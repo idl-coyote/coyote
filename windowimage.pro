@@ -76,6 +76,8 @@
 ;          level readouts, window resizing. 23 Nov 2001. DWF.
 ;       Added LEVEL and WIDTH keywords. Changed output formatting to
 ;          accommodate floating integer values. 28 Nov 2005. DWF.
+;       Renamed Colorbar object to FSC_Colorbar to avoid conflict with IDL 8 Colorbar object.
+;        26 September 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -614,7 +616,7 @@ pixmap = !D.Window
 pos = [0.05,0.05,0.95,0.8]
 TVImage, BytScl(image, Min=displayMin, Max=displayMax, TOP=!D.Table_Size-1), $
    Position=pos, /Keep_Aspect, /NoInterpolation
-cbar = Obj_New('Colorbar', Range=[minval, maxval], Font=0, Position=[0.1 > pos[0], 0.88,pos[2] < 0.9, 0.93])
+cbar = Obj_New('FSC_Colorbar', Range=[minval, maxval], Font=0, Position=[0.1 > pos[0], 0.88,pos[2] < 0.9, 0.93])
 cbar->Loadct, colortable
 cbar->Draw
 

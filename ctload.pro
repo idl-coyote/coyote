@@ -103,15 +103,15 @@
 ;           CTLoad, 0
 ;           CTLoad, 3, /REVERSE, CLIP=[32,240], BOTTOM=1, NCOLORS=10
 ;           CTLoad, 1, CLIP=[64, 245], BOTTOM=11, NCOLORS=10
-;           Colorbar, NCOLORS=20, BOTTOM=1, DIV=10, RANGE=[-10,10]
+;           FSC_Colorbar, NCOLORS=20, BOTTOM=1, DIV=10, RANGE=[-10,10]
 ;
 ;       Here is an example that shows the difference between LOADCT and CTLOAD:
 ;
 ;           ERASE, COLOR=FSC_COLOR('Charcoal)
 ;           LoadCT, 5, NCOLORS=8
-;           Colorbar, NCOLORS=8, DIVISIONS=8, POSITION=[0.1, 0.65, 0.9, 0.75], XMINOR=0, XTICKLEN=1
+;           FSC_Colorbar, NCOLORS=8, DIVISIONS=8, POSITION=[0.1, 0.65, 0.9, 0.75], XMINOR=0, XTICKLEN=1
 ;           CTLoad, 5, NCOLORS=8, CLIP=[16, 240]
-;           Colorbar, NCOLORS=8, DIVISIONS=8, POSITION=[0.1, 0.35, 0.9, 0.45], XMINOR=0, XTICKLEN=1
+;           FSC_Colorbar, NCOLORS=8, DIVISIONS=8, POSITION=[0.1, 0.35, 0.9, 0.45], XMINOR=0, XTICKLEN=1
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -120,6 +120,8 @@
 ;       Small change in the way the program looks for the Brewer file. 8 July 2008. DWF.
 ;       Changed the way the program looks for the Brewer color table file. Now use
 ;          the Coyote Library routine FIND_RESOURCE_FILE to look for the file. 29 June 2010. DWF. 
+;       Renamed Colorbar procedure to FSC_Colorbar to avoid conflict with IDL 8 Colorbar function.
+;          26 September 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;

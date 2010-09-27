@@ -267,19 +267,19 @@
 ;     p = [0.02, 0.3, 0.98, 0.98]
 ;     LoadCT, 0
 ;     TVImage, image, Position=p
-;     Colorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;     FSC_Colorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
 ;     p = [0.02, 0.3, 0.98, 0.98]
 ;     LoadCT, 2
 ;     TVImage, image, Position=p
-;     Colorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;     FSC_Colorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
 ;     p = [0.02, 0.3, 0.98, 0.98]
 ;     LoadCT, 3
 ;     TVImage, image, Position=p
-;     Colorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;     FSC_Colorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
 ;     p = [0.02, 0.3, 0.98, 0.98]
 ;     LoadCT, 5
 ;     TVImage, image, Position=p
-;     Colorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;     FSC_Colorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
 ;     !P.Multi =0
 ;
 ; MODIFICATION HISTORY:

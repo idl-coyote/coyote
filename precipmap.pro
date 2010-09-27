@@ -43,7 +43,9 @@
 ; MODIFICATION HISTORY:
 ;
 ;  Written by David W. Fanning, 28 April 2006 from code and discussion supplied
-;  by James Kuyper in the IDL newsgroup.
+;       by James Kuyper in the IDL newsgroup.
+;  Renamed Colorbar procedure to FSC_Colorbar to avoid conflict with IDL 8 Colorbar function.
+;        26 September 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -175,7 +177,7 @@ PRO PrecipMap, filename
              COLOR=FSC_Color('light gray'), MAP_STRUCTURE=stereo
 
    ; Add a colorbar. Non-linear scaling requires use of tick formatting function.
-   Colorbar, NColors=14, Bottom=1, Position=[pos[0], 0.1, pos[2], 0.15], $
+   FSC_Colorbar, NColors=14, Bottom=1, Position=[pos[0], 0.1, pos[2], 0.15], $
       Divisions=14, Title='24 Hour Precipitation (mm)', $
       Color=FSC_Color('black'), XTicklen=1, XMinor=1, XTickFormat='precipmap_annotate'   
       

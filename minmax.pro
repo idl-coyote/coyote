@@ -86,7 +86,10 @@
 ;       Prepend this string to the output of MinMax. Default: "MinMax: ".
 ;       
 ; :Examples:
-;    IDL> MinMax, a, TEXT='Variable A:'
+;   The MinMax routine gives the range of the variable::
+;     IDL> a = Findgen(11)
+;     IDL> MinMax, a, TEXT='Variable A:'
+;     MinMax:   0    11
 ;    
 ; :Author:
 ;    David W. Fanning (david@dfanning.com)

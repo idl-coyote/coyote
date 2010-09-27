@@ -65,7 +65,7 @@
 ;       NCOLORS:      An alternative way to specify the colors in the color bar is by
 ;                     using the NCOLORS and BOTTOM keywords to locate the colors in the
 ;                     current color table. The NCOLORS and BOTTOM keywords have the same
-;                     meaning as in the LOADCT, XLOADCT, XCOLORS, or COLORBAR programs.
+;                     meaning as in the LOADCT, XLOADCT, XCOLORS, or FSC_COLORBAR programs.
 ;
 ;       POSITION:     A four-element array of normalized coordinates in the same
 ;                     form as the POSITION keyword on a plot. Default is

@@ -1,9 +1,14 @@
 ;+
 ; NAME:
-;       COLORBAR__DEFINE
+;       FSC_COLORBAR__DEFINE
+;       Note: The name of the routine has been changed from COLORBAR__DEFINE
+;       on 25 Sept 2010 to avoid conflicts with an IDL 8.0 routine of the
+;       same name. See the article "IDL 8 Name Conflicts" here:
+;       
+;           http://www.dfanning.com/misc_tips/idl8_name_conflicts.html
 ;
 ; PURPOSE:
-;       The purpose of this routine is to implement a COLORBAR object
+;       The purpose of this routine is to implement a FSC_COLORBAR object
 ;       class. The ColorBar is rendered in the direct graphics system.
 ;
 ; AUTHOR:
@@ -19,7 +24,7 @@
 ;       Graphics.
 ;
 ; CALLING SEQUENCE:
-;       colorbar = Obj_New("COLORBAR")
+;       colorbar = Obj_New("FSC_COLORBAR")
 ;
 ; INPUTS:
 ;       All inputs to the program are via keyword parameters.
@@ -109,7 +114,7 @@
 ; EXAMPLE:
 ;       To create a colorbar, use it, then destroy it, type:
 ;
-;       colorbar = Obj_New("COLORBAR", Title='Colorbar Values', Range=[0,1000],$
+;       colorbar = Obj_New("FSC_COLORBAR", Title='Colorbar Values', Range=[0,1000],$
 ;                  Format='(I4)')
 ;       Window
 ;       LoadCT, 5
@@ -134,6 +139,8 @@
 ;                INIT, GetProperty and SetProperty methods.
 ;                Changed default tick length to -0.1. DWF (and Jack Saba)
 ;       18 Nov 2001. Added Clamp method. DWF.
+;       25 September 2010. Renamed to FSC_Colorbar__Define to avoid conflict with a
+;                Colorbar__Define program introduced with IDL 8.0. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -162,7 +169,7 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-PRO ColorBar::Clamp, datarange, Draw=draw
+PRO FSC_Colorbar::Clamp, datarange, Draw=draw
 
 ; This method clamps the data to a particular data range.
 
@@ -179,9 +186,9 @@ END
 ;-------------------------------------------------------------------------
 
 
-PRO Colorbar::GetProperty, $
+PRO FSC_Colorbar::GetProperty, $
 
-; The GetProperty method of the COLORBAR object class. All properties are
+; The GetProperty method of the FSC_COLORBAR object class. All properties are
 ; obtained via the following keywords:
 
    Background=background, $ ; Background color. Default is !P.Background.
@@ -223,7 +230,7 @@ IF error NE 0 THEN BEGIN
    Catch, Cancel=1
    ok = Dialog_Message('Error in GETPROPERTY method. Returning...')
    Print, ''
-   Print, 'Colorbar::GetProperty Method: ' + !Error_State.Msg
+   Print, 'FSC_Colorbar::GetProperty Method: ' + !Error_State.Msg
    RETURN
 ENDIF
 
@@ -255,9 +262,9 @@ END
 
 
 
-PRO Colorbar::SetProperty, $
+PRO FSC_Colorbar::SetProperty, $
 
-; The SetProperty method of the COLORBAR object class. All properties are
+; The SetProperty method of the FSC_COLORBAR object class. All properties are
 ; set via the following keywords:
 
    Background=background, $ ; Background color. Default is !P.Background.
@@ -305,7 +312,7 @@ IF error NE 0 THEN BEGIN
    Catch, Cancel=1
    ok = Dialog_Message('Error in SETPROPERTY method. Returning...')
    Print, ''
-   Print, 'Colorbar::SetProperty Method: ' + !Error_State.Msg
+   Print, 'FSC_Colorbar::SetProperty Method: ' + !Error_State.Msg
    RETURN
 ENDIF
 
@@ -359,9 +366,9 @@ END
 
 
 
-PRO Colorbar::LoadCT, index, Draw=draw, Erase=erase
+PRO FSC_Colorbar::LoadCT, index, Draw=draw, Erase=erase
 
-; The LoadCT method of the COLORBAR object class.
+; The LoadCT method of the FSC_COLORBAR object class.
 
    ; Error handling.
 
@@ -371,7 +378,7 @@ IF error NE 0 THEN BEGIN
    Catch, Cancel=1
    ok = Dialog_Message('Error in LoadCT method. Returning...')
    Print, ''
-   Print, 'Colorbar::LoadCT Method: ' + !Error_State.Msg
+   Print, 'FSC_Colorbar::LoadCT Method: ' + !Error_State.Msg
    RETURN
 ENDIF
 
@@ -387,9 +394,9 @@ END
 
 
 
-PRO Colorbar::Erase
+PRO FSC_Colorbar::Erase
 
-; The Erase method of the COLORBAR object class.
+; The Erase method of the FSC_COLORBAR object class.
 
    ; Error handling.
 
@@ -398,7 +405,7 @@ IF error NE 0 THEN BEGIN
    Catch, Cancel=1
    ok = Dialog_Message('Error in ERASE method. Returning...')
    Print, ''
-   Print, 'Colorbar::Erase Method: ' + !Error_State.Msg
+   Print, 'FSC_Colorbar::Erase Method: ' + !Error_State.Msg
    RETURN
 ENDIF
 
@@ -417,9 +424,9 @@ END
 
 
 
-PRO Colorbar::Draw, Erase=erase
+PRO FSC_Colorbar::Draw, Erase=erase
 
-; The Draw method of the COLORBAR object class.
+; The Draw method of the FSC_COLORBAR object class.
 
    ; Error handling.
 
@@ -428,7 +435,7 @@ IF error NE 0 THEN BEGIN
    Catch, Cancel=1
    ok = Dialog_Message('Error in DRAW method. Returning...')
    Print, ''
-   Print, 'Colorbar::Draw Method: ' + !Error_State.Msg
+   Print, 'FSC_Colorbar::Draw Method: ' + !Error_State.Msg
    RETURN
 ENDIF
 
@@ -522,9 +529,9 @@ END
 
 
 
-PRO Colorbar::CleanUp
+PRO FSC_Colorbar::CleanUp
 
-; The CleanUp method of the COLORBAR object class.
+; The CleanUp method of the FSC_COLORBAR object class.
 
 Ptr_Free, self.bar
 Ptr_Free, self.tickv
@@ -533,9 +540,9 @@ END
 
 
 
-FUNCTION Colorbar::Init, $
+FUNCTION FSC_Colorbar::Init, $
 
-; The INIT method of the COLORBAR object class.
+; The INIT method of the FSC_COLORBAR object class.
 
    Background=background, $ ; Background color. Default is !P.Background.
    Bottom=bottom, $         ; Bottom color index of colors allocated to
@@ -577,7 +584,7 @@ IF error NE 0 THEN BEGIN
    Catch, Cancel=1
    ok = Dialog_Message('Error in INIT method. Returning...')
    Print, ''
-   Print, 'Colorbar::INIT Method: ' + !Error_State.Msg
+   Print, 'FSC_Colorbar::INIT Method: ' + !Error_State.Msg
    RETURN, 0
 ENDIF
 
@@ -619,7 +626,7 @@ ENDELSE
 
 bar = BytScl(bar, Top=ncolors-1) + bottom
 
-   ; Fill out this particular instance of the COLORBAR object.
+   ; Fill out this particular instance of the FSC_COLORBAR object.
 
 self.bar = Ptr_New(bar)
 self.position = Float(position)
@@ -649,11 +656,11 @@ END
 
 
 
-PRO Colorbar__Define
+PRO FSC_Colorbar__Define
 
-; Structure definition of the COLORBAR object class.
+; Structure definition of the FSC_COLORBAR object class.
 
-struct = { COLORBAR, $     ; The COLORBAR object class definition.
+struct = { FSC_COLORBAR, $ ; The FSC_COLORBAR object class definition.
    bar:Ptr_New(), $        ; The colorbar image.
    position:FltArr(4), $   ; Position in the window (normalized coords).
    vertical:0, $           ; Flag for vertical colorbar. Default is 0.

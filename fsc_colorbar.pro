@@ -1,6 +1,12 @@
 ;+
 ; NAME:
 ;   FSC_COLORBAR
+;   
+;      Note: The name of the routine has been changed from COLORBAR
+;      on 25 Sept 2010 to avoid conflicts with an IDL 8.0 routine of the
+;      same name. See the article "IDL 8 Name Conflicts" here:
+;       
+;           http://www.dfanning.com/ng_tips/idl8_name_conflicts.html
 ;
 ; PURPOSE:
 ;
@@ -42,13 +48,13 @@
 ;
 ;                          LoadCT, 33
 ;                          TVImage, image
-;                          Colorbar, Color=FSC_Color('firebrick')
+;                          FSC_Colorbar, Color=FSC_Color('firebrick')
 ;
 ;                     The proper syntax for device-independent color is like this:
 ;
 ;                          LoadCT, 33
 ;                          TVImage, image
-;                          Colorbar, AnnotateColor='firebrick', Color=255
+;                          FSC_Colorbar, AnnotateColor='firebrick', Color=255
 ;
 ;       BOTTOM:       The lowest color index of the colors to be loaded in
 ;                     the bar.
@@ -191,9 +197,10 @@
 ;      21 May 2008. Changed the default CHARSIZE to !P.CHARSIZE from 1.0. DWF.
 ;      30 Oct 2008. Fixed a problem with the FONT keyword not being recognized in certain
 ;            configurations.
-;-     9 Nov 2009. Fixed typo in title of vertical colorbar. DWF.
+;      9 Nov 2009. Fixed typo in title of vertical colorbar. DWF.
 ;      25 Sep 2010. Renamed FSC_Colorbar from Colorbar to avoid conflict with ITTVIS introduced
 ;             colorbar.pro function in IDL 8.0. DWF.
+;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
 ;  All rights reserved.                                                                    ;

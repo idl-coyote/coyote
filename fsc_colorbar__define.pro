@@ -5,7 +5,7 @@
 ;       on 25 Sept 2010 to avoid conflicts with an IDL 8.0 routine of the
 ;       same name. See the article "IDL 8 Name Conflicts" here:
 ;       
-;           http://www.dfanning.com/misc_tips/idl8_name_conflicts.html
+;           http://www.dfanning.com/ng_tips/idl8_name_conflicts.html
 ;
 ; PURPOSE:
 ;       The purpose of this routine is to implement a FSC_COLORBAR object

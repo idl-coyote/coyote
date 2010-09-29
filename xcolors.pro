@@ -403,6 +403,8 @@
 ;           inproved the documentation and made it more accurate. DWF.
 ;       14 Oct 2009. Still a few problems getting the Brewer color tables completely 
 ;            integrated. Fixed several bugs with updating color table names and type. DWF.
+;       29 Sept 2010. Modified the program to work correctly with a user-supplied color
+;            table file. DWF.
 ;
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
@@ -1017,11 +1019,17 @@ PRO XCOLORS_SWITCH_COLORS, event
    
    CASE thisType OF
    
+   
         'IDL': BEGIN
            info.file = Filepath(SubDir=['resource','colors'], 'colors1.tbl')
            info.brewer = 0
            END
            
+        'USER-DEFINED': BEGIN
+           info.file = info.userfile
+           info.brewer = 0
+           END
+
         'BREWER': BEGIN
            info.file = Find_Resource_File('fsc_brewer.tbl')
            info.brewer = 1
@@ -1101,7 +1109,8 @@ IF N_Elements(drag) EQ 0 THEN drag = 0
 
 IF N_Elements(file) EQ 0 THEN BEGIN
     file = Filepath(SubDir=['resource','colors'], 'colors1.tbl')
-ENDIF
+    userfile = ""
+ENDIF ELSE userfile = file
 
    ; Try to locate the brewer file. Check resource/colors directory, then look for it
    ; in the IDL path if it is not found there.
@@ -1116,7 +1125,7 @@ ENDIF ELSE BEGIN
 ENDELSE
 IF locatedBrewerFile AND Keyword_Set(brewer) $
    THEN colortabletype = 'BREWER' $
-   ELSE colortabletype = 'IDL'
+   ELSE IF userfile NE "" THEN colortabletype = 'USER-DEFINED' ELSE colortabletype = 'IDL'
 object_data = Keyword_Set(object_data)
 IF N_Elements(notifyID) EQ 0 THEN notifyID = [-1L, -1L]
 IF N_Elements(notifyObj) EQ 0 THEN BEGIN
@@ -1192,7 +1201,7 @@ IF N_Elements(ncolors) EQ 0 THEN ncolors = (256 < !D.Table_Size) - bottom
 IF (ncolors + bottom) GT 256 THEN ncolors = 256 - bottom
 
    ; Load colors in INDEX if specified.
-
+IF userfile NE "" THEN file = userfile
 IF N_Elements(index) NE 0 THEN BEGIN
    LoadCT, index, File=file, /Silent, NColors=ncolors, Bottom=bottom
 ENDIF ELSE index = -1
@@ -1243,8 +1252,15 @@ IF Keyword_Set(reverse) THEN Widget_Control, reverseID, SET_BUTTON=1
 
    ; A row for additional control.
 IF locatedBrewerFile THEN BEGIN
-    colorType = Widget_Droplist(cbase, Value=[' IDL Colors ', ' Brewer Colors '], $
-        /DYNAMIC_RESIZE, EVENT_PRO='XCOLORS_SWITCH_COLORS', UVALUE=['IDL','BREWER']) 
+    IF userfile NE "" THEN BEGIN
+       colorvalues = [' User-Defined Colors ', ' Brewer Colors ']
+       coloruvalue = ['USER-DEFINED', 'BREWER']
+    ENDIF ELSE BEGIN
+       colorvalues = [' IDL Colors ', ' Brewer Colors ']
+       coloruvalue = ['IDL','BREWER']
+    ENDELSE
+    colorType = Widget_Droplist(cbase, Value=colorvalues, $
+        /DYNAMIC_RESIZE, EVENT_PRO='XCOLORS_SWITCH_COLORS', UVALUE=coloruvalue) 
     IF Keyword_Set(Brewer) THEN Widget_Control, colorType, Set_Droplist_Select=1
 ENDIF 
     
@@ -1326,7 +1342,8 @@ info = {  windowIndex:windowIndex, $         ; The WID of the draw widget.
           gammaID:gammaID, $                 ; The widget ID of the gamma label
           ncolors:ncolors, $                 ; The number of colors we are using.
           gamma:1.0, $                       ; The current gamma value.
-          file:file, $                       ; The name of the color table file.
+          file:file, $                       ; The name of the user-supplied or default color table file.
+          userfile:userfile, $               ; The name, if any, of a user-supplied color table file.
           bottom:bottom, $                   ; The bottom color index.
           top:top, $                         ; The top color index.
           topcolor:topColor, $               ; The top color in this color table.

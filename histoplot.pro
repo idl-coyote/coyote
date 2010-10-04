@@ -83,6 +83,8 @@
 ;       MIN_VALUE:        The minimum Y data value to represent on graphics plot. Default: 0.
 ;
 ;       MISSING:          The value that should be represented as "missing" and not used in the histogram.
+;                         Be aware that if the input data is not of type "float" or "double" that the input
+;                         data will be converted to floating point prior to calculating the histogram.
 ;       
 ;       NAN:              If set, ignore NAN values in calculating and plotting histogram.
 ;
@@ -168,6 +170,15 @@
 ;       I was trying to be a good citizen by reloading the input color table when I exited
 ;            the program. But, of course, that makes it impossible to use the program in
 ;            the Z-buffer. Fixed by being less of a good citizen. 23 July 2010. DWF.
+;       Because of the way I was dealing with NANs and MISSING data, the reverse indices were
+;            inaccurate when they were returned, if there was NANs or MISSING data in the
+;            input array. The data is now being handled correctly in all cases. This requires
+;            that missing data must be set to !VALUES.F_NAN prior to calculating the histogram.
+;            This means the data MUST be converted to floats for this operation. Since I am
+;            always working on a *copy* of the data when this occurs, it should not affect
+;            user input data. Also, I scan all input floating point and double data for NANs,
+;            and if found, and the NAN keyword is not set, I issue a warning and set the NAN
+;            keyword. This is a change in behavior. 1 October 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2010, by Fanning Software Consulting, Inc.                           ;
@@ -259,11 +270,14 @@ PRO HistoPlot , $                   ; The program name.
    ; What kind of data are we doing a HISTOGRAM on?
    dataType = Size(dataToHistogram, /TYPE)
       
-   ; Check the data for NANs and remove them if any are found.
+   ; Check the data for NANs and alert the user if the NAN keyword is not set.
    IF dataType EQ 4 OR datatype EQ 5 THEN BEGIN
         goodIndices = Where(Finite(dataToHistogram), count, NCOMPLEMENT=nancount, COMPLEMENT=nanIndices)
         IF nancount GT 0 THEN BEGIN
-           _dataToHistogram = dataToHistogram[goodIndices]
+           IF ~Keyword_Set(nan) THEN BEGIN
+               Message, 'NANs found in the data. NAN keyword is set to 1.', /INFORMATIONAL
+               nan = 1
+           ENDIF
         ENDIF 
    ENDIF 
    
@@ -271,11 +285,25 @@ PRO HistoPlot , $                   ; The program name.
    ; a devil of a time putting it back together again at the end.
    IF N_Elements(_dataToHistogram) EQ 0 THEN _dataToHistogram = dataToHistogram
    
-   ; If you have any "missing" data, remove those now.
+   ; If you have any "missing" data, then the data needs to be converted to float
+   ; and the missing data set to F_NAN.
    IF N_Elements(missing) NE 0 THEN BEGIN
-      nonMissingIndices = Where(_dataToHistogram NE missing, nonMissingCount)
-      IF nonMissingCount NE 0 THEN _dataToHistogram = (Temporary(_dataToHistogram))[nonMissingIndices] $
-                    ELSE Message, 'There is no non-missing data.'
+      missingIndices = Where(_dataToHistogram EQ missing, missingCount)
+      IF missingCount GT 0 THEN BEGIN
+         CASE datatype OF
+            4: _dataToHistogram[missingIndices] = !Values.F_NAN
+            5: _dataToHistogram[missingIndices] = !Values.D_NAN
+            ELSE: BEGIN
+                _dataToHistogram = Float(_dataToHistogram)
+                dataType = 4
+                _dataToHistogram[missingIndices] = !Values.F_NAN
+                END
+         ENDCASE
+         nan = 1
+      ENDIF ELSE BEGIN
+        IF missingCount EQ N_Elements(_dataToHistogram) THEN $
+            Message, 'All values are "missing"!'
+      ENDELSE
    ENDIF
    
    ; Did someone pass the number of bins?
@@ -313,8 +341,8 @@ PRO HistoPlot , $                   ; The program name.
       IF N_Elements(orientation) EQ 0 THEN orientation = 0
       IF N_Elements(spacing) EQ 0 THEN spacing = 0
    ENDIF
-   IF N_Elements(mininput) EQ 0 THEN mininput = Min(_dataToHistogram)
-   IF N_Elements(maxinput) EQ 0 THEN maxinput = Max(_dataToHistogram)
+   IF N_Elements(mininput) EQ 0 THEN mininput = Min(_dataToHistogram, NAN=nan)
+   IF N_Elements(maxinput) EQ 0 THEN maxinput = Max(_dataToHistogram, NAN=nan)
    IF N_Elements(thick) EQ 0 THEN thick = 1.0
 
    ; Load plot colors.

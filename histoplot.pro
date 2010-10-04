@@ -179,6 +179,8 @@
 ;            user input data. Also, I scan all input floating point and double data for NANs,
 ;            and if found, and the NAN keyword is not set, I issue a warning and set the NAN
 ;            keyword. This is a change in behavior. 1 October 2010. DWF.
+;       Fixed a problem when specifying more than one POLYCOLOR. I made a change to the program
+;            and forgot to propogate it everywhere. 4 October 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2010, by Fanning Software Consulting, Inc.                           ;
@@ -443,7 +445,7 @@ PRO HistoPlot , $                   ; The program name.
             fillcolor = polycolor[j MOD ncolors]
             orient = orientation[j MOD norient]
             space = spacing[j MOD nspace]
-            PolyFill, x, y, COLOR=polyColor, /LINE_FILL, ORIENTATION=orient, $
+            PolyFill, x, y, COLOR=fillColor, /LINE_FILL, ORIENTATION=orient, $
                PATTERN=pattern, SPACING=space, NOCLIP=0
             start = start + binsize
             endpt = start + binsize
@@ -458,7 +460,7 @@ PRO HistoPlot , $                   ; The program name.
             x = [start, start, endpt, endpt, start]
             y = [0, histdata[j], histdata[j], 0, 0]
             fillcolor = polycolor[j MOD ncolors]
-            PolyFill, x, y, COLOR=polyColor, NOCLIP=0
+            PolyFill, x, y, COLOR=fillColor, NOCLIP=0
             start = start + binsize
             endpt = start + binsize
          ENDFOR

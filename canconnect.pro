@@ -6,7 +6,13 @@
 ;
 ;       This function will check to see if it is possible to make
 ;       a connection with the window system. It is useful when 
-;       running IDL as a CRON job or from remote logins.
+;       running IDL as a CRON job or from remote logins. The program
+;       will establish a system variable named !FSC_Display_Connection the
+;       first time it is run. Programs which need to know if a connection
+;       can be established can consult this system variable as a faster
+;       way of determining a connection than running this program. The
+;       system variable is set to 1 if a connection can be made and to
+;       0 otherwise.
 ;
 ; AUTHOR:
 ;
@@ -38,10 +44,18 @@
 ; KEYWORDS:
 ;
 ;        None.
+;        
+; NOTES:
+; 
+;      A system variable, !FSC_Display_Connection is created.
 ;
 ; MODIFICATION HISTORY:
 ;
 ;       Written by David W. Fanning, 10 February 2010.
+;       Modified program to set the system variable !FSC_Display_Connection. This is primarily
+;           a way for legacy code to run in cron jobs without continually checking for
+;           a connection, which before this update required opening and closing a window.
+;           7 October 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc.                                ;
@@ -94,7 +108,14 @@ Function CanConnect
           WDelete, !D.Window
           IF theWindow GE 0 THEN WSet, theWindow
       ENDIF
-
+      
+      ; Does the system variable !FSC_Display_Connection exist? If so, set its value.
+      ; If not, create it.
+      DefSysV, '!FSC_Display_Connection', EXISTS=sysvarExists
+      IF sysvarExists $
+          THEN !FSC_Display_Connection = haveConnection $
+          ELSE DefSysV, '!FSC_Display_Connection', haveConnection
+          
       RETURN, haveConnection
       
 END

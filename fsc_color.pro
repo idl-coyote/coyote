@@ -351,6 +351,18 @@
 ;           mode, even when using an 8-bit graphics buffer. (Unless set manaually.) Now I set
 ;           the decomposition mode in the program by looking at buffer depth, rather than
 ;           the decomposition state, for the Z-buffer. 23 July 2010. DWF.
+;       Adding "system" colors to FSC_Color may have been the worst design decision I ever made.
+;            Since these require a window connection to determine, this decision has haunted
+;            me for years in the form of people wanting to use the software in places where
+;            there is no window connection. For example, in cron jobs. To accommodate legacy
+;            code, I need to *always* check for a connection. I am loath to do this because it
+;            means opening and closing a window, which is, relatively speaking, a slow process.
+;            I've made another attempt to solve this problem with this update and the
+;            corresponding update to the Coyote Library program CanConnect. CanConnect how
+;            creates the system variable !FSC_Display_Connection. If this system variable 
+;            exists, FSC_Color consults it to determine if there is a display connection. It
+;            it doesn't exist, it calls CanConnect. This way, a window has to be open only
+;            once in an IDL session to determine if a display connection can be made. 7 Oct 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -468,32 +480,8 @@ FUNCTION FSC_Color, theColour, colorIndex, $
    
     ; Return to caller as the default error behavior.
     On_Error, 2
-
-    ; Do you have to check the window connection?
-    haveConnection = 1
-    IF Keyword_Set(check_connection) THEN BEGIN
-    
-       ; In CRON jobs, there is no X connection so system colors cannot be supported.
-       ; Here is a quick test to see if we can connect to a windowing system. 
-       Catch, theError
-       IF theError NE 0 THEN BEGIN
-          Catch, /CANCEL
-          haveConnection = 0
-          GOTO, testConnection
-       ENDIF
-       theWindow = !D.Window
-       Window, /FREE, XSIZE=5, YSIZE=5, /PIXMAP
-       Catch, /CANCEL
-       
-       testConnection: ; Come here if you choke on creating a window.
-       IF !D.Window NE theWindow THEN BEGIN
-          WDelete, !D.Window
-          IF theWindow GE 0 THEN WSet, theWindow
-       ENDIF
-    
-    ENDIF    
-    
-     ; Error handling for the rest of the program.
+        
+    ; Error handling for the rest of the program.
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
@@ -520,9 +508,6 @@ FUNCTION FSC_Color, theColour, colorIndex, $
     i = Where(bytecheck GT 57, greaterthan)
     IF (lessthan + greaterthan) EQ 0 THEN useCurrentColors = 1 ELSE useCurrentColors = 0
     
-    ; Handle depreciated NODISPLAY keyword.
-    IF Keyword_Set(nodisplay) THEN haveConnection = 0
-
     ; Get the decomposed state of the IDL session right now.
     IF N_Elements(decomposedState) EQ 0 THEN BEGIN
        IF Float(!Version.Release) GE 5.2 THEN BEGIN
@@ -749,13 +734,21 @@ FUNCTION FSC_Color, theColour, colorIndex, $
            gvalue = [ gvalue,  48,    103,   141,   188,   188,   149,   113,    81 ]
            bvalue = [ bvalue,   5,     26,    60,   118,   177,   141,   105,    71 ]
        ENDELSE
-    ENDELSE
+   ENDELSE
     
-    ; Don't load system colors if you are doing this without a window connection.
-    IF haveConnection THEN BEGIN
-    
-       ; Add system color names for IDL version 5.6 and higher.
-       IF Float(!Version.Release) GE 5.6 THEN BEGIN
+   ; Add system color names for IDL version 5.6 and higher. We don't want to
+   ; do this we cannot establish a display connection (e.g., we are running
+   ; in a cron job). Check for system variable !FSC_Display_Connection. If not
+   ; defined, check the connection.
+   DefSysV, '!FSC_Display_Connection', EXISTS=sysvarExists
+   IF sysvarExists $
+        THEN haveConnection = !FSC_Display_Connection $
+        ELSE haveConnection = CanConnect()
+      
+   ; Handle depreciated NODISPLAY keyword.
+   IF Keyword_Set(nodisplay) THEN haveConnection = 0
+
+   IF (Float(!Version.Release) GE 5.6) && Keyword_Set(haveConnection) THEN BEGIN
        
           tlb = Widget_Base()
           sc = Widget_Info(tlb, /System_Colors)
@@ -777,10 +770,8 @@ FUNCTION FSC_Color, theColour, colorIndex, $
           gvalue =  [gvalue,   highlight[1], edge[1], selected[1], face[1]]
           bvalue =  [bvalue,   highlight[2], edge[2], selected[2], face[2]]
        
-       ENDIF
-       
     ENDIF
-    
+       
     ; Load the colors from the current color table, if you need them.
     IF useCurrentColors THEN BEGIN
         TVLCT, rrr, ggg, bbb, /GET
@@ -796,6 +787,7 @@ FUNCTION FSC_Color, theColour, colorIndex, $
             bvalue = [bvalue, bbb]
         ENDELSE
     ENDIF
+    
     ; Make sure we are looking at compressed, uppercase names.
     colors = StrUpCase(StrCompress(StrTrim(colors,2), /Remove_All))
 

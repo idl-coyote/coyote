@@ -596,9 +596,16 @@ ENDELSE
 
 NCOLORS = N_Elements(colors)
 
-   ; Add system color names for IDL version 5.6 and higher.
-
-IF Float(!Version.Release) GE 5.6 THEN BEGIN
+; Add system color names for IDL version 5.6 and higher. We don't want to
+; do this we cannot establish a display connection (e.g., we are running
+; in a cron job). Check for system variable !FSC_Display_Connection. If not
+; defined, check the connection.
+DefSysV, '!FSC_Display_Connection', EXISTS=sysvarExists
+IF sysvarExists $
+     THEN haveConnection = !FSC_Display_Connection $
+     ELSE haveConnection = CanConnect()
+      
+IF (Float(!Version.Release) GE 5.6) && Keyword_Set(haveConnection) THEN BEGIN
 
    tlb = Widget_Base()
    sc = Widget_Info(tlb, /System_Colors)

@@ -74,6 +74,9 @@
 ;          will list in descending time order. Matt Savoie suggestion. DWF. 10 Sept 2010.
 ;       Added NO_PREFIX keyword that, if set, will prevent an underscore character from being
 ;          added to the time stamp. 10 Sept 2010. DWF.
+;       Discovered that Windows and UNIX computers report the UTC time differently, resulting
+;          in the day string being a one digit integer on UNIX and a two digit integer on
+;          Windows. Fixed so the day string is always forced to be two digits. 8 October 2010.
 ;
 ;******************************************************************************************;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc.                                ;
@@ -126,7 +129,7 @@ FUNCTION TimeStamp, format, $
     ; Get some values for the current time.
     time = Systime(UTC=Keyword_Set(utc))
     day = Strmid(time, 0, 3)
-    date = Strmid(time, 8, 2)
+    date = String(StrMid(time, 8, 2), Format='(I2.2)') ; Required because UNIX and Windows differ in time format.
     month = Strmid(time, 4, 3)
     year = Strmid(time, 20, 4)
     stamp = Strmid(time, 11, 8)

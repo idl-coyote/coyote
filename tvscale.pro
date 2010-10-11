@@ -331,6 +331,12 @@
 ;      Modified to work with 24-bit color PostScript in IDL 7.1. 24 May 2009. DWF.
 ;      Added MULTIMARGIN keyword to allow position adjustment when plotting with 
 ;          !P.Multi. 7 July 2009. DWF.
+;      Fixed a problem in which displaying an image with !P.MULTI turned on, switched the
+;          color of the output window. If this happens to you, set the BACKGROUND keyword
+;          to the color you want to have in the window. 4 January 2010. DWF.
+;      Some LINUX distributions cannot both get the current color decomposition state and
+;           set the state to another value on the same DEVICE command. I have changed all such 
+;           occurances to two commands. One gets the current state, the other sets it. 11 Oct 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
@@ -635,12 +641,14 @@ PRO TVSCALE, image, x, y, $
                      TVLCT, r, g, b
                      END
                   varType EQ 'LONG': BEGIN
-                     Device, Decomposed=1, Get_Decomposed=theState
+                     Device, Get_Decomposed=theState
+                     Device, Decomposed=1
                      Erase, Color=background
                      Device, Decomposed=theState
                      END
                   varType EQ 'STRING': BEGIN
-                     Device, Decomposed=1, Get_Decomposed=theState
+                     Device, Get_Decomposed=theState
+                     Device, Decomposed=1
                      Erase, Color=FSC_Color(background)
                      Device, Decomposed=theState
                      END
@@ -753,6 +761,7 @@ PRO TVSCALE, image, x, y, $
     ; Check for position and overplot keywords.    
     IF N_Elements(position) EQ 0 THEN BEGIN
        IF Keyword_Set(multi) AND (Keyword_Set(overplot) NE 1) THEN BEGIN
+           IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
           Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
              XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]]
           position = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
@@ -765,6 +774,7 @@ PRO TVSCALE, image, x, y, $
        IF Keyword_Set(multi) AND (Keyword_Set(overplot) NE 1)THEN BEGIN
     
           ; Draw the invisible plot to get plot position.
+          IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
           Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
               XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]]
     

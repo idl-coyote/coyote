@@ -367,9 +367,12 @@
 ;      Modified to work with 24-bit color PostScript in IDL 7.1. 24 May 2009. DWF.
 ;      Added MULTIMARGIN keyword to allow position adjustment when plotting with 
 ;          !P.Multi. 7 July 2009. DWF.
-;      Fixed a problem in which displaying an image with !P.MULTI turned on switched the
-;          color of the output window. If this happens to you, use the BACKGROUND keyword
-;          to the color you want to have in the window. 4 January 2010.
+;      Fixed a problem in which displaying an image with !P.MULTI turned on, switched the
+;          color of the output window. If this happens to you, set the BACKGROUND keyword
+;          to the color you want to have in the window. 4 January 2010. DWF.
+;      Some LINUX distributions cannot both get the current color decomposition state and
+;           set the state to another value on the same DEVICE command. I have changed all such 
+;           occurances to two commands. One gets the current state, the other sets it. 11 Oct 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -677,12 +680,14 @@ PRO TVIMAGE, image, x, y, $
                      TVLCT, r, g, b
                      END
                   varType EQ 'LONG': BEGIN
-                     Device, Decomposed=1, Get_Decomposed=theState
+                     Device, Get_Decomposed=theState
+                     Device, Decomposed=1
                      Erase, Color=background
                      Device, Decomposed=theState
                      END
                   varType EQ 'STRING': BEGIN
-                     Device, Decomposed=1, Get_Decomposed=theState
+                     Device, Get_Decomposed=theState
+                     Device, Decomposed=1
                      Erase, Color=FSC_Color(background, BREWER=brewer)
                      Device, Decomposed=theState
                      END

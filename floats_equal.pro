@@ -92,23 +92,23 @@
 ;  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
-;******************************************************************************************;
+;******************************************************************************************;
 FUNCTION FLOATS_EQUAL, array_1, array_2, ULP=ulp
 
        ; Error handling. Return to caller on error.
-       ON_ERROR, 2
-       IF N_Params() NE 2 THEN Message, 'Must pass two arrays or values to compare.'
+       ON_ERROR, 2
+       IF N_Params() NE 2 THEN Message, 'Must pass two arrays or values to compare.'
        ; Are we comparing double precision values?
        IF Size(array_1, /TNAME) EQ 'DOUBLE' OR Size(array_2, /TNAME) EQ 'DOUBLE' THEN $
            double = 1 ELSE double = 0           
         ; Check keyword.
        IF N_Elements(ulp) EQ 0 THEN ulp = 1.0D ELSE ulp = ROUND(ABS(ulp))       
        ; Arrays not equal if they are not the same length.
-       IF N_Elements(array_1) NE N_Elements(array_2) THEN RETURN, 0
+       IF N_Elements(array_1) NE N_Elements(array_2) THEN RETURN, 0
        ; Choose a number "sufficiently close" to zero for comparison.
        epsilon = (MACHAR(DOUBLE=double)).eps
-       NUMBER = (Abs(array_1) > Abs(array_2)) * epsilon * ulp
+       NUMBER = (Abs(array_1) > Abs(array_2)) * epsilon * ulp
        ; Compare the arrays.
        IF Total(Abs(array_1 - array_2) LE NUMBER) EQ N_Elements(array_1) THEN $
-           RETURN, 1 ELSE RETURN, 0
-   END
+           RETURN, 1 ELSE RETURN, 0
+   END

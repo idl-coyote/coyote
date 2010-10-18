@@ -1,16 +1,20 @@
 ;+
 ; NAME:
-;       Pickfile
+;       FSC_Pickfile
 ;
 ; PURPOSE:
 ;
 ;       This is a utility program for selecting data files. It is a wrapper
 ;       for DIALOG_PICKFILE, with special keywords to go to the specified
-;       data directories in my IDL program layout. The advantage of using
-;       Pickfile is that it remembers the directory in which you selected the 
+;       data directories in my IDL file system. The advantage of using
+;       FSC_Pickfile is that it remembers the directory in which you selected the 
 ;       last data file and returns there for the next file selection. The 
 ;       last directory selection made is stored in the system variable 
-;       !Coyote_LastDir.
+;       !Coyote_LastDir. The last file selected in stored in the systm variable
+;       !Coyote_LastFile. Normally, Dialog_Pickfile starts in the last directory
+;       where you selected a file. If you set the LAST_FILE keyword, the name
+;       of the last file selected will be loaded into the Dialog_Pickfile 
+;       interface when it appears.
 ;
 ; AUTHOR:
 ;       FANNING SOFTWARE CONSULTING
@@ -27,7 +31,7 @@
 ;
 ; CALLING SEQUENCE:
 ;
-;       filename = Pickfile()
+;       filename = FSC_Pickfile()
 ;
 ; RETURN VALUE:
 ;
@@ -36,27 +40,30 @@
 ;
 ;  KEYWORDS:
 ;
-;       DATA:         If set, starts in the "data" directory.
+;       DATA:         If set, starts in the "data" directory. That is, ".../IDL/data.
+;                     If assumes this file resides in a directory rooted in ".../IDL", too,
+;                     for example, ".../IDL/coyote."
 ;       
 ;       DEMO:         If set, starts in the !DIR/examples/data directory.
 ;       
-;       JPEG:         If set, starts in the "jpeg" directory.
+;       JPEG:         If set, starts in the "jpeg" directory at ".../IDL/data/jpeg".
 ;
-;       HDF:          If set, starts in the "hdf" directory.
+;       HDF:          If set, starts in the "hdf" directory at ".../IDL/data/hdf".
 ;
-;       LIDAR:        If set, starts in the "lidar" directory.
+;       LIDAR:        If set, starts in the "lidar" directory at ".../IDL/data/lidar".
 ;
-;       NCDF:         If set, starts in the "netCDF" directory.
+;       NCDF:         If set, starts in the "netCDF" directory at ".../IDL/data/ncdf".
 ;
-;       PNG:          If set, starts in the "png" directory.
+;       PNG:          If set, starts in the "png" directory at ".../IDL/data/png".
 ;
-;       TIFF:         If set, starts in the "tiff" directory.
+;       TIFF:         If set, starts in the "tiff" directory at ".../IDL/data/tiff".
 ;       
 ;       EXTRA:        Accepts any input keywords to DIALOG_PICKFILE (e.g., FILTER).
 ;
 ; MODIFICATION HISTORY:
 ;
 ;       Written by David W. Fanning, 22 February 2010.
+;       Name changed from Pickfile to FSC_Pickfile on 14 October 2010. DWF.
 ;
 ;
 ;******************************************************************************************;
@@ -86,11 +93,12 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-FUNCTION Pickfile, $
+FUNCTION FSC_Pickfile, $
     DATA=data, $
     DEMO=demo, $
     JPEG=jpeg, $
     HDF=hdf, $
+    LAST_FILE=last_file, $
     LIDAR=lidar, $
     NCDF=ncdf, $
     PNG=png, $
@@ -150,17 +158,33 @@ FUNCTION Pickfile, $
         
     ENDELSE
     
+    ; Should we use the last file?
+    IF Keyword_Set(last_file) THEN BEGIN
+    
+        ; If the last file was saved, use it. Otherwise, the nothing to use.
+        DEFSYSV, '!Coyote_LastFile', EXISTS=exists
+        IF exists THEN lastFile =  !Coyote_LastFile
+    
+    ENDIF
+    
     ; Has the fileDir been defined. If not, use the dataDir.
     IF N_Elements(fileDir) EQ 0 THEN fileDir = dataDir
-    file = Dialog_Pickfile(PATH=fileDir, GET_PATH=selectedDir, _STRICT_EXTRA=extra)
+    file = Dialog_Pickfile(PATH=fileDir, GET_PATH=selectedDir, $
+        FILE=lastFile, _STRICT_EXTRA=extra)
     
-    ; Save the last directory.
+    ; Save the last directory and filename.
     IF file NE "" THEN BEGIN
         DEFSYSV, '!Coyote_LastDir', EXISTS=exists
         IF (exists AND (N_Elements(selectedDir) NE 0)) THEN BEGIN
             !Coyote_LastDir = selectedDir 
         ENDIF ELSE BEGIN
             IF N_Elements(selectedDir) NE 0 THEN DEFSYSV, '!Coyote_LastDir', selectedDir
+        ENDELSE
+        DEFSYSV, '!Coyote_LastFile', EXISTS=exists
+        IF exists THEN BEGIN
+            !Coyote_LastFile = File_BaseName(file)
+        ENDIF ELSE BEGIN
+            DEFSYSV, '!Coyote_LastFile', File_BaseName(file)
         ENDELSE
     ENDIF 
     

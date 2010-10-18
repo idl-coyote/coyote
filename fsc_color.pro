@@ -6,9 +6,10 @@
 ;
 ;       The purpose of this function is to obtain drawing colors
 ;       by name and in a device/decomposition independent way.
-;       The color names and values may be read in as a file, or 104 color
+;       The color names and values may be read in as a file, or 192 color
 ;       names and values are supplied with the program. These colors were
-;       obtained from the file rgb.txt, found on most X-Window distributions.
+;       obtained from the file rgb.txt, found on most X-Window distributions,
+;       and from colors in the Brewer color tables (http://colorbrewer2.org/).
 ;       Representative colors were chosen from across the color spectrum. To
 ;       see a list of colors available, type:
 ;
@@ -86,10 +87,6 @@
 ;              Snow      Spring Green        Steel Blue               Tan              Teal              Text
 ;           Thistle            Tomato         Turquoise            Violet        Violet Red             Wheat
 ;             White            Yellow
-;
-;           In addition, these system colors are available if a connection to the window system is available.
-;
-;           Frame   Text   Active   Shadow   Highlight   Edge   Selected   Face
 ;
 ;           The color WHITE is used if this parameter is absent or a color name is mis-spelled. To see a list
 ;           of the color names available in the program, type this:
@@ -202,6 +199,8 @@
 ;              a window connection before it tries to load system colors (which require one). If you
 ;              think you might be using FSC_COLOR in a cron job, for example, you would want to set this
 ;              keyword. If there is no window connection, the system colors are not available from the program.
+;              As of 18 October 2010, this keyword is no longer used, as system colors have been
+;              removed from the program.
 ;
 ;       FILENAME: The string name of an ASCII file that can be opened to read in
 ;              color values and color names. There should be one color per row
@@ -233,6 +232,8 @@
 ;              colors (and most people don't even know they are there, to tell you the truth), 
 ;              then setting this keyword will keep them from being loaded, and you can run
 ;              FSC_COLOR without a display. THIS KEYWORD NOW DEPRECIATED IN FAVOR OF CHECK_CONNECTION.
+;              As of 18 October 2010, this keyword is no longer used, as system colors have been
+;              removed from the program.
 ;
 ;       ROW:   If this keyword is set, the return value of the function when the TRIPLE
 ;              keyword is set is returned as a row vector, rather than as the default
@@ -363,6 +364,10 @@
 ;            exists, FSC_Color consults it to determine if there is a display connection. It
 ;            it doesn't exist, it calls CanConnect. This way, a window has to be open only
 ;            once in an IDL session to determine if a display connection can be made. 7 Oct 2010. DWF.
+;       I am tired of dealing with "system" colors. I've never used them, no one I know
+;            has ever used them, and they have given me nothing but headaches. I'm done
+;            with them. I'll leave the code here for awhile in case you use them, but
+;            I'm pretty sure I'm not putting them back in. 17 October 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -465,7 +470,7 @@ END ;---------------------------------------------------------------------------
 FUNCTION FSC_Color, theColour, colorIndex, $
    AllColors=allcolors, $
    Brewer=brewer, $
-   Check_Connection=check_connection, $
+   Check_Connection=check_connection, $ ; This keyword is completely ignored.
    ColorStructure=colorStructure, $
    Cancel=cancelled, $
    Decomposed=decomposedState, $
@@ -473,7 +478,7 @@ FUNCTION FSC_Color, theColour, colorIndex, $
    Filename=filename, $
    Names=names, $
    NColors=ncolors, $
-   NODISPLAY=nodisplay, $
+   NODISPLAY=nodisplay, $ ; This keyword is completely ignored.
    Row=row, $
    SelectColor=selectcolor, $
    Triple=triple
@@ -494,10 +499,19 @@ FUNCTION FSC_Color, theColour, colorIndex, $
     IF N_Elements(theColour) NE 0 THEN theColor = theColour ELSE $
         theColor = Keyword_Set(brewer) ? 'WT1' : 'WHITE'
         
-    ; Make sure the color parameter is compressed and an uppercase string.
+    ; Make sure the color parameter is a string.
     varInfo = Size(theColor)
     IF varInfo[varInfo[0] + 1] NE 7 THEN $
        Message, 'The color name parameter must be a string.', /NoName
+       
+    ; We don't want underscores in color names. Turn all underscores
+    ; to spaces.
+    FOR j=0,N_Elements(theColor)-1 DO BEGIN
+        theColor[j] = StrJoin( StrSplit(theColor[j], '_', /Extract, $
+           /Preserve_Null), ' ')
+    ENDFOR
+    
+    ; Make sure the color is compressed anduppercase.   
     theColor = StrUpCase(StrCompress(StrTrim(theColor,2), /Remove_All))
     
     ; Read the first color as bytes. If none of the bytes are less than 48
@@ -735,42 +749,47 @@ FUNCTION FSC_Color, theColour, colorIndex, $
            bvalue = [ bvalue,   5,     26,    60,   118,   177,   141,   105,    71 ]
        ENDELSE
    ENDELSE
+   
+   
+; I have completely removed all access to "system" colors in this code. I'll
+; leave the code here for awhile to be sure no one is using system colors, but
+; I seriously doubt it will be coming back.
     
    ; Add system color names for IDL version 5.6 and higher. We don't want to
    ; do this we cannot establish a display connection (e.g., we are running
    ; in a cron job). Check for system variable !FSC_Display_Connection. If not
    ; defined, check the connection.
-   DefSysV, '!FSC_Display_Connection', EXISTS=sysvarExists
-   IF sysvarExists $
-        THEN haveConnection = !FSC_Display_Connection $
-        ELSE haveConnection = CanConnect()
-      
+;   DefSysV, '!FSC_Display_Connection', EXISTS=sysvarExists
+;   IF sysvarExists $
+;        THEN haveConnection = !FSC_Display_Connection $
+;        ELSE haveConnection = CanConnect()
+;      
    ; Handle depreciated NODISPLAY keyword.
    IF Keyword_Set(nodisplay) THEN haveConnection = 0
 
-   IF (Float(!Version.Release) GE 5.6) && Keyword_Set(haveConnection) THEN BEGIN
-       
-          tlb = Widget_Base()
-          sc = Widget_Info(tlb, /System_Colors)
-          Widget_Control, tlb, /Destroy
-          frame = sc.window_frame
-          text = sc.window_text
-          active = sc.active_border
-          shadow = sc.shadow_3d
-          highlight = sc.light_3d
-          edge = sc.light_edge_3d
-          selected = sc.highlight
-          face = sc.face_3d
-          colors  = [colors,  'Frame',  'Text',  'Active',  'Shadow']
-          rvalue =  [rvalue,   frame[0], text[0], active[0], shadow[0]]
-          gvalue =  [gvalue,   frame[1], text[1], active[1], shadow[1]]
-          bvalue =  [bvalue,   frame[2], text[2], active[2], shadow[2]]
-          colors  = [colors,  'Highlight',  'Edge',  'Selected',  'Face']
-          rvalue =  [rvalue,   highlight[0], edge[0], selected[0], face[0]]
-          gvalue =  [gvalue,   highlight[1], edge[1], selected[1], face[1]]
-          bvalue =  [bvalue,   highlight[2], edge[2], selected[2], face[2]]
-       
-    ENDIF
+;   IF (Float(!Version.Release) GE 5.6) && Keyword_Set(haveConnection) THEN BEGIN
+;       
+;          tlb = Widget_Base()
+;          sc = Widget_Info(tlb, /System_Colors)
+;          Widget_Control, tlb, /Destroy
+;          frame = sc.window_frame
+;          text = sc.window_text
+;          active = sc.active_border
+;          shadow = sc.shadow_3d
+;          highlight = sc.light_3d
+;          edge = sc.light_edge_3d
+;          selected = sc.highlight
+;          face = sc.face_3d
+;          colors  = [colors,  'Frame',  'Text',  'Active',  'Shadow']
+;          rvalue =  [rvalue,   frame[0], text[0], active[0], shadow[0]]
+;          gvalue =  [gvalue,   frame[1], text[1], active[1], shadow[1]]
+;          bvalue =  [bvalue,   frame[2], text[2], active[2], shadow[2]]
+;          colors  = [colors,  'Highlight',  'Edge',  'Selected',  'Face']
+;          rvalue =  [rvalue,   highlight[0], edge[0], selected[0], face[0]]
+;          gvalue =  [gvalue,   highlight[1], edge[1], selected[1], face[1]]
+;          bvalue =  [bvalue,   highlight[2], edge[2], selected[2], face[2]]
+;       
+;    ENDIF
        
     ; Load the colors from the current color table, if you need them.
     IF useCurrentColors THEN BEGIN

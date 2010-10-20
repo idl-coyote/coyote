@@ -374,7 +374,7 @@ CASE number OF
 
    2: BEGIN
       data = MAKEZ(41, 41, 10, Seed=-5L)
-      data = BYTSCL(data, Top=!D.Table_Size-1)
+      data = Scale_Vector(data, 0, 60)
       END
 
    3: BEGIN

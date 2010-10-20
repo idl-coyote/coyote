@@ -90,7 +90,7 @@
 ;                     fail. If you can live without the system colors (and most people 
 ;                     don't even know they are there, to tell you the truth), then setting 
 ;                     this keyword will keep them from being loaded, and you can run
-;                     FSC_COLORBAR without a display.
+;                     FSC_COLORBAR without a display. As of 19 Oct 2010, set to 1  by default.
 ;
 ;       POSITION:     A four-element array of normalized coordinates in the same
 ;                     form as the POSITION keyword on a plot. Default is
@@ -200,6 +200,12 @@
 ;      9 Nov 2009. Fixed typo in title of vertical colorbar. DWF.
 ;      25 Sep 2010. Renamed FSC_Colorbar from Colorbar to avoid conflict with ITTVIS introduced
 ;             colorbar.pro function in IDL 8.0. DWF.
+;      19 Oct 2010. Made changes so that axes titles are not picked up in _EXTRA and displayed
+;             on the color bar. Also changed all _EXTRA passes to _STRICT_EXTRA to report
+;             mis-spelled and/or inappropriate keywords. DWF.
+;      19 Oct 2010. Changed the default value of NODISPLAY keyword to 1, since FSC_Color
+;             no longer looks for system colors anyway. NODISPLAY is a depreciated keyword
+;             and does nothing if using the latest version of FSC_Color. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -237,8 +243,13 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
 
     compile_opt idl2
 
-    ; Return to caller on error.
-    On_Error, 2
+    ; Catch the error.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
 
     ; Save the current plot state.
     bang_p = !P
@@ -291,6 +302,7 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
     IF N_ELEMENTS(charsize) EQ 0 THEN charsize = !P.Charsize
     IF N_ELEMENTS(format) EQ 0 THEN format = '(I0)'
     IF N_ELEMENTS(color) EQ 0 THEN color = !P.Color
+    IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
     minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange)
     maxrange = (N_ELEMENTS(maxrange) EQ 0) ? Float(ncolors) : Float(maxrange)
     IF N_ELEMENTS(ticklen) EQ 0 THEN ticklen = 0.2
@@ -424,22 +436,22 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
        IF KEYWORD_SET(right) THEN BEGIN
 
           PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1, $
-             YTICKS=divisions, XSTYLE=1, YSTYLE=9, $
+             YTICKS=divisions, XSTYLE=1, YSTYLE=9, XTITLE="", YTITLE="", $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
-             XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', YMINOR=minor, _EXTRA=extra, $
+             XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', YMINOR=minor, _STRICT_EXTRA=extra, $
              YTICKNAME=ticknames, FONT=font, YLOG=ylog
 
           AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
-             YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, $
-             FONT=font, YTITLE=title, _EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, YLOG=ylog
+             YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
+             FONT=font, YTITLE=title, _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, YLOG=ylog
 
        ENDIF ELSE BEGIN
 
           PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1,  $
              YTICKS=divisions, YSTYLE=1, XSTYLE=1, YTITLE=title, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
-             XTICKFORMAT='(A1)', YTICKFORMAT=format, YMinor=minor, _EXTRA=extra, $
-             YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font
+             XTICKFORMAT='(A1)', YTICKFORMAT=format, YMinor=minor, _STRICT_EXTRA=extra, $
+             YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font, XTITLE=""
 
        ENDELSE
 
@@ -451,13 +463,13 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
              YTICKS=1, XSTYLE=9, YSTYLE=1, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              YTICKFORMAT='(A1)', XTICKFORMAT='(A1)', XTICKLEN=ticklen, $
-             XRANGE=[minrange, maxrange], FONT=font, XMINOR=minor,_EXTRA=extra, $
-             XTICKNAME=ticknames, XLOG=xlog
+             XRANGE=[minrange, maxrange], FONT=font, XMINOR=minor, _STRICT_EXTRA=extra, $
+             XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE=""
 
           AXIS, XTICKS=divisions, XSTYLE=1, COLOR=color, CHARSIZE=charsize, $
              XTICKFORMAT=format, XTICKLEN=ticklen, XRANGE=[minrange, maxrange], XAXIS=1, $
-             FONT=font, XTITLE=title, _EXTRA=extra, XCHARSIZE=charsize, XMINOR=minor, $
-             XTICKNAME=ticknames, XLOG=xlog
+             FONT=font, XTITLE=title, _STRICT_EXTRA=extra, XCHARSIZE=charsize, XMINOR=minor, $
+             XTICKNAME=ticknames, XLOG=xlog, YTITLE=""
 
        ENDIF ELSE BEGIN
 
@@ -465,8 +477,8 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
              YTICKS=1, XSTYLE=1, YSTYLE=1, TITLE=title, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              YTICKFORMAT='(A1)', XTICKFORMAT=format, XTICKLEN=ticklen, $
-             XRANGE=[minrange, maxrange], FONT=font, XMinor=minor, _EXTRA=extra, $
-             XTICKNAME=ticknames, XLOG=xlog
+             XRANGE=[minrange, maxrange], FONT=font, XMinor=minor, _STRICT_EXTRA=extra, $
+             XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE=""
 
         ENDELSE
 

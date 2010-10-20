@@ -130,7 +130,7 @@ FUNCTION SetDifference, set_a, set_b, $
     mina = Min(set_a, Max=maxa)
     minb = Min(set_b, Max=maxb)
     
-    ; If no overlap, return set A.
+    ; If no overlap, return no result.
     IF (minb GT maxa) OR (maxb LT mina) THEN BEGIN
         success = 0
         RETURN, noresult 

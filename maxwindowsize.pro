@@ -68,7 +68,9 @@
 ;           Coyote's Guide to IDL Programming: http://www.dfanning.com
 ;
 ; :History:
-;     Written, 26 October 2010.
+;     Change History::
+;        Written, 26 October 2010.
+;        Misunderstood Macintosh result. Now Mac treated like UNIX. 27 Oct 2010.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -90,8 +92,7 @@ FUNCTION MaxWindowSize, MONITOR_RESOLUTION=monitor_resolution
         Device, Get_Screen_Size=monitor_resolution
     ENDIF
     
-    ; Different ways to obtain information based on Windows, UNIX, 
-    ; and Macintosh computers.
+    ; Different ways to obtain information based on Windows and UNIX computers.
     CASE StrUpCase(!Version.OS_Family) OF
     
         'WINDOWS': BEGIN 
@@ -106,16 +107,11 @@ FUNCTION MaxWindowSize, MONITOR_RESOLUTION=monitor_resolution
             
         'UNIX': BEGIN
         
-            ; Check to see if this is a Macintosh.
-            IF StrPos(!Version.OS_Family, 'Mac ') NE -1 THEN BEGIN
-                retValue =  Get_Screen_Size()
-            ENDIF ELSE BEGIN ; All other UNIX computers.
-                ; Unavoidable screen flash here. Uughh!
+               ; Unavoidable screen flash here. Uughh!
                 s = Get_Screen_Size()
                 Window, XSIZE=s[0], YSIZE=s[1], /FREE
                 retValue = [!D.X_Size, !D.Y_Size]
                 WDelete, !D.Window
-            ENDELSE
             
             END
         

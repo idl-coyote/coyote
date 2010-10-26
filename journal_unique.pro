@@ -1,40 +1,11 @@
 ; docformat = 'rst'
-;+
+;
 ; NAME:
 ;   Journal_Unique
 ;
 ; PURPOSE:
-; 
 ;   This procedure creates a new journal file with a unique journal
 ;   name based on the current time.
-;
-; CATEGORY:
-; 
-;    Utility
-;  
-; CALLING SEQUENCE:
-; 
-;    Journal_Unique, theDirectory
-;
-; ARGUMENTS:
-; 
-;  theDirectory: The directory where you wish to create the journal file.
-;                If not provided, the current working directory.
-;     
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: davidf@dfanning.com
-;   Coyote's Guide to IDL Programming: http://www.dfanning.com
-;   
-; MODIFICATION HISTORY:
-; 
-;    Written by: David W. Fanning, 20 September 2010.
-;-
 ;******************************************************************************************;
 ;                                                                                          ;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc. All rights reserved.           ;
@@ -62,7 +33,7 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-;
+;+
 ; :Description:
 ;    Creates a new journal file with a unique journal name based on the current time.
 ; 
@@ -77,15 +48,20 @@
 ;    Journal_Unique
 ;
 ; :Author:
-;    David W. Fanning (david@dfanning.com)
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: davidf@dfanning.com
+;           Coyote's Guide to IDL Programming: http://www.dfanning.com
 ;    
 ; :History:
 ;     Written, 20 Sept 2010.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
-;
-;
+;-
 PRO Journal_Unique, theDirectory
 
    Compile_Opt idl2

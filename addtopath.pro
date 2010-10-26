@@ -1,5 +1,5 @@
 ; docformat = 'rst'
-;+
+;
 ; NAME:
 ;   AddToPath
 ;
@@ -9,36 +9,6 @@
 ;   system variable. If a directory name is not passed in, the current
 ;   IDL working directory is used. The directory must currently exist
 ;   to be added.
-;
-; CATEGORY:
-; 
-;    Utility
-;  
-; CALLING SEQUENCE:
-; 
-;    AddToPath, '/usr/david/IDL'
-;
-; ARGUMENTS:
-; 
-;  theDirectory: The directory you wish to add to the front of the IDL
-;                !PATH system variable. If not provided, the current working 
-;                directory is added. The directory must currently exist to be 
-;                added to !PATH.
-;     
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: davidf@dfanning.com
-;   Coyote's Guide to IDL Programming: http://www.dfanning.com
-;
-; MODIFICATION HISTORY:
-; 
-;    Written by: David W. Fanning, 20 September 2010.
-;-
 ;******************************************************************************************;
 ;                                                                                          ;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc. All rights reserved.           ;
@@ -67,7 +37,7 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 ;
-;
+;+
 ; :Description:
 ;    Adds a directory to the beginning of the !PATH system variable.
 ;
@@ -83,17 +53,24 @@
 ;       Set this keyword if you wish to receive confirmation of action.
 ;
 ; :Examples:
-;    AddToPath, '/usr/david/IDL/programs/'
+;    For example, to add a "programs" directory to the IDL path::
+;       AddToPath, '/usr/david/IDL/programs/'
 ;
 ; :Author:
-;    David W. Fanning (david@dfanning.com)
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: davidf@dfanning.com
+;           Coyote's Guide to IDL Programming: http://www.dfanning.com
 ;
 ; :History:
 ;     Written, 20 Sept 2010.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
-;
+;-
 PRO ADDTOPATH, theDirectory, VERBOSE=verbose
 
     Compile_Opt idl2

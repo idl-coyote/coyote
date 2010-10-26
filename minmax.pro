@@ -1,5 +1,5 @@
 ; docformat = 'rst'
-;+
+;
 ; NAME:
 ;   MinMax
 ;
@@ -7,40 +7,6 @@
 ; 
 ;   Calculates and prints the minimum and maximum of a variable.
 ;
-; CATEGORY:
-; 
-;    Utility
-;  
-; CALLING SEQUENCE:
-; 
-;    MinMax, variable
-;
-; ARGUMENTS:
-; 
-;    variable: The IDL variable whose minimum and maximum you wish to know.
-;  
-; KEYWORDS:
-;  
-;     NAN:      Set this keyword to ignore NANs in the data.
-;     
-;     TEXT:     A text string that is prepended to the printed output. If
-;               not provide the string "MinMax: " is used. To supress text
-;               use TEXT="".
-;     
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: davidf@dfanning.com
-;   Coyote's Guide to IDL Programming: http://www.dfanning.com
-;   
-; MODIFICATION HISTORY:
-; 
-;    Written by: David W. Fanning, 20 September 2010.
-;-
 ;******************************************************************************************;
 ;                                                                                          ;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc. All rights reserved.           ;
@@ -68,7 +34,7 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-;
+;+
 ; :Description:
 ;    Prints the minimum and maximum of an IDL variable.
 ; 
@@ -89,18 +55,23 @@
 ;   The MinMax routine gives the range of the variable::
 ;     IDL> a = Findgen(11)
 ;     IDL> MinMax, a, TEXT='Variable A:'
-;     MinMax:   0    11
+;     Variable A:   0    11
 ;    
 ; :Author:
-;    David W. Fanning (david@dfanning.com)
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: davidf@dfanning.com
+;           Coyote's Guide to IDL Programming: http://www.dfanning.com
 ;    
 ; :History:
 ;     Written, 20 Sept 2010.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
-;
-;
+;-
 PRO MinMax, variable, NAN=nan, TEXT=text
 
   Compile_Opt idl2

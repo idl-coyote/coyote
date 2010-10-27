@@ -5,8 +5,10 @@
 ;
 ; PURPOSE:
 ;   Returns the resolution of the largest unobstructed graphics window that can be
-;   created on this particular graphics device. Works properly for Windows, UNIX, and
-;   Macintosh computers.
+;   created on this particular graphics device. Works properly for Windows and UNIX
+;   computers, excluding Macintosh computers. There is no known way to find the resolution
+;   of the largest unobstructed graphics window on a Macintosh computer, so a fudge factor
+;   of 22 pixels is used to account for the Macintosh "dock".
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -39,8 +41,10 @@
 ;+
 ; :Description:
 ;    Returns the resolution of the largest unobstructed graphics window that can be
-;    created on this particular graphics device. Works properly for Windows, UNIX, and
-;    Macintosh computers.
+;    created on this particular graphics device. Works properly for Windows and UNIX
+;    computers, excluding Macintosh computers. There is no known way to find the resolution
+;    of the largest unobstructed graphics window on a Macintosh computer, so a fudge factor
+;    of 22 pixels is used to account for the Macintosh "dock".
 ;
 ; :Categories:
 ;    Utility
@@ -69,8 +73,10 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 26 October 2010.
-;        Misunderstood Macintosh result. Now Mac treated like UNIX. 27 Oct 2010.
+;        Written, 26 October 2010. DWF.
+;        Misunderstood Macintosh result. Now Mac treated like UNIX. 27 Oct 2010. DWF.
+;        No known method for Macintosh computers. Resorting to a fudge factor
+;           of 22 pixels to account for the Macintosh dock. 27 Oct 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -86,6 +92,10 @@ FUNCTION MaxWindowSize, MONITOR_RESOLUTION=monitor_resolution
         void = Error_Message()
         RETURN, [-1,-1]
     ENDIF
+    
+    ; Macintosh fudge factor. Should be the size of the dock.
+    ; Adjust as necessary.
+    macfudge = 22
     
     ; Need monitor resolution?
     IF Arg_Present(monitor_resolution) THEN BEGIN
@@ -107,12 +117,22 @@ FUNCTION MaxWindowSize, MONITOR_RESOLUTION=monitor_resolution
             
         'UNIX': BEGIN
         
-               ; Unavoidable screen flash here. Uughh!
+            IF StrPos(!Version.OS_Name, 'Mac')  GE 0 THEN BEGIN
+        
+                ; Unavoidable screen flash here. Uughh!
                 s = Get_Screen_Size()
                 Window, XSIZE=s[0], YSIZE=s[1], /FREE
                 retValue = [!D.X_Size, !D.Y_Size]
                 WDelete, !D.Window
             
+            ENDIF ELSE BEGIN ; Macintosh computers.
+                
+                 ; Have to use fudge factor. No way to determine otherwise.
+                 s = Get_Screen_Size()
+                 retValue = [s[0], s[1] - macfudge]
+                
+            ENDELSE
+                
             END
         
     ENDCASE

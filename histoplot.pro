@@ -30,7 +30,7 @@
 ;
 ; INPUT KEYWORDS:
 ;
-;       AXISCOLORNAME:    The name of the axis color. Default: "Navy". (All color names
+;       AXISCOLORNAME:    The name of the axis color. Default: "Black". (All color names
 ;                         derived from FSC_COLOR.)
 ;
 ;       BACKCOLORNAME:    The name of the background color. Default: "White".
@@ -181,6 +181,7 @@
 ;            keyword. This is a change in behavior. 1 October 2010. DWF.
 ;       Fixed a problem when specifying more than one POLYCOLOR. I made a change to the program
 ;            and forgot to propogate it everywhere. 4 October 2010. DWF.
+;       Default axis color name changed from "Navy" to "Black". 28 October 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2010, by Fanning Software Consulting, Inc.                           ;
@@ -332,7 +333,7 @@ PRO HistoPlot , $                   ; The program name.
 
    ; Check for keywords.
    IF N_Elements(dataColorName) EQ 0 THEN dataColorName = "Indian Red"
-   IF N_Elements(axisColorName) EQ 0 THEN axisColorName = "Navy"
+   IF N_Elements(axisColorName) EQ 0 THEN axisColorName = "Black"
    IF N_Elements(backColorName) EQ 0 THEN backColorName = "White"
    IF N_Elements(polycolorname) EQ 0 THEN polycolorname = "Rose"
    frequency = Keyword_Set(frequency)

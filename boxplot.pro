@@ -132,6 +132,7 @@
 ;       Fixed a typo that didn't allow a single column vector to be displayed as a box plot. 17 May 2009. DWF.
 ;       Now allow a single row vector to be passed into program and displayed. 20 May 2009. DWF.
 ;       Added NOCLIP=0 keyword to PLOTS command when drawing outliers. 15 July 2009. DWF.
+;       Minor adjustment of the X axis label position. 28 October 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -305,17 +306,17 @@
       IF maxcount EQ 0 THEN BEGIN
         top = maxData 
       ENDIF ELSE BEGIN
-            index = Value_Locate(sortedData, quartile_75 + (1.5 * iqr))
-            top = sortedData[0 > (index) < (N_Elements(data)-1)]
+        index = Value_Locate(sortedData, quartile_75 + (1.5 * iqr))
+        top = sortedData[0 > (index) < (N_Elements(data)-1)]
       ENDELSE
       
       ; Are there any data less than 1.5*iqr
       imin = Where(data LT quartile_25 - (1.5 * iqr), mincount)
       IF mincount EQ 0 THEN BEGIN
-            bottom = minData 
+         bottom = minData 
       ENDIF ELSE BEGIN
-            index = Value_Locate(sortedData, quartile_25 - (1.5 * iqr))
-            bottom = sortedData[0 > (index+1) < (N_Elements(data)-1)]
+         index = Value_Locate(sortedData, quartile_25 - (1.5 * iqr))
+         bottom = sortedData[0 > (index+1) < (N_Elements(data)-1)]
       ENDELSE
       
       ; Draw the whiskers.
@@ -434,7 +435,7 @@
          ENDCASE
          FOR j=1,numbox DO BEGIN
              xy = Convert_Coord(xloc[j], !Y.CRange[0], /DATA, /TO_NORMAL)
-             XYOUTS, xy[0], xy[1] - 0.025, /NORMAL, plotlabels[j], $
+             XYOUTS, xy[0], xy[1] - 0.0375, /NORMAL, plotlabels[j], $
                 ALIGNMENT=alignment, COLOR=FSC_Color(axes_color), $
                 ORIENTATION=rotate
          ENDFOR

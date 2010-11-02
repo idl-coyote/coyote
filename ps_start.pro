@@ -70,6 +70,15 @@
 ;       When PS_START is called, the current graphics device is set to "PS" (the PostScript 
 ;       device). When PS_END is called the current graphics device is returned to the device
 ;       in effect when PS_START was called.
+;       
+;       PS_Start uses the current display window as a template for the Postscript
+;       file. Thus, if the display window is wider than it is higher, output is
+;       in Landscape mode. To set the size of the PostScript "window" yourself, be
+;       sure to set the NOMATCH keyword to 1.
+;       
+;       To display surface plots correctly the FONT keyword should be set to 1.
+;       Otherwise, the default font is 0, or hardware fonts when outputting to 
+;       PostScript.
 ;
 ; RESTRICTIONS:
 ;
@@ -125,10 +134,11 @@
 ;           before they call PS_START, rather than after. 23 March  2009. DWF.
 ;       Moved PS_END to its own file to allow the IDLExBr_Assistant to work properly. 7 April 2009. DWF.
 ;       Modified to allow PostScript page type to be stored for future processing with FixPS. 9 August 2009. DWF.
+;       Added NoFix keyword to PS_END calls to repair previous, but unused set-ups. 1 Nov 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
-;  Copyright (c) 2008 -2009, by Fanning Software Consulting, Inc.                          ;
+;  Copyright (c) 2008 - 2010, by Fanning Software Consulting, Inc.                         ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -179,7 +189,7 @@ PRO PS_START, $
    
    ; If the setup flag is on, then we have to close the previous
    ; start command before we can continue.
-   IF ps_struct.setup EQ 1 THEN PS_END
+   IF ps_struct.setup EQ 1 THEN PS_END, /NoFix
    
    ; Save current setup information in the PS_STRUCT structure.
    ps_struct.setup = 1
@@ -218,7 +228,7 @@ PRO PS_START, $
       keywords = PSConfig(_Extra=extra, Cancel=cancelled, NOGUI=(~gui))
    ENDELSE
    IF cancelled THEN BEGIN
-        PS_END
+        PS_END, /NoFix
         RETURN
    ENDIF
 

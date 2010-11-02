@@ -3,23 +3,10 @@
 ;     TVIMAGE
 ;
 ; PURPOSE:
-;     This purpose of TVIMAGE is to enable the TV command in IDL
-;     to be a completely device-independent and color-decomposition-
-;     state independent command. On 24-bit displays color decomposition
-;     is always turned off for 8-bit images and on for 24-bit images.
-;     The color decomposition state is restored for those versions of
-;     IDL that support it (> 5.2). Moreover, TVIMAGE adds features
-;     that TV lacks. For example, images can be positioned in windows
-;     using the POSITION keyword like other IDL graphics commands.
-;     TVIMAGE also supports the !P.MULTI system variable, unlike the
-;     TV command. TVIMAGE was written to work especially well in
-;     resizeable graphics windows. Note that if you wish to preserve
-;     the aspect ratio of images in resizeable windows, you should set
-;     the KEEP_ASPECT_RATIO keyword, described below. TVIMAGE works
-;     equally well on the display, in the PostScript device, and in
-;     the Printer and Z-Graphics Buffer devices. The TRUE keyword is
-;     set automatically to the correct value for 24-bit images, so you
-;     don't need to specify it when using TVIMAGE.
+;     This purpose of TVIMAGE is to create a device-independent TV command
+;     with the power and functionality to be used in sophisticated graphics
+;     programs, as well as at the IDL command line. It can be thought of as 
+;     a "smart" TV command.
 ;
 ; AUTHOR:
 ;       FANNING SOFTWARE CONSULTING:
@@ -38,8 +25,11 @@
 ;     TVIMAGE, image
 ;
 ; INPUTS:
-;     image:    A 2D or 3D image array. It should be byte data. Can also be
-;               a 3D image with an alpha channel (e.g., MxNx4).
+;     image:    A 2D (MxN) or 24-bit (e.g., MxNx3) byte array. A
+;               24-bit image with an alpha channel (e.g., MxNx4) is
+;               also permitted. The alpha channel will be blended with
+;               the current background image. See the AlphaBackgroundImage
+;               keyword for details.
 ;
 ;       x  :    The X position of the lower-left corner of the image.
 ;               This parameter is only recognized if the TV keyword is set.
@@ -56,6 +46,22 @@
 ;               it will assume you are using INDEXED color mode. If a long integer
 ;               is will assume you are using DECOMPOSED color mode. If a string,
 ;               is will pass the string color name along to FSC_COLOR for processing.
+;               
+;     ALPHABACKGROUNDIMAGE: Normally, when a image with an alpha channel is displayed,
+;               the image is blended with the image currently in the display window.
+;               This means, the program has to obtain that background image. This is not a 
+;               problem on devices (e.g., WIN, X, Z) that allow this kind of operation,
+;               but it is on devices (e.g., the PostScript device, PS) that do not.
+;               To get around this problem, you can pass the background image to the
+;               TVImage program, along with the alpha channel image you wish to display
+;               (via the image parameter) and the alpha channel image will be blended
+;               with this image appropriately on all devices. If an alpha channel image
+;               is displayed on a device in which there is no way to obtain the background
+;               image, and this keyword is not used to pass a background image, then
+;               the alpha channel image will be blended with a white background image.
+;               This keyword is only used if an alpha channel image is passed to the 
+;               program via the image parameter. The AlphaBackgroundImage does not need
+;               to have the same dimensions as the alpha channel image.
 ;
 ;     AXES:     Set this keyword to draw a set of axes around the image.
 ;
@@ -189,8 +195,16 @@
 ;                example, if you are using TVIMAGE to draw a color bar, it would
 ;                not be necessary. Setting this keyword means that TVIMAGE just
 ;                goes quietly about it's business without bothering anyone else.
+;             
+;    SAVE:      Set this keyword to save the data coordinate system established
+;               by using the AXES keyword. The default is to not save the
+;               data coordinate system, but to restore the one in place when
+;               the image is displayed. This keyword is only applied if axes
+;               are drawn on the image.
 ;
 ;    SCALE:     Set this keyword to byte scale the image before display.
+;               This keyword should only be applied to 2D (MxN) images.
+;               TVScale might be a better option than using this keyword.
 ;
 ;     TV:       Setting this keyword makes the TVIMAGE command work much
 ;               like the TV command, although better. That is to say, it
@@ -205,7 +219,8 @@
 ;
 ;               Setting this keyword will ensure that the keywords
 ;               KEEP_ASPECT_RATIO, MARGIN, MINUS_ONE, MULTI, and POSITION
-;               are ignored.
+;               are ignored. Alpha channels are also ignored when this keyword
+;               is set.
 ;               
 ;      XRANGE:  If the AXES keyword is set, this keyword is a two-element vector
 ;               giving the X axis range. By default, [0, size of image in X].
@@ -373,7 +388,19 @@
 ;      Some LINUX distributions cannot both get the current color decomposition state and
 ;           set the state to another value on the same DEVICE command. I have changed all such 
 ;           occurances to two commands. One gets the current state, the other sets it. 11 Oct 2010. DWF.
-;-
+;       Added the SAVE keyword to save the data coordinate system established by adding axes
+;           to the image. 29 Oct 2010. DWF.
+;       If the AXES keyword is set, but no MARGIN or POSITION keyword is set, and the command
+;           is not doing a multiplot, then a Margin of 0.1 is used so image axes are shown.
+;           30 Oct 2010. DWF.
+;       Changed the way alpha channel blending works. The alpha channel image is now blended
+;           with the background image in the display, if it can be obtained for a partical graphics
+;           device, or a background image can be passed to the program via the AlphaBackgroundImage
+;           keyword, or failing that, the alpha channel image is blended with a white background.
+;           1 November 2010. DWF.
+;       Removed TVIMAGE_ERROR routine in favor of ERROR_MESSAGE, since other Coyote Library
+;           routines are already used in the program. 1 Nov 2010. DWF.
+;;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
@@ -400,8 +427,7 @@
 ;  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
-;******************************************************************************************;
-;
+;******************************************************************************************;;
 ;
 ; NAME:
 ;  TVIMAGE_CONGRID
@@ -566,47 +592,172 @@ END
 
 
 
-FUNCTION TVIMAGE_ERROR, theMessage, Traceback=traceback, NoName=noName, _Extra=extra
+FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, TV=tv
 
-    On_Error, 2
-    
-    ; Check for presence and type of message.
-    IF N_Elements(theMessage) EQ 0 THEN theMessage = !Error_State.Msg
-    s = Size(theMessage)
-    messageType = s[s[0]+1]
-    IF messageType NE 7 THEN BEGIN
-       Message, "The message parameter must be a string.", _Extra=extra
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+       Catch, /Cancel
+       ok = Error_Message()
+       IF Ptr_Valid(ptr) THEN BEGIN
+            image = Temporary(*ptr)
+            Ptr_Free, ptr
+       ENDIF
+       IF N_Elements(thisDevice) NE 0 THEN Set_Plot, thisDevice
+       RETURN, image
     ENDIF
+
+
+    ; Prepare an alpha image, if needed.
+    index = Where(Size(image,/DIMENSIONS) EQ 4)
+    CASE index OF
+         0: aImage = Transpose(image, [1,2,0])
+         1: aImage = Transpose(image, [0,2,1])
+         ELSE: aImage = image
+    ENDCASE
+       
+    ; Separate the alpha channel.
+    alpha_channel = aImage[*,*,3]
+       
+    ; If this is acting like a TV command, then there is no alpha channel.
+    ; Exit now.
+    IF Keyword_Set(tv) THEN RETURN, aImage[*,*,0:2]
+                    
+    ; Some alpha channels are screwy. Just ignore those and return now.
+    IF MIN(alpha_channel) EQ MAX(alpha_channel) THEN RETURN, aImage[*,*,0:2]
+       
+       
+    ; Now we have an alpha channel.
+    alpha_channel = Scale_Vector(alpha_channel, 0.0, 1.0)
+    foregndImage = aImage[*,*,0:2]
+       
+    ; If we don't have a background image, check to see if we
+    ; are on a device where we could get such an image.
+    IF N_Elements(alphaBackgroundImage) EQ 0 THEN BEGIN
+        IF (!D.Flags AND 256) NE 0 THEN BEGIN
+        
+            ; Is the background image 2D or 3D?
+            alphaBackgroundImage = TVRead()
+            ndim = Size(alphaBackgroundImage, /N_DIMENSIONS)
+            CASE ndim OF
+                2: BEGIN
+                   TVLCT, r, g, b, /GET
+                   s = Size(alphaBackgroundImage, /DIMENSIONS)
+                   bImage = BytArr(s[0], s[1], 3)
+                   bImage[*,*,0] = r[alphaBackgroundImage]
+                   bImage[*,*,1] = g[alphaBackgroundImage]
+                   bImage[*,*,2] = b[alphaBackgroundImage]
+                   END
+                3: BEGIN
+                   index = Where(Size(alphaBackgroundImage,/DIMENSIONS) EQ 3)
+                   CASE index OF
+                        0: bImage = Transpose(alphaBackgroundImage, [1,2,0])
+                        1: bImage = Transpose(alphaBackgroundImage, [0,2,1])
+                        ELSE: bImage = alphaBackgroundImage
+                   ENDCASE
+                   END
+                ELSE: Message, 'Unexpected dimensions of the background image.'
+            ENDCASE
     
-    ; Get the call stack and the calling routine's name.
-    Help, Calls=callStack
-    callingRoutine = (StrSplit(StrCompress(callStack[1])," ", /Extract))[0]
-    
-    ; Are widgets supported? Doesn't matter in IDL 5.3 and higher.
-    widgetsSupported = ((!D.Flags AND 65536L) NE 0) OR Float(!Version.Release) GE 5.3
-    IF widgetsSupported THEN BEGIN
-       IF Keyword_Set(noName) THEN answer = Dialog_Message(theMessage, _Extra=extra) ELSE BEGIN
-          IF StrUpCase(callingRoutine) EQ "$MAIN$" THEN answer = Dialog_Message(theMessage, _Extra=extra) ELSE $
-             answer = Dialog_Message(StrUpCase(callingRoutine) + ": " + theMessage, _Extra=extra)
-       ENDELSE
+            ; Now that we have a background image, display that in
+            ; the Z-Graphics buffer, unless it is the same size as
+            ; the image you are trying to display.
+            sb = Size(bImage, /DIMENSIONS)
+            sf = Size(foregndImage, /DIMENSIONS)
+            IF Total(sb EQ sf) EQ 3 THEN BEGIN ; Images are the same size.
+                alpha = Rebin(alpha_channel, sf[0], sf[1], sf[2])
+                outImage = foregndImage*alpha + (1 - alpha)*bImage        
+            ENDIF ELSE BEGIN ; Images are NOT the same size.
+                thisDevice = !D.Name
+                Set_Plot, 'Z'
+                Device, Get_Decomposed=theState
+                Device, Set_Resolution=sb[0:1], Decomposed=1
+                TV, bImage, TRUE=3
+                xstart = position[0]*sb[0]
+                cols = (position[2] - position[0]) * sb[0]
+                ystart = position[1]*sb[1]
+                rows = (position[3] - position[1]) * sb[1]
+                bImage = TVRD(xstart, ystart, cols, rows, TRUE=3)
+                sb = Size(bImage, /DIMENSIONS)
+                Device, Decomposed=theState
+                Set_Plot, thisDevice
+                foregndImage = Congrid(foregndImage, cols, rows, 3)
+                alpha = Congrid(alpha_channel, sb[0], sb[1],/Interp)
+                alpha = Rebin(alpha, sb[0], sb[1], 3)
+                outImage = foregndImage*alpha + (1 - alpha)*bImage      
+                   index = Where(Size(foregndImage,/DIMENSIONS) EQ 3)
+                   CASE index OF
+                        0: outImage = Transpose(outImage, [2,0,1])
+                        1: outImage = Transpose(outImage, [1,0,2])
+                        ELSE: outImage = outImage
+                   ENDCASE
+            ENDELSE
+        ENDIF ELSE BEGIN
+            ss = Size(foregndImage, /DIMENSIONS)
+            alphaBackgroundImage = BytArr(ss[0], ss[1], 3) + 255B
+            alpha = Rebin(alpha_channel, ss[0], ss[1], ss[2])
+            outImage = foregndImage*alpha + (1 - alpha)*alphaBackgroundImage  
+        ENDELSE
     ENDIF ELSE BEGIN
-          Message, theMessage, /Continue, /NoPrint, /NoName, /NoPrefix, _Extra=extra
-          Print, '%' + callingRoutine + ': ' + theMessage
-          answer = 'OK'
+             ndim = Size(alphaBackgroundImage, /N_DIMENSIONS)
+            CASE ndim OF
+                2: BEGIN
+                   TVLCT, r, g, b, /GET
+                   s = Size(alphaBackgroundImage, /DIMENSIONS)
+                   bImage = BytArr(s[0], s[1], 3)
+                   bImage[*,*,0] = r[alphaBackgroundImage]
+                   bImage[*,*,1] = g[alphaBackgroundImage]
+                   bImage[*,*,2] = b[alphaBackgroundImage]
+                   END
+                3: BEGIN
+                   index = Where(Size(alphaBackgroundImage,/DIMENSIONS) EQ 3)
+                   CASE index OF
+                        0: bImage = Transpose(alphaBackgroundImage, [1,2,0])
+                        1: bImage = Transpose(alphaBackgroundImage, [0,2,1])
+                        ELSE: bImage = alphaBackgroundImage
+                   ENDCASE
+                   END
+                ELSE: Message, 'Unexpected dimensions of the background image.'
+            ENDCASE
+    
+            ; Now that we have a background image, display that in
+            ; the Z-Graphics buffer, unless it is the same size as
+            ; the image you are trying to display.
+            sb = Size(bImage, /DIMENSIONS)
+            sf = Size(foregndImage, /DIMENSIONS)
+            IF Total(sb EQ sf) EQ 3 THEN BEGIN ; Images are the same size.
+                alpha = Rebin(alpha_channel, sf[0], sf[1], sf[2])
+                outImage = foregndImage*alpha + (1 - alpha)*bImage        
+            ENDIF ELSE BEGIN ; Images are NOT the same size.
+                thisDevice = !D.Name
+                Set_Plot, 'Z'
+                Device, Get_Decomposed=theState
+                Device, Set_Resolution=sb[0:1], Decomposed=1
+                TV, bImage, TRUE=3
+                xstart = position[0]*sb[0]
+                cols = (position[2] - position[0]) * sb[0]
+                ystart = position[1]*sb[1]
+                rows = (position[3] - position[1]) * sb[1]
+                bImage = TVRD(xstart, ystart, cols, rows, TRUE=3)
+                sb = Size(bImage, /DIMENSIONS)
+                Device, Decomposed=theState
+                Set_Plot, thisDevice
+                foregndImage = Congrid(foregndImage, cols, rows, 3)
+                alpha = Congrid(alpha_channel, sb[0], sb[1],/Interp)
+                alpha = Rebin(alpha, sb[0], sb[1], 3)
+                outImage = foregndImage*alpha + (1 - alpha)*bImage      
+                   index = Where(Size(foregndImage,/DIMENSIONS) EQ 3)
+                   CASE index OF
+                        0: outImage = Transpose(outImage, [2,0,1])
+                        1: outImage = Transpose(outImage, [1,0,2])
+                        ELSE: outImage = outImage
+                   ENDCASE
+            ENDELSE
     ENDELSE
     
-    ; Provide traceback information if requested.
-    IF Keyword_Set(traceback) THEN BEGIN
-       Help, /Last_Message, Output=traceback
-       Print,''
-       Print, 'Traceback Report from ' + StrUpCase(callingRoutine) + ':'
-       Print, ''
-       FOR j=0,N_Elements(traceback)-1 DO Print, "     " + traceback[j]
-       Print, ''
-    ENDIF
-    
-    RETURN, answer
+     RETURN, outimage
 END
+;--------------------------------------------------------------------------
 
 
 
@@ -616,6 +767,7 @@ PRO TVIMAGE, image, x, y, $
    AXES=axes, $
    AXKEYWORDS=axkeywords, $
    BACKGROUND=background, $
+   ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
    BREWER=brewer, $
    ERASE=eraseit, $
    HALF_HALF=half_half, $
@@ -628,6 +780,7 @@ PRO TVIMAGE, image, x, y, $
    POSITION=position, $
    OVERPLOT=overplot, $
    QUIET=quiet, $
+   SAVE=save, $
    SCALE=scale, $
    TV=tv, $
    XRANGE=plotxrange, $
@@ -638,7 +791,7 @@ PRO TVIMAGE, image, x, y, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
-       ok = TVIMAGE_ERROR(Traceback=1, /Error)
+       ok = Error_Message()
        IF Ptr_Valid(ptr) THEN BEGIN
             image = Temporary(*ptr)
             Ptr_Free, ptr
@@ -652,22 +805,41 @@ PRO TVIMAGE, image, x, y, $
                          _tvimage_position, _tvimage_winID, $
                          _tvimage_current
     
+     ; Which release of IDL is this?
+    thisRelease = Float(!Version.Release)
+    
+    ; Doing multiple plots?
+    IF Total(!P.Multi) GT 0 THEN multi = 1 ELSE multi = 0
+    
     ; Check for image parameter and keywords.
-    IF N_Elements(image) EQ 0 THEN MESSAGE, 'You must pass a valid image argument.', /NoName
+    IF N_Elements(image) EQ 0 THEN MESSAGE, 'You must pass a valid image argument.'
     
     ; Did the user want me to scale the image.
     IF Keyword_Set(scale) THEN BEGIN
         ptr = Ptr_New(image, /NO_COPY)
         image = BytScl(*ptr)
     ENDIF
-    IF N_Elements(acolor) EQ 0 THEN acolor = !P.Color
-    IF Keyword_Set(axis) THEN axes = 1
+    
+    ; Check for mis-spelling of AXES as AXIS.
+    IF Keyword_Set(axis) THEN axes = 1    
     axes = Keyword_Set(axes)
+    
+    ; If axes are set and MARGIN and POSITION are NOT set and you are NOT
+    ; doing multiplots, then set a normal "plot" margin.
+    IF Keyword_Set(axes) AND ((N_Elements(margin) EQ 0) AND (N_Elements(position) EQ 0) $
+        AND (multi EQ 0)) THEN margin = 0.075
+    
+    ; Check other keywords.
+    IF N_Elements(acolor) EQ 0 THEN acolor = !P.Color
     brewer = Keyword_Set(brewer)
     interp = 1.0 - Keyword_Set(nointerp)
     half_half = Keyword_Set(half_half)
     minusOne = Keyword_Set(minusOne)
     IF N_Elements(background) EQ 0 THEN background = !P.Background
+    
+    ; Do you need to erase the window before image display?
+    ; If so, then it depends on how you have specified the
+    ; background color.
     IF Keyword_Set(eraseit) THEN BEGIN
          IF (!D.Flags AND 256) NE 0 THEN BEGIN
             Device, Get_Visual_Depth=theDepth
@@ -720,7 +892,7 @@ PRO TVIMAGE, image, x, y, $
     ; Check image size.
     s = Size(image)
     IF s[0] LT 2 OR s[0] GT 3 THEN $
-       MESSAGE, 'Argument does not appear to be an image. Returning...', /NoName
+       MESSAGE, 'Argument does not appear to be an image. Returning...'
     alphaImage = 0
     
     ; Allow 24-bit images and 2D images that are sent in as 3D
@@ -739,7 +911,7 @@ PRO TVIMAGE, image, x, y, $
        ; Now handle normal 24-bit images and suspect 2D images.
        IF (s[1] NE 3L) AND (s[2] NE 3L) AND (s[3] NE 3L) THEN BEGIN
           IF (s[1] NE 1L) AND (s[2] NE 1L) AND (s[3] NE 1L) THEN BEGIN
-             MESSAGE, 'Argument does not appear to be a 24-bit image. Returning...', /NoName
+             MESSAGE, 'Argument does not appear to be a 24-bit image. Returning...'
           ENDIF ELSE BEGIN
              IF s[1] EQ 1 THEN single = 1
              IF s[2] EQ 1 THEN single = 2
@@ -754,40 +926,9 @@ PRO TVIMAGE, image, x, y, $
        ENDIF
     ENDIF ELSE s = Size(image)
     
-    ; Prepare an alpha image, if needed.
-    IF alphaImage THEN BEGIN
-       index = Where(Size(image,/DIMENSIONS) EQ 4)
-       CASE index OF
-            0: aImage = Transpose(image, [1,2,0])
-            1: aImage = Transpose(image, [0,2,1])
-            ELSE: aImage = image
-       ENDCASE
-       
-       ; Separate the alpha channel.
-       alpha_channel = aImage[*,*,3]
-                    
-       ; Some alpha channels are screwy. Just ignore those.
-       IF MIN(alpha_channel) EQ MAX(alpha_channel) THEN BEGIN
-             outimage = aImage[*,*,0:2]
-       ENDIF ELSE BEGIN
-             alpha_channel = Scale_Vector(alpha_channel, 0.0, 1.0)
-             foregndImage = aImage[*,*,0:2]
-             ss = Size(foregndImage, /DIMENSIONS)
-             backgndImage = BytArr(ss[0], ss[1], 3) + 255B
-             alpha = Rebin(alpha_channel, ss[0], ss[1], ss[2])
-             outImage = foregndImage*alpha + (1 - alpha)*backgndImage
-       ENDELSE
-    ENDIF
-    
     ; If a window is not open, open one, otherwise in X devices you get incorrect
     ; window size information the first time you call TVIMAGE.
     IF (!D.FLAGS AND 256) NE 0 THEN IF !D.Window EQ -1 THEN Window
-    
-    ; Which release of IDL is this?
-    thisRelease = Float(!Version.Release)
-    
-    ; Doing multiple plots?
-    IF Total(!P.Multi) GT 0 THEN multi = 1 ELSE multi = 0
     
     ; Check for position and overplot keywords.
     IF N_Elements(position) EQ 0 THEN BEGIN
@@ -948,12 +1089,14 @@ PRO TVIMAGE, image, x, y, $
          IF N_Elements(y) EQ 0 THEN y = 0
          IF Keyword_Set(normal) THEN BEGIN
             IF alphaImage THEN BEGIN
+               outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, TV=1)
                TV, outImage, x, y, True=3, _STRICT_EXTRA=extra, /Normal
             ENDIF ELSE BEGIN
                TV, image, x, y, True=true, _STRICT_EXTRA=extra, /Normal 
             ENDELSE
          ENDIF ELSE BEGIN
             IF alphaImage THEN BEGIN
+               outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, TV=1)
                TV, outImage, x, y, True=3, _STRICT_EXTRA=extra, /Device
             ENDIF ELSE BEGIN
                TV, image, x, y, True=true, _STRICT_EXTRA=extra, /Device
@@ -963,12 +1106,14 @@ PRO TVIMAGE, image, x, y, $
          IF N_Params() EQ 2 THEN BEGIN
             IF Keyword_Set(normal) THEN BEGIN
                 IF alphaImage THEN BEGIN
+                   outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, TV=1)
                    TV, outImage, x,  True=3, _STRICT_EXTRA=extra, /Normal
                 ENDIF ELSE BEGIN
                    TV, image, x, True=true, _STRICT_EXTRA=extra, /Normal
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
+                   outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, TV=1)
                    TV, outImage, x,  True=3, _STRICT_EXTRA=extra, /Device
                 ENDIF ELSE BEGIN
                    TV, image, x, True=true, _STRICT_EXTRA=extra, /Device
@@ -1021,6 +1166,7 @@ PRO TVIMAGE, image, x, y, $
        ; color image.
        IF true GT 0 THEN LOADCT, 0, /Silent
        IF alphaImage THEN BEGIN
+           outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
            TV, outImage, xstart, ystart, XSIZE=xsize, $
               YSIZE=ysize, _STRICT_EXTRA=extra, True=3
        ENDIF ELSE BEGIN
@@ -1035,6 +1181,7 @@ PRO TVIMAGE, image, x, y, $
                 ystart, _STRICT_EXTRA=extra
           1: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
+                    outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
                     TV, TVIMAGE_CONGRID(outImage, xsize, ysize, 3, INTERP=interp, $
                        MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
                        ystart, _STRICT_EXTRA=extra, True=3
@@ -1045,6 +1192,7 @@ PRO TVIMAGE, image, x, y, $
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
+                    outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
                     image2d = Color_Quan(outImage, 3, r, g, b, _EXTRA=extra)               
                 ENDIF ELSE BEGIN
                     image2d = Color_Quan(image, 1, r, g, b, _EXTRA=extra)   
@@ -1056,6 +1204,7 @@ PRO TVIMAGE, image, x, y, $
              ENDELSE
           2: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
+                    outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
                     TV, TVIMAGE_CONGRID(outImage, xsize, ysize, 3, INTERP=interp, $
                        MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
                        ystart, _STRICT_EXTRA=extra, True=3
@@ -1066,6 +1215,7 @@ PRO TVIMAGE, image, x, y, $
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
+                    outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
                     image2d = Color_Quan(outImage, 3, r, g, b, _EXTRA=extra)               
                 ENDIF ELSE BEGIN
                     image2d = Color_Quan(image, 2, r, g, b, _EXTRA=extra)
@@ -1077,6 +1227,7 @@ PRO TVIMAGE, image, x, y, $
              ENDELSE
           3: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
+                    outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
                     TV, TVIMAGE_CONGRID(outImage, xsize, ysize, 3, INTERP=interp, $
                        MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
                        ystart, _STRICT_EXTRA=extra, True=3
@@ -1087,6 +1238,7 @@ PRO TVIMAGE, image, x, y, $
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
+                    outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
                     image2d = Color_Quan(outImage, 3, r, g, b, _EXTRA=extra)               
                 ENDIF ELSE BEGIN
                     image2d = Color_Quan(image, 3, r, g, b, _EXTRA=extra)
@@ -1164,9 +1316,11 @@ PRO TVIMAGE, image, x, y, $
             
         ; Clean up after yourself.
         TVLCT, r, g, b
-        !P = bangp
-        !X = bangx
-        !Y = bangy
+        IF ~Keyword_Set(save) THEN BEGIN
+            !P = bangp
+            !X = bangx
+            !Y = bangy
+        ENDIF
     ENDIF
 
     ; If you scaled the data, but the image back.

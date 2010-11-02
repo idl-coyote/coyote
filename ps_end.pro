@@ -51,6 +51,9 @@
 ;       GIF:          Set this keyword to convert the PostScript output file to a GIF image.
 ;
 ;       JPEG:         Set this keyword to convert the PostScript output file to a JPEG image.
+;       
+;       NOFIX:        If this keyword is set, then the FixPS program to fix IDL landscape
+;                     PostScript files is not called.
 ;
 ;       PNG:          Set this keyword to convert the PostScript output file to a PNG image.
 ;
@@ -141,10 +144,11 @@
 ;       If the PostScript file is in Landscape mode, it is now "fixed" with FixPS to allow it
 ;           to be displayed right-side up in PostScript viewers. 8 August 2009. DWF.
 ;       Fixed a problem in not checking the GIF keyword properly. 4 December 2009. DWF.
+;       Added NOFIX keyword to the program. 1 November 2010. DWF.
 ;- 
 ;
 ;******************************************************************************************;
-;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
+;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -176,6 +180,7 @@ PRO PS_END, $
     IM_OPTIONS=im_options, $
     GIF=gif, $
     JPEG=jpeg, $
+    NOFIX=nofix, $
     PNG=png, $
     RESIZE=resize, $
     TIFF=tiff
@@ -190,7 +195,9 @@ PRO PS_END, $
    
    ; If the file is in landscape mode, then fix it so that the plot
    ; is right-side up.
-   IF ps_struct.landscape THEN FixPS, ps_struct.filename, PAGETYPE=ps_struct.pagetype
+   IF ps_struct.landscape THEN BEGIN
+        IF ~Keyword_Set(nofix) THEN FixPS, ps_struct.filename, PAGETYPE=ps_struct.pagetype
+   ENDIF
    
    ; Need to convert with ImageMagick?
    allow_transparent = Keyword_Set(allow_transparent)

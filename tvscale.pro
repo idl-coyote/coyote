@@ -3,24 +3,12 @@
 ;     TVSCALE
 ;
 ; PURPOSE:
-;     This purpose of TVSCALE is to enable the TVSCL command in IDL
-;     to be a completely device-independent and color-decomposition-
-;     state independent command. On 24-bit displays color decomposition
-;     is always turned off for 8-bit images and on for 24-bit images.
-;     The color decomposition state is restored for those versions of
-;     IDL that support it (> 5.2). Moreover, TVSCALE adds features
-;     that TVSCL lacks. For example, images can be positioned in windows
-;     using the POSITION keyword like other IDL graphics commands.
-;     TVSCALE also supports the !P.MULTI system variable, unlike the
-;     TVSCL command. TVSCALE was written to work especially well in
-;     resizeable graphics windows. Note that if you wish to preserve
-;     the aspect ratio of images in resizeable windows, you should set
-;     the KEEP_ASPECT_RATIO keyword, described below. TVSCALE works
-;     equally well on the display, in the PostScript device, and in
-;     the Printer and Z-Graphics Buffer devices. The TRUE keyword is
-;     set automatically to the correct value for 24-bit images, so you
-;     don't need to specify it when using TVSCALE. In addition, you can
-;     use the TOP and BOTTOM keywords to define a particular set of
+;     This purpose of TVSCALE is to create a device-independent TVSCL command
+;     with the power and functionality to be used in sophisticated graphics
+;     programs, as well as at the IDL command line. It can be thought of as 
+;     a "smart" TVSCL command.
+;
+;     Use the TOP and BOTTOM keywords to define a particular set of
 ;     number to scale the data to. The algorithm used is this:
 ;
 ;         TV, BytScl(image, TOP=top-bottom) + bottom
@@ -218,6 +206,12 @@
 ;               not be necessary. Setting this keyword means that TVIMAGE just
 ;               goes quietly about it's business without bothering anyone else.
 ;
+;    SAVE:      Set this keyword to save the data coordinate system established
+;               by using the AXES keyword. The default is to not save the
+;               data coordinate system, but to restore the one in place when
+;               the image is displayed. This keyword is only applied if axes
+;               are drawn on the image.
+;
 ;     TOP:      The image is scaled so that all displayed pixels have values
 ;               greater than or equal to BOTTOM and less than or equal to TOP.
 ;               The value of TOP is !D.Table_Size by default.
@@ -337,9 +331,15 @@
 ;      Some LINUX distributions cannot both get the current color decomposition state and
 ;           set the state to another value on the same DEVICE command. I have changed all such 
 ;           occurances to two commands. One gets the current state, the other sets it. 11 Oct 2010. DWF.
+;      Added SAVE keyword. 30 Oct 2010. DWF.
+;      If the AXES keyword is set, but no MARGIN or POSITION keyword is set, and the command
+;           is not doing a multiplot, then a Margin of 0.1 is used so image axes are shown.
+;           30 Oct 2010. DWF.
+;      Removed TVSCALE_ERROR routine in favor of ERROR_MESSAGE, since other Coyote Library
+;           routines are already used in the program. 1 Nov 2010. DWF.
 ;-
 ;******************************************************************************************;
-;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
+;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -528,53 +528,6 @@ END
 ;--------------------------------------------------------------------------
 
 
-FUNCTION TVSCALE_ERROR, theMessage, Traceback=traceback, NoName=noName, _Extra=extra
-
-On_Error, 2
-
-   ; Check for presence and type of message.
-
-IF N_Elements(theMessage) EQ 0 THEN theMessage = !Error_State.Msg
-s = Size(theMessage)
-messageType = s[s[0]+1]
-IF messageType NE 7 THEN BEGIN
-   Message, "The message parameter must be a string.", _Extra=extra
-ENDIF
-
-   ; Get the call stack and the calling routine's name.
-
-Help, Calls=callStack
-callingRoutine = (StrSplit(StrCompress(callStack[1])," ", /Extract))[0]
-
-   ; Are widgets supported? Doesn't matter in IDL 5.3 and higher.
-
-widgetsSupported = ((!D.Flags AND 65536L) NE 0) OR Float(!Version.Release) GE 5.3
-IF widgetsSupported THEN BEGIN
-   IF Keyword_Set(noName) THEN answer = Dialog_Message(theMessage, _Extra=extra) ELSE BEGIN
-      IF StrUpCase(callingRoutine) EQ "$MAIN$" THEN answer = Dialog_Message(theMessage, _Extra=extra) ELSE $
-         answer = Dialog_Message(StrUpCase(callingRoutine) + ": " + theMessage, _Extra=extra)
-   ENDELSE
-ENDIF ELSE BEGIN
-      Message, theMessage, /Continue, /NoPrint, /NoName, /NoPrefix, _Extra=extra
-      Print, '%' + callingRoutine + ': ' + theMessage
-      answer = 'OK'
-ENDELSE
-
-   ; Provide traceback information if requested.
-
-IF Keyword_Set(traceback) THEN BEGIN
-   Help, /Last_Message, Output=traceback
-   Print,''
-   Print, 'Traceback Report from ' + StrUpCase(callingRoutine) + ':'
-   Print, ''
-   FOR j=0,N_Elements(traceback)-1 DO Print, "     " + traceback[j]
-   Print, ''
-ENDIF
-
-RETURN, answer
-END ;--------------------------------------------------------------------------------------------------
-
-
 PRO TVSCALE, image, x, y, $
    ACOLOR=acolor, $
    AXIS=axis, $
@@ -597,7 +550,7 @@ PRO TVSCALE, image, x, y, $
    POSITION=position, $
    OVERPLOT=overplot, $
    QUIET=quiet, $
-   SCALE=scale, $
+   SAVE=save, $
    TOP=top, $
    TVSCL=tvscl, $
    XRANGE=plotxrange, $
@@ -611,7 +564,7 @@ PRO TVSCALE, image, x, y, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
-       ok = TVSCALE_ERROR(Traceback=1, /Error)
+       ok = Error_Message()
        RETURN
     ENDIF
     
@@ -621,10 +574,22 @@ PRO TVSCALE, image, x, y, $
                           _tvimage_position, _tvimage_winID, $
                           _tvimage_current
     
+    ; Which release of IDL is this?    
+    thisRelease = Float(!Version.Release)
+    
+    ; Doing multiple plots?   
+    IF Total(!P.Multi) GT 0 THEN multi = 1 ELSE multi = 0
+    
     ; Check for image and keyword parameters.
-    IF N_Elements(image) EQ 0 THEN MESSAGE, 'You must pass a valid image argument.', /NoName
+    IF N_Elements(image) EQ 0 THEN MESSAGE, 'You must pass a valid image argument.'
     IF Keyword_Set(axis) THEN axes = 1
     axes = Keyword_Set(axes)
+
+    ; If axes are set and MARGIN and POSITION are NOT set and you are NOT
+    ; doing multiplots, then set a normal "plot" margin.
+    IF Keyword_Set(axes) AND ((N_Elements(margin) EQ 0) AND (N_Elements(position) EQ 0) $
+        AND (multi EQ 0)) THEN margin = 0.075
+    
     interp = 1.0 - Keyword_Set(nointerp)
     half_half = Keyword_Set(half_half)
     minusOne = Keyword_Set(minusOne)
@@ -681,12 +646,11 @@ PRO TVSCALE, image, x, y, $
     ; Check image size..
     s = Size(image)
     IF s[0] LT 2 OR s[0] GT 3 THEN $
-       MESSAGE, 'Argument does not appear to be an image. Returning...', /NoName
+       MESSAGE, 'Argument does not appear to be an image. Returning...'
     alphaImage = 0
     
     ; Allow 24-bit images and 2D images that are sent in as 3D
-    ; arrays where one dimension is a 1. 24-bit images can have an
-    ; alpha channel.
+    ; arrays where one dimension is a 1. 
     IF s[0] EQ 3 THEN BEGIN
     
        ; We are going to fake doing something with the alpha channel here.
@@ -700,7 +664,7 @@ PRO TVSCALE, image, x, y, $
        ; Now handle normal 24-bit images and suspect 2D images.
        IF (s[1] NE 3L) AND (s[2] NE 3L) AND (s[3] NE 3L) THEN BEGIN
           IF (s[1] NE 1L) AND (s[2] NE 1L) AND (s[3] NE 1L) THEN BEGIN
-             MESSAGE, 'Argument does not appear to be a 24-bit image. Returning...', /NoName
+             MESSAGE, 'Argument does not appear to be a 24-bit image. Returning...'
           ENDIF ELSE BEGIN
              IF s[1] EQ 1 THEN single = 1
              IF s[2] EQ 1 THEN single = 2
@@ -751,12 +715,6 @@ PRO TVSCALE, image, x, y, $
     ; If a window is not open, open one, otherwise in X devices you get incorrect
     ; window size information the first time you call TVIMAGE.
     IF (!D.FLAGS AND 256) NE 0 THEN IF !D.Window EQ -1 THEN Window
-    
-    ; Which release of IDL is this?    
-    thisRelease = Float(!Version.Release)
-    
-    ; Doing multiple plots?   
-    IF Total(!P.Multi) GT 0 THEN multi = 1 ELSE multi = 0
     
     ; Check for position and overplot keywords.    
     IF N_Elements(position) EQ 0 THEN BEGIN
@@ -1136,10 +1094,11 @@ PRO TVSCALE, image, x, y, $
             XSTYLE=1, YSTYLE=1, POSITION=position, COLOR=acolor, _STRICT_EXTRA=axkeywords
             
         ; Clean up after yourself.
-        TVLCT, r, g, b
-        !P = bangp
-        !X = bangx
-        !Y = bangy
+        IF ~Keyword_Set(save) THEN BEGIN
+            !P = bangp
+            !X = bangx
+            !Y = bangy
+        ENDIF
     ENDIF
     
 

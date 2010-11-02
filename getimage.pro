@@ -123,6 +123,7 @@
 ;          XSIZE, YSIZE, CATCH, and FRAMES keyword made obsolete.
 ;          HEADDATA, ENDIAN, DATATYPE, DIMENSIONS keywords added.
 ;          Now dependent on FSC_FIELD, ERROR_MESSAGE, and CENTER_TLB from Coyote Library.
+;       Added ability to parse fully qualified file names passed from Dialog_Pickfile. 30 Oct 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -355,25 +356,25 @@ FUNCTION GETIMAGE, filename, Directory=directory, DataType=datatype, Dimensions=
 
    ; Check for parameters and keywords.
    IF N_Params() EQ 0 THEN filename='ctscan.dat'
+   IF filename EQ "" THEN filename = 'ctscan.dat'
+   
+   ; Does the file name have a directory? Is so, use it.
+   fileDir = File_Dirname(filename)
+   IF StrLen(fileDir) GT 1 THEN BEGIN
+       filename = File_Basename(filename)
+       directory = fileDir
+   ENDIF ELSE BEGIN
+       IF fileDir EQ "." THEN BEGIN
+          CD, CURRENT=directory
+          filename = File_Basename(filename)
+       ENDIF
+   ENDELSE
 
-   ; If DIRECTORY keyword is not used, use the "coyote" directory.
-   ; If that is not found, use the current directory.
+   ; If DIRECTORY keyword is not used, use the IDL example/data directory.
    IF N_Elements(directory) EQ 0 THEN BEGIN
-
-      startDirectory = GetImage_Find_Coyote()
-      IF startDirectory EQ '' THEN BEGIN
-         ;CD, Current=startDirectory
-         dir = Filepath(Subdirectory=['examples', 'data'], 'ctscan.dat')
-         startDirectory = StrMid(dir, 0, StrLen(dir)-11)
-      ENDIF
-
-   ENDIF ELSE startDirectory = directory
-
-   ; If the default file is not in the directory, make the filename
-   ; a null string.
-   thisFile = Filepath(Root_Dir=startDirectory, filename)
-   ok = Findfile(thisFile, Count=count)
-   IF count EQ 0 THEN filename = ''
+       directory = File_DirName(Filepath(Subdirectory=['examples', 'data'], 'nonesense.dat'))
+   ENDIF 
+   startDirectory = directory
 
    ; Check for size and header keywords. These probably come in as
    ; numbers and you need strings to put them into text widgets.

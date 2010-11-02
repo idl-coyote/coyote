@@ -56,6 +56,8 @@
 ;          to by the IDL_TMPDIR environment variable. Now check to see if the input filename
 ;          is the same as the output filename and make a change, if necessary. 22 July 2010. DWF.
 ;        Retreated to standard error handling with ERROR_MESSAGE as there are inevitable errors. 2 August 2010. DWF.
+;        Output file was created, even if not used. Now deleting file and issuing messages to
+;           explain why output file was not created. 1 November 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -150,6 +152,7 @@ PRO FIXPS, in_filename, out_filename, $
   count = 0
   target = "void"
   buffer = StrArr(100)
+  
   OpenR, in_lun, in_filename, /GET_LUN
   WHILE target NE '%%EndProlog' DO BEGIN
       ReadF, in_lun, line
@@ -169,6 +172,8 @@ PRO FIXPS, in_filename, out_filename, $
   IF landscape_cnt EQ 0 THEN BEGIN
         Free_Lun, in_lun
         Free_Lun, out_lun
+        File_Delete, out_filename
+        Message, 'File not a landscape file. Exiting...', /Informational
         RETURN
   ENDIF
   
@@ -177,6 +182,8 @@ PRO FIXPS, in_filename, out_filename, $
   IF StrMid(in_lines[1], 0, 10) EQ '180 rotate' THEN BEGIN
         Free_Lun, in_lun
         Free_Lun, out_lun
+        File_Delete, out_filename
+        Message, 'File is in the proper rotation. Exiting...', /Informational
         RETURN
   ENDIF ELSE BEGIN
         FOR j=0,count-1 DO PrintF, out_lun, buffer[j]

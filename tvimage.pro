@@ -400,6 +400,8 @@
 ;           1 November 2010. DWF.
 ;       Removed TVIMAGE_ERROR routine in favor of ERROR_MESSAGE, since other Coyote Library
 ;           routines are already used in the program. 1 Nov 2010. DWF.
+;       Forgot to set the SET_PIXEL_DEPTH keyword in Z-Buffer to 24. Screwed up alpha channel
+;           display. 2 November 2010. DWF.
 ;;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -592,7 +594,9 @@ END
 
 
 
-FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, TV=tv
+FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
+    NOINTERP=nointerp, $
+    TV=tv
 
     ; Error handling.
     Catch, theError
@@ -671,7 +675,7 @@ FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, TV=tv
                 thisDevice = !D.Name
                 Set_Plot, 'Z'
                 Device, Get_Decomposed=theState
-                Device, Set_Resolution=sb[0:1], Decomposed=1
+                Device, Set_Resolution=sb[0:1], Decomposed=1, Set_Pixel_Depth=24
                 TV, bImage, TRUE=3
                 xstart = position[0]*sb[0]
                 cols = (position[2] - position[0]) * sb[0]
@@ -732,7 +736,7 @@ FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, TV=tv
                 thisDevice = !D.Name
                 Set_Plot, 'Z'
                 Device, Get_Decomposed=theState
-                Device, Set_Resolution=sb[0:1], Decomposed=1
+                Device, Set_Resolution=sb[0:1], Decomposed=1, Set_Pixel_Depth=24
                 TV, bImage, TRUE=3
                 xstart = position[0]*sb[0]
                 cols = (position[2] - position[0]) * sb[0]
@@ -743,7 +747,7 @@ FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, TV=tv
                 Device, Decomposed=theState
                 Set_Plot, thisDevice
                 foregndImage = Congrid(foregndImage, cols, rows, 3)
-                alpha = Congrid(alpha_channel, sb[0], sb[1],/Interp)
+                alpha = Congrid(alpha_channel, sb[0], sb[1],/NoInterp)
                 alpha = Rebin(alpha, sb[0], sb[1], 3)
                 outImage = foregndImage*alpha + (1 - alpha)*bImage      
                    index = Where(Size(foregndImage,/DIMENSIONS) EQ 3)

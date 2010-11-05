@@ -138,9 +138,11 @@
 ;       Fixed a problem with determining visual depth in Z-buffer. 15 January 2010. DWF.
 ;       Added SPACING keyword and changed the default spacing on horizontal color bars slightly. 
 ;           23 Apr 2010. DWF.
+;       Modified the spacing of the labels on the color bar, specifically for the 
+;           PostScript device. 3 November 2010. DWF.
 ;-
 ;******************************************************************************************;
-;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
+;  Copyright (c) 2009-2010, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -366,6 +368,7 @@ PRO DCBar, colors, $
         ; Add the annotations of the bar.
         chardist = !D.Y_CH_SIZE / Float(!D.Y_Size) * $
             ((StrUpCase(!Version.OS_Family) EQ 'WINDOWS') ? (0.9 * spacing) : (1.5 * spacing))
+        IF !D.Name EQ 'PS' THEN chardist = !D.Y_CH_SIZE / Float(!D.Y_Size) * (0.75 * spacing)
         step = (position[2]-position[0])/ncolors
         x = position[0] + step/2.
         y = y0 - (chardist * ((rotate NE 0) ? 1 : 2))

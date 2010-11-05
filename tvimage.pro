@@ -402,6 +402,8 @@
 ;           routines are already used in the program. 1 Nov 2010. DWF.
 ;       Forgot to set the SET_PIXEL_DEPTH keyword in Z-Buffer to 24. Screwed up alpha channel
 ;           display. 2 November 2010. DWF.
+;       Small error in alpha channel processing when images are the same size. Reorganized
+;           the code to avoid duplication. 5 November 2010. DWF.
 ;;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -639,125 +641,75 @@ FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
     ; are on a device where we could get such an image.
     IF N_Elements(alphaBackgroundImage) EQ 0 THEN BEGIN
         IF (!D.Flags AND 256) NE 0 THEN BEGIN
-        
-            ; Is the background image 2D or 3D?
-            alphaBackgroundImage = TVRead()
-            ndim = Size(alphaBackgroundImage, /N_DIMENSIONS)
-            CASE ndim OF
-                2: BEGIN
-                   TVLCT, r, g, b, /GET
-                   s = Size(alphaBackgroundImage, /DIMENSIONS)
-                   bImage = BytArr(s[0], s[1], 3)
-                   bImage[*,*,0] = r[alphaBackgroundImage]
-                   bImage[*,*,1] = g[alphaBackgroundImage]
-                   bImage[*,*,2] = b[alphaBackgroundImage]
-                   END
-                3: BEGIN
-                   index = Where(Size(alphaBackgroundImage,/DIMENSIONS) EQ 3)
-                   CASE index OF
-                        0: bImage = Transpose(alphaBackgroundImage, [1,2,0])
-                        1: bImage = Transpose(alphaBackgroundImage, [0,2,1])
-                        ELSE: bImage = alphaBackgroundImage
-                   ENDCASE
-                   END
-                ELSE: Message, 'Unexpected dimensions of the background image.'
-            ENDCASE
-    
-            ; Now that we have a background image, display that in
-            ; the Z-Graphics buffer, unless it is the same size as
-            ; the image you are trying to display.
-            sb = Size(bImage, /DIMENSIONS)
-            sf = Size(foregndImage, /DIMENSIONS)
-            IF Total(sb EQ sf) EQ 3 THEN BEGIN ; Images are the same size.
-                alpha = Rebin(alpha_channel, sf[0], sf[1], sf[2])
-                outImage = foregndImage*alpha + (1 - alpha)*bImage        
-            ENDIF ELSE BEGIN ; Images are NOT the same size.
-                thisDevice = !D.Name
-                Set_Plot, 'Z'
-                Device, Get_Decomposed=theState
-                Device, Set_Resolution=sb[0:1], Decomposed=1, Set_Pixel_Depth=24
-                TV, bImage, TRUE=3
-                xstart = position[0]*sb[0]
-                cols = (position[2] - position[0]) * sb[0]
-                ystart = position[1]*sb[1]
-                rows = (position[3] - position[1]) * sb[1]
-                bImage = TVRD(xstart, ystart, cols, rows, TRUE=3)
-                sb = Size(bImage, /DIMENSIONS)
-                Device, Decomposed=theState
-                Set_Plot, thisDevice
-                foregndImage = Congrid(foregndImage, cols, rows, 3)
-                alpha = Congrid(alpha_channel, sb[0], sb[1],/Interp)
-                alpha = Rebin(alpha, sb[0], sb[1], 3)
-                outImage = foregndImage*alpha + (1 - alpha)*bImage      
-                   index = Where(Size(foregndImage,/DIMENSIONS) EQ 3)
-                   CASE index OF
-                        0: outImage = Transpose(outImage, [2,0,1])
-                        1: outImage = Transpose(outImage, [1,0,2])
-                        ELSE: outImage = outImage
-                   ENDCASE
-            ENDELSE
+           alphaBackgroundImage = TVRead()
         ENDIF ELSE BEGIN
             ss = Size(foregndImage, /DIMENSIONS)
             alphaBackgroundImage = BytArr(ss[0], ss[1], 3) + 255B
-            alpha = Rebin(alpha_channel, ss[0], ss[1], ss[2])
-            outImage = foregndImage*alpha + (1 - alpha)*alphaBackgroundImage  
         ENDELSE
-    ENDIF ELSE BEGIN
-             ndim = Size(alphaBackgroundImage, /N_DIMENSIONS)
-            CASE ndim OF
-                2: BEGIN
-                   TVLCT, r, g, b, /GET
-                   s = Size(alphaBackgroundImage, /DIMENSIONS)
-                   bImage = BytArr(s[0], s[1], 3)
-                   bImage[*,*,0] = r[alphaBackgroundImage]
-                   bImage[*,*,1] = g[alphaBackgroundImage]
-                   bImage[*,*,2] = b[alphaBackgroundImage]
-                   END
-                3: BEGIN
-                   index = Where(Size(alphaBackgroundImage,/DIMENSIONS) EQ 3)
-                   CASE index OF
-                        0: bImage = Transpose(alphaBackgroundImage, [1,2,0])
-                        1: bImage = Transpose(alphaBackgroundImage, [0,2,1])
-                        ELSE: bImage = alphaBackgroundImage
-                   ENDCASE
-                   END
-                ELSE: Message, 'Unexpected dimensions of the background image.'
-            ENDCASE
+    ENDIF
     
-            ; Now that we have a background image, display that in
-            ; the Z-Graphics buffer, unless it is the same size as
-            ; the image you are trying to display.
-            sb = Size(bImage, /DIMENSIONS)
-            sf = Size(foregndImage, /DIMENSIONS)
-            IF Total(sb EQ sf) EQ 3 THEN BEGIN ; Images are the same size.
-                alpha = Rebin(alpha_channel, sf[0], sf[1], sf[2])
-                outImage = foregndImage*alpha + (1 - alpha)*bImage        
-            ENDIF ELSE BEGIN ; Images are NOT the same size.
-                thisDevice = !D.Name
-                Set_Plot, 'Z'
-                Device, Get_Decomposed=theState
-                Device, Set_Resolution=sb[0:1], Decomposed=1, Set_Pixel_Depth=24
-                TV, bImage, TRUE=3
-                xstart = position[0]*sb[0]
-                cols = (position[2] - position[0]) * sb[0]
-                ystart = position[1]*sb[1]
-                rows = (position[3] - position[1]) * sb[1]
-                bImage = TVRD(xstart, ystart, cols, rows, TRUE=3)
-                sb = Size(bImage, /DIMENSIONS)
-                Device, Decomposed=theState
-                Set_Plot, thisDevice
-                foregndImage = Congrid(foregndImage, cols, rows, 3)
-                alpha = Congrid(alpha_channel, sb[0], sb[1],/NoInterp)
-                alpha = Rebin(alpha, sb[0], sb[1], 3)
-                outImage = foregndImage*alpha + (1 - alpha)*bImage      
-                   index = Where(Size(foregndImage,/DIMENSIONS) EQ 3)
-                   CASE index OF
-                        0: outImage = Transpose(outImage, [2,0,1])
-                        1: outImage = Transpose(outImage, [1,0,2])
-                        ELSE: outImage = outImage
-                   ENDCASE
-            ENDELSE
-    ENDELSE
+    ; Get the size and dimensions of the background image.
+    ndim = Size(alphaBackgroundImage, /N_DIMENSIONS)
+    CASE ndim OF
+        2: BEGIN
+           TVLCT, r, g, b, /GET
+           s = Size(alphaBackgroundImage, /DIMENSIONS)
+           bImage = BytArr(s[0], s[1], 3)
+           bImage[*,*,0] = r[alphaBackgroundImage]
+           bImage[*,*,1] = g[alphaBackgroundImage]
+           bImage[*,*,2] = b[alphaBackgroundImage]
+           END
+        3: BEGIN
+           index = Where(Size(alphaBackgroundImage,/DIMENSIONS) EQ 3)
+           CASE index OF
+              0: bImage = Transpose(alphaBackgroundImage, [1,2,0])
+              1: bImage = Transpose(alphaBackgroundImage, [0,2,1])
+              ELSE: bImage = alphaBackgroundImage
+           ENDCASE
+           END
+      ELSE: Message, 'Unexpected dimensions of the background image.'
+    ENDCASE
+    
+    ; Now that we have a background image, display that in
+    ; the Z-Graphics buffer.
+    sb = Size(bImage, /DIMENSIONS)
+    sf = Size(foregndImage, /DIMENSIONS)
+    thisDevice = !D.Name
+    Set_Plot, 'Z'
+    Device, Get_Decomposed=theState
+    Device, Set_Resolution=sb[0:1], Decomposed=1, Set_Pixel_Depth=24
+    TV, bImage, TRUE=3
+            
+    ; Calculate the parameters for taking a snapshot of the
+    ; relevant portion of the window.
+    xstart = position[0]*sb[0]
+    cols = (position[2] - position[0]) * sb[0]
+    ystart = position[1]*sb[1]
+    rows = (position[3] - position[1]) * sb[1]
+            
+    ; Take a snapshot
+    bImage = TVRD(xstart, ystart, cols, rows, TRUE=3)
+            
+    ; Get the size of the snapshot.
+    sb = Size(bImage, /DIMENSIONS)
+    Device, Decomposed=theState
+    Set_Plot, thisDevice
+            
+     ; Make the foreground image the right size.
+     foregndImage = Congrid(foregndImage, cols, rows, 3)
+     alpha = Congrid(alpha_channel, sb[0], sb[1],/Interp)
+     alpha = Rebin(alpha, sb[0], sb[1], 3)
+            
+     ; Blend the two images.
+     outImage = foregndImage*alpha + (1 - alpha)*bImage   
+            
+     ; Put the dimensions back the way they came in.   
+     index = Where(Size(foregndImage,/DIMENSIONS) EQ 3)
+     CASE index OF
+        0: outImage = Transpose(outImage, [2,0,1])
+        1: outImage = Transpose(outImage, [1,0,2])
+        ELSE: outImage = outImage
+     ENDCASE
     
      RETURN, outimage
 END

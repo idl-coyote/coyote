@@ -138,6 +138,7 @@
 ;       Added TYPE keyword 27 Sep 2006. DWF.
 ;       Updated program to work with 24-bit Z-buffer in IDL 6.4. 11 June 2007. DWF.
 ;       Added OVERWRITE_PROMPT keyword. 2 Oct 2008. DWF.
+;       Found an extra line of code that wrote PNG files twice! Removed. 10 Nov 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -440,7 +441,6 @@ IF writeImage THEN BEGIN
          ENDIF ELSE BEGIN
             TVLCT, r, g, b, /Get
             image2D = image
-            Write_PNG, filename, Reverse(image2D,2), r, g, b, _Extra=extra
             Write_PNG, filename, image2D, r, g, b, _Extra=extra
          ENDELSE
          END

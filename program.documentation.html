@@ -12,7 +12,7 @@ This page was created by the IDL library routine
 this routine, refer to the IDL Online Help Navigator 
 or type: <P>
 <PRE>     ? mk_html_help</PRE><P>at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Mon Sep 27 07:24:05 2010.<P>
+<STRONG>Last modified: </STRONG>Fri Nov 12 06:44:09 2010.<P>
  
 <HR>
  
@@ -85,6 +85,7 @@ or type: <P>
 <LI><A HREF="#FSC_COLORBAR">FSC_COLORBAR</A>
 <LI><A HREF="#FSC_COLORBAR__DEFINE">FSC_COLORBAR__DEFINE</A>
 <LI><A HREF="#FSC_COLORSELECT">FSC_COLORSELECT</A>
+<LI><A HREF="#FSC_CONTOUR">FSC_CONTOUR</A>
 <LI><A HREF="#FSC_DROPLIST">FSC_DROPLIST</A>
 <LI><A HREF="#FSC_FIELD">FSC_FIELD</A>
 <LI><A HREF="#FSC_FILESELECT">FSC_FILESELECT</A>
@@ -116,8 +117,10 @@ or type: <P>
 <LI><A HREF="#LIST_SELECTOR">LIST_SELECTOR</A>
 <LI><A HREF="#LOADDATA">LOADDATA</A>
 <LI><A HREF="#LOGSCL">LOGSCL</A>
+<LI><A HREF="#MAKE_TRANSPARENT_IMAGE">MAKE_TRANSPARENT_IMAGE</A>
 <LI><A HREF="#MAP_GSHHS_SHORELINE">MAP_GSHHS_SHORELINE</A>
-<LI><A HREF="#MINMAX">MINMAX</A>
+<LI><A HREF="#MAXMIN">MAXMIN</A>
+<LI><A HREF="#MAXWINDOWSIZE">MAXWINDOWSIZE</A>
 <LI><A HREF="#MPI_AXIS__DEFINE">MPI_AXIS__DEFINE</A>
 <LI><A HREF="#MPI_PLOT">MPI_PLOT</A>
 <LI><A HREF="#MPI_PLOTCONFIG__DEFINE">MPI_PLOTCONFIG__DEFINE</A>
@@ -311,44 +314,38 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A HREF="#ADJUSTPOSITION">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
- NAME:
-   AddToPath
+ :Description:
+    Adds a directory to the beginning of the !PATH system variable.
 
- PURPOSE:
- 
-   This procedure adds a directory to the beginning of the IDL !PATH
-   system variable. If a directory name is not passed in, the current
-   IDL working directory is used. The directory must currently exist
-   to be added.
-
- CATEGORY:
- 
+ :Categories:
     Utility
-  
- CALLING SEQUENCE:
- 
-    AddToPath, '/usr/david/IDL'
+    
+ :Params:
+    theDirectory: in, optional, type=string
+       The name of the directory to add to !PATH. If missing, the current directory.
+       
+ :Keywords:
+     verbose: in, optional, type=boolean
+       Set this keyword if you wish to receive confirmation of action.
 
- ARGUMENTS:
- 
-  theDirectory: The directory you wish to add to the front of the IDL
-                !PATH system variable. If not provided, the current working 
-                directory is added. The directory must currently exist to be 
-                added to !PATH.
-     
- AUTHOR:
+ :Examples:
+    For example, to add a "programs" directory to the IDL path::
+       AddToPath, '/usr/david/IDL/programs/'
 
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
 
- MODIFICATION HISTORY:
- 
-    Written by: David W. Fanning, 20 September 2010.
+ :History:
+     Written, 20 Sept 2010.
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
 </PRE><P>
 <STRONG>(See addtopath.pro)</STRONG><P>
 <HR>
@@ -1419,6 +1416,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        Fixed a typo that didn't allow a single column vector to be displayed as a box plot. 17 May 2009. DWF.
        Now allow a single row vector to be passed into program and displayed. 20 May 2009. DWF.
        Added NOCLIP=0 keyword to PLOTS command when drawing outliers. 15 July 2009. DWF.
+       Minor adjustment of the X axis label position. 28 October 2010. DWF.
 </PRE><P>
 <STRONG>(See boxplot.pro)</STRONG><P>
 <HR>
@@ -1436,7 +1434,13 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 
        This function will check to see if it is possible to make
        a connection with the window system. It is useful when 
-       running IDL as a CRON job or from remote logins.
+       running IDL as a CRON job or from remote logins. The program
+       will establish a system variable named !FSC_Display_Connection the
+       first time it is run. Programs which need to know if a connection
+       can be established can consult this system variable as a faster
+       way of determining a connection than running this program. The
+       system variable is set to 1 if a connection can be made and to
+       0 otherwise.
 
  AUTHOR:
 
@@ -1468,10 +1472,18 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  KEYWORDS:
 
         None.
+        
+ NOTES:
+ 
+      A system variable, !FSC_Display_Connection is created.
 
  MODIFICATION HISTORY:
 
        Written by David W. Fanning, 10 February 2010.
+       Modified program to set the system variable !FSC_Display_Connection. This is primarily
+           a way for legacy code to run in cron jobs without continually checking for
+           a connection, which before this update required opening and closing a window.
+           7 October 2010. DWF.
 </PRE><P>
 <STRONG>(See canconnect.pro)</STRONG><P>
 <HR>
@@ -2667,6 +2679,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        Fixed a problem with determining visual depth in Z-buffer. 15 January 2010. DWF.
        Added SPACING keyword and changed the default spacing on horizontal color bars slightly. 
            23 Apr 2010. DWF.
+       Modified the spacing of the labels on the color bar, specifically for the 
+           PostScript device. 3 November 2010. DWF.
 </PRE><P>
 <STRONG>(See dcbar.pro)</STRONG><P>
 <HR>
@@ -4498,6 +4512,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        Replaced the ERROR_MESSAGE routine with the latest version. 15 December 2002. DWF.
        Fixed a problem in which XSIZE and YSIZE have to be specified as integers to work. 6 March 2006. DWF.
        Fixed a small problem with very small ROIs that caused the program to crash. 1 October 2008. DWF.
+       Modified the algorithm that determines the number of boundary points for small ROIs. 28 Sept 2010. DWF.
 </PRE><P>
 <STRONG>(See find_boundary.pro)</STRONG><P>
 <HR>
@@ -4740,6 +4755,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
           to by the IDL_TMPDIR environment variable. Now check to see if the input filename
           is the same as the output filename and make a change, if necessary. 22 July 2010. DWF.
         Retreated to standard error handling with ERROR_MESSAGE as there are inevitable errors. 2 August 2010. DWF.
+        Output file was created, even if not used. Now deleting file and issuing messages to
+           explain why output file was not created. 1 November 2010. DWF.
 </PRE><P>
 <STRONG>(See fixps.pro)</STRONG><P>
 <HR>
@@ -4983,9 +5000,10 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 
        The purpose of this function is to obtain drawing colors
        by name and in a device/decomposition independent way.
-       The color names and values may be read in as a file, or 104 color
+       The color names and values may be read in as a file, or 192 color
        names and values are supplied with the program. These colors were
-       obtained from the file rgb.txt, found on most X-Window distributions.
+       obtained from the file rgb.txt, found on most X-Window distributions,
+       and from colors in the Brewer color tables (http://colorbrewer2.org/).
        Representative colors were chosen from across the color spectrum. To
        see a list of colors available, type:
 
@@ -5063,10 +5081,6 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
               Snow      Spring Green        Steel Blue               Tan              Teal              Text
            Thistle            Tomato         Turquoise            Violet        Violet Red             Wheat
              White            Yellow
-
-           In addition, these system colors are available if a connection to the window system is available.
-
-           Frame   Text   Active   Shadow   Highlight   Edge   Selected   Face
 
            The color WHITE is used if this parameter is absent or a color name is mis-spelled. To see a list
            of the color names available in the program, type this:
@@ -5179,6 +5193,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
               a window connection before it tries to load system colors (which require one). If you
               think you might be using FSC_COLOR in a cron job, for example, you would want to set this
               keyword. If there is no window connection, the system colors are not available from the program.
+              As of 18 October 2010, this keyword is no longer used, as system colors have been
+              removed from the program.
 
        FILENAME: The string name of an ASCII file that can be opened to read in
               color values and color names. There should be one color per row
@@ -5210,6 +5226,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
               colors (and most people don't even know they are there, to tell you the truth), 
               then setting this keyword will keep them from being loaded, and you can run
               FSC_COLOR without a display. THIS KEYWORD NOW DEPRECIATED IN FAVOR OF CHECK_CONNECTION.
+              As of 18 October 2010, this keyword is no longer used, as system colors have been
+              removed from the program.
 
        ROW:   If this keyword is set, the return value of the function when the TRIPLE
               keyword is set is returned as a row vector, rather than as the default
@@ -5328,6 +5346,22 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
            mode, even when using an 8-bit graphics buffer. (Unless set manaually.) Now I set
            the decomposition mode in the program by looking at buffer depth, rather than
            the decomposition state, for the Z-buffer. 23 July 2010. DWF.
+       Adding "system" colors to FSC_Color may have been the worst design decision I ever made.
+            Since these require a window connection to determine, this decision has haunted
+            me for years in the form of people wanting to use the software in places where
+            there is no window connection. For example, in cron jobs. To accommodate legacy
+            code, I need to *always* check for a connection. I am loath to do this because it
+            means opening and closing a window, which is, relatively speaking, a slow process.
+            I've made another attempt to solve this problem with this update and the
+            corresponding update to the Coyote Library program CanConnect. CanConnect how
+            creates the system variable !FSC_Display_Connection. If this system variable 
+            exists, FSC_Color consults it to determine if there is a display connection. It
+            it doesn't exist, it calls CanConnect. This way, a window has to be open only
+            once in an IDL session to determine if a display connection can be made. 7 Oct 2010. DWF.
+       I am tired of dealing with "system" colors. I've never used them, no one I know
+            has ever used them, and they have given me nothing but headaches. I'm done
+            with them. I'll leave the code here for awhile in case you use them, but
+            I'm pretty sure I'm not putting them back in. 17 October 2010. DWF.
 </PRE><P>
 <STRONG>(See fsc_color.pro)</STRONG><P>
 <HR>
@@ -5340,6 +5374,12 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <PRE>
  NAME:
    FSC_COLORBAR
+   
+      Note: The name of the routine has been changed from COLORBAR
+      on 25 Sept 2010 to avoid conflicts with an IDL 8.0 routine of the
+      same name. See the article "IDL 8 Name Conflicts" here:
+       
+           http://www.dfanning.com/ng_tips/idl8_name_conflicts.html
 
  PURPOSE:
 
@@ -5381,13 +5421,13 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 
                           LoadCT, 33
                           TVImage, image
-                          Colorbar, Color=FSC_Color('firebrick')
+                          FSC_Colorbar, Color=FSC_Color('firebrick')
 
                      The proper syntax for device-independent color is like this:
 
                           LoadCT, 33
                           TVImage, image
-                          Colorbar, AnnotateColor='firebrick', Color=255
+                          FSC_Colorbar, AnnotateColor='firebrick', Color=255
 
        BOTTOM:       The lowest color index of the colors to be loaded in
                      the bar.
@@ -5423,7 +5463,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                      fail. If you can live without the system colors (and most people 
                      don't even know they are there, to tell you the truth), then setting 
                      this keyword will keep them from being loaded, and you can run
-                     FSC_COLORBAR without a display.
+                     FSC_COLORBAR without a display. As of 19 Oct 2010, set to 1  by default.
 
        POSITION:     A four-element array of normalized coordinates in the same
                      form as the POSITION keyword on a plot. Default is
@@ -5530,6 +5570,15 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
       21 May 2008. Changed the default CHARSIZE to !P.CHARSIZE from 1.0. DWF.
       30 Oct 2008. Fixed a problem with the FONT keyword not being recognized in certain
             configurations.
+      9 Nov 2009. Fixed typo in title of vertical colorbar. DWF.
+      25 Sep 2010. Renamed FSC_Colorbar from Colorbar to avoid conflict with ITTVIS introduced
+             colorbar.pro function in IDL 8.0. DWF.
+      19 Oct 2010. Made changes so that axes titles are not picked up in _EXTRA and displayed
+             on the color bar. Also changed all _EXTRA passes to _STRICT_EXTRA to report
+             mis-spelled and/or inappropriate keywords. DWF.
+      19 Oct 2010. Changed the default value of NODISPLAY keyword to 1, since FSC_Color
+             no longer looks for system colors anyway. NODISPLAY is a depreciated keyword
+             and does nothing if using the latest version of FSC_Color. DWF.
 </PRE><P>
 <STRONG>(See fsc_colorbar.pro)</STRONG><P>
 <HR>
@@ -5546,7 +5595,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        on 25 Sept 2010 to avoid conflicts with an IDL 8.0 routine of the
        same name. See the article "IDL 8 Name Conflicts" here:
        
-           http://www.dfanning.com/misc_tips/idl8_name_conflicts.html
+           http://www.dfanning.com/ng_tips/idl8_name_conflicts.html
 
  PURPOSE:
        The purpose of this routine is to implement a FSC_COLORBAR object
@@ -5689,7 +5738,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A NAME="FSC_COLORSELECT">
 <H2>FSC_COLORSELECT</H2></A>
 <A HREF="#FSC_COLORBAR__DEFINE">[Previous Routine]</A>
-<A HREF="#FSC_DROPLIST">[Next Routine]</A>
+<A HREF="#FSC_CONTOUR">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -5830,9 +5879,114 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See fsc_colorselect.pro)</STRONG><P>
 <HR>
  
+<A NAME="FSC_CONTOUR">
+<H2>FSC_CONTOUR</H2></A>
+<A HREF="#FSC_COLORSELECT">[Previous Routine]</A>
+<A HREF="#FSC_DROPLIST">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   The purpose of FSC_Contour is to create a wrapper for the traditional IDL graphics
+   command, Contour. The Contour command has a number of deficiencies that make it
+   difficult to use in a modern computing environment. FSC_Contour corrects these
+   deficiencies and allows the user to produce traditional contour plots in a device
+   and machine independent manner.
+
+ :Categories:
+    Graphics
+    
+ :Params:
+    data: in, required, type=any
+         A one- or two-dimensional array containing the values that make 
+         up the contour surface.
+    x: in, optional, type=any
+         A vector or two-dimensional array specifying the X coordinates for
+         the contour surface.
+    y: in, optional, type=any
+         A vector or two-dimensional array specifying the Y coordinates for
+         the contour surface.
+       
+ :Keywords:
+     axiscolor: in, optional, type=string/integer, default=Same as 'color'
+        If this keyword is a string, the name of the axis color. By default, same as 'color'.
+        Otherwise, the keyword is assumed to be a color index into the current color table.
+     axescolor: in, optional, type=string/integer
+        Provisions for bad spellers.
+     background: in, optional, type=string/integer, default='white'
+        If this keyword is a string, the name of the background color. By default, 'white'.
+        Otherwise, the keyword is assumed to be a color index into the current color table.
+     c_labels: in, optional, type=integer vector
+        A vector that specifies which contour levels to label. If used, the SKIPLABEL
+        keyword is ignored.
+     color: in, optional, type=string/integer, default='black'
+        If this keyword is a string, the name of the data color. By default, 'black'.
+        Otherwise, the keyword is assumed to be a color index into the current color table.
+     fill: in, optional, type=boolean, default=0
+        Set to indicate filled contours should be created.
+     irregular: in, optional, type=boolean
+        If this keyword is set, the data, x, and y input parameters are taken to be
+        irregularly gridded data, the the data is gridded for use in the contour plot
+        using the Triangulate and Trigrid method. The resolution of the gridded output
+        is set by the RESOLUTION keyword.
+     levels: in, optional, type=any
+         A vector of data levels to contour. If used, NLEVELS is ignored. If missing, 
+         NLEVELS is used to construct N equally-spaced contour levels.
+     missingvalue: in, optional, type=any
+        Use this keyword to identify any missing data in the input data values.
+     nlevels: in, optional, type=integer, default=6
+        If the Contour plot LEVELS keyword is not used, this keyword will produce this
+        number of equally spaced contour intervals. Unlike the Contour NLEVELS keyword,
+        this keyword actually works!
+     overplot: in, optional, type=boolean
+        Set this keyword to overplot the contours onto a previously established
+        data coordinate system.
+     resolution: in, optional, type=integer array, default=[41\,41]
+        If the IRREGULAR keyword is set, this keyword specifies the X and Y resolution
+        in a two element integer array of the final gridded data that is sent to the 
+        contour plot.
+     skiplabel: in, optional, type=integer, default=1
+        An number that tells how many labels to skip while labelling contours. A 1 means
+        all contour levels are labelled. A 2 indices every other contour level is labelled.
+        A 3, every third level is labelled, and so on. Set to 0 to prevent level labelling.
+     xstyle: in, optional, type=integer, default=1
+        If unused in the program, set to 1 to force exact axis scaling.
+     ystyle: in, optional, type=integer, default=1
+        If unused in the program, set to 1 to force exact axis scaling.
+     _extra: in, optional, type=any
+        Any keyword appropriate for the IDL Contour command is allowed in the program.
+
+ :Examples:
+    Use as you would use the IDL CONTOUR command::
+       data = dist(51)
+       FSC_Contour, data
+       LoadCT, 33
+       FSC_Contour, data, /FILL
+       FSC_Contour, data, /OVERPLOT
+       
+       See http://www.dfanning.com/graphics_tips/fsc_contour.html for additional examples.
+
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ :History:
+     Change History::
+        Written, 11 November 2010. DWF.
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See fsc_contour.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="FSC_DROPLIST">
 <H2>FSC_DROPLIST</H2></A>
-<A HREF="#FSC_COLORSELECT">[Previous Routine]</A>
+<A HREF="#FSC_CONTOUR">[Previous Routine]</A>
 <A HREF="#FSC_FIELD">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -7061,11 +7215,11 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
    keyword and method descriptions, and example programs using the object
    can be found on the Coyote's Guide to IDL Programming web page:
 
-     http://www.dfanning.com/documents/document_images/fsc_psconfig.html
+     http://www.dfanning.com/programs/docs/fsc_psconfig.html
 
    Or, if you would prefer, you can download a self-contained PDF file:
 
-     http://www.dfanning.com/documents/document_images/fsc_psconfig.pdf
+     http://www.dfanning.com/programs/docs/fsc_psconfig.pdf
 
  KEYWORDS:
 
@@ -7917,6 +8071,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
           XSIZE, YSIZE, CATCH, and FRAMES keyword made obsolete.
           HEADDATA, ENDIAN, DATATYPE, DIMENSIONS keywords added.
           Now dependent on FSC_FIELD, ERROR_MESSAGE, and CENTER_TLB from Coyote Library.
+       Added ability to parse fully qualified file names passed from Dialog_Pickfile. 30 Oct 2010. DWF.
 </PRE><P>
 <STRONG>(See getimage.pro)</STRONG><P>
 <HR>
@@ -8648,7 +8803,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 
  INPUT KEYWORDS:
 
-       AXISCOLORNAME:    The name of the axis color. Default: "Navy". (All color names
+       AXISCOLORNAME:    The name of the axis color. Default: "Black". (All color names
                          derived from FSC_COLOR.)
 
        BACKCOLORNAME:    The name of the background color. Default: "White".
@@ -8701,6 +8856,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        MIN_VALUE:        The minimum Y data value to represent on graphics plot. Default: 0.
 
        MISSING:          The value that should be represented as "missing" and not used in the histogram.
+                         Be aware that if the input data is not of type "float" or "double" that the input
+                         data will be converted to floating point prior to calculating the histogram.
        
        NAN:              If set, ignore NAN values in calculating and plotting histogram.
 
@@ -8786,6 +8943,18 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        I was trying to be a good citizen by reloading the input color table when I exited
             the program. But, of course, that makes it impossible to use the program in
             the Z-buffer. Fixed by being less of a good citizen. 23 July 2010. DWF.
+       Because of the way I was dealing with NANs and MISSING data, the reverse indices were
+            inaccurate when they were returned, if there was NANs or MISSING data in the
+            input array. The data is now being handled correctly in all cases. This requires
+            that missing data must be set to !VALUES.F_NAN prior to calculating the histogram.
+            This means the data MUST be converted to floats for this operation. Since I am
+            always working on a *copy* of the data when this occurs, it should not affect
+            user input data. Also, I scan all input floating point and double data for NANs,
+            and if found, and the NAN keyword is not set, I issue a warning and set the NAN
+            keyword. This is a change in behavior. 1 October 2010. DWF.
+       Fixed a problem when specifying more than one POLYCOLOR. I made a change to the program
+            and forgot to propogate it everywhere. 4 October 2010. DWF.
+       Default axis color name changed from "Navy" to "Black". 28 October 2010. DWF.
 </PRE><P>
 <STRONG>(See histoplot.pro)</STRONG><P>
 <HR>
@@ -9138,40 +9307,33 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A HREF="#LEFTJUSTIFY">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
- NAME:
-   Journal_Unique
-
- PURPOSE:
+ :Description:
+    Creates a new journal file with a unique journal name based on the current time.
  
-   This procedure creates a new journal file with a unique journal
-   name based on the current time.
-
- CATEGORY:
- 
+ :Categories:
     Utility
-  
- CALLING SEQUENCE:
- 
-    Journal_Unique, theDirectory
 
- ARGUMENTS:
- 
-  theDirectory: The directory where you wish to create the journal file.
-                If not provided, the current working directory.
-     
- AUTHOR:
+ :Params:
+    theDirectory: in, optional, type=string
+       The name of the directory containing the new journal file.
+       
+ :Examples:
+    Journal_Unique
 
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com
-   
- MODIFICATION HISTORY:
- 
-    Written by: David W. Fanning, 20 September 2010.
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+    
+ :History:
+     Written, 20 Sept 2010.
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
 </PRE><P>
 <STRONG>(See journal_unique.pro)</STRONG><P>
 <HR>
@@ -9639,7 +9801,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A NAME="LOGSCL">
 <H2>LOGSCL</H2></A>
 <A HREF="#LOADDATA">[Previous Routine]</A>
-<A HREF="#MAP_GSHHS_SHORELINE">[Next Routine]</A>
+<A HREF="#MAKE_TRANSPARENT_IMAGE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -9729,10 +9891,82 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See logscl.pro)</STRONG><P>
 <HR>
  
+<A NAME="MAKE_TRANSPARENT_IMAGE">
+<H2>MAKE_TRANSPARENT_IMAGE</H2></A>
+<A HREF="#LOGSCL">[Previous Routine]</A>
+<A HREF="#MAP_GSHHS_SHORELINE">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   Creates a transparent image from an input image or from the current display window.
+   The transparent color is set with the COLOR keyword.
+
+ :Categories:
+    Graphics
+    
+ :Params:
+    image: in, optional, type=byte
+       A 2D image or a 24-bit image with or without an alpha channel.
+       
+ :Keywords:
+     color: in, optional, type=various
+        If COLOR is a string, use FSC_Color to obtain a color triple. If
+        COLOR is a scalar, replicate the value to obtain a color triple.
+        Othersize, expect a color triple to indicate the "transparent"
+        color in the output image. The alpha channel in the output image
+        is set to 0 for the transparent color. If this keyword is not used,
+        the color of the pixels in the lower-left [0,0] corner of the image
+        is used instead.
+        
+     filename: in, optional, type=string
+         If the SAVE_PNG keyword is used this keyword will specify the name
+         of the PNG file to create. If a filename is provided, no user dialog
+         will be displayed. If a filename is not provided, the user will be
+         prompted for the name of the output file.
+        
+     save_png: in, optional, type=boolean
+         If this keyword is set, the resulting transparent image will
+         be written as a PNG image file.
+        
+     wset: in, optional, type=long
+        If image parameter is not passed, make the window indicated with
+        this keyword the current graphics window for obtaining an image parameter.
+        If not passed, the current graphics window is used.
+
+ :Examples:
+    To create and display a transparent image::
+       Window, 0
+       LoadCT, 0
+       TVImage, LoadData(5)
+       timage = Make_Transparent_Image(COLOR='black')
+       Window, 1
+       LoadCT, 22
+       TVImage, LoadData(7)
+       TVImage, timage, Position=[0.2, 0.2, 0.8, 0.8], /Keep_Aspect
+
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ :History:
+     Change History::
+        Written, 4 November 2010. DWF.
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See make_transparent_image.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="MAP_GSHHS_SHORELINE">
 <H2>MAP_GSHHS_SHORELINE</H2></A>
-<A HREF="#LOGSCL">[Previous Routine]</A>
-<A HREF="#MINMAX">[Next Routine]</A>
+<A HREF="#MAKE_TRANSPARENT_IMAGE">[Previous Routine]</A>
+<A HREF="#MAXMIN">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -9857,59 +10091,109 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See map_gshhs_shoreline.pro)</STRONG><P>
 <HR>
  
-<A NAME="MINMAX">
-<H2>MINMAX</H2></A>
+<A NAME="MAXMIN">
+<H2>MAXMIN</H2></A>
 <A HREF="#MAP_GSHHS_SHORELINE">[Previous Routine]</A>
+<A HREF="#MAXWINDOWSIZE">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+    Prints the maximum and minimum of an IDL variable.
+ 
+ :Categories:
+    Utility
+
+ :Params:
+    variable: in, required, type=any
+       The variable whose minimum and maximum you wish to know.
+       
+ :Keywords:
+     NAN: in, optional, type=boolean
+       Set this keyword to ignore NANs in the variable. Default: 0.
+     TEXT: in, optional, type=string
+       Prepend this string to the output of MinMax. Default: "MinMax: ".
+       
+ :Examples:
+   The MaxMin routine gives the range of the variable::
+     IDL> a = Findgen(11)
+     IDL> MaxMin, a, TEXT='Variable A:'
+     Variable A:   11    0
+    
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+    
+ :History:
+     Change History::
+        Written, 20 Sept 2010.
+        Changed name of program from MinMax to MaxMin to avoid conflict with 
+        MinMax program in NASA Astronomy Library. 1 Nov 2010. DWF.
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See maxmin.pro)</STRONG><P>
+<HR>
+ 
+<A NAME="MAXWINDOWSIZE">
+<H2>MAXWINDOWSIZE</H2></A>
+<A HREF="#MAXMIN">[Previous Routine]</A>
 <A HREF="#MPI_AXIS__DEFINE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
- NAME:
-   MinMax
+ :Description:
+    Returns the resolution of the largest unobstructed graphics window that can be
+    created on this particular graphics device. Works properly for Windows and UNIX
+    computers, excluding Macintosh computers. There is no known way to find the resolution
+    of the largest unobstructed graphics window on a Macintosh computer, so a fudge factor
+    of 22 pixels is used to account for the Macintosh "dock".
 
- PURPOSE:
- 
-   Calculates and prints the minimum and maximum of a variable.
-
- CATEGORY:
- 
+ :Categories:
     Utility
-  
- CALLING SEQUENCE:
- 
-    MinMax, variable
+    
+ :Params:
+    none:
+       
+ :Keywords:
+     monitor_resolution: out, optional, type=long
+        Set this keyword to a named variable to return the resolution of the
+        primary display monitor.
 
- ARGUMENTS:
- 
-    variable: The IDL variable whose minimum and maximum you wish to know.
-  
- KEYWORDS:
-  
-     NAN:      Set this keyword to ignore NANs in the data.
-     
-     TEXT:     A text string that is prepended to the printed output. If
-               not provide the string "MinMax: " is used. To supress text
-               use TEXT="".
-     
- AUTHOR:
+ :Examples:
+    To create a window of maximum size::
+       maxsize = MaxWindowSize()
+       Window, XSize=maxsize[0], YSize=maxsize[1], /Free
 
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com
-   
- MODIFICATION HISTORY:
- 
-    Written by: David W. Fanning, 20 September 2010.
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ :History:
+     Change History::
+        Written, 26 October 2010. DWF.
+        Misunderstood Macintosh result. Now Mac treated like UNIX. 27 Oct 2010. DWF.
+        No known method for Macintosh computers. Resorting to a fudge factor
+           of 22 pixels to account for the Macintosh dock. 27 Oct 2010. DWF.
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
 </PRE><P>
-<STRONG>(See minmax.pro)</STRONG><P>
+<STRONG>(See maxwindowsize.pro)</STRONG><P>
 <HR>
  
 <A NAME="MPI_AXIS__DEFINE">
 <H2>MPI_AXIS__DEFINE</H2></A>
-<A HREF="#MINMAX">[Previous Routine]</A>
+<A HREF="#MAXWINDOWSIZE">[Previous Routine]</A>
 <A HREF="#MPI_PLOT">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -15008,7 +15292,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
    keyword and method descriptions, and example programs using the object
    can be found on the Coyote's Guide to IDL Programming web page:
 
-     http://www.dfanning.com/documents/document_images/fsc_psconfig.html
+     http://www.dfanning.com/programs/docs/fsc_psconfig.html
 
  INPUT:
 
@@ -15325,6 +15609,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        GIF:          Set this keyword to convert the PostScript output file to a GIF image.
 
        JPEG:         Set this keyword to convert the PostScript output file to a JPEG image.
+       
+       NOFIX:        If this keyword is set, then the FixPS program to fix IDL landscape
+                     PostScript files is not called.
 
        PNG:          Set this keyword to convert the PostScript output file to a PNG image.
 
@@ -15415,6 +15702,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        If the PostScript file is in Landscape mode, it is now "fixed" with FixPS to allow it
            to be displayed right-side up in PostScript viewers. 8 August 2009. DWF.
        Fixed a problem in not checking the GIF keyword properly. 4 December 2009. DWF.
+       Added NOFIX keyword to the program. 1 November 2010. DWF.
 </PRE><P>
 <STRONG>(See ps_end.pro)</STRONG><P>
 <HR>
@@ -15496,6 +15784,15 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        When PS_START is called, the current graphics device is set to "PS" (the PostScript 
        device). When PS_END is called the current graphics device is returned to the device
        in effect when PS_START was called.
+       
+       PS_Start uses the current display window as a template for the Postscript
+       file. Thus, if the display window is wider than it is higher, output is
+       in Landscape mode. To set the size of the PostScript "window" yourself, be
+       sure to set the NOMATCH keyword to 1.
+       
+       To display surface plots correctly the FONT keyword should be set to 1.
+       Otherwise, the default font is 0, or hardware fonts when outputting to 
+       PostScript.
 
  RESTRICTIONS:
 
@@ -15551,6 +15848,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
            before they call PS_START, rather than after. 23 March  2009. DWF.
        Moved PS_END to its own file to allow the IDLExBr_Assistant to work properly. 7 April 2009. DWF.
        Modified to allow PostScript page type to be stored for future processing with FixPS. 9 August 2009. DWF.
+       Added NoFix keyword to PS_END calls to repair previous, but unused set-ups. 1 Nov 2010. DWF.
 </PRE><P>
 <STRONG>(See ps_start.pro)</STRONG><P>
 <HR>
@@ -17580,23 +17878,10 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      TVIMAGE
 
  PURPOSE:
-     This purpose of TVIMAGE is to enable the TV command in IDL
-     to be a completely device-independent and color-decomposition-
-     state independent command. On 24-bit displays color decomposition
-     is always turned off for 8-bit images and on for 24-bit images.
-     The color decomposition state is restored for those versions of
-     IDL that support it (> 5.2). Moreover, TVIMAGE adds features
-     that TV lacks. For example, images can be positioned in windows
-     using the POSITION keyword like other IDL graphics commands.
-     TVIMAGE also supports the !P.MULTI system variable, unlike the
-     TV command. TVIMAGE was written to work especially well in
-     resizeable graphics windows. Note that if you wish to preserve
-     the aspect ratio of images in resizeable windows, you should set
-     the KEEP_ASPECT_RATIO keyword, described below. TVIMAGE works
-     equally well on the display, in the PostScript device, and in
-     the Printer and Z-Graphics Buffer devices. The TRUE keyword is
-     set automatically to the correct value for 24-bit images, so you
-     don't need to specify it when using TVIMAGE.
+     This purpose of TVIMAGE is to create a device-independent TV command
+     with the power and functionality to be used in sophisticated graphics
+     programs, as well as at the IDL command line. It can be thought of as 
+     a "smart" TV command.
 
  AUTHOR:
        FANNING SOFTWARE CONSULTING:
@@ -17615,8 +17900,11 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      TVIMAGE, image
 
  INPUTS:
-     image:    A 2D or 3D image array. It should be byte data. Can also be
-               a 3D image with an alpha channel (e.g., MxNx4).
+     image:    A 2D (MxN) or 24-bit (e.g., MxNx3) byte array. A
+               24-bit image with an alpha channel (e.g., MxNx4) is
+               also permitted. The alpha channel will be blended with
+               the current background image. See the AlphaBackgroundImage
+               keyword for details.
 
        x  :    The X position of the lower-left corner of the image.
                This parameter is only recognized if the TV keyword is set.
@@ -17633,6 +17921,22 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                it will assume you are using INDEXED color mode. If a long integer
                is will assume you are using DECOMPOSED color mode. If a string,
                is will pass the string color name along to FSC_COLOR for processing.
+               
+     ALPHABACKGROUNDIMAGE: Normally, when a image with an alpha channel is displayed,
+               the image is blended with the image currently in the display window.
+               This means, the program has to obtain that background image. This is not a 
+               problem on devices (e.g., WIN, X, Z) that allow this kind of operation,
+               but it is on devices (e.g., the PostScript device, PS) that do not.
+               To get around this problem, you can pass the background image to the
+               TVImage program, along with the alpha channel image you wish to display
+               (via the image parameter) and the alpha channel image will be blended
+               with this image appropriately on all devices. If an alpha channel image
+               is displayed on a device in which there is no way to obtain the background
+               image, and this keyword is not used to pass a background image, then
+               the alpha channel image will be blended with a white background image.
+               This keyword is only used if an alpha channel image is passed to the 
+               program via the image parameter. The AlphaBackgroundImage does not need
+               to have the same dimensions as the alpha channel image.
 
      AXES:     Set this keyword to draw a set of axes around the image.
 
@@ -17766,8 +18070,15 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                 example, if you are using TVIMAGE to draw a color bar, it would
                 not be necessary. Setting this keyword means that TVIMAGE just
                 goes quietly about it's business without bothering anyone else.
+             
+    SAVE:      Set this to cause a data coordinate system to be established
+               for the image. The XRANGE and YRANGE keyword values will be used
+               to establish a data coordinate system coincident with the final
+               image position. 
 
     SCALE:     Set this keyword to byte scale the image before display.
+               This keyword should only be applied to 2D (MxN) images.
+               TVScale might be a better option than using this keyword.
 
      TV:       Setting this keyword makes the TVIMAGE command work much
                like the TV command, although better. That is to say, it
@@ -17782,7 +18093,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 
                Setting this keyword will ensure that the keywords
                KEEP_ASPECT_RATIO, MARGIN, MINUS_ONE, MULTI, and POSITION
-               are ignored.
+               are ignored. Alpha channels are also ignored when this keyword
+               is set.
                
       XRANGE:  If the AXES keyword is set, this keyword is a two-element vector
                giving the X axis range. By default, [0, size of image in X].
@@ -17944,9 +18256,219 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
       Modified to work with 24-bit color PostScript in IDL 7.1. 24 May 2009. DWF.
       Added MULTIMARGIN keyword to allow position adjustment when plotting with 
           !P.Multi. 7 July 2009. DWF.
-      Fixed a problem in which displaying an image with !P.MULTI turned on switched the
-          color of the output window. If this happens to you, use the BACKGROUND keyword
-          to the color you want to have in the window. 4 January 2010.
+      Fixed a problem in which displaying an image with !P.MULTI turned on, switched the
+          color of the output window. If this happens to you, set the BACKGROUND keyword
+          to the color you want to have in the window. 4 January 2010. DWF.
+      Some LINUX distributions cannot both get the current color decomposition state and
+           set the state to another value on the same DEVICE command. I have changed all such 
+           occurances to two commands. One gets the current state, the other sets it. 11 Oct 2010. DWF.
+       Added the SAVE keyword to save the data coordinate system established by adding axes
+           to the image. 29 Oct 2010. DWF.
+       If the AXES keyword is set, but no MARGIN or POSITION keyword is set, and the command
+           is not doing a multiplot, then a Margin of 0.1 is used so image axes are shown.
+           30 Oct 2010. DWF.
+       Changed the way alpha channel blending works. The alpha channel image is now blended
+           with the background image in the display, if it can be obtained for a partical graphics
+           device, or a background image can be passed to the program via the AlphaBackgroundImage
+           keyword, or failing that, the alpha channel image is blended with a white background.
+           1 November 2010. DWF.
+       Removed TVIMAGE_ERROR routine in favor of ERROR_MESSAGE, since other Coyote Library
+           routines are already used in the program. 1 Nov 2010. DWF.
+       Forgot to set the SET_PIXEL_DEPTH keyword in Z-Buffer to 24. Screwed up alpha channel
+           display. 2 November 2010. DWF.
+       Small error in alpha channel processing when images are the same size. Reorganized
+           the code to avoid duplication. 5 November 2010. DWF.
+       The SAVE keyword now always establishes a data coordinate system for the image
+           if this keyword is set, using the values of XRANGE and YRANGE. The data 
+           coordinate system is coincident with the file position of the image. 11 Nov 2010. DWF.
+;-
+******************************************************************************************;
+  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
+  All rights reserved.                                                                    ;
+                                                                                          ;
+  Redistribution and use in source and binary forms, with or without                      ;
+  modification, are permitted provided that the following conditions are met:             ;
+                                                                                          ;
+      * Redistributions of source code must retain the above copyright                    ;
+        notice, this list of conditions and the following disclaimer.                     ;
+      * Redistributions in binary form must reproduce the above copyright                 ;
+        notice, this list of conditions and the following disclaimer in the               ;
+        documentation and/or other materials provided with the distribution.              ;
+      * Neither the name of Fanning Software Consulting, Inc. nor the names of its        ;
+        contributors may be used to endorse or promote products derived from this         ;
+        software without specific prior written permission.                               ;
+                                                                                          ;
+  THIS SOFTWARE IS PROVIDED BY FANNING SOFTWARE CONSULTING, INC. ''AS IS'' AND ANY        ;
+  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES    ;
+  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT     ;
+  SHALL FANNING SOFTWARE CONSULTING, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,             ;
+  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED    ;
+  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;         ;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND             ;
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
+******************************************************************************************;;
+
+ NAME:
+  TVIMAGE_CONGRID
+
+ PURPOSE:
+       Shrink or expand the size of an array by an arbitrary amount.
+       This IDL procedure simulates the action of the VAX/VMS
+       CONGRID/CONGRIDI function.
+
+  This function is similar to "REBIN" in that it can resize a
+       one, two, or three dimensional array.   "REBIN", however,
+       requires that the new array size must be an integer multiple
+       of the original size.   CONGRID will resize an array to any
+       arbitrary size (REBIN is somewhat faster, however).
+       REBIN averages multiple points when shrinking an array,
+       while CONGRID just resamples the array.
+
+ CATEGORY:
+       Array Manipulation.
+
+ CALLING SEQUENCE:
+  array = TVIMAGE_CONGRID(array, x, y, z)
+
+ INPUTS:
+       array:  A 1, 2, or 3 dimensional array to resize.
+               Data Type : Any type except string or structure.
+
+       x:      The new X dimension of the resized array.
+               Data Type : Int or Long (greater than or equal to 2).
+
+ OPTIONAL INPUTS:
+       y:      The new Y dimension of the resized array.   If the original
+               array has only 1 dimension then y is ignored.   If the
+               original array has 2 or 3 dimensions then y MUST be present.
+
+       z:      The new Z dimension of the resized array.   If the original
+               array has only 1 or 2 dimensions then z is ignored.   If the
+               original array has 3 dimensions then z MUST be present.
+
+ KEYWORD PARAMETERS:
+       INTERP: If set, causes linear interpolation to be used.
+               Otherwise, the nearest-neighbor method is used.
+
+       CUBIC:  If set, uses "Cubic convolution" interpolation.  A more
+               accurate, but more time-consuming, form of interpolation.
+               CUBIC has no effect when used with 3 dimensional arrays.
+
+       MINUS_ONE:
+               If set, will prevent CONGRID from extrapolating one row or
+               column beyond the bounds of the input array.   For example,
+               If the input array has the dimensions (i, j) and the
+               output array has the dimensions (x, y), then by
+               default the array is resampled by a factor of (i/x)
+               in the X direction and (j/y) in the Y direction.
+               If MINUS_ONE is present (AND IS NON-ZERO) then the array
+               will be resampled by the factors (i-1)/(x-1) and
+               (j-1)/(y-1).
+
+       HALF_HALF:
+               If set, will tell CONGRID to extrapolate a *half* row
+               and column on either side, rather than the default of
+               one full row/column at the ends of the array.  If you
+               are interpolating images with few rows, then the
+               output will be more consistent with this technique.
+               This keyword is intended as a replacement for
+               MINUS_ONE, and both keywords probably should not be
+               used in the same call to CONGRID.
+
+ OUTPUTS:
+  The returned array has the same number of dimensions as the original
+       array and is of the same data type.   The returned array will have
+       the dimensions (x), (x, y), or (x, y, z) depending on how many
+       dimensions the input array had.
+
+ PROCEDURE:
+       IF the input array has three dimensions, or if INTERP is set,
+       then the IDL interpolate function is used to interpolate the
+       data values.
+       If the input array has two dimensions, and INTERP is NOT set,
+       then the IDL POLY_2D function is used for nearest neighbor sampling.
+       If the input array has one dimension, and INTERP is NOT set,
+       then nearest neighbor sampling is used.
+
+ EXAMPLE:
+       ; vol is a 3-D array with the dimensions (80, 100, 57)
+       ; Resize vol to be a (90, 90, 80) array
+       vol = TVIMAGE_CONGRID(vol, 90, 90, 80)
+
+ MODIFICATION HISTORY:
+       DMS, Sept. 1988.
+       DMS, Added the MINUS_ONE keyword, Sept. 1992.
+  Daniel Carr. Re-wrote to handle one and three dimensional arrays
+                    using INTERPOLATE function.
+  DMS, RSI, Nov, 1993.  Added CUBIC keyword.
+       Craig Markwardt, Dec, 1997.  Added halfhalf keyword to
+                        more evenly distribute "dead" pixel row
+       Use uniformly spaced grid points for half_half W. Landsman   Feb. 2000
+              (and slightly modified by C. Markwardt 14 Feb 2000)
+  DWF, FSC, 22 Apr 2007. Modified the program so that 3D arrays use nearest-neighbor
+       interpolation unless the INTERP keyword is set.
+  DWF, FSC, 22 Apr 2007. Function renamed from CMCONGRID to TVIMAGE_CONGRID on
+       recommendation of Craig Markwardt as he wants no part of this. :-)
+
+
+UNCTION TVIMAGE_CONGRID, arr, x, y, z, Interp=int, Minus_One=m1, Cubic = cubic, $
+                   Half_Half=hh
+
+   ON_ERROR, 2    ;Return to caller if error
+   s = Size(arr)
+   
+   IF ((s[0] EQ 0) OR (s[0] GT 3)) THEN $
+      Message, 'Array must have 1, 2, or 3 dimensions.'
+   
+   ;  Supply defaults = no interpolate, and no minus_one.
+   if n_elements(int) le 0 then int = 0 else int = keyword_set(int)
+   if n_elements(m1) le 0 then m1 = 0 else m1 = keyword_set(m1)
+   
+   ; Compute offsets pixel offsets for half_half
+   halfx = 0.0 & halfy = 0.0 & halfz = 0.0
+   if keyword_set(hh) then begin
+       if s[0] GE 1 then halfx = -0.5 + (float(s[1])/x)
+       if s[0] GE 2 then halfy = -0.5 + (float(s[2])/y)
+       if s[0] GE 3 then halfz = -0.5 + (float(s[3])/z)
+   endif
+   cub = KEYWORD_SET(cubic)
+   if cub THEN int = 1  ;Cubic implies interpolate
+   
+   
+   CASE s[0] OF
+      1: BEGIN          ; *** ONE DIMENSIONAL ARRAY
+      srx = float(s[1] - m1)/(x-m1) * findgen(x) + halfx
+         IF int THEN $
+            RETURN, INTERPOLATE(arr, srx, CUBIC = cub) ELSE $
+            RETURN, arr(ROUND(srx))
+      ENDCASE
+      2: BEGIN ; *** TWO DIMENSIONAL ARRAY
+      IF int THEN BEGIN
+        srx = float(s[1] - m1) / (x-m1) * findgen(x) + halfx
+        sry = float(s[2] - m1) / (y-m1) * findgen(y) + halfy
+             RETURN, INTERPOLATE(arr, srx, sry, /GRID, CUBIC=cub)
+      ENDIF ELSE $
+        RETURN, POLY_2D(arr, $
+         [[0,0],[(s[1]-m1)/float(x-m1),0]], $ ;Use poly_2d
+         [[0,(s[2]-m1)/float(y-m1)],[0,0]],int,x,y)
+   
+      ENDCASE
+      3: BEGIN ; *** THREE DIMENSIONAL ARRAY
+      srx = float(s[1] - m1) / (x-m1) * findgen(x) + halfx
+      sry = float(s[2] - m1) / (y-m1) * findgen(y) + halfy
+      srz = float(s[3] - m1) / (z-m1) * findgen(z) + halfz
+      IF int THEN BEGIN
+         RETURN, interpolate(arr, srx, sry, srz, /grid)
+      ENDIF ELSE BEGIN
+         RETURN, interpolate(arr, round(srx), round(sry), round(srz), /grid)
+      ENDELSE
+      ENDCASE
+   ENDCASE
+   
+   RETURN, arr_r
+ND
 </PRE><P>
 <STRONG>(See tvimage.pro)</STRONG><P>
 <HR>
@@ -18193,6 +18715,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        Added TYPE keyword 27 Sep 2006. DWF.
        Updated program to work with 24-bit Z-buffer in IDL 6.4. 11 June 2007. DWF.
        Added OVERWRITE_PROMPT keyword. 2 Oct 2008. DWF.
+       Found an extra line of code that wrote PNG files twice! Removed. 10 Nov 2010. DWF.
 </PRE><P>
 <STRONG>(See tvread.pro)</STRONG><P>
 <HR>
@@ -18207,24 +18730,12 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      TVSCALE
 
  PURPOSE:
-     This purpose of TVSCALE is to enable the TVSCL command in IDL
-     to be a completely device-independent and color-decomposition-
-     state independent command. On 24-bit displays color decomposition
-     is always turned off for 8-bit images and on for 24-bit images.
-     The color decomposition state is restored for those versions of
-     IDL that support it (> 5.2). Moreover, TVSCALE adds features
-     that TVSCL lacks. For example, images can be positioned in windows
-     using the POSITION keyword like other IDL graphics commands.
-     TVSCALE also supports the !P.MULTI system variable, unlike the
-     TVSCL command. TVSCALE was written to work especially well in
-     resizeable graphics windows. Note that if you wish to preserve
-     the aspect ratio of images in resizeable windows, you should set
-     the KEEP_ASPECT_RATIO keyword, described below. TVSCALE works
-     equally well on the display, in the PostScript device, and in
-     the Printer and Z-Graphics Buffer devices. The TRUE keyword is
-     set automatically to the correct value for 24-bit images, so you
-     don't need to specify it when using TVSCALE. In addition, you can
-     use the TOP and BOTTOM keywords to define a particular set of
+     This purpose of TVSCALE is to create a device-independent TVSCL command
+     with the power and functionality to be used in sophisticated graphics
+     programs, as well as at the IDL command line. It can be thought of as 
+     a "smart" TVSCL command.
+
+     Use the TOP and BOTTOM keywords to define a particular set of
      number to scale the data to. The algorithm used is this:
 
          TV, BytScl(image, TOP=top-bottom) + bottom
@@ -18422,6 +18933,11 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                not be necessary. Setting this keyword means that TVIMAGE just
                goes quietly about it's business without bothering anyone else.
 
+    SAVE:      Set this to cause a data coordinate system to be established
+               for the image. The XRANGE and YRANGE keyword values will be used
+               to establish a data coordinate system coincident with the final
+               image position. 
+
      TOP:      The image is scaled so that all displayed pixels have values
                greater than or equal to BOTTOM and less than or equal to TOP.
                The value of TOP is !D.Table_Size by default.
@@ -18535,6 +19051,21 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
       Modified to work with 24-bit color PostScript in IDL 7.1. 24 May 2009. DWF.
       Added MULTIMARGIN keyword to allow position adjustment when plotting with 
           !P.Multi. 7 July 2009. DWF.
+      Fixed a problem in which displaying an image with !P.MULTI turned on, switched the
+          color of the output window. If this happens to you, set the BACKGROUND keyword
+          to the color you want to have in the window. 4 January 2010. DWF.
+      Some LINUX distributions cannot both get the current color decomposition state and
+           set the state to another value on the same DEVICE command. I have changed all such 
+           occurances to two commands. One gets the current state, the other sets it. 11 Oct 2010. DWF.
+      Added SAVE keyword. 30 Oct 2010. DWF.
+      If the AXES keyword is set, but no MARGIN or POSITION keyword is set, and the command
+           is not doing a multiplot, then a Margin of 0.1 is used so image axes are shown.
+           30 Oct 2010. DWF.
+      Removed TVSCALE_ERROR routine in favor of ERROR_MESSAGE, since other Coyote Library
+           routines are already used in the program. 1 Nov 2010. DWF.
+       The SAVE keyword now always establishes a data coordinate system for the image
+           if this keyword is set, using the values of XRANGE and YRANGE. The data 
+           coordinate system is coincident with the file position of the image. 11 Nov 2010. DWF.
 </PRE><P>
 <STRONG>(See tvscale.pro)</STRONG><P>
 <HR>

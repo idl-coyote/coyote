@@ -510,9 +510,9 @@ CASE number OF
 
  17: BEGIN
 
-        ; Random 400 by 400 array.
+        ; Random 401 by 401 array.
 
-     data = MAKEZ(400, 400, 41, Seed=seed)
+     data = MAKEZ(401, 401, 41, Seed=seed)
      data = Hist_Equal(data)
      data = BytScl(data, Top=!D.Table_Size-1)
 

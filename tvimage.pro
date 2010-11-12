@@ -196,11 +196,10 @@
 ;                not be necessary. Setting this keyword means that TVIMAGE just
 ;                goes quietly about it's business without bothering anyone else.
 ;             
-;    SAVE:      Set this keyword to save the data coordinate system established
-;               by using the AXES keyword. The default is to not save the
-;               data coordinate system, but to restore the one in place when
-;               the image is displayed. This keyword is only applied if axes
-;               are drawn on the image.
+;    SAVE:      Set this to cause a data coordinate system to be established
+;               for the image. The XRANGE and YRANGE keyword values will be used
+;               to establish a data coordinate system coincident with the final
+;               image position. 
 ;
 ;    SCALE:     Set this keyword to byte scale the image before display.
 ;               This keyword should only be applied to 2D (MxN) images.
@@ -404,7 +403,10 @@
 ;           display. 2 November 2010. DWF.
 ;       Small error in alpha channel processing when images are the same size. Reorganized
 ;           the code to avoid duplication. 5 November 2010. DWF.
-;;-
+;       The SAVE keyword now always establishes a data coordinate system for the image
+;           if this keyword is set, using the values of XRANGE and YRANGE. The data 
+;           coordinate system is coincident with the file position of the image. 11 Nov 2010. DWF.
+;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
@@ -1252,31 +1254,40 @@ PRO TVIMAGE, image, x, y, $
         ENDIF 
     ENDIF
     
+    ; Save plot system variables and current color table.
+    bangp = !P
+    bangx = !X
+    bangy = !Y
+    TVLCT, r, g, b, /GET
+    
+    ; Need a data range?
+    IF N_Elements(plotxrange) EQ 0 THEN plotxrange = [0, imgXsize]
+    IF N_Elements(plotyrange) EQ 0 THEN plotyrange = [0, imgYsize]
+    
     ; If the user wanted axes, draw them now.
     IF axes THEN BEGIN
     
-         ; Save plot system variables and current color table.
-        bangp = !P
-        bangx = !X
-        bangy = !Y
-        TVLCT, r, g, b, /GET
-    
-        ; If axes color is string, convert it.
+        ; If axes color is a string, convert it.
         IF Size(acolor, /TNAME) EQ 'STRING' THEN acolor = FSC_COLOR(acolor, BREWER=brewer)    
-    
-        ; Need a data range?
-        IF N_Elements(plotxrange) EQ 0 THEN plotxrange = [0, imgXsize]
-        IF N_Elements(plotyrange) EQ 0 THEN plotyrange = [0, imgYsize]
         PLOT, [0], /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
             XSTYLE=1, YSTYLE=1, POSITION=position, COLOR=acolor, _STRICT_EXTRA=axkeywords
             
-        ; Clean up after yourself.
-        TVLCT, r, g, b
-        IF ~Keyword_Set(save) THEN BEGIN
-            !P = bangp
-            !X = bangx
-            !Y = bangy
+    ENDIF ELSE BEGIN
+    
+        ; If you are saving the data coordinate space, draw invisible axes.
+        IF Keyword_Set(save) THEN BEGIN
+            PLOT, [0], /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
+                XSTYLE=5, YSTYLE=5, POSITION=position, _STRICT_EXTRA=axkeywords
         ENDIF
+    
+    ENDELSE
+
+    ; Clean up after yourself.
+    TVLCT, r, g, b
+    IF ~Keyword_Set(save) THEN BEGIN
+        !P = bangp
+        !X = bangx
+        !Y = bangy
     ENDIF
 
     ; If you scaled the data, but the image back.

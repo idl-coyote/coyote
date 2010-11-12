@@ -1,7 +1,7 @@
 ;;
 ;; IDLWAVE catalog for library coyote
 ;; Automatically Generated -- do not edit.
-;; Created by idlwave_catalog on Mon Sep 27 07:24:06 2010
+;; Created by idlwave_catalog on Fri Nov 12 06:44:10 2010
 ;;
 (setq idlwave-library-catalog-libname "coyote")
 (setq idlwave-library-catalog-routines
@@ -160,6 +160,7 @@
    ("FSC_ColorSelect" fun nil (lib "fsc_colorselect.pro" nil "coyote") "Result = %s(parent)" (nil ("_Extra") ("Brewer") ("Button_Text") ("CFont") ("Color") ("CT_Index") ("CT_NColors") ("Event_Func") ("Event_Pro") ("Frame") ("LabelAlign") ("LabelFont") ("LabelSize") ("Name") ("Scr_XSize") ("Scr_YSize") ("Style") ("Title") ("UValue") ("XSize")))
    ("Example_Event" pro nil (lib "fsc_colorselect.pro" nil "coyote") "%s, event" (nil))
    ("Example" pro nil (lib "fsc_colorselect.pro" nil "coyote") "%s" (nil))
+   ("FSC_Contour" pro nil (lib "fsc_contour.pro" nil "coyote") "%s, data, x, y" (nil ("_Extra") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("C_LABELS") ("COLOR") ("FILL") ("IRREGULAR") ("LEVELS") ("MISSINGVALUE") ("NLEVELS") ("OVERPLOT") ("RESOLUTION") ("SKIPLABEL") ("XSTYLE") ("YSTYLE")))
    ("FSC_Droplist_Kill_Notify" pro nil (lib "fsc_droplist.pro" nil "coyote") "%s, droplistID" (nil))
    ("EventHandler" fun "FSC_Droplist" (lib "fsc_droplist.pro" nil "coyote") "Result = Obj ->[%s::]%s(event)" (nil))
    ("FSC_Droplist_Events" fun nil (lib "fsc_droplist.pro" nil "coyote") "Result = %s(event)" (nil))
@@ -269,6 +270,7 @@
    ("Example_Event" pro nil (lib "fsc_inputfield.pro" nil "coyote") "%s, event" (nil))
    ("Example" pro nil (lib "fsc_inputfield.pro" nil "coyote") "%s" (nil))
    ("FSC_Normalize" fun nil (lib "fsc_normalize.pro" nil "coyote") "Result = %s(range)" (nil ("Position")))
+   ("FSC_Pickfile" fun nil (lib "fsc_pickfile.pro" nil "coyote") "Result = %s" (nil ("_REF_EXTRA") ("DATA") ("DEMO") ("HDF") ("JPEG") ("LAST_FILE") ("LIDAR") ("NCDF") ("PNG") ("TIFF")))
    ("FSC_PLOTWINDOW_Error_Message" fun nil (lib "fsc_plotwindow.pro" nil "coyote") "Result = %s(theMessage)" (nil ("NoName") ("Traceback")))
    ("FSC_PLOTWINDOW_Normalize" fun nil (lib "fsc_plotwindow.pro" nil "coyote") "Result = %s(range)" (nil ("Position")))
    ("Refresh" pro "FSC_PLOTWINDOW" (lib "fsc_plotwindow.pro" nil "coyote") "Obj ->[%s::]%s" (nil))
@@ -444,8 +446,10 @@
    ("LOADDATA_EVENT" pro nil (lib "loaddata.pro" nil "coyote") "%s, event" (nil))
    ("LOADDATA" fun nil (lib "loaddata.pro" nil "coyote") "Result = %s(number)" (nil ("CANCEL") ("Group_Leader") ("Images")))
    ("LogScl" fun nil (lib "logscl.pro" nil "coyote") "Result = %s(image)" (nil ("EXPONENT") ("MAX") ("MEAN") ("MIN") ("NEGATIVE") ("OMAX") ("OMIN")))
+   ("Make_Transparent_Image" fun nil (lib "make_transparent_image.pro" nil "coyote") "Result = %s(image)" (nil ("COLOR") ("FILENAME") ("SAVE_PNG") ("WSET")))
    ("Map_GSHHS_Shoreline" pro nil (lib "map_gshhs_shoreline.pro" nil "coyote") "%s, filename" (nil ("_EXTRA") ("COLOR") ("FILL") ("LAND_COLOR") ("LEVEL") ("MAP_PROJECTION") ("MINAREA") ("OUTLINE") ("WATER_COLOR")))
-   ("MinMax" pro nil (lib "minmax.pro" nil "coyote") "%s, variable" (nil ("NAN") ("TEXT")))
+   ("MaxMin" pro nil (lib "maxmin.pro" nil "coyote") "%s, variable" (nil ("NAN") ("TEXT")))
+   ("MaxWindowSize" fun nil (lib "maxwindowsize.pro" nil "coyote") "Result = %s" (nil ("MONITOR_RESOLUTION")))
    ("MPI_Axis_Widget_Events" pro nil (lib "mpi_axis.pro" nil "coyote") "%s, Event" (nil))
    ("MPI_Axis" fun nil (lib "mpi_axis.pro" nil "coyote") "Result = %s" (nil ("_Extra") ("Group_Leader") ("Only_Style") ("Only_Tick") ("Short") ("XAxis") ("YAxis")))
    ("MPI_Axis_FindTLB" fun nil (lib "mpi_axis__define.pro" nil "coyote") "Result = %s(startID)" (nil))
@@ -683,7 +687,6 @@
    ("PickColorName_Select_Color" pro nil (lib "pickcolorname.pro" nil "coyote") "%s, event" (nil))
    ("PickColorName_Buttons" pro nil (lib "pickcolorname.pro" nil "coyote") "%s, event" (nil))
    ("PickColorName" fun nil (lib "pickcolorname.pro" nil "coyote") "Result = %s(theName)" (nil ("Bottom") ("Brewer") ("Cancel") ("Columns") ("Filename") ("Group_Leader") ("Index") ("Title")))
-   ("Pickfile" fun nil (lib "pickfile.pro" nil "coyote") "Result = %s" (nil ("_REF_EXTRA") ("DATA") ("DEMO") ("HDF") ("JPEG") ("LIDAR") ("NCDF") ("PNG") ("TIFF")))
    ("PrecipMap_Annotate" fun nil (lib "precipmap.pro" nil "coyote") "Result = %s(axis, index, value)" (nil))
    ("PrecipMap" pro nil (lib "precipmap.pro" nil "coyote") "%s, filename" (nil))
    ("PrintPath" pro nil (lib "printpath.pro" nil "coyote") "%s" (nil))
@@ -708,7 +711,7 @@
    ("PSConfig" fun nil (lib "psconfig.pro" nil "coyote") "Result = %s(psObject)" (nil ("AvantGarde") ("Bits_per_Pixel") ("Bkman") ("Bold") ("BookStyle") ("Cancel") ("CMYK") ("Color") ("Courier") ("Debug") ("Decomposed") ("DefaultSetup") ("Demi") ("Directory") ("Encapsulate") ("European") ("Filename") ("FontInfo") ("FontSize") ("FontType") ("Group_Leader") ("Helvetica") ("Inches") ("Isolatin") ("Italic") ("Landscape") ("Light") ("Medium") ("Name") ("Narrow") ("NOGUI") ("Palatino") ("Preview") ("Schoolbook") ("Set_Font") ("Symbol") ("Times") ("TrueType") ("XOffset") ("XSize") ("YOffset") ("YSize") ("ZapfChancery") ("ZapfDingbats")))
    ("PSWINDOW_ASPECT" fun nil (lib "pswindow.pro" nil "coyote") "Result = %s(aspectRatio)" (nil ("MARGIN") ("WindowAspect")))
    ("PSWINDOW" fun nil (lib "pswindow.pro" nil "coyote") "Result = %s" (nil ("CM") ("Fudge") ("LANDSCAPE") ("MARGIN") ("PageSize") ("Printer") ("XFudge") ("YFudge")))
-   ("PS_END" pro nil (lib "ps_end.pro" nil "coyote") "%s" (nil ("ALLOW_TRANSPARENT") ("DENSITY") ("GIF") ("IM_OPTIONS") ("JPEG") ("PNG") ("RESIZE") ("TIFF")))
+   ("PS_END" pro nil (lib "ps_end.pro" nil "coyote") "%s" (nil ("ALLOW_TRANSPARENT") ("DENSITY") ("GIF") ("IM_OPTIONS") ("JPEG") ("NOFIX") ("PNG") ("RESIZE") ("TIFF")))
    ("PS_START" pro nil (lib "ps_start.pro" nil "coyote") "%s" (nil ("_EXTRA") ("FONT") ("GUI") ("NOMATCH") ("QUIET") ("SCALE_FACTOR") ("TT_FONT")))
    ("PWD" pro nil (lib "pwd.pro" nil "coyote") "%s" (nil))
    ("GetRandomDigits" fun "RandomNumberGenerator" (lib "randomnumbergenerator__define.pro" nil "coyote") "Result = Obj ->[%s::]%s(digits)" (nil ("BYTES")))
@@ -776,14 +779,13 @@
    ("TimeStamp" fun nil (lib "timestamp.pro" nil "coyote") "Result = %s(format)" (nil ("NO_PREFIX") ("RANDOM_DIGITS") ("UTC") ("VALID")))
    ("Transform_Volume" fun nil (lib "transform_volume.pro" nil "coyote") "Result = %s(volume)" (nil ("Buffer_Size") ("Centre_Rotation") ("Missing") ("Rotation") ("Scale") ("T3Dmat") ("Translate")))
    ("TVIMAGE_CONGRID" fun nil (lib "tvimage.pro" nil "coyote") "Result = %s(arr, x, y, z)" (nil ("Cubic") ("Half_Half") ("Interp") ("Minus_One")))
-   ("TVIMAGE_ERROR" fun nil (lib "tvimage.pro" nil "coyote") "Result = %s(theMessage)" (nil ("_Extra") ("NoName") ("Traceback")))
-   ("TVIMAGE" pro nil (lib "tvimage.pro" nil "coyote") "%s, image, x, y" (nil ("_EXTRA") ("ACOLOR") ("AXES") ("AXIS") ("AXKEYWORDS") ("BACKGROUND") ("BREWER") ("ERASE") ("HALF_HALF") ("KEEP_ASPECT_RATIO") ("MARGIN") ("MINUS_ONE") ("MULTIMARGIN") ("NOINTERPOLATION") ("NORMAL") ("OVERPLOT") ("POSITION") ("QUIET") ("SCALE") ("TV") ("XRANGE") ("YRANGE")))
+   ("TVIMAGE_PREPARE_ALPHA" fun nil (lib "tvimage.pro" nil "coyote") "Result = %s(image, position, alphaBackgroundImage)" (nil ("NOINTERP") ("TV")))
+   ("TVIMAGE" pro nil (lib "tvimage.pro" nil "coyote") "%s, image, x, y" (nil ("_EXTRA") ("ACOLOR") ("ALPHABACKGROUNDIMAGE") ("AXES") ("AXIS") ("AXKEYWORDS") ("BACKGROUND") ("BREWER") ("ERASE") ("HALF_HALF") ("KEEP_ASPECT_RATIO") ("MARGIN") ("MINUS_ONE") ("MULTIMARGIN") ("NOINTERPOLATION") ("NORMAL") ("OVERPLOT") ("POSITION") ("QUIET") ("SAVE") ("SCALE") ("TV") ("XRANGE") ("YRANGE")))
    ("TVINFO" pro nil (lib "tvinfo.pro" nil "coyote") "%s, image, position" (nil))
    ("TVREAD_ERROR_MESSAGE" fun nil (lib "tvread.pro" nil "coyote") "Result = %s(theMessage)" (nil ("_Extra") ("NoName") ("Traceback")))
    ("TVREAD" fun nil (lib "tvread.pro" nil "coyote") "Result = %s(xstart, ystart, ncols, nrows)" (nil ("_Extra") ("BMP") ("Cancel") ("Colors") ("Cube") ("Dither") ("Filename") ("GIF") ("JPEG") ("NoDialog") ("Order") ("Overwrite_Prompt") ("PICT") ("PNG") ("Quality") ("TIFF") ("True") ("TYPE") ("WID")))
    ("TVSCALE_CONGRID" fun nil (lib "tvscale.pro" nil "coyote") "Result = %s(arr, x, y, z)" (nil ("Cubic") ("Half_Half") ("Interp") ("Minus_One")))
-   ("TVSCALE_ERROR" fun nil (lib "tvscale.pro" nil "coyote") "Result = %s(theMessage)" (nil ("_Extra") ("NoName") ("Traceback")))
-   ("TVSCALE" pro nil (lib "tvscale.pro" nil "coyote") "%s, image, x, y" (nil ("_EXTRA") ("ACOLOR") ("AXES") ("AXIS") ("AXKEYWORDS") ("BACKGROUND") ("BOTTOM") ("BREWER") ("ERASE") ("HALF_HALF") ("KEEP_ASPECT_RATIO") ("MARGIN") ("MAXValue") ("MINUS_ONE") ("MINValue") ("MULTIMARGIN") ("NCOLORS") ("NOINTERPOLATION") ("NORMAL") ("OVERPLOT") ("POSITION") ("QUIET") ("SCALE") ("TOP") ("TVSCL") ("XRANGE") ("YRANGE")))
+   ("TVSCALE" pro nil (lib "tvscale.pro" nil "coyote") "%s, image, x, y" (nil ("_EXTRA") ("ACOLOR") ("AXES") ("AXIS") ("AXKEYWORDS") ("BACKGROUND") ("BOTTOM") ("BREWER") ("ERASE") ("HALF_HALF") ("KEEP_ASPECT_RATIO") ("MARGIN") ("MAXValue") ("MINUS_ONE") ("MINValue") ("MULTIMARGIN") ("NCOLORS") ("NOINTERPOLATION") ("NORMAL") ("OVERPLOT") ("POSITION") ("QUIET") ("SAVE") ("TOP") ("TVSCL") ("XRANGE") ("YRANGE")))
    ("UNDEFINE" pro nil (lib "undefine.pro" nil "coyote") "%s, var0, var1, var2, var3, var4, var5, var6, var7, var8, var9" (nil))
    ("Clamp" pro "VColorBar" (lib "vcolorbar__define.pro" nil "coyote") "Obj ->[%s::]%s, datarange" (nil))
    ("INIT" fun "VColorBar" (lib "vcolorbar__define.pro" nil "coyote") "Result = Obj ->[%s::]%s" (nil ("_Extra") ("Color") ("Major") ("Minor") ("Name") ("NColors") ("Palette") ("Position") ("Range") ("Title")))

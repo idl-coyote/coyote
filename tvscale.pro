@@ -339,6 +339,9 @@
 ;       The SAVE keyword now always establishes a data coordinate system for the image
 ;           if this keyword is set, using the values of XRANGE and YRANGE. The data 
 ;           coordinate system is coincident with the file position of the image. 11 Nov 2010. DWF.
+;       Added the WHITE keyword. 12 Nov 2010. DWF.
+;       Modified how the ERASE keyword works. Now images only erase the background when this
+;            keyword is set and !P.MULTI[0] is set to 0. 12 Nov 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -555,12 +558,10 @@ PRO TVSCALE, image, x, y, $
    SAVE=save, $
    TOP=top, $
    TVSCL=tvscl, $
+   WHITE=white, $
    XRANGE=plotxrange, $
    YRANGE=plotyrange, $
    _EXTRA=extra
-   
-   
-   
 
    ; Error handling.
     Catch, theError
@@ -595,8 +596,17 @@ PRO TVSCALE, image, x, y, $
     interp = 1.0 - Keyword_Set(nointerp)
     half_half = Keyword_Set(half_half)
     minusOne = Keyword_Set(minusOne)
+
+    ; Check the drawing colors for background and axes.
+    IF Keyword_Set(white) THEN BEGIN
+       IF N_Elements(acolor) EQ 0 THEN acolor = 'black'
+       background = 'white'
+       eraseit = 1
+    ENDIF
+    IF N_Elements(acolor) EQ 0 THEN acolor = !P.Color
     IF N_Elements(background) EQ 0 THEN background = !P.Background
-    IF Keyword_Set(eraseit) THEN BEGIN
+
+    IF Keyword_Set(eraseit) AND (!P.MULTI[0] EQ 0) THEN BEGIN
          IF (!D.Flags AND 256) NE 0 THEN BEGIN
             Device, Get_Visual_Depth=theDepth
             IF theDepth GE 24 THEN BEGIN

@@ -61,8 +61,8 @@
 ;         the contour surface.
 ;       
 ; :Keywords:
-;     axiscolor: in, optional, type=string/integer, default=Same as 'color'
-;        If this keyword is a string, the name of the axis color. By default, same as 'color'.
+;     axiscolor: in, optional, type=string/integer, default='black'
+;        If this keyword is a string, the name of the axis color. By default, 'black'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     axescolor: in, optional, type=string/integer
 ;        Provisions for bad spellers.
@@ -70,14 +70,14 @@
 ;        If this keyword is a string, the name of the background color. By default, 'white'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     c_labels: in, optional, type=integer vector
-;        A vector that specifies which contour levels to label. If used, the SKIPLABEL
+;        A vector that specifies which contour levels to label. If used, the LABEL
 ;        keyword is ignored.
 ;     cell_fill: in, optional, type=boolean, default=0
 ;        Set to indicate filled contours should be created using the "cell fill" method.
 ;        This keyword should always be set if displaying filled contours on map projections
 ;        or if missing data is present in the data you are contouring.
 ;     color: in, optional, type=string/integer, default='black'
-;        If this keyword is a string, the name of the data color. By default, 'black'.
+;        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     fill: in, optional, type=boolean, default=0
 ;        Set to indicate filled contours should be created.
@@ -86,6 +86,11 @@
 ;        irregularly gridded data, the the data is gridded for use in the contour plot
 ;        using the Triangulate and Trigrid method. The resolution of the gridded output
 ;        is set by the RESOLUTION keyword.
+;     label: in, optional, type=integer, default=1
+;        An number that tells how to label contour levels. A 0 means
+;        no contour levels are labelled. A 1 (the default) means all contour levels are
+;        labelled. A 2 means label every 2nd contour level is labelled. A 3 means every 
+;        3rd contour level is labelled, and so on.
 ;     levels: in, optional, type=any
 ;         A vector of data levels to contour. If used, NLEVELS is ignored. If missing, 
 ;         NLEVELS is used to construct N equally-spaced contour levels.
@@ -102,10 +107,6 @@
 ;        If the IRREGULAR keyword is set, this keyword specifies the X and Y resolution
 ;        in a two element integer array of the final gridded data that is sent to the 
 ;        contour plot.
-;     skiplabel: in, optional, type=integer, default=1
-;        An number that tells how many labels to skip while labelling contours. A 1 means
-;        all contour levels are labelled. A 2 indices every other contour level is labelled.
-;        A 3, every third level is labelled, and so on. Set to 0 to prevent level labelling.
 ;     xstyle: in, optional, type=integer, default=1
 ;        If unused in the program, set to 1 to force exact axis scaling.
 ;     ystyle: in, optional, type=integer, default=1
@@ -150,12 +151,12 @@ PRO FSC_Contour, data, x, y, $
     COLOR=color, $
     FILL=fill, $
     IRREGULAR=irregular, $
+    LABEL=label, $
     LEVELS=levels, $
     NLEVELS=nlevels, $
     MISSINGVALUE=missingvalue, $
     OVERPLOT=overplot, $
     RESOLUTION=resolution, $
-    SKIPLABEL=skiplabel, $
     XSTYLE=xstyle, $
     YSTYLE=ystyle, $
     _Extra=extra
@@ -193,14 +194,14 @@ PRO FSC_Contour, data, x, y, $
     
     ; Check the keywords.
     IF N_Elements(background) EQ 0 THEN background = 'white'
-    IF N_Elements(color) EQ 0 THEN color = 'black'
     IF (N_Elements(axescolor) EQ 0) AND (N_Elements(axiscolor) EQ 0) THEN BEGIN
-       axiscolor = color
+       axiscolor = 'black'
     ENDIF
     IF N_Elements(axescolor) NE 0 THEN axiscolor = axescolor
+    IF N_Elements(color) EQ 0 THEN color = axiscolor
     fill = Keyword_Set(fill)
     irregular = Keyword_Set(irregular)
-    IF N_Elements(skiplabel) EQ 0 THEN skiplabel = 1
+    IF N_Elements(label) EQ 0 THEN label = 1
     IF N_Elements(resolution) EQ 0 THEN resolution=[41,41]
     IF (N_Elements(nlevels) EQ 0) AND (N_Elements(levels) EQ 0) THEN nlevels = 6
     IF N_Elements(xstyle) EQ 0 THEN xstyle=1
@@ -241,9 +242,9 @@ PRO FSC_Contour, data, x, y, $
     ; Set up the appropriate contour labeling. Only can do if C_LABELS not passed in.
     IF N_Elements(c_labels) EQ 0 THEN BEGIN
         indices = Indgen(N_Elements(levels))
-        IF skiplabel EQ 0 THEN BEGIN
+        IF label EQ 0 THEN BEGIN
            c_labels = Replicate(0,N_Elements(levels))
-        ENDIF ELSE c_labels = Reverse((indices MOD skiplabel) EQ 0)
+        ENDIF ELSE c_labels = Reverse((indices MOD label) EQ 0)
     ENDIF
         
     ; Load the drawing colors, if needed.
@@ -254,7 +255,7 @@ PRO FSC_Contour, data, x, y, $
     IF Size(background, /TNAME) EQ 'STRING' THEN $
         background = FSC_Color(background, DECOMPOSED=0, 252)
     
-    ; Going to have to do all of this in decomposed color.
+    ; Going to have to do all of this in indexed color.
     currentState = DecomposedColor()
     Device, Decomposed=0
     

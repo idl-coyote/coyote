@@ -221,7 +221,7 @@
 ;               are ignored. Alpha channels are also ignored when this keyword
 ;               is set.
 ;      WHITE:   A shorthand way of setting the ERASE keyword to 1 and the BACKGROUND
-;               keyword to "white." Also sets the ACOLOR keyword to "black," unless
+;               keyword to "white. Also sets the ACOLOR keyword to "black," unless
 ;               it is already set to something else.
 ;               
 ;      XRANGE:  If the AXES keyword is set, this keyword is a two-element vector
@@ -410,6 +410,8 @@
 ;           if this keyword is set, using the values of XRANGE and YRANGE. The data 
 ;           coordinate system is coincident with the file position of the image. 11 Nov 2010. DWF.
 ;       Added the WHITE keyword. 12 Nov 2010. DWF.
+;       Modified how the ERASE keyword works. Now images only erase the background when this
+;            keyword is set and !P.MULTI[0] is set to 0. 12 Nov 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -810,7 +812,7 @@ PRO TVIMAGE, image, x, y, $
     ; Do you need to erase the window before image display?
     ; If so, then it depends on how you have specified the
     ; background color.
-    IF Keyword_Set(eraseit) THEN BEGIN
+    IF Keyword_Set(eraseit) AND (!P.MULTI[0] EQ 0) THEN BEGIN
          IF (!D.Flags AND 256) NE 0 THEN BEGIN
             Device, Get_Visual_Depth=theDepth
             IF theDepth GE 24 THEN BEGIN
@@ -898,7 +900,7 @@ PRO TVIMAGE, image, x, y, $
     
     ; If a window is not open, open one, otherwise in X devices you get incorrect
     ; window size information the first time you call TVIMAGE.
-    IF (!D.FLAGS AND 256) NE 0 THEN IF !D.Window EQ -1 THEN Window
+    IF (!D.FLAGS AND 256) NE 0 THEN IF (!D.Window EQ -1) THEN Window
     
     ; Check for position and overplot keywords.
     IF N_Elements(position) EQ 0 THEN BEGIN
@@ -919,6 +921,7 @@ PRO TVIMAGE, image, x, y, $
           IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
           Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
               XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]]
+              
           ; Use position coordinates to indicate position in this set of coordinates.
           xrange = !X.Window[1] - !X.Window[0]
           xstart = !X.Window[0] + position[0]*xrange

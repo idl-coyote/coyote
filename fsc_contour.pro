@@ -72,6 +72,10 @@
 ;     c_labels: in, optional, type=integer vector
 ;        A vector that specifies which contour levels to label. If used, the SKIPLABEL
 ;        keyword is ignored.
+;     cell_fill: in, optional, type=boolean, default=0
+;        Set to indicate filled contours should be created using the "cell fill" method.
+;        This keyword should always be set if displaying filled contours on map projections
+;        or if missing data is present in the data you are contouring.
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, 'black'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -131,6 +135,8 @@
 ; :History:
 ;     Change History::
 ;        Written, 11 November 2010. DWF.
+;        Restored the CELL_FILL keyword, which had been accidentally removed in
+;           the earlier version. 12 November 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -140,6 +146,7 @@ PRO FSC_Contour, data, x, y, $
     AXESCOLOR=axescolor, $
     BACKGROUND=background, $
     C_LABELS=c_labels, $
+    CELL_FILL=cell_fill, $
     COLOR=color, $
     FILL=fill, $
     IRREGULAR=irregular, $

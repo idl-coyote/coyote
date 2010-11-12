@@ -220,6 +220,9 @@
 ;               KEEP_ASPECT_RATIO, MARGIN, MINUS_ONE, MULTI, and POSITION
 ;               are ignored. Alpha channels are also ignored when this keyword
 ;               is set.
+;      WHITE:   A shorthand way of setting the ERASE keyword to 1 and the BACKGROUND
+;               keyword to "white." Also sets the ACOLOR keyword to "black," unless
+;               it is already set to something else.
 ;               
 ;      XRANGE:  If the AXES keyword is set, this keyword is a two-element vector
 ;               giving the X axis range. By default, [0, size of image in X].
@@ -406,6 +409,7 @@
 ;       The SAVE keyword now always establishes a data coordinate system for the image
 ;           if this keyword is set, using the values of XRANGE and YRANGE. The data 
 ;           coordinate system is coincident with the file position of the image. 11 Nov 2010. DWF.
+;       Added the WHITE keyword. 12 Nov 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -741,6 +745,7 @@ PRO TVIMAGE, image, x, y, $
    SAVE=save, $
    SCALE=scale, $
    TV=tv, $
+   WHITE=white, $
    XRANGE=plotxrange, $
    YRANGE=plotyrange, $
    _EXTRA=extra
@@ -788,11 +793,18 @@ PRO TVIMAGE, image, x, y, $
         AND (multi EQ 0)) THEN margin = 0.075
     
     ; Check other keywords.
-    IF N_Elements(acolor) EQ 0 THEN acolor = !P.Color
     brewer = Keyword_Set(brewer)
     interp = 1.0 - Keyword_Set(nointerp)
     half_half = Keyword_Set(half_half)
     minusOne = Keyword_Set(minusOne)
+    
+    ; Check the drawing colors for background and axes.
+    IF Keyword_Set(white) THEN BEGIN
+       IF N_Elements(acolor) EQ 0 THEN acolor = 'black'
+       background = 'white'
+       eraseit = 1
+    ENDIF
+    IF N_Elements(acolor) EQ 0 THEN acolor = !P.Color
     IF N_Elements(background) EQ 0 THEN background = !P.Background
     
     ; Do you need to erase the window before image display?

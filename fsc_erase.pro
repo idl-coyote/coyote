@@ -79,7 +79,9 @@ PRO FSC_Erase, background_color, COLOR=color
 
    IF N_Elements(background_color) EQ 0 THEN color = 'white' ELSE color = background_color
    IF N_Elements(color) EQ 0 THEN color = 'white'
+   TVLCT, rr, gg, bb, /Get
    IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)
    ERASE, Color=color
+   TVLCT, rr, gg, bb
    
 END

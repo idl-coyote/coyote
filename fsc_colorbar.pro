@@ -41,9 +41,9 @@
 ;                     FSC_COLOR, and using the keyword implies that FSC_COLOR is also in
 ;                     your !PATH. If this keyword is used, the annotation color is loaded
 ;                     *after* the color bar is displayed. The color will be represented
-;                     as theColor = FSC_COLOR(ANNOTATECOLOR, COLOR). This keyword is provide
+;                     as theColor = FSC_COLOR(ANNOTATECOLOR). This keyword is provide
 ;                     to maintain backward compatibility, but also to solve the problem of
-;                     and extra line in the color bar when this kind of syntax is used in
+;                     an extra line in the color bar when this kind of syntax is used in
 ;                     conjunction with the indexed (DEVICE, DECOMPOSED=0) model is used:
 ;
 ;                          LoadCT, 33
@@ -55,6 +55,9 @@
 ;                          LoadCT, 33
 ;                          TVImage, image
 ;                          FSC_Colorbar, AnnotateColor='firebrick', Color=255
+;                          
+;                    Set the Modification History note for 13 November 2010 for additional
+;                    information about default values.
 ;
 ;       BOTTOM:       The lowest color index of the colors to be loaded in
 ;                     the bar.
@@ -62,7 +65,9 @@
 ;       CHARSIZE:     The character size of the color bar annotations. Default is !P.Charsize.
 ;
 ;       COLOR:        The color index of the bar outline and characters. Default
-;                     is !P.Color..
+;                     is !P.Color. To display the color bar in a device indpendent
+;                     way, you should use the ANNOTATECOLOR keyword instead of this keyword.
+;                     If this keyword is a string color name, then ANNOTATECOLOR=color.
 ;
 ;       DIVISIONS:    The number of divisions to divide the bar into. There will
 ;                     be (divisions + 1) annotations. The default is 6.
@@ -206,6 +211,10 @@
 ;      19 Oct 2010. Changed the default value of NODISPLAY keyword to 1, since FSC_Color
 ;             no longer looks for system colors anyway. NODISPLAY is a depreciated keyword
 ;             and does nothing if using the latest version of FSC_Color. DWF.
+;      13 Nov 2010. Samples the upper-right hand pixel on the display if it can. It this pixel is 
+;             "white" or the current device is PostScript, sets the ANNOTATECOLOR keyword
+;             to "black" if it of the COLOR keyword is not currently set to some other color. 
+;             If the pixel is "black" then ANNOTATECOLOR is set to "white". DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -301,7 +310,6 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
     IF N_ELEMENTS(bottom) EQ 0 THEN bottom = 0B
     IF N_ELEMENTS(charsize) EQ 0 THEN charsize = !P.Charsize
     IF N_ELEMENTS(format) EQ 0 THEN format = '(I0)'
-    IF N_ELEMENTS(color) EQ 0 THEN color = !P.Color
     IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
     minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange)
     maxrange = (N_ELEMENTS(maxrange) EQ 0) ? Float(ncolors) : Float(maxrange)
@@ -428,8 +436,23 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
     ENDELSE
 
     ; Annotate the color bar.
-    IF N_Elements(annotateColor) NE 0 THEN $
-      color = FSC_Color(annotateColor, color, NODISPLAY=Keyword_Set(nodisplay))
+    IF (!D.Name EQ 'PS') AND N_Elements(annotateColor) EQ 0 THEN BEGIN
+        annotateColor = 'black'
+    ENDIF ELSE BEGIN
+        IF (!D.Window GE 0) AND ~scalablePixels THEN BEGIN
+            pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+            IF N_ELEMENTS(color) EQ 0 THEN BEGIN
+                IF Total(pixel) EQ 765 THEN annotateColor = 'black'
+                IF Total(pixel) EQ 0 THEN annotateColor = 'white'
+            ENDIF ELSE BEGIN
+                 IF Size(color, /TNAME) EQ 'STRING' THEN annotateColor = color
+            ENDELSE
+        ENDIF
+    ENDELSE
+    
+    ; Get the current colortable.
+    TVLCT, rr, gg, bb, /GET
+    IF N_Elements(annotateColor) NE 0 THEN color = FSC_Color(annotateColor)
 
     IF KEYWORD_SET(vertical) THEN BEGIN
 
@@ -490,5 +513,7 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
     !Y = bang_y
     !Z = bang_z
     !Map = bang_map
-
+    
+    ; Set the current colors back.
+    TVLCT, rr, gg, bb
 END

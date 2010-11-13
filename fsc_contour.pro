@@ -198,7 +198,7 @@ PRO FSC_Contour, data, x, y, $
        axiscolor = 'black'
     ENDIF
     IF N_Elements(axescolor) NE 0 THEN axiscolor = axescolor
-    IF N_Elements(color) EQ 0 THEN color = axiscolor
+    IF N_Elements(color) EQ 0 THEN color = 'black'
     fill = Keyword_Set(fill)
     irregular = Keyword_Set(irregular)
     IF N_Elements(label) EQ 0 THEN label = 1

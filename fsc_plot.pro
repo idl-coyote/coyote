@@ -149,7 +149,7 @@ PRO FSC_Plot, x, y, $
        axiscolor = 'black'
     ENDIF
     IF N_Elements(axescolor) NE 0 THEN axiscolor = axescolor
-    IF N_Elements(color) EQ 0 THEN color = axiscolor
+    IF N_Elements(color) EQ 0 THEN color = 'black'
     IF Keyword_Set(isotropic) THEN aspect = 1.0
     IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
         position = Aspect(aspect)

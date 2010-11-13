@@ -1,7 +1,7 @@
 ;;
 ;; IDLWAVE catalog for library coyote
 ;; Automatically Generated -- do not edit.
-;; Created by idlwave_catalog on Fri Nov 12 06:44:10 2010
+;; Created by idlwave_catalog on Sat Nov 13 12:47:15 2010
 ;;
 (setq idlwave-library-catalog-libname "coyote")
 (setq idlwave-library-catalog-routines
@@ -160,7 +160,7 @@
    ("FSC_ColorSelect" fun nil (lib "fsc_colorselect.pro" nil "coyote") "Result = %s(parent)" (nil ("_Extra") ("Brewer") ("Button_Text") ("CFont") ("Color") ("CT_Index") ("CT_NColors") ("Event_Func") ("Event_Pro") ("Frame") ("LabelAlign") ("LabelFont") ("LabelSize") ("Name") ("Scr_XSize") ("Scr_YSize") ("Style") ("Title") ("UValue") ("XSize")))
    ("Example_Event" pro nil (lib "fsc_colorselect.pro" nil "coyote") "%s, event" (nil))
    ("Example" pro nil (lib "fsc_colorselect.pro" nil "coyote") "%s" (nil))
-   ("FSC_Contour" pro nil (lib "fsc_contour.pro" nil "coyote") "%s, data, x, y" (nil ("_Extra") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("C_LABELS") ("COLOR") ("FILL") ("IRREGULAR") ("LEVELS") ("MISSINGVALUE") ("NLEVELS") ("OVERPLOT") ("RESOLUTION") ("SKIPLABEL") ("XSTYLE") ("YSTYLE")))
+   ("FSC_Contour" pro nil (lib "fsc_contour.pro" nil "coyote") "%s, data, x, y" (nil ("_Extra") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("C_LABELS") ("CELL_FILL") ("COLOR") ("FILL") ("IRREGULAR") ("LABEL") ("LEVELS") ("MISSINGVALUE") ("NLEVELS") ("OVERPLOT") ("RESOLUTION") ("XSTYLE") ("YSTYLE")))
    ("FSC_Droplist_Kill_Notify" pro nil (lib "fsc_droplist.pro" nil "coyote") "%s, droplistID" (nil))
    ("EventHandler" fun "FSC_Droplist" (lib "fsc_droplist.pro" nil "coyote") "Result = Obj ->[%s::]%s(event)" (nil))
    ("FSC_Droplist_Events" fun nil (lib "fsc_droplist.pro" nil "coyote") "Result = %s(event)" (nil))
@@ -180,6 +180,7 @@
    ("FSC_Droplist" fun nil (lib "fsc_droplist.pro" nil "coyote") "Result = %s(parent)" (nil ("_Extra") ("Title") ("Value")))
    ("Example_Events" pro nil (lib "fsc_droplist.pro" nil "coyote") "%s, event" (nil))
    ("Example" pro nil (lib "fsc_droplist.pro" nil "coyote") "%s" (nil))
+   ("FSC_Erase" pro nil (lib "fsc_erase.pro" nil "coyote") "%s, background_color" (nil ("COLOR")))
    ("FSC_Field_WidgetFont" fun nil (lib "fsc_field.pro" nil "coyote") "Result = %s" (nil ("DEFAULT")))
    ("FSC_Field_Error_Message" fun nil (lib "fsc_field.pro" nil "coyote") "Result = %s(theMessage)" (nil ("_Extra") ("NoName") ("Traceback")))
    ("GetLabelSize" fun "FSC_Field" (lib "fsc_field.pro" nil "coyote") "Result = Obj ->[%s::]%s" (nil))
@@ -271,6 +272,7 @@
    ("Example" pro nil (lib "fsc_inputfield.pro" nil "coyote") "%s" (nil))
    ("FSC_Normalize" fun nil (lib "fsc_normalize.pro" nil "coyote") "Result = %s(range)" (nil ("Position")))
    ("FSC_Pickfile" fun nil (lib "fsc_pickfile.pro" nil "coyote") "Result = %s" (nil ("_REF_EXTRA") ("DATA") ("DEMO") ("HDF") ("JPEG") ("LAST_FILE") ("LIDAR") ("NCDF") ("PNG") ("TIFF")))
+   ("FSC_Plot" pro nil (lib "fsc_plot.pro" nil "coyote") "%s, x, y" (nil ("_Extra") ("ASPECT") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("COLOR") ("ISOTROPIC") ("POSITION")))
    ("FSC_PLOTWINDOW_Error_Message" fun nil (lib "fsc_plotwindow.pro" nil "coyote") "Result = %s(theMessage)" (nil ("NoName") ("Traceback")))
    ("FSC_PLOTWINDOW_Normalize" fun nil (lib "fsc_plotwindow.pro" nil "coyote") "Result = %s(range)" (nil ("Position")))
    ("Refresh" pro "FSC_PLOTWINDOW" (lib "fsc_plotwindow.pro" nil "coyote") "Obj ->[%s::]%s" (nil))
@@ -342,6 +344,7 @@
    ("INIT" fun "FSC_PSCONFIG" (lib "fsc_psconfig__define.pro" nil "coyote") "Result = Obj ->[%s::]%s" (nil ("AvantGarde") ("Bits_per_Pixel") ("Bkman") ("Bold") ("BookStyle") ("CMYK") ("Color") ("Courier") ("Debug") ("Decomposed") ("Demi") ("Directory") ("Encapsulated") ("European") ("Filename") ("FontSize") ("FontType") ("Helvetica") ("Inches") ("Isolatin") ("Italic") ("Landscape") ("Light") ("Medium") ("Name") ("Narrow") ("Oblique") ("Palatino") ("Preview") ("Schoolbook") ("Set_Font") ("Symbol") ("Times") ("TrueType") ("XOffset") ("XSize") ("YOffset") ("YSize") ("ZapfChancery") ("ZapfDingbats")))
    ("FSC_PSCONFIG__DEFINE" pro nil (lib "fsc_psconfig__define.pro" nil "coyote") "%s" (nil))
    ("FSC_PS_SETUP__DEFINE" pro nil (lib "fsc_ps_setup__define.pro" nil "coyote") "%s" (nil))
+   ("FSC_Surf" pro nil (lib "fsc_surf.pro" nil "coyote") "%s, data, x, y" (nil ("_Extra") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("BOTTOM") ("COLOR") ("SHADED") ("SHADES") ("XSTYLE") ("YSTYLE") ("ZSTYLE")))
    ("CW_Light_Control_Intensity_Events" pro nil (lib "fsc_surface.pro" nil "coyote") "%s, event" (nil))
    ("CW_Light_Control_Events" pro nil (lib "fsc_surface.pro" nil "coyote") "%s, event" (nil))
    ("CW_Light_Control" fun nil (lib "fsc_surface.pro" nil "coyote") "Result = %s(parent, theLight)" (nil ("Color") ("Event_Pro") ("Index") ("LabelSize") ("Name") ("UValue")))
@@ -780,12 +783,12 @@
    ("Transform_Volume" fun nil (lib "transform_volume.pro" nil "coyote") "Result = %s(volume)" (nil ("Buffer_Size") ("Centre_Rotation") ("Missing") ("Rotation") ("Scale") ("T3Dmat") ("Translate")))
    ("TVIMAGE_CONGRID" fun nil (lib "tvimage.pro" nil "coyote") "Result = %s(arr, x, y, z)" (nil ("Cubic") ("Half_Half") ("Interp") ("Minus_One")))
    ("TVIMAGE_PREPARE_ALPHA" fun nil (lib "tvimage.pro" nil "coyote") "Result = %s(image, position, alphaBackgroundImage)" (nil ("NOINTERP") ("TV")))
-   ("TVIMAGE" pro nil (lib "tvimage.pro" nil "coyote") "%s, image, x, y" (nil ("_EXTRA") ("ACOLOR") ("ALPHABACKGROUNDIMAGE") ("AXES") ("AXIS") ("AXKEYWORDS") ("BACKGROUND") ("BREWER") ("ERASE") ("HALF_HALF") ("KEEP_ASPECT_RATIO") ("MARGIN") ("MINUS_ONE") ("MULTIMARGIN") ("NOINTERPOLATION") ("NORMAL") ("OVERPLOT") ("POSITION") ("QUIET") ("SAVE") ("SCALE") ("TV") ("XRANGE") ("YRANGE")))
+   ("TVIMAGE" pro nil (lib "tvimage.pro" nil "coyote") "%s, image, x, y" (nil ("_EXTRA") ("ACOLOR") ("ALPHABACKGROUNDIMAGE") ("AXES") ("AXIS") ("AXKEYWORDS") ("BACKGROUND") ("BREWER") ("ERASE") ("HALF_HALF") ("KEEP_ASPECT_RATIO") ("MARGIN") ("MINUS_ONE") ("MULTIMARGIN") ("NOINTERPOLATION") ("NORMAL") ("OVERPLOT") ("POSITION") ("QUIET") ("SAVE") ("SCALE") ("TV") ("WHITE") ("XRANGE") ("YRANGE")))
    ("TVINFO" pro nil (lib "tvinfo.pro" nil "coyote") "%s, image, position" (nil))
    ("TVREAD_ERROR_MESSAGE" fun nil (lib "tvread.pro" nil "coyote") "Result = %s(theMessage)" (nil ("_Extra") ("NoName") ("Traceback")))
    ("TVREAD" fun nil (lib "tvread.pro" nil "coyote") "Result = %s(xstart, ystart, ncols, nrows)" (nil ("_Extra") ("BMP") ("Cancel") ("Colors") ("Cube") ("Dither") ("Filename") ("GIF") ("JPEG") ("NoDialog") ("Order") ("Overwrite_Prompt") ("PICT") ("PNG") ("Quality") ("TIFF") ("True") ("TYPE") ("WID")))
    ("TVSCALE_CONGRID" fun nil (lib "tvscale.pro" nil "coyote") "Result = %s(arr, x, y, z)" (nil ("Cubic") ("Half_Half") ("Interp") ("Minus_One")))
-   ("TVSCALE" pro nil (lib "tvscale.pro" nil "coyote") "%s, image, x, y" (nil ("_EXTRA") ("ACOLOR") ("AXES") ("AXIS") ("AXKEYWORDS") ("BACKGROUND") ("BOTTOM") ("BREWER") ("ERASE") ("HALF_HALF") ("KEEP_ASPECT_RATIO") ("MARGIN") ("MAXValue") ("MINUS_ONE") ("MINValue") ("MULTIMARGIN") ("NCOLORS") ("NOINTERPOLATION") ("NORMAL") ("OVERPLOT") ("POSITION") ("QUIET") ("SAVE") ("TOP") ("TVSCL") ("XRANGE") ("YRANGE")))
+   ("TVSCALE" pro nil (lib "tvscale.pro" nil "coyote") "%s, image, x, y" (nil ("_EXTRA") ("ACOLOR") ("AXES") ("AXIS") ("AXKEYWORDS") ("BACKGROUND") ("BOTTOM") ("BREWER") ("ERASE") ("HALF_HALF") ("KEEP_ASPECT_RATIO") ("MARGIN") ("MAXValue") ("MINUS_ONE") ("MINValue") ("MULTIMARGIN") ("NCOLORS") ("NOINTERPOLATION") ("NORMAL") ("OVERPLOT") ("POSITION") ("QUIET") ("SAVE") ("TOP") ("TVSCL") ("WHITE") ("XRANGE") ("YRANGE")))
    ("UNDEFINE" pro nil (lib "undefine.pro" nil "coyote") "%s, var0, var1, var2, var3, var4, var5, var6, var7, var8, var9" (nil))
    ("Clamp" pro "VColorBar" (lib "vcolorbar__define.pro" nil "coyote") "Obj ->[%s::]%s, datarange" (nil))
    ("INIT" fun "VColorBar" (lib "vcolorbar__define.pro" nil "coyote") "Result = Obj ->[%s::]%s" (nil ("_Extra") ("Color") ("Major") ("Minor") ("Name") ("NColors") ("Palette") ("Position") ("Range") ("Title")))

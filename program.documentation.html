@@ -12,7 +12,7 @@ This page was created by the IDL library routine
 this routine, refer to the IDL Online Help Navigator 
 or type: <P>
 <PRE>     ? mk_html_help</PRE><P>at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Fri Nov 12 06:44:09 2010.<P>
+<STRONG>Last modified: </STRONG>Sat Nov 13 12:47:14 2010.<P>
  
 <HR>
  
@@ -87,13 +87,16 @@ or type: <P>
 <LI><A HREF="#FSC_COLORSELECT">FSC_COLORSELECT</A>
 <LI><A HREF="#FSC_CONTOUR">FSC_CONTOUR</A>
 <LI><A HREF="#FSC_DROPLIST">FSC_DROPLIST</A>
+<LI><A HREF="#FSC_ERASE">FSC_ERASE</A>
 <LI><A HREF="#FSC_FIELD">FSC_FIELD</A>
 <LI><A HREF="#FSC_FILESELECT">FSC_FILESELECT</A>
 <LI><A HREF="#FSC_INPUTFIELD">FSC_INPUTFIELD</A>
 <LI><A HREF="#FSC_NORMALIZE">FSC_NORMALIZE</A>
+<LI><A HREF="#FSC_PLOT">FSC_PLOT</A>
 <LI><A HREF="#FSC_PLOTWINDOW">FSC_PLOTWINDOW</A>
 <LI><A HREF="#FSC_PSCONFIG__DEFINE">FSC_PSCONFIG__DEFINE</A>
 <LI><A HREF="#FSC_PS_SETUP__DEFINE">FSC_PS_SETUP__DEFINE</A>
+<LI><A HREF="#FSC_SURF">FSC_SURF</A>
 <LI><A HREF="#FSC_SURFACE">FSC_SURFACE</A>
 <LI><A HREF="#FSC_WINDOW">FSC_WINDOW</A>
 <LI><A HREF="#GAUSSSCL">GAUSSSCL</A>
@@ -5414,9 +5417,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                      FSC_COLOR, and using the keyword implies that FSC_COLOR is also in
                      your !PATH. If this keyword is used, the annotation color is loaded
                      *after* the color bar is displayed. The color will be represented
-                     as theColor = FSC_COLOR(ANNOTATECOLOR, COLOR). This keyword is provide
+                     as theColor = FSC_COLOR(ANNOTATECOLOR). This keyword is provide
                      to maintain backward compatibility, but also to solve the problem of
-                     and extra line in the color bar when this kind of syntax is used in
+                     an extra line in the color bar when this kind of syntax is used in
                      conjunction with the indexed (DEVICE, DECOMPOSED=0) model is used:
 
                           LoadCT, 33
@@ -5428,6 +5431,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                           LoadCT, 33
                           TVImage, image
                           FSC_Colorbar, AnnotateColor='firebrick', Color=255
+                          
+                    Set the Modification History note for 13 November 2010 for additional
+                    information about default values.
 
        BOTTOM:       The lowest color index of the colors to be loaded in
                      the bar.
@@ -5435,7 +5441,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        CHARSIZE:     The character size of the color bar annotations. Default is !P.Charsize.
 
        COLOR:        The color index of the bar outline and characters. Default
-                     is !P.Color..
+                     is !P.Color. To display the color bar in a device indpendent
+                     way, you should use the ANNOTATECOLOR keyword instead of this keyword.
+                     If this keyword is a string color name, then ANNOTATECOLOR=color.
 
        DIVISIONS:    The number of divisions to divide the bar into. There will
                      be (divisions + 1) annotations. The default is 6.
@@ -5579,6 +5587,10 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
       19 Oct 2010. Changed the default value of NODISPLAY keyword to 1, since FSC_Color
              no longer looks for system colors anyway. NODISPLAY is a depreciated keyword
              and does nothing if using the latest version of FSC_Color. DWF.
+      13 Nov 2010. Samples the upper-right hand pixel on the display if it can. It this pixel is 
+             "white" or the current device is PostScript, sets the ANNOTATECOLOR keyword
+             to "black" if it of the COLOR keyword is not currently set to some other color. 
+             If the pixel is "black" then ANNOTATECOLOR is set to "white". DWF.
 </PRE><P>
 <STRONG>(See fsc_colorbar.pro)</STRONG><P>
 <HR>
@@ -5907,8 +5919,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
          the contour surface.
        
  :Keywords:
-     axiscolor: in, optional, type=string/integer, default=Same as 'color'
-        If this keyword is a string, the name of the axis color. By default, same as 'color'.
+     axiscolor: in, optional, type=string/integer, default='black'
+        If this keyword is a string, the name of the axis color. By default, 'black'.
         Otherwise, the keyword is assumed to be a color index into the current color table.
      axescolor: in, optional, type=string/integer
         Provisions for bad spellers.
@@ -5916,10 +5928,14 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         If this keyword is a string, the name of the background color. By default, 'white'.
         Otherwise, the keyword is assumed to be a color index into the current color table.
      c_labels: in, optional, type=integer vector
-        A vector that specifies which contour levels to label. If used, the SKIPLABEL
+        A vector that specifies which contour levels to label. If used, the LABEL
         keyword is ignored.
+     cell_fill: in, optional, type=boolean, default=0
+        Set to indicate filled contours should be created using the "cell fill" method.
+        This keyword should always be set if displaying filled contours on map projections
+        or if missing data is present in the data you are contouring.
      color: in, optional, type=string/integer, default='black'
-        If this keyword is a string, the name of the data color. By default, 'black'.
+        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
         Otherwise, the keyword is assumed to be a color index into the current color table.
      fill: in, optional, type=boolean, default=0
         Set to indicate filled contours should be created.
@@ -5928,6 +5944,11 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         irregularly gridded data, the the data is gridded for use in the contour plot
         using the Triangulate and Trigrid method. The resolution of the gridded output
         is set by the RESOLUTION keyword.
+     label: in, optional, type=integer, default=1
+        An number that tells how to label contour levels. A 0 means
+        no contour levels are labelled. A 1 (the default) means all contour levels are
+        labelled. A 2 means label every 2nd contour level is labelled. A 3 means every 
+        3rd contour level is labelled, and so on.
      levels: in, optional, type=any
          A vector of data levels to contour. If used, NLEVELS is ignored. If missing, 
          NLEVELS is used to construct N equally-spaced contour levels.
@@ -5944,10 +5965,6 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         If the IRREGULAR keyword is set, this keyword specifies the X and Y resolution
         in a two element integer array of the final gridded data that is sent to the 
         contour plot.
-     skiplabel: in, optional, type=integer, default=1
-        An number that tells how many labels to skip while labelling contours. A 1 means
-        all contour levels are labelled. A 2 indices every other contour level is labelled.
-        A 3, every third level is labelled, and so on. Set to 0 to prevent level labelling.
      xstyle: in, optional, type=integer, default=1
         If unused in the program, set to 1 to force exact axis scaling.
      ystyle: in, optional, type=integer, default=1
@@ -5977,6 +5994,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  :History:
      Change History::
         Written, 11 November 2010. DWF.
+        Restored the CELL_FILL keyword, which had been accidentally removed in
+           the earlier version. 12 November 2010. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -5987,7 +6006,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A NAME="FSC_DROPLIST">
 <H2>FSC_DROPLIST</H2></A>
 <A HREF="#FSC_CONTOUR">[Previous Routine]</A>
-<A HREF="#FSC_FIELD">[Next Routine]</A>
+<A HREF="#FSC_ERASE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -6149,9 +6168,57 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See fsc_droplist.pro)</STRONG><P>
 <HR>
  
+<A NAME="FSC_ERASE">
+<H2>FSC_ERASE</H2></A>
+<A HREF="#FSC_DROPLIST">[Previous Routine]</A>
+<A HREF="#FSC_FIELD">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   Provides a device-independent and color-model-independent way to erase a graphics
+   window with a particular color.
+
+ :Categories:
+    Graphics
+    
+ :Params:
+    background_color: in, optional, type=string/integer/long, default='white'
+         The color to use in erasing the graphics window. Default is "white."
+         Color names are those used with FSC_Color.
+       
+ :Keywords:
+     color: in, optional, type=string/integer/long, default='white'
+         An alternative way to specify the color to use in erasing the graphics window.
+         Color names are those used with FSC_Color.
+          
+ :Examples:
+    Used like the IDL Erase command::
+       IDL> FSC_Erase
+       IDL> FSC_Erase, 'gray'
+       IDL> FSC_Erase, COLOR='charcoal'
+       
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ :History:
+     Change History::
+        Written, 12 November 2010. DWF.
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See fsc_erase.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="FSC_FIELD">
 <H2>FSC_FIELD</H2></A>
-<A HREF="#FSC_DROPLIST">[Previous Routine]</A>
+<A HREF="#FSC_ERASE">[Previous Routine]</A>
 <A HREF="#FSC_FILESELECT">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -7036,7 +7103,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A NAME="FSC_NORMALIZE">
 <H2>FSC_NORMALIZE</H2></A>
 <A HREF="#FSC_INPUTFIELD">[Previous Routine]</A>
-<A HREF="#FSC_PLOTWINDOW">[Next Routine]</A>
+<A HREF="#FSC_PLOT">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -7105,9 +7172,81 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See fsc_normalize.pro)</STRONG><P>
 <HR>
  
+<A NAME="FSC_PLOT">
+<H2>FSC_PLOT</H2></A>
+<A HREF="#FSC_NORMALIZE">[Previous Routine]</A>
+<A HREF="#FSC_PLOTWINDOW">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   The purpose of FSC_Plot is to create a wrapper for the traditional IDL graphics
+   command, Plot. The primary purpose of this is to create plot commands that work
+   and look identically both on the display and in PostScript files.
+
+ :Categories:
+    Graphics
+    
+ :Params:
+    x: in, required, type=any
+         If X is provided without Y, a vector representing the dependent values to be 
+         plotted If both X and Y are provided, X is the independent parameter and 
+         Y is the dependent parameter to be plotted.
+    y: in, optional, type=any
+         A vector representing the dependent values to be plotted.
+       
+ :Keywords:
+     aspect: in, optional, type=float, default=none
+        Set this keyword to a floating point ratio that represents the aspect ratio 
+        (ysize/xsize) of the resulting plot. The plot position may change as a result
+        of setting this keyword. Note that ASPECT cannot be used when plotting with
+        !P.MULTI.
+     axiscolor: in, optional, type=string/integer, default='black'
+        If this keyword is a string, the name of the axis color. By default, 'black'.
+        Otherwise, the keyword is assumed to be a color index into the current color table.
+     axescolor: in, optional, type=string/integer
+        Provisions for bad spellers.
+     background: in, optional, type=string/integer, default='white'
+        If this keyword is a string, the name of the background color. By default, 'white'.
+        Otherwise, the keyword is assumed to be a color index into the current color table.
+     color: in, optional, type=string/integer, default='black'
+        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
+        Otherwise, the keyword is assumed to be a color index into the current color table.
+     isotropic: in, optional, type=boolean, default=0
+         A short-hand way of setting the ASPECT keyword to 1.
+     position: in, optional, type=vector
+         The usual four-element position vector for the Plot comamnd. Only monitored and
+         possibly set if the ASPECT keyword is used.
+     _extra: in, optional, type=any
+        Any keyword appropriate for the IDL Plot command is allowed in the program.
+
+ :Examples:
+    Use as you would use the IDL PLOT command::
+       FSC_Plot, Findgen(11)
+       FSC_Plot, Findgen(11), Aspect=1.0
+       FSC_Plot, Findgen(11), Color='olive', AxisColor='red', Thick=2
+       
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ :History:
+     Change History::
+        Written, 12 November 2010. DWF.
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See fsc_plot.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="FSC_PLOTWINDOW">
 <H2>FSC_PLOTWINDOW</H2></A>
-<A HREF="#FSC_NORMALIZE">[Previous Routine]</A>
+<A HREF="#FSC_PLOT">[Previous Routine]</A>
 <A HREF="#FSC_PSCONFIG__DEFINE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -7350,7 +7489,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A NAME="FSC_PS_SETUP__DEFINE">
 <H2>FSC_PS_SETUP__DEFINE</H2></A>
 <A HREF="#FSC_PSCONFIG__DEFINE">[Previous Routine]</A>
-<A HREF="#FSC_SURFACE">[Next Routine]</A>
+<A HREF="#FSC_SURF">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -7394,9 +7533,96 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See fsc_ps_setup__define.pro)</STRONG><P>
 <HR>
  
+<A NAME="FSC_SURF">
+<H2>FSC_SURF</H2></A>
+<A HREF="#FSC_PS_SETUP__DEFINE">[Previous Routine]</A>
+<A HREF="#FSC_SURFACE">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   The purpose of FSC_Surf is to create a wrapper for the traditional IDL graphics
+   commands, Surface and Shade_Surf. The primary purpose of this is to create surface 
+   commands that work and look identically both on the display and in PostScript files.
+
+ :Categories:
+    Graphics
+    
+ :Params:
+    data: in, required, type=any
+         A two-dimensional array of data to be displayed.
+    x: in, optional, type=any
+         A vector or two-dimensional array specifying the X coordinates of the
+         surface grid.
+    y: in, optional, type=any
+         A vector or two-dimensional array specifying the Y coordinates of the
+         surface grid.
+       
+ :Keywords:
+     axiscolor: in, optional, type=string/integer, default='black'
+        If this keyword is a string, the name of the axis color. By default, 'black'.
+        Otherwise, the keyword is assumed to be a color index into the current color table.
+     axescolor: in, hidden, type=string/integer
+        Provisions for bad spellers.
+     background: in, optional, type=string/integer, default='white'
+        If this keyword is a string, the name of the background color. By default, 'white'.
+        Otherwise, the keyword is assumed to be a color index into the current color table.
+     bottom: in, optional, type=string/integer, default='black'
+        If this keyword is a string, the name of the bottom color. By default, same as COLOR.
+        Otherwise, the keyword is assumed to be a color index into the current color table.
+     color: in, optional, type=string/integer, default='black'
+        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
+        Otherwise, the keyword is assumed to be a color index into the current color table.
+     shaded: in, optional, type=boolean, default=0
+        Set this keyword if you wish to display a shaded surface. To display shaded surfaces
+        in a device-independent way, the shading values are confined to indices 0 to 253 with
+        SET_SHADING, and the background color is placed in color index 254. The color table vectors
+        are reduced to 254 elements when this happens. This all happens behind the stage, 
+        and the original color table is restore upon exit. Because I can't tell how many values
+        SET_SHADING is using on entering the program, I just set it back to its default 256 values
+        on exiting the program.
+     shades: in, optional, type=byte
+        Set this keyword to a byte scaled 2D array of the same size as data to shade the surface
+        with these color indices.
+     xstyle: in, hidden
+         The normal XSTYLE keyword.
+     ystyle: in, hidden
+         The normal YSTYLE keyword.
+     zstyle: in, hidden
+         The normal ZSTYLE keyword.
+     _extra: in, optional, type=any
+        Any keyword appropriate for the IDL Plot command is allowed in the program.
+
+ :Examples:
+    Use as you would use the IDL SURFACE of SHADE_SURF command::
+       data = Dist(200)
+       LoadCT, 33
+       FSC_Surf, data
+       FSC_Surf, data, Shades=BytScl(data)
+       FSC_Surf, data, /Shaded
+       FSC_Surf, data, /Shaded, Shades=BytScl(data) 
+       
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ :History:
+     Change History::
+        Written, 13 November 2010. DWF.
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See fsc_surf.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="FSC_SURFACE">
 <H2>FSC_SURFACE</H2></A>
-<A HREF="#FSC_PS_SETUP__DEFINE">[Previous Routine]</A>
+<A HREF="#FSC_SURF">[Previous Routine]</A>
 <A HREF="#FSC_WINDOW">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -18095,6 +18321,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                KEEP_ASPECT_RATIO, MARGIN, MINUS_ONE, MULTI, and POSITION
                are ignored. Alpha channels are also ignored when this keyword
                is set.
+      WHITE:   A shorthand way of setting the ERASE keyword to 1 and the BACKGROUND
+               keyword to "white. Also sets the ACOLOR keyword to "black," unless
+               it is already set to something else.
                
       XRANGE:  If the AXES keyword is set, this keyword is a two-element vector
                giving the X axis range. By default, [0, size of image in X].
@@ -18281,194 +18510,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        The SAVE keyword now always establishes a data coordinate system for the image
            if this keyword is set, using the values of XRANGE and YRANGE. The data 
            coordinate system is coincident with the file position of the image. 11 Nov 2010. DWF.
-;-
-******************************************************************************************;
-  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
-  All rights reserved.                                                                    ;
-                                                                                          ;
-  Redistribution and use in source and binary forms, with or without                      ;
-  modification, are permitted provided that the following conditions are met:             ;
-                                                                                          ;
-      * Redistributions of source code must retain the above copyright                    ;
-        notice, this list of conditions and the following disclaimer.                     ;
-      * Redistributions in binary form must reproduce the above copyright                 ;
-        notice, this list of conditions and the following disclaimer in the               ;
-        documentation and/or other materials provided with the distribution.              ;
-      * Neither the name of Fanning Software Consulting, Inc. nor the names of its        ;
-        contributors may be used to endorse or promote products derived from this         ;
-        software without specific prior written permission.                               ;
-                                                                                          ;
-  THIS SOFTWARE IS PROVIDED BY FANNING SOFTWARE CONSULTING, INC. ''AS IS'' AND ANY        ;
-  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES    ;
-  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT     ;
-  SHALL FANNING SOFTWARE CONSULTING, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,             ;
-  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED    ;
-  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;         ;
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND             ;
-  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
-  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
-******************************************************************************************;;
-
- NAME:
-  TVIMAGE_CONGRID
-
- PURPOSE:
-       Shrink or expand the size of an array by an arbitrary amount.
-       This IDL procedure simulates the action of the VAX/VMS
-       CONGRID/CONGRIDI function.
-
-  This function is similar to "REBIN" in that it can resize a
-       one, two, or three dimensional array.   "REBIN", however,
-       requires that the new array size must be an integer multiple
-       of the original size.   CONGRID will resize an array to any
-       arbitrary size (REBIN is somewhat faster, however).
-       REBIN averages multiple points when shrinking an array,
-       while CONGRID just resamples the array.
-
- CATEGORY:
-       Array Manipulation.
-
- CALLING SEQUENCE:
-  array = TVIMAGE_CONGRID(array, x, y, z)
-
- INPUTS:
-       array:  A 1, 2, or 3 dimensional array to resize.
-               Data Type : Any type except string or structure.
-
-       x:      The new X dimension of the resized array.
-               Data Type : Int or Long (greater than or equal to 2).
-
- OPTIONAL INPUTS:
-       y:      The new Y dimension of the resized array.   If the original
-               array has only 1 dimension then y is ignored.   If the
-               original array has 2 or 3 dimensions then y MUST be present.
-
-       z:      The new Z dimension of the resized array.   If the original
-               array has only 1 or 2 dimensions then z is ignored.   If the
-               original array has 3 dimensions then z MUST be present.
-
- KEYWORD PARAMETERS:
-       INTERP: If set, causes linear interpolation to be used.
-               Otherwise, the nearest-neighbor method is used.
-
-       CUBIC:  If set, uses "Cubic convolution" interpolation.  A more
-               accurate, but more time-consuming, form of interpolation.
-               CUBIC has no effect when used with 3 dimensional arrays.
-
-       MINUS_ONE:
-               If set, will prevent CONGRID from extrapolating one row or
-               column beyond the bounds of the input array.   For example,
-               If the input array has the dimensions (i, j) and the
-               output array has the dimensions (x, y), then by
-               default the array is resampled by a factor of (i/x)
-               in the X direction and (j/y) in the Y direction.
-               If MINUS_ONE is present (AND IS NON-ZERO) then the array
-               will be resampled by the factors (i-1)/(x-1) and
-               (j-1)/(y-1).
-
-       HALF_HALF:
-               If set, will tell CONGRID to extrapolate a *half* row
-               and column on either side, rather than the default of
-               one full row/column at the ends of the array.  If you
-               are interpolating images with few rows, then the
-               output will be more consistent with this technique.
-               This keyword is intended as a replacement for
-               MINUS_ONE, and both keywords probably should not be
-               used in the same call to CONGRID.
-
- OUTPUTS:
-  The returned array has the same number of dimensions as the original
-       array and is of the same data type.   The returned array will have
-       the dimensions (x), (x, y), or (x, y, z) depending on how many
-       dimensions the input array had.
-
- PROCEDURE:
-       IF the input array has three dimensions, or if INTERP is set,
-       then the IDL interpolate function is used to interpolate the
-       data values.
-       If the input array has two dimensions, and INTERP is NOT set,
-       then the IDL POLY_2D function is used for nearest neighbor sampling.
-       If the input array has one dimension, and INTERP is NOT set,
-       then nearest neighbor sampling is used.
-
- EXAMPLE:
-       ; vol is a 3-D array with the dimensions (80, 100, 57)
-       ; Resize vol to be a (90, 90, 80) array
-       vol = TVIMAGE_CONGRID(vol, 90, 90, 80)
-
- MODIFICATION HISTORY:
-       DMS, Sept. 1988.
-       DMS, Added the MINUS_ONE keyword, Sept. 1992.
-  Daniel Carr. Re-wrote to handle one and three dimensional arrays
-                    using INTERPOLATE function.
-  DMS, RSI, Nov, 1993.  Added CUBIC keyword.
-       Craig Markwardt, Dec, 1997.  Added halfhalf keyword to
-                        more evenly distribute "dead" pixel row
-       Use uniformly spaced grid points for half_half W. Landsman   Feb. 2000
-              (and slightly modified by C. Markwardt 14 Feb 2000)
-  DWF, FSC, 22 Apr 2007. Modified the program so that 3D arrays use nearest-neighbor
-       interpolation unless the INTERP keyword is set.
-  DWF, FSC, 22 Apr 2007. Function renamed from CMCONGRID to TVIMAGE_CONGRID on
-       recommendation of Craig Markwardt as he wants no part of this. :-)
-
-
-UNCTION TVIMAGE_CONGRID, arr, x, y, z, Interp=int, Minus_One=m1, Cubic = cubic, $
-                   Half_Half=hh
-
-   ON_ERROR, 2    ;Return to caller if error
-   s = Size(arr)
-   
-   IF ((s[0] EQ 0) OR (s[0] GT 3)) THEN $
-      Message, 'Array must have 1, 2, or 3 dimensions.'
-   
-   ;  Supply defaults = no interpolate, and no minus_one.
-   if n_elements(int) le 0 then int = 0 else int = keyword_set(int)
-   if n_elements(m1) le 0 then m1 = 0 else m1 = keyword_set(m1)
-   
-   ; Compute offsets pixel offsets for half_half
-   halfx = 0.0 & halfy = 0.0 & halfz = 0.0
-   if keyword_set(hh) then begin
-       if s[0] GE 1 then halfx = -0.5 + (float(s[1])/x)
-       if s[0] GE 2 then halfy = -0.5 + (float(s[2])/y)
-       if s[0] GE 3 then halfz = -0.5 + (float(s[3])/z)
-   endif
-   cub = KEYWORD_SET(cubic)
-   if cub THEN int = 1  ;Cubic implies interpolate
-   
-   
-   CASE s[0] OF
-      1: BEGIN          ; *** ONE DIMENSIONAL ARRAY
-      srx = float(s[1] - m1)/(x-m1) * findgen(x) + halfx
-         IF int THEN $
-            RETURN, INTERPOLATE(arr, srx, CUBIC = cub) ELSE $
-            RETURN, arr(ROUND(srx))
-      ENDCASE
-      2: BEGIN ; *** TWO DIMENSIONAL ARRAY
-      IF int THEN BEGIN
-        srx = float(s[1] - m1) / (x-m1) * findgen(x) + halfx
-        sry = float(s[2] - m1) / (y-m1) * findgen(y) + halfy
-             RETURN, INTERPOLATE(arr, srx, sry, /GRID, CUBIC=cub)
-      ENDIF ELSE $
-        RETURN, POLY_2D(arr, $
-         [[0,0],[(s[1]-m1)/float(x-m1),0]], $ ;Use poly_2d
-         [[0,(s[2]-m1)/float(y-m1)],[0,0]],int,x,y)
-   
-      ENDCASE
-      3: BEGIN ; *** THREE DIMENSIONAL ARRAY
-      srx = float(s[1] - m1) / (x-m1) * findgen(x) + halfx
-      sry = float(s[2] - m1) / (y-m1) * findgen(y) + halfy
-      srz = float(s[3] - m1) / (z-m1) * findgen(z) + halfz
-      IF int THEN BEGIN
-         RETURN, interpolate(arr, srx, sry, srz, /grid)
-      ENDIF ELSE BEGIN
-         RETURN, interpolate(arr, round(srx), round(sry), round(srz), /grid)
-      ENDELSE
-      ENDCASE
-   ENDCASE
-   
-   RETURN, arr_r
-ND
+       Added the WHITE keyword. 12 Nov 2010. DWF.
+       Modified how the ERASE keyword works. Now images only erase the background when this
+            keyword is set and !P.MULTI[0] is set to 0. 12 Nov 2010. DWF.
 </PRE><P>
 <STRONG>(See tvimage.pro)</STRONG><P>
 <HR>
@@ -19066,6 +19110,9 @@ ND
        The SAVE keyword now always establishes a data coordinate system for the image
            if this keyword is set, using the values of XRANGE and YRANGE. The data 
            coordinate system is coincident with the file position of the image. 11 Nov 2010. DWF.
+       Added the WHITE keyword. 12 Nov 2010. DWF.
+       Modified how the ERASE keyword works. Now images only erase the background when this
+            keyword is set and !P.MULTI[0] is set to 0. 12 Nov 2010. DWF.
 </PRE><P>
 <STRONG>(See tvscale.pro)</STRONG><P>
 <HR>

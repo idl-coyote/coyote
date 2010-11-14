@@ -67,9 +67,18 @@
 ;     bottom: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the bottom color. By default, same as COLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     charsize: in, optional, type=float
+;        The character size of the surface annotation. If the current graphics device is 
+;        PostScript, and this keyword is undefined, and the font keyword is set to 1, then
+;        the character size is set to 2.0 to produce "normal" true-type characters.
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     font: in, optional, type=integer, default=-1
+;        The type of font desired. If undefined, and the current graphics device is PostScript,
+;        the FONT keyword will be set to 1, indicating true-type fonts. The FONT keyword must
+;        be set to -1 (Hershey fonts) or 1 (true-type fonts) for surface annotations to be
+;        rotated correctly in PostScript output.
 ;     shaded: in, optional, type=boolean, default=0
 ;        Set this keyword if you wish to display a shaded surface. To display shaded surfaces
 ;        in a device-independent way, the shading values are confined to indices 0 to 253 with
@@ -81,6 +90,8 @@
 ;     shades: in, optional, type=byte
 ;        Set this keyword to a byte scaled 2D array of the same size as data to shade the surface
 ;        with these color indices.
+;     title: in, optional, type=string
+;        The title of the plot. It will be written "flat to the screen", rather than rotated.
 ;     xstyle: in, hidden
 ;         The normal XSTYLE keyword.
 ;     ystyle: in, hidden
@@ -120,9 +131,12 @@ PRO FSC_Surf, data, x, y, $
     AXESCOLOR=axescolor, $
     BACKGROUND=background, $
     BOTTOM=bottom, $
+    CHARSIZE=charsize, $
     COLOR=color, $
+    FONT=font, $
     SHADED=shaded, $
     SHADES=shades, $
+    TITLE=title, $
     XSTYLE=xstyle, $
     YSTYLE=ystyle, $
     ZSTYLE=zstyle, $
@@ -139,7 +153,7 @@ PRO FSC_Surf, data, x, y, $
     
     ; Check parameters.
     IF N_Elements(data) EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_Surf, data, x, y'
+        Print, 'USE SYNTAX: FSC_Surf, data, x, y, [SHADED=1]'
         RETURN
     ENDIF
     ndims = Size(data, /N_DIMENSIONS)
@@ -159,6 +173,10 @@ PRO FSC_Surf, data, x, y, $
     IF N_Elements(axescolor) NE 0 THEN axiscolor = axescolor
     IF N_Elements(color) EQ 0 THEN color = 'black'
     IF N_Elements(bottom) EQ 0 THEN bottom = color
+    IF N_Elements(font) EQ 0 THEN IF (!D.Name EQ 'PS') THEN font = 1 ELSE font = !P.font
+    IF N_Elements(charsize) EQ 0 THEN BEGIN
+        IF (!P.Charsize EQ 0) AND ((font EQ 1) OR (!P.FONT EQ 1)) THEN charsize = 2.0
+    END
     IF N_Elements(xstyle) EQ 0 THEN xstyle = 0
     IF N_Elements(ystyle) EQ 0 THEN ystyle = 0
     IF N_Elements(zstyle) EQ 0 THEN zstyle = 0
@@ -205,10 +223,41 @@ PRO FSC_Surf, data, x, y, $
     ; Going to draw the axes in decomposed color if we can.
     IF currentState THEN Device, Decomposed=1
     
+    bangx = !X
+    bangy = !Y
+    bangz = !Z
+    bangp = !P
+
     ; Draw the surface axes.
     Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
-        /NODATA, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, _STRICT_EXTRA=extra
+        /NODATA, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
+        FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra
         
+    ; Draw the title, if you have one.
+    IF N_Elements(title) NE 0 THEN BEGIN
+       IF (!P.Charsize EQ 0) AND (N_Elements(charsize) EQ 0) THEN BEGIN
+            titleSize = 1.25 
+       ENDIF ELSE BEGIN
+           IF (!P.Charsize NE 0) THEN titleSize = !P.Charsize * 1.25
+           IF (N_Elements(charsize) NE 0) THEN titleSize = charsize * 1.25
+       ENDELSE
+       xloc = (!X.Window[1] - !X.Window[0]) / 2.0 + !X.Window[0]
+       yloc = !Y.Window[1] + 0.005
+       XYOutS, xloc, yloc, /NORMAL, ALIGNMENT=0.5, CHARSIZE=titleSize, $
+            title, FONT=font, COLOR=axiscolor
+    ENDIF
+
+    ; Storing these system variable is *required* to make !P.MULTI work correct.
+    ; Do not delete!
+    newx = !X
+    newy = !y
+    newz = !Z
+    newP = !P
+    !X = bangx
+    !Y = bangy
+    !Z = bangz
+    !P = bangp
+    
     ; Turn the axes off to draw the surface itself. Start by making sure bit 4 in
     ; the [XYZ]Style bits are turned on.
     IF BitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
@@ -257,7 +306,22 @@ PRO FSC_Surf, data, x, y, $
         ; colors in it.
         IF currentState THEN Device, Decomposed=1 ELSE TVLCT, rl, gl, bl
         Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
-            /NODATA, /NOERASE, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, _STRICT_EXTRA=extra
+            /NODATA, /NOERASE, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
+            FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra
+            
+        ; Have to repair the title, too.
+        IF N_Elements(title) NE 0 THEN BEGIN
+           IF (!P.Charsize EQ 0) AND (N_Elements(charsize) EQ 0) THEN BEGIN
+                titleSize = 1.25 
+           ENDIF ELSE BEGIN
+               IF (!P.Charsize NE 0) THEN titleSize = !P.Charsize * 1.25
+               IF (N_Elements(charsize) NE 0) THEN titleSize = charsize * 1.25
+           ENDELSE
+           xloc = (!X.Window[1] - !X.Window[0]) / 2.0 + !X.Window[0]
+           yloc = !Y.Window[1] + 0.005
+           XYOutS, xloc, yloc, /NORMAL, ALIGNMENT=0.5, CHARSIZE=titleSize, $
+                title, FONT=font, COLOR=axiscolor
+        ENDIF
             
         ; Shading parameters are "sticky", but I can't tell what they
         ; were when I came into the program. Here is just set them back
@@ -272,12 +336,14 @@ PRO FSC_Surf, data, x, y, $
             Device, Decomposed=0
             TVLCT, rr, gg, bb
             Surface, data, x, y, /NOERASE, SHADES=shades, $
-                XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, _STRICT_EXTRA=extra        
+                XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
+                FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra        
         ENDIF ELSE BEGIN
             IF currentState THEN Device, Decomposed=1 ELSE TVLCT, rl, gl, bl
             Surface, data, x, y, /NOERASE, COLOR=color, BOTTOM=bottom, $
                 BACKGROUND=background, SHADES=shades, $
-                XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, _STRICT_EXTRA=extra
+                XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
+                FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra
         ENDELSE
         
     ENDELSE
@@ -288,5 +354,11 @@ PRO FSC_Surf, data, x, y, $
     ; Restore the original color table.
     TVLCT, rr, gg, bb
     
+    ; Update the system variables.
+    !X = newx 
+    !y = newy 
+    !Z = newz 
+    !P = newP
+
 END
     

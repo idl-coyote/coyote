@@ -33,6 +33,9 @@
 ;       PS_END
 ;
 ; KEYWORD PARAMETERS FOR PS_START:
+; 
+;       CHARSIZE:     If this keyword is set, the !P.Charsize variable is set to this
+;                     value until PS_END is called.
 ;
 ;       FONT:         Set this to the type of font you want. A -1 selects Hershey 
 ;                     fonts, a 0 selects hardware fonts (Helvetica, normally), and
@@ -135,6 +138,7 @@
 ;       Moved PS_END to its own file to allow the IDLExBr_Assistant to work properly. 7 April 2009. DWF.
 ;       Modified to allow PostScript page type to be stored for future processing with FixPS. 9 August 2009. DWF.
 ;       Added NoFix keyword to PS_END calls to repair previous, but unused set-ups. 1 Nov 2010. DWF.
+;       Added Charsize keyword to PS_START. 14 Nov 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -165,6 +169,7 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 PRO PS_START, $
+    CHARSIZE=charsize, $
     FONT=font , $
     GUI=gui, $
     NOMATCH=nomatch, $
@@ -202,7 +207,13 @@ PRO PS_START, $
    ; Change any parameters you feel like changing.
    IF ps_struct.p.thick EQ 0 THEN !P.Thick = 2
    IF ps_struct.p.charthick EQ 0 THEN !P.Charthick = 2
-   IF ps_struct.p.charsize EQ 0 THEN !P.Charsize = (!Version.OS_Family EQ 'Windows') ? 1.25 : 1.5
+   IF ps_struct.p.charsize EQ 0 THEN BEGIN
+        IF N_Elements(charsize) EQ 0 THEN BEGIN
+             !P.Charsize = (!Version.OS_Family EQ 'Windows') ? 1.25 : 1.5
+        ENDIF ELSE !P.Charsize = charsize
+   ENDIF ELSE BEGIN
+        IF N_Elements(charsize) NE 0 THEN !P.Charsize = charsize
+   ENDELSE
    IF ps_struct.x.thick EQ 0 THEN !X.Thick = 2
    IF ps_struct.y.thick EQ 0 THEN !Y.Thick = 2
    IF ps_struct.z.thick EQ 0 THEN !Z.Thick = 2

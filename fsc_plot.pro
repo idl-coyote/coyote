@@ -68,10 +68,14 @@
 ;        If this keyword is a string, the name of the background color. By default, 'white'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     color: in, optional, type=string/integer, default='black'
-;        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
-;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;        If this keyword is a string, the name of the data color. By default, 'black'.
+;        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
+;        to be a color index into the current color table.
 ;     isotropic: in, optional, type=boolean, default=0
 ;         A short-hand way of setting the ASPECT keyword to 1.
+;     overplot: in, optional, type=boolean, default=0
+;         Set this keyword if you wish to overplot data on an already exisiting set of
+;         axes. It is like calling the IDL OPLOT command.
 ;     position: in, optional, type=vector
 ;         The usual four-element position vector for the Plot comamnd. Only monitored and
 ;         possibly set if the ASPECT keyword is used.
@@ -107,6 +111,7 @@ PRO FSC_Plot, x, y, $
     BACKGROUND=background, $
     COLOR=color, $
     ISOTROPIC=isotropic, $
+    OVERPLOT=overplot, $
     POSITION=position, $
     _Extra=extra
     
@@ -121,7 +126,7 @@ PRO FSC_Plot, x, y, $
     
     ; Check parameters.
     IF N_Params() EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: Plot, x, y'
+        Print, 'USE SYNTAX: FSC_Plot, x, y'
         RETURN
     ENDIF
     
@@ -167,10 +172,14 @@ PRO FSC_Plot, x, y, $
     currentState = DecomposedColor()
     Device, Decomposed=0
     
-    ; Draw the plot axes.
-    Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, $
-        POSITION=position, /NODATA, _EXTRA=extra
-    OPLOT, indep, dep, COLOR=color, _STRICT_EXTRA=extra
+    ; Draw the plot.
+    IF Keyword_Set(overplot) THEN BEGIN
+       OPLOT, indep, dep, COLOR=color, _STRICT_EXTRA=extra
+    ENDIF ELSE BEGIN
+        Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, $
+            POSITION=position, /NODATA, _STRICT_EXTRA=extra
+        OPLOT, indep, dep, COLOR=color, _EXTRA=extra
+    ENDELSE
          
     ; Restore the decomposed color state if you can.
     IF currentState THEN Device, Decomposed=1

@@ -145,6 +145,7 @@
 ;           to be displayed right-side up in PostScript viewers. 8 August 2009. DWF.
 ;       Fixed a problem in not checking the GIF keyword properly. 4 December 2009. DWF.
 ;       Added NOFIX keyword to the program. 1 November 2010. DWF.
+;       Added better handing of errors coming from FIXPS after update to FIXPS. 15 November 2010. DWF.
 ;- 
 ;
 ;******************************************************************************************;
@@ -196,7 +197,10 @@ PRO PS_END, $
    ; If the file is in landscape mode, then fix it so that the plot
    ; is right-side up.
    IF ps_struct.landscape THEN BEGIN
-        IF ~Keyword_Set(nofix) THEN FixPS, ps_struct.filename, PAGETYPE=ps_struct.pagetype
+        IF ~Keyword_Set(nofix) THEN BEGIN
+            FixPS, ps_struct.filename, PAGETYPE=ps_struct.pagetype, SUCCESS=success, QUIET=1
+            IF success EQ 0 THEN Print, 'Encountered problem fixing landscape PostScript file. Proceeding...'
+        ENDIF
    ENDIF
    
    ; Need to convert with ImageMagick?

@@ -1,7 +1,7 @@
 ;;
 ;; IDLWAVE catalog for library coyote
 ;; Automatically Generated -- do not edit.
-;; Created by idlwave_catalog on Sat Nov 13 12:47:15 2010
+;; Created by idlwave_catalog on Mon Nov 15 08:18:24 2010
 ;;
 (setq idlwave-library-catalog-libname "coyote")
 (setq idlwave-library-catalog-routines
@@ -120,7 +120,7 @@
    ("Find_Boundary" fun nil (lib "find_boundary.pro" nil "coyote") "Result = %s(indices)" (nil ("AREA") ("CENTER") ("PERIM_AREA") ("PERIMETER") ("SCALE") ("XSIZE") ("YSIZE")))
    ("Find_Resource_File" fun nil (lib "find_resource_file.pro" nil "coyote") "Result = %s(filename)" (nil ("SUCCESS") ("VERBOSE")))
    ("Fit_Ellipse" fun nil (lib "fit_ellipse.pro" nil "coyote") "Result = %s(indices)" (nil ("AXES") ("CENTER") ("NPOINTS") ("ORIENTATION") ("SCALE") ("SEMIAXES") ("XSIZE") ("YSIZE")))
-   ("FIXPS" pro nil (lib "fixps.pro" nil "coyote") "%s, in_filename, out_filename" (nil ("A4") ("LEDGER") ("LEGAL") ("LETTER") ("PAGETYPE")))
+   ("FIXPS" pro nil (lib "fixps.pro" nil "coyote") "%s, in_filename, out_filename" (nil ("A4") ("LEDGER") ("LEGAL") ("LETTER") ("PAGETYPE") ("QUIET") ("SUCCESS")))
    ("FLOATS_EQUAL" fun nil (lib "floats_equal.pro" nil "coyote") "Result = %s(array_1, array_2)" (nil ("ULP")))
    ("FPUFIX" fun nil (lib "fpufix.pro" nil "coyote") "Result = %s(data)" (nil))
    ("FSC_Base_Filename" fun nil (lib "fsc_base_filename.pro" nil "coyote") "Result = %s(filename)" (nil ("Directory") ("Extension") ("Path_Separator")))
@@ -272,7 +272,8 @@
    ("Example" pro nil (lib "fsc_inputfield.pro" nil "coyote") "%s" (nil))
    ("FSC_Normalize" fun nil (lib "fsc_normalize.pro" nil "coyote") "Result = %s(range)" (nil ("Position")))
    ("FSC_Pickfile" fun nil (lib "fsc_pickfile.pro" nil "coyote") "Result = %s" (nil ("_REF_EXTRA") ("DATA") ("DEMO") ("HDF") ("JPEG") ("LAST_FILE") ("LIDAR") ("NCDF") ("PNG") ("TIFF")))
-   ("FSC_Plot" pro nil (lib "fsc_plot.pro" nil "coyote") "%s, x, y" (nil ("_Extra") ("ASPECT") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("COLOR") ("ISOTROPIC") ("POSITION")))
+   ("FSC_Plot" pro nil (lib "fsc_plot.pro" nil "coyote") "%s, x, y" (nil ("_Extra") ("ASPECT") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("COLOR") ("ISOTROPIC") ("OVERPLOT") ("POSITION")))
+   ("FSC_PlotS" pro nil (lib "fsc_plots.pro" nil "coyote") "%s, x, y, z" (nil ("_EXTRA") ("COLOR")))
    ("FSC_PLOTWINDOW_Error_Message" fun nil (lib "fsc_plotwindow.pro" nil "coyote") "Result = %s(theMessage)" (nil ("NoName") ("Traceback")))
    ("FSC_PLOTWINDOW_Normalize" fun nil (lib "fsc_plotwindow.pro" nil "coyote") "Result = %s(range)" (nil ("Position")))
    ("Refresh" pro "FSC_PLOTWINDOW" (lib "fsc_plotwindow.pro" nil "coyote") "Obj ->[%s::]%s" (nil))
@@ -344,7 +345,7 @@
    ("INIT" fun "FSC_PSCONFIG" (lib "fsc_psconfig__define.pro" nil "coyote") "Result = Obj ->[%s::]%s" (nil ("AvantGarde") ("Bits_per_Pixel") ("Bkman") ("Bold") ("BookStyle") ("CMYK") ("Color") ("Courier") ("Debug") ("Decomposed") ("Demi") ("Directory") ("Encapsulated") ("European") ("Filename") ("FontSize") ("FontType") ("Helvetica") ("Inches") ("Isolatin") ("Italic") ("Landscape") ("Light") ("Medium") ("Name") ("Narrow") ("Oblique") ("Palatino") ("Preview") ("Schoolbook") ("Set_Font") ("Symbol") ("Times") ("TrueType") ("XOffset") ("XSize") ("YOffset") ("YSize") ("ZapfChancery") ("ZapfDingbats")))
    ("FSC_PSCONFIG__DEFINE" pro nil (lib "fsc_psconfig__define.pro" nil "coyote") "%s" (nil))
    ("FSC_PS_SETUP__DEFINE" pro nil (lib "fsc_ps_setup__define.pro" nil "coyote") "%s" (nil))
-   ("FSC_Surf" pro nil (lib "fsc_surf.pro" nil "coyote") "%s, data, x, y" (nil ("_Extra") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("BOTTOM") ("COLOR") ("SHADED") ("SHADES") ("XSTYLE") ("YSTYLE") ("ZSTYLE")))
+   ("FSC_Surf" pro nil (lib "fsc_surf.pro" nil "coyote") "%s, data, x, y" (nil ("_Extra") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("BOTTOM") ("CHARSIZE") ("COLOR") ("FONT") ("SHADED") ("SHADES") ("TITLE") ("XSTYLE") ("YSTYLE") ("ZSTYLE")))
    ("CW_Light_Control_Intensity_Events" pro nil (lib "fsc_surface.pro" nil "coyote") "%s, event" (nil))
    ("CW_Light_Control_Events" pro nil (lib "fsc_surface.pro" nil "coyote") "%s, event" (nil))
    ("CW_Light_Control" fun nil (lib "fsc_surface.pro" nil "coyote") "Result = %s(parent, theLight)" (nil ("Color") ("Event_Pro") ("Index") ("LabelSize") ("Name") ("UValue")))
@@ -715,7 +716,7 @@
    ("PSWINDOW_ASPECT" fun nil (lib "pswindow.pro" nil "coyote") "Result = %s(aspectRatio)" (nil ("MARGIN") ("WindowAspect")))
    ("PSWINDOW" fun nil (lib "pswindow.pro" nil "coyote") "Result = %s" (nil ("CM") ("Fudge") ("LANDSCAPE") ("MARGIN") ("PageSize") ("Printer") ("XFudge") ("YFudge")))
    ("PS_END" pro nil (lib "ps_end.pro" nil "coyote") "%s" (nil ("ALLOW_TRANSPARENT") ("DENSITY") ("GIF") ("IM_OPTIONS") ("JPEG") ("NOFIX") ("PNG") ("RESIZE") ("TIFF")))
-   ("PS_START" pro nil (lib "ps_start.pro" nil "coyote") "%s" (nil ("_EXTRA") ("FONT") ("GUI") ("NOMATCH") ("QUIET") ("SCALE_FACTOR") ("TT_FONT")))
+   ("PS_START" pro nil (lib "ps_start.pro" nil "coyote") "%s" (nil ("_EXTRA") ("CHARSIZE") ("FONT") ("GUI") ("NOMATCH") ("QUIET") ("SCALE_FACTOR") ("TT_FONT")))
    ("PWD" pro nil (lib "pwd.pro" nil "coyote") "%s" (nil))
    ("GetRandomDigits" fun "RandomNumberGenerator" (lib "randomnumbergenerator__define.pro" nil "coyote") "Result = Obj ->[%s::]%s(digits)" (nil ("BYTES")))
    ("GetRandomNumbers" fun "RandomNumberGenerator" (lib "randomnumbergenerator__define.pro" nil "coyote") "Result = Obj ->[%s::]%s(d1, d2, d3, d4, d5, d6, d7, d8)" (nil ("BINOMIAL") ("DOUBLE") ("GAMMA") ("LONG") ("NORMAL") ("POISSON") ("UNIFORM")))

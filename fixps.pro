@@ -40,6 +40,12 @@
 ;      LETTER:       Set this keyword if the PostScript file is using a US letter size (8.5 x 11 inch) page.
 ;      PAGETYPE:     A generic way to set the page size. A string of "LETTER", "LEDGER", "LEGAL", or "A4".
 ;                    By default, set to "LETTER".
+;      QUIET:        Set this keyword to suppress error messages from the program.
+;      SUCCESS:      If this keyword is set to a named variable, then on output the variable will
+;                    return a 1 if the operation was successful, and a 0 otherwise. Using this
+;                    keyword also supresses the program's ability to "throw" an error. Informational
+;                    messages are issued about program developments, but this program will allow the
+;                    program caller to decide what to do with unsuccessful program completion.
 ;
 ; SIDE EFFECTS and RESTRICTIONS:
 ;
@@ -58,6 +64,7 @@
 ;        Retreated to standard error handling with ERROR_MESSAGE as there are inevitable errors. 2 August 2010. DWF.
 ;        Output file was created, even if not used. Now deleting file and issuing messages to
 ;           explain why output file was not created. 1 November 2010. DWF.
+;        Added SUCCESS and QUIET keywords. 15 Novemember 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -92,19 +99,37 @@ PRO FIXPS, in_filename, out_filename, $
     LEDGER=ledger, $
     LEGAL=legal, $
     LETTER=letter, $
-    PAGETYPE=pagetype
+    PAGETYPE=pagetype, $
+    QUIET=quiet, $
+    SUCCESS=success
 
   Compile_Opt idl2
   
   ; Error handling.
-  Catch, theError
-  IF theError NE 0 THEN BEGIN
-      Catch, /CANCEL
-      ok = Error_Message()
-      IF N_Elements(out_lun) NE 0 THEN Free_Lun, out_lun
-      IF N_Elements(in_lun) NE 0 THEN Free_Lun, in_lun
-      RETURN
-  ENDIF
+  IF Arg_Present(success) THEN BEGIN
+      Catch, theError
+      IF theError NE 0 THEN BEGIN
+          Catch, /CANCEL
+          success = 0
+          IF N_Elements(out_lun) NE 0 THEN Free_Lun, out_lun
+          IF N_Elements(in_lun) NE 0 THEN Free_Lun, in_lun
+          IF ~Keyword_Set(quiet) THEN Print, !Error_State.MSG
+          RETURN
+      ENDIF
+  ENDIF ELSE BEGIN
+      Catch, theError
+      IF theError NE 0 THEN BEGIN
+          Catch, /CANCEL
+          IF ~Keyword_Set(quiet) THEN ok = Error_Message()
+          success = 0
+          IF N_Elements(out_lun) NE 0 THEN Free_Lun, out_lun
+          IF N_Elements(in_lun) NE 0 THEN Free_Lun, in_lun
+          RETURN
+      ENDIF
+  ENDELSE
+  
+  ; Assume success
+  success = 1
   
   ; Is there an input filename?
   IF N_Elements(in_filename) EQ 0 THEN BEGIN

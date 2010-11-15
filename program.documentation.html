@@ -1,8 +1,8 @@
 </HEAD>
 <BODY VLINK="#ff0000" BACKGROUND="../images/graymarble.gif">
 
-<P><CENTER><IMG SRC="../images/banner.gif" WIDTH="443" HEIGHT="111" ALT=
-"Fanning Consulting Services (25K)"   ALIGN="BOTTOM"></CENTER> 
+<!-- ************** CONSULTING BANNER ************-->
+<DIV ID=banner2010><IMG SRC="../images/banner2010.png" ALT="Fanning Software Consulting"</DIV>
 
 
 <H1>Coyote Library Documentation</H1>
@@ -11,8 +11,9 @@ This page was created by the IDL library routine
 <CODE>mk_html_help</CODE>.  For more information on 
 this routine, refer to the IDL Online Help Navigator 
 or type: <P>
-<PRE>     ? mk_html_help</PRE><P>at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Sat Nov 13 12:47:14 2010.<P>
+<PRE>     ? mk_html_help</PRE>
+<P>at the IDL command line prompt.<P>
+<STRONG>Last modified: </STRONG>Mon Nov 15 08:18:23 2010.<P>
  
 <HR>
  
@@ -93,6 +94,7 @@ or type: <P>
 <LI><A HREF="#FSC_INPUTFIELD">FSC_INPUTFIELD</A>
 <LI><A HREF="#FSC_NORMALIZE">FSC_NORMALIZE</A>
 <LI><A HREF="#FSC_PLOT">FSC_PLOT</A>
+<LI><A HREF="#FSC_PLOTS">FSC_PLOTS</A>
 <LI><A HREF="#FSC_PLOTWINDOW">FSC_PLOTWINDOW</A>
 <LI><A HREF="#FSC_PSCONFIG__DEFINE">FSC_PSCONFIG__DEFINE</A>
 <LI><A HREF="#FSC_PS_SETUP__DEFINE">FSC_PS_SETUP__DEFINE</A>
@@ -4742,6 +4744,12 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
       LETTER:       Set this keyword if the PostScript file is using a US letter size (8.5 x 11 inch) page.
       PAGETYPE:     A generic way to set the page size. A string of "LETTER", "LEDGER", "LEGAL", or "A4".
                     By default, set to "LETTER".
+      QUIET:        Set this keyword to suppress error messages from the program.
+      SUCCESS:      If this keyword is set to a named variable, then on output the variable will
+                    return a 1 if the operation was successful, and a 0 otherwise. Using this
+                    keyword also supresses the program's ability to "throw" an error. Informational
+                    messages are issued about program developments, but this program will allow the
+                    program caller to decide what to do with unsuccessful program completion.
 
  SIDE EFFECTS and RESTRICTIONS:
 
@@ -4760,6 +4768,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Retreated to standard error handling with ERROR_MESSAGE as there are inevitable errors. 2 August 2010. DWF.
         Output file was created, even if not used. Now deleting file and issuing messages to
            explain why output file was not created. 1 November 2010. DWF.
+        Added SUCCESS and QUIET keywords. 15 Novemember 2010. DWF.
 </PRE><P>
 <STRONG>(See fixps.pro)</STRONG><P>
 <HR>
@@ -7175,7 +7184,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A NAME="FSC_PLOT">
 <H2>FSC_PLOT</H2></A>
 <A HREF="#FSC_NORMALIZE">[Previous Routine]</A>
-<A HREF="#FSC_PLOTWINDOW">[Next Routine]</A>
+<A HREF="#FSC_PLOTS">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  :Description:
@@ -7209,10 +7218,14 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         If this keyword is a string, the name of the background color. By default, 'white'.
         Otherwise, the keyword is assumed to be a color index into the current color table.
      color: in, optional, type=string/integer, default='black'
-        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
-        Otherwise, the keyword is assumed to be a color index into the current color table.
+        If this keyword is a string, the name of the data color. By default, 'black'.
+        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
+        to be a color index into the current color table.
      isotropic: in, optional, type=boolean, default=0
          A short-hand way of setting the ASPECT keyword to 1.
+     overplot: in, optional, type=boolean, default=0
+         Set this keyword if you wish to overplot data on an already exisiting set of
+         axes. It is like calling the IDL OPLOT command.
      position: in, optional, type=vector
          The usual four-element position vector for the Plot comamnd. Only monitored and
          possibly set if the ASPECT keyword is used.
@@ -7244,9 +7257,67 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See fsc_plot.pro)</STRONG><P>
 <HR>
  
+<A NAME="FSC_PLOTS">
+<H2>FSC_PLOTS</H2></A>
+<A HREF="#FSC_PLOT">[Previous Routine]</A>
+<A HREF="#FSC_PLOTWINDOW">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   The purpose of FSC_PlotS is to create a wrapper for the traditional IDL graphics
+   command, PlotS. The primary purpose of this is to create plot commands that work
+   and look identically both on the display and in PostScript files.
+
+ :Categories:
+    Graphics
+    
+ :Params:
+    X: in, required, type=any
+         A vector or scalar argument providing the X components of the points to be
+         drawn or connected. May be a 2xN or 3xN array, if Y and Z parameters are
+         not used.
+    Y: in, optional, type=any
+         A vector or scalar argument providing the Y components of the points to be
+         drawn or connected.
+    Z: in, optional, type=any
+         A vector or scalar argument providing the Z components of the points to be
+         drawn or connected.
+         
+ :Keywords:
+     color: in, optional, type=string/integer, default='black'
+        If this keyword is a string, the name of the data color. By default, 'black'.
+        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
+        to be a color index into the current color table.
+     _extra: in, optional, type=any
+         Any keywords supported by the PLOTS command are allowed.
+         
+ :Examples:
+    Use like the IDL PLOTS command::
+       IDL> FSC_Plot, Findgen(11)
+       IDL> FSC_PlotS, !X.CRange, [5,5], LINESTYLE=2, THICK=2, COLOR='red'
+       
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ :History:
+     Change History::
+        Written, 12 November 2010. DWF.
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See fsc_plots.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="FSC_PLOTWINDOW">
 <H2>FSC_PLOTWINDOW</H2></A>
-<A HREF="#FSC_PLOT">[Previous Routine]</A>
+<A HREF="#FSC_PLOTS">[Previous Routine]</A>
 <A HREF="#FSC_PSCONFIG__DEFINE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -7569,9 +7640,18 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      bottom: in, optional, type=string/integer, default='black'
         If this keyword is a string, the name of the bottom color. By default, same as COLOR.
         Otherwise, the keyword is assumed to be a color index into the current color table.
+     charsize: in, optional, type=float
+        The character size of the surface annotation. If the current graphics device is 
+        PostScript, and this keyword is undefined, and the font keyword is set to 1, then
+        the character size is set to 2.0 to produce "normal" true-type characters.
      color: in, optional, type=string/integer, default='black'
         If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
         Otherwise, the keyword is assumed to be a color index into the current color table.
+     font: in, optional, type=integer, default=-1
+        The type of font desired. If undefined, and the current graphics device is PostScript,
+        the FONT keyword will be set to 1, indicating true-type fonts. The FONT keyword must
+        be set to -1 (Hershey fonts) or 1 (true-type fonts) for surface annotations to be
+        rotated correctly in PostScript output.
      shaded: in, optional, type=boolean, default=0
         Set this keyword if you wish to display a shaded surface. To display shaded surfaces
         in a device-independent way, the shading values are confined to indices 0 to 253 with
@@ -7583,6 +7663,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      shades: in, optional, type=byte
         Set this keyword to a byte scaled 2D array of the same size as data to shade the surface
         with these color indices.
+     title: in, optional, type=string
+        The title of the plot. It will be written "flat to the screen", rather than rotated.
      xstyle: in, hidden
          The normal XSTYLE keyword.
      ystyle: in, hidden
@@ -15929,6 +16011,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
            to be displayed right-side up in PostScript viewers. 8 August 2009. DWF.
        Fixed a problem in not checking the GIF keyword properly. 4 December 2009. DWF.
        Added NOFIX keyword to the program. 1 November 2010. DWF.
+       Added better handing of errors coming from FIXPS after update to FIXPS. 15 November 2010. DWF.
 </PRE><P>
 <STRONG>(See ps_end.pro)</STRONG><P>
 <HR>
@@ -15973,6 +16056,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        PS_END
 
  KEYWORD PARAMETERS FOR PS_START:
+ 
+       CHARSIZE:     If this keyword is set, the !P.Charsize variable is set to this
+                     value until PS_END is called.
 
        FONT:         Set this to the type of font you want. A -1 selects Hershey 
                      fonts, a 0 selects hardware fonts (Helvetica, normally), and
@@ -16075,6 +16161,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        Moved PS_END to its own file to allow the IDLExBr_Assistant to work properly. 7 April 2009. DWF.
        Modified to allow PostScript page type to be stored for future processing with FixPS. 9 August 2009. DWF.
        Added NoFix keyword to PS_END calls to repair previous, but unused set-ups. 1 Nov 2010. DWF.
+       Added Charsize keyword to PS_START. 14 Nov 2010. DWF.
 </PRE><P>
 <STRONG>(See ps_start.pro)</STRONG><P>
 <HR>

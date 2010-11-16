@@ -79,6 +79,12 @@
 ;     position: in, optional, type=vector
 ;         The usual four-element position vector for the Plot comamnd. Only monitored and
 ;         possibly set if the ASPECT keyword is used.
+;     psym: in, optional, type=integer
+;         Any normal IDL PSYM values, plus and value supported by the Coyote Library
+;         routine SYMCAT. An integer between 0 and 46.
+;     symcolor: in, optional, type=string/integer, default=COLOR
+;        If this keyword is a string, the name of the symbol color. By default, same as COLOR.
+;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     _extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot command is allowed in the program.
 ;
@@ -87,6 +93,7 @@
 ;       FSC_Plot, Findgen(11)
 ;       FSC_Plot, Findgen(11), Aspect=1.0
 ;       FSC_Plot, Findgen(11), Color='olive', AxisColor='red', Thick=2
+;       FSC_Plot, Findgen(11), Color='blue', SymColor='red', PSym=-16
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -100,6 +107,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 12 November 2010. DWF.
+;        Added SYMCOLOR keyword, and allow all 46 symbols from SYMCAT. 15 November 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -113,6 +121,8 @@ PRO FSC_Plot, x, y, $
     ISOTROPIC=isotropic, $
     OVERPLOT=overplot, $
     POSITION=position, $
+    PSYM=psym, $
+    SYMCOLOR=symcolor, $
     _Extra=extra
     
     Compile_Opt idl2
@@ -155,7 +165,9 @@ PRO FSC_Plot, x, y, $
     ENDIF
     IF N_Elements(axescolor) NE 0 THEN axiscolor = axescolor
     IF N_Elements(color) EQ 0 THEN color = 'black'
+    IF N_Elements(symcolor) EQ 0 THEN symcolor = color
     IF Keyword_Set(isotropic) THEN aspect = 1.0
+    IF N_Elements(psym) EQ 0 THEN psym = 0
     IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
         position = Aspect(aspect)
     ENDIF
@@ -167,6 +179,8 @@ PRO FSC_Plot, x, y, $
         color = FSC_Color(color, DECOMPOSED=0, 253)
     IF Size(background, /TNAME) EQ 'STRING' THEN $
         background = FSC_Color(background, DECOMPOSED=0, 252)
+    IF Size(symcolor, /TNAME) EQ 'STRING' THEN $
+        symcolor = FSC_Color(symcolor, DECOMPOSED=0, 251)
     
     ; Going to have to do all of this in indexed color.
     currentState = DecomposedColor()
@@ -178,7 +192,10 @@ PRO FSC_Plot, x, y, $
     ENDIF ELSE BEGIN
         Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, $
             POSITION=position, /NODATA, _STRICT_EXTRA=extra
-        OPLOT, indep, dep, COLOR=color, _EXTRA=extra
+        IF PSYM LE 0 THEN OPLOT, indep, dep, COLOR=color, _EXTRA=extra    
+        IF Abs(psym) GT 0 THEN BEGIN
+            OPLOT, indep, dep, COLOR=symcolor, PSYM=SymCat(Abs(psym)), _EXTRA=extra
+        ENDIF 
     ENDELSE
          
     ; Restore the decomposed color state if you can.

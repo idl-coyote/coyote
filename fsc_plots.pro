@@ -61,9 +61,20 @@
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, 'black'.
 ;        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
-;        to be a color index into the current color table.
+;        to be a color index into the current color table. May be a vector of the same
+;        length as X.
+;     psym: in, optional, type=integer
+;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
+;        routine SYMCAT. An integer between 0 and 46. 
+;     symcolor: in, optional, type=string/integer/vector, default=COLOR
+;        If this keyword is a string, the name of the symbol color. By default, same as COLOR.
+;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;        May be a vector of the same length as X.
+;     symsize: in, optional, type=float/vector, default=1.0
+;        A scalar or vector of symbol sizes. Default is 1.0. May be a vector of the same 
+;        length as X.
 ;     _extra: in, optional, type=any
-;         Any keywords supported by the PLOTS command are allowed.
+;        Any keywords supported by the PLOTS command are allowed.
 ;         
 ; :Examples:
 ;    Use like the IDL PLOTS command::
@@ -82,11 +93,18 @@
 ; :History:
 ;     Change History::
 ;        Written, 12 November 2010. DWF.
+;        Added SYMCOLOR keyword. PSYM accepts all values from SYMCAT. SYMCOLOR and SYMSIZE
+;           keywords can be vectors the size of x. 15 November 2010. DWF
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_PlotS, x, y, z, COLOR=color, _EXTRA=extra
+PRO FSC_PlotS, x, y, z, $
+    COLOR=color, $
+    PSYM=psym, $
+    SYMCOLOR=symcolor, $
+    SYMSIZE=symsize, $
+    _EXTRA=extra
 
     Compile_Opt idl2
 
@@ -98,13 +116,33 @@ PRO FSC_PlotS, x, y, z, COLOR=color, _EXTRA=extra
         RETURN
     ENDIF
     
-   ; Check parameters and keywords.
-   IF N_Elements(color) EQ 0 THEN color = 'black'
+    ; Need some help?
     IF N_Params() EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_PlotS, x, y'
+        Print, 'USE SYNTAX: FSC_PlotS, x, y, [z]'
         RETURN
     ENDIF
+    
+   ; Check parameters and keywords.
+   IF N_Elements(color) EQ 0 THEN color = 'black'
+   IF N_Elements(psym) EQ 0 THEN psym = 0
+   IF N_Elements(symcolor) EQ 0 THEN symcolor = 'black'
+   IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
    
+   ; Be sure the vectors are the right length.
+   CASE N_Params() OF
+        1: xsize = N_Elements(x[0,*])
+        ELSE: xsize = N_Elements(x)
+    ENDCASE
+    IF N_Elements(symcolor) GT 1 THEN BEGIN
+       IF N_Elements(symcolor) NE xsize THEN $
+          Message, 'SYMCOLOR vector must contain the same number of elements as the data.'
+    ENDIF
+    IF N_Elements(symsize) GT 1 THEN BEGIN
+       IF N_Elements(symsize) NE xsize THEN $
+          Message, 'SYMSIZE vector must contain the same number of elements as the data.'
+    ENDIF
+    IF N_Elements(psym) GT 1 THEN Message, 'PSYM value must be a scalar value.'
+    
    ; Get current color table vectors.
    TVLCT, rr, gg, bb, /Get
    
@@ -113,10 +151,42 @@ PRO FSC_PlotS, x, y, z, COLOR=color, _EXTRA=extra
    
    ; Draw the line or symbol.
    CASE N_Params() OF
-        1: PlotS, x, Color=color, _STRICT_EXTRA=extra
-        2: PlotS, x, y, Color=color, _STRICT_EXTRA=extra
-        3: PlotS, x, y, z, Color=color, _STRICT_EXTRA=extra
+        1: IF psym[0] LE 0 THEN PlotS, x, Color=color, _STRICT_EXTRA=extra
+        2: IF psym[0] LE 0 THEN PlotS, x, y, Color=color, _STRICT_EXTRA=extra
+        3: IF psym[0] LE 0 THEN PlotS, x, y, z, Color=color, _STRICT_EXTRA=extra
    ENDCASE   
+   
+   ; Draw the symbol, if required.
+   IF Abs(psym) GT 0 THEN BEGIN
+      
+      FOR j=0,N_Elements(x)-1 DO BEGIN
+      
+          ; Get information about the symbol you are drawing.
+          IF N_Elements(symcolor) GT 1 THEN thisColor = symcolor[j] ELSE thisColor = symcolor
+          IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(thisColor)
+          IF N_Elements(symsize) GT 1 THEN thisSize = symsize[j] ELSE thisSize = symsize
+          CASE N_Params() OF
+              
+                1: BEGIN
+                   PlotS, x[*,j], COLOR=thisColor, PSYM=SymCat(Abs(psym)), $
+                      SYMSIZE=thisSize, _STRICT_EXTRA=extra
+                   END
+                   
+                2: BEGIN
+                  PlotS, x[j], y[j], COLOR=thisColor, PSYM=SymCat(Abs(psym)), $
+                       SYMSIZE=thisSize, _STRICT_EXTRA=extra
+                   END
+                   
+                3: BEGIN
+                   PlotS, x[j], y[j], z[j], COLOR=thisColor, PSYM=SymCat(Abs(psym)), $
+                       SYMSIZE=thisSize, _STRICT_EXTRA=extra
+                   END
+                       
+          ENDCASE  
+           
+       ENDFOR
+       
+   ENDIF 
    
    ; Restore the color table vectors.
    TVLCT, rr, gg, bb

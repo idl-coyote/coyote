@@ -73,6 +73,8 @@
 ;        to be a color index into the current color table.
 ;     isotropic: in, optional, type=boolean, default=0
 ;         A short-hand way of setting the ASPECT keyword to 1.
+;     nodata: in, optional, type=boolian, default=0
+;         Set this keyword to draw axes, but no data.
 ;     overplot: in, optional, type=boolean, default=0
 ;         Set this keyword if you wish to overplot data on an already exisiting set of
 ;         axes. It is like calling the IDL OPLOT command.
@@ -82,8 +84,8 @@
 ;     psym: in, optional, type=integer
 ;         Any normal IDL PSYM values, plus and value supported by the Coyote Library
 ;         routine SYMCAT. An integer between 0 and 46.
-;     symcolor: in, optional, type=string/integer, default=COLOR
-;        If this keyword is a string, the name of the symbol color. By default, same as COLOR.
+;     symcolor: in, optional, type=string/integer, default='black'
+;        If this keyword is a string, the name of the symbol color. By default, 'black'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     _extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot command is allowed in the program.
@@ -108,6 +110,7 @@
 ;     Change History::
 ;        Written, 12 November 2010. DWF.
 ;        Added SYMCOLOR keyword, and allow all 46 symbols from SYMCAT. 15 November 2010. DWF.
+;        Added NODATA keyword. 15 November 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -119,6 +122,7 @@ PRO FSC_Plot, x, y, $
     BACKGROUND=background, $
     COLOR=color, $
     ISOTROPIC=isotropic, $
+    NODATA=nodata, $
     OVERPLOT=overplot, $
     POSITION=position, $
     PSYM=psym, $
@@ -165,7 +169,7 @@ PRO FSC_Plot, x, y, $
     ENDIF
     IF N_Elements(axescolor) NE 0 THEN axiscolor = axescolor
     IF N_Elements(color) EQ 0 THEN color = 'black'
-    IF N_Elements(symcolor) EQ 0 THEN symcolor = color
+    IF N_Elements(symcolor) EQ 0 THEN symcolor = 'black'
     IF Keyword_Set(isotropic) THEN aspect = 1.0
     IF N_Elements(psym) EQ 0 THEN psym = 0
     IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
@@ -192,9 +196,12 @@ PRO FSC_Plot, x, y, $
     ENDIF ELSE BEGIN
         Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, $
             POSITION=position, /NODATA, _STRICT_EXTRA=extra
-        IF PSYM LE 0 THEN OPLOT, indep, dep, COLOR=color, _EXTRA=extra    
+        IF PSYM LE 0 THEN BEGIN
+            IF ~Keyword_Set(nodata) THEN OPLOT, indep, dep, COLOR=color, _EXTRA=extra  
+        ENDIF  
         IF Abs(psym) GT 0 THEN BEGIN
-            OPLOT, indep, dep, COLOR=symcolor, PSYM=SymCat(Abs(psym)), _EXTRA=extra
+            IF ~Keyword_Set(nodata) THEN OPLOT, indep, dep, COLOR=symcolor, $
+                   PSYM=SymCat(Abs(psym)), _EXTRA=extra
         ENDIF 
     ENDELSE
          

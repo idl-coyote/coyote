@@ -95,6 +95,7 @@
 ;        Written, 12 November 2010. DWF.
 ;        Added SYMCOLOR keyword. PSYM accepts all values from SYMCAT. SYMCOLOR and SYMSIZE
 ;           keywords can be vectors the size of x. 15 November 2010. DWF
+;        Added ability to support COLOR keyword as a vector the size of x. 15 November 2010. DWF
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -133,6 +134,10 @@ PRO FSC_PlotS, x, y, z, $
         1: xsize = N_Elements(x[0,*])
         ELSE: xsize = N_Elements(x)
     ENDCASE
+    IF N_Elements(color) GT 1 THEN BEGIN
+       IF N_Elements(color) NE xsize THEN $
+          Message, 'COLOR vector must contain the same number of elements as the data.'
+    ENDIF
     IF N_Elements(symcolor) GT 1 THEN BEGIN
        IF N_Elements(symcolor) NE xsize THEN $
           Message, 'SYMCOLOR vector must contain the same number of elements as the data.'
@@ -146,15 +151,38 @@ PRO FSC_PlotS, x, y, z, $
    ; Get current color table vectors.
    TVLCT, rr, gg, bb, /Get
    
-   ; Load a color, if needed.
-   IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)
-   
    ; Draw the line or symbol.
-   CASE N_Params() OF
-        1: IF psym[0] LE 0 THEN PlotS, x, Color=color, _STRICT_EXTRA=extra
-        2: IF psym[0] LE 0 THEN PlotS, x, y, Color=color, _STRICT_EXTRA=extra
-        3: IF psym[0] LE 0 THEN PlotS, x, y, z, Color=color, _STRICT_EXTRA=extra
-   ENDCASE   
+   IF N_Elements(color) EQ 1 THEN BEGIN
+   
+       ; Load a color, if needed.
+       IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)
+       CASE N_Params() OF
+            1: IF psym[0] LE 0 THEN PlotS, x, Color=color, _STRICT_EXTRA=extra
+            2: IF psym[0] LE 0 THEN PlotS, x, y, Color=color, _STRICT_EXTRA=extra
+            3: IF psym[0] LE 0 THEN PlotS, x, y, z, Color=color, _STRICT_EXTRA=extra
+       ENDCASE   
+       
+   ENDIF ELSE BEGIN
+   
+        FOR j=0,xsize-2 DO BEGIN
+            thisColor = color[j]
+            CASE N_Params() OF
+                1: IF psym[0] LE 0 THEN BEGIN
+                       PlotS, [x[0,j],x[0,j+1]], [x[1,j],x[1,j+1]], [x[2,j],x[2,j+1]], $
+                           Color=thisColor, _STRICT_EXTRA=extra
+                   END
+                2: IF psym[0] LE 0 THEN BEGIN
+                       PlotS, [x[j],x[j+1]], [y[j], y[j+1]], $
+                            Color=thisColor, _STRICT_EXTRA=extra
+                   ENDIF
+                3: IF psym[0] LE 0 THEN BEGIN
+                        PlotS, [x[j],x[j+1]], [y[j], y[j+1]], [z[j], z[j+1]], $
+                            Color=thisColor, _STRICT_EXTRA=extra
+                   ENDIF
+            ENDCASE
+        ENDFOR
+   
+   ENDELSE
    
    ; Draw the symbol, if required.
    IF Abs(psym) GT 0 THEN BEGIN

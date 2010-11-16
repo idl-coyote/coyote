@@ -51,7 +51,9 @@
 ;       COLOR:        This is the name of a color known to FSC_COLOR that can be
 ;                     used to draw the color bar annotations (labels and title).
 ;                     By default, "Black" for the PostScript device, and "White" 
-;                     for all other devices.
+;                     for all other devices. If unspecified, the "color" of the
+;                     pixel in the upper-right corner of the display will be used
+;                     to choose either "black" or "white".
 ;                     
 ;       FILE:         The name of a color table file that can be read by FSC_COLOR.
 ;                     This allows you to specify your own color names for your own colors.
@@ -193,7 +195,19 @@ PRO DCBar, colors, $
     ENDIF 
     
     ; Check parameters and keywords.
-    IF N_Elements(color) EQ 0 THEN color = (!D.Name EQ 'PS') ? "BLACK" : "WHITE"
+;    IF N_Elements(color) EQ 0 THEN color = (!D.Name EQ 'PS') ? "BLACK" : "WHITE"
+    IF (!D.Name EQ 'PS') AND N_Elements(color) EQ 0 THEN BEGIN
+        color = 'black'
+    ENDIF ELSE BEGIN
+        IF (!D.Window GE 0) AND ((!D.Flags AND 1) EQ 0) THEN BEGIN
+            pixel = TVRead(!D.X_Size-1, !D.Y_Size-1, 1, 1)
+            IF N_ELEMENTS(color) EQ 0 THEN BEGIN
+                color = 'white'
+                IF Total(pixel) EQ 765 THEN color = 'black'
+                IF Total(pixel) EQ 0 THEN color = 'white'
+            ENDIF 
+        ENDIF ELSE color = 'white'
+    ENDELSE
     IF N_Elements(barcolor) EQ 0 THEN   barcolor = color
     IF N_Elements(charsize) EQ 0 THEN charsize = !P.Charsize
     IF N_Elements(colors) EQ 0 THEN BEGIN

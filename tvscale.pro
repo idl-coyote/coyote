@@ -345,6 +345,7 @@
 ;       Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
 ;       Made changes that supports the BACKGROUND color in PostScript. Requires the program
 ;           PS_BACKGROUND from the Coyote Library. 17 November 2010. DWF.
+;       If the BACKGROUND color is set, then ERASEIT=1 automatically. 17 November 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -583,6 +584,9 @@ PRO TVSCALE, image, x, y, $
     ; Which release of IDL is this?    
     thisRelease = Float(!Version.Release)
     
+    ; If the background color is specified, then ERASEIT should be automatically set.
+    IF N_Elements(background) NE 0 THEN eraseit = 1
+
     ; Doing multiple plots?   
     IF Total(!P.Multi) GT 0 THEN multi = 1 ELSE multi = 0
     

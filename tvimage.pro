@@ -413,6 +413,8 @@
 ;       Modified how the ERASE keyword works. Now images only erase the background when this
 ;            keyword is set and !P.MULTI[0] is set to 0. 12 Nov 2010. DWF.
 ;       Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
+;       Made changes that supports the BACKGROUND color in PostScript. Requires the program
+;           PS_BACKGROUND from the Coyote Library. 17 November 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -847,6 +849,9 @@ PRO TVIMAGE, image, x, y, $
             IF (!D.NAME EQ 'Z') THEN BEGIN
                 IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
                 Erase, Color=background
+            ENDIF
+            IF (!D.NAME EQ 'PS') THEN BEGIN
+                PS_Background, background
             ENDIF
          ENDELSE
     ENDIF

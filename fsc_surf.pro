@@ -70,7 +70,7 @@
 ;     charsize: in, optional, type=float
 ;        The character size of the surface annotation. If the current graphics device is 
 ;        PostScript, and this keyword is undefined, and the font keyword is set to 1, then
-;        the character size is set to 2.0 to produce "normal" true-type characters.
+;        the character size is set to 1.75 to produce "normal" true-type characters.
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -79,6 +79,9 @@
 ;        the FONT keyword will be set to 1, indicating true-type fonts. The FONT keyword must
 ;        be set to -1 (Hershey fonts) or 1 (true-type fonts) for surface annotations to be
 ;        rotated correctly in PostScript output.
+;     noerase: in, optional, type=boolean, default=0
+;        Set this keyword to prevent the window from erasing the contents before displaying
+;        the surface plot.
 ;     shaded: in, optional, type=boolean, default=0
 ;        Set this keyword if you wish to display a shaded surface. To display shaded surfaces
 ;        in a device-independent way, the shading values are confined to indices 0 to 253 with
@@ -92,6 +95,13 @@
 ;        with these color indices.
 ;     title: in, optional, type=string
 ;        The title of the plot. It will be written "flat to the screen", rather than rotated.
+;     tsize: in, optional, type=float
+;        The character size for the title. Normally, the title character size is 1.25 times
+;        the character size of the surface annotation.
+;     tspace: in, optional, type=float
+;        The title Y spacing. This should be a number, between 0 and 1 that is the fraction 
+;        of the distance between !Y.Window[1] and !Y.Window[0] to locate the title above 
+;        !Y.Window[1]. When Total(!P.MULTI) EQ 0, the default is 0.005, and it is 0.0025 otherwise.
 ;     xstyle: in, hidden
 ;         The normal XSTYLE keyword.
 ;     ystyle: in, hidden
@@ -123,6 +133,9 @@
 ;     Change History::
 ;        Written, 13 November 2010. DWF.
 ;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
+;        Added TSIZE and TSPACE keywords to treak title size and placement, 
+;           as necessary. 17 November 2010. DWF.
+;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -135,9 +148,12 @@ PRO FSC_Surf, data, x, y, $
     CHARSIZE=charsize, $
     COLOR=color, $
     FONT=font, $
+    NOERASE=noerase, $
     SHADED=shaded, $
     SHADES=shades, $
     TITLE=title, $
+    TSIZE=tsize, $
+    TSPACE=tspace, $
     XSTYLE=xstyle, $
     YSTYLE=ystyle, $
     ZSTYLE=zstyle, $
@@ -176,11 +192,20 @@ PRO FSC_Surf, data, x, y, $
     IF N_Elements(bottom) EQ 0 THEN bottom = color
     IF N_Elements(font) EQ 0 THEN IF (!D.Name EQ 'PS') THEN font = 1 ELSE font = !P.font
     IF N_Elements(charsize) EQ 0 THEN BEGIN
-        IF (!P.Charsize EQ 0) AND ((font EQ 1) OR (!P.FONT EQ 1)) THEN charsize = 2.0
+        IF (!P.Charsize EQ 0) AND ((font EQ 1) OR (!P.FONT EQ 1)) THEN charsize = 1.75
     END
+    noerase = Keyword_Set(noerase)
     IF N_Elements(xstyle) EQ 0 THEN xstyle = 0
     IF N_Elements(ystyle) EQ 0 THEN ystyle = 0
     IF N_Elements(zstyle) EQ 0 THEN zstyle = 0
+
+    ; Do you need a PostScript background color? 
+    IF !D.Name EQ 'PS' THEN BEGIN
+       IF ~noerase THEN BEGIN
+           PS_Background, background
+           noerase = 1
+        ENDIF
+     ENDIF
             
     ; Load the drawing colors, if needed. These drawing colors will be done
     ; using decomposed color, so we don't have to "dirty" the color table.
@@ -232,19 +257,23 @@ PRO FSC_Surf, data, x, y, $
     ; Draw the surface axes.
     Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
         /NODATA, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
-        FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra
+        FONT=font, CHARSIZE=charsize, NOERASE=noerase, _STRICT_EXTRA=extra
         
     ; Draw the title, if you have one.
     IF N_Elements(title) NE 0 THEN BEGIN
-       IF (!P.Charsize EQ 0) AND (N_Elements(charsize) EQ 0) THEN BEGIN
-            titleSize = 1.25 
-       ENDIF ELSE BEGIN
-           IF (!P.Charsize NE 0) THEN titleSize = !P.Charsize * 1.25
-           IF (N_Elements(charsize) NE 0) THEN titleSize = charsize * 1.25
-       ENDELSE
+       IF N_Elements(tsize) EQ 0 THEN BEGIN
+           IF (!P.Charsize EQ 0) AND (N_Elements(charsize) EQ 0) THEN BEGIN
+                titleSize = 1.25 
+           ENDIF ELSE BEGIN
+               IF (!P.Charsize NE 0) THEN titleSize = !P.Charsize * 1.25
+               IF (N_Elements(charsize) NE 0) THEN titleSize = charsize * 1.25
+           ENDELSE
+       ENDIF ELSE titleSize = tsize
        xloc = (!X.Window[1] - !X.Window[0]) / 2.0 + !X.Window[0]
-       yloc = !Y.Window[1] + 0.005
-       XYOutS, xloc, yloc, /NORMAL, ALIGNMENT=0.5, CHARSIZE=titleSize, $
+       distance = !Y.Window[1] - !Y.Window[0]
+       IF N_Elements(tspace) EQ 0 THEN tspace = (Total(!P.Multi) EQ 0) ? 0.0025 : 0.00125
+       yloc = !Y.Window[1] + (distance * tspace)
+        XYOutS, xloc, yloc, /NORMAL, ALIGNMENT=0.5, CHARSIZE=titleSize, $
             title, FONT=font, COLOR=axiscolor
     ENDIF
 
@@ -319,13 +348,15 @@ PRO FSC_Surf, data, x, y, $
                IF (N_Elements(charsize) NE 0) THEN titleSize = charsize * 1.25
            ENDELSE
            xloc = (!X.Window[1] - !X.Window[0]) / 2.0 + !X.Window[0]
-           yloc = !Y.Window[1] + 0.005
+           distance = !Y.Window[1] - !Y.Window[0]
+           IF N_Elements(tspace) EQ 0 THEN tspace = (Total(!P.Multi) EQ 0) ? 0.0025 : 0.00125
+           yloc = !Y.Window[1] + (distance * tspace)
            XYOutS, xloc, yloc, /NORMAL, ALIGNMENT=0.5, CHARSIZE=titleSize, $
                 title, FONT=font, COLOR=axiscolor
         ENDIF
             
         ; Shading parameters are "sticky", but I can't tell what they
-        ; were when I came into the program. Here is just set them back
+        ; were when I came into the program. Here I just set them back
         ; to their default values.
         Set_Shading, VALUES=[0,255]
             
@@ -352,8 +383,9 @@ PRO FSC_Surf, data, x, y, $
     ; Restore the decomposed color state to the input state.
     IF currentState THEN Device, Decomposed=1 ELSE Device, Decomposed=0
 
-    ; Restore the original color table.
-    TVLCT, rr, gg, bb
+    ; Restore the color table. Can't do this for the Z-buffer or
+    ; the snap shot will be incorrect.
+    IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb
     
     ; Update the system variables.
     !X = newx 

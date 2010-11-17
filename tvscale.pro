@@ -342,6 +342,7 @@
 ;       Added the WHITE keyword. 12 Nov 2010. DWF.
 ;       Modified how the ERASE keyword works. Now images only erase the background when this
 ;            keyword is set and !P.MULTI[0] is set to 0. 12 Nov 2010. DWF.
+;       Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -637,7 +638,10 @@ PRO TVSCALE, image, x, y, $
                ENDCASE
             ENDIF
          ENDIF ELSE BEGIN
-            IF (!D.NAME EQ 'Z') THEN Erase
+            IF (!D.NAME EQ 'Z') THEN BEGIN
+                IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
+                Erase, Color=background
+            ENDIF
          ENDELSE
     ENDIF
 
@@ -1116,7 +1120,7 @@ PRO TVSCALE, image, x, y, $
     ENDELSE
 
     ; Clean up after yourself.
-    TVLCT, r, g, b
+    IF (!D.Name NE 'Z') THEN TVLCT, r, g, b
     IF ~Keyword_Set(save) THEN BEGIN
         !P = bangp
         !X = bangx

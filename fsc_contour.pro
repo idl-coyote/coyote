@@ -103,6 +103,9 @@
 ;        If the Contour plot LEVELS keyword is not used, this keyword will produce this
 ;        number of equally spaced contour intervals. Unlike the Contour NLEVELS keyword,
 ;        this keyword actually works!
+;     noerase: in, optional, type=boolean, default=0
+;        Set this keyword to prevent the window from erasing the contents before displaying
+;        the contour plot.
 ;     overplot: in, optional, type=boolean
 ;        Set this keyword to overplot the contours onto a previously established
 ;        data coordinate system.
@@ -143,6 +146,8 @@
 ;           the earlier version. 12 November 2010. DWF.
 ;        Add the ability to specify the contour colors as color names. 16 November 2010. DWF.
 ;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
+;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
+;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -160,6 +165,7 @@ PRO FSC_Contour, data, x, y, $
     LABEL=label, $
     LEVELS=levels, $
     NLEVELS=nlevels, $
+    NOERASE=noerase, $
     MISSINGVALUE=missingvalue, $
     OVERPLOT=overplot, $
     RESOLUTION=resolution, $
@@ -210,6 +216,7 @@ PRO FSC_Contour, data, x, y, $
     IF N_Elements(label) EQ 0 THEN label = 1
     IF N_Elements(resolution) EQ 0 THEN resolution=[41,41]
     IF (N_Elements(nlevels) EQ 0) AND (N_Elements(levels) EQ 0) THEN nlevels = 6
+    noerase = Keyword_Set(noerase)
     IF N_Elements(xstyle) EQ 0 THEN xstyle=1
     IF N_Elements(ystyle) EQ 0 THEN ystyle=1
     IF N_Elements(missingvalue) NE 0 THEN BEGIN
@@ -253,6 +260,14 @@ PRO FSC_Contour, data, x, y, $
         ENDIF ELSE c_labels = Reverse((indices MOD label) EQ 0)
     ENDIF
 
+    ; Do you need a PostScript background color? 
+    IF !D.Name EQ 'PS' THEN BEGIN
+       IF ~noerase THEN BEGIN
+           PS_Background, background
+           noerase = 1
+        ENDIF
+     ENDIF
+
     ; Load the drawing colors, if needed.
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN $
         axiscolor = FSC_Color(axiscolor, DECOMPOSED=0, 254)
@@ -273,10 +288,10 @@ PRO FSC_Contour, data, x, y, $
     IF ~Keyword_Set(overplot) THEN BEGIN
         Contour, contourData, xgrid, ygrid, COLOR=axiscolor, $
             BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
-            _STRICT_EXTRA=extra, /NODATA, OVERPLOT=0
+            _STRICT_EXTRA=extra, /NODATA, NOERASE=noerase, OVERPLOT=0
     ENDIF
     Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
-        BACKGROUND=background, LEVELS=levels, C_Labels=c_labels, C_COLORS=c_colors, $
+        LEVELS=levels, C_Labels=c_labels, C_COLORS=c_colors, $
         XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, /OVERPLOT
         
     ; If you filled the contour plot, you will need to repair the axes.
@@ -289,8 +304,9 @@ PRO FSC_Contour, data, x, y, $
     ; Restore the decomposed color state if you can.
     IF currentState THEN SetDecomposedState, 1
     
-    ; Restore the color table.
-    TVLCT, rr, gg, bb
-    
+    ; Restore the color table. Can't do this for the Z-buffer or
+    ; the snap shot will be incorrect.
+    IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb
+     
 END
     

@@ -73,8 +73,10 @@
 ;        to be a color index into the current color table.
 ;     isotropic: in, optional, type=boolean, default=0
 ;         A short-hand way of setting the ASPECT keyword to 1.
-;     nodata: in, optional, type=boolian, default=0
+;     nodata: in, optional, type=boolean, default=0
 ;         Set this keyword to draw axes, but no data.
+;     noerase: in, optional, type=boolean, default=0
+;         Set this keyword to draw the plot without erasing the display first.
 ;     overplot: in, optional, type=boolean, default=0
 ;         Set this keyword if you wish to overplot data on an already exisiting set of
 ;         axes. It is like calling the IDL OPLOT command.
@@ -112,6 +114,9 @@
 ;        Added SYMCOLOR keyword, and allow all 46 symbols from SYMCAT. 15 November 2010. DWF.
 ;        Added NODATA keyword. 15 November 2010. DWF.
 ;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
+;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
+;        Fixed a problem with overplotting with symbols. 17 November 2010. DWF.
+;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
 ;        
 ;
 ; :Copyright:
@@ -125,6 +130,7 @@ PRO FSC_Plot, x, y, $
     COLOR=color, $
     ISOTROPIC=isotropic, $
     NODATA=nodata, $
+    NOERASE=noerase, $
     OVERPLOT=overplot, $
     POSITION=position, $
     PSYM=psym, $
@@ -173,12 +179,21 @@ PRO FSC_Plot, x, y, $
     IF N_Elements(color) EQ 0 THEN color = 'black'
     IF N_Elements(symcolor) EQ 0 THEN symcolor = 'black'
     IF Keyword_Set(isotropic) THEN aspect = 1.0
+    noerase = Keyword_Set(noerase)
     IF N_Elements(psym) EQ 0 THEN psym = 0
     IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
         position = Aspect(aspect)
     ENDIF
-            
-    ; Load the drawing colors, if needed.
+    
+    ; Do you need a PostScript background color? 
+    IF !D.Name EQ 'PS' THEN BEGIN
+       IF ~noerase THEN BEGIN
+           PS_Background, background
+           noerase = 1
+        ENDIF
+     ENDIF
+       
+     ; Load the drawing colors, if needed.
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN $
         axiscolor = FSC_Color(axiscolor, DECOMPOSED=0, 254)
     IF Size(color, /TNAME) EQ 'STRING' THEN $
@@ -193,24 +208,25 @@ PRO FSC_Plot, x, y, $
     
     ; Draw the plot.
     IF Keyword_Set(overplot) THEN BEGIN
-       OPLOT, indep, dep, COLOR=color, _STRICT_EXTRA=extra
+       IF psym LE 0 THEN OPlot, indep, dep, COLOR=color, _STRICT_EXTRA=extra
     ENDIF ELSE BEGIN
-        Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, $
-            POSITION=position, /NODATA, _STRICT_EXTRA=extra
-        IF PSYM LE 0 THEN BEGIN
-            IF ~Keyword_Set(nodata) THEN OPLOT, indep, dep, COLOR=color, _EXTRA=extra  
+      Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, $
+            POSITION=position, /NODATA, NOERASE=noerase, _STRICT_EXTRA=extra
+        IF psym LE 0 THEN BEGIN
+           IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=color, _EXTRA=extra  
         ENDIF  
-        IF Abs(psym) GT 0 THEN BEGIN
-            IF ~Keyword_Set(nodata) THEN OPLOT, indep, dep, COLOR=symcolor, $
-                   PSYM=SymCat(Abs(psym)), _EXTRA=extra
-        ENDIF 
     ENDELSE
+    IF Abs(psym) GT 0 THEN BEGIN
+        IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=symcolor, $
+            PSYM=SymCat(Abs(psym)), _EXTRA=extra
+    ENDIF 
          
     ; Restore the decomposed color state if you can.
     IF currentState THEN SetDecomposedState, 1
     
-    ; Restore the color table.
-    TVLCT, rr, gg, bb
+    ; Restore the color table. Can't do this for the Z-buffer or
+    ; the snap shot will be incorrect.
+    IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb
     
 END
     

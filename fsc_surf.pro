@@ -122,6 +122,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 13 November 2010. DWF.
+;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -221,7 +222,7 @@ PRO FSC_Surf, data, x, y, $
     TVLCT, rl, gl, bl, /GET
     
     ; Going to draw the axes in decomposed color if we can.
-    IF currentState THEN Device, Decomposed=1
+    IF currentState THEN SetDecomposedState,1
     
     bangx = !X
     bangy = !Y

@@ -86,6 +86,7 @@
 ;      Added ability to specify position directly in call. 20 March 2008. DWF
 ;      Changed cursor operation to conform with expected differences
 ;         between Windows and UNIX. 20 March 2008, DWF.
+;      Slightly modified screen directions. 16 November 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -178,9 +179,9 @@ PRO TVINFO, image, position
 
     ; Print instructions to the user.
     Print, ''
-    Print, 'Move cursor in image window (window ' + StrTrim(_tvimage_winID,2) + ') to get image values.'
-    Print, 'Use LEFT mouse to inquire.'
-    Print, 'Click the RIGHT mouse button to exit program.'
+    Print, 'Click cursor in image window (window ' + StrTrim(_tvimage_winID,2) + ') to get image values.'
+    Print, 'Use LEFT mouse buton to inquire.'
+    Print, 'Use RIGHT mouse button to exit program.'
     Print, ''
     Print, 'Expecting cursor clicks in image window...'
 

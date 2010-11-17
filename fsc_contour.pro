@@ -69,6 +69,9 @@
 ;     background: in, optional, type=string/integer, default='white'
 ;        If this keyword is a string, the name of the background color. By default, 'white'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     c_colors: in, optional, type=integer/string vector
+;        Set to the index values of the contour colors or to named colors. Must contain
+;        the same number of colors as the number of requested contour levels.
 ;     c_labels: in, optional, type=integer vector
 ;        A vector that specifies which contour levels to label. If used, the LABEL
 ;        keyword is ignored.
@@ -138,6 +141,8 @@
 ;        Written, 11 November 2010. DWF.
 ;        Restored the CELL_FILL keyword, which had been accidentally removed in
 ;           the earlier version. 12 November 2010. DWF.
+;        Add the ability to specify the contour colors as color names. 16 November 2010. DWF.
+;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -146,6 +151,7 @@ PRO FSC_Contour, data, x, y, $
     AXISCOLOR=axiscolor, $
     AXESCOLOR=axescolor, $
     BACKGROUND=background, $
+    C_COLORS=c_colors, $
     C_LABELS=c_labels, $
     CELL_FILL=cell_fill, $
     COLOR=color, $
@@ -246,7 +252,7 @@ PRO FSC_Contour, data, x, y, $
            c_labels = Replicate(0,N_Elements(levels))
         ENDIF ELSE c_labels = Reverse((indices MOD label) EQ 0)
     ENDIF
-        
+
     ; Load the drawing colors, if needed.
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN $
         axiscolor = FSC_Color(axiscolor, DECOMPOSED=0, 254)
@@ -254,10 +260,14 @@ PRO FSC_Contour, data, x, y, $
         color = FSC_Color(color, DECOMPOSED=0, 253)
     IF Size(background, /TNAME) EQ 'STRING' THEN $
         background = FSC_Color(background, DECOMPOSED=0, 252)
-    
+    IF Size(c_colors, /TNAME) EQ 'STRING' THEN BEGIN
+      tempcolors = c_colors
+      c_colors = BytArr(N_Elements(c_colors))
+      FOR j=1,N_Elements(c_colors) DO c_colors[j-1] = FSC_Color(tempcolors[j-1], DECOMPOSED=0, j)
+    ENDIF
+       
     ; Going to have to do all of this in indexed color.
-    currentState = DecomposedColor()
-    Device, Decomposed=0
+    SetDecomposedState, 0, CURRENTSTATE=currentState
     
     ; Draw the contour plot.
     IF ~Keyword_Set(overplot) THEN BEGIN
@@ -277,7 +287,7 @@ PRO FSC_Contour, data, x, y, $
     ENDIF
     
     ; Restore the decomposed color state if you can.
-    IF currentState THEN Device, Decomposed=1
+    IF currentState THEN SetDecomposedState, 1
     
     ; Restore the color table.
     TVLCT, rr, gg, bb

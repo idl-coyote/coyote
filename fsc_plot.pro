@@ -111,6 +111,8 @@
 ;        Written, 12 November 2010. DWF.
 ;        Added SYMCOLOR keyword, and allow all 46 symbols from SYMCAT. 15 November 2010. DWF.
 ;        Added NODATA keyword. 15 November 2010. DWF.
+;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
+;        
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -187,8 +189,7 @@ PRO FSC_Plot, x, y, $
         symcolor = FSC_Color(symcolor, DECOMPOSED=0, 251)
     
     ; Going to have to do all of this in indexed color.
-    currentState = DecomposedColor()
-    Device, Decomposed=0
+    SetDecomposedState, 0, CURRENTSTATE=currentState
     
     ; Draw the plot.
     IF Keyword_Set(overplot) THEN BEGIN
@@ -206,7 +207,7 @@ PRO FSC_Plot, x, y, $
     ENDELSE
          
     ; Restore the decomposed color state if you can.
-    IF currentState THEN Device, Decomposed=1
+    IF currentState THEN SetDecomposedState, 1
     
     ; Restore the color table.
     TVLCT, rr, gg, bb

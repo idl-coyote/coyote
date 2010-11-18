@@ -76,10 +76,28 @@
 ;     BACKGROUND:   This keyword specifies the background color. Note that
 ;               the keyword ONLY has effect if the ERASE keyword is also
 ;               set or !P.MULTI is set to multiple plots and TVIMAGE is
-;               used to place the *first* plot. Can be a string (e.g., 'ivory'), or
+;               used to place the *first* plot. [Note change, setting this keyword
+;               automatically sets ERASE=1.] Can be a string (e.g., 'ivory'), or
 ;               a 24-bit value that can be decomposed into a color, or an 8-bit
 ;               index number into the current color table. ERASE and BACKGROUND
 ;               should only be used on 24-bit devices that support windows!
+;               
+;               If you are in indexed color mode, the background color index
+;               must be outside the range of image color indices, or you will
+;               see the background color in your image output. For example, you
+;               should NOT use code like this while in indexed color mode:
+;               
+;                  TVImage, image, Background=FSC_Color('gray')
+;                  
+;                Since FSC_Color will load a gray color in index 81, which is inside
+;                the indices assigned to the image. To do this correctly in indexed color
+;                mode, do this:
+;                
+;                   TVImage, image, Background='gray'
+;                   
+;                Or, this:
+;                
+;                    TVImage, Bytscl(image, Top=253), Background=FSC_Color('gray',254)
 ;
 ;     BREWER:   If set, applies only to BACKGROUND AND ACOLOR keywords. Selects
 ;               brewer colors, rather than standard FSC_COLOR colors as strings.
@@ -417,6 +435,8 @@
 ;           PS_BACKGROUND from the Coyote Library. 17 November 2010. DWF.
 ;       If the BACKGROUND color is set, then ERASEIT=1 automatically. 17 November 2010. DWF.
 ;       Alpha images can only be produced in IDL 6.5 or higher. Issue warning. 17 November 2010. DWF.
+;       BACKGROUND color changes affected multi-plots. Fixed 18 Nov 2010. DWF.
+;       BACKGROND color changes affected display in indexed color. Fixed 18 Nov 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -820,47 +840,27 @@ PRO TVIMAGE, image, x, y, $
        background = 'white'
        eraseit = 1
     ENDIF
-    IF N_Elements(acolor) EQ 0 THEN acolor = !P.Color
+    
     IF N_Elements(background) EQ 0 THEN background = !P.Background
-    noerase = Keyword_Set(noerase)
+    IF Size(background, /TNAME) EQ 'STRING' THEN BEGIN
+        IF StrUpCase(background) EQ 'WHITE' THEN BEGIN
+           IF N_Elements(acolor) EQ 0 THEN acolor = 'black 
+        ENDIF 
+    ENDIF
+    IF N_Elements(acolor) EQ 0 THEN acolor = !P.Color
+    noerase = Keyword_Set(noerase) ; Don't change, used in PS output.
+    
+    ; Before you do anything, get the current color table vectors
+    ; so they can be restored later.
+    TVLCT, rr, gg, bb, /Get
     
     ; Do you need to erase the window before image display?
-    ; If so, then it depends on how you have specified the
-    ; background color.
     IF Keyword_Set(eraseit) AND (!P.MULTI[0] EQ 0) THEN BEGIN
          IF (!D.Flags AND 256) NE 0 THEN BEGIN
-            Device, Get_Visual_Depth=theDepth
-            IF theDepth GE 24 THEN BEGIN
-               varType = Size(background, /TNAME)
-               CASE 1 OF
-                  varType EQ 'BYTE' OR varType EQ 'INT': BEGIN
-                     TVLCT, r, g, b, /GET
-                     Erase, Color=background
-                     TVLCT, r, g, b
-                     END
-                  varType EQ 'LONG': BEGIN
-                     Device, Get_Decomposed=theState
-                     Device, Decomposed=1
-                     Erase, Color=background
-                     Device, Decomposed=theState
-                     END
-                  varType EQ 'STRING': BEGIN
-                     Device, Get_Decomposed=theState
-                     Device, Decomposed=1
-                     Erase, Color=FSC_Color(background)
-                     Device, Decomposed=theState
-                     END
-                  ELSE: BEGIN
-                     TVLCT, r, g, b, /GET
-                     Erase, Color=background
-                     TVLCT, r, g, b
-                     END
-               ENDCASE
-            ENDIF
+            FSC_Erase, background
          ENDIF ELSE BEGIN
             IF (!D.NAME EQ 'Z') THEN BEGIN
-                IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
-                Erase, Color=background
+                FSC_Erase, background
             ENDIF
             
             ; Do you need a PostScript background color? Lot's of problems here!
@@ -897,7 +897,7 @@ PRO TVIMAGE, image, x, y, $
                         !X = bangx
                         !Y = bangy
                         !P = bangp
-                        
+                        TVLCT, rr, gg, bb
                     ENDIF ELSE tempNoErase = noerase
                 ENDIF ELSE tempNoErase = noerase
              ENDIF ELSE tempNoErase = noerase
@@ -967,6 +967,7 @@ PRO TVIMAGE, image, x, y, $
           Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
              XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]], NOERASE=tempNoErase
           position = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
+          TVLCT, rr, gg, bb
        ENDIF ELSE BEGIN
           IF Keyword_Set(overplot) THEN BEGIN
              position = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
@@ -978,7 +979,7 @@ PRO TVIMAGE, image, x, y, $
           IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
           Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
               XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]], NOERASE=tempNoErase
-              
+          TVLCT, rr, gg, bb
           ; Use position coordinates to indicate position in this set of coordinates.
           xrange = !X.Window[1] - !X.Window[0]
           xstart = !X.Window[0] + position[0]*xrange
@@ -1088,6 +1089,7 @@ PRO TVIMAGE, image, x, y, $
                    TVLCT, r, g, b, /GET
                    LoadCT, 0, /Silent
                    Device, DECOMPOSED=1, BITS_PER_PIXEL=8, COLOR=1
+                   TVLCT, r, g, b
              ENDIF ELSE thisDepth = 8
              ENDCASE
           
@@ -1334,12 +1336,11 @@ PRO TVIMAGE, image, x, y, $
         ENDIF 
     ENDIF
     
-    ; Save plot system variables and current color table.
+    ; Save plot system variables.
     bangp = !P
     bangx = !X
     bangy = !Y
-    TVLCT, r, g, b, /GET
-    
+     
     ; Need a data range?
     IF N_Elements(plotxrange) EQ 0 THEN plotxrange = [0, imgXsize]
     IF N_Elements(plotyrange) EQ 0 THEN plotyrange = [0, imgYsize]
@@ -1348,7 +1349,7 @@ PRO TVIMAGE, image, x, y, $
     IF axes THEN BEGIN
     
         ; If axes color is a string, convert it.
-        IF Size(acolor, /TNAME) EQ 'STRING' THEN acolor = FSC_COLOR(acolor, BREWER=brewer)    
+        IF Size(acolor, /TNAME) EQ 'STRING' THEN acolor = FSC_COLOR(acolor)    
         PLOT, [0], /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
             XSTYLE=1, YSTYLE=1, POSITION=position, COLOR=acolor, _STRICT_EXTRA=axkeywords
             
@@ -1363,7 +1364,7 @@ PRO TVIMAGE, image, x, y, $
     ENDELSE
 
     ; Clean up after yourself.
-    IF (!D.Name NE 'Z') THEN TVLCT, r, g, b
+    IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb
     IF ~Keyword_Set(save) THEN BEGIN
         !P = bangp
         !X = bangx

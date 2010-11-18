@@ -71,17 +71,18 @@
 ; :History:
 ;     Change History::
 ;        Written, 12 November 2010. DWF.
+;        Modified so that input variables are not changed. 18 Nov 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO FSC_Erase, background_color, COLOR=color
 
-   IF N_Elements(background_color) EQ 0 THEN color = 'white' ELSE color = background_color
-   IF N_Elements(color) EQ 0 THEN color = 'white'
+   IF N_Elements(background_color) EQ 0 THEN thisColor = 'white' ELSE thisColor = background_color
+   IF N_Elements(color) EQ 0 THEN thisColor = 'white' ELSE thisColor = color
    TVLCT, rr, gg, bb, /Get
-   IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)
-   ERASE, Color=color
+   IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(thisColor)
+   ERASE, Color=thisColor
    TVLCT, rr, gg, bb
    
 END

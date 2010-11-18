@@ -96,6 +96,8 @@
 ;        Added SYMCOLOR keyword. PSYM accepts all values from SYMCAT. SYMCOLOR and SYMSIZE
 ;           keywords can be vectors the size of x. 15 November 2010. DWF
 ;        Added ability to support COLOR keyword as a vector the size of x. 15 November 2010. DWF
+;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
+;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -150,7 +152,10 @@ PRO FSC_PlotS, x, y, z, $
     
    ; Get current color table vectors.
    TVLCT, rr, gg, bb, /Get
-   
+
+   ; Going to draw the axes in indexed color.
+   SetDecomposedState, 0, CurrentState=currentState
+    
    ; Draw the line or symbol.
    IF N_Elements(color) EQ 1 THEN BEGIN
    
@@ -216,7 +221,11 @@ PRO FSC_PlotS, x, y, z, $
        
    ENDIF 
    
-   ; Restore the color table vectors.
-   TVLCT, rr, gg, bb
+   ; Restore the decomposed state if you can.
+   IF currentState THEN SetDecomposedState, 1
+   
+   ; Restore the color table. Can't do this for the Z-buffer or
+   ; the snap shot will be incorrect.
+   IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb
    
 END

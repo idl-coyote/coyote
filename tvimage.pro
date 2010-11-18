@@ -416,6 +416,7 @@
 ;       Made changes that supports the BACKGROUND color in PostScript. Requires the program
 ;           PS_BACKGROUND from the Coyote Library. 17 November 2010. DWF.
 ;       If the BACKGROUND color is set, then ERASEIT=1 automatically. 17 November 2010. DWF.
+;       Alpha images can only be produced in IDL 6.5 or higher. Issue warning. 17 November 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -640,10 +641,16 @@ FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
     ; If this is acting like a TV command, then there is no alpha channel.
     ; Exit now.
     IF Keyword_Set(tv) THEN RETURN, aImage[*,*,0:2]
+    
+    ; If this version of IDL is 6.4 or older, we can't do this.
+    thisRelease = Float(!Version.Release)
+    IF thisRelease LT 6.5 THEN BEGIN
+       Message, 'IDL 6.5 or higher required to correctly display alpha images.', /INFORMATIONAL
+       RETURN, aImage[*,*,0:2]
+    ENDIF
                     
     ; Some alpha channels are screwy. Just ignore those and return now.
     IF MIN(alpha_channel) EQ MAX(alpha_channel) THEN RETURN, aImage[*,*,0:2]
-       
        
     ; Now we have an alpha channel.
     alpha_channel = Scale_Vector(alpha_channel, 0.0, 1.0)
@@ -691,7 +698,7 @@ FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
     Device, Get_Decomposed=theState
     Device, Set_Resolution=sb[0:1], Decomposed=1, Set_Pixel_Depth=24
     TV, bImage, TRUE=3
-            
+                
     ; Calculate the parameters for taking a snapshot of the
     ; relevant portion of the window.
     xstart = position[0]*sb[0]
@@ -774,7 +781,7 @@ PRO TVIMAGE, image, x, y, $
                          _tvimage_position, _tvimage_winID, $
                          _tvimage_current
     
-     ; Which release of IDL is this?
+    ; Which release of IDL is this?
     thisRelease = Float(!Version.Release)
     
     ; If the background color is specified, then ERASEIT should be automatically set.

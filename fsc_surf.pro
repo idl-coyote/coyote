@@ -381,7 +381,7 @@ PRO FSC_Surf, data, x, y, $
     ENDELSE
     
     ; Restore the decomposed color state to the input state.
-    IF currentState THEN Device, Decomposed=1 ELSE Device, Decomposed=0
+    IF currentState THEN SetDecomposedState, 1
 
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.

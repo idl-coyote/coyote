@@ -612,6 +612,7 @@ PRO TVSCALE, image, x, y, $
     ENDIF
     IF N_Elements(acolor) EQ 0 THEN acolor = !P.Color
     IF N_Elements(background) EQ 0 THEN background = !P.Background
+    noerase = Keyword_Set(noerase)
 
     IF Keyword_Set(eraseit) AND (!P.MULTI[0] EQ 0) THEN BEGIN
          IF (!D.Flags AND 256) NE 0 THEN BEGIN
@@ -648,9 +649,45 @@ PRO TVSCALE, image, x, y, $
                 IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
                 Erase, Color=background
             ENDIF
-            IF (!D.NAME EQ 'PS') THEN BEGIN
-                PS_Background, background
-            ENDIF
+            
+            ; Do you need a PostScript background color? Lot's of problems here!
+            ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a
+            ; plot of any sort erases the background color. So, I have to draw a 
+            ; plot, store the new system variables, then draw my background, etc.
+            ; I have tried LOTS of options. This is the only one that worked.
+            IF !D.Name EQ 'PS' THEN BEGIN
+               IF ~noerase THEN BEGIN
+               
+                   ; I only have to do this, if this is the first plot.
+                   IF !P.MULTI[0] EQ 0 THEN BEGIN
+                   
+                        ; Save the current system variables. Will need to restore later.
+                        bangx = !X
+                        bangy = !Y
+                        bangp = !P
+                        
+                        ; Draw the plot that doesn't draw anything.
+                        Plot, [0], POSITION=position, /NODATA, XSTYLE=4, YSTYLE=4, ZSTYLE=4
+                        
+                        ; Save the "after plot" system variables. Will use later. 
+                        afterx = !X
+                        aftery = !Y
+                        afterp = !P     
+                        
+                        ; Draw the background color and set the variables you will need later.
+                        PS_Background, background
+                        psnodraw = 1
+                        tempNoErase = 1
+                        
+                        ; Restore the original system variables so that it is as if you didn't
+                        ; draw the invisible plot.
+                        !X = bangx
+                        !Y = bangy
+                        !P = bangp
+                        
+                    ENDIF ELSE tempNoErase = noerase
+                ENDIF ELSE tempNoErase = noerase
+             ENDIF ELSE tempNoErase = noerase
          ENDELSE
     ENDIF
 
@@ -746,7 +783,7 @@ PRO TVSCALE, image, x, y, $
        IF Keyword_Set(multi) AND (Keyword_Set(overplot) NE 1) THEN BEGIN
            IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
           Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
-             XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]]
+             XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]], NOERASE=tempNoErase
           position = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
       ENDIF ELSE BEGIN
          IF Keyword_Set(overplot) THEN BEGIN
@@ -759,7 +796,7 @@ PRO TVSCALE, image, x, y, $
           ; Draw the invisible plot to get plot position.
           IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
           Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
-              XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]]
+              XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]], NOERASE=tempNoErase
     
           ; Use position coordinates to indicate position in this set of coordinates.
           xrange = !X.Window[1] - !X.Window[0]
@@ -1058,6 +1095,14 @@ PRO TVSCALE, image, x, y, $
     ; Restore Decomposed state if necessary.
     RestoreDecomposed:
     
+    ; If this is the first plot in PS, then we have to make it appear that we have
+    ; drawn a plot, even though we haven't.
+    IF N_Elements(psnodraw) EQ 1 THEN BEGIN
+        !X = afterX
+        !Y = afterY
+        !P = afterP
+    ENDIF
+ 
     CASE StrUpCase(!D.NAME) OF
        'X': BEGIN
           IF thisRelease GE 5.2 THEN Device, Decomposed=thisDecomposed

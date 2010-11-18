@@ -136,6 +136,7 @@
 ;        Added TSIZE and TSPACE keywords to treak title size and placement, 
 ;           as necessary. 17 November 2010. DWF.
 ;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
+;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -198,14 +199,6 @@ PRO FSC_Surf, data, x, y, $
     IF N_Elements(xstyle) EQ 0 THEN xstyle = 0
     IF N_Elements(ystyle) EQ 0 THEN ystyle = 0
     IF N_Elements(zstyle) EQ 0 THEN zstyle = 0
-
-    ; Do you need a PostScript background color? 
-    IF !D.Name EQ 'PS' THEN BEGIN
-       IF ~noerase THEN BEGIN
-           PS_Background, background
-           noerase = 1
-        ENDIF
-     ENDIF
             
     ; Load the drawing colors, if needed. These drawing colors will be done
     ; using decomposed color, so we don't have to "dirty" the color table.
@@ -249,6 +242,55 @@ PRO FSC_Surf, data, x, y, $
     ; Going to draw the axes in decomposed color if we can.
     IF currentState THEN SetDecomposedState,1
     
+    ; Do you need a PostScript background color? Lot's of problems here!
+    ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a
+    ; plot of any sort erases the background color. So, I have to draw a 
+    ; plot, store the new system variables, then draw my background, etc.
+    ; I have tried LOTS of options. This is the only one that worked.
+    IF !D.Name EQ 'PS' THEN BEGIN
+       IF ~noerase THEN BEGIN
+       
+           ; I only have to do this, if this is the first plot.
+           IF !P.MULTI[0] EQ 0 THEN BEGIN
+           
+                ; Make sure axis are turned off. I don't really want to draw anything,
+                ; just advance !P.MULTI or "erase" the display for the next plot.
+                IF BitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
+                IF BitGet(ystyle, 2) NE 1 THEN yystyle = ystyle + 4 ELSE yystyle = ystyle
+                IF BitGet(zstyle, 2) NE 1 THEN zzstyle = zstyle + 4 ELSE zzstyle = zstyle
+                
+                ; Save the current system variables. Will need to restore later.
+                bangx = !X
+                bangy = !Y
+                bangz = !Z
+                bangp = !P
+                
+                ; Draw the plot that doesn't draw anything.
+                Surface, data, x, y, XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
+                    CHARSIZE=charsize, _STRICT_EXTRA=extra  
+                
+                ; Save the "after plot" system variables. Will use later. 
+                afterx = !X
+                aftery = !Y
+                afterz = !Z
+                afterp = !P     
+                
+                ; Draw the background color and set the variables you will need later.
+                PS_Background, background
+                psnodraw = 1
+                tempNoErase = 1
+                
+                ; Restore the original system variables so that it is as if you didn't
+                ; draw the invisible plot.
+                !X = bangx
+                !Y = bangy
+                !Z = bangz
+                !P = bangp
+                
+            ENDIF ELSE tempNoErase = noerase
+        ENDIF ELSE tempNoErase = noerase
+     ENDIF ELSE tempNoErase = noerase
+
     bangx = !X
     bangy = !Y
     bangz = !Z
@@ -257,7 +299,7 @@ PRO FSC_Surf, data, x, y, $
     ; Draw the surface axes.
     Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
         /NODATA, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
-        FONT=font, CHARSIZE=charsize, NOERASE=noerase, _STRICT_EXTRA=extra
+        FONT=font, CHARSIZE=charsize, NOERASE=tempNoErase, _STRICT_EXTRA=extra
         
     ; Draw the title, if you have one.
     IF N_Elements(title) NE 0 THEN BEGIN
@@ -362,17 +404,18 @@ PRO FSC_Surf, data, x, y, $
             
     ENDIF ELSE BEGIN
     
+        
         ; We can draw the surface in decomposed color mode, unless the SHADES
-        ; keyword is being used. Then we have to use indexed color mode. 
+        ; keyword is being used. Then we have to use indexed color mode.         
         IF N_Elements(shades) NE 0 THEN BEGIN
             Device, Decomposed=0
             TVLCT, rr, gg, bb
-            Surface, data, x, y, /NOERASE, SHADES=shades, $
+            Surface, data, x, y, NOERASE=1, SHADES=shades, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
                 FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra        
         ENDIF ELSE BEGIN
             IF currentState THEN Device, Decomposed=1 ELSE TVLCT, rl, gl, bl
-            Surface, data, x, y, /NOERASE, COLOR=color, BOTTOM=bottom, $
+            Surface, data, x, y, NOERASE=1, COLOR=color, BOTTOM=bottom, $
                 BACKGROUND=background, SHADES=shades, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
                 FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra
@@ -380,6 +423,15 @@ PRO FSC_Surf, data, x, y, $
         
     ENDELSE
     
+    ; If this is the first plot in PS, then we have to make it appear that we have
+    ; drawn a plot, even though we haven't.
+    IF N_Elements(psnodraw) EQ 1 THEN BEGIN
+        newx = afterX
+        newy = afterY
+        newz = afterZ
+        newp = afterP
+    ENDIF
+
     ; Restore the decomposed color state to the input state.
     IF currentState THEN SetDecomposedState, 1
 
@@ -389,7 +441,7 @@ PRO FSC_Surf, data, x, y, $
     
     ; Update the system variables.
     !X = newx 
-    !y = newy 
+    !Y = newy 
     !Z = newz 
     !P = newP
 

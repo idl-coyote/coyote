@@ -148,6 +148,7 @@
 ;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
 ;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
 ;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
+;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -260,14 +261,6 @@ PRO FSC_Contour, data, x, y, $
         ENDIF ELSE c_labels = Reverse((indices MOD label) EQ 0)
     ENDIF
 
-    ; Do you need a PostScript background color? 
-    IF !D.Name EQ 'PS' THEN BEGIN
-       IF ~noerase THEN BEGIN
-           PS_Background, background
-           noerase = 1
-        ENDIF
-     ENDIF
-
     ; Load the drawing colors, if needed.
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN $
         axiscolor = FSC_Color(axiscolor, DECOMPOSED=0, 254)
@@ -284,21 +277,104 @@ PRO FSC_Contour, data, x, y, $
     ; Going to have to do all of this in indexed color.
     SetDecomposedState, 0, CURRENTSTATE=currentState
     
-    ; Draw the contour plot.
+    ; Do you need a PostScript background color? Lot's of problems here!
+    ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a
+    ; plot of any sort erases the background color. So, I have to draw a 
+    ; plot, store the new system variables, then draw my background, etc.
+    ; I have tried LOTS of options. This is the only one that worked.
+    IF !D.Name EQ 'PS' THEN BEGIN
+       IF ~noerase THEN BEGIN
+       
+           ; I only have to do this, if this is the first plot.
+           IF !P.MULTI[0] EQ 0 THEN BEGIN
+           
+                ; Make sure axis are turned off. I don't really want to draw anything,
+                ; just advance !P.MULTI or "erase" the display for the next plot.
+                IF BitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
+                IF BitGet(ystyle, 2) NE 1 THEN yystyle = ystyle + 4 ELSE yystyle = ystyle
+                
+                ; Save the current system variables. Will need to restore later.
+                bangx = !X
+                bangy = !Y
+                bangp = !P
+                
+                ; Draw the plot that doesn't draw anything.
+                Contour, contourData, xgrid, ygrid, XSTYLE=xxstyle, YSTYLE=yxstyle, /NODATA  
+                
+                ; Save the "after plot" system variables. Will use later. 
+                afterx = !X
+                aftery = !Y
+                afterp = !P     
+                
+                ; Draw the background color and set the variables you will need later.
+                PS_Background, background
+                psnodraw = 1
+                tempNoErase = 1
+                
+                ; Restore the original system variables so that it is as if you didn't
+                ; draw the invisible plot.
+                !X = bangx
+                !Y = bangy
+                !P = bangp
+                
+            ENDIF ELSE tempNoErase = noerase
+        ENDIF ELSE tempNoErase = noerase
+     ENDIF ELSE tempNoErase = noerase
+     
+    ; Storing these system variable is *required* to make !P.MULTI work correctly
+    ; when doing filled contours. Do not delete!
+    bangx = !X
+    bangy = !Y
+    bangp = !P
+    
+    ; If you are not overploting, draw the contour plot now. Only the axes are
+    ; drawn here, no data.
     IF ~Keyword_Set(overplot) THEN BEGIN
+    
         Contour, contourData, xgrid, ygrid, COLOR=axiscolor, $
             BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
-            _STRICT_EXTRA=extra, /NODATA, NOERASE=noerase, OVERPLOT=0
+            _STRICT_EXTRA=extra, /NODATA, NOERASE=tempNoErase
+                    
     ENDIF
+    
+    ; This is where we actually draw the data.
     Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
         LEVELS=levels, C_Labels=c_labels, C_COLORS=c_colors, $
         XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, /OVERPLOT
         
-    ; If you filled the contour plot, you will need to repair the axes.
+    ; If this is the first plot in PS, then we have to make it appear that we have
+    ; drawn a plot, even though we haven't.
+    IF N_Elements(psnodraw) EQ 1 THEN BEGIN
+        !X = afterX
+        !Y = afterY
+        !P = afterP
+    ENDIF
+        
+    ; If you filled the contour plot, you will need to repair the axes. We have
+    ; to be careful that we don't advance a !P.MULTI plot when we do this. Thus,
+    ; we have to take care with the system variables again.
     IF Keyword_Set(fill) OR Keyword_Set(cell_fill) THEN BEGIN
+        
+        ; Get the current system variables, so we can restore them later.
+        newx = !X
+        newy = !y
+        newP = !P
+        
+        ; Set the system variables to their original values.
+        !X = bangx
+        !Y = bangy
+        !P = bangp
+        
+        ; Repair the plot.
         Contour, contourData, xgrid, ygrid, COLOR=axiscolor, C_COLORS=c_colors, $
-          BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
-          _STRICT_EXTRA=extra, /NODATA, /NOERASE, OVERPLOT=0
+           BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
+           _STRICT_EXTRA=extra, /NODATA, NOERASE=1
+          
+        ; Restore the system variables so that it appears we didn't do what we just did.
+        !X = newx 
+        !y = newy 
+        !P = newP
+
     ENDIF
     
     ; Restore the decomposed color state if you can.

@@ -117,6 +117,7 @@
 ;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
 ;        Fixed a problem with overplotting with symbols. 17 November 2010. DWF.
 ;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
+;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
 ;        
 ;
 ; :Copyright:
@@ -184,15 +185,7 @@ PRO FSC_Plot, x, y, $
     IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
         position = Aspect(aspect)
     ENDIF
-    
-    ; Do you need a PostScript background color? 
-    IF !D.Name EQ 'PS' THEN BEGIN
-       IF ~noerase THEN BEGIN
-           PS_Background, background
-           noerase = 1
-        ENDIF
-     ENDIF
-       
+           
      ; Load the drawing colors, if needed.
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN $
         axiscolor = FSC_Color(axiscolor, DECOMPOSED=0, 254)
@@ -203,7 +196,46 @@ PRO FSC_Plot, x, y, $
     IF Size(symcolor, /TNAME) EQ 'STRING' THEN $
         symcolor = FSC_Color(symcolor, DECOMPOSED=0, 251)
     
-    ; Going to have to do all of this in indexed color.
+    ; Do you need a PostScript background color? Lot's of problems here!
+    ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a
+    ; plot of any sort erases the background color. So, I have to draw a 
+    ; plot, store the new system variables, then draw my background, etc.
+    ; I have tried LOTS of options. This is the only one that worked.
+    IF !D.Name EQ 'PS' THEN BEGIN
+       IF ~noerase THEN BEGIN
+       
+           ; I only have to do this, if this is the first plot.
+           IF !P.MULTI[0] EQ 0 THEN BEGIN
+           
+                ; Save the current system variables. Will need to restore later.
+                bangx = !X
+                bangy = !Y
+                bangp = !P
+                
+                ; Draw the plot that doesn't draw anything.
+                Plot, indep, dep, POSITION=position, /NODATA, _STRICT_EXTRA=extra  
+                
+                ; Save the "after plot" system variables. Will use later. 
+                afterx = !X
+                aftery = !Y
+                afterp = !P     
+                
+                ; Draw the background color and set the variables you will need later.
+                PS_Background, background
+                psnodraw = 1
+                tempNoErase = 1
+                
+                ; Restore the original system variables so that it is as if you didn't
+                ; draw the invisible plot.
+                !X = bangx
+                !Y = bangy
+                !P = bangp
+                
+            ENDIF ELSE tempNoErase = noerase
+        ENDIF ELSE tempNoErase = noerase
+     ENDIF ELSE tempNoErase = noerase
+ 
+     ; Going to have to do all of this in indexed color.
     SetDecomposedState, 0, CURRENTSTATE=currentState
     
     ; Draw the plot.
@@ -211,7 +243,7 @@ PRO FSC_Plot, x, y, $
        IF psym LE 0 THEN OPlot, indep, dep, COLOR=color, _STRICT_EXTRA=extra
     ENDIF ELSE BEGIN
       Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, $
-            POSITION=position, /NODATA, NOERASE=noerase, _STRICT_EXTRA=extra
+            POSITION=position, /NODATA, NOERASE=tempNoErase, _STRICT_EXTRA=extra
         IF psym LE 0 THEN BEGIN
            IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=color, _EXTRA=extra  
         ENDIF  
@@ -221,6 +253,14 @@ PRO FSC_Plot, x, y, $
             PSYM=SymCat(Abs(psym)), _EXTRA=extra
     ENDIF 
          
+    ; If this is the first plot in PS, then we have to make it appear that we have
+    ; drawn a plot, even though we haven't.
+    IF N_Elements(psnodraw) EQ 1 THEN BEGIN
+        !X = afterX
+        !Y = afterY
+        !P = afterP
+    ENDIF
+
     ; Restore the decomposed color state if you can.
     IF currentState THEN SetDecomposedState, 1
     

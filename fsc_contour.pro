@@ -149,6 +149,7 @@
 ;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
 ;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
 ;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
+;        Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -288,34 +289,37 @@ PRO FSC_Contour, data, x, y, $
            ; I only have to do this, if this is the first plot.
            IF !P.MULTI[0] EQ 0 THEN BEGIN
            
-                ; Make sure axis are turned off. I don't really want to draw anything,
-                ; just advance !P.MULTI or "erase" the display for the next plot.
-                IF BitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
-                IF BitGet(ystyle, 2) NE 1 THEN yystyle = ystyle + 4 ELSE yystyle = ystyle
+                IF Keyword_Set(overplot) NE 1 THEN BEGIN
+                    ; Make sure axis are turned off. I don't really want to draw anything,
+                    ; just advance !P.MULTI or "erase" the display for the next plot.
+                    IF BitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
+                    IF BitGet(ystyle, 2) NE 1 THEN yystyle = ystyle + 4 ELSE yystyle = ystyle
+                    
+                    ; Save the current system variables. Will need to restore later.
+                    bangx = !X
+                    bangy = !Y
+                    bangp = !P
+                    
+                    ; Draw the plot that doesn't draw anything.
+                    Contour, contourData, xgrid, ygrid, XSTYLE=xxstyle, YSTYLE=yxstyle, /NODATA  
+                    
+                    ; Save the "after plot" system variables. Will use later. 
+                    afterx = !X
+                    aftery = !Y
+                    afterp = !P     
+                    
+                    ; Draw the background color and set the variables you will need later.
+                    PS_Background, background
+                    psnodraw = 1
+                    tempNoErase = 1
+                    
+                    ; Restore the original system variables so that it is as if you didn't
+                    ; draw the invisible plot.
+                    !X = bangx
+                    !Y = bangy
+                    !P = bangp
                 
-                ; Save the current system variables. Will need to restore later.
-                bangx = !X
-                bangy = !Y
-                bangp = !P
-                
-                ; Draw the plot that doesn't draw anything.
-                Contour, contourData, xgrid, ygrid, XSTYLE=xxstyle, YSTYLE=yxstyle, /NODATA  
-                
-                ; Save the "after plot" system variables. Will use later. 
-                afterx = !X
-                aftery = !Y
-                afterp = !P     
-                
-                ; Draw the background color and set the variables you will need later.
-                PS_Background, background
-                psnodraw = 1
-                tempNoErase = 1
-                
-                ; Restore the original system variables so that it is as if you didn't
-                ; draw the invisible plot.
-                !X = bangx
-                !Y = bangy
-                !P = bangp
+                ENDIF
                 
             ENDIF ELSE tempNoErase = noerase
         ENDIF ELSE tempNoErase = noerase
@@ -329,7 +333,7 @@ PRO FSC_Contour, data, x, y, $
     
     ; If you are not overploting, draw the contour plot now. Only the axes are
     ; drawn here, no data.
-    IF ~Keyword_Set(overplot) THEN BEGIN
+    IF Keyword_Set(overplot) EQ 0 THEN BEGIN
     
         Contour, contourData, xgrid, ygrid, COLOR=axiscolor, $
             BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $

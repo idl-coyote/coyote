@@ -118,6 +118,7 @@
 ;        Fixed a problem with overplotting with symbols. 17 November 2010. DWF.
 ;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
 ;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
+;        Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
 ;        
 ;
 ; :Copyright:
@@ -207,30 +208,33 @@ PRO FSC_Plot, x, y, $
            ; I only have to do this, if this is the first plot.
            IF !P.MULTI[0] EQ 0 THEN BEGIN
            
-                ; Save the current system variables. Will need to restore later.
-                bangx = !X
-                bangy = !Y
-                bangp = !P
+                IF Keyword_Set(overplot) NE 1 THEN BEGIN
                 
-                ; Draw the plot that doesn't draw anything.
-                Plot, indep, dep, POSITION=position, /NODATA, _STRICT_EXTRA=extra  
+                    ; Save the current system variables. Will need to restore later.
+                    bangx = !X
+                    bangy = !Y
+                    bangp = !P
+                    
+                    ; Draw the plot that doesn't draw anything.
+                    Plot, indep, dep, POSITION=position, /NODATA, _STRICT_EXTRA=extra  
+                    
+                    ; Save the "after plot" system variables. Will use later. 
+                    afterx = !X
+                    aftery = !Y
+                    afterp = !P     
+                    
+                    ; Draw the background color and set the variables you will need later.
+                    PS_Background, background
+                    psnodraw = 1
+                    tempNoErase = 1
+                    
+                    ; Restore the original system variables so that it is as if you didn't
+                    ; draw the invisible plot.
+                    !X = bangx
+                    !Y = bangy
+                    !P = bangp
                 
-                ; Save the "after plot" system variables. Will use later. 
-                afterx = !X
-                aftery = !Y
-                afterp = !P     
-                
-                ; Draw the background color and set the variables you will need later.
-                PS_Background, background
-                psnodraw = 1
-                tempNoErase = 1
-                
-                ; Restore the original system variables so that it is as if you didn't
-                ; draw the invisible plot.
-                !X = bangx
-                !Y = bangy
-                !P = bangp
-                
+                ENDIF
             ENDIF ELSE tempNoErase = noerase
         ENDIF ELSE tempNoErase = noerase
      ENDIF ELSE tempNoErase = noerase

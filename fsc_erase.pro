@@ -51,7 +51,8 @@
 ; :Keywords:
 ;     color: in, optional, type=string/integer/long, default='white'
 ;         An alternative way to specify the color to use in erasing the graphics window.
-;         Color names are those used with FSC_Color.
+;         Color names are those used with FSC_Color. This parameter is used in
+;         preference to the background_color parameter.
 ;          
 ; :Examples:
 ;    Used like the IDL Erase command::
@@ -72,6 +73,8 @@
 ;     Change History::
 ;        Written, 12 November 2010. DWF.
 ;        Modified so that input variables are not changed. 18 Nov 2010. DWF.
+;        Got my color selection algorithm right. COLOR keyword takes precedence
+;          over the parameter. 18 Nov 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -79,7 +82,7 @@
 PRO FSC_Erase, background_color, COLOR=color
 
    IF N_Elements(background_color) EQ 0 THEN thisColor = 'white' ELSE thisColor = background_color
-   IF N_Elements(color) EQ 0 THEN thisColor = 'white' ELSE thisColor = color
+   IF N_Elements(color) NE 0 THEN thisColor = color 
    TVLCT, rr, gg, bb, /Get
    IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(thisColor)
    ERASE, Color=thisColor

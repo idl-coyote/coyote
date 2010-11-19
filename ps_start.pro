@@ -120,11 +120,16 @@
 ;
 ;          !P.Thick = 2
 ;          !P.CharThick = 2
-;          !P.Charsize = 1.25 (or 1.5 if in UNIX)
 ;          !X.Thick = 2
 ;          !Y.Thick = 2
 ;          !Z.Thick = 2
 ;          !P.Font = 0
+;          
+;        The !P.Charsize variable is set differently on Windows computers, and depending
+;        on whether !P.MULTI is being used. On Windows the default is 1.25, or 1.00 for
+;        multiple plots. On other computers, the default is 1.5, or 1.25 for multiple plots.
+;        If true-type fonts are being used (FONT=1), the default is 1.5, or 1.25 for 
+;        multiple plots.
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -139,6 +144,7 @@
 ;       Modified to allow PostScript page type to be stored for future processing with FixPS. 9 August 2009. DWF.
 ;       Added NoFix keyword to PS_END calls to repair previous, but unused set-ups. 1 Nov 2010. DWF.
 ;       Added Charsize keyword to PS_START. 14 Nov 2010. DWF.
+;       Changed the way default character sizes are set. 19 Nov 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -209,7 +215,25 @@ PRO PS_START, $
    IF ps_struct.p.charthick EQ 0 THEN !P.Charthick = 2
    IF ps_struct.p.charsize EQ 0 THEN BEGIN
         IF N_Elements(charsize) EQ 0 THEN BEGIN
-             !P.Charsize = (!Version.OS_Family EQ 'Windows') ? 1.25 : 1.5
+        
+            CASE StrUpCase(!Version.OS_Family) OF
+            
+                'WINDOWS': BEGIN
+                    IF Total(!P.MULTI) EQ 0 THEN !P.Charsize = 1.25 ELSE !P.Charsize = 1.00
+                    IF (font EQ 1) THEN BEGIN
+                        IF Total(!P.MULTI) EQ 0 THEN !P.Charsize = 1.50 ELSE !P.Charsize = 1.25
+                    ENDIF
+                    END
+                    
+                ELSE: BEGIN
+                    IF Total(!P.MULTI) EQ 0 THEN !P.Charsize = 1.50 ELSE !P.Charsize = 1.25
+                    IF (font EQ 1) THEN BEGIN
+                        IF Total(!P.MULTI) EQ 0 THEN !P.Charsize = 1.50 ELSE !P.Charsize = 1.25
+                    ENDIF
+                    END
+            
+            ENDCASE
+             
         ENDIF ELSE !P.Charsize = charsize
    ENDIF ELSE BEGIN
         IF N_Elements(charsize) NE 0 THEN !P.Charsize = charsize

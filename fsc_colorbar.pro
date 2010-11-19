@@ -215,6 +215,7 @@
 ;             "white" or the current device is PostScript, sets the ANNOTATECOLOR keyword
 ;             to "black" if it of the COLOR keyword is not currently set to some other color. 
 ;             If the pixel is "black" then ANNOTATECOLOR is set to "white". DWF.
+;      19 Nov 2010. Fixed a small problem when choosing an AnnnotateColor. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -439,16 +440,19 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
     IF (!D.Name EQ 'PS') AND N_Elements(annotateColor) EQ 0 THEN BEGIN
         annotateColor = 'black'
     ENDIF ELSE BEGIN
-        IF (!D.Window GE 0) AND ~scalablePixels THEN BEGIN
-            pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-            IF N_ELEMENTS(color) EQ 0 THEN BEGIN
-                IF Total(pixel) EQ 765 THEN annotateColor = 'black'
-                IF Total(pixel) EQ 0 THEN annotateColor = 'white'
-            ENDIF ELSE BEGIN
-                 IF Size(color, /TNAME) EQ 'STRING' THEN annotateColor = color
-            ENDELSE
-        ENDIF
+        IF N_Elements(annotateColor) EQ 0 THEN BEGIN
+            IF (!D.Window GE 0) AND ~scalablePixels THEN BEGIN
+                pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                IF N_ELEMENTS(color) EQ 0 THEN BEGIN
+                    IF Total(pixel) EQ 765 THEN annotateColor = 'black'
+                    IF Total(pixel) EQ 0 THEN annotateColor = 'white'
+                ENDIF ELSE BEGIN
+                     IF Size(color, /TNAME) EQ 'STRING' THEN annotateColor = color
+                ENDELSE
+            ENDIF ELSE annotateColor = 'white'
+        ENDIF 
     ENDELSE
+    IF N_Elements(annotateColor) EQ 0 THEN annotateColor = 'white'
     
     ; Get the current colortable.
     TVLCT, rr, gg, bb, /GET
@@ -515,5 +519,5 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
     !Map = bang_map
     
     ; Set the current colors back.
-    TVLCT, rr, gg, bb
+    IF !D.Name NE 'Z' THEN TVLCT, rr, gg, bb
 END

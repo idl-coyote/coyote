@@ -72,6 +72,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 16 November 2010. DWF.
+;        Changes to include SET_PIXEL_DEPTH in Z-graphics buffer. 19 Nov 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -95,7 +96,12 @@ PRO SetDecomposedState, state, CURRENTSTATE=currentState
              END
              
         'Z': BEGIN ; Z-Graphics Buffer
-             IF Float(!Version.Release) GE 6.4 THEN Device, Decomposed=state
+             IF Float(!Version.Release) GE 6.4 THEN BEGIN
+                CASE state OF
+                    0: Device, Decomposed=state, Set_Pixel_Depth=8
+                    1: Device, Decomposed=state, Set_Pixel_Depth=24
+                 ENDCASE
+             ENDIF
              END
              
         'MAC': BEGIN
@@ -106,7 +112,7 @@ PRO SetDecomposedState, state, CURRENTSTATE=currentState
          
          'WIN': Device, Decomposed=state
          
-         ELSE:
+         ELSE: Message, 'Unrecognized device. Assuming indexed color state.', /INFORMATIONAL
          
     ENDCASE
     

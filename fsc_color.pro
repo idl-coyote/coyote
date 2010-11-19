@@ -125,6 +125,10 @@
 ;       As of 3 July 2008, the Brewer names are also now available to the user without using 
 ;       the BREWER keyword. If the BREWER keyword is used, *only* Brewer names are available.
 ;       
+;       The color name "OPPOSITE" is also available. It chooses a color "opposite" to the 
+;       color of the pixel in the upper-right corner of the display, if a window is open.
+;       Otherwise, this color is "black" in PostScript and "white" everywhere else.
+;       
 ; RETURN VALUE:
 ;
 ;       The value that is returned by FSC_Color depends upon the keywords
@@ -368,6 +372,10 @@
 ;            has ever used them, and they have given me nothing but headaches. I'm done
 ;            with them. I'll leave the code here for awhile in case you use them, but
 ;            I'm pretty sure I'm not putting them back in. 17 October 2010. DWF.
+;       Added a new color name "OPPOSITE". This is a color that is "opposite" of the pixel color
+;            in the upper right hand corner of the display, if a window is open and the pixel
+;            color can be determined. Otherwise, it is black in PostScript and white everywhere
+;            else. 19 Nov 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -513,6 +521,20 @@ FUNCTION FSC_Color, theColour, colorIndex, $
     
     ; Make sure the color is compressed anduppercase.   
     theColor = StrUpCase(StrCompress(StrTrim(theColor,2), /Remove_All))
+    
+    ; Get the pixel value of the "opposite" color. This is the pixel color
+    ; opposite the pixel color in the upper right corner of the display.
+    IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+       opixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+       IF N_Elements(opixel) NE 3 THEN BEGIN
+            TVLCT, rrr, ggg, bbb, /Get
+            opixel = [rrr[opixel], ggg[opixel], bbb[opixel]]
+       ENDIF
+    ENDIF ELSE BEGIN
+       IF (!D.Name EQ 'PS') THEN opixel = [255,255,255]
+    ENDELSE
+    IF N_Elements(opixel) EQ 0 THEN opixel = [0,0,0]
+    opixel = 255 - opixel
     
     ; Read the first color as bytes. If none of the bytes are less than 48
     ; or greater than 57, then this is a "number" string and you should
@@ -743,10 +765,10 @@ FUNCTION FSC_Color, theColour, colorIndex, $
            rvalue = [ rvalue,   201,    245,    253,    251,    228,    193,    114,     59 ]
            gvalue = [ gvalue,    35,    121,    206,    253,    244,    228,    171,     85 ]
            bvalue = [ bvalue,    38,    72,     127,    197,    239,    239,    207,    164 ]
-           colors = [ colors, 'TG1', 'TG2', 'TG3', 'TG4', 'TG5', 'TG6', 'TG7', 'TG8']
-           rvalue = [ rvalue,  84,    163,   197,   220,   105,    51,    13,     0 ]
-           gvalue = [ gvalue,  48,    103,   141,   188,   188,   149,   113,    81 ]
-           bvalue = [ bvalue,   5,     26,    60,   118,   177,   141,   105,    71 ]
+           colors = [ colors, 'TG1', 'TG2', 'TG3', 'TG4', 'TG5', 'TG6', 'TG7', 'TG8', 'OPPOSITE']
+           rvalue = [ rvalue,  84,    163,   197,   220,   105,    51,    13,     0,   opixel[0]]
+           gvalue = [ gvalue,  48,    103,   141,   188,   188,   149,   113,    81,   opixel[1]]
+           bvalue = [ bvalue,   5,     26,    60,   118,   177,   141,   105,    71,   opixel[2]]
        ENDELSE
    ENDELSE
    

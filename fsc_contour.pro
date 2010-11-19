@@ -290,19 +290,21 @@ PRO FSC_Contour, data, x, y, $
            IF !P.MULTI[0] EQ 0 THEN BEGIN
            
                 IF Keyword_Set(overplot) NE 1 THEN BEGIN
-                    ; Make sure axis are turned off. I don't really want to draw anything,
-                    ; just advance !P.MULTI or "erase" the display for the next plot.
-                    IF BitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
-                    IF BitGet(ystyle, 2) NE 1 THEN yystyle = ystyle + 4 ELSE yystyle = ystyle
-                    
+
                     ; Save the current system variables. Will need to restore later.
                     bangx = !X
                     bangy = !Y
                     bangp = !P
+ 
+                    ; Make sure axis are turned off. I don't really want to draw anything,
+                    ; just advance !P.MULTI or "erase" the display for the next plot.
+                    IF BitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
+                    IF BitGet(ystyle, 2) NE 1 THEN yystyle = xstyle + 4 ELSE yystyle = ystyle
                     
                     ; Draw the plot that doesn't draw anything.
-                    Contour, contourData, xgrid, ygrid, XSTYLE=xxstyle, YSTYLE=yxstyle, $
-                        /NODATA, _STRICT_EXTRA=extra
+                     Contour, contourData, xgrid, ygrid, COLOR=axiscolor, $
+                        BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=xstyle, $
+                        _STRICT_EXTRA=extra, /NODATA
                     
                     ; Save the "after plot" system variables. Will use later. 
                     afterx = !X

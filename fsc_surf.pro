@@ -253,17 +253,17 @@ PRO FSC_Surf, data, x, y, $
            ; I only have to do this, if this is the first plot.
            IF !P.MULTI[0] EQ 0 THEN BEGIN
            
-                ; Make sure axis are turned off. I don't really want to draw anything,
-                ; just advance !P.MULTI or "erase" the display for the next plot.
-                IF BitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
-                IF BitGet(ystyle, 2) NE 1 THEN yystyle = ystyle + 4 ELSE yystyle = ystyle
-                IF BitGet(zstyle, 2) NE 1 THEN zzstyle = zstyle + 4 ELSE zzstyle = zstyle
-                
                 ; Save the current system variables. Will need to restore later.
                 bangx = !X
                 bangy = !Y
                 bangz = !Z
                 bangp = !P
+                
+                ; Make sure axis are turned off. I don't really want to draw anything,
+                ; just advance !P.MULTI or "erase" the display for the next plot.
+                IF BitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
+                IF BitGet(ystyle, 2) NE 1 THEN yystyle = ystyle + 4 ELSE yystyle = ystyle
+                IF BitGet(zstyle, 2) NE 1 THEN zzstyle = zstyle + 4 ELSE zzstyle = zstyle
                 
                 ; Draw the plot that doesn't draw anything.
                 Surface, data, x, y, XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $

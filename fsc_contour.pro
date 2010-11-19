@@ -284,7 +284,7 @@ PRO FSC_Contour, data, x, y, $
     ; plot, store the new system variables, then draw my background, etc.
     ; I have tried LOTS of options. This is the only one that worked.
     IF !D.Name EQ 'PS' THEN BEGIN
-       IF ~noerase THEN BEGIN
+       IF Keyword_Set(noerase) EQ 0 THEN BEGIN
        
            ; I only have to do this, if this is the first plot.
            IF !P.MULTI[0] EQ 0 THEN BEGIN
@@ -301,7 +301,8 @@ PRO FSC_Contour, data, x, y, $
                     bangp = !P
                     
                     ; Draw the plot that doesn't draw anything.
-                    Contour, contourData, xgrid, ygrid, XSTYLE=xxstyle, YSTYLE=yxstyle, /NODATA  
+                    Contour, contourData, xgrid, ygrid, XSTYLE=xxstyle, YSTYLE=yxstyle, $
+                        /NODATA, _STRICT_EXTRA=extra
                     
                     ; Save the "after plot" system variables. Will use later. 
                     afterx = !X

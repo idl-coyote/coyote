@@ -63,7 +63,8 @@
 ;               program via the image parameter. The AlphaBackgroundImage does not need
 ;               to have the same dimensions as the alpha channel image.
 ;
-;     AXES:     Set this keyword to draw a set of axes around the image.
+;     AXES:     Set this keyword to draw a set of axes around the image. Setting this
+;               keyword also sets SAVE=1, unless told otherwise.
 ;
 ;     AXKEYWORDS:   An IDL structure variable of PLOT keywords as structure fields
 ;               and keyword values as the values of the fields. Pass directly to the
@@ -79,8 +80,7 @@
 ;               used to place the *first* plot. [Note change, setting this keyword
 ;               automatically sets ERASE=1.] Can be a string (e.g., 'ivory'), or
 ;               a 24-bit value that can be decomposed into a color, or an 8-bit
-;               index number into the current color table. ERASE and BACKGROUND
-;               should only be used on 24-bit devices that support windows!
+;               index number into the current color table. 
 ;               
 ;               If you are in indexed color mode, the background color index
 ;               must be outside the range of image color indices, or you will
@@ -99,25 +99,16 @@
 ;                
 ;                    TVImage, Bytscl(image, Top=253), Background=FSC_Color('gray',254)
 ;
-;     BREWER:   If set, applies only to BACKGROUND AND ACOLOR keywords. Selects
-;               brewer colors, rather than standard FSC_COLOR colors as strings.
+;     BREWER:   Obsolete and not used.
 ;
 ;     ERASE:    If this keyword is set an ERASE command is issued
-;               before the image is displayed. ERASE and BACKGROUND 
-;               should only be used on 24-bit devices that support windows! 
-;               The keyword is ignored on 8-bit devices or devices that do
-;               not support windows.
+;               before the image is displayed. 
 ;
 ;     _EXTRA:   This keyword picks up any TV keywords you wish to use.
 ;
-;     HALF_HALF: If set, will tell CONGRID to extrapolate a *half* row
-;               and column on either side, rather than the default of
-;               one full row/column at the ends of the array.  If you
-;               are interpolating images with few rows, then the
-;               output will be more consistent with this technique.
-;               This keyword is intended as a replacement for
-;               MINUS_ONE, and both keywords probably should not be
-;               used in the same call to CONGRID.
+;     HALF_HALF: Obsolete and not used. Image resizing is always done
+;               as if CONGRID was called with CENTER=1. This prevents
+;               image pixels from changing locations in the output image.
 ;
 ;     KEEP_ASPECT_RATIO: Normally, the image will be resized to fit the
 ;               specified position in the window. If you prefer, you can
@@ -159,10 +150,10 @@
 ;               This keyword applies *only* to images displayed with !P.Multi, and if
 ;               passed a scalar value, will use the same value for all four positions.
 ;               
-;     MINUS_ONE: The value of this keyword is passed along to the CONGRID
-;               command. It prevents CONGRID from adding an extra row and
+;     MINUS_ONE: The value of this keyword is passed along to the FSC_RESIZE_IMAGE
+;               command. It prevents FSC_RESIZE_IMAGE from adding an extra row and
 ;               column to the resulting array, which can be a problem with
-;               small image arrays.
+;               small image arrays. This keyword is set to 1 by default.
 ;
 ;     NOINTERPOLATION: Setting this keyword disables the default bilinear
 ;               interpolation done to the image when it is resized. Nearest
@@ -217,7 +208,7 @@
 ;    SAVE:      Set this to cause a data coordinate system to be established
 ;               for the image. The XRANGE and YRANGE keyword values will be used
 ;               to establish a data coordinate system coincident with the final
-;               image position. 
+;               image position. Setting the AXES keyword automatically sets SAVE=1.
 ;
 ;    SCALE:     Set this keyword to byte scale the image before display.
 ;               This keyword should only be applied to 2D (MxN) images.
@@ -271,8 +262,7 @@
 ;     IDL-supplied color tables. Hence, other graphics windows open at
 ;     the time the image is display are likely to look strange.
 ;
-;     Other programs from Coyote Library (e.g., FSC_COLOR) may also be
-;     required.
+;     Other programs from Coyote Library are required.
 ;
 ; EXAMPLE:
 ;     To display an image with a contour plot on top of it, type:
@@ -436,7 +426,10 @@
 ;       If the BACKGROUND color is set, then ERASEIT=1 automatically. 17 November 2010. DWF.
 ;       Alpha images can only be produced in IDL 6.5 or higher. Issue warning. 17 November 2010. DWF.
 ;       BACKGROUND color changes affected multi-plots. Fixed 18 Nov 2010. DWF.
-;       BACKGROND color changes affected display in indexed color. Fixed 18 Nov 2010. DWF.
+;       BACKGROUND color changes affected display in indexed color. Fixed 18 Nov 2010. DWF.
+;       Removed TVIMAGE_CONGRID in favor of FSC_RESIZE_IMAGE, which always does the interpolation
+;            with centered pixels, and allows nearest neightbor resampling of true-color images.
+;            20 November 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -464,171 +457,7 @@
 ;  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
-;******************************************************************************************;;
-;
-; NAME:
-;  TVIMAGE_CONGRID
-;
-; PURPOSE:
-;       Shrink or expand the size of an array by an arbitrary amount.
-;       This IDL procedure simulates the action of the VAX/VMS
-;       CONGRID/CONGRIDI function.
-;
-;  This function is similar to "REBIN" in that it can resize a
-;       one, two, or three dimensional array.   "REBIN", however,
-;       requires that the new array size must be an integer multiple
-;       of the original size.   CONGRID will resize an array to any
-;       arbitrary size (REBIN is somewhat faster, however).
-;       REBIN averages multiple points when shrinking an array,
-;       while CONGRID just resamples the array.
-;
-; CATEGORY:
-;       Array Manipulation.
-;
-; CALLING SEQUENCE:
-;  array = TVIMAGE_CONGRID(array, x, y, z)
-;
-; INPUTS:
-;       array:  A 1, 2, or 3 dimensional array to resize.
-;               Data Type : Any type except string or structure.
-;
-;       x:      The new X dimension of the resized array.
-;               Data Type : Int or Long (greater than or equal to 2).
-;
-; OPTIONAL INPUTS:
-;       y:      The new Y dimension of the resized array.   If the original
-;               array has only 1 dimension then y is ignored.   If the
-;               original array has 2 or 3 dimensions then y MUST be present.
-;
-;       z:      The new Z dimension of the resized array.   If the original
-;               array has only 1 or 2 dimensions then z is ignored.   If the
-;               original array has 3 dimensions then z MUST be present.
-;
-; KEYWORD PARAMETERS:
-;       INTERP: If set, causes linear interpolation to be used.
-;               Otherwise, the nearest-neighbor method is used.
-;
-;       CUBIC:  If set, uses "Cubic convolution" interpolation.  A more
-;               accurate, but more time-consuming, form of interpolation.
-;               CUBIC has no effect when used with 3 dimensional arrays.
-;
-;       MINUS_ONE:
-;               If set, will prevent CONGRID from extrapolating one row or
-;               column beyond the bounds of the input array.   For example,
-;               If the input array has the dimensions (i, j) and the
-;               output array has the dimensions (x, y), then by
-;               default the array is resampled by a factor of (i/x)
-;               in the X direction and (j/y) in the Y direction.
-;               If MINUS_ONE is present (AND IS NON-ZERO) then the array
-;               will be resampled by the factors (i-1)/(x-1) and
-;               (j-1)/(y-1).
-;
-;       HALF_HALF:
-;               If set, will tell CONGRID to extrapolate a *half* row
-;               and column on either side, rather than the default of
-;               one full row/column at the ends of the array.  If you
-;               are interpolating images with few rows, then the
-;               output will be more consistent with this technique.
-;               This keyword is intended as a replacement for
-;               MINUS_ONE, and both keywords probably should not be
-;               used in the same call to CONGRID.
-;
-; OUTPUTS:
-;  The returned array has the same number of dimensions as the original
-;       array and is of the same data type.   The returned array will have
-;       the dimensions (x), (x, y), or (x, y, z) depending on how many
-;       dimensions the input array had.
-;
-; PROCEDURE:
-;       IF the input array has three dimensions, or if INTERP is set,
-;       then the IDL interpolate function is used to interpolate the
-;       data values.
-;       If the input array has two dimensions, and INTERP is NOT set,
-;       then the IDL POLY_2D function is used for nearest neighbor sampling.
-;       If the input array has one dimension, and INTERP is NOT set,
-;       then nearest neighbor sampling is used.
-;
-; EXAMPLE:
-;       ; vol is a 3-D array with the dimensions (80, 100, 57)
-;       ; Resize vol to be a (90, 90, 80) array
-;       vol = TVIMAGE_CONGRID(vol, 90, 90, 80)
-;
-; MODIFICATION HISTORY:
-;       DMS, Sept. 1988.
-;       DMS, Added the MINUS_ONE keyword, Sept. 1992.
-;  Daniel Carr. Re-wrote to handle one and three dimensional arrays
-;                    using INTERPOLATE function.
-;  DMS, RSI, Nov, 1993.  Added CUBIC keyword.
-;       Craig Markwardt, Dec, 1997.  Added halfhalf keyword to
-;                        more evenly distribute "dead" pixel row
-;       Use uniformly spaced grid points for half_half W. Landsman   Feb. 2000
-;              (and slightly modified by C. Markwardt 14 Feb 2000)
-;  DWF, FSC, 22 Apr 2007. Modified the program so that 3D arrays use nearest-neighbor
-;       interpolation unless the INTERP keyword is set.
-;  DWF, FSC, 22 Apr 2007. Function renamed from CMCONGRID to TVIMAGE_CONGRID on
-;       recommendation of Craig Markwardt as he wants no part of this. :-)
-
-
-FUNCTION TVIMAGE_CONGRID, arr, x, y, z, Interp=int, Minus_One=m1, Cubic = cubic, $
-                    Half_Half=hh
-
-    ON_ERROR, 2    ;Return to caller if error
-    s = Size(arr)
-    
-    IF ((s[0] EQ 0) OR (s[0] GT 3)) THEN $
-       Message, 'Array must have 1, 2, or 3 dimensions.'
-    
-    ;  Supply defaults = no interpolate, and no minus_one.
-    if n_elements(int) le 0 then int = 0 else int = keyword_set(int)
-    if n_elements(m1) le 0 then m1 = 0 else m1 = keyword_set(m1)
-    
-    ; Compute offsets pixel offsets for half_half
-    halfx = 0.0 & halfy = 0.0 & halfz = 0.0
-    if keyword_set(hh) then begin
-        if s[0] GE 1 then halfx = -0.5 + (float(s[1])/x)
-        if s[0] GE 2 then halfy = -0.5 + (float(s[2])/y)
-        if s[0] GE 3 then halfz = -0.5 + (float(s[3])/z)
-    endif
-    cub = KEYWORD_SET(cubic)
-    if cub THEN int = 1  ;Cubic implies interpolate
-    
-    
-    CASE s[0] OF
-       1: BEGIN          ; *** ONE DIMENSIONAL ARRAY
-       srx = float(s[1] - m1)/(x-m1) * findgen(x) + halfx
-          IF int THEN $
-             RETURN, INTERPOLATE(arr, srx, CUBIC = cub) ELSE $
-             RETURN, arr(ROUND(srx))
-       ENDCASE
-       2: BEGIN ; *** TWO DIMENSIONAL ARRAY
-       IF int THEN BEGIN
-         srx = float(s[1] - m1) / (x-m1) * findgen(x) + halfx
-         sry = float(s[2] - m1) / (y-m1) * findgen(y) + halfy
-              RETURN, INTERPOLATE(arr, srx, sry, /GRID, CUBIC=cub)
-       ENDIF ELSE $
-         RETURN, POLY_2D(arr, $
-          [[0,0],[(s[1]-m1)/float(x-m1),0]], $ ;Use poly_2d
-          [[0,(s[2]-m1)/float(y-m1)],[0,0]],int,x,y)
-    
-       ENDCASE
-       3: BEGIN ; *** THREE DIMENSIONAL ARRAY
-       srx = float(s[1] - m1) / (x-m1) * findgen(x) + halfx
-       sry = float(s[2] - m1) / (y-m1) * findgen(y) + halfy
-       srz = float(s[3] - m1) / (z-m1) * findgen(z) + halfz
-       IF int THEN BEGIN
-          RETURN, interpolate(arr, srx, sry, srz, /grid)
-       ENDIF ELSE BEGIN
-          RETURN, interpolate(arr, round(srx), round(sry), round(srz), /grid)
-       ENDELSE
-       ENDCASE
-    ENDCASE
-    
-    RETURN, arr_r
-END
-;--------------------------------------------------------------------------
-
-
-
+;******************************************************************************************;
 FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
     NOINTERP=nointerp, $
     TV=tv
@@ -735,8 +564,8 @@ FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
     Set_Plot, thisDevice
             
      ; Make the foreground image the right size.
-     foregndImage = Congrid(foregndImage, cols, rows, 3)
-     alpha = Congrid(alpha_channel, sb[0], sb[1],/Interp)
+     foregndImage = FSC_Resize_Image(foregndImage, cols, rows)
+     alpha = FSC_Resize_Image(alpha_channel, sb[0], sb[1], /INTERPOLATE)
      alpha = Rebin(alpha, sb[0], sb[1], 3)
             
      ; Blend the two images.
@@ -763,9 +592,9 @@ PRO TVIMAGE, image, x, y, $
    AXKEYWORDS=axkeywords, $
    BACKGROUND=background, $
    ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
-   BREWER=brewer, $
+   BREWER=brewer, $ ; Obsolete and not used.
    ERASE=eraseit, $
-   HALF_HALF=half_half, $
+   HALF_HALF=half_half, $ ; Obsolete and not used.
    KEEP_ASPECT_RATIO=keep, $
    MARGIN=margin, $
    MINUS_ONE=minusOne, $
@@ -823,15 +652,18 @@ PRO TVIMAGE, image, x, y, $
     IF Keyword_Set(axis) THEN axes = 1    
     axes = Keyword_Set(axes)
     
+    ; If you want axes, then save the coordinate system, unless s
+    ; pecifically asked not to.
+    IF axes THEN IF N_Elements(save) EQ 0 THEN save = 1
+    
     ; If axes are set and MARGIN and POSITION are NOT set and you are NOT
     ; doing multiplots, then set a normal "plot" margin.
     IF Keyword_Set(axes) AND ((N_Elements(margin) EQ 0) AND (N_Elements(position) EQ 0) $
         AND (multi EQ 0)) THEN margin = 0.075
     
     ; Check other keywords.
-    brewer = Keyword_Set(brewer)
     interp = 1.0 - Keyword_Set(nointerp)
-    half_half = Keyword_Set(half_half)
+    IF N_Elements(minusOne) EQ 0 THEN minusOne = 1
     minusOne = Keyword_Set(minusOne)
     
     ; Check the drawing colors for background and axes.
@@ -1199,8 +1031,7 @@ PRO TVIMAGE, image, x, y, $
        IF true GT 0 THEN LOADCT, 0, /Silent
        IF alphaImage THEN BEGIN
            outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
-           TV, outImage, xstart, ystart, XSIZE=xsize, $
-              YSIZE=ysize, _STRICT_EXTRA=extra, True=3
+           TV, outImage, xstart, ystart, XSIZE=xsize, YSIZE=ysize, _STRICT_EXTRA=extra, True=3
        ENDIF ELSE BEGIN
            TV, image, xstart, ystart, XSIZE=xsize, $
               YSIZE=ysize, _STRICT_EXTRA=extra, True=true
@@ -1208,19 +1039,17 @@ PRO TVIMAGE, image, x, y, $
     ENDIF ELSE BEGIN ; All other devices.
     
        CASE true OF
-          0: TV, TVIMAGE_CONGRID(image, xsize, ysize, INTERP=interp, $
-                MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
+          0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
+                MINUS_ONE=minusOne), xstart, $
                 ystart, _STRICT_EXTRA=extra
           1: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
                     outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
-                    TV, TVIMAGE_CONGRID(outImage, xsize, ysize, 3, INTERP=interp, $
-                       MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
-                       ystart, _STRICT_EXTRA=extra, True=3
+                    TV, FSC_Resize_Image(outImage, xsize, ysize, INTERP=interp, $
+                       MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDIF ELSE BEGIN
-                    TV, TVIMAGE_CONGRID(image, 3, xsize, ysize, INTERP=interp, $
-                       MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
-                       ystart, _STRICT_EXTRA=extra, True=1
+                    TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
+                       MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=1
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
@@ -1230,20 +1059,17 @@ PRO TVIMAGE, image, x, y, $
                     image2d = Color_Quan(image, 1, r, g, b, _EXTRA=extra)   
                 ENDELSE                
                 TVLCT, r, g, b
-                TV, TVIMAGE_CONGRID(image2d, xsize, ysize, INTERP=0, $
-                   MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
-                   ystart, _STRICT_EXTRA=extra, True=0
+                TV, FSC_Resize_Image(image2d, xsize, ysize, INTERP=0, $
+                   MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=0
              ENDELSE
           2: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
                     outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
-                    TV, TVIMAGE_CONGRID(outImage, xsize, ysize, 3, INTERP=interp, $
-                       MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
-                       ystart, _STRICT_EXTRA=extra, True=3
+                    TV, FSC_Resize_Image(outImage, xsize, ysize, INTERP=interp, $
+                       MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDIF ELSE BEGIN
-                    TV, TVIMAGE_CONGRID(image, xsize, 3, ysize, INTERP=interp, $
-                       MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
-                       ystart, _STRICT_EXTRA=extra, True=2
+                    TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
+                       MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=2
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
@@ -1253,20 +1079,17 @@ PRO TVIMAGE, image, x, y, $
                     image2d = Color_Quan(image, 2, r, g, b, _EXTRA=extra)
                 ENDELSE                
                 TVLCT, r, g, b
-                TV, TVIMAGE_CONGRID(image2d, xsize, ysize, INTERP=0, $
-                   MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
-                   ystart, _STRICT_EXTRA=extra, True=0
+                TV, FSC_Resize_Image(image2d, xsize, ysize, INTERP=0, $
+                   MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=0
              ENDELSE
           3: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
                     outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
-                    TV, TVIMAGE_CONGRID(outImage, xsize, ysize, 3, INTERP=interp, $
-                       MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
-                       ystart, _STRICT_EXTRA=extra, True=3
+                    TV, FSC_Resize_Image(outImage, xsize, ysize, INTERP=interp, $
+                       MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDIF ELSE BEGIN
-                    TV, TVIMAGE_CONGRID(image, xsize, ysize, 3, INTERP=interp, $
-                       MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
-                       ystart, _STRICT_EXTRA=extra, True=3
+                    TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
+                       MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
@@ -1276,9 +1099,8 @@ PRO TVIMAGE, image, x, y, $
                     image2d = Color_Quan(image, 3, r, g, b, _EXTRA=extra)
                 ENDELSE
                 TVLCT, r, g, b
-                TV, TVIMAGE_CONGRID(image2d, xsize, ysize, INTERP=0, $
-                   MINUS_ONE=minusOne, HALF_HALF=half_half), xstart, $
-                   ystart, _STRICT_EXTRA=extra, True=0
+                TV, FSC_Resize_Image(image2d, xsize, ysize, INTERP=0, $
+                   MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=0
              ENDELSE
       ENDCASE
     ENDELSE

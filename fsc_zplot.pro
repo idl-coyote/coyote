@@ -173,8 +173,8 @@ PRO FSC_ZPlot_Drawbox, event
      ; draw the "zoomed" plot in both the draw widget and the pixmap.
 
      ; Erase the arrow box one final time by copying the plot from the pixmap.
-;     WSet, info.drawIndex
-;     Device, Copy = [0, 0, info.xsize, info.ysize, 0, 0, info.pixIndex]
+     WSet, info.drawIndex
+     Device, Copy = [0, 0, info.xsize, info.ysize, 0, 0, info.pixIndex]
 
      ; Turn motion events off and redirect the events to FSC_ZPlot_Events.
      Widget_Control, event.id, Draw_Motion_Events=0, $
@@ -210,7 +210,6 @@ PRO FSC_ZPlot_Drawbox, event
      ENDELSE
      info.xrange = [x1,x2]
 
-     window, xsize = 400, ysize=250, title='ZPlot Window', 0
      ; Draw the "zoomed" plot in both the draw widget and the pixmap.
      ; Draw the plot in both windows.
      FSC_Plot, info.indep, info.dep, $

@@ -119,6 +119,7 @@
 ;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
 ;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
 ;        Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
+;        Changes so that color inputs don't change type. 23 Nov 2010. DWF.
 ;        
 ;
 ; :Copyright:
@@ -126,17 +127,17 @@
 ;-
 PRO FSC_Plot, x, y, $
     ASPECT=aspect, $
-    AXISCOLOR=axiscolor, $
-    AXESCOLOR=axescolor, $
-    BACKGROUND=background, $
-    COLOR=color, $
+    AXISCOLOR=saxiscolor, $
+    AXESCOLOR=saxescolor, $
+    BACKGROUND=sbackground, $
+    COLOR=scolor, $
     ISOTROPIC=isotropic, $
     NODATA=nodata, $
     NOERASE=noerase, $
     OVERPLOT=overplot, $
     POSITION=position, $
     PSYM=psym, $
-    SYMCOLOR=symcolor, $
+    SYMCOLOR=ssymcolor, $
     _Extra=extra
     
     Compile_Opt idl2
@@ -173,13 +174,13 @@ PRO FSC_Plot, x, y, $
     TVLCT, rr, gg, bb, /GET
     
     ; Check the keywords.
-    IF N_Elements(background) EQ 0 THEN background = 'white'
-    IF (N_Elements(axescolor) EQ 0) AND (N_Elements(axiscolor) EQ 0) THEN BEGIN
-       axiscolor = 'black'
+    IF N_Elements(sbackground) EQ 0 THEN background = 'white' ELSE background = sbackground
+    IF (N_Elements(saxescolor) EQ 0) AND (N_Elements(saxiscolor) EQ 0) THEN BEGIN
+       saxiscolor = 'black'
     ENDIF
-    IF N_Elements(axescolor) NE 0 THEN axiscolor = axescolor
-    IF N_Elements(color) EQ 0 THEN color = 'black'
-    IF N_Elements(symcolor) EQ 0 THEN symcolor = 'black'
+    IF N_Elements(saxescolor) NE 0 THEN axiscolor = saxescolor ELSE axiscolor = saxiscolor
+    IF N_Elements(scolor) EQ 0 THEN color = 'black' ELSE color = scolor
+    IF N_Elements(ssymcolor) EQ 0 THEN symcolor = 'black' ELSE symcolor = ssymcolor
     IF Keyword_Set(isotropic) THEN aspect = 1.0
     noerase = Keyword_Set(noerase)
     IF N_Elements(psym) EQ 0 THEN psym = 0

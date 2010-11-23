@@ -150,18 +150,19 @@
 ;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
 ;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
 ;        Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
+;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO FSC_Contour, data, x, y, $
-    AXISCOLOR=axiscolor, $
-    AXESCOLOR=axescolor, $
-    BACKGROUND=background, $
+    AXISCOLOR=saxiscolor, $
+    AXESCOLOR=saxescolor, $
+    BACKGROUND=sbackground, $
     C_COLORS=c_colors, $
     C_LABELS=c_labels, $
     CELL_FILL=cell_fill, $
-    COLOR=color, $
+    COLOR=scolor, $
     FILL=fill, $
     IRREGULAR=irregular, $
     LABEL=label, $
@@ -207,12 +208,12 @@ PRO FSC_Contour, data, x, y, $
     TVLCT, rr, gg, bb, /GET
     
     ; Check the keywords.
-    IF N_Elements(background) EQ 0 THEN background = 'white'
-    IF (N_Elements(axescolor) EQ 0) AND (N_Elements(axiscolor) EQ 0) THEN BEGIN
-       axiscolor = 'black'
+    IF N_Elements(sbackground) EQ 0 THEN background = 'white' ELSE background = sbackground
+    IF (N_Elements(saxescolor) EQ 0) AND (N_Elements(saxiscolor) EQ 0) THEN BEGIN
+       saxiscolor = 'black'
     ENDIF
-    IF N_Elements(axescolor) NE 0 THEN axiscolor = axescolor
-    IF N_Elements(color) EQ 0 THEN color = 'black'
+    IF N_Elements(saxescolor) NE 0 THEN axiscolor = saxescolor ELSE axiscolor = saxiscolor
+    IF N_Elements(scolor) EQ 0 THEN color = 'black' ELSE color = scolor
     fill = Keyword_Set(fill)
     irregular = Keyword_Set(irregular)
     IF N_Elements(label) EQ 0 THEN label = 1

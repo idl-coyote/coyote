@@ -86,12 +86,13 @@
 ; :History:
 ;     Change History::
 ;        Written, 15 November 2010. DWF.
+;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO FSC_Display, windowIndex, pxsize, pysize, $
-    COLOR=color, $
+    COLOR=scolor, $
     XSIZE=xsize, $
     YSIZE=ysize, $
     _EXTRA=extra
@@ -107,7 +108,7 @@ PRO FSC_Display, windowIndex, pxsize, pysize, $
     ENDIF
     
     ; Check parameters and keywords.
-    IF N_Elements(color) EQ 0 THEN color = 'white'
+    IF N_Elements(scolor) EQ 0 THEN color = 'white' ELSE color = scolor
     IF N_Elements(windowIndex) EQ 0 THEN windowIndex = 0
     IF N_Elements(xsize) EQ 0 THEN xsize = 640
     IF N_Elements(ysize) EQ 0 THEN ysize = 512

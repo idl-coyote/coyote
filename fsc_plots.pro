@@ -98,14 +98,15 @@
 ;        Added ability to support COLOR keyword as a vector the size of x. 15 November 2010. DWF
 ;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
 ;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
+;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO FSC_PlotS, x, y, z, $
-    COLOR=color, $
+    COLOR=scolor, $
     PSYM=psym, $
-    SYMCOLOR=symcolor, $
+    SYMCOLOR=ssymcolor, $
     SYMSIZE=symsize, $
     _EXTRA=extra
 
@@ -126,9 +127,9 @@ PRO FSC_PlotS, x, y, z, $
     ENDIF
     
    ; Check parameters and keywords.
-   IF N_Elements(color) EQ 0 THEN color = 'black'
+   IF N_Elements(scolor) EQ 0 THEN color = 'black' ELSE color = scolor
    IF N_Elements(psym) EQ 0 THEN psym = 0
-   IF N_Elements(symcolor) EQ 0 THEN symcolor = 'black'
+   IF N_Elements(ssymcolor) EQ 0 THEN symcolor = 'black' ELSE symcolor = ssymcolor
    IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
    
    ; Be sure the vectors are the right length.

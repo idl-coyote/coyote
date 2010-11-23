@@ -137,17 +137,18 @@
 ;           as necessary. 17 November 2010. DWF.
 ;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
 ;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
+;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO FSC_Surf, data, x, y, $
-    AXISCOLOR=axiscolor, $
-    AXESCOLOR=axescolor, $
-    BACKGROUND=background, $
-    BOTTOM=bottom, $
+    AXISCOLOR=saxiscolor, $
+    AXESCOLOR=saxescolor, $
+    BACKGROUND=sbackground, $
+    BOTTOM=sbottom, $
     CHARSIZE=charsize, $
-    COLOR=color, $
+    COLOR=scolor, $
     FONT=font, $
     NOERASE=noerase, $
     SHADED=shaded, $
@@ -184,13 +185,13 @@ PRO FSC_Surf, data, x, y, $
     TVLCT, rr, gg, bb, /GET
     
     ; Check the keywords.
-    IF N_Elements(background) EQ 0 THEN background = 'white'
-    IF (N_Elements(axescolor) EQ 0) AND (N_Elements(axiscolor) EQ 0) THEN BEGIN
-       axiscolor = 'black'
+    IF N_Elements(sbackground) EQ 0 THEN background = 'white' ELSE background = sbackground
+    IF (N_Elements(saxescolor) EQ 0) AND (N_Elements(saxiscolor) EQ 0) THEN BEGIN
+       saxiscolor = 'black'
     ENDIF
-    IF N_Elements(axescolor) NE 0 THEN axiscolor = axescolor
-    IF N_Elements(color) EQ 0 THEN color = 'black'
-    IF N_Elements(bottom) EQ 0 THEN bottom = color
+    IF N_Elements(saxescolor) NE 0 THEN axiscolor = saxescolor ELSE axiscolor = saxiscolor
+    IF N_Elements(scolor) EQ 0 THEN color = 'black' ELSE color = scolor
+    IF N_Elements(sbottom) EQ 0 THEN bottom = color ELSE bottom = sbottom
     IF N_Elements(font) EQ 0 THEN IF (!D.Name EQ 'PS') THEN font = 1 ELSE font = !P.font
     IF N_Elements(charsize) EQ 0 THEN BEGIN
         IF (!P.Charsize EQ 0) AND ((font EQ 1) OR (!P.FONT EQ 1)) THEN charsize = 1.75

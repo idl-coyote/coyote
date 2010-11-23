@@ -99,6 +99,10 @@
 ;                
 ;                    TVImage, Bytscl(image, Top=253), Background=FSC_Color('gray',254)
 ;
+;     BOTTOM:   IF SCALE=1, the image is scaled so that all displayed pixels have values
+;               greater than or equal to BOTTOM and less than or equal to TOP.
+;               The value of BOTTOM is 0 by default.
+;
 ;     BREWER:   Obsolete and not used.
 ;
 ;     ERASE:    If this keyword is set an ERASE command is issued
@@ -136,6 +140,16 @@
 ;               default is to have a slight margin about the image to separate
 ;               it from other images or graphics.
 ;
+;      MAXVALUE: If defined, the data is linearly scaled between MINVALUE
+;               and MAXVALUE. MAXVALUE is set to MAX(image) by default.
+;               Setting this keyword to a value implies SCALE=1. If the maximum
+;               value of the image is GT 255, this implies SCALE=1.
+;
+;      MINVALUE: If defined, the data is linearly scaled between MINVALUE
+;               and MAXVALUE. MINVALUE is set to MIN(image) by default.
+;               Setting this keyword to a value implies SCALE=1. If the minimum
+;               value of the image is LT 0, this implies SCALE=1.
+;               
 ;      MULTIMARGIN: Sometimes, when displaying multiple images with !P.Multi, you
 ;               want the images to be slightly smaller than the position created
 ;               by !P.Multi so you can add, for example, a colorbar or an annotation
@@ -154,6 +168,16 @@
 ;               command. It prevents FSC_RESIZE_IMAGE from adding an extra row and
 ;               column to the resulting array, which can be a problem with
 ;               small image arrays. This keyword is set to 1 by default.
+;
+;     NCOLORS:  If this keyword is supplied, the TOP keyword is ignored and
+;               the TOP keyword is set equal to  NCOLORS - 1. This
+;               keyword is provided to make TVIMAGE easier to use with the
+;               color-loading programs such as LOADCT:
+;
+;                  LoadCT, 5, NColors=100, Bottom=100
+;                  TVImage, image, NColors=100, Bottom=100
+;                  
+;               Setting this keyword to a value implies SCALE=1.
 ;
 ;     NOINTERPOLATION: Setting this keyword disables the default bilinear
 ;               interpolation done to the image when it is resized. Nearest
@@ -210,9 +234,12 @@
 ;               to establish a data coordinate system coincident with the final
 ;               image position. Setting the AXES keyword automatically sets SAVE=1.
 ;
-;    SCALE:     Set this keyword to byte scale the image before display.
-;               This keyword should only be applied to 2D (MxN) images.
-;               TVScale might be a better option than using this keyword.
+;    SCALE:     Set this keyword to byte scale the image before display. If this
+;               keyword is not set, the image is not scaled before display.
+;               
+;     TOP:      IF SCALE=1, the image is scaled so that all displayed pixels have values
+;               greater than or equal to BOTTOM and less than or equal to TOP.
+;               The value of TOP is !D.Table_Size by default.
 ;
 ;     TV:       Setting this keyword makes the TVIMAGE command work much
 ;               like the TV command, although better. That is to say, it
@@ -430,6 +457,7 @@
 ;       Removed TVIMAGE_CONGRID in favor of FSC_RESIZE_IMAGE, which always does the interpolation
 ;            with centered pixels, and allows nearest neightbor resampling of true-color images.
 ;            20 November 2010. DWF.
+;       Incorporated TVSCALE functionality into TVIMAGE. 22 November 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -587,18 +615,22 @@ END
 
 PRO TVIMAGE, image, x, y, $
    ACOLOR=acolor, $
+   ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
    AXIS=axis, $
    AXES=axes, $
    AXKEYWORDS=axkeywords, $
    BACKGROUND=background, $
-   ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
    BREWER=brewer, $ ; Obsolete and not used.
+   BOTTOM=bottom, $
    ERASE=eraseit, $
    HALF_HALF=half_half, $ ; Obsolete and not used.
    KEEP_ASPECT_RATIO=keep, $
    MARGIN=margin, $
+   MAXVALUE=max, $
    MINUS_ONE=minusOne, $
+   MINVALUE=min, $
    MULTIMARGIN=multimargin, $
+   NCOLORS=ncolors, $
    NOINTERPOLATION=nointerp, $
    NORMAL=normal, $
    POSITION=position, $
@@ -606,6 +638,7 @@ PRO TVIMAGE, image, x, y, $
    QUIET=quiet, $
    SAVE=save, $
    SCALE=scale, $
+   TOP=top, $
    TV=tv, $
    WHITE=white, $
    XRANGE=plotxrange, $
@@ -617,10 +650,6 @@ PRO TVIMAGE, image, x, y, $
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
        ok = Error_Message()
-       IF Ptr_Valid(ptr) THEN BEGIN
-            image = Temporary(*ptr)
-            Ptr_Free, ptr
-       ENDIF
        RETURN
     ENDIF
     
@@ -642,12 +671,22 @@ PRO TVIMAGE, image, x, y, $
     ; Check for image parameter and keywords.
     IF N_Elements(image) EQ 0 THEN MESSAGE, 'You must pass a valid image argument.'
     
-    ; Did the user want me to scale the image.
-    IF Keyword_Set(scale) THEN BEGIN
-        ptr = Ptr_New(image, /NO_COPY)
-        image = BytScl(*ptr)
+    ; Did the user want to scale the image?
+    ; If either MIN or MAX are set, this implies SCALE=1.
+    ; If min LT 0 or max GT 255, this implies SCALE=1.
+    ; If NCOLORS is used, this implies SCALE=1.
+    IF N_Elements(min) EQ 0 THEN min = Min(image, /NAN) ELSE scale = 1
+    IF N_Elements(max) EQ 0 THEN max = Max(image, /NAN) ELSE scale = 1
+    IF (min LT 0) OR (max GT 255) THEN scale = 1
+    IF N_Elements(top) EQ 0 THEN top = !D.TABLE_SIZE - 1
+    IF N_Elements(bottom) EQ 0 THEN bottom = 0B
+    IF N_Elements(ncolors) NE 0 THEN BEGIN
+        top = (ncolors - 1) < 255
+        scale = 1
     ENDIF
-    
+    ncolors = top-bottom+1
+    scale = Keyword_Set(scale)
+
     ; Check for mis-spelling of AXES as AXIS.
     IF Keyword_Set(axis) THEN axes = 1    
     axes = Keyword_Set(axes)
@@ -956,14 +995,22 @@ PRO TVIMAGE, image, x, y, $
                outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, TV=1)
                TV, outImage, x, y, True=3, _STRICT_EXTRA=extra, /Normal
             ENDIF ELSE BEGIN
-               TV, image, x, y, True=true, _STRICT_EXTRA=extra, /Normal 
+               CASE scale OF
+                    0: TV, image, x, y, True=true, _STRICT_EXTRA=extra, /Normal 
+                    1: TV, BytScl(image, Top=top, Max=max, Min=min) + bottom, $
+                           x, y, True=true, _STRICT_EXTRA=extra, /Normal
+                ENDCASE
             ENDELSE
          ENDIF ELSE BEGIN
             IF alphaImage THEN BEGIN
                outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, TV=1)
                TV, outImage, x, y, True=3, _STRICT_EXTRA=extra, /Device
             ENDIF ELSE BEGIN
-               TV, image, x, y, True=true, _STRICT_EXTRA=extra, /Device
+               CASE scale OF
+                   0: TV, image, x, y, True=true, _STRICT_EXTRA=extra, /Device
+                   1: TV, BytScl(image, Top=top, Max=max, Min=min) + bottom, $
+                           x, y, True=true, _STRICT_EXTRA=extra, /Device
+                ENDCASE
             ENDELSE
          ENDELSE
        ENDIF ELSE BEGIN
@@ -973,14 +1020,22 @@ PRO TVIMAGE, image, x, y, $
                    outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, TV=1)
                    TV, outImage, x,  True=3, _STRICT_EXTRA=extra, /Normal
                 ENDIF ELSE BEGIN
-                   TV, image, x, True=true, _STRICT_EXTRA=extra, /Normal
+                   CASE scale OF 
+                        0: TV, image, x, True=true, _STRICT_EXTRA=extra, /Normal
+                        1: TV, BytScl(image, Top=top, Max=max, Min=min) + bottom, $
+                                x, True=true, _STRICT_EXTRA=extra, /Normal
+                   ENDCASE
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
                    outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, TV=1)
                    TV, outImage, x,  True=3, _STRICT_EXTRA=extra, /Device
                 ENDIF ELSE BEGIN
-                   TV, image, x, True=true, _STRICT_EXTRA=extra, /Device
+                   CASE scale OF 
+                        0: TV, image, x, True=true, _STRICT_EXTRA=extra, /Device
+                        1: TV, BytScl(image, Top=top, Max=max, Min=min) + bottom, $
+                                x, True=true, _STRICT_EXTRA=extra, /Device
+                   ENDCASE
                 ENDELSE
              ENDELSE
          ENDIF
@@ -1033,23 +1088,40 @@ PRO TVIMAGE, image, x, y, $
            outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
            TV, outImage, xstart, ystart, XSIZE=xsize, YSIZE=ysize, _STRICT_EXTRA=extra, True=3
        ENDIF ELSE BEGIN
-           TV, image, xstart, ystart, XSIZE=xsize, $
-              YSIZE=ysize, _STRICT_EXTRA=extra, True=true
+           CASE scale OF 
+                0: TV, image, xstart, ystart, XSIZE=xsize, $
+                        YSIZE=ysize, _STRICT_EXTRA=extra, True=true
+                1: TV, BytScl(image, Top=(top-bottom), Max=max, Min=min) + $
+                         bottom, xstart, ystart, XSIZE=xsize, YSIZE=ysize, $
+                         _STRICT_EXTRA=extra, True=true
+            ENDCASE
        ENDELSE
     ENDIF ELSE BEGIN ; All other devices.
     
        CASE true OF
-          0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
-                MINUS_ONE=minusOne), xstart, $
-                ystart, _STRICT_EXTRA=extra
+          0: BEGIN
+             CASE scale OF
+                 0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
+                        MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra
+                 1: TV, BYTSCL( FSC_Resize_Image(image, CEIL(xsize), CEIL(ysize), $
+                        INTERP=interp, MINUS_ONE=minusOne), Top=top, Max=max, Min=min) $
+                        + bottom, ROUND(xstart), ROUND(ystart), _STRICT_EXTRA=extra
+             ENDCASE
+             END
           1: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
                     outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage)
                     TV, FSC_Resize_Image(outImage, xsize, ysize, INTERP=interp, $
                        MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDIF ELSE BEGIN
-                    TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
-                       MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=1
+                    CASE scale OF
+                        0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
+                                MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=1
+                        1: TV, BYTSCL(FSC_Resize_Image(image, CEIL(xsize), CEIL(ysize), $
+                                INTERP=interp, MINUS_ONE=minusOne), Top=top-bottom, $
+                                Max=max, Min=min) + bottom, ROUND(xstart), ROUND(ystart), $
+                                _STRICT_EXTRA=extra, True=1
+                     ENDCASE
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
@@ -1068,8 +1140,14 @@ PRO TVIMAGE, image, x, y, $
                     TV, FSC_Resize_Image(outImage, xsize, ysize, INTERP=interp, $
                        MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDIF ELSE BEGIN
-                    TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
-                       MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=2
+                    CASE scale OF
+                        0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
+                                MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=2
+                        1: TV, BYTSCL(FSC_Resize_Image(image, CEIL(xsize), CEIL(ysize), $
+                                INTERP=interp, MINUS_ONE=minusOne), Top=top-bottom, Max=max, $
+                                Min=min) + bottom, ROUND(xstart), ROUND(ystart), $
+                                _STRICT_EXTRA=extra, True=2
+                    ENDCASE
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
@@ -1088,8 +1166,14 @@ PRO TVIMAGE, image, x, y, $
                     TV, FSC_Resize_Image(outImage, xsize, ysize, INTERP=interp, $
                        MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDIF ELSE BEGIN
-                    TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
-                       MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
+                    CASE scale OF
+                        0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
+                                MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
+                        1: TV, BYTSCL(FSC_Resize_Image(image, CEIL(xsize), CEIL(ysize), $
+                                INTERP=interp, MINUS_ONE=minusOne), Top=top-bottom, Max=max, $
+                                Min=min) + bottom, ROUND(xstart), ROUND(ystart), $
+                                _STRICT_EXTRA=extra, True=3
+                    ENDCASE
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
@@ -1193,9 +1277,4 @@ PRO TVIMAGE, image, x, y, $
         !Y = bangy
     ENDIF
 
-    ; If you scaled the data, but the image back.
-    IF Ptr_Valid(ptr) THEN BEGIN
-        image = Temporary(*ptr)
-        Ptr_Free, ptr
-    ENDIF
 END

@@ -87,6 +87,11 @@
 ;                     used concurrently with GET_NAMES. Use two separate calls if you want both.
 ;
 ;       NCOLORS:      The number of colors loaded. By default, !D.TABLE_SIZE.
+;       
+;       NG:           Set this keyword to indicate you are getting the RGB_TABLE vectors
+;                     for use in the IDL "new graphics". Whereas TVLCT expects color tables
+;                     to be 256x3, the new graphics routines expect them to be 3x256. Setting
+;                     this keyword will transpose the vectors before they are returned.
 ;
 ;       REVERSE:      If this keyword is set, the color table vectors are reversed.
 ;
@@ -122,6 +127,7 @@
 ;          the Coyote Library routine FIND_RESOURCE_FILE to look for the file. 29 June 2010. DWF. 
 ;       Renamed Colorbar procedure to FSC_Colorbar to avoid conflict with IDL 8 Colorbar function.
 ;          26 September 2010. DWF.
+;       Added NG keyword to transpose color table vectors for new graphics functions in IDL 8. 23 Nov 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -158,6 +164,7 @@ PRO CTLOAD, table, $
    FILE=file, $
    GET_NAMES=get_names, $
    NCOLORS=ncolors, $
+   NG=ng, $
    REVERSE=reverse, $
    SILENT=silent
 
@@ -258,6 +265,7 @@ PRO CTLOAD, table, $
   ; Load a color_table, if needed. Otherwise, load color vectors.
   IF Arg_Present(color_table) THEN BEGIN
      color_table = [[r], [g], [b]]
+     IF Keyword_Set(ng) THEN color_table = Transpose(color_table)
   ENDIF ELSE BEGIN
      r_orig = BYTSCL(Indgen(!D.TABLE_SIZE))
      g_orig = r_orig

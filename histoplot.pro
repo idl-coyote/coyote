@@ -92,11 +92,15 @@
 ;                         meaning in the HISTOGRAM command. Used only to calculate BINSIZE when BINSIZE is
 ;                         not specified. In this case, binsize = rangeofData/(nbins-1).
 ;
-;
+;       OPROBABILITY:     Set this keyword if you want to overplot the cumulative probability on the plot.
+;       
 ;       OPLOT:            Set this keyword if you want to overplot data on already established axes.
 ;       
 ;       OUTLINE:          Set this keyword if you wish to draw only the outline of the histogram plot,
 ;                         in a manner similar to setting PSYM=10 on a PLOT command.
+;                         
+;       PROBCOLORNAME:    The name of the probability color for overplotting the cumulative probability
+;                         on the plot.  Default: "Blue".
 ;       
 ;       THICK:            Set this keyword to a value greater than 1 to draw thicker axes and lines.
 ;
@@ -111,6 +115,8 @@
 ;       OMAX:             The maximum output value used to construct the histogram. (See HISTOGRAM documentation.)
 ;
 ;       OMIN:             The minimum output value used to construct the histogram. (See HISTOGRAM documentation.)
+;       
+;       PROBABILITY:      The total cummulative probability of the histogram plot, scaled from 0 to 1.
 ;
 ;       REVERSE_INDICES:  List of reverse indices. (See HISTOGRAM documentation.)
 ;
@@ -182,6 +188,8 @@
 ;       Fixed a problem when specifying more than one POLYCOLOR. I made a change to the program
 ;            and forgot to propogate it everywhere. 4 October 2010. DWF.
 ;       Default axis color name changed from "Navy" to "Black". 28 October 2010. DWF.
+;       Fixed a problem with restoring color tables in PostScript. 24 Nov 2010. DWF.
+;       Added OPROBABILITY, PROBCOLOR, and PROBABILITY keywords. 24 Nov 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2010, by Fanning Software Consulting, Inc.                           ;
@@ -222,7 +230,9 @@ PRO HistoPlot , $                   ; The program name.
    MIN_VALUE=min_value, $           ; The minimum value to plot.
    MISSING=missing, $               ; The value that indicates "missing" data to be excluded from the histgram.
    OPLOT=overplot, $                ; Set if you want overplotting.
+   OPROB=oprob, $                   ; Overplot the cummulative probability distribution.
    OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
+   PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
    THICK=thick, $                   ; Set to draw thicker lines and axes.
    ;
    ; POLYFILL KEYWORDS
@@ -240,6 +250,7 @@ PRO HistoPlot , $                   ; The program name.
    LOCATIONS=locations, $
    OMAX=omax, $
    OMIN=omin, $
+   PROBABLITY_FUNCTION=probability, $
    REVERSE_INDICES=ri, $
    ;
    ; HISTOGRAM INPUT KEYWORDS
@@ -336,6 +347,7 @@ PRO HistoPlot , $                   ; The program name.
    IF N_Elements(axisColorName) EQ 0 THEN axisColorName = "Black"
    IF N_Elements(backColorName) EQ 0 THEN backColorName = "White"
    IF N_Elements(polycolorname) EQ 0 THEN polycolorname = "Rose"
+   IF N_Elements(probColorname) EQ 0 THEN probColorname = "Blue"
    frequency = Keyword_Set(frequency)
    line_fill = Keyword_Set(line_fill)
    IF line_fill THEN fillpolygon = 1
@@ -354,6 +366,7 @@ PRO HistoPlot , $                   ; The program name.
    dataColor = FSC_Color(datacolorName, FILE=file)
    backColor = FSC_Color(backColorName, FILE=file)
    polyColor = FSC_Color(polyColorName, FILE=file)
+   probColor = FSC_Color(probColorName, FILE=file)
 
    ; Set up some labels.
    IF frequency THEN BEGIN
@@ -376,6 +389,12 @@ PRO HistoPlot , $                   ; The program name.
       OMIN=omin, $
       REVERSE_INDICES=ri)
    IF frequency THEN histdata = Float(histdata)/N_Elements(_dataToHistogram)
+   
+   ; Need a probability distribution?
+   IF Arg_Present(probablity) OR Keyword_Set(oprob) THEN BEGIN
+       cumTotal = Total(histData, /CUMULATIVE)
+       probability = Scale_Vector(cumTotal, 0, 1)
+   ENDIF
 
    ; Calculate the range of the plot output.
 ;   ymin = 0
@@ -468,7 +487,7 @@ PRO HistoPlot , $                   ; The program name.
 
       ENDELSE
    ENDIF
-   
+      
    ; Restore the pre-plot system variables.
    IF Total(!P.MULTI) NE 0 THEN BEGIN
        !P = bangp
@@ -521,6 +540,14 @@ PRO HistoPlot , $                   ; The program name.
         ENDELSE
     ENDFOR
    
+   ; Need to overplot probability function?
+   IF Keyword_Set(oprob) THEN BEGIN
+        proby = Scale_Vector(cumTotal, !Y.CRange[0], !Y.CRange[1])
+        IF Keyword_Set(oplot) THEN bsize = 0 ELSE bsize = binsize
+        probx = Scale_Vector(Findgen(N_Elements(proby)), !X.CRange[0] + bsize, !X.CRange[1] - bsize)
+        Oplot, probx, proby, COLOR=probcolor
+   ENDIF
+
    ; Advance the plot for !P.Multi purposes.
    IF Total(!P.MULTI) NE 0 THEN BEGIN
        !P = bangAfterp 
@@ -529,11 +556,8 @@ PRO HistoPlot , $                   ; The program name.
        !MAP = bangAftermap
    ENDIF
 
-   ; Clean up. But you really can't do this in PostScript or the Z-buffer. Causes
-   ; total havoc in the Z-buffer, in particular.
-   CASE !D.Name OF
-     'Z':
-     'PS':
-     ELSE: TVLCT, r, g, b
-   ENDCASE
+   ; Clean up. But you really can't do this in the Z-buffer. 
+   IF !D.Name NE 'Z' THEN TVLCT, r, g, b
+   
+
 END

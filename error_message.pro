@@ -160,7 +160,7 @@ FUNCTION ERROR_MESSAGE, theMessage, Error=error, Informational=information, $
    callingRoutine = (StrSplit(StrCompress(callStack[1])," ", /Extract))[0]
    
    ; Are widgets supported?
-   IF !D.Name EQ 'PS' THEN BEGIN
+   IF !D.Name EQ 'PS' OR !D.Name EQ 'Z' THEN BEGIN
       widgetsSupported = 1
    ENDIF ELSE BEGIN
       widgetsSupported = ((!D.Flags AND 65536L) NE 0)

@@ -15,6 +15,7 @@
 ;       ASINH          An inverse hyperbolic sine function (strong log function).
 ;       SQUARE ROOT    Another type of log function.
 ;       EQUALIZATION   Image histogram is equalized before stretching.
+;       ADAPTIVE EQUALIZATION Image histogram is equalized with Adapt_Hist_Equal before stretching.
 ;       GAUSSIAN       A gaussian normal distribution function.
 ;
 ;       An image histogram is provided to the user as an aid in manipulating
@@ -60,11 +61,11 @@
 ;       COLORS:        A five element string array, listing the FSC_COLORS colors for drawing the
 ;                      histogram plot. The colors are used as follows:
 ;
-;                      colors[0] : Background color. Default: "ivory".
-;                      colors[1] : Axis color. Default: "charcoal".
+;                      colors[0] : Background color. Default: "white".
+;                      colors[1] : Axis color. Default: "black".
 ;                      colors[2] : Min threshold color. Default: "firebrick".
 ;                      colors[3] : Max threshold  color. Default: "steel blue".
-;                      colors[4] : ASinh color. Default: "sea green".
+;                      colors[4] : ASinh color. Default: "grn6".
 ;                      colors[5] : Histogram color. Default: "charcoal".
 ;
 ;                      If a particular color is represented as a null string, then the
@@ -304,6 +305,7 @@
 ;           threshold values stay within the data range appropriate for the data type. 21 April 2010. DWF.
 ;        Fixed another problem with integer data types and bin size. 23 April 2010. DWF.
 ;        Fixed a problem with the display image when starting with a Square Root stretch. 23 April 2010. DWF.
+;        Added ADAPTIVE EQUALIZATION stretch and changed default colors. 24 Nov 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -398,6 +400,11 @@ FUNCTION XSTRETCH_SCALEIMAGE, info
       'LINEAR 2%': BEGIN
       
          scaledImage = BytScl(*info.image, Max=info.maxThresh, Min=info.minThresh, /NAN)
+         IF info.negative THEN RETURN, 255B - scaledImage ELSE RETURN, scaledImage
+         END
+
+      'ADAPTIVE EQUALIZATION': BEGIN
+         scaledImage = BytScl(Adapt_Hist_Equal(*info.image), Max=info.maxThresh, Min=info.minThresh, /NAN)
          IF info.negative THEN RETURN, 255B - scaledImage ELSE RETURN, scaledImage
          END
 
@@ -680,6 +687,13 @@ PRO XSTRETCH_DRAWLINES, minThresh, maxThresh, info
             OPlot, x, line, Color=FSC_Color(info.colors[4]), LineStyle=2, Thick=2
          END
 
+      'ADAPTIVE EQUALIZATION': BEGIN
+            line = BytScl(Findgen(101))
+            line = Scale_Vector(line, 0.0, !Y.CRange[1])
+            x = Scale_Vector(Findgen(101), minThresh, maxThresh)
+            OPlot, x, line, Color=FSC_Color(info.colors[4]), LineStyle=2, Thick=2
+         END
+
       'EQUALIZATION': BEGIN
             line = BytScl(Findgen(101))
             line = Scale_Vector(line, 0.0, !Y.CRange[1])
@@ -806,6 +820,27 @@ PRO XSTRETCH_HISTOPLOT, info, $
 
    ; Normalized pixel density.
    CASE info.type OF
+   
+      'ADAPTIVE EQUALIZATION': BEGIN
+         goodIndices = Where(Finite(*info.image), NCOMPLEMENT=nanCount, count)
+         IF nanCount GT 0 THEN BEGIN
+             binsize = (3.5 * StdDev(ADAPT_HIST_EQUAL(*info.image), /NAN))/N_Elements((*info.image)[goodIndices])^(1./3)
+             IF (dataType LE 3) OR (dataType GE 12) THEN binsize = Round(binsize) > 1
+             binsize = Convert_To_Type(binsize, dataType)
+             IF binsize LT 1 THEN binsize = 1
+             histdata = Histogram(/NAN, ADAPT_HIST_EQUAL((*info.image)[goodIndices]), Binsize=binsize, $
+                OMIN=omin, OMAX=omax)/Float(count)         
+         ENDIF ELSE BEGIN
+             binsize = (3.5 * StdDev(ADAPT_HIST_EQUAL(*info.image), /NAN))/N_Elements(*info.image)^(1./3)
+             IF (dataType LE 3) OR (dataType GE 12) THEN binsize = Round(binsize) > 1
+             binsize = Convert_To_Type(binsize, dataType)
+             IF binsize LT 1 THEN binsize = 1
+             histdata = Histogram(/NAN, ADAPT_HIST_EQUAL(*info.image), Binsize=binsize, $
+                OMIN=omin, OMAX=omax)/Float(N_Elements(*info.image))
+         ENDELSE
+         imageTitle = 'Adapted Equalization Image Value'
+         END
+   
 
       'EQUALIZATION': BEGIN
          goodIndices = Where(Finite(*info.image), NCOMPLEMENT=nanCount, count)
@@ -2075,6 +2110,11 @@ PRO XSTRETCH_STRETCHTYPE, event
            Widget_Control, info.currentMappedBase, Map=0
          END
 
+      'ADAPTIVE EQUALIZATION': BEGIN
+         IF Widget_Info(info.currentMappedBase, /Valid_ID) THEN $
+           Widget_Control, info.currentMappedBase, Map=0
+         END
+
       'EQUALIZATION': BEGIN
          IF Widget_Info(info.currentMappedBase, /Valid_ID) THEN $
            Widget_Control, info.currentMappedBase, Map=0
@@ -2451,10 +2491,10 @@ PRO XSTRETCH, theImage, $
   IF N_Elements(beta) EQ 0 THEN beta = 3 ELSE beta = beta > 0.0
   brewer = Keyword_Set(brewer)
   IF N_Elements(colors) EQ 0 THEN BEGIN
-      colors = ['ivory', 'charcoal', 'firebrick', 'steel blue', 'sea green', 'charcoal']
+      colors = ['white', 'black', 'firebrick', 'steel blue', 'grn6', 'black']
    ENDIF ELSE BEGIN
       IF N_Elements(colors) NE 6 THEN Message, 'Incorrect number of colors in COLORS vector.'
-      defcolors = ['ivory', 'charcoal', 'firebrick', 'steel blue', 'sea green', 'charcoal']
+      defcolors = ['white', 'black', 'firebrick', 'steel blue', 'grn6', 'black']
       i = Where(colors EQ "", count)
       IF count GT 0 THEN colors[i] = defcolors[i]
    ENDELSE
@@ -2487,14 +2527,15 @@ PRO XSTRETCH, theImage, $
    IF N_Elements(title) EQ 0 THEN title = 'Drag Vertical Lines to STRETCH Image Contrast'
 
    ; Determine scaling type.
-   possibleTypes = ['LINEAR', 'GAMMA', 'LOG', 'ASINH', 'LINEAR 2%', 'SQUARE ROOT', 'EQUALIZATION', 'GAUSSIAN']
+   possibleTypes = ['LINEAR', 'GAMMA', 'LOG', 'ASINH', 'LINEAR 2%', 'SQUARE ROOT', $
+        'EQUALIZATION', 'ADAPTIVE EQUALIZATION', 'GAUSSIAN']
    IF N_Elements(type) EQ 0 THEN type = 'LINEAR'
    IF Size(type, /TName) EQ 'STRING' THEN BEGIN
       type = StrUpCase(type)
       index = WHERE(possibleTypes EQ type, count)
       IF count EQ 0 THEN Message, 'Cannot find specified stretch type: ' + type
    ENDIF ELSE BEGIN
-      type = 0 > Fix(type) < 7
+      type = 0 > Fix(type) < 8
       type = possibleTypes[type]
    ENDELSE
 
@@ -2565,10 +2606,12 @@ PRO XSTRETCH, theImage, $
    ; Stretch TYPE buttons.
    paramBaseID = Widget_Base(histo_tlb, XPAD=0, YPAD=0, Column=1, Base_Align_Left=1)
    rowID = Widget_Base(paramBaseID, XPAD=0, YPAD=0, ROW=1, SPACE=10)
-   types = StrUpCase(['Linear', 'Linear 2%', 'Gamma', 'Log', 'Square Root', 'Asinh', 'Equalization', 'Gaussian'])
+   types = StrUpCase(['Linear', 'Linear 2%', 'Gamma', 'Log', 'Square Root', 'Asinh', $
+        'Equalization', 'Adaptive Equalization', 'Gaussian'])
    index = Where(types EQ type) ; Necessary for backward compatibility and for my ordering in pull-down.
    scaleID = FSC_Droplist(rowID, Title='Scaling: ', Spaces=1, $
-      Value=['Linear', 'Linear 2%', 'Gamma', 'Log', 'Square Root', 'Asinh', 'Equalization', 'Gaussian'], $
+      Value=['Linear', 'Linear 2%', 'Gamma', 'Log', 'Square Root', 'Asinh', $
+        'Equalization', 'Adaptive Equalization','Gaussian'], $
       Event_Pro='XStretch_StretchType')
    scaleID -> SetIndex, index[0] > 0
 

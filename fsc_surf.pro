@@ -74,6 +74,8 @@
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     elevation_shading: in, optional, type=boolean, default=0
+;        Set this keyword to put elevation shading into effect for the surface.
 ;     font: in, optional, type=integer, default=-1
 ;        The type of font desired. If undefined, and the current graphics device is PostScript,
 ;        the FONT keyword will be set to 1, indicating true-type fonts. The FONT keyword must
@@ -138,6 +140,7 @@
 ;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
 ;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
 ;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
+;        Added ELEVATION_SHADING keyword. 26 Nov 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -149,6 +152,7 @@ PRO FSC_Surf, data, x, y, $
     BOTTOM=sbottom, $
     CHARSIZE=charsize, $
     COLOR=scolor, $
+    ELEVATION_SHADING=elevation_shading, $
     FONT=font, $
     NOERASE=noerase, $
     SHADED=shaded, $
@@ -192,6 +196,7 @@ PRO FSC_Surf, data, x, y, $
     IF N_Elements(saxescolor) NE 0 THEN axiscolor = saxescolor ELSE axiscolor = saxiscolor
     IF N_Elements(scolor) EQ 0 THEN color = 'blu6' ELSE color = scolor
     IF N_Elements(sbottom) EQ 0 THEN bottom = color ELSE bottom = sbottom
+    elevation_shading = Keyword_Set(elevation_shading)
     IF N_Elements(font) EQ 0 THEN IF (!D.Name EQ 'PS') THEN font = 1 ELSE font = !P.font
     IF N_Elements(charsize) EQ 0 THEN BEGIN
         IF (!P.Charsize EQ 0) AND ((font EQ 1) OR (!P.FONT EQ 1)) THEN charsize = 1.75
@@ -239,6 +244,11 @@ PRO FSC_Surf, data, x, y, $
     
     ; Get the color table with loaded drawing colors.
     TVLCT, rl, gl, bl, /GET
+    
+    ; Are you doing elevation shading?
+    IF elevation_shading THEN BEGIN
+        IF N_Elements(shades) EQ 0 THEN shades = BytScl(data, /NAN)
+    ENDIF
     
     ; Going to draw the axes in decomposed color if we can.
     IF currentState THEN SetDecomposedState,1

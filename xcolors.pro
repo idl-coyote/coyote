@@ -405,6 +405,9 @@
 ;            integrated. Fixed several bugs with updating color table names and type. DWF.
 ;       29 Sept 2010. Modified the program to work correctly with a user-supplied color
 ;            table file. DWF.
+;       26 November 2010. Fixed a problem I noticed when starting the program with reversed
+;            color tables. The initial colors were incorrect on subsequent calls. Also made
+;            a modification so that color index -1 as input is handled properly (ignored). DWF.
 ;
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
@@ -587,6 +590,7 @@ IF info.from EQ 'PROTECT' THEN RETURN
 
 s = SIZE(info.notifyID)
 IF s(0) EQ 1 THEN count = 0 ELSE count = s(2)-1
+print, 'Indo.reversed in ColorSet', info.reversed
 FOR j=0,count DO BEGIN
    colorEvent = { XCOLORS_LOAD, $            ;
                   ID:info.notifyID(0,j), $   ;
@@ -621,10 +625,10 @@ FOR j=0,nelements-1 DO BEGIN
          ENDIF ELSE BEGIN
             IF info.object_data $
                THEN Call_Method, (info.notifyobj)[j].method, $
-                      (info.notifyobj)[j].object,_Extra=*info.extra, $
+                      (info.notifyobj)[j].object,_Strict_Extra=*info.extra, $
                       XCOLORS_DATA=*info.colorinfoptr $ 
                ELSE Call_Method, (info.notifyobj)[j].method, $
-                      (info.notifyobj)[j].object,_Extra=*info.extra
+                      (info.notifyobj)[j].object,_Strict_Extra=*info.extra
          ENDELSE
       ENDIF ELSE BEGIN
         s = Size(*info.extra)
@@ -639,10 +643,10 @@ FOR j=0,nelements-1 DO BEGIN
             IF info.object_data $
                THEN Call_Method, (info.notifyobj)[j].method, $
                   (info.notifyobj)[j].object, DATA=*info.xcolorsData, $
-                  _Extra=*info.extra, XCOLORS_DATA=*info.colorinfoptr  $
+                  _Strict_Extra=*info.extra, XCOLORS_DATA=*info.colorinfoptr  $
                ELSE Call_Method, (info.notifyobj)[j].method, $
                   (info.notifyobj)[j].object, DATA=*info.xcolorsData, $
-                  _Extra=*info.extra
+                  _Strict_Extra=*info.extra
         ENDELSE
       ENDELSE
    ENDIF
@@ -656,14 +660,14 @@ IF info.notifyPro NE "" THEN BEGIN
       IF s[s[0]+1] EQ 0 THEN BEGIN
          Call_Procedure, info.notifyPro
       ENDIF ELSE BEGIN
-         Call_Procedure, info.notifyPro, _Extra=*info.extra
+         Call_Procedure, info.notifyPro, _Strict_Extra=*info.extra
       ENDELSE
    ENDIF ELSE BEGIN
       s = Size(*info.extra)
       IF s[s[0]+1] EQ 0 THEN BEGIN
          Call_Procedure, info.notifyPro, DATA=*info.xcolorsData
       ENDIF ELSE BEGIN
-         Call_Procedure, info.notifyPro, DATA=*info.xcolorsData, _Extra=*info.extra
+         Call_Procedure, info.notifyPro, DATA=*info.xcolorsData, _Strict_Extra=*info.extra
       ENDELSE
    ENDELSE
 ENDIF
@@ -867,34 +871,70 @@ PRO XCOLORS_REVERSE_BUTTON, event
 
 Widget_Control, event.top, Get_UValue=info, /No_Copy
 
-   ; Is the button set or not?
+; To get the initial colors correct. We have to load the colors as if they
+; were not reversed.
+IF info.index GE 0 THEN BEGIN  
+CTLoad, info.index, BREWER=info.brewer, RGB_TABLE=c
+info.r = c[*,0]
+info.g = c[*,1]
+info.b = c[*,2]
+ENDIF ELSE TVLCT, info.r, info.g, info.b
 
+; Is the button set or not?
 buttonSet = Widget_Info(event.id, /BUTTON_SET)
 
-   ; Make a pseudo structure.
+; Make a pseudo structure.
+IF buttonSet THEN  BEGIN
+    
+    IF info.currentBottom GT info.currentTop THEN $
+       pseudo = {currenttop:info.currentbottom, currentbottom:info.currenttop, $
+          reversed:1, bottomcolor:info.topcolor, topcolor:info.bottomcolor, $
+          gamma:info.gamma, top:info.top, bottom:info.bottom, index:info.index, $
+          ncolors:info.ncolors, r:info.r, g:info.g, b:info.b, $
+          notifyID:info.notifyID, colorimage:info.colorimage, extra:info.extra, $
+          windowindex:info.windowindex, from:'SLIDER', notifyObj:info.notifyObj, $
+          thisWindow:info.thisWindow, notifyPro:info.notifyPro, xcolorsData:info.xcolorsData, $
+          colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
+          needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
+          object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer} $
+    ELSE $
+       pseudo = {currenttop:info.currenttop, currentbottom:info.currentbottom, $
+          reversed:1, bottomcolor:info.bottomcolor, topcolor:info.topcolor, $
+          gamma:info.gamma, top:info.top, bottom:info.bottom, index:info.index, $
+          ncolors:info.ncolors, r:info.r, g:info.g, b:info.b, $
+          notifyID:info.notifyID, colorimage:info.colorimage, extra:info.extra, $
+          windowindex:info.windowindex, from:'SLIDER', notifyObj:info.notifyObj, $
+          thisWindow:info.thisWindow, notifyPro:info.notifyPro, xcolorsData:info.xcolorsData, $
+          colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
+          needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
+          object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer}
+          
+ENDIF ELSE BEGIN
 
-IF info.currentBottom GT info.currentTop THEN $
-   pseudo = {currenttop:info.currentbottom, currentbottom:info.currenttop, $
-      reversed:1, bottomcolor:info.topcolor, topcolor:info.bottomcolor, $
-      gamma:info.gamma, top:info.top, bottom:info.bottom, index:info.index, $
-      ncolors:info.ncolors, r:info.r, g:info.g, b:info.b, $
-      notifyID:info.notifyID, colorimage:info.colorimage, extra:info.extra, $
-      windowindex:info.windowindex, from:'SLIDER', notifyObj:info.notifyObj, $
-      thisWindow:info.thisWindow, notifyPro:info.notifyPro, xcolorsData:info.xcolorsData, $
-      colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
-      needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
-      object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer} $
-ELSE $
-   pseudo = {currenttop:info.currenttop, currentbottom:info.currentbottom, $
-      reversed:0, bottomcolor:info.bottomcolor, topcolor:info.topcolor, $
-      gamma:info.gamma, top:info.top, bottom:info.bottom, index:info.index, $
-      ncolors:info.ncolors, r:info.r, g:info.g, b:info.b, $
-      notifyID:info.notifyID, colorimage:info.colorimage, extra:info.extra, $
-      windowindex:info.windowindex, from:'SLIDER', notifyObj:info.notifyObj, $
-      thisWindow:info.thisWindow, notifyPro:info.notifyPro, xcolorsData:info.xcolorsData, $
-      colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
-      needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
-      object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer}
+    IF info.currentBottom GT info.currentTop THEN $
+       pseudo = {currenttop:info.currentbottom, currentbottom:info.currenttop, $
+          reversed:0, bottomcolor:info.topcolor, topcolor:info.bottomcolor, $
+          gamma:info.gamma, top:info.top, bottom:info.bottom, index:info.index, $
+          ncolors:info.ncolors, r:info.r, g:info.g, b:info.b, $
+          notifyID:info.notifyID, colorimage:info.colorimage, extra:info.extra, $
+          windowindex:info.windowindex, from:'SLIDER', notifyObj:info.notifyObj, $
+          thisWindow:info.thisWindow, notifyPro:info.notifyPro, xcolorsData:info.xcolorsData, $
+          colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
+          needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
+          object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer} $
+    ELSE $
+       pseudo = {currenttop:info.currenttop, currentbottom:info.currentbottom, $
+          reversed:0, bottomcolor:info.bottomcolor, topcolor:info.topcolor, $
+          gamma:info.gamma, top:info.top, bottom:info.bottom, index:info.index, $
+          ncolors:info.ncolors, r:info.r, g:info.g, b:info.b, $
+          notifyID:info.notifyID, colorimage:info.colorimage, extra:info.extra, $
+          windowindex:info.windowindex, from:'SLIDER', notifyObj:info.notifyObj, $
+          thisWindow:info.thisWindow, notifyPro:info.notifyPro, xcolorsData:info.xcolorsData, $
+          colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
+          needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
+          object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer}
+          
+ENDELSE
 
    ; Load the colors.
 
@@ -1202,9 +1242,12 @@ IF (ncolors + bottom) GT 256 THEN ncolors = 256 - bottom
 
    ; Load colors in INDEX if specified.
 IF userfile NE "" THEN file = userfile
-IF N_Elements(index) NE 0 THEN BEGIN
-   LoadCT, index, File=file, /Silent, NColors=ncolors, Bottom=bottom
+IF N_Elements(index) GE 0 THEN BEGIN
+   IF index GE 0 THEN BEGIN
+        LoadCT, index, File=file, /Silent, NColors=ncolors, Bottom=bottom
+   ENDIF ELSE index = -1
 ENDIF ELSE index = -1
+
 
    ; Create a pointer to the color information.
 
@@ -1213,6 +1256,7 @@ IF Keyword_Set(reverse) THEN BEGIN
    rr = Reverse(rr)
    gg = Reverse(gg)
    bb = Reverse(bb)
+   TVLCT, rr, gg, bb
 ENDIF
 colorInfoPtr = Ptr_New({R:rr, G:gg, B:bb, Name:'Unknown', $
    Index:index, Type:colortabletype, Reversed:Keyword_Set(reverse), $
@@ -1320,7 +1364,7 @@ colornames = Ptr_New(colornames)
    ; Create a cancel structure.
 
 cancelstruct = {currenttop:top, currentbottom:bottom, $
-   reversed:0, windowindex:windowindex, $
+   reversed:Keyword_Set(reverse), windowindex:windowindex, $
    bottomcolor:bottomcolor, topcolor:topcolor, gamma:1.0, $
    top:top, bottom:bottom, ncolors:ncolors, r:r, $
    g:g, b:b, notifyID:notifyID, index:index, $
@@ -1348,7 +1392,7 @@ info = {  windowIndex:windowIndex, $         ; The WID of the draw widget.
           top:top, $                         ; The top color index.
           topcolor:topColor, $               ; The top color in this color table.
           bottomcolor:bottomColor, $         ; The bottom color in this color table.
-          reversed:0, $                      ; A reverse color table flag.
+          reversed:Keyword_Set(reverse), $   ; A reverse color table flag.
           reverseID:reverseID, $             ; The reverseID button.
           nosliders:Keyword_set(nosliders), $; A no slider flag.
           notifyID:notifyID, $               ; Notification widget IDs.
@@ -1384,6 +1428,7 @@ info = {  windowIndex:windowIndex, $         ; The WID of the draw widget.
 
    ; Turn color protection on.
 
+Print, 'Info.reversed in XColors def module.', info.reversed
 IF !D.NAME NE 'MAC' THEN Widget_Control, draw, Draw_Expose_Events=1
 
    ; Store the info structure in the user value of the top-level base.

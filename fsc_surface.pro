@@ -1076,571 +1076,593 @@ END
 
 
 
-PRO FSC_Surface, data, x, y, _Extra=extra, XTitle=xtitle, $
-   YTitle=ytitle, ZTitle=ztitle, Title=plotTitle, Block=block, $
-   Group_Leader=groupLeader, Exact=exact, Position=pos, $
-   Landscape=landscape, Elevation_Shading=elevation, $
-   Colortable=colortable, Shaded=shaded, Hidden_Lines=hidden_lines, $
-   XRange=xrange_u, YRange=yrange_u, ZRange=zrange_u
-
-   ; New printer functionality requires IDL 5.3 or higher.
-
-IF Float(!Version.Release) LT 5.3 THEN BEGIN
-   ok = Dialog_Message('Program functionality requires IDL 5.3 or higher. Returning...')
-   RETURN
-ENDIF
+PRO FSC_Surface, data, x, y, $
+    Axiscolor=saxiscolor, $
+    Background=sbackground, $
+    Block=block, $
+    Bottom=sbottom, $
+    Brewer=brewer, $
+    Color=scolor, $
+    Constrain_Aspect=constrain_aspect, $
+    CTable=colortable, $
+    Elevation_Shading=elevation, $
+    Exact=exact, $
+    Hidden_Lines=hidden_lines, $
+    Group_Leader=groupLeader, $
+    Landscape=landscape, $
+    Position=pos, $
+    Shaded=shaded, $
+    Shades=shades, $
+    Title=plotTitle, $
+    XRange=xrange_u, $
+    XTitle=xtitle, $
+    YRange=yrange_u, $
+    YTitle=ytitle, $
+    ZRange=zrange_u, $
+    ZScale=zscale, $
+    ZTitle=ztitle, $
+    _Extra=extra
 
     ; Check for keywords.
-
-IF N_Elements(xtitle) EQ 0 THEN xtitle='X Axis'
-IF N_Elements(ytitle) EQ 0 THEN ytitle='Y Axis'
-IF N_Elements(ztitle) EQ 0 THEN ztitle='Z Axis'
-IF N_Elements(plotTitle) EQ 0 THEN plotTitle=''
-IF N_Elements(colortable) EQ 0 THEN colortable = 4 ELSE colortable = 0 > colortable < 40
-hidden_lines = Keyword_Set(hidden_lines)
-elevation = Keyword_Set(elevation)
-landscape = Keyword_Set(landscape)
-IF Keyword_Set(shaded) THEN BEGIN
-   shading = 1
-   style = 2
-ENDIF ELSE BEGIN
-   shading = 0
-   style = 1
-ENDELSE
-CASE N_Elements(exact) OF
-   0: exact = [0,0,0]
-   1: exact = Replicate(exact, 3)
-   2: exact = [exact, 0]
-   3:
-   ELSE: BEGIN
-      ok = Dialog_Message('Exact keyword contains too many elements. Returning...')
-      RETURN
-      ENDCASE
-ENDCASE
-
-    ; Need some data.
-
-Catch, error
-IF error NE 0 THEN BEGIN  ; Can't find LoadData.
-   data = DIST(41)
-   x = Findgen(41)
-   y = Findgen(41)
-   IF !Error NE -154 THEN Print, !Err_String ELSE Print, 'Skipping LOADDATA call.'
-ENDIF
-
-TVLCT, r, g, b, /Get
-
-IF N_Elements(data) EQ 0 THEN BEGIN
-   data = LoadData(2)
-ENDIF
-
-s = Size(data)
-
-IF s(0) NE 2 THEN Message,'Must pass 2D argument. Using fake data.'
-IF N_Elements(x) EQ 0 THEN x = Findgen(s(1))
-IF N_Elements(y) EQ 0 THEN y = Findgen(s(2))
-
-
-Catch, /Cancel
-
-   ; Calculate or use the position coordinates.
-
-IF N_Elements(pos) EQ 0 THEN BEGIN
-
-      ; I want the surface data to have the same aspect ratio as the data itself
-      ; in the X and Y directions.
-
-   surfaceAspect = Float(s[2]) / s[1]
-   windowAspect = 1.0
-   pos = FSC_Surface_Aspect(surfaceAspect, WindowAspect=windowAspect, Margin=0)
-   pos = [pos[0], pos[2], pos[1], pos[3], 0.0, 1.0] - 0.5
-
-ENDIF ELSE BEGIN
-
-   CASE N_Elements(pos) OF
-
-      2: BEGIN
-         pos = [pos, 0.0, 1.0, 0.0, 1.0]
-         pos[0] = 0.0 > pos[0]
-         pos[1] = pos[1] < 1.0
-         END
-
-      4: BEGIN
-         pos = [pos, 0.0, 1.0]
-         pos[0] = 0.0 > pos[0]
-         pos[1] = pos[1] < 1.0
-         pos[2] = 0.0 > pos[2]
-         pos[3] = pos[3] > 1.0
-         END
-
-      6: BEGIN
-         pos[0] = 0.0 > pos[0]
-         pos[1] = pos[1] < 1.0
-         pos[2] = 0.0 > pos[2]
-         pos[3] = pos[3] > 1.0
-         pos[4] = 0.0 > pos[4]
-         pos[5] = pos[5] > 1.0
-         END
-
-      ELSE: BEGIN
-         ok = Dialog_Message('POSITION keyword must be a 2, 4, or 6 element array. Returning...')
-         RETURN
-         END
-
-   ENDCASE
-
-   pos = pos - 0.5
-
-ENDELSE
-
-    ; Create a view. Use RGB color. Charcoal background.
-    ; The coodinate system is chosen so that (0,0,0) is in the
-    ; center of the window. This will make rotations easier.
-
-thisView = OBJ_NEW('IDLgrView', Color=[80,80,80], $
-   Viewplane_Rect=[-1.2,-1.1,2.3,2.3])
-
-    ; Create a model for the surface and axes and add it to the view.
-    ; This model will rotate under the direction of the trackball object.
-
-thisModel = OBJ_NEW('IDLgrModel')
-thisView->Add, thisModel
-
-    ; Create a separate model for the title that doesn't rotate.
-
-textModel = Obj_New('IDLgrModel')
-thisView->Add, textModel
-
-    ; Create helper objects. First, create title objects
-    ; for the axes and plot. Color them green.
-
-xTitle = Obj_New('IDLgrText', xtitle, Color=[0,255,0], /Enable_Formatting)
-yTitle = Obj_New('IDLgrText', ytitle, Color=[0,255,0], /Enable_Formatting)
-zTitle = Obj_New('IDLgrText', ztitle, Color=[0,255,0], /Enable_Formatting)
-
-    ; Create font objects.
-
-helvetica10pt = Obj_New('IDLgrFont', 'Helvetica', Size=10)
-helvetica14pt = Obj_New('IDLgrFont', 'Helvetica', Size=14)
-
-    ; Create a plot title object. I am going to place the title
-    ; centered in X and towards the top of the viewplane rectangle.
-
-plotTitle = Obj_New('IDLgrText', plotTitle, Color=[0,255,0], /Enable_Formatting, $
-   Alignment=0.5, Location=[0.0, 1.05, 0.0], Font=helvetica14pt)
-textModel->Add, plotTitle
-
-    ; Create a trackball for surface rotations. Center it in
-    ; the 400-by-400 window. Give it a 200 pixel diameter.
-
-thisTrackball = OBJ_NEW('Trackball', [200, 200], 200)
-
-   ; Create a palette for the surface.
-
-thisPalette = Obj_New("IDLgrPalette")
-thisPalette->LoadCT, colortable
-thisPalette->GetProperty, Red=r, Green=g, Blue=b
-
-    ; Create a surface object. Make it white.
-thisSurface = OBJ_NEW('IDLgrSurface', data, x, y, $
-   Color=[255,255,255], _Extra=extra, Style=style, $
-   Shading=shading, Hidden_Lines=hidden_lines)
-
-    ; Get the data ranges of the surface.
-
-thisSurface->GetProperty, XRange=xrange, YRange=yrange, ZRange=zrange
-IF N_Elements(xrange_u) NE 0 THEN xrange = xrange_u
-IF N_Elements(yrange_u) NE 0 THEN yrange = yrange_u
-IF N_Elements(zrange_u) NE 0 THEN zrange = zrange_u
-
-    ; Create axes objects for the surface. Color them green.
-    ; Axes are created after the surface so the range can be
-    ; set correctly. Note how I set the font to 10 pt helvetica.
-
-xAxis = Obj_New("IDLgrAxis", 0, Color=[0,255,0], Ticklen=0.1, $
-   Minor=4, Title=xtitle, Range=xrange, Exact=exact[0])
-xAxis->GetProperty, Ticktext=xAxisText
-xAxisText->SetProperty, Font=helvetica10pt
-
-yAxis = Obj_New("IDLgrAxis", 1, Color=[0,255,0], Ticklen=0.1, $
-   Minor=4, Title=ytitle, Range=yrange, Exact=exact[1])
-yAxis->GetProperty, Ticktext=yAxisText
-yAxisText->SetProperty, Font=helvetica10pt
-
-zAxis = Obj_New("IDLgrAxis", 2, Color=[0,255,0], Ticklen=0.1, $
-   Minor=4, Title=ztitle, Range=zrange, Exact=exact[2])
-zAxis->GetProperty, Ticktext=zAxisText
-zAxisText->SetProperty, Font=helvetica10pt
-
-    ; The axes may not use exact axis scaling, so the ranges may
-    ; have changed from what they were originally set to. Get
-    ; and update the range variables.
-
-xAxis->GetProperty, CRange=xrange
-yAxis->GetProperty, CRange=yrange
-zAxis->GetProperty, CRange=zrange
-
-   ; If you want elevation shading, have to set the colors up now.
-
-IF elevation THEN BEGIN
-   s = Size(data, /Dimensions)
-   thisSurface->SetProperty, Vert_Colors=Reform(BytScl(data, /NAN, Min=Min(zrange), Max=Max(zrange)), $
-      s[0]*s[1]), Palette=thisPalette
-ENDIF
-
-    ; Set scaling parameters for the surface and axes so that everything
-    ; is scaled into the range -0.5 to 0.5. We do this so that when the
-    ; surface is rotated we don't have to worry about translations. In
-    ; other words, the rotations occur about the point (0,0,0).
-
-xs = FSC_Normalize(xrange, Position=[pos[0], pos[1]])
-ys = FSC_Normalize(yrange, Position=[pos[2], pos[3]])
-zs = FSC_Normalize(zrange, Position=[pos[4], pos[5]])
-
-    ; Scale the axes and place them in the coordinate space.
-    ; Note that not all values in the Location keyword are
-    ; used. (I've put really large values into the positions
-    ; that are not being used to demonstate this.) For
-    ; example, with the X axis only the Y and Z locations are used.
-
-xAxis->SetProperty, Location=[9999.0, pos[2], pos[4]], XCoord_Conv=xs
-yAxis->SetProperty, Location=[pos[0], 9999.0, pos[4]], YCoord_Conv=ys
-zAxis->SetProperty, Location=[pos[0],  pos[3], 9999.0], ZCoord_Conv=zs
-
-    ; Scale the surface.
-
-thisSurface->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys, ZCoord_Conv=zs
-
-    ; Add the surface and axes objects to the model.
-
-thisModel->Add, thisSurface
-thisModel->Add, xAxis
-thisModel->Add, yAxis
-thisModel->Add, zAxis
-
-    ; Rotate the surface model to the standard surface view.
-
-thisModel->Rotate,[1,0,0], -90  ; To get the Z-axis vertical.
-thisModel->Rotate,[0,1,0],  30  ; Rotate it slightly to the right.
-thisModel->Rotate,[1,0,0],  30  ; Rotate it down slightly.
-
-; Create some lights to view the surface. Surfaces will look
-; best if there is some ambient lighting to illuminate them
-; uniformly, and some positional lights to give the surface
-; definition. We will create three positional lights: one,
-; non-rotating light will provide overhead definition. Two
-; rotating lights will provide specific surface definition.
-; Lights should be turned off or hidden if elevation shading
-; is in effect.
-
-    ; First create the ambient light. Don't turn it on too much,
-    ; or the surface will appear washed out.
-
-ambientLight = Obj_New('IDLgrLight', Type=0, Intensity=0.2)
-thisModel->Add, ambientLight
-
-    ; Shaded surfaces will not look shaded unless there is a
-    ; positional light source to give the surface edges definition.
-    ; This light will rotate with the surface.
-
-rotatingLight = Obj_New('IDLgrLight', Type=1, Intensity=0.60, $
-    Location=[xrange[1], yrange[1], 4*zrange[1]], $
-    Direction=[xrange[0], yrange[0], zrange[0]])
-thisModel->Add, rotatingLight
-
-    ; Create a fill light source so you can see the underside
-    ; of the surface. Otherwise, just the top surface will be visible.
-    ; This light will also rotate with the surface.
-
-fillLight = Obj_New('IDLgrLight', Type=1, Intensity=0.4, $
-   Location=[(xrange[1]-xrange[0])/2.0, (yrange[1]-yrange[0])/2.0, -2*Abs(zrange[0])], $
-   Direction=[(xrange[1]-xrange[0])/2.0, (yrange[1]-yrange[0])/2.0, zrange[1]])
-thisModel->Add, fillLight
-
-    ; Create a non-rotating overhead side light.
-
-nonrotatingLight = Obj_New('IDLgrLight', Type=1, Intensity=0.8, $
-    Location=[-xrange[1], (yrange[1]-yrange[0])/2.0, 4*zrange[1]], $
-    Direction=[xrange[1], (yrange[1]-yrange[0])/2.0, zrange[0]])
-nonrotatingModel = Obj_New('IDLgrModel')
-nonrotatingModel->Add, nonrotatingLight
-
-   ; Be sure to add the non-rotating model to the view, or it won't be visualized.
-
-thisView->Add, nonrotatingModel
-
-    ; Scale the light sources.
-
-rotatingLight->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys, ZCoord_Conv=zs
-fillLight->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys, ZCoord_Conv=zs
-nonrotatingLight->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys, ZCoord_Conv=zs
-
-    ; Rotate the non-rotating model to the standard surface view.
-
-nonrotatingModel->Rotate,[1,0,0], -90  ; To get the Z-axis vertical.
-nonrotatingModel->Rotate,[0,1,0],  30  ; Rotate it slightly to the right.
-nonrotatingModel->Rotate,[1,0,0],  30  ; Rotate it down slightly.
-
-   ; Check for availability of GIF files.
-
-thisVersion = Float(!Version.Release)
-IF thisVersion LT 5.4 THEN haveGif = 1 ELSE haveGIF = 0
-
-    ; Create the widgets to view the surface. 
-    ; Button events are on to enable trackball movement.
-
-tlb = Widget_Base(Title='Resizeable Window Surface Example', Column=1, $
-   TLB_Size_Events=1, MBar=menubase)
-
-; Sigh...Rendering throws a LOT of floating point exception errors, especially
-; when asking IDL to to the retaining for backing store. You can solve the problem
-; in one of two ways. Do your own backing store by turning EXPOSE events on, which
-; has its own problems when working with blocking widgets, or do the rendering
-; in software. The code exists here for you to choose your own poison. :-(
-;drawID = Widget_Draw(tlb, XSize=400, YSize=400, Graphics_Level=2, $
-;   Event_Pro='FSC_Surface_Draw_Events', Button_Events=1, Retain=2)
-;drawID = Widget_Draw(tlb, XSize=400, YSize=400, Graphics_Level=2, $
-;   Event_Pro='FSC_Surface_Draw_Events', Button_Events=1, Expose_Events=1)
-drawID = Widget_Draw(tlb, XSize=400, YSize=400, Graphics_Level=2, $
-   Event_Pro='FSC_Surface_Draw_Events', Button_Events=1, Retain=2, Renderer=1)
-
-    ; Create FILE menu buttons for printing and exiting.
-
-filer = Widget_Button(menubase, Value='File', /Menu)
-
-   ; Create OUTPUT menu buttons for formatted output files. Use GIF
-   ; files if available.
-
-output = Widget_Button(filer, Value='Save As...', /Menu)
-button = Widget_Button(output, Value='BMP File', $
-   UValue='BMP', Event_Pro='FSC_Surface_Output')
-button = Widget_Button(output, Value='EPS File', $
-   UValue='EPS', Event_Pro='FSC_Surface_Output')
-IF havegif THEN gif = Widget_Button(output, Value='GIF File', $
-   UValue='GIF', Event_Pro='FSC_Surface_Output')
-button = Widget_Button(output, Value='JPEG File', $
-   UValue='JPEG', Event_Pro='FSC_Surface_Output')
-button = Widget_Button(output, Value='PNG File', $
-   UValue='PNG', Event_Pro='FSC_Surface_Output')
-button = Widget_Button(output, Value='TIFF File', $
-   UValue='TIFF', Event_Pro='FSC_Surface_Output')
-
-printer = Widget_Button(filer, Value='Print', /Separator, $
-   Event_Pro='FSC_Surface_Printing', /Menu)
-dummy = Widget_Button(printer, Value='Vector Output (faster BW)', UValue='VECTOR')
-dummy = Widget_Button(printer, Value='Bitmap Output (slower BW)', UValue='BITMAP')
-dummy = Widget_Button(printer, Value='Full Color Printing (slower)', UValue='COLOR')
-
-quitter = Widget_Button(filer, /Separator, Value='Exit', $
-   Event_Pro='FSC_Surface_Exit')
-
-   ; Create STYLE menu buttons for surface style.
-
-style = Widget_Button(menubase, Value='Style', /Menu)
-dummy = Widget_Button(style, Value='Dot Surface', $
-   Event_Pro='FSC_Surface_Style', UValue='DOTS')
-dummy = Widget_Button(style, Value='Wire Mesh', $
-   Event_Pro='FSC_Surface_Style', UValue='MESH')
-dummy = Widget_Button(style, Value='Solid', $
-   Event_Pro='FSC_Surface_Style', UValue='SOLID')
-dummy = Widget_Button(style, Value='Parallel X Lines', $
-   Event_Pro='FSC_Surface_Style', UValue='XPARALLEL')
-dummy = Widget_Button(style, Value='Parallel Y Lines', $
-   Event_Pro='FSC_Surface_Style', UValue='YPARALLEL')
-dummy = Widget_Button(style, Value='Wire Mesh Lego', $
-   Event_Pro='FSC_Surface_Style', UValue='WIRELEGO')
-dummy = Widget_Button(style, Value='Solid Lego', $
-   Event_Pro='FSC_Surface_Style', UValue='SOLIDLEGO')
-IF hidden_lines THEN hlValue = 'Hidden Lines OFF' ELSE hlValue='Hidden Lines ON'
-dummy = Widget_Button(style, Value=hlvalue, $
-   Event_Pro='FSC_Surface_Style', UValue='HIDDEN', /Separator)
-
-IF elevation THEN BEGIN
-   elevationID = Widget_Button(style, Value='Elevation Shading OFF', $
-      /Separator, UValue='Elevation Shading ON', $
-      Event_Pro='FSC_Surface_Elevation_Shading')
-ENDIF ELSE BEGIN
-   elevationID = Widget_Button(style, Value='Elevation Shading ON', $
-      /Separator, UValue='Elevation Shading OFF', $
-      Event_Pro='FSC_Surface_Elevation_Shading')
-ENDELSE
-colorsID = Widget_Button(style, Value='Elevation Colors...', $
-   Event_Pro='FSC_Surface_Elevation_Colors')
-
-   ; Create PROPERTIES menu buttons for surface properties.
-
-properties = Widget_Button(menubase, Value='Properties', /Menu, $
-   Event_Pro='FSC_Surface_Properties')
-
-   ; Surface Color
-
-scolorID = Widget_Button(properties, Value='Surface Color...', $
-   UVALUE='SURFACE_COLOR')
-
-IF elevation EQ 0 THEN BEGIN
-   Widget_Control, colorsID, Sensitive = 0
-   Widget_Control, scolorID, Sensitive = 1
-ENDIF ELSE BEGIN
-   Widget_Control, colorsID, Sensitive = 1
-   Widget_Control, scolorID, Sensitive = 0
-ENDELSE
-
-   ; Background Color
-
-bcolor = Widget_Button(properties, Value='Background Color', /Menu)
-dummy = Widget_Button(bcolor, Value='Black', $
-   Event_Pro='FSC_Surface_Properties', UValue='BBLACK')
-dummy = Widget_Button(bcolor, Value='White', $
-   Event_Pro='FSC_Surface_Properties', UValue='BWHITE')
-dummy = Widget_Button(bcolor, Value='Charcoal', $
-   Event_Pro='FSC_Surface_Properties', UValue='BCHARCOAL')
-dummy = Widget_Button(bcolor, Value='Gray', $
-   Event_Pro='FSC_Surface_Properties', UValue='BGRAY')
-
-   ; Axes Color
-
-acolor = Widget_Button(properties, Value='Axes Color', /Menu)
-dummy = Widget_Button(acolor, Value='Black', $
-   Event_Pro='FSC_Surface_Properties', UValue='ABLACK')
-dummy = Widget_Button(acolor, Value='White', $
-   Event_Pro='FSC_Surface_Properties', UValue='AWHITE')
-dummy = Widget_Button(acolor, Value='Yellow', $
-   Event_Pro='FSC_Surface_Properties', UValue='AYELLOW')
-dummy = Widget_Button(acolor, Value='Green', $
-   Event_Pro='FSC_Surface_Properties', UValue='AGREEN')
-dummy = Widget_Button(acolor, Value='Navy Blue', $
-   Event_Pro='FSC_Surface_Properties', UValue='ANAVY')
-
-   ; Title Color
-
-tcolor = Widget_Button(properties, Value='Title Color', /Menu)
-dummy = Widget_Button(tcolor, Value='Black', $
-   Event_Pro='FSC_Surface_Properties', UValue='TBLACK')
-dummy = Widget_Button(tcolor, Value='White', $
-   Event_Pro='FSC_Surface_Properties', UValue='TWHITE')
-dummy = Widget_Button(tcolor, Value='Yellow', $
-   Event_Pro='FSC_Surface_Properties', UValue='TYELLOW')
-dummy = Widget_Button(tcolor, Value='Green', $
-   Event_Pro='FSC_Surface_Properties', UValue='TGREEN')
-dummy = Widget_Button(tcolor, Value='Navy Blue', $
-   Event_Pro='FSC_Surface_Properties', UValue='TNAVY')
-
-   ; Color Schemes.
-
-dummy = Widget_Button(properties, Value='Black on White', /Separator, $
-   Event_Pro='FSC_Surface_Properties', UValue='B/W')
-dummy = Widget_Button(properties, Value='White on Black', $
-   Event_Pro='FSC_Surface_Properties', UValue='W/B')
-dummy = Widget_Button(properties, Value='Original Colors', $
-   Event_Pro='FSC_Surface_Properties', UValue='ORIGINAL_COLORS')
-
-   ; Original Axis rotation.
-
-dummy = Widget_Button(properties, Value='Original Rotation', /Separator, $
-   Event_Pro='FSC_Surface_Properties', UValue='ORIGINAL_T3D')
-
-   ; Drag Quality.
-
-dragID = Widget_Button(properties, Value='Drag Quality', /Separator, /Menu)
-   dragLowID = Widget_Button(dragID, Value='Low', $
-      Event_Pro='FSC_Surface_Properties', UValue='DRAG_LOW')
-   dragMedID = Widget_Button(dragID, Value='Medium', $
-      Event_Pro='FSC_Surface_Properties', UValue='DRAG_MEDIUM')
-   dragHighID = Widget_Button(dragID, Value='High', $
-      Event_Pro='FSC_Surface_Properties', UValue='DRAG_HIGH')
-Widget_Control, dragHighID, Sensitive=0
-
-lightID = Widget_Button(properties, Value='Light Controls...', $
-   /Separator, Event_Pro='FSC_Surface_Light_Controls')
-
-Widget_Control, tlb, /Realize
-
-    ; Get the window destination object. The view will
-    ; be drawn when the window is exposed.
-
-Widget_Control, drawID, Get_Value=thisWindow
-thisWindow -> Draw, thisView
-
-   ; Get a printer object for this graphic.
-
-thisPrinter = Obj_New('IDLgrPrinter', Landscape=landscape)
-
-   ; Create a container object to hold all the other
-   ; objects. This will make it easy to free all the
-   ; objects when we are finished with the program.
-
-thisContainer = Obj_New('IDL_Container')
-
-   ; Add created objects to the container.
-
-thisContainer->Add, thisView
-thisContainer->Add, thisPrinter
-thisContainer->Add, thisTrackball
-thisContainer->Add, xTitle
-thisContainer->Add, yTitle
-thisContainer->Add, zTitle
-thisContainer->Add, xAxis
-thisContainer->Add, yAxis
-thisContainer->Add, zAxis
-thisContainer->Add, thisSurface
-thisContainer->Add, nonRotatingModel
-thisContainer->Add, thisModel
-thisContainer->Add, plotTitle
-thisContainer->Add, helvetica10pt
-thisContainer->Add, helvetica14pt
-thisContainer->Add, thisPalette
-
-   ; Get the current transformation matrix, so it can be restored.
-
-thisModel->GetProperty, Transform=origTransform
-
-   ; Create an INFO structure to hold needed program information.
-
-info = { origTransform:origTransform, $       ; The transformation matrix.
-         thisContainer:thisContainer, $       ; The object container.
-         thisWindow:thisWindow, $             ; The window object.
-         thisPrinter:thisPrinter, $           ; The printer object.
-         thisSurface:thisSurface, $           ; The surface object.
-         thisTrackball:thisTrackball, $       ; The trackball object.
-         thisModel:thisModel, $               ; The model object.
-         textModel:textModel, $               ; The model holding the instructions.
-         xAxis:xAxis, $                       ; The X Axis object.
-         yAxis:yAxis, $                       ; The Y Axis object.
-         zAxis:zAxis, $                       ; The Z Axis object.
-         nonRotatingLight:nonRotatingLight, $ ; The non-rotating light object.
-         rotatingLight:rotatingLight, $       ; The rotating light object.
-         fillLight:fillLight, $               ; The fill light object.
-         ambientLight:ambientLight, $         ; The ambient light object.
-         thisPalette:thisPalette, $           ; The surface color palette.
-         colorsID:colorsID, $                 ; The color button for the texture map.
-         drawID:drawID, $                     ; The widget identifier of the draw widget.
-         colortable:colortable, $             ; The current color table.
-         r:r, $                               ; The R values of the current color table.
-         g:g, $                               ; The G values of the current color table.
-         b:b, $                               ; The B values of the current color table.
-         data:data, $                         ; The original 2D data set.
-         elevation:elevation, $               ; An elevation shading flag.
-         elevationID:elevationID, $           ; The ID of the Elevation Shading button.
-         scolorID:scolorID, $                 ; The surface color button ID.
-         lightID:lightID, $                   ; The light control button ID.
-         plotTitle:plotTitle, $               ; The plot title object.
-         dragLowID:dragLowID, $               ; ID of Drag Quality Low button.
-         dragMedID:dragMedID, $               ; ID of Drag Quality Medium button.
-         dragHighID:dragHighID, $             ; ID of Drag Quality High button.
-         dragQuality:2, $                     ; The current drag quality.
-         surfIndex:!D.Table_Size-22, $        ; The surface color index.
-         surfColor:[255,255,255], $           ; The surface color.
-         landscape:landscape, $               ; Flag to indicate landscape printing.
-         thisView:thisView }                  ; The view object.
-
-   ; Store the info structure in the UValue of the TLB.
-
-Widget_Control, tlb, Set_UValue=info, /No_Copy
-
-   ; Call XManager. Set a cleanup routine so the objects
-   ; can be freed upon exit from this program.
-
-XManager, 'fsc_surface', tlb, Cleanup='FSC_Surface_Cleanup', No_Block=(1 - Keyword_Set(block)), $
-   Event_Handler='FSC_Surface_Resize', Group_Leader=groupLeader
+    IF N_Elements(saxiscolor) EQ 0 THEN axiscolor = 'black'
+    IF N_Elements(sbackground) EQ 0 THEN background = 'white'
+    IF N_Elements(scolor) EQ 0 THEN color = 'black'
+    IF N_Elements(sbottom) EQ 0 THEN IF N_Elements(color) EQ 0 THEN bottom = 'black' ELSE bottom = color 
+    IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = Reform(FSC_Color(axiscolor, /TRIPLE))
+    IF Size(background, /TNAME) EQ 'STRING' THEN background = Reform(FSC_Color(background, /TRIPLE))
+    IF Size(bottom, /TNAME) EQ 'STRING' THEN bottom = Reform(FSC_Color(bottom, /TRIPLE))
+    IF Size(color, /TNAME) EQ 'STRING' THEN color = Reform(FSC_Color(color, /TRIPLE))
+    
+    
+    IF N_Elements(xtitle) EQ 0 THEN xtitle=''
+    IF N_Elements(ytitle) EQ 0 THEN ytitle=''
+    IF N_Elements(ztitle) EQ 0 THEN ztitle=''
+    IF N_Elements(plotTitle) EQ 0 THEN plotTitle=''
+    IF N_Elements(colortable) EQ 0 THEN colortable = 4 ELSE colortable = 0 > colortable < 40
+    hidden_lines = Keyword_Set(hidden_lines)
+    elevation = Keyword_Set(elevation)
+    landscape = Keyword_Set(landscape)
+    IF Keyword_Set(shaded) THEN BEGIN
+       shading = 1
+       style = 2
+    ENDIF ELSE BEGIN
+       shading = 0
+       style = 1
+    ENDELSE
+    CASE N_Elements(exact) OF
+       0: exact = [0,0,0]
+       1: exact = Replicate(exact, 3)
+       2: exact = [exact, 0]
+       3:
+       ELSE: BEGIN
+          ok = Dialog_Message('Exact keyword contains too many elements. Returning...')
+          RETURN
+          ENDCASE
+    ENDCASE
+    
+        ; Need some data.
+    
+    Catch, error
+    IF error NE 0 THEN BEGIN  ; Can't find LoadData.
+       data = DIST(41)
+       x = Findgen(41)
+       y = Findgen(41)
+       IF !Error NE -154 THEN Print, !Err_String ELSE Print, 'Skipping LOADDATA call.'
+    ENDIF
+    
+    TVLCT, r, g, b, /Get
+    
+    IF N_Elements(data) EQ 0 THEN BEGIN
+       data = LoadData(2)
+    ENDIF
+    
+    s = Size(data)
+    
+    IF s(0) NE 2 THEN Message,'Must pass 2D argument. Using fake data.'
+    IF N_Elements(x) EQ 0 THEN x = Findgen(s(1))
+    IF N_Elements(y) EQ 0 THEN y = Findgen(s(2))
+    
+    
+    Catch, /Cancel
+    
+       ; Calculate or use the position coordinates.
+    
+    IF N_Elements(pos) EQ 0 THEN BEGIN
+    
+          ; I want the surface data to have the same aspect ratio as the data itself
+          ; in the X and Y directions.
+    
+       surfaceAspect = Float(s[2]) / s[1]
+       windowAspect = 1.0
+       pos = FSC_Surface_Aspect(surfaceAspect, WindowAspect=windowAspect, Margin=0)
+       pos = [pos[0], pos[2], pos[1], pos[3], 0.0, 1.0] - 0.5
+    
+    ENDIF ELSE BEGIN
+    
+       CASE N_Elements(pos) OF
+    
+          2: BEGIN
+             pos = [pos, 0.0, 1.0, 0.0, 1.0]
+             pos[0] = 0.0 > pos[0]
+             pos[1] = pos[1] < 1.0
+             END
+    
+          4: BEGIN
+             pos = [pos, 0.0, 1.0]
+             pos[0] = 0.0 > pos[0]
+             pos[1] = pos[1] < 1.0
+             pos[2] = 0.0 > pos[2]
+             pos[3] = pos[3] > 1.0
+             END
+    
+          6: BEGIN
+             pos[0] = 0.0 > pos[0]
+             pos[1] = pos[1] < 1.0
+             pos[2] = 0.0 > pos[2]
+             pos[3] = pos[3] > 1.0
+             pos[4] = 0.0 > pos[4]
+             pos[5] = pos[5] > 1.0
+             END
+    
+          ELSE: BEGIN
+             ok = Dialog_Message('POSITION keyword must be a 2, 4, or 6 element array. Returning...')
+             RETURN
+             END
+    
+       ENDCASE
+    
+       pos = pos - 0.5
+    
+    ENDELSE
+    
+        ; Create a view. Use RGB color. Charcoal background.
+        ; The coodinate system is chosen so that (0,0,0) is in the
+        ; center of the window. This will make rotations easier.
+    
+    thisView = OBJ_NEW('IDLgrView', Color=background, $
+       Viewplane_Rect=[-1.0,-1.0,2.0,2.0])
+    
+        ; Create a model for the surface and axes and add it to the view.
+        ; This model will rotate under the direction of the trackball object.
+    
+    thisModel = OBJ_NEW('IDLgrModel')
+    thisView->Add, thisModel
+    
+        ; Create a separate model for the title that doesn't rotate.
+    
+    textModel = Obj_New('IDLgrModel')
+    thisView->Add, textModel
+    
+        ; Create helper objects. First, create title objects
+        ; for the axes and plot. Color them green.
+    
+    xTitle = Obj_New('IDLgrText', xtitle, Color=axiscolor, /Enable_Formatting)
+    yTitle = Obj_New('IDLgrText', ytitle, Color=axiscolor, /Enable_Formatting)
+    zTitle = Obj_New('IDLgrText', ztitle, Color=axiscolor, /Enable_Formatting)
+    
+        ; Create font objects.
+    
+    helvetica10pt = Obj_New('IDLgrFont', 'Helvetica', Size=10)
+    helvetica14pt = Obj_New('IDLgrFont', 'Helvetica', Size=14)
+    
+        ; Create a plot title object. I am going to place the title
+        ; centered in X and towards the top of the viewplane rectangle.
+    
+    plotTitle = Obj_New('IDLgrText', plotTitle, Color=axiscolor, /Enable_Formatting, $
+       Alignment=0.5, Location=[0.0, 1.05, 0.0], Font=helvetica14pt)
+    textModel->Add, plotTitle
+    
+        ; Create a trackball for surface rotations. Center it in
+        ; the 400-by-400 window. Give it a 200 pixel diameter.
+    
+    thisTrackball = OBJ_NEW('Trackball', [200, 200], 200)
+    
+       ; Create a palette for the surface.
+    
+    thisPalette = Obj_New("IDLgrPalette")
+    thisPalette->LoadCT, colortable
+    thisPalette->GetProperty, Red=r, Green=g, Blue=b
+    
+        ; Create a surface object. Make it white.
+    thisSurface = OBJ_NEW('IDLgrSurface', data, x, y, $
+       Color=color, Bottom=bottom, _Extra=extra, Style=style, $
+       Shading=shading, Hidden_Lines=hidden_lines)
+    
+        ; Get the data ranges of the surface.
+    
+    thisSurface->GetProperty, XRange=xrange, YRange=yrange, ZRange=zrange
+    IF N_Elements(xrange_u) NE 0 THEN xrange = xrange_u
+    IF N_Elements(yrange_u) NE 0 THEN yrange = yrange_u
+    IF N_Elements(zrange_u) NE 0 THEN zrange = zrange_u
+    
+        ; Create axes objects for the surface. Color them green.
+        ; Axes are created after the surface so the range can be
+        ; set correctly. Note how I set the font to 10 pt helvetica.
+    
+    xAxis = Obj_New("IDLgrAxis", 0, Color=axiscolor, Ticklen=0.1, $
+       Minor=4, Title=xtitle, Range=xrange, Exact=exact[0])
+    xAxis->GetProperty, Ticktext=xAxisText
+    xAxisText->SetProperty, Font=helvetica10pt
+    
+    yAxis = Obj_New("IDLgrAxis", 1, Color=axiscolor, Ticklen=0.1, $
+       Minor=4, Title=ytitle, Range=yrange, Exact=exact[1])
+    yAxis->GetProperty, Ticktext=yAxisText
+    yAxisText->SetProperty, Font=helvetica10pt
+    
+    zAxis = Obj_New("IDLgrAxis", 2, Color=axiscolor, Ticklen=0.1, $
+       Minor=4, Title=ztitle, Range=zrange, Exact=exact[2])
+    zAxis->GetProperty, Ticktext=zAxisText
+    zAxisText->SetProperty, Font=helvetica10pt
+    
+        ; The axes may not use exact axis scaling, so the ranges may
+        ; have changed from what they were originally set to. Get
+        ; and update the range variables.
+    
+    xAxis->GetProperty, CRange=xrange
+    yAxis->GetProperty, CRange=yrange
+    zAxis->GetProperty, CRange=zrange
+    
+       ; If you want elevation shading, have to set the colors up now.
+    
+    IF elevation THEN BEGIN
+       s = Size(data, /Dimensions)
+       thisSurface->SetProperty, Vert_Colors=Reform(BytScl(data, /NAN, Min=Min(zrange), Max=Max(zrange)), $
+          s[0]*s[1]), Palette=thisPalette
+    ENDIF
+    
+        ; Set scaling parameters for the surface and axes so that everything
+        ; is scaled into the range -0.5 to 0.5. We do this so that when the
+        ; surface is rotated we don't have to worry about translations. In
+        ; other words, the rotations occur about the point (0,0,0).
+    
+    xs = FSC_Normalize(xrange, Position=[pos[0], pos[1]])
+    ys = FSC_Normalize(yrange, Position=[pos[2], pos[3]])
+    zs = FSC_Normalize(zrange, Position=[pos[4], pos[5]])
+    
+        ; Scale the axes and place them in the coordinate space.
+        ; Note that not all values in the Location keyword are
+        ; used. (I've put really large values into the positions
+        ; that are not being used to demonstate this.) For
+        ; example, with the X axis only the Y and Z locations are used.
+    
+    xAxis->SetProperty, Location=[9999.0, pos[2], pos[4]], XCoord_Conv=xs
+    yAxis->SetProperty, Location=[pos[0], 9999.0, pos[4]], YCoord_Conv=ys
+    zAxis->SetProperty, Location=[pos[0],  pos[3], 9999.0], ZCoord_Conv=zs
+    
+        ; Scale the surface.
+    
+    thisSurface->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys, ZCoord_Conv=zs
+    
+        ; Add the surface and axes objects to the model.
+    
+    thisModel->Add, thisSurface
+    thisModel->Add, xAxis
+    thisModel->Add, yAxis
+    thisModel->Add, zAxis
+    
+        ; Rotate the surface model to the standard surface view.
+    
+    thisModel->Rotate,[1,0,0], -90  ; To get the Z-axis vertical.
+    thisModel->Rotate,[0,1,0],  30  ; Rotate it slightly to the right.
+    thisModel->Rotate,[1,0,0],  30  ; Rotate it down slightly.
+    
+    ; Create some lights to view the surface. Surfaces will look
+    ; best if there is some ambient lighting to illuminate them
+    ; uniformly, and some positional lights to give the surface
+    ; definition. We will create three positional lights: one,
+    ; non-rotating light will provide overhead definition. Two
+    ; rotating lights will provide specific surface definition.
+    ; Lights should be turned off or hidden if elevation shading
+    ; is in effect.
+    
+        ; First create the ambient light. Don't turn it on too much,
+        ; or the surface will appear washed out.
+    
+    ambientLight = Obj_New('IDLgrLight', Type=0, Intensity=0.2)
+    thisModel->Add, ambientLight
+    
+        ; Shaded surfaces will not look shaded unless there is a
+        ; positional light source to give the surface edges definition.
+        ; This light will rotate with the surface.
+    
+    rotatingLight = Obj_New('IDLgrLight', Type=1, Intensity=0.60, $
+        Location=[xrange[1], yrange[1], 4*zrange[1]], $
+        Direction=[xrange[0], yrange[0], zrange[0]])
+    thisModel->Add, rotatingLight
+    
+        ; Create a fill light source so you can see the underside
+        ; of the surface. Otherwise, just the top surface will be visible.
+        ; This light will also rotate with the surface.
+    
+    fillLight = Obj_New('IDLgrLight', Type=1, Intensity=0.4, $
+       Location=[(xrange[1]-xrange[0])/2.0, (yrange[1]-yrange[0])/2.0, -2*Abs(zrange[0])], $
+       Direction=[(xrange[1]-xrange[0])/2.0, (yrange[1]-yrange[0])/2.0, zrange[1]])
+    thisModel->Add, fillLight
+    
+        ; Create a non-rotating overhead side light.
+    
+    nonrotatingLight = Obj_New('IDLgrLight', Type=1, Intensity=0.8, $
+        Location=[-xrange[1], (yrange[1]-yrange[0])/2.0, 4*zrange[1]], $
+        Direction=[xrange[1], (yrange[1]-yrange[0])/2.0, zrange[0]])
+    nonrotatingModel = Obj_New('IDLgrModel')
+    nonrotatingModel->Add, nonrotatingLight
+    
+       ; Be sure to add the non-rotating model to the view, or it won't be visualized.
+    
+    thisView->Add, nonrotatingModel
+    
+        ; Scale the light sources.
+    
+    rotatingLight->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys, ZCoord_Conv=zs
+    fillLight->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys, ZCoord_Conv=zs
+    nonrotatingLight->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys, ZCoord_Conv=zs
+    
+        ; Rotate the non-rotating model to the standard surface view.
+    
+    nonrotatingModel->Rotate,[1,0,0], -90  ; To get the Z-axis vertical.
+    nonrotatingModel->Rotate,[0,1,0],  30  ; Rotate it slightly to the right.
+    nonrotatingModel->Rotate,[1,0,0],  30  ; Rotate it down slightly.
+    
+       ; Check for availability of GIF files.
+    
+    thisVersion = Float(!Version.Release)
+    IF thisVersion LT 5.4 THEN haveGif = 1 ELSE haveGIF = 0
+    
+        ; Create the widgets to view the surface. 
+        ; Button events are on to enable trackball movement.
+    
+    tlb = Widget_Base(Title='Resizeable Window Surface Example', Column=1, $
+       TLB_Size_Events=1, MBar=menubase)
+    
+    ; Sigh...Rendering throws a LOT of floating point exception errors, especially
+    ; when asking IDL to to the retaining for backing store. You can solve the problem
+    ; in one of two ways. Do your own backing store by turning EXPOSE events on, which
+    ; has its own problems when working with blocking widgets, or do the rendering
+    ; in software. The code exists here for you to choose your own poison. :-(
+    ;drawID = Widget_Draw(tlb, XSize=400, YSize=400, Graphics_Level=2, $
+    ;   Event_Pro='FSC_Surface_Draw_Events', Button_Events=1, Retain=2)
+    ;drawID = Widget_Draw(tlb, XSize=400, YSize=400, Graphics_Level=2, $
+    ;   Event_Pro='FSC_Surface_Draw_Events', Button_Events=1, Expose_Events=1)
+    drawID = Widget_Draw(tlb, XSize=400, YSize=400, Graphics_Level=2, $
+       Event_Pro='FSC_Surface_Draw_Events', Button_Events=1, Retain=2, Renderer=1)
+    
+        ; Create FILE menu buttons for printing and exiting.
+    
+    filer = Widget_Button(menubase, Value='File', /Menu)
+    
+       ; Create OUTPUT menu buttons for formatted output files. Use GIF
+       ; files if available.
+    
+    output = Widget_Button(filer, Value='Save As...', /Menu)
+    button = Widget_Button(output, Value='BMP File', $
+       UValue='BMP', Event_Pro='FSC_Surface_Output')
+    button = Widget_Button(output, Value='EPS File', $
+       UValue='EPS', Event_Pro='FSC_Surface_Output')
+    IF havegif THEN gif = Widget_Button(output, Value='GIF File', $
+       UValue='GIF', Event_Pro='FSC_Surface_Output')
+    button = Widget_Button(output, Value='JPEG File', $
+       UValue='JPEG', Event_Pro='FSC_Surface_Output')
+    button = Widget_Button(output, Value='PNG File', $
+       UValue='PNG', Event_Pro='FSC_Surface_Output')
+    button = Widget_Button(output, Value='TIFF File', $
+       UValue='TIFF', Event_Pro='FSC_Surface_Output')
+    
+    printer = Widget_Button(filer, Value='Print', /Separator, $
+       Event_Pro='FSC_Surface_Printing', /Menu)
+    dummy = Widget_Button(printer, Value='Vector Output (faster BW)', UValue='VECTOR')
+    dummy = Widget_Button(printer, Value='Bitmap Output (slower BW)', UValue='BITMAP')
+    dummy = Widget_Button(printer, Value='Full Color Printing (slower)', UValue='COLOR')
+    
+    quitter = Widget_Button(filer, /Separator, Value='Exit', $
+       Event_Pro='FSC_Surface_Exit')
+    
+       ; Create STYLE menu buttons for surface style.
+    
+    style = Widget_Button(menubase, Value='Style', /Menu)
+    dummy = Widget_Button(style, Value='Dot Surface', $
+       Event_Pro='FSC_Surface_Style', UValue='DOTS')
+    dummy = Widget_Button(style, Value='Wire Mesh', $
+       Event_Pro='FSC_Surface_Style', UValue='MESH')
+    dummy = Widget_Button(style, Value='Solid', $
+       Event_Pro='FSC_Surface_Style', UValue='SOLID')
+    dummy = Widget_Button(style, Value='Parallel X Lines', $
+       Event_Pro='FSC_Surface_Style', UValue='XPARALLEL')
+    dummy = Widget_Button(style, Value='Parallel Y Lines', $
+       Event_Pro='FSC_Surface_Style', UValue='YPARALLEL')
+    dummy = Widget_Button(style, Value='Wire Mesh Lego', $
+       Event_Pro='FSC_Surface_Style', UValue='WIRELEGO')
+    dummy = Widget_Button(style, Value='Solid Lego', $
+       Event_Pro='FSC_Surface_Style', UValue='SOLIDLEGO')
+    IF hidden_lines THEN hlValue = 'Hidden Lines OFF' ELSE hlValue='Hidden Lines ON'
+    dummy = Widget_Button(style, Value=hlvalue, $
+       Event_Pro='FSC_Surface_Style', UValue='HIDDEN', /Separator)
+    
+    IF elevation THEN BEGIN
+       elevationID = Widget_Button(style, Value='Elevation Shading OFF', $
+          /Separator, UValue='Elevation Shading ON', $
+          Event_Pro='FSC_Surface_Elevation_Shading')
+    ENDIF ELSE BEGIN
+       elevationID = Widget_Button(style, Value='Elevation Shading ON', $
+          /Separator, UValue='Elevation Shading OFF', $
+          Event_Pro='FSC_Surface_Elevation_Shading')
+    ENDELSE
+    colorsID = Widget_Button(style, Value='Elevation Colors...', $
+       Event_Pro='FSC_Surface_Elevation_Colors')
+    
+       ; Create PROPERTIES menu buttons for surface properties.
+    
+    properties = Widget_Button(menubase, Value='Properties', /Menu, $
+       Event_Pro='FSC_Surface_Properties')
+    
+       ; Surface Color
+    
+    scolorID = Widget_Button(properties, Value='Surface Color...', $
+       UVALUE='SURFACE_COLOR')
+    
+    IF elevation EQ 0 THEN BEGIN
+       Widget_Control, colorsID, Sensitive = 0
+       Widget_Control, scolorID, Sensitive = 1
+    ENDIF ELSE BEGIN
+       Widget_Control, colorsID, Sensitive = 1
+       Widget_Control, scolorID, Sensitive = 0
+    ENDELSE
+    
+       ; Background Color
+    
+    bcolor = Widget_Button(properties, Value='Background Color', /Menu)
+    dummy = Widget_Button(bcolor, Value='Black', $
+       Event_Pro='FSC_Surface_Properties', UValue='BBLACK')
+    dummy = Widget_Button(bcolor, Value='White', $
+       Event_Pro='FSC_Surface_Properties', UValue='BWHITE')
+    dummy = Widget_Button(bcolor, Value='Charcoal', $
+       Event_Pro='FSC_Surface_Properties', UValue='BCHARCOAL')
+    dummy = Widget_Button(bcolor, Value='Gray', $
+       Event_Pro='FSC_Surface_Properties', UValue='BGRAY')
+    
+       ; Axes Color
+    
+    acolor = Widget_Button(properties, Value='Axes Color', /Menu)
+    dummy = Widget_Button(acolor, Value='Black', $
+       Event_Pro='FSC_Surface_Properties', UValue='ABLACK')
+    dummy = Widget_Button(acolor, Value='White', $
+       Event_Pro='FSC_Surface_Properties', UValue='AWHITE')
+    dummy = Widget_Button(acolor, Value='Yellow', $
+       Event_Pro='FSC_Surface_Properties', UValue='AYELLOW')
+    dummy = Widget_Button(acolor, Value='Green', $
+       Event_Pro='FSC_Surface_Properties', UValue='AGREEN')
+    dummy = Widget_Button(acolor, Value='Navy Blue', $
+       Event_Pro='FSC_Surface_Properties', UValue='ANAVY')
+    
+       ; Title Color
+    
+    tcolor = Widget_Button(properties, Value='Title Color', /Menu)
+    dummy = Widget_Button(tcolor, Value='Black', $
+       Event_Pro='FSC_Surface_Properties', UValue='TBLACK')
+    dummy = Widget_Button(tcolor, Value='White', $
+       Event_Pro='FSC_Surface_Properties', UValue='TWHITE')
+    dummy = Widget_Button(tcolor, Value='Yellow', $
+       Event_Pro='FSC_Surface_Properties', UValue='TYELLOW')
+    dummy = Widget_Button(tcolor, Value='Green', $
+       Event_Pro='FSC_Surface_Properties', UValue='TGREEN')
+    dummy = Widget_Button(tcolor, Value='Navy Blue', $
+       Event_Pro='FSC_Surface_Properties', UValue='TNAVY')
+    
+       ; Color Schemes.
+    
+    dummy = Widget_Button(properties, Value='Black on White', /Separator, $
+       Event_Pro='FSC_Surface_Properties', UValue='B/W')
+    dummy = Widget_Button(properties, Value='White on Black', $
+       Event_Pro='FSC_Surface_Properties', UValue='W/B')
+    dummy = Widget_Button(properties, Value='Original Colors', $
+       Event_Pro='FSC_Surface_Properties', UValue='ORIGINAL_COLORS')
+    
+       ; Original Axis rotation.
+    
+    dummy = Widget_Button(properties, Value='Original Rotation', /Separator, $
+       Event_Pro='FSC_Surface_Properties', UValue='ORIGINAL_T3D')
+    
+       ; Drag Quality.
+    
+    dragID = Widget_Button(properties, Value='Drag Quality', /Separator, /Menu)
+       dragLowID = Widget_Button(dragID, Value='Low', $
+          Event_Pro='FSC_Surface_Properties', UValue='DRAG_LOW')
+       dragMedID = Widget_Button(dragID, Value='Medium', $
+          Event_Pro='FSC_Surface_Properties', UValue='DRAG_MEDIUM')
+       dragHighID = Widget_Button(dragID, Value='High', $
+          Event_Pro='FSC_Surface_Properties', UValue='DRAG_HIGH')
+    Widget_Control, dragHighID, Sensitive=0
+    
+    lightID = Widget_Button(properties, Value='Light Controls...', $
+       /Separator, Event_Pro='FSC_Surface_Light_Controls')
+    
+    Widget_Control, tlb, /Realize
+    
+        ; Get the window destination object. The view will
+        ; be drawn when the window is exposed.
+    
+    Widget_Control, drawID, Get_Value=thisWindow
+    thisWindow -> Draw, thisView
+    
+       ; Get a printer object for this graphic.
+    
+    thisPrinter = Obj_New('IDLgrPrinter', Landscape=landscape)
+    
+       ; Create a container object to hold all the other
+       ; objects. This will make it easy to free all the
+       ; objects when we are finished with the program.
+    
+    thisContainer = Obj_New('IDL_Container')
+    
+       ; Add created objects to the container.
+    
+    thisContainer->Add, thisView
+    thisContainer->Add, thisPrinter
+    thisContainer->Add, thisTrackball
+    thisContainer->Add, xTitle
+    thisContainer->Add, yTitle
+    thisContainer->Add, zTitle
+    thisContainer->Add, xAxis
+    thisContainer->Add, yAxis
+    thisContainer->Add, zAxis
+    thisContainer->Add, thisSurface
+    thisContainer->Add, nonRotatingModel
+    thisContainer->Add, thisModel
+    thisContainer->Add, plotTitle
+    thisContainer->Add, helvetica10pt
+    thisContainer->Add, helvetica14pt
+    thisContainer->Add, thisPalette
+    
+       ; Get the current transformation matrix, so it can be restored.
+    
+    thisModel->GetProperty, Transform=origTransform
+    
+       ; Create an INFO structure to hold needed program information.
+    
+    info = { origTransform:origTransform, $       ; The transformation matrix.
+             thisContainer:thisContainer, $       ; The object container.
+             thisWindow:thisWindow, $             ; The window object.
+             thisPrinter:thisPrinter, $           ; The printer object.
+             thisSurface:thisSurface, $           ; The surface object.
+             thisTrackball:thisTrackball, $       ; The trackball object.
+             thisModel:thisModel, $               ; The model object.
+             textModel:textModel, $               ; The model holding the instructions.
+             xAxis:xAxis, $                       ; The X Axis object.
+             yAxis:yAxis, $                       ; The Y Axis object.
+             zAxis:zAxis, $                       ; The Z Axis object.
+             nonRotatingLight:nonRotatingLight, $ ; The non-rotating light object.
+             rotatingLight:rotatingLight, $       ; The rotating light object.
+             fillLight:fillLight, $               ; The fill light object.
+             ambientLight:ambientLight, $         ; The ambient light object.
+             thisPalette:thisPalette, $           ; The surface color palette.
+             colorsID:colorsID, $                 ; The color button for the texture map.
+             drawID:drawID, $                     ; The widget identifier of the draw widget.
+             colortable:colortable, $             ; The current color table.
+             r:r, $                               ; The R values of the current color table.
+             g:g, $                               ; The G values of the current color table.
+             b:b, $                               ; The B values of the current color table.
+             data:data, $                         ; The original 2D data set.
+             elevation:elevation, $               ; An elevation shading flag.
+             elevationID:elevationID, $           ; The ID of the Elevation Shading button.
+             scolorID:scolorID, $                 ; The surface color button ID.
+             lightID:lightID, $                   ; The light control button ID.
+             plotTitle:plotTitle, $               ; The plot title object.
+             dragLowID:dragLowID, $               ; ID of Drag Quality Low button.
+             dragMedID:dragMedID, $               ; ID of Drag Quality Medium button.
+             dragHighID:dragHighID, $             ; ID of Drag Quality High button.
+             dragQuality:2, $                     ; The current drag quality.
+             surfIndex:!D.Table_Size-22, $        ; The surface color index.
+             surfColor:[255,255,255], $           ; The surface color.
+             landscape:landscape, $               ; Flag to indicate landscape printing.
+             thisView:thisView }                  ; The view object.
+    
+       ; Store the info structure in the UValue of the TLB.
+    
+    Widget_Control, tlb, Set_UValue=info, /No_Copy
+    
+       ; Call XManager. Set a cleanup routine so the objects
+       ; can be freed upon exit from this program.
+    
+    XManager, 'fsc_surface', tlb, Cleanup='FSC_Surface_Cleanup', No_Block=(1 - Keyword_Set(block)), $
+       Event_Handler='FSC_Surface_Resize', Group_Leader=groupLeader
 END
 ;-------------------------------------------------------------------

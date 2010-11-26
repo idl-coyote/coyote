@@ -190,7 +190,7 @@ PRO FSC_Surf, data, x, y, $
        saxiscolor = 'black'
     ENDIF
     IF N_Elements(saxescolor) NE 0 THEN axiscolor = saxescolor ELSE axiscolor = saxiscolor
-    IF N_Elements(scolor) EQ 0 THEN color = 'black' ELSE color = scolor
+    IF N_Elements(scolor) EQ 0 THEN color = 'blu6' ELSE color = scolor
     IF N_Elements(sbottom) EQ 0 THEN bottom = color ELSE bottom = sbottom
     IF N_Elements(font) EQ 0 THEN IF (!D.Name EQ 'PS') THEN font = 1 ELSE font = !P.font
     IF N_Elements(charsize) EQ 0 THEN BEGIN

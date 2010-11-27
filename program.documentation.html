@@ -13,7 +13,7 @@ this routine, refer to the IDL Online Help Navigator
 or type: <P>
 <PRE>     ? mk_html_help</PRE>
 <P>at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Tue Nov 23 07:27:33 2010.<P>
+<STRONG>Last modified: </STRONG>Sat Nov 27 08:46:32 2010.<P>
  
 <HR>
  
@@ -2360,8 +2360,14 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                      used concurrently with GET_NAMES. Use two separate calls if you want both.
 
        NCOLORS:      The number of colors loaded. By default, !D.TABLE_SIZE.
-
+       
        REVERSE:      If this keyword is set, the color table vectors are reversed.
+
+       ROW:          Set this keyword to indicate you are getting the RGB_TABLE vectors
+                     for use in the IDL's object graphics routines. Whereas TVLCT expects color 
+                     tablesto be 256x3 (column vectors), the object graphics routines expect them 
+                     to be 3x256 (row vectors). Setting this keyword will transpose the vectors 
+                     before they are returned.
 
        SILENT:       This keyword is provided ONLY for compatibility with LOADCT. *All*
                      color table manipulations are handled silently.
@@ -2395,6 +2401,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
           the Coyote Library routine FIND_RESOURCE_FILE to look for the file. 29 June 2010. DWF. 
        Renamed Colorbar procedure to FSC_Colorbar to avoid conflict with IDL 8 Colorbar function.
           26 September 2010. DWF.
+       Added ROW keyword to transpose color table vectors for new graphics functions 
+          in IDL 8. 23 Nov 2010. DWF.
 </PRE><P>
 <STRONG>(See ctload.pro)</STRONG><P>
 <HR>
@@ -7911,9 +7919,11 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         The character size of the surface annotation. If the current graphics device is 
         PostScript, and this keyword is undefined, and the font keyword is set to 1, then
         the character size is set to 1.75 to produce "normal" true-type characters.
-     color: in, optional, type=string/integer, default='black'
-        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
+     color: in, optional, type=string/integer, default='blu6'
+        If this keyword is a string, the name of the data color. By default, "BLU6".
         Otherwise, the keyword is assumed to be a color index into the current color table.
+     elevation_shading: in, optional, type=boolean, default=0
+        Set this keyword to put elevation shading into effect for the surface.
      font: in, optional, type=integer, default=-1
         The type of font desired. If undefined, and the current graphics device is PostScript,
         the FONT keyword will be set to 1, indicating true-type fonts. The FONT keyword must
@@ -7933,6 +7943,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      shades: in, optional, type=byte
         Set this keyword to a byte scaled 2D array of the same size as data to shade the surface
         with these color indices.
+     skirt: in, optional, type=any
+        Set this keyword to a Z value where a skirt will be drawn for the surface.
      title: in, optional, type=string
         The title of the plot. It will be written "flat to the screen", rather than rotated.
      tsize: in, optional, type=float
@@ -7978,6 +7990,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
         Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
         Changes so that color variables don't change type. 23 Nov 2010. DWF.
+        Added ELEVATION_SHADING keyword. 26 Nov 2010. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -7991,178 +8004,123 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A HREF="#FSC_TEXT">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
- NAME:
-       FSC_SURFACE
+ :Description:
+   The purpose of FSC_Surface is to create a window where a surface is displayed. Surfaces
+   can be wire-framed, shaded surfaces, and surfaces with texture maps draped on top of
+   them, among other types of surfaces. LEFT mouse button rotates the surface, MIDDLE
+   mouse button zooms into the surface, RIGHT mouse button zoom out of the surface. 
+   Clicking on the surface title allows the user to drag the title to a better location.
 
- PURPOSE:
+ :Categories:
+    Graphics
+    
+ :Params:
+    data: in, required, type=any
+         A two-dimensional array of data to be displayed.
+    x: in, optional, type=any
+         A vector or two-dimensional array specifying the X coordinates of the
+         surface grid.
+    y: in, optional, type=any
+         A vector or two-dimensional array specifying the Y coordinates of the
+         surface grid.
+       
+ :Keywords:
+     axiscolor: in, optional, type=string, default='black'
+        The name of the axis color. By default, 'black'..
+     background: in, optional, type=string, default='white'
+        The name of the background color. By default, 'white'.
+     block: in, optional, type=boolean, default=0
+         Set this keyword to make the program a blocking widget program.
+     bottom: in, optional, type=string, default=COLOR
+        The name of the bottom color. By default, same as COLOR.
+     brewer: in, optional, type=boolean, default=0
+        Set this keyword to indicate that the colortable (CTABLE) is
+        to use Brewer color tables rather than IDL standard color tables.
+     charsize: in, optional, type=float, default=1.0
+        The character size of the surface annotation. 
+     color: in, optional, type=string, default='blu6'
+        The name of the data color. 
+     constrain_aspect: in, optional, type=boolean, default=0
+        Set this keyword to maintain the aspect ratio of the Y size
+        of the data to the Y size of the data. The default is to let the
+        sizes conform to a unit square.
+     ctable: in, optional, type=integer
+        The color table to use with the surface. The default is to use the
+        current color table.
+     elevation_shading: in, optional, type=boolean, default=0
+        Set this keyword to put elevation shading into effect for the surface.
+     font: in, optional, type=string, default="Helvetica"
+        The name of the true-type font desired for axis annotation and the plot title. 
+        If undefined, the default is "Helvetica".
+     hidden_lines: in, optional, type=boolean, default=1
+        Set this keyword to turn hidden line removal on for the surface. Turned 
+        ON by default.
+     group_leader: in, optional, type=long
+         Set this keyword to the identifier of a widget that will serve as the
+         group leader for this widget program. When the group leader dies, this
+         program will die, too.
+     reverse: in, optional, type=boolean, default=0
+        Set this keyword to reverse the color table set by CTABLE.
+     shaded: in, optional, type=boolean, default=0
+        Set this keyword if you wish to display a shaded surface. The is the same as setting STYLE=2.
+     skirt: in, optional, type=any
+         Set this keyword to a Z value where a skirt will be drawn for the surface.
+     texture_image: in, optional, type=byte
+         Set this keyword to a 2d or true-color image that will be overlaid on the surface
+         as a texture map. If a 2D image is passed, the colortable specified with CTABLE will
+         be used to construct a true-color image for the texture map.
+     tcharsize: in, optional, type=float
+         The title character size. By default 1.25 times the CHARSIZE.
+     title: in, optional, type=string
+        The title of the plot. It will be written "flat to the screen", rather than rotated.
+     tsize: in, optional, type=float, default=1.25*CHARSIZE
+        The character size for the title. By default, the title character size is 1.25 times
+        the character size of the surface annotation.
+     xsize: in, optional, type=interger, default=640
+         The X size of the initial surface window. By default, 640 pixels.
+     xstyle: in, hidden
+         The normal XSTYLE keyword.
+     xtitle: in, optional, type=string
+         The text for the X axis of the surface plot.
+     ysize: in, optional, type=integer, default=512
+         The Y size of the initial surface window. By default, 640 pixels.
+     ystyle: in, hidden
+         The normal YSTYLE keyword.
+     ytitle: in, optional, type=string
+         The text for the Y axis of the surface plot.
+     zscale: in, optional, type=float, default=1.0
+          A number between 0.001 and 1.0 that will "scale" the Z axis height. Default is 1.0.
+     zstyle: in, hidden
+         The normal ZSTYLE keyword.
+     ztitle: in, optional, type=string
+         The text for the Z axis of the surface plot.
+     _extra: in, optional, type=any
+        Any keyword appropriate for the IDLgrSurface object is allowed in the program.
 
-       The purpose of this program is to demonstrate how to
-       create a rotating surface using object graphics.
+ :Examples:
+    Use as you would use the IDL SURFACE of SHADE_SURF command::
+       data = Dist(200)
+       LoadCT, 33
+       FSC_Surface, data
+       FSC_Surface, data, /Elevation_Shading
+       FSC_Surface, data, /Shaded
+       FSC_Surface, data, /Shaded, Texture_Image=Loaddata(16) 
+       
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
 
- AUTHOR:
+ :History:
+     Change History::
+        Completely re-written, 26 November 2010 from old FSC_SURFACE program. DWF.
 
-       FANNING SOFTWARE CONSULTING
-       David Fanning, Ph.D.
-       1645 Sheely Drive
-       Fort Collins, CO 80526 USA
-       Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
-
- CATEGORY:
-
-       Widgets, Object Graphics.
-
- CALLING SEQUENCE:
-
-       FSC_SURFACE, data, x, y
-
- REQUIRED INPUTS:
-
-       None. Fake data will be used if no data is supplied in call.
-
- OPTIONAL INPUTS
-
-       data: A 2D array of surface data.
-
-       x: A vector of X data values.
-
-       y: A vector of Y data values.
-
- OPTIONAL KEYWORD PARAMETERS:
-
-       BLOCK: Set this keyword to 1 to create a blocking widget program. This is
-       useful if you want to call this program from within a stopped program, for
-       example. Remember only the first blocking program actually blocks.
-
-       COLORTABLE: Set this keyword to a number between 0 and 40 to select one
-       of the pre-selected IDL color tables for elevation shading.
-
-       ELEVATION_SHADING: Set this keyword to put elevation shading into effect.
-
-       EXACT: Set this keyword to a one-, two-,or three-element array to set exact axis
-       scaling for the X, Y, and Z axes, respectively. If Exact is a one-element array,
-       all three axes are set to the same value. For example, to set the X axis to
-       exact scaling and the Y and Z axes to normal scaling, type:
-
-           IDL> FSC_Surface, Exact=[1,0,0]
-
-       _EXTRA: This keyword collects otherwise undefined keywords that are
-        passed to the IDLgrSURFACE initialization routine.
-
-       GROUP_LEADER: The group leader for this program. When the group leader
-       is destroyed, this program will be destroyed.
-
-       HIDDEN_LINES: Set this keyword to draw the surface with hidden lines removed.
-
-       LANDSCAPE: Set this keyword if you are printing in landscape mode. The
-       default is Portrait mode. The Landscape keyword on the PRINTER object
-       is set, but not all printers will honor this keyword setting. If yours
-       does not, set Landscape mode in the Printer Setup dialog.
-
-       POSITION: A two-, four- or six-element array of normalized (0 to 1) coordinates
-       used to position the X, Y, and Z axis in the coordinate space. Uses the form
-       [x0, x1, y0, y1, z0, z1]. In the absence of POSITION information, the Z position
-       is always [0,1] and the X and Y positions are calculated in a manner that
-       preserves the aspect ratio of the surface data.
-
-       SHADED: Set this keyword to set up a shaded surface plot rather than a wire
-       mesh surface, which is the default.
-
-       TITLE:  A string used as the title of the plot.
-
-       XRANGE: A two-element array specifying the range of the X axis.
-
-       XTITLE: A string used as the X title of the plot.
-
-       YRANGE: A two-element array specifying the range of the Y axis.
-
-       ZRANGE: A two-element array specifying the range of the Z axis.
-
-       YTITLE: A string used as the Y title of the plot.
-
-       ZTITLE: A string used as the Z title of the plot.
-
- COMMON BLOCKS:
-
-       None.
-
- SIDE EFFECTS:
-
-       None.
-
- DEPENDENCIES:
-
-       This program requires the following additional files from the Coyote Library:
-
-          error_message.pro
-          fsc_droplist.pro
-          fsc_color.pro
-          normalize.pro
-          loaddata.pro
-          pickcolor.pro
-          xcolors.pro
-
- EXAMPLE:
-
-       To use this program with your data, type:
-
-        IDL> FSC_Surface, data
-
-       Use your LEFT mouse button to rotate the surface plot in the window.
-       Use your RIGHT mouse button to zoom into a closer view of the plot.
-       Use your MIDDLE mouse button to zoom away from the plot.
-
- MODIFICATION HISTORY:
-
-       Written by David Fanning, 8 June 97.
-       Made axis scaling more robust. 17 Sept 97. DWF.
-       Minor modifications to incorporate better understanding
-          of how objects work. 4 Oct 97. DWF.
-       Fixed error cleaning up all of my created objects. 12 Feb 98. DWF.
-       Changed IDLgrContainer to IDL_Container to fix 5.1 problems. 20 May 98. DWF.
-       Fixed mis-spelling of HELVETICA14. 29 June 98. DWF.
-       Added the EXACT keyword to the X and Y axes to force axis ranging. 27 July 98. DWF
-       Added the ability to select rendering "drag" quality for faster operation. 22 Aug 98. DWF.
-       Added ability to get non-exact axis scaling. 12 May 99. DWF.
-       Improved documentation and readability of code. 12 May 99. DWF.
-       Added VECTOR and LANDSCAPE keywords and improved printing capability. 16 Feb 2000. DWF.
-       Added different lights and a Light Controller option. 28 April 2000. DWF.
-       Added elevation shading. 8 May 2000. DWF.
-       Removed VECTOR keyword. Replaced with VECTOR/BITMAP/COLOR Print buttons. 8 May 2000. DWF.
-       Added HIDDEN_LINE keyword. 8 May 2000. DWF.
-       Added EXACT keyword extensions and changed name from XSURFACE to FSC_SURFACE. 11 May 2000. DWF.
-       Made change to Light Control code to accomodate FSC_DROPLIST changes. 6 Jan 2001. DWF.
-       Removed unused color table vector code from a LONG time ago. 17 Jan 2001. DWF.
-       Added TIFF file output and removed GIF output for IDL 5.4. 11 Feb 2001. DWF.
-       Added short wait before taking image snapshot for JPEG and TIFF files to avoid
-          extraneous text in output files. 22 October 2001. DWF.
-       Added the POSITION keyword. 16 April 2002. DWF.
-       Added the ability to zoom into and out of plot with RIGHT and MIDDLE mouse buttons. 16 April 2002. DWF.
-       Fixed a problem with leaving lights on when switching to elevation shading. 16 April 2002. DWF.
-       Fixed a problem in not restoring viewport parameters after printing. 20 April 2002. DWF.
-       Added BMP, EPS, and PGN file output. 20 April 2002.DWF.
-       Added a BLOCK keyword. 11 May 2002. DWF.
-       Added a check for NAN in elevation colors part of the code. 14 August 2002. DWF.
-       Removed extra Save As TIFF File button. 24 August 2002. DWF.
-       Removed NORMALIZE from the source code. 29 November 2005. DWF.
-       Added [XYZ]Range keywords. 15 February 2006. DWF.
-       Fixed a problem with colors. Elevation shading now corresponds to Z Axis range, not data range.
-          15 February 2006. DWF.
-       Added ENABLE_FORMATTING keywords to axis and plot title creation functions. 15 February 2006. DWF.
-       Fixed a problem with EXPOSE events not blocking when blocking widgets are running. This is apparently
-          due to undocumented changes in XMANAGER behaviour. 5 July 2006. DWF.
-       Set RETAIN=2 on draw widget and removed EXPOSE EVENTS to avoid problems with menus interfering
-           with window updating. (Must be 2 and not 1 on RETAIN!) 13 June 2008. DWF.
-       In the past, lights completely interfered with elevation shading. This is no longer the case, so
-           I removed all light hiding when elevation shading. 13 June 2008. DWF.
-       Modified the way Encapsulated PostScript output is created. Set up for 600 DPI output. 29 July 2008.
-       Floating point exception errors popping up everywhere with hardware rendering on
-           Windows 7 64-bit OS. The problem can be solved in several ways. (1) Use EXPOSE events,
-           rather than let IDL maintain backing store. (2) Use software rendering for your IDLgrWindow.
-           (3) Turn off exception handling when rendering. But, (1) has problems with blocking
-           widgets (see notes above) and (3) seems dishonest, so I have settled on (2). But code
-           exists in the program to make your own choice and live with the consequences. 11 Dec 2009.
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
 </PRE><P>
 <STRONG>(See fsc_surface.pro)</STRONG><P>
 <HR>
@@ -8189,11 +8147,33 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         The text to output. By default, the calling sequence of the program.
        
  :Keywords:
+     alignment: in, optional, type=integer, default=0
+         Set this keyword to indicate the alignment of the text with respect to the
+         x and y location. 0 is left aligned, 0.5 is centered, and 1.0 is right aligned.
+         The alignment is set to 0.5 if PLACE is set and ALIGNMENT is unspecified. 
+         Otherwise, the default is 0.
      color: in, optional, type=string/integer/long
          The color of the text. Color names are those used with FSC_Color. By default,
          "black", unless the upper-right hand pixel in the display is black, then "white".
+     data: in, optional, type=boolean
+         Set this keyword to indicate xloc and yloc are in data coordinates. Data coordinates
+         are the default, unless DEVICE or NORMAL is set.
+     device: in, optional, type=boolean
+         Set this keyword to indicate xloc and yloc are in device coordinates.
      font: in, optional, type=integer
          The type of font desired. By default, !P.Font.
+     normal: in, optional, type=boolean
+         Set this keyword to indicate xloc and yloc are in normalized coordinates.
+     outloc: out, optional, type=various
+         Only used if PLACE is set, this is a two-element array containing the xloc and yloc
+         of the cursor position in the window.
+     place: in, optional, type=boolean
+          Set this keyword if you wish to click the cursor in the graphics window to place
+          the text. If this keyword is set, you do not need to specify the xloc and yloc
+          positional parameters. The first positional parameter is assumed to be the text.
+          The clicked location will be returned in the OUTLOC variable. If the ALIGNMENT
+          keyword is not set, it will be set to 0.5 to set "center" as the default placement
+          alignment.
      tt_font: in, optional, type=string
          The true-type font to use for the text. Only used if FONT=1.
      _extra: in, optional
@@ -8203,6 +8183,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  :Examples:
     Used like the IDL XYOUTS command::
        IDL> FSC_Text, 0.5, 0.5, 'This is sample text', ALIGNMENT=0.5, /NORMAL
+       IDL> FSC_Text, /PLACE, 'Use the cursor to locate this text', COLOR='dodger blue'
        
  :Author:
        FANNING SOFTWARE CONSULTING::
@@ -8216,6 +8197,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  :History:
      Change History::
         Written, 19 November 2010. DWF.
+        Corrected a problem with setting text color and added PLACE and OUTLOC 
+            keywords. 25 Nov 2010. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -9657,11 +9640,15 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                          meaning in the HISTOGRAM command. Used only to calculate BINSIZE when BINSIZE is
                          not specified. In this case, binsize = rangeofData/(nbins-1).
 
-
+       OPROBABILITY:     Set this keyword if you want to overplot the cumulative probability on the plot.
+       
        OPLOT:            Set this keyword if you want to overplot data on already established axes.
        
        OUTLINE:          Set this keyword if you wish to draw only the outline of the histogram plot,
                          in a manner similar to setting PSYM=10 on a PLOT command.
+                         
+       PROBCOLORNAME:    The name of the probability color for overplotting the cumulative probability
+                         on the plot.  Default: "Blue".
        
        THICK:            Set this keyword to a value greater than 1 to draw thicker axes and lines.
 
@@ -9676,6 +9663,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        OMAX:             The maximum output value used to construct the histogram. (See HISTOGRAM documentation.)
 
        OMIN:             The minimum output value used to construct the histogram. (See HISTOGRAM documentation.)
+       
+       PROBABILITY:      The total cummulative probability of the histogram plot, scaled from 0 to 1.
 
        REVERSE_INDICES:  List of reverse indices. (See HISTOGRAM documentation.)
 
@@ -9747,6 +9736,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        Fixed a problem when specifying more than one POLYCOLOR. I made a change to the program
             and forgot to propogate it everywhere. 4 October 2010. DWF.
        Default axis color name changed from "Navy" to "Black". 28 October 2010. DWF.
+       Fixed a problem with restoring color tables in PostScript. 24 Nov 2010. DWF.
+       Added OPROBABILITY, PROBCOLOR, and PROBABILITY keywords. 24 Nov 2010. DWF.
 </PRE><P>
 <STRONG>(See histoplot.pro)</STRONG><P>
 <HR>
@@ -15835,6 +15826,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
           jumps back to the center of the display when I select a color on UNIX
           machines. Also had to remove TLB updating with UPDATE keyword to avoid 
           tickling the same IDL bug. Sigh... 13 March (Friday) 2009.
+       Removed system color names, since these are no longer available in FSC_Color. 
+          27 Nov 2010. DWF
 </PRE><P>
 <STRONG>(See pickcolorname.pro)</STRONG><P>
 <HR>
@@ -19679,6 +19672,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        Updated program to work with 24-bit Z-buffer in IDL 6.4. 11 June 2007. DWF.
        Added OVERWRITE_PROMPT keyword. 2 Oct 2008. DWF.
        Found an extra line of code that wrote PNG files twice! Removed. 10 Nov 2010. DWF.
+       Replaced TVREAD_ERROR_MESSAGE with ERROR_MESSAGE. 25 Nov 2010. DWF.
 </PRE><P>
 <STRONG>(See tvread.pro)</STRONG><P>
 <HR>
@@ -21112,6 +21106,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        ASINH          An inverse hyperbolic sine function (strong log function).
        SQUARE ROOT    Another type of log function.
        EQUALIZATION   Image histogram is equalized before stretching.
+       ADAPTIVE EQUALIZATION Image histogram is equalized with Adapt_Hist_Equal before stretching.
        GAUSSIAN       A gaussian normal distribution function.
 
        An image histogram is provided to the user as an aid in manipulating
@@ -21157,11 +21152,11 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        COLORS:        A five element string array, listing the FSC_COLORS colors for drawing the
                       histogram plot. The colors are used as follows:
 
-                      colors[0] : Background color. Default: "ivory".
-                      colors[1] : Axis color. Default: "charcoal".
+                      colors[0] : Background color. Default: "white".
+                      colors[1] : Axis color. Default: "black".
                       colors[2] : Min threshold color. Default: "firebrick".
                       colors[3] : Max threshold  color. Default: "steel blue".
-                      colors[4] : ASinh color. Default: "sea green".
+                      colors[4] : ASinh color. Default: "grn6".
                       colors[5] : Histogram color. Default: "charcoal".
 
                       If a particular color is represented as a null string, then the
@@ -21401,6 +21396,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
            threshold values stay within the data range appropriate for the data type. 21 April 2010. DWF.
         Fixed another problem with integer data types and bin size. 23 April 2010. DWF.
         Fixed a problem with the display image when starting with a Square Root stretch. 23 April 2010. DWF.
+        Added ADAPTIVE EQUALIZATION stretch and changed default colors. 24 Nov 2010. DWF.
 </PRE><P>
 <STRONG>(See xstretch.pro)</STRONG><P>
 <HR>

@@ -153,6 +153,8 @@
 ;          jumps back to the center of the display when I select a color on UNIX
 ;          machines. Also had to remove TLB updating with UPDATE keyword to avoid 
 ;          tickling the same IDL bug. Sigh... 13 March (Friday) 2009.
+;       Removed system color names, since these are no longer available in FSC_Color. 
+;          27 Nov 2010. DWF
 ;-
 ;
 ;******************************************************************************************;
@@ -596,38 +598,38 @@ ENDELSE
 
 NCOLORS = N_Elements(colors)
 
-; Add system color names for IDL version 5.6 and higher. We don't want to
-; do this we cannot establish a display connection (e.g., we are running
-; in a cron job). Check for system variable !FSC_Display_Connection. If not
-; defined, check the connection.
-DefSysV, '!FSC_Display_Connection', EXISTS=sysvarExists
-IF sysvarExists $
-     THEN haveConnection = !FSC_Display_Connection $
-     ELSE haveConnection = CanConnect()
-      
-IF (Float(!Version.Release) GE 5.6) && Keyword_Set(haveConnection) THEN BEGIN
-
-   tlb = Widget_Base()
-   sc = Widget_Info(tlb, /System_Colors)
-   Widget_Control, tlb, /Destroy
-   frame = sc.window_frame
-   text = sc.window_text
-   active = sc.active_border
-   shadow = sc.shadow_3d
-   highlight = sc.light_3d
-   edge = sc.light_edge_3d
-   selected = sc.highlight
-   face = sc.face_3d
-   colors  = [colors,  'Frame',  'Text',  'Active',  'Shadow']
-   red =     [red,     frame[0], text[0], active[0], shadow[0]]
-   green =   [green,   frame[1], text[1], active[1], shadow[1]]
-   blue =    [blue,    frame[2], text[2], active[2], shadow[2]]
-   colors  = [colors,  'Highlight',  'Edge',  'Selected',  'Face']
-   red =     [red,     highlight[0], edge[0], selected[0], face[0]]
-   green =   [green,   highlight[1], edge[1], selected[1], face[1]]
-   blue =    [blue,    highlight[2], edge[2], selected[2], face[2]]
-
-ENDIF
+;; Add system color names for IDL version 5.6 and higher. We don't want to
+;; do this we cannot establish a display connection (e.g., we are running
+;; in a cron job). Check for system variable !FSC_Display_Connection. If not
+;; defined, check the connection.
+;DefSysV, '!FSC_Display_Connection', EXISTS=sysvarExists
+;IF sysvarExists $
+;     THEN haveConnection = !FSC_Display_Connection $
+;     ELSE haveConnection = CanConnect()
+;      
+;IF (Float(!Version.Release) GE 5.6) && Keyword_Set(haveConnection) THEN BEGIN
+;
+;   tlb = Widget_Base()
+;   sc = Widget_Info(tlb, /System_Colors)
+;   Widget_Control, tlb, /Destroy
+;   frame = sc.window_frame
+;   text = sc.window_text
+;   active = sc.active_border
+;   shadow = sc.shadow_3d
+;   highlight = sc.light_3d
+;   edge = sc.light_edge_3d
+;   selected = sc.highlight
+;   face = sc.face_3d
+;   colors  = [colors,  'Frame',  'Text',  'Active',  'Shadow']
+;   red =     [red,     frame[0], text[0], active[0], shadow[0]]
+;   green =   [green,   frame[1], text[1], active[1], shadow[1]]
+;   blue =    [blue,    frame[2], text[2], active[2], shadow[2]]
+;   colors  = [colors,  'Highlight',  'Edge',  'Selected',  'Face']
+;   red =     [red,     highlight[0], edge[0], selected[0], face[0]]
+;   green =   [green,   highlight[1], edge[1], selected[1], face[1]]
+;   blue =    [blue,    highlight[2], edge[2], selected[2], face[2]]
+;
+;ENDIF
 
 
    ; Save decomposed state and restore it, if possible.

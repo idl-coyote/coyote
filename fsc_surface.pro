@@ -1,3 +1,43 @@
+; docformat = 'rst'
+;
+; NAME:
+;   FSC_Surface
+;
+; PURPOSE:
+;   The purpose of FSC_Surface is to create a window where a surface is displayed. Surfaces
+;   can be wire-framed, shaded surfaces, and surfaces with texture maps draped on top of
+;   them, among other types of surfaces. LEFT mouse button rotates the surface, MIDDLE
+;   mouse button zooms out from the surface, RIGHT mouse button zoom into the surface. 
+;   Clicking on the surface title allows the user to drag the title to a better location.
+;
+;******************************************************************************************;
+;                                                                                          ;
+;  Copyright (c) 2010, by Fanning Software Consulting, Inc. All rights reserved.           ;
+;                                                                                          ;
+;  Redistribution and use in source and binary forms, with or without                      ;
+;  modification, are permitted provided that the following conditions are met:             ;
+;                                                                                          ;
+;      * Redistributions of source code must retain the above copyright                    ;
+;        notice, this list of conditions and the following disclaimer.                     ;
+;      * Redistributions in binary form must reproduce the above copyright                 ;
+;        notice, this list of conditions and the following disclaimer in the               ;
+;        documentation and/or other materials provided with the distribution.              ;
+;      * Neither the name of Fanning Software Consulting, Inc. nor the names of its        ;
+;        contributors may be used to endorse or promote products derived from this         ;
+;        software without specific prior written permission.                               ;
+;                                                                                          ;
+;  THIS SOFTWARE IS PROVIDED BY FANNING SOFTWARE CONSULTING, INC. ''AS IS'' AND ANY        ;
+;  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES    ;
+;  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT     ;
+;  SHALL FANNING SOFTWARE CONSULTING, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,             ;
+;  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED    ;
+;  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;         ;
+;  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND             ;
+;  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
+;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
+;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
+;******************************************************************************************;
+;
 PRO CW_Light_Control_Intensity_Events, event
 
     ; Handles selection events from the Intensity Value widget.
@@ -182,156 +222,52 @@ END ;---------------------------------------------------------------------------
 
 
 
-PRO FSC_Surface_Change_Colors, event
+PRO FSC_Surface_Light_Done, event
+    Widget_Control, event.top, /Destroy
+END ;--------------------------------------------------------------------
 
-    ; This event handler changes color tables for elevation shading.
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
-    ENDIF
 
+
+PRO FSC_Surface_Light_Controls_Event, event
+    Widget_Control, event.top, Get_UValue=info
+    info.theWindow->Draw, info.theView
+END
+;-------------------------------------------------------------------------
+
+
+
+PRO FSC_Surface_Light_Controls, event
+
+    ; Place the light control beside the current widget program.
     Widget_Control, event.top, Get_UValue=info, /No_Copy
-    Widget_Control, event.id, Get_Value=buttonValue, Get_UValue=buttonUValue
-    CASE StrUpCase(buttonValue) OF
-        'SURFACE COLOR': BEGIN
-            title = 'Set Surface Color'
-            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
-            info.color = FSC_Color(color, /Triple, /Row)
-            info.thisSurface -> SetProperty, COLOR=info.color
-            END
-        'BACKGROUND COLOR': BEGIN
-            title = 'Set Background Color'
-            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
-            info.background = FSC_Color(color, /Triple, /Row)
-            info.thisView -> SetProperty, COLOR=info.background
-            END
-        'AXIS COLOR': BEGIN
-            title = 'Set Axis Color'
-            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
-            info.axiscolor = FSC_Color(color, /Triple, /Row)
-            info.xaxis -> SetProperty, COLOR=info.axiscolor
-            info.yaxis -> SetProperty, COLOR=info.axiscolor
-            info.zaxis -> SetProperty, COLOR=info.axiscolor
-            info.xtitle -> SetProperty, COLOR=info.axiscolor
-            info.ytitle -> SetProperty, COLOR=info.axiscolor
-            info.ztitle -> SetProperty, COLOR=info.axiscolor
-            info.plottitle -> SetProperty, COLOR=info.axiscolor
-            END
-        'BOTTOM COLOR': BEGIN
-            title = 'Set Bottom Color'
-            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
-            info.bottom = FSC_Color(color, /Triple, /Row)
-            info.thisSurface -> SetProperty, BOTTOM=info.color
-            END
-    ENDCASE
+    Widget_Control, event.top, TLB_Get_Size=sizes, TLB_Get_Offset=offsets
+    xpos = sizes[0] + offsets[0] + 10
+    ypos = offsets[1] + 100
     
-    ; Set the user value to new color name.
-    Widget_Control, event.id, SET_UVALUE=color
-    
-    ; Draw the surface.
-    info.thisWindow -> Draw, info.thisView
-    
-    Widget_Control, event.top, Set_UValue=info, /No_Copy
-END ;------------------------------------------------------------------------------
-
-
-PRO FSC_Surface_Elevation_Colors, event
-
-    ; This event handler changes color tables for elevation shading.
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
-    ENDIF
-
-    Widget_Control, event.top, Get_UValue=info, /No_Copy
-    
-    ; What kind of event is this? Could be from Change Colors button
-    ; or from XCOLORS itself.
-    thisEvent = Tag_Names(event, /Structure_Name)
-    CASE thisEvent OF
-    
-       "WIDGET_BUTTON": BEGIN
-          IF info.colortable EQ -1 THEN BEGIN
-            TVLCT, info.r, info.g, info.b
-          ENDIF ELSE BEGIN
-            CTLoad, info.colortable, BREWER=info.brewer, REVERSE=info.reverse
-          ENDELSE
-          Print, 'Info.Reverse set to on button event:', info.reverse
-          XColors, Group_Leader=event.top, NotifyID=[event.id, event.top], $
-             Title="FSC_Surface Elevation Shading Colors", BREWER=info.brewer, $
-             INDEX=info.colortable, REVERSE=info.reverse
-          ENDCASE
-    
-       "XCOLORS_LOAD": BEGIN
-          info.r = event.r
-          info.g = event.g
-          info.b = event.b
-          info.colortable = event.index
-          info.brewer = event.brewer
-          info.reverse = event.reversed
-          Print, 'Info.Reverse set to on XColors event:', info.reverse
-          IF Obj_Valid(info.colorPalette) THEN info.colorPalette->SetProperty, $
-             Red=event.r, Green=event.g, Blue=event.b
-          ENDCASE
-    
-    ENDCASE
-    
-    ; Draw the graphic display.
-    info.thisWindow -> Draw, info.thisView
-    Widget_Control, event.top, Set_UValue=info, /No_Copy
-    
-END ;------------------------------------------------------------------------------
-
-
-PRO FSC_Surface_Elevation_Shading, event
-
-    ; This event handler sets up elevation shading for the surface.
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
-    ENDIF
-
-    Widget_Control, event.top, Get_UValue=info, /No_Copy
-    Widget_Control, event.id, Get_Value=buttonValue, Get_UValue=uvalue
-    Widget_Control, event.id, Set_Value=uvalue, Set_UValue=buttonValue
-    
-    CASE buttonValue OF
-    
-       'Elevation Shading ON': BEGIN
-          s = Size(info.data, /Dimensions)
-          info.zAxis->GetProperty, CRange=zrange
-          info.thisSurface->SetProperty, Palette=info.colorPalette, $
-             Vert_Colors=Reform(BytScl(info.data, /NAN, Min=Min(zrange), $
-             Max=Max(zrange)), s[0]*s[1]), Bottom=info.bottomOffPtr, Specular=""
-          Widget_Control, info.bottomID, Set_Value='Bottom Color ON' 
-          Widget_Control, info.bottomID, Set_UValue='Bottom Color OFF'
-          ENDCASE
-    
-       'Elevation Shading OFF': BEGIN
-          info.thisSurface->SetProperty, Palette=Obj_New(), Vert_Colors=0, $
-            Bottom=info.bottom, SPECULAR=info.specularColor
-          Widget_Control, info.bottomID, Set_Value='Bottom Color OFF'
-          Widget_Control, info.bottomID, Set_UValue='Bottom Color ON'
-          ENDCASE
-    
-    ENDCASE
-    
-    ; Draw the graphic display.
+    ; Lights only make sense with a solid surface.
+    info.thisSurface->SetProperty, Style=2, Shading=1
     info.thisWindow->Draw, info.thisView
+    
+    ; Create widgets.
+    tlb = Widget_Base(Title='FSC_Surface Light Controls', Column=1, Group_Leader=event.top, $
+       UValue={theView:info.thisView, theWindow:info.thisWindow}, XOffset=xpos, YOffset=ypos)
+    dummy = CW_Light_Control(tlb, Name='Non-Rotating Light', info.nonRotatingLight, LabelSize=130, $
+       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-18, Color=[255,255,255])
+    dummy = CW_Light_Control(tlb, Name='Rotating Light', info.rotatingLight, LabelSize=130, $
+       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-19, Color=[255,255,255])
+    dummy = CW_Light_Control(tlb, Name='Fill Light', info.fillLight, LabelSize=130, $
+       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-20, Color=[255,255,255])
+    dummy = CW_Light_Control(tlb, Name='Ambient Light', info.ambientLight, LabelSize=130, $
+       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-21, Color=[255,255,255])
+    quit = Widget_Button(tlb, Value='Done', Event_Pro='FSC_Surface_Light_Done')
+    
+    Widget_Control, tlb, /Realize
+    
+    XManager, 'FSC_Surface_Light_Controls', tlb, /No_Block, Event_Handler='FSC_Surface_Light_Controls_Event'
     Widget_Control, event.top, Set_UValue=info, /No_Copy
-END ;------------------------------------------------------------------------------
+
+END
+;-------------------------------------------------------------------------
 
 
 PRO FSC_Surface_Bottom_OnOff, event
@@ -366,10 +302,10 @@ PRO FSC_Surface_Bottom_OnOff, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Move_Title, event
+PRO FSC_Surface_Change_Colors, event
 
-    ; This event handler moves the surface title.
-
+    ; This event handler changes color tables for elevation shading.
+    
     ; Error handling.
     Catch, theError
     IF theError NE 0 THEN BEGIN
@@ -379,32 +315,49 @@ PRO FSC_Surface_Move_Title, event
     ENDIF
 
     Widget_Control, event.top, Get_UValue=info, /No_Copy
-    
-    drawTypes = ['PRESS', 'RELEASE', 'MOTION', 'SCROLL', 'EXPOSE']
-    thisEvent = drawTypes(event.type)
-    CASE thisEvent OF
-    
-        'RELEASE': BEGIN
-            Widget_Control, event.id, /CLEAR_EVENTS
-            Widget_Control, event.id, EVENT_PRO='FSC_SURFACE_DRAW_EVENTS'
-            Widget_Control, event.id, DRAW_MOTION_EVENTS=0
-            info.xstart = -1
-            info.ystart = -1
-            info.selectedItem = Obj_New()
+    Widget_Control, event.id, Get_Value=buttonValue, Get_UValue=buttonUValue
+    CASE StrUpCase(buttonValue) OF
+        'TITLE COLOR': BEGIN
+            title = 'Set Title Color'
+            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
+            info.tcolor = FSC_Color(color, /Triple, /Row)
+            info.plottitle -> SetProperty, COLOR=info.tcolor
             END
-            
-        'MOTION': BEGIN
-            delta_x = (event.x - info.xstart) / Float(info.xsize) 
-            delta_y = (event.y - info.ystart) / Float(info.ysize) 
-            info.textModel -> Translate, 2*delta_x, 2*delta_y, 0
-            info.thisWindow -> Draw, info.thisView
-            info.xstart = event.x
-            info.ystart = event.y
+        'SURFACE COLOR': BEGIN
+            title = 'Set Surface Color'
+            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
+            info.color = FSC_Color(color, /Triple, /Row)
+            info.thisSurface -> SetProperty, COLOR=info.color
+            END
+        'BACKGROUND COLOR': BEGIN
+            title = 'Set Background Color'
+            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
+            info.background = FSC_Color(color, /Triple, /Row)
+            info.thisView -> SetProperty, COLOR=info.background
+            END
+        'AXIS COLOR': BEGIN
+            title = 'Set Axis Color'
+            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
+            info.axiscolor = FSC_Color(color, /Triple, /Row)
+            info.xaxis -> SetProperty, COLOR=info.axiscolor
+            info.yaxis -> SetProperty, COLOR=info.axiscolor
+            info.zaxis -> SetProperty, COLOR=info.axiscolor
+            END
+        'BOTTOM COLOR': BEGIN
+            title = 'Set Bottom Color'
+            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
+            info.bottom = FSC_Color(color, /Triple, /Row)
+            info.thisSurface -> SetProperty, BOTTOM=info.color
             END
     ENDCASE
     
+    ; Set the user value to new color name.
+    Widget_Control, event.id, SET_UVALUE=color
+    
+    ; Draw the surface.
+    info.thisWindow -> Draw, info.thisView
+    
     Widget_Control, event.top, Set_UValue=info, /No_Copy
-
 END ;------------------------------------------------------------------------------
 
 
@@ -518,10 +471,10 @@ PRO FSC_Surface_Draw_Events, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Style, event
+PRO FSC_Surface_Elevation_Colors, event
 
-     ; Event handler to select surface style.
-
+    ; This event handler changes color tables for elevation shading.
+    
     ; Error handling.
     Catch, theError
     IF theError NE 0 THEN BEGIN
@@ -532,51 +485,48 @@ PRO FSC_Surface_Style, event
 
     Widget_Control, event.top, Get_UValue=info, /No_Copy
     
-    ; Make sure lights are turned on.
-    info.nonRotatingLight->SetProperty, Hide=0
-    info.rotatingLight->SetProperty, Hide=0
-    info.fillLight->SetProperty, Hide=0
-    info.ambientLight->SetProperty, Hide=0
-    info.thisSurface->SetProperty, Color=info.color
+    ; What kind of event is this? Could be from Change Colors button
+    ; or from XCOLORS itself.
+    thisEvent = Tag_Names(event, /Structure_Name)
+    CASE thisEvent OF
     
-    ; What style is wanted?
-    Widget_Control, event.id, Get_UValue=newStyle
-    CASE newStyle OF
+       "WIDGET_BUTTON": BEGIN
+          IF info.colortable EQ -1 THEN BEGIN
+            TVLCT, info.r, info.g, info.b
+          ENDIF ELSE BEGIN
+            CTLoad, info.colortable, BREWER=info.brewer, REVERSE=info.reverse
+          ENDELSE
+          Print, 'Info.Reverse set to on button event:', info.reverse
+          XColors, Group_Leader=event.top, NotifyID=[event.id, event.top], $
+             Title="FSC_Surface Elevation Shading Colors", BREWER=info.brewer, $
+             INDEX=info.colortable, REVERSE=info.reverse
+          ENDCASE
     
-       'DOTS': info.thisSurface->SetProperty, Style=0
-       'MESH': info.thisSurface->SetProperty, Style=1
-       'SOLID': info.thisSurface->SetProperty, Style=2, Shading=1
-       'XPARALLEL': info.thisSurface->SetProperty, Style=3
-       'YPARALLEL': info.thisSurface->SetProperty, Style=4
-       'WIRELEGO': info.thisSurface->SetProperty, Style=5
-       'SOLIDLEGO': info.thisSurface->SetProperty, Style=6
-       'HIDDEN': BEGIN
-           Widget_Control, event.id, Get_Value=buttonValue
-           IF buttonValue EQ 'Hidden Lines OFF' THEN BEGIN
-              setting = 0
-              hlvalue = 'Hidden Lines ON'
-           ENDIF ELSE BEGIN
-              setting = 1
-              hlvalue = 'Hidden Lines OFF'
-           ENDELSE
-           Widget_Control, event.id, Set_Value=hlvalue
-           info.thisSurface->SetProperty, Hidden_Lines=setting
-           ENDCASE
+       "XCOLORS_LOAD": BEGIN
+          info.r = event.r
+          info.g = event.g
+          info.b = event.b
+          info.colortable = event.index
+          info.brewer = event.brewer
+          info.reverse = event.reversed
+          Print, 'Info.Reverse set to on XColors event:', info.reverse
+          IF Obj_Valid(info.colorPalette) THEN info.colorPalette->SetProperty, $
+             Red=event.r, Green=event.g, Blue=event.b
+          ENDCASE
     
     ENDCASE
     
-    ; Redraw the graphic.
-    info.thisWindow->Draw, info.thisView
-    
-    ; Put the info structure back.
+    ; Draw the graphic display.
+    info.thisWindow -> Draw, info.thisView
     Widget_Control, event.top, Set_UValue=info, /No_Copy
+    
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Properties, event
+PRO FSC_Surface_Elevation_Shading, event
 
-    ; Event handler to set program properties.
-
+    ; This event handler sets up elevation shading for the surface.
+    
     ; Error handling.
     Catch, theError
     IF theError NE 0 THEN BEGIN
@@ -586,101 +536,85 @@ PRO FSC_Surface_Properties, event
     ENDIF
 
     Widget_Control, event.top, Get_UValue=info, /No_Copy
+    Widget_Control, event.id, Get_Value=buttonValue, Get_UValue=uvalue
+    Widget_Control, event.id, Set_Value=uvalue, Set_UValue=buttonValue
     
-    ; What property is wanted?
-    Widget_Control, event.id, Get_UValue=newProperty
-    CASE newProperty OF
+    CASE buttonValue OF
     
-       'ORIGINAL_T3D': info.thisModel->SetProperty, Transform=info.origTransform
-       
-       'DRAG_LOW': BEGIN
-          info.dragQuality = 0
-          Widget_Control, info.dragLowID, Sensitive=0
-          Widget_Control, info.dragMedID, Sensitive=1
-          Widget_Control, info.dragHighID, Sensitive=1
-          END
+       'Elevation Shading ON': BEGIN
+          s = Size(info.data, /Dimensions)
+          info.zAxis->GetProperty, CRange=zrange
+          info.thisSurface->SetProperty, Palette=info.colorPalette, $
+             Vert_Colors=Reform(BytScl(info.data, /NAN, Min=Min(zrange), $
+             Max=Max(zrange)), s[0]*s[1]), Bottom=info.bottomOffPtr, Specular=""
+          Widget_Control, info.bottomID, Set_Value='Bottom Color ON' 
+          Widget_Control, info.bottomID, Set_UValue='Bottom Color OFF'
+          ENDCASE
     
-       'DRAG_MEDIUM': BEGIN
-          info.dragQuality = 1
-          Widget_Control, info.dragMedID, Sensitive=0
-          Widget_Control, info.dragLowID, Sensitive=1
-          Widget_Control, info.dragHighID, Sensitive=1
-          END
-    
-       'DRAG_HIGH': BEGIN
-          info.dragQuality = 2
-          Widget_Control, info.dragMedID, Sensitive=1
-          Widget_Control, info.dragLowID, Sensitive=1
-          Widget_Control, info.dragHighID, Sensitive=0
-          END
+       'Elevation Shading OFF': BEGIN
+          info.thisSurface->SetProperty, Palette=Obj_New(), Vert_Colors=0, $
+            Bottom=info.bottom, SPECULAR=info.specularColor
+          Widget_Control, info.bottomID, Set_Value='Bottom Color OFF'
+          Widget_Control, info.bottomID, Set_UValue='Bottom Color ON'
+          ENDCASE
     
     ENDCASE
     
-    ; Redraw the graphic.
+    ; Draw the graphic display.
     info.thisWindow->Draw, info.thisView
-    
-    ;Put the info structure back.
     Widget_Control, event.top, Set_UValue=info, /No_Copy
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Cleanup, tlb
+PRO FSC_Surface_Exit, event
 
-    ; Come here when program dies. Free all created objects.
-    Widget_Control, tlb, Get_UValue=info
-    IF N_Elements(info) NE 0 THEN BEGIN
-        Ptr_Free, info.bottomOffPtr
-        Obj_Destroy, info.thisContainer
-    ENDIF
-    
-END ;------------------------------------------------------------------------------
-
-
-FUNCTION FSC_Surface_Aspect, aspectRatio, MARGIN=margin, WindowAspect=wAspectRatio
-
-    ; This function calculates the correct aspect ratio for display.
-    
-    ON_ERROR, 2
-    
-    ; Check for aspect ratio parameter and possibilities.
-    IF N_PARAMS() EQ 0 THEN aspectRatio = 1.0
-    
-    IF aspectRatio EQ 0 THEN BEGIN
-       MESSAGE, 'Aspect Ratio of 0. Changing to 1...', /Informational
-       aspectRatio = 1.0
-    ENDIF
-    
-    s = SIZE(aspectRatio)
-    IF s(s(0)+1) NE 4 THEN $
-       MESSAGE, 'Aspect Ratio is not a FLOAT. Take care...', /Informational
-    
-    ; Check for margins.
-    IF N_ELEMENTS(margin) EQ 0 THEN margin = 0
-    
-    ; Error checking.
-    IF margin LT 0 OR margin GE 0.5 THEN $
-       MESSAGE, 'The MARGIN keyword value must be between 0.0 and 0.5.'
-    
-    ; Calculate the aspect ratio of the current window.
-    IF N_Elements(wAspectRatio) EQ 0 THEN wAspectRatio = FLOAT(!D.Y_VSIZE) / !D.X_VSIZE
-    
-    ; Calculate normalized positions in window.
-    IF (aspectRatio LE wAspectRatio) THEN BEGIN
-       xstart = margin
-       ystart = 0.5 - (0.5 - margin) * (aspectRatio / wAspectRatio)
-       xend = 1.0 - margin
-       yend = 0.5 + (0.5 - margin) * (aspectRatio / wAspectRatio)
-    ENDIF ELSE BEGIN
-       xstart = 0.5 - (0.5 - margin) * (wAspectRatio / aspectRatio)
-       ystart = margin
-       xend = 0.5 + (0.5 - margin) * (wAspectRatio / aspectRatio)
-       yend = 1.0 - margin
-    ENDELSE
-    
-    ; Return the position in the window.
-    RETURN, [xstart, ystart, xend, yend]
-        
+   ; Exit the program. This will cause the CLEANUP
+   ; routine to be called automatically.
+   Widget_Control, event.top, /Destroy
+   
 END ;-----------------------------------------------------------------------------------------
+
+
+PRO FSC_Surface_Move_Title, event
+
+    ; This event handler moves the surface title.
+
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
+    ENDIF
+
+    Widget_Control, event.top, Get_UValue=info, /No_Copy
+    
+    drawTypes = ['PRESS', 'RELEASE', 'MOTION', 'SCROLL', 'EXPOSE']
+    thisEvent = drawTypes(event.type)
+    CASE thisEvent OF
+    
+        'RELEASE': BEGIN
+            Widget_Control, event.id, /CLEAR_EVENTS
+            Widget_Control, event.id, EVENT_PRO='FSC_SURFACE_DRAW_EVENTS'
+            Widget_Control, event.id, DRAW_MOTION_EVENTS=0
+            info.xstart = -1
+            info.ystart = -1
+            info.selectedItem = Obj_New()
+            END
+            
+        'MOTION': BEGIN
+            delta_x = (event.x - info.xstart) / Float(info.xsize) 
+            delta_y = (event.y - info.ystart) / Float(info.ysize) 
+            info.textModel -> Translate, 2*delta_x, 2*delta_y, 0
+            info.thisWindow -> Draw, info.thisView
+            info.xstart = event.x
+            info.ystart = event.y
+            END
+    ENDCASE
+    
+    Widget_Control, event.top, Set_UValue=info, /No_Copy
+
+END ;------------------------------------------------------------------------------
 
 
 PRO FSC_Surface_Output, event
@@ -753,68 +687,58 @@ PRO FSC_Surface_Output, event
     
     Widget_Control, event.top, Set_UValue=info, /No_Copy
     
-END
-;------------------------------------------------------------------------
+END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Exit, event
+PRO FSC_Surface_Properties, event
 
-   ; Exit the program. This will cause the CLEANUP
-   ; routine to be called automatically.
-   Widget_Control, event.top, /Destroy
-   
-END
-;------------------------------------------------------------------------
+    ; Event handler to set program properties.
 
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
+    ENDIF
 
-
-PRO FSC_Surface_Light_Done, event
-    Widget_Control, event.top, /Destroy
-END ;--------------------------------------------------------------------
-
-
-
-PRO FSC_Surface_Light_Controls_Event, event
-    Widget_Control, event.top, Get_UValue=info
-    info.theWindow->Draw, info.theView
-END
-;-------------------------------------------------------------------------
-
-
-
-PRO FSC_Surface_Light_Controls, event
-
-    ; Place the light control beside the current widget program.
     Widget_Control, event.top, Get_UValue=info, /No_Copy
-    Widget_Control, event.top, TLB_Get_Size=sizes, TLB_Get_Offset=offsets
-    xpos = sizes[0] + offsets[0] + 10
-    ypos = offsets[1] + 100
     
-    ; Lights only make sense with a solid surface.
-    info.thisSurface->SetProperty, Style=2, Shading=1
+    ; What property is wanted?
+    Widget_Control, event.id, Get_UValue=newProperty
+    CASE newProperty OF
+    
+       'ORIGINAL_T3D': info.thisModel->SetProperty, Transform=info.origTransform
+       
+       'DRAG_LOW': BEGIN
+          info.dragQuality = 0
+          Widget_Control, info.dragLowID, Sensitive=0
+          Widget_Control, info.dragMedID, Sensitive=1
+          Widget_Control, info.dragHighID, Sensitive=1
+          END
+    
+       'DRAG_MEDIUM': BEGIN
+          info.dragQuality = 1
+          Widget_Control, info.dragMedID, Sensitive=0
+          Widget_Control, info.dragLowID, Sensitive=1
+          Widget_Control, info.dragHighID, Sensitive=1
+          END
+    
+       'DRAG_HIGH': BEGIN
+          info.dragQuality = 2
+          Widget_Control, info.dragMedID, Sensitive=1
+          Widget_Control, info.dragLowID, Sensitive=1
+          Widget_Control, info.dragHighID, Sensitive=0
+          END
+    
+    ENDCASE
+    
+    ; Redraw the graphic.
     info.thisWindow->Draw, info.thisView
     
-    ; Create widgets.
-    tlb = Widget_Base(Title='FSC_Surface Light Controls', Column=1, Group_Leader=event.top, $
-       UValue={theView:info.thisView, theWindow:info.thisWindow}, XOffset=xpos, YOffset=ypos)
-    dummy = CW_Light_Control(tlb, Name='Non-Rotating Light', info.nonRotatingLight, LabelSize=130, $
-       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-18, Color=[255,255,255])
-    dummy = CW_Light_Control(tlb, Name='Rotating Light', info.rotatingLight, LabelSize=130, $
-       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-19, Color=[255,255,255])
-    dummy = CW_Light_Control(tlb, Name='Fill Light', info.fillLight, LabelSize=130, $
-       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-20, Color=[255,255,255])
-    dummy = CW_Light_Control(tlb, Name='Ambient Light', info.ambientLight, LabelSize=130, $
-       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-21, Color=[255,255,255])
-    quit = Widget_Button(tlb, Value='Done', Event_Pro='FSC_Surface_Light_Done')
-    
-    Widget_Control, tlb, /Realize
-    
-    XManager, 'FSC_Surface_Light_Controls', tlb, /No_Block, Event_Handler='FSC_Surface_Light_Controls_Event'
+    ;Put the info structure back.
     Widget_Control, event.top, Set_UValue=info, /No_Copy
-
-END
-;-------------------------------------------------------------------------
-
+END ;------------------------------------------------------------------------------
 
 
 PRO FSC_Surface_Resize, event
@@ -850,6 +774,269 @@ END
 
 
 
+PRO FSC_Surface_Skirt_OnOff, event
+
+    ; This event handler turns the skirt on or off.
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
+    ENDIF
+
+    Widget_Control, event.top, Get_UValue=info, /No_Copy
+    Widget_Control, event.id, Get_Value=buttonValue, Get_UValue=uvalue
+    Widget_Control, event.id, Set_Value=uvalue, Set_UValue=buttonValue
+    
+    CASE buttonValue OF
+    
+       'Turn Skirt ON':  info.thisSurface -> SetProperty, SHOW_SKIRT=1
+       'Turn Skirt OFF': info.thisSurface -> SetProperty, SHOW_SKIRT=0
+    
+    ENDCASE
+    
+    ; Draw the graphic display.
+    info.thisWindow -> Draw, info.thisView
+    Widget_Control, event.top, Set_UValue=info, /No_Copy
+    
+END ;------------------------------------------------------------------------------
+
+
+PRO FSC_Surface_Style, event
+
+     ; Event handler to select surface style.
+
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
+    ENDIF
+
+    Widget_Control, event.top, Get_UValue=info, /No_Copy
+    
+    ; Make sure lights are turned on.
+    info.nonRotatingLight->SetProperty, Hide=0
+    info.rotatingLight->SetProperty, Hide=0
+    info.fillLight->SetProperty, Hide=0
+    info.ambientLight->SetProperty, Hide=0
+    info.thisSurface->SetProperty, Color=info.color
+    
+    ; What style is wanted?
+    Widget_Control, event.id, Get_UValue=newStyle
+    CASE newStyle OF
+    
+       'DOTS': info.thisSurface->SetProperty, Style=0
+       'MESH': info.thisSurface->SetProperty, Style=1
+       'SOLID': info.thisSurface->SetProperty, Style=2, Shading=1
+       'XPARALLEL': info.thisSurface->SetProperty, Style=3
+       'YPARALLEL': info.thisSurface->SetProperty, Style=4
+       'WIRELEGO': info.thisSurface->SetProperty, Style=5
+       'SOLIDLEGO': info.thisSurface->SetProperty, Style=6
+       'HIDDEN': BEGIN
+           Widget_Control, event.id, Get_Value=buttonValue
+           IF buttonValue EQ 'Hidden Lines OFF' THEN BEGIN
+              setting = 0
+              hlvalue = 'Hidden Lines ON'
+           ENDIF ELSE BEGIN
+              setting = 1
+              hlvalue = 'Hidden Lines OFF'
+           ENDELSE
+           Widget_Control, event.id, Set_Value=hlvalue
+           info.thisSurface->SetProperty, Hidden_Lines=setting
+           ENDCASE
+    
+    ENDCASE
+    
+    ; Redraw the graphic.
+    info.thisWindow->Draw, info.thisView
+    
+    ; Put the info structure back.
+    Widget_Control, event.top, Set_UValue=info, /No_Copy
+END ;------------------------------------------------------------------------------
+
+
+PRO FSC_Surface_Cleanup, tlb
+
+    ; Come here when program dies. Free all created objects.
+    Widget_Control, tlb, Get_UValue=info
+    IF N_Elements(info) NE 0 THEN BEGIN
+        Ptr_Free, info.bottomOffPtr
+        Obj_Destroy, info.thisContainer
+    ENDIF
+    
+END ;------------------------------------------------------------------------------
+
+
+FUNCTION FSC_Surface_Aspect, aspectRatio, MARGIN=margin, WindowAspect=wAspectRatio
+
+    ; This function calculates the correct aspect ratio for display.
+    
+    ON_ERROR, 2
+    
+    ; Check for aspect ratio parameter and possibilities.
+    IF N_PARAMS() EQ 0 THEN aspectRatio = 1.0
+    
+    IF aspectRatio EQ 0 THEN BEGIN
+       MESSAGE, 'Aspect Ratio of 0. Changing to 1...', /Informational
+       aspectRatio = 1.0
+    ENDIF
+    
+    s = SIZE(aspectRatio)
+    IF s(s(0)+1) NE 4 THEN $
+       MESSAGE, 'Aspect Ratio is not a FLOAT. Take care...', /Informational
+    
+    ; Check for margins.
+    IF N_ELEMENTS(margin) EQ 0 THEN margin = 0
+    
+    ; Error checking.
+    IF margin LT 0 OR margin GE 0.5 THEN $
+       MESSAGE, 'The MARGIN keyword value must be between 0.0 and 0.5.'
+    
+    ; Calculate the aspect ratio of the current window.
+    IF N_Elements(wAspectRatio) EQ 0 THEN wAspectRatio = FLOAT(!D.Y_VSIZE) / !D.X_VSIZE
+    
+    ; Calculate normalized positions in window.
+    IF (aspectRatio LE wAspectRatio) THEN BEGIN
+       xstart = margin
+       ystart = 0.5 - (0.5 - margin) * (aspectRatio / wAspectRatio)
+       xend = 1.0 - margin
+       yend = 0.5 + (0.5 - margin) * (aspectRatio / wAspectRatio)
+    ENDIF ELSE BEGIN
+       xstart = 0.5 - (0.5 - margin) * (wAspectRatio / aspectRatio)
+       ystart = margin
+       xend = 0.5 + (0.5 - margin) * (wAspectRatio / aspectRatio)
+       yend = 1.0 - margin
+    ENDELSE
+    
+    ; Return the position in the window.
+    RETURN, [xstart, ystart, xend, yend]
+        
+END ;-----------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;   The purpose of FSC_Surface is to create a window where a surface is displayed. Surfaces
+;   can be wire-framed, shaded surfaces, and surfaces with texture maps draped on top of
+;   them, among other types of surfaces. LEFT mouse button rotates the surface, MIDDLE
+;   mouse button zooms into the surface, RIGHT mouse button zoom out of the surface. 
+;   Clicking on the surface title allows the user to drag the title to a better location.
+;
+; :Categories:
+;    Graphics
+;    
+; :Params:
+;    data: in, required, type=any
+;         A two-dimensional array of data to be displayed.
+;    x: in, optional, type=any
+;         A vector or two-dimensional array specifying the X coordinates of the
+;         surface grid.
+;    y: in, optional, type=any
+;         A vector or two-dimensional array specifying the Y coordinates of the
+;         surface grid.
+;       
+; :Keywords:
+;     axiscolor: in, optional, type=string, default='black'
+;        The name of the axis color. By default, 'black'..
+;     background: in, optional, type=string, default='white'
+;        The name of the background color. By default, 'white'.
+;     block: in, optional, type=boolean, default=0
+;         Set this keyword to make the program a blocking widget program.
+;     bottom: in, optional, type=string, default=COLOR
+;        The name of the bottom color. By default, same as COLOR.
+;     brewer: in, optional, type=boolean, default=0
+;        Set this keyword to indicate that the colortable (CTABLE) is
+;        to use Brewer color tables rather than IDL standard color tables.
+;     charsize: in, optional, type=float, default=1.0
+;        The character size of the surface annotation. 
+;     color: in, optional, type=string, default='blu6'
+;        The name of the data color. 
+;     constrain_aspect: in, optional, type=boolean, default=0
+;        Set this keyword to maintain the aspect ratio of the Y size
+;        of the data to the Y size of the data. The default is to let the
+;        sizes conform to a unit square.
+;     ctable: in, optional, type=integer
+;        The color table to use with the surface. The default is to use the
+;        current color table.
+;     elevation_shading: in, optional, type=boolean, default=0
+;        Set this keyword to put elevation shading into effect for the surface.
+;     font: in, optional, type=string, default="Helvetica"
+;        The name of the true-type font desired for axis annotation and the plot title. 
+;        If undefined, the default is "Helvetica".
+;     hidden_lines: in, optional, type=boolean, default=1
+;        Set this keyword to turn hidden line removal on for the surface. Turned 
+;        ON by default.
+;     group_leader: in, optional, type=long
+;         Set this keyword to the identifier of a widget that will serve as the
+;         group leader for this widget program. When the group leader dies, this
+;         program will die, too.
+;     reverse: in, optional, type=boolean, default=0
+;        Set this keyword to reverse the color table set by CTABLE.
+;     shaded: in, optional, type=boolean, default=0
+;        Set this keyword if you wish to display a shaded surface. The is the same as setting STYLE=2.
+;     skirt: in, optional, type=any
+;         Set this keyword to a Z value where a skirt will be drawn for the surface.
+;     texture_image: in, optional, type=byte
+;         Set this keyword to a 2d or true-color image that will be overlaid on the surface
+;         as a texture map. If a 2D image is passed, the colortable specified with CTABLE will
+;         be used to construct a true-color image for the texture map.
+;     tcharsize: in, optional, type=float
+;         The title character size. By default 1.25 times the CHARSIZE.
+;     title: in, optional, type=string
+;        The title of the plot. It will be written "flat to the screen", rather than rotated.
+;     tsize: in, optional, type=float, default=1.25*CHARSIZE
+;        The character size for the title. By default, the title character size is 1.25 times
+;        the character size of the surface annotation.
+;     xsize: in, optional, type=interger, default=640
+;         The X size of the initial surface window. By default, 640 pixels.
+;     xstyle: in, hidden
+;         The normal XSTYLE keyword.
+;     xtitle: in, optional, type=string
+;         The text for the X axis of the surface plot.
+;     ysize: in, optional, type=integer, default=512
+;         The Y size of the initial surface window. By default, 640 pixels.
+;     ystyle: in, hidden
+;         The normal YSTYLE keyword.
+;     ytitle: in, optional, type=string
+;         The text for the Y axis of the surface plot.
+;     zscale: in, optional, type=float, default=1.0
+;          A number between 0.001 and 1.0 that will "scale" the Z axis height. Default is 1.0.
+;     zstyle: in, hidden
+;         The normal ZSTYLE keyword.
+;     ztitle: in, optional, type=string
+;         The text for the Z axis of the surface plot.
+;     _extra: in, optional, type=any
+;        Any keyword appropriate for the IDLgrSurface object is allowed in the program.
+;
+; :Examples:
+;    Use as you would use the IDL SURFACE of SHADE_SURF command::
+;       data = Dist(200)
+;       LoadCT, 33
+;       FSC_Surface, data
+;       FSC_Surface, data, /Elevation_Shading
+;       FSC_Surface, data, /Shaded
+;       FSC_Surface, data, /Shaded, Texture_Image=Loaddata(16) 
+;       
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: davidf@dfanning.com
+;           Coyote's Guide to IDL Programming: http://www.dfanning.com
+;
+; :History:
+;     Change History::
+;        Completely re-written, 26 November 2010 from old FSC_SURFACE program. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2010, Fanning Software Consulting, Inc.
+;-
 PRO FSC_Surface, data, x, y, $
     Axiscolor=axiscolorName, $
     Background=backgroundName, $
@@ -861,15 +1048,17 @@ PRO FSC_Surface, data, x, y, $
     Constrain_Aspect=constrain_aspect, $
     CTable=colortable, $
     Elevation_Shading=elevation_shading, $
+    Font=font, $
     Hidden_Lines=hidden_lines, $
     Group_Leader=groupLeader, $
     Reverse=reverse, $
     Shaded=shaded, $
-    Shades=shades, $
     Skirt=skirt, $
     Style=style, $
+    Texture_Image=texture_image, $
     Title=plotTitleText, $
     TCharsize=tcharsize, $
+    TColor=tcolorName, $
     XRange=xrange_u, $
     XSize=xsize, $
     XStyle=xstyle, $
@@ -902,11 +1091,10 @@ PRO FSC_Surface, data, x, y, $
     SetDecomposedState, 1, CurrentState=currentDecomposedState
       
     ; Check parameters.
-IF N_Elements(data) EQ 0 THEN data = LoadData(2)
-    
     IF N_Elements(data) EQ 0 THEN BEGIN
         Print, 'USE SYNTAX: FSC_Surface, data, x, y'
-        RETURN
+        Print, 'Using example data.'
+        data = LoadData(2)
     ENDIF
     
     ; Get the current color table vectors. May need them later.
@@ -921,6 +1109,7 @@ IF N_Elements(data) EQ 0 THEN data = LoadData(2)
     ; Check keywords.
     IF N_Elements(axisColorName) EQ 0 THEN axisColorName = 'black' 
     IF N_Elements(backgroundName) EQ 0 THEN backgroundName = 'white' 
+    IF N_Elements(tcolorName) EQ 0 THEN tcolorName = axisColorName 
     IF N_Elements(colorName) EQ 0 THEN colorName = 'blu6' 
     IF N_Elements(bottomName) EQ 0 THEN bottomName = 'dark gray' 
     IF N_Elements(colortable) EQ 0 THEN BEGIN
@@ -939,6 +1128,7 @@ IF N_Elements(data) EQ 0 THEN data = LoadData(2)
     IF N_Elements(charsize) EQ 0 THEN charsize = 1.0
     constrain_aspect = Keyword_Set(constrain_aspect)
     elevation_shading = Keyword_Set(elevation_shading)
+    IF N_Elements(font) EQ 0 THEN font = 'Helvetica'
     IF N_Elements(hidden_lines) EQ 0 THEN hidden_lines = 1
     hidden_lines = Keyword_Set(hidden_lines)
     reverse = Keyword_Set(reverse)
@@ -995,6 +1185,14 @@ IF N_Elements(data) EQ 0 THEN data = LoadData(2)
             color = [rr[0>color<255],gg[0>color<255],bb[0>color<255]]
         ENDELSE
     ENDIF
+    IF Size(tcolorName, /TNAME) EQ 'STRING' THEN tcolor = FSC_Color(tcolorName, /Triple, /Row)
+    IF N_Elements(tcolor) NE 3 THEN BEGIN
+        IF Size(tcolor, /TNAME) EQ 'LONG' THEN BEGIN
+            tcolor = [Byte(tcolor), Byte(tcolor,1), Byte(tcolor,2)]
+        ENDIF ELSE BEGIN
+            tcolor = [rr[0>tcolor<255],gg[0>tcolor<255],bb[0>tcolor<255]]
+        ENDELSE
+    ENDIF
     
     ; Should we constrain the aspect ratio of the surface?
     IF constrain_aspect THEN BEGIN
@@ -1008,9 +1206,41 @@ IF N_Elements(data) EQ 0 THEN data = LoadData(2)
     
     ENDIF ELSE pos = [0, 1, 0, 1, 0, 1] - 0.5
     
+    ; Do you have a texture image?
+    IF N_Elements(texture_image) NE 0 THEN BEGIN
+    
+        ; Create a texture image object.
+        ndims = Size(texture_image, /N_DIMENSIONS)
+        IF ndims LT 2 OR ndims GT 3 THEN Message, 'Texture image must be a 2D or 3D array.'
+        type = Size(texture_image, /TYPE)
+        IF type GT 1 THEN Message, 'Texture image must be a byte array.'
+        IF ndims EQ 2 THEN BEGIN
+            textureImage = Obj_New('IDLgrImage', texture_image, PALETTE=colorPalette)
+        ENDIF ELSE BEGIN
+            textureImage = Obj_New('IDLgrImage', texture_image)
+        ENDELSE
+        
+        ; Set up texture coordinates.
+        imageDims = Image_Dimensions(data, XSize=ixsize, YSize=iysize, TrueIndex=trueindex) 
+        texcoords = FltArr(2, ixsize, iysize)
+        texcoords[0,*,*] = (Findgen(ixsize)#Replicate(1,iysize)) / (ixsize-1)
+        texcoords[1,*,*] = (Replicate(1,iysize)#Findgen(ixsize)) / (ixsize-1)
+       
+        ; Need white surface.
+        color = [255, 255, 255]
+        
+        ; Need shaded surface.
+        style = 2
+    ENDIF
+    
     ; Create a view. The coodinate system is chosen so that (0,0,0) is in the
     ; center of the window. This will make rotations easier.
-    thisView = OBJ_NEW('IDLgrView', Color=background, Viewplane_Rect=[-1.0,-1.0,2.0,2.0])
+    IF plotTitleText EQ "" THEN BEGIN
+       viewrect = [-1.0,-1.0,1.9,1.9]
+    ENDIF ELSE BEGIN
+       viewrect = [-1.0,-1.0,1.9,2.0]
+    ENDELSE
+    thisView = OBJ_NEW('IDLgrView', Color=background, Viewplane_Rect=viewrect)
     
     ; Create a model for the surface and axes and add it to the view.
     ; This model will rotate under the direction of the trackball object.
@@ -1023,17 +1253,17 @@ IF N_Elements(data) EQ 0 THEN data = LoadData(2)
     
     ; Create helper objects. First, create title objects
     ; for the axes and plot. Color them green.
-    xTitle = Obj_New('IDLgrText', xtitleText, Color=axiscolor, /Enable_Formatting)
-    yTitle = Obj_New('IDLgrText', ytitleText, Color=axiscolor, /Enable_Formatting)
-    zTitle = Obj_New('IDLgrText', ztitleText, Color=axiscolor, /Enable_Formatting)
+    xTitle = Obj_New('IDLgrText', xtitleText, Color=axisColor, /Enable_Formatting)
+    yTitle = Obj_New('IDLgrText', ytitleText, Color=axisColor, /Enable_Formatting)
+    zTitle = Obj_New('IDLgrText', ztitleText, Color=axisColor, /Enable_Formatting)
     
     ; Create font objects.
-    axisFont  = Obj_New('IDLgrFont', 'Helvetica', Size=12*charsize)
-    titleFont = Obj_New('IDLgrFont', 'Helvetica', Size=12*tcharsize)
+    axisFont  = Obj_New('IDLgrFont', font, Size=12*charsize)
+    titleFont = Obj_New('IDLgrFont', font, Size=12*tcharsize)
     
     ; Create a plot title object. I am going to place the title
     ; centered in X and towards the top of the viewplane rectangle.
-    plotTitle = Obj_New('IDLgrText', plotTitleText, Color=axiscolor, /Enable_Formatting, $
+    plotTitle = Obj_New('IDLgrText', plotTitleText, Color=tcolor, /Enable_Formatting, $
        Alignment=0.5, Location=[0.0, 0.75, 0.0], Font=titleFont)
     textModel->Add, plotTitle
     
@@ -1049,8 +1279,19 @@ IF N_Elements(data) EQ 0 THEN data = LoadData(2)
     ENDIF ELSE BEGIN
         thisSurface = OBJ_NEW('IDLgrSurface', data, x, y, $
            Color=color, _Strict_Extra=extra, Style=style, $
-           Shading=shading, Hidden_Lines=hidden_lines, BOTTOM=bottom, SPECULAR=specularColor)    
+           Shading=shading, Hidden_Lines=hidden_lines, BOTTOM=bottom, $
+           SPECULAR=specularColor)    
     ENDELSE
+    
+    ; Do you have a texture image?
+    IF N_Elements(texture_image) GT 0 THEN BEGIN
+        thisSurface -> SetProperty, Texture_Map=textureImage, Texture_Coord=texcoords
+    ENDIF
+    
+    ; Did you want a skirt?
+    IF N_Elements(skirt) NE 0 THEN BEGIN
+        thisSurface -> SetProperty, SKIRT=skirt, /SHOW_SKIRT
+    ENDIF
     
     ; Get the data ranges of the surface. Use the ranges from the surface,
     ; unless the user specified something else.
@@ -1061,18 +1302,18 @@ IF N_Elements(data) EQ 0 THEN data = LoadData(2)
     
     ; Create axes objects for the surface. Axes are created after the surface 
     ; so the range can be set correctly. Note how I set the font.
-    xAxis = Obj_New("IDLgrAxis", 0, Color=axiscolor, Ticklen=0.1, $
-       Minor=4, Title=xtitle, Range=xrange, Exact=(xstyle AND 1))
+    xAxis = Obj_New("IDLgrAxis", 0, Color=axisColor, Ticklen=0.1, $
+       Minor=4, Title=xtitle, Range=xrange, Exact=(xstyle AND 1), Hide=(xstyle AND 8))
     xAxis->GetProperty, Ticktext=xAxisText
     xAxisText->SetProperty, Font=axisFont
     
-    yAxis = Obj_New("IDLgrAxis", 1, Color=axiscolor, Ticklen=0.1, $
-       Minor=4, Title=ytitle, Range=yrange, Exact=(ystyle AND 1))
+    yAxis = Obj_New("IDLgrAxis", 1, Color=axisColor, Ticklen=0.1, $
+       Minor=4, Title=ytitle, Range=yrange, Exact=(ystyle AND 1), Hide=(ystyle AND 8))
     yAxis->GetProperty, Ticktext=yAxisText
     yAxisText->SetProperty, Font=axisFont
     
-    zAxis = Obj_New("IDLgrAxis", 2, Color=axiscolor, Ticklen=0.1, $
-       Minor=4, Title=ztitle, Range=zrange, Exact=(zstyle AND 1))
+    zAxis = Obj_New("IDLgrAxis", 2, Color=axisColor, Ticklen=0.1, $
+       Minor=4, Title=ztitle, Range=zrange, Exact=(zstyle AND 1), Hide=(zstyle AND 8))
     zAxis->GetProperty, Ticktext=zAxisText
     zAxisText->SetProperty, Font=axisFont
     
@@ -1255,7 +1496,12 @@ IF N_Elements(data) EQ 0 THEN data = LoadData(2)
           /Separator, UValue='Bottom Color ON', $
           Event_Pro='FSC_Surface_Bottom_OnOff')
     ENDELSE
-
+    
+    IF N_Elements(skirt) GT 0 THEN BEGIN
+        skirtID = Widget_Button(style, Value='Turn Skirt OFF', $
+          /Separator, UValue='Turn Skirt ON', $
+          Event_Pro='FSC_Surface_Skirt_OnOff')
+    ENDIF
     ; Create PROPERTIES menu buttons for surface properties.
     properties = Widget_Button(menubase, Value='Properties', /Menu, $
        Event_Pro='FSC_Surface_Properties')
@@ -1264,11 +1510,13 @@ IF N_Elements(data) EQ 0 THEN data = LoadData(2)
     colorID = Widget_Button(properties, Value='Colors', /Menu, $
         Event_Pro='FSC_Surface_Change_Colors')
     dummy = Widget_Button(colorID, Value='Surface Color', UValue=colorName)
-    dummy = Widget_Button(colorID, Value='Background Color', UValue=backgroundName)
-    dummy = Widget_Button(colorID, Value='Axis Color', UValue=axiscolorName)
     dummy = Widget_Button(colorID, Value='Bottom Color', UValue=bottomName)
+    dummy = Widget_Button(colorID, Value='Axis Color', UValue=axiscolorName)
+    dummy = Widget_Button(colorID, Value='Background Color', UValue=backgroundName)
+    dummy = Widget_Button(colorID, Value='Title Color', UValue=tColorName)
+    
     colorsID = Widget_Button(colorID, Value='Elevation Color Table', $
-       Event_Pro='FSC_Surface_Elevation_Colors')
+       Event_Pro='FSC_Surface_Elevation_Colors', /Separator)
      
     ; Original Axis rotation.
     dummy = Widget_Button(properties, Value='Original Rotation', /Separator, $
@@ -1317,6 +1565,7 @@ IF N_Elements(data) EQ 0 THEN data = LoadData(2)
     thisContainer->Add, axisFont
     thisContainer->Add, titleFont
     thisContainer->Add, colorPalette
+    IF Obj_Valid(textureImage) THEN thisContainer->Add, textureImage
     
     ; Get the current transformation matrix, so it can be restored.
     thisModel->GetProperty, Transform=origTransform
@@ -1376,7 +1625,8 @@ IF N_Elements(data) EQ 0 THEN data = LoadData(2)
     
     ; Call XManager. Set a cleanup routine so the objects
     ; can be freed upon exit from this program.
-    XManager, 'fsc_surface', tlb, Cleanup='FSC_Surface_Cleanup', No_Block=(1 - Keyword_Set(block)), $
+    XManager, 'fsc_surface', tlb, Cleanup='FSC_Surface_Cleanup', $
+       No_Block=(1 - Keyword_Set(block)), $
        Event_Handler='FSC_Surface_Resize', Group_Leader=groupLeader
     
 END ;-----------------------------------------------------------------------------------------

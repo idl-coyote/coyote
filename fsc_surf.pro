@@ -71,8 +71,8 @@
 ;        The character size of the surface annotation. If the current graphics device is 
 ;        PostScript, and this keyword is undefined, and the font keyword is set to 1, then
 ;        the character size is set to 1.75 to produce "normal" true-type characters.
-;     color: in, optional, type=string/integer, default='black'
-;        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
+;     color: in, optional, type=string/integer, default='blu6'
+;        If this keyword is a string, the name of the data color. By default, "BLU6".
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     elevation_shading: in, optional, type=boolean, default=0
 ;        Set this keyword to put elevation shading into effect for the surface.
@@ -95,6 +95,8 @@
 ;     shades: in, optional, type=byte
 ;        Set this keyword to a byte scaled 2D array of the same size as data to shade the surface
 ;        with these color indices.
+;     skirt: in, optional, type=any
+;        Set this keyword to a Z value where a skirt will be drawn for the surface.
 ;     title: in, optional, type=string
 ;        The title of the plot. It will be written "flat to the screen", rather than rotated.
 ;     tsize: in, optional, type=float
@@ -157,6 +159,7 @@ PRO FSC_Surf, data, x, y, $
     NOERASE=noerase, $
     SHADED=shaded, $
     SHADES=shades, $
+    SKIRT=skirt, $
     TITLE=title, $
     TSIZE=tsize, $
     TSPACE=tspace, $
@@ -278,7 +281,7 @@ PRO FSC_Surf, data, x, y, $
                 
                 ; Draw the plot that doesn't draw anything.
                 Surface, data, x, y, XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
-                    CHARSIZE=charsize, _STRICT_EXTRA=extra  
+                    CHARSIZE=charsize, SKIRT=skirt, _STRICT_EXTRA=extra  
                 
                 ; Save the "after plot" system variables. Will use later. 
                 afterx = !X
@@ -390,7 +393,7 @@ PRO FSC_Surf, data, x, y, $
         IF currentState THEN Device, Decomposed=1 ELSE TVLCT, rl, gl, bl
         Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
             /NODATA, /NOERASE, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
-            FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra
+            FONT=font, CHARSIZE=charsize, SKIRT=skirt, _STRICT_EXTRA=extra
             
         ; Have to repair the title, too.
         IF N_Elements(title) NE 0 THEN BEGIN
@@ -427,7 +430,7 @@ PRO FSC_Surf, data, x, y, $
         ENDIF ELSE BEGIN
             IF currentState THEN Device, Decomposed=1 ELSE TVLCT, rl, gl, bl
             Surface, data, x, y, NOERASE=1, COLOR=color, BOTTOM=bottom, $
-                BACKGROUND=background, SHADES=shades, $
+                BACKGROUND=background, SHADES=shades, SKIRT=skirt, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
                 FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra
         ENDELSE

@@ -347,7 +347,7 @@ PRO FSC_Surface_Change_Colors, event
             title = 'Set Bottom Color'
             color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
             info.bottom = FSC_Color(color, /Triple, /Row)
-            info.thisSurface -> SetProperty, BOTTOM=info.color
+            info.thisSurface -> SetProperty, BOTTOM=info.bottom
             END
     ENDCASE
     

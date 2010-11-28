@@ -590,7 +590,6 @@ IF info.from EQ 'PROTECT' THEN RETURN
 
 s = SIZE(info.notifyID)
 IF s(0) EQ 1 THEN count = 0 ELSE count = s(2)-1
-print, 'Indo.reversed in ColorSet', info.reversed
 FOR j=0,count DO BEGIN
    colorEvent = { XCOLORS_LOAD, $            ;
                   ID:info.notifyID(0,j), $   ;
@@ -1242,7 +1241,7 @@ IF (ncolors + bottom) GT 256 THEN ncolors = 256 - bottom
 
    ; Load colors in INDEX if specified.
 IF userfile NE "" THEN file = userfile
-IF N_Elements(index) GE 0 THEN BEGIN
+IF N_Elements(index) GE 1 THEN BEGIN
    IF index GE 0 THEN BEGIN
         LoadCT, index, File=file, /Silent, NColors=ncolors, Bottom=bottom
    ENDIF ELSE index = -1
@@ -1428,7 +1427,6 @@ info = {  windowIndex:windowIndex, $         ; The WID of the draw widget.
 
    ; Turn color protection on.
 
-Print, 'Info.reversed in XColors def module.', info.reversed
 IF !D.NAME NE 'MAC' THEN Widget_Control, draw, Draw_Expose_Events=1
 
    ; Store the info structure in the user value of the top-level base.
@@ -1437,9 +1435,9 @@ Widget_Control, tlb, /Managed
 WSet, thisWindow
 
 XManager, registerName, tlb, Group=(group_leader GE 0) ? group_leader : xx, No_Block=noblock, Cleanup="XColors_Cleanup"
+   
    ; Return the colorInfo information as a structure if this program
    ; was called as a modal widget.
-
 IF (Keyword_Set(modal) AND N_Elements(group_leader) NE 0 AND needColorInfo) OR (noblock EQ 0 AND needColorInfo) THEN BEGIN
    colorStruct = *colorInfoPtr
    Ptr_Free, colorInfoPtr

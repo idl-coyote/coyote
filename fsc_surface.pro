@@ -8,7 +8,8 @@
 ;   can be wire-framed, shaded surfaces, and surfaces with texture maps draped on top of
 ;   them, among other types of surfaces. LEFT mouse button rotates the surface, MIDDLE
 ;   mouse button zooms out from the surface, RIGHT mouse button zoom into the surface. 
-;   Clicking on the surface title allows the user to drag the title to a better location.
+;   Clicking on the surface axes will allow the user to move or translate the surface, and 
+;   clicking on the plot title will allow the user to move the title.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -403,6 +404,16 @@ PRO FSC_Surface_Draw_Events, event
                    Widget_Control, event.id, DRAW_MOTION_EVENTS=1
                    RETURN
                ENDIF
+               IF Obj_Class(item[0]) EQ 'IDLGRAXIS' THEN BEGIN
+                   Widget_Control, event.id, /CLEAR_EVENTS
+                   Widget_Control, event.id, EVENT_PRO='FSC_SURFACE_MOVE_SURFACE'
+                   info.xstart = event.x
+                   info.ystart = event.y
+                   info.selectedItem = item[0]
+                   Widget_Control, event.top, Set_UValue=info, /No_Copy
+                   Widget_Control, event.id, DRAW_MOTION_EVENTS=1
+                   RETURN
+               ENDIF
            ENDIF
     
            ; Zoom out on middle, zoom in on right, rotate on left.
@@ -573,6 +584,48 @@ PRO FSC_Surface_Exit, event
    Widget_Control, event.top, /Destroy
    
 END ;-----------------------------------------------------------------------------------------
+
+
+PRO FSC_Surface_Move_Surface, event
+
+    ; This event handler moves the surface.
+
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
+    ENDIF
+
+    Widget_Control, event.top, Get_UValue=info, /No_Copy
+    
+    drawTypes = ['PRESS', 'RELEASE', 'MOTION', 'SCROLL', 'EXPOSE']
+    thisEvent = drawTypes(event.type)
+    CASE thisEvent OF
+    
+        'RELEASE': BEGIN
+            Widget_Control, event.id, /CLEAR_EVENTS
+            Widget_Control, event.id, EVENT_PRO='FSC_SURFACE_DRAW_EVENTS'
+            Widget_Control, event.id, DRAW_MOTION_EVENTS=0
+            info.xstart = -1
+            info.ystart = -1
+            info.selectedItem = Obj_New()
+            END
+            
+        'MOTION': BEGIN
+            delta_x = (event.x - info.xstart) / Float(info.xsize) 
+            delta_y = (event.y - info.ystart) / Float(info.ysize) 
+            info.thisModel -> Translate, 2*delta_x, 2*delta_y, 0
+            info.thisWindow -> Draw, info.thisView
+            info.xstart = event.x
+            info.ystart = event.y
+            END
+    ENDCASE
+    
+    Widget_Control, event.top, Set_UValue=info, /No_Copy
+
+END ;------------------------------------------------------------------------------
 
 
 PRO FSC_Surface_Move_Title, event
@@ -923,8 +976,9 @@ END ;---------------------------------------------------------------------------
 ;   The purpose of FSC_Surface is to create a window where a surface is displayed. Surfaces
 ;   can be wire-framed, shaded surfaces, and surfaces with texture maps draped on top of
 ;   them, among other types of surfaces. LEFT mouse button rotates the surface, MIDDLE
-;   mouse button zooms into the surface, RIGHT mouse button zoom out of the surface. 
-;   Clicking on the surface title allows the user to drag the title to a better location.
+;   mouse button zooms out from the surface, RIGHT mouse button zoom into the surface. 
+;   Clicking on the surface axes will allow the user to move or translate the surface, and 
+;   clicking on the plot title will allow the user to move the title.
 ;
 ; :Categories:
 ;    Graphics
@@ -1439,7 +1493,7 @@ PRO FSC_Surface, data, x, y, $
     ; Create OUTPUT menu buttons for formatted output files. Use GIF
     ; files if available.
     output = Widget_Button(filer, Value='Save As...', /Menu)
-    button = Widget_Button(output, Value='PostSript File', $
+    button = Widget_Button(output, Value='PostScript File', $
        UValue='PS', Event_Pro='FSC_Surface_Output')
     button = Widget_Button(output, Value='BMP File', $
        UValue='BMP', Event_Pro='FSC_Surface_Output')

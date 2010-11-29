@@ -1261,7 +1261,8 @@ PRO FSC_Surface, data, x, y, $
     
        ; I want the surface data to have the same aspect ratio as 
        ; the data itself in the X and Y directions.
-       surfaceAspect = Float(s[2]) / s[1]
+       s = Size(data, /DIMENSIONS)
+       surfaceAspect = Float(s[1]) / s[0]
        windowAspect = Float(ysize) / xsize
        pos = FSC_Surface_Aspect(surfaceAspect, WindowAspect=windowAspect, Margin=0)
        pos = [pos[0], pos[2], pos[1], pos[3], 0.0, 1.0] - 0.5

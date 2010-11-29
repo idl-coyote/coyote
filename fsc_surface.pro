@@ -105,10 +105,10 @@ PRO CW_Light_Control_Events, event
        'COLOR': BEGIN
           TVLCT, info.color, info.index
           DEVICE, Decomposed=0, Get_Decomposed=theDecomposedState
-          thisColor = PickColor(Group_Leader=event.top, info.index)
+          setcolor_title = Widget_Info(event.id, /UNAME)
+          thisColor = PickColor(CURRENTCOLOR=info.color, Group_Leader=event.top, Title=setcolor_title)
           thisColor = Reform(thisColor, 3, 1)
           info.theLight->SetProperty, Color=thisColor
-          info.theColor = thisColor
           DEVICE, Decomposed=theDecomposedState
           info.color = thisColor
           END
@@ -167,7 +167,7 @@ END ;---------------------------------------------------------------------------
 
 
 FUNCTION CW_Light_Control, parent, theLight, Name=name, UValue=uvalue, Event_Pro=event_pro, $
-   LabelSize=labelsize, Index=index, Color=color
+   LabelSize=labelsize, Index=index, Color=color, SETCOLOR_NAME=setColor_name
 
 ; This is a compound widget that allows one to manipulate various
 ; properties of light objects.
@@ -181,6 +181,7 @@ FUNCTION CW_Light_Control, parent, theLight, Name=name, UValue=uvalue, Event_Pro
     IF N_Elements(uvalue) EQ 0 THEN uvalue = "LIGHT_CONTROL"
     IF N_Elements(event_pro) EQ 0 THEN event_pro = ""
     IF N_Elements(index) EQ 0 THEN index =  !D.Table_Size-2
+    IF N_Elements(setcolor_name) EQ 0 THEN setcolor_name = ""
     IF N_Elements(color) EQ 0 THEN BEGIN
        TVLCT, r, g, b, /Get
        color = Reform([r[index], g[index], b[index]], 1, 3)
@@ -206,7 +207,7 @@ FUNCTION CW_Light_Control, parent, theLight, Name=name, UValue=uvalue, Event_Pro
     intensityID = FSC_Droplist(tlb, Title='Intensity:', Value = intensityValues, $
        Event_Pro='CW_Light_Control_Intensity_Events', Format='(F3.1)', Spaces=[1,1])
     intensityID->SetSelection, theIntensity
-    colorID = Widget_Button(tlb, Value='Set Color', UValue='COLOR')
+    colorID = Widget_Button(tlb, Value='Set Color', UValue='COLOR', UNAME=setcolor_name)
     resetID= Widget_Button(tlb, Value='Reset', UValue='RESET')
     Widget_Control, tlb, /Realize
     
@@ -253,13 +254,17 @@ PRO FSC_Surface_Light_Controls, event
     tlb = Widget_Base(Title='FSC_Surface Light Controls', Column=1, Group_Leader=event.top, $
        UValue={theView:info.thisView, theWindow:info.thisWindow}, XOffset=xpos, YOffset=ypos)
     dummy = CW_Light_Control(tlb, Name='Non-Rotating Light', info.nonRotatingLight, LabelSize=130, $
-       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-18, Color=[255,255,255])
+       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-18, Color=[255,255,255], $
+       SetColor_Name='Color for Non-Rotating Light')
     dummy = CW_Light_Control(tlb, Name='Rotating Light', info.rotatingLight, LabelSize=130, $
-       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-19, Color=[255,255,255])
+       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-19, Color=[255,255,255], $
+       SetColor_Name='Color for Rotating Light')
     dummy = CW_Light_Control(tlb, Name='Fill Light', info.fillLight, LabelSize=130, $
-       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-20, Color=[255,255,255])
+       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-20, Color=[255,255,255], $
+       SetColor_Name='Color for Fill Light')
     dummy = CW_Light_Control(tlb, Name='Ambient Light', info.ambientLight, LabelSize=130, $
-       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-21, Color=[255,255,255])
+       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-21, Color=[255,255,255], $
+       SetColor_Name='Color for Ambient Light')
     quit = Widget_Button(tlb, Value='Done', Event_Pro='FSC_Surface_Light_Done')
     
     Widget_Control, tlb, /Realize
@@ -1087,6 +1092,9 @@ END ;---------------------------------------------------------------------------
 ; :History:
 ;     Change History::
 ;        Completely re-written, 26 November 2010 from old FSC_SURFACE program. DWF.
+;        Added ability to translate the surface by clicking on an axis. 28 Nov 2010. DWF.
+;        Fixed a problem with light controls in which the light controls didn't show the
+;            current light color. 28 Nov 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.

@@ -125,6 +125,7 @@
 ;       Added CURRENTCOLOR keyword. 3 July 2003. DWF.
 ;       Added BREWER keyword. 15 May 2008. DWF.
 ;       Fixed a couple of problems with outline color. 19 May 2008. DWF.
+;       Added all the colors available from FSC_COLOR. 28 Nov 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -278,7 +279,7 @@ IF Float(!Version.Release) GE 5.2 THEN BEGIN
 ENDIF ELSE decomposedState = 0
 
 Device, Decomposed=0
-NCOLORS = 96
+NCOLORS = 192
 
    ; Check parameters.
 
@@ -343,7 +344,7 @@ TVLCT, r_old, g_old, b_old, /Get
        colors = [ colors, 'TG1', 'TG2', 'TG3', 'TG4', 'TG5', 'TG6', 'TG7', 'TG8']
        red =   [ red,      84,    163,   197,   220,   105,    51,    13,     0 ]
        green = [ green,    48,    103,   141,   188,   188,   149,   113,    81 ]
-       blue =  [ blue,      5,     26,    60,   118,   177,   141,   105,    71 ]      
+       blue =  [ blue,      5,     26,    60,   118,   177,   141,   105,    71 ]   
    ENDIF ELSE BEGIN
        colors= ['White']
        red =   [ 255]
@@ -413,7 +414,57 @@ TVLCT, r_old, g_old, b_old, /Get
        red =   [ red,           106,            72]
        green = [ green,            90,            61]
        blue =  [ blue,           205,           139]
+       colors = [ colors, 'WT1', 'WT2', 'WT3', 'WT4', 'WT5', 'WT6', 'WT7', 'WT8']
+       red =   [ red,     255,   255,   255,   255,   255,   245,   255,   250 ]
+       green = [ green,   255,   250,   255,   255,   248,   245,   245,   240 ]
+       blue =  [ blue,    255,   250,   240,   224,   220,   220,   238,   230 ]
+       colors = [ colors, 'TAN1', 'TAN2', 'TAN3', 'TAN4', 'TAN5', 'TAN6', 'TAN7', 'TAN8']
+       red =   [ red,      250,   255,    255,    255,    255,    245,    222,    210 ]
+       green = [ green,    235,   239,    235,    228,    228,    222,    184,    180 ]
+       blue =  [ blue,     215,   213,    205,    196,    181,    179,    135,    140 ]
+       colors = [ colors, 'BLK1', 'BLK2', 'BLK3', 'BLK4', 'BLK5', 'BLK6', 'BLK7', 'BLK8']
+       red =   [ red,      250,   230,    210,    190,    112,     110,    70,       0 ]
+       green = [ green,    250,   230,    210,    190,    128,     110,    70,       0 ]
+       blue =  [ blue,     250,   230,    210,    190,    128,     110,    70,       0 ]
+       colors = [ colors, 'GRN1', 'GRN2', 'GRN3', 'GRN4', 'GRN5', 'GRN6', 'GRN7', 'GRN8']
+       red =   [ red,      250,   223,    173,    109,     53,     35,      0,       0 ]
+       green = [ green,    253,   242,    221,    193,    156,     132,    97,      69 ]
+       blue =  [ blue,     202,   167,    142,    115,     83,      67,    52,      41 ]
+       colors = [ colors, 'BLU1', 'BLU2', 'BLU3', 'BLU4', 'BLU5', 'BLU6', 'BLU7', 'BLU8']
+       red =   [ red,      232,   202,    158,     99,     53,     33,      8,       8 ]
+       green = [ green,    241,   222,    202,    168,    133,    113,     75,      48 ]
+       blue =  [ blue,     250,   240,    225,    211,    191,    181,    147,     107 ]
+       colors = [ colors, 'ORG1', 'ORG2', 'ORG3', 'ORG4', 'ORG5', 'ORG6', 'ORG7', 'ORG8']
+       red =   [ red,      254,    253,    253,    250,    231,    217,    159,    127 ]
+       green = [ green,    236,    212,    174,    134,     92,     72,     51,     39 ]
+       blue =  [ blue,     217,    171,    107,     52,     12,      1,      3,      4 ]
+       colors = [ colors, 'RED1', 'RED2', 'RED3', 'RED4', 'RED5', 'RED6', 'RED7', 'RED8']
+       red =   [ red,      254,    252,    252,    248,    225,    203,    154,    103 ]
+       green = [ green,    232,    194,    146,     97,     45,     24,     12,      0 ]
+       blue =  [ blue,     222,    171,    114,     68,     38,     29,     19,     13 ]
+       colors = [ colors, 'PUR1', 'PUR2', 'PUR3', 'PUR4', 'PUR5', 'PUR6', 'PUR7', 'PUR8']
+       red =   [ red,      244,    222,    188,    152,    119,    106,     80,     63 ]
+       green = [ green,    242,    221,    189,    148,    108,     82,     32,      0 ]
+       blue =  [ blue,     248,    237,    220,    197,    177,    163,    139,    125 ]
+       colors = [ colors, 'PBG1', 'PBG2', 'PBG3', 'PBG4', 'PBG5', 'PBG6', 'PBG7', 'PBG8']
+       red =   [ red,      243,    213,    166,     94,     34,      3,      1,      1 ]
+       green = [ green,    234,    212,    189,    164,    138,    129,    101,     70 ]
+       blue =  [ blue,     244,    232,    219,    204,    171,    139,     82,     54 ]
+       colors = [ colors, 'YGB1', 'YGB2', 'YGB3', 'YGB4', 'YGB5', 'YGB6', 'YGB7', 'YGB8']
+       red =   [ red,      244,    206,    127,     58,     30,     33,     32,      8 ]
+       green = [ green,    250,    236,    205,    175,    125,     95,     48,     29 ]
+       blue =  [ blue,     193,    179,    186,    195,    182,    168,    137,     88 ]
+       colors = [ colors, 'RYB1', 'RYB2', 'RYB3', 'RYB4', 'RYB5', 'RYB6', 'RYB7', 'RYB8']
+       red =   [ red,       201,    245,    253,    251,    228,    193,    114,     59 ]
+       green = [ green,      35,    121,    206,    253,    244,    228,    171,     85 ]
+       blue =  [ blue,       38,    72,     127,    197,    239,    239,    207,    164 ]
+       colors = [ colors, 'TG1', 'TG2', 'TG3', 'TG4', 'TG5', 'TG6', 'TG7', 'TG8']
+       red =   [ red,      84,    163,   197,   220,   105,    51,    13,     0 ]
+       green = [ green,    48,    103,   141,   188,   188,   149,   113,    81 ]
+       blue =  [ blue,      5,     26,    60,   118,   177,   141,   105,    71 ]   
    ENDELSE
+
+NCOLORS = N_Elements(colors)
 colorNames = colors
 nameIndex = currentColorIndex - startIndex
 IF nameIndex GE 0 AND nameIndex LE N_Elements(colorNames) THEN BEGIN
@@ -433,7 +484,7 @@ ENDIF ELSE BEGIN
 ENDELSE
 
 colorbaseID = Widget_Base(tlb, Column=12, Event_Pro='PickColor_Select_Color')
-drawID = LonArr(96)
+drawID = LonArr(NCOLORS)
 FOR j=0,NCOLORS-1 DO BEGIN
    drawID[j] = Widget_Draw(colorbaseID, XSize=20, YSize=15, $
       UValue=colorNames[j], Button_Events=1)

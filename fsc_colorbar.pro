@@ -63,6 +63,14 @@
 ;                     the bar.
 ;
 ;       CHARSIZE:     The character size of the color bar annotations. Default is !P.Charsize.
+;       
+;       CLAMP:        A two-element array in data units. The color bar is clamped to these
+;                     two values. This is mostly of interest if you are "window-leveling"
+;                     an image. The clamp is set to the "window" of the color bar.
+;                     Normally, when you are doing this, you would like the colors outside
+;                     the "window" to be set to a neutral color. Use the NEUTRALINDEX keyword
+;                     to set the netural color index in the color bar. (See the Example section
+;                     for more information.
 ;
 ;       COLOR:        The color index of the bar outline and characters. Default
 ;                     is !P.Color. To display the color bar in a device indpendent
@@ -86,6 +94,13 @@
 ;       MINOR:        The number of minor tick divisions. Default is 2.
 ;
 ;       NCOLORS:      This is the number of colors in the color bar.
+;       
+;       NEUTRALINDEX: This is the color index to use for color bar values outside the
+;                     clamping range when clamping the color bar with the CLAMP keyword.
+;                     If this keyword is absent, the highest color table value is used
+;                     for low range values and the lowest color table value is used
+;                     for high range values, in order to provide contrast with the
+;                     clamped region. See the Example section for more information.
 ;
 ;       NODISPLAY:    FSC_COLORBAR uses FSC_COLOR to specify some of it colors. Normally, 
 ;                     FSC_COLOR loads "system" colors as part of its palette of colors.
@@ -146,6 +161,13 @@
 ;       CONTOUR, DIST(31,41), POSITION=[0.15, 0.15, 0.95, 0.75], $
 ;          C_COLORS=INDGEN(25)*4, NLEVELS=25
 ;       FSC_COLORBAR, NCOLORS=100, POSITION=[0.15, 0.85, 0.95, 0.90]
+;       
+;       Example using the CLAMP and NEUTRALINDEX keywords.
+;       
+;       LOADCT, 33, NCOLORS=254
+;       TVLCT, FSC_COLOR('gray', /TRIPLE), 255
+;       FSC_COLORBAR, NCOLORS=254, NEUTRALINDEX=255, RANGE=[0,1500], $
+;           DIVISIONS=8, CLAMP=[400, 800]
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -216,6 +238,8 @@
 ;             to "black" if it of the COLOR keyword is not currently set to some other color. 
 ;             If the pixel is "black" then ANNOTATECOLOR is set to "white". DWF.
 ;      19 Nov 2010. Fixed a small problem when choosing an AnnnotateColor. DWF.
+;      29 Nov 2010. Added CLAMP and NEUTRALINDEX keywords, updated ability to set
+;             color model with SetDecomposedState command. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -244,14 +268,36 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divisions, $
-   FORMAT=format, POSITION=position, MAXRANGE=maxrange, MINRANGE=minrange, NCOLORS=ncolors, $
-   TITLE=title, VERTICAL=vertical, TOP=top, RIGHT=right, MINOR=minor, $
-   RANGE=range, FONT=font, TICKLEN=ticklen, _EXTRA=extra, INVERTCOLORS=invertcolors, $
-   TICKNAMES=ticknames, REVERSE=reverse, ANNOTATECOLOR=annotatecolor, XLOG=xlog, YLOG=ylog, $
-   NODISPLAY=nodisplay
+PRO FSC_COLORBAR, $
+    ANNOTATECOLOR=annotatecolor, $
+    BOTTOM=bottom, $
+    CHARSIZE=charsize, $
+    CLAMP=clamp, $
+    COLOR=color, $
+    DIVISIONS=divisions, $
+    FONT=font, $
+    FORMAT=format, $
+    INVERTCOLORS=invertcolors, $
+    MAXRANGE=maxrange, $
+    MINOR=minor, $
+    MINRANGE=minrange, $
+    NCOLORS=ncolors, $
+    NEUTRALINDEX=neutralIndex, $
+    NODISPLAY=nodisplay, $
+    POSITION=position, $
+    RANGE=range, $
+    REVERSE=reverse, $
+    RIGHT=right, $
+    TICKLEN=ticklen, $
+    TICKNAMES=ticknames, $
+    TITLE=title, $
+    TOP=top, $
+    VERTICAL=vertical, $
+    XLOG=xlog, $
+    YLOG=ylog, $
+    _EXTRA=extra
 
-    compile_opt idl2
+    Compile_Opt idl2
 
     ; Catch the error.
     Catch, theError
@@ -275,39 +321,7 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
     thisRelease = Float(!Version.Release)
 
     ; Check and define keywords.
-    IF N_ELEMENTS(ncolors) EQ 0 THEN BEGIN
-
-       ; Most display devices to not use the 256 colors available to
-       ; the PostScript device. This presents a problem when writing
-       ; general-purpose programs that can be output to the display or
-       ; to the PostScript device. This problem is especially bothersome
-       ; if you don't specify the number of colors you are using in the
-       ; program. One way to work around this problem is to make the
-       ; default number of colors the same for the display device and for
-       ; the PostScript device. Then, the colors you see in PostScript are
-       ; identical to the colors you see on your display. Here is one way to
-       ; do it.
-
-       IF scalablePixels THEN BEGIN
-          oldDevice = !D.NAME
-
-             ; What kind of computer are we using? SET_PLOT to appropriate
-             ; display device.
-
-          thisOS = !VERSION.OS_FAMILY
-          thisOS = STRMID(thisOS, 0, 3)
-          thisOS = STRUPCASE(thisOS)
-          CASE thisOS of
-             'MAC': SET_PLOT, thisOS
-             'WIN': SET_PLOT, thisOS
-             ELSE: SET_PLOT, 'X'
-          ENDCASE
-
-          ; Here is how many colors we should use.
-          ncolors = !D.TABLE_SIZE
-          SET_PLOT, oldDevice
-        ENDIF ELSE ncolors = !D.TABLE_SIZE
-    ENDIF
+    IF N_ELEMENTS(ncolors) EQ 0 THEN ncolors = 256
     IF N_ELEMENTS(bottom) EQ 0 THEN bottom = 0B
     IF N_ELEMENTS(charsize) EQ 0 THEN charsize = !P.Charsize
     IF N_ELEMENTS(format) EQ 0 THEN format = '(I0)'
@@ -374,10 +388,30 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
           IF position[0] GE position[2] THEN Message, "Position coordinates can't be reconciled."
           IF position[1] GE position[3] THEN Message, "Position coordinates can't be reconciled."
        ENDELSE
-    ENDELSE
+     ENDELSE
 
-    ; Scale the color bar.
-     bar = BYTSCL(bar, TOP=(ncolors-1) < (255-bottom)) + bottom
+     ; Scale the color bar.
+     IF N_Elements(clamp) NE 0 THEN BEGIN
+        IF N_Elements(clamp) NE 2 THEN Message, 'The CLAMP keyword must be a two-element array.'
+        byterange = BytScl(clamp, minrange, maxrange)
+        tempbar = BYTSCL(bar, TOP=(ncolors-1) < (255-bottom)) + bottom   
+        bar = BYTSCL(bar, TOP=(ncolors-1) < (255-bottom), MIN=byterange[0], MAX=byterange[1]) + bottom 
+        IF N_Elements(neutralIndex) EQ 0 THEN BEGIN
+            neutralBottom = (ncolors-1) < (255-bottom)
+            neutralTop = bottom
+        ENDIF ELSE BEGIN
+            neutralBottom = neutralIndex
+            neutralTop = neutralIndex
+        ENDELSE
+        i = Where(tempbar LT byterange[0], count)
+        IF count GT 0 THEN bar[i] = neutralBottom
+        i = Where(tempbar GT byterange[1], count)
+        IF count GT 0 THEN bar[i] = neutralTop
+        
+         
+     ENDIF ELSE BEGIN
+        bar = BYTSCL(bar, TOP=(ncolors-1) < (255-bottom)) + bottom
+     ENDELSE
 
      IF Keyword_Set(reverse) THEN BEGIN
        IF Keyword_Set(vertical) THEN bar = Reverse(bar,2) ELSE bar = Reverse(bar,1)
@@ -391,50 +425,28 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
     xsize = (position[2] - position[0])
     ysize = (position[3] - position[1])
 
+       
+    ; Decomposed color off if device supports it.
+    SetDecomposedState, 0, CURRENTSTATE=currentState
+       
     ; Display the color bar in the window. Sizing is
     ; different for PostScript and regular display.
     IF scalablePixels THEN BEGIN
 
+       ; Display the color bar.
        TV, bar, xstart, ystart, XSIZE=xsize, YSIZE=ysize, /Normal
 
     ENDIF ELSE BEGIN
 
        bar = CONGRID(bar, CEIL(xsize*!D.X_VSize), CEIL(ysize*!D.Y_VSize))
 
-       ; Decomposed color off if device supports it.
-       CASE  StrUpCase(!D.NAME) OF
-            'X': BEGIN
-                IF thisRelease GE 5.2 THEN Device, Get_Decomposed=thisDecomposed
-                Device, Decomposed=0
-                ENDCASE
-            'WIN': BEGIN
-                IF thisRelease GE 5.2 THEN Device, Get_Decomposed=thisDecomposed
-                Device, Decomposed=0
-                ENDCASE
-            'MAC': BEGIN
-                IF thisRelease GE 5.2 THEN Device, Get_Decomposed=thisDecomposed
-                Device, Decomposed=0
-                ENDCASE
-            ELSE:
-       ENDCASE
-
+       ; Display the color bar.
        TV, bar, xstart, ystart, /Normal
 
-       ; Restore Decomposed state if necessary.
-       CASE StrUpCase(!D.NAME) OF
-          'X': BEGIN
-             IF thisRelease GE 5.2 THEN Device, Decomposed=thisDecomposed
-             ENDCASE
-          'WIN': BEGIN
-             IF thisRelease GE 5.2 THEN Device, Decomposed=thisDecomposed
-             ENDCASE
-          'MAC': BEGIN
-             IF thisRelease GE 5.2 THEN Device, Decomposed=thisDecomposed
-             ENDCASE
-          ELSE:
-       ENDCASE
-
-    ENDELSE
+   ENDELSE
+   
+   ; Restore the decomposed state if needed.
+   IF currentState THEN SetDecomposedState, 1
 
     ; Annotate the color bar.
     IF (!D.Name EQ 'PS') AND N_Elements(annotateColor) EQ 0 THEN BEGIN
@@ -446,6 +458,7 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
                 IF N_ELEMENTS(color) EQ 0 THEN BEGIN
                     IF Total(pixel) EQ 765 THEN annotateColor = 'black'
                     IF Total(pixel) EQ 0 THEN annotateColor = 'white'
+                    IF N_Elements(annotateColor) EQ 0 THEN annotateColor = 'opposite'
                 ENDIF ELSE BEGIN
                      IF Size(color, /TNAME) EQ 'STRING' THEN annotateColor = color
                 ENDELSE
@@ -456,6 +469,7 @@ PRO FSC_COLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divis
     
     ; Get the current colortable.
     TVLCT, rr, gg, bb, /GET
+    
     IF N_Elements(annotateColor) NE 0 THEN color = FSC_Color(annotateColor)
 
     IF KEYWORD_SET(vertical) THEN BEGIN

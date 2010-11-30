@@ -1050,12 +1050,18 @@ END ;---------------------------------------------------------------------------
 ;     tsize: in, optional, type=float, default=1.25*CHARSIZE
 ;        The character size for the title. By default, the title character size is 1.25 times
 ;        the character size of the surface annotation.
+;     xoffset: in, optional, type=integer, default=50
+;         The number of pixels the surface window should be offset in the X direction
+;         from the upper-left corner of the display.
 ;     xsize: in, optional, type=interger, default=640
 ;         The X size of the initial surface window. By default, 640 pixels.
 ;     xstyle: in, hidden
 ;         The normal XSTYLE keyword.
 ;     xtitle: in, optional, type=string
 ;         The text for the X axis of the surface plot.
+;     yoffset: in, optional, type=integer, default=25
+;         The number of pixels the surface window should be offset in the Y direction
+;         from the upper-left corner of the display.
 ;     ysize: in, optional, type=integer, default=512
 ;         The Y size of the initial surface window. By default, 640 pixels.
 ;     ystyle: in, hidden
@@ -1121,10 +1127,12 @@ PRO FSC_Surface, data, x, y, $
     Title=plotTitleText, $
     TCharsize=tcharsize, $
     TColor=tcolorName, $
+    XOffset=xoffset, $
     XRange=xrange_u, $
     XSize=xsize, $
     XStyle=xstyle, $
     XTitle=xtitleText, $
+    YOffset=yoffset, $
     YRange=yrange_u, $
     YSize=ysize, $
     YStyle=ystyle, $
@@ -1194,6 +1202,8 @@ PRO FSC_Surface, data, x, y, $
     IF N_Elements(hidden_lines) EQ 0 THEN hidden_lines = 1
     hidden_lines = Keyword_Set(hidden_lines)
     reverse = Keyword_Set(reverse)
+    IF N_Elements(xoffset) EQ 0 THEN xoffset = 50
+    IF N_Elements(yoffset) EQ 0 THEN yoffset = 25
     IF Keyword_Set(shaded) THEN style = 2
     IF N_Elements(style) EQ 0 THEN style = 1
     IF N_Elements(tcharsize) EQ 0 THEN tcharsize = 1.25
@@ -1482,7 +1492,7 @@ PRO FSC_Surface, data, x, y, $
     ; Create the widgets to view the surface. 
     ; Button events are on to enable trackball movement.
     tlb = Widget_Base(Title='Resizeable Surface Window', Column=1, $
-       TLB_Size_Events=1, MBar=menubase)
+       TLB_Size_Events=1, MBar=menubase, XOFFSET=xoffset, YOFFSET=yoffset)
     
     ; Sigh...Rendering throws a LOT of floating point exception errors, especially
     ; when asking IDL to to the retaining for backing store. You can solve the problem

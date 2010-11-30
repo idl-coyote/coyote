@@ -47,13 +47,13 @@
 ; INPUT KEYWORDS:
 ;
 ;   BMP -- Set this keyword to select BMP files.
+;   
+;   DEMO -- If this keyword is set, the program changes directory to !DIR/examples/data.
 ;
 ;   DICOM -- Set this keyword to select DICOM files.
 ;
 ;   DIRECTORY -- The initial input directory name. The current directory by default.
 ;   
-;   EXAMPLES -- If this keyword is set, the program changes directory to !DIR/examples/data.
-;
 ;   EXCLUDE -- A list of filenames that should excluded from the file selection list.
 ;
 ;   FILENAME -- The initial filename. If the initial directory has image files of the
@@ -194,6 +194,7 @@
 ;   Updated for reading transparent images. 13 May 2009. DWF.
 ;   Provided check for PNG images with more than 8 bits per channel. 5 August 2009. DWF.
 ;   Fixed a problem in which the starting directory was changed on exit. 20 Nov 2010. DWF.
+;   Change EXAMPLES to more easily remembered DEMO keyword. 29 Nov 2010. DWF.
 ;   
 ;-
 ;
@@ -1394,6 +1395,7 @@ END ; --------------------------------------------------------------------------
 FUNCTION ImageSelect, $
    BMP=bmp, $                      ; Set this keyword to select BMP files.
    Cancel=cancel, $                ; An output keyword. Returns 0 if the ACCEPT button is used, 1 otherwise.
+   Demo=demo, $                    ; If set, check the $IDL_DIR/examples/data directory first.
    Dicom=dicom, $                  ; Set this keyword to select DICOM files
    Directory=directory, $          ; Initial directory to search for files.
    Examples=examples, $            ; If set, check the $IDL_DIR/examples/data directory first.
@@ -1497,6 +1499,8 @@ ENDELSE
 IF Keyword_Set(bmp) THEN IF N_Elements(filter) EQ 0 THEN filter = ["*.bmp"] ELSE filter = [filter, "*.bmp"]
 IF Keyword_Set(dicom) THEN IF N_Elements(filter) EQ 0 THEN filter = ["*.dcm"] ELSE filter = [filter, "*.dcm"]
 flipimage = Keyword_Set(flipimage)
+IF Keyword_Set(examples) THEN demo = 1
+demo = Keyword_Set(demo)
 IF N_Elements(exclude) NE 0 THEN info.excludeFiles = Ptr_New(exclude)
 IF Keyword_Set(gif) THEN BEGIN
    IF havegif THEN BEGIN
@@ -1530,7 +1534,7 @@ only3D = Keyword_Set(only3d)
 IF N_Elements(title) EQ 0 THEN title = 'Select Image File'
 
 ; Get the current directory. Some processing involved.
-IF Keyword_Set(examples) THEN BEGIN
+IF Keyword_Set(demo) THEN BEGIN
    path = Filepath(SubDir=['examples', 'data'], 'junk.pro')
    directory = File_Dirname(path)
 ENDIF

@@ -272,16 +272,23 @@ PRO WindowImage_Display, info
 
     SetDecomposedState, 1, CURRENTSTATE=currentState
 
+    ; Load the color table.
+    CTLoad, info.colortable, REVERSE=info.reverse, BREWER=info.brewer, NCOLORS=253
+    TVLCT, FSC_Color(info.neutralColor, /TRIPLE), 254
+    
+    ; Draw the image.
     WSet, info.imgWinID
     TVImage, info.image, SCALE=info.scale, NCOLORS=253, /Keep, $
         MINVALUE=info.iwindow[0], MAXVALUE=info.iwindow[1]
 
+    ; Draw the color bar.
     WSet, info.cbWinID
     FSC_Erase
     FSC_Colorbar, NCOLORS=253, CLAMP=info.iwindow, NEUTRALINDEX=254, $
         POSITION=[0.05, 0.35, 0.95, 0.65], FONT=0, ANNOTATECOLOR='black', $
         RANGE=[info.minImage, info.maxImage], DIVISIONS=5, FORMAT='(F0.2)'
     
+    ; Write a label on the color bar.
     format = '(F0.3)'
     txt = 'Window: [' + String(info.iwindow[0], FORMAT=format) + ', ' + $
                         String(info.iwindow[1], FORMAT=format) + ']  Level: ' + $
@@ -335,6 +342,7 @@ END ;---------------------------------------------------------------------------
 ; :History:
 ;     Change History::
 ;        Written, 29 November 2010. DWF. 
+;        Added color protection to the program. 30 Nov 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -438,6 +446,10 @@ PRO WindowImage, image, $
              cbWinID: cbWinID, $
              imgWinID: imgWinID, $
              scale: scale, $
+             colortable: colortable, $
+             neutralcolor: neutralcolor, $
+             brewer: brewer, $
+             reverse: reverse, $
              x: -1, $
              y: -1, $
              imageAspect: imageAspect, $

@@ -376,8 +376,10 @@ PRO WindowImage, image, $
         IF N_Elements(neutralColor) EQ 0 THEN neutralColor = 'rose'
         IF brewer THEN BEGIN
             CTLoad, 17, REVERSE=reverse, BREWER=1, NCOLORS=253
+            colortable = 17
         ENDIF ELSE BEGIN
             CTLoad,  0, REVERSE=reverse, BREWER=0, NCOLORS=253
+            colortable = 0
         ENDELSE
     ENDIF ELSE BEGIN
         IF N_Elements(neutralColor) EQ 0 THEN neutralColor = 'gray'

@@ -185,6 +185,9 @@ PRO FSC_Contour, data, x, y, $
         RETURN
     ENDIF
     
+    ; Set up PostScript device for working with colors.
+    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
     ; Check parameters.
     IF N_Elements(data) EQ 0 THEN BEGIN
         Print, 'USE SYNTAX: FSC_Contour, data, x, y, NLEVELS=10'

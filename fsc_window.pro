@@ -314,6 +314,9 @@ IF theError NE 0 THEN BEGIN
    RETURN
 ENDIF
 
+; Set up PostScript device for working with colors.
+IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
    ; Current window, if supported.
 
 IF (!D.Flags AND 256) NE 0 THEN WSet, info.wid

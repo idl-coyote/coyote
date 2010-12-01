@@ -659,6 +659,9 @@ PRO TVIMAGE, image, x, y, $
                          _tvimage_position, _tvimage_winID, $
                          _tvimage_current
     
+    ; Set up PostScript device for working with colors.
+    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
     ; Which release of IDL is this?
     thisRelease = Float(!Version.Release)
     

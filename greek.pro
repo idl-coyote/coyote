@@ -168,6 +168,9 @@ FUNCTION Greek, letter, CAPITAL=capital, EXAMPLE=example, UNICODE=unicode
     ; Return to caller on error.
     ON_Error, 2
     
+    ; Set up PostScript device for working with Greek letters.
+    IF !D.Name EQ 'PS' THEN Device, ISOLATIN1=1
+    
     ; Do you wish to see an example?
     IF Keyword_Set(example) THEN BEGIN
         Greek_Example, UNICODE=unicode

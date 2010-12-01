@@ -130,6 +130,9 @@ PRO FSC_Text, xloc, yloc, text, $
         RETURN
     ENDIF
     
+    ; Set up PostScript device for working with colors.
+    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
     IF Keyword_Set(place) THEN BEGIN
     
         ; Make sure this device is appropriate for a CURSOR command.

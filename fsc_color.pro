@@ -503,6 +503,9 @@ FUNCTION FSC_Color, theColour, colorIndex, $
        RETURN, !P.Color
     ENDIF
     
+    ; Set up PostScript device for working with colors.
+    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
     ; I don't want to change the original variable.
     IF N_Elements(theColour) NE 0 THEN theColor = theColour ELSE $
         theColor = Keyword_Set(brewer) ? 'WT1' : 'WHITE'

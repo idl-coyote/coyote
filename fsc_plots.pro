@@ -120,6 +120,9 @@ PRO FSC_PlotS, x, y, z, $
         RETURN
     ENDIF
     
+    ; Set up PostScript device for working with colors.
+    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
     ; Need some help?
     IF N_Params() EQ 0 THEN BEGIN
         Print, 'USE SYNTAX: FSC_PlotS, x, y, [z]'

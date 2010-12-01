@@ -107,6 +107,9 @@ PRO FSC_Display, windowIndex, pxsize, pysize, $
         RETURN
     ENDIF
     
+    ; Set up PostScript device for working with colors.
+    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
     ; Check parameters and keywords.
     IF N_Elements(scolor) EQ 0 THEN color = 'white' ELSE color = scolor
     IF N_Elements(windowIndex) EQ 0 THEN windowIndex = 0

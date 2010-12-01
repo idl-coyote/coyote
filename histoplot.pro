@@ -278,6 +278,9 @@ PRO HistoPlot , $                   ; The program name.
       RETURN
    ENDIF
 
+   ; Set up PostScript device for working with colors.
+   IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
    ; Check for positional parameter.
    IF N_Elements(dataToHistogram) EQ 0 THEN Message, 'Must pass data to histogram.'
    

@@ -554,6 +554,9 @@ FUNCTION FSC_ColorSelect::INIT, $   ; The compound widget FSC_ColorSelect INIT m
        RETURN, -1L
     ENDIF
     
+    ; Set up PostScript device for working with colors.
+    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
     ; Check keyword values. Properties of the widget are determined by
     ; whether the COLOR parameter is a null string or not.
     IF N_Elements(color) EQ 0 THEN color = ""

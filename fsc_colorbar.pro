@@ -240,6 +240,8 @@
 ;      19 Nov 2010. Fixed a small problem when choosing an AnnnotateColor. DWF.
 ;      29 Nov 2010. Added CLAMP and NEUTRALINDEX keywords, updated ability to set
 ;             color model with SetDecomposedState command. DWF.
+;      1 Dec 2010. Set COLOR=1 and BITS_PER_PIXEL=8 in PostScript device. Tired of getting
+;             e-mails that "your damn colorbar doesn't work!". DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -307,6 +309,9 @@ PRO FSC_COLORBAR, $
         RETURN
     ENDIF
 
+    ; Set up PostScript device for working with colors.
+    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
     ; Save the current plot state.
     bang_p = !P
     bang_x = !X

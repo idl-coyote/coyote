@@ -81,6 +81,9 @@
 ;-
 PRO FSC_Erase, background_color, COLOR=color
 
+    ; Set up PostScript device for working with colors.
+    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
    IF N_Elements(background_color) EQ 0 THEN thisColor = 'white' ELSE thisColor = background_color
    IF N_Elements(color) NE 0 THEN thisColor = color 
    TVLCT, rr, gg, bb, /Get

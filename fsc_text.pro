@@ -192,13 +192,11 @@ PRO FSC_Text, xloc, yloc, text, $
         IF N_Elements(color) EQ 0 THEN BEGIN
             IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
                 pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                IF N_ELEMENTS(color) EQ 0 THEN BEGIN
-                    IF Total(pixel) EQ 765 THEN color = 'black'
-                    IF Total(pixel) EQ 0 THEN color = 'white'
-                    IF N_Elements(color) EQ 0 THEN color = 'opposite'
-                ENDIF 
+                IF Total(pixel) EQ 765 THEN color = 'black'
+                IF Total(pixel) EQ 0 THEN color = 'white'
+                IF N_Elements(color) EQ 0 THEN color = 'opposite'
             ENDIF
-        ENDIF ELSE IF N_Elements(color) EQ 0 THEN color = !P.Color
+        ENDIF ELSE color = !P.Color
     ENDELSE 
     IF N_Elements(color) EQ 0 THEN color = !P.Color
      

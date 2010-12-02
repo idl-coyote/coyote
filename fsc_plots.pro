@@ -129,14 +129,28 @@ PRO FSC_PlotS, x, y, z, $
         RETURN
     ENDIF
     
-   ; Check parameters and keywords.
-   IF N_Elements(scolor) EQ 0 THEN color = 'black' ELSE color = scolor
-   IF N_Elements(psym) EQ 0 THEN psym = 0
-   IF N_Elements(ssymcolor) EQ 0 THEN symcolor = 'black' ELSE symcolor = ssymcolor
-   IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
+    ; Choose a color.
+    IF N_Elements(sColor) EQ 0 THEN BEGIN
+        IF !D.Name EQ 'PS' THEN BEGIN
+                sColor = 'BLACK' 
+        ENDIF ELSE BEGIN
+             IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                 pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                 IF Total(pixel) EQ 765 THEN sColor = 'BLACK'
+                 IF Total(pixel) EQ 0 THEN sColor = 'WHITE'
+                 IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
+             ENDIF ELSE sColor = 'OPPOSITE'
+        ENDELSE
+    ENDIF
+    IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
+    
+    ; Check parameters and keywords.
+    IF N_Elements(psym) EQ 0 THEN psym = 0
+    IF N_Elements(ssymcolor) EQ 0 THEN symcolor = color ELSE symcolor = ssymcolor
+    IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
    
-   ; Be sure the vectors are the right length.
-   CASE N_Params() OF
+    ; Be sure the vectors are the right length.
+    CASE N_Params() OF
         1: xsize = N_Elements(x[0,*])
         ELSE: xsize = N_Elements(x)
     ENDCASE

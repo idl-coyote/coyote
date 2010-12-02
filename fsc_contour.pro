@@ -211,13 +211,48 @@ PRO FSC_Contour, data, x, y, $
     TVLCT, rr, gg, bb, /GET
     
     ; Check the keywords.
-    IF N_Elements(sbackground) EQ 0 THEN background = 'white' ELSE background = sbackground
-    IF (N_Elements(saxescolor) EQ 0) AND (N_Elements(saxiscolor) EQ 0) THEN BEGIN
-       saxiscolor = 'black'
+    IF N_Elements(sbackground) EQ 0 THEN background = 'WHITE' ELSE background = sbackground
+    ; Choose an axis color.
+    IF N_Elements(saxisColor) EQ 0 AND N_Elements(saxescolor) NE 0 THEN saxiscolor = saxescolor
+    IF N_Elements(saxiscolor) EQ 0 THEN BEGIN
+       IF (Size(background, /TNAME) EQ 'STRING') && (StrUpCase(background) EQ 'WHITE') THEN BEGIN
+            IF !P.Multi[0] EQ 0 THEN saxisColor = 'BLACK'
+       ENDIF
+       IF N_Elements(saxiscolor) EQ 0 THEN BEGIN
+           IF !D.Name EQ 'PS' THEN BEGIN
+                saxisColor = 'BLACK' 
+           ENDIF ELSE BEGIN
+                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    IF Total(pixel) EQ 765 THEN saxisColor = 'BLACK'
+                    IF Total(pixel) EQ 0 THEN saxisColor = 'WHITE'
+                    IF N_Elements(saxisColor) EQ 0 THEN saxisColor = 'OPPOSITE'
+                ENDIF ELSE saxisColor = 'OPPOSITE'
+           ENDELSE
+       ENDIF
     ENDIF
-    IF N_Elements(saxescolor) NE 0 THEN axiscolor = saxescolor ELSE axiscolor = saxiscolor
-    IF N_Elements(scolor) EQ 0 THEN color = 'black' ELSE color = scolor
-    fill = Keyword_Set(fill)
+    IF N_Elements(saxisColor) EQ 0 THEN axisColor = !P.Color ELSE axisColor = saxisColor
+    
+    ; Choose a color.
+    IF N_Elements(sColor) EQ 0 THEN BEGIN
+       IF (Size(background, /TNAME) EQ 'STRING') && (StrUpCase(background) EQ 'WHITE') THEN BEGIN
+            IF !P.Multi[0] EQ 0 THEN sColor = 'BLACK'
+       ENDIF
+       IF N_Elements(sColor) EQ 0 THEN BEGIN
+           IF !D.Name EQ 'PS' THEN BEGIN
+                sColor = 'BLACK' 
+           ENDIF ELSE BEGIN
+                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    IF Total(pixel) EQ 765 THEN sColor = 'BLACK'
+                    IF Total(pixel) EQ 0 THEN sColor = 'WHITE'
+                    IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
+                ENDIF ELSE sColor = 'OPPOSITE'
+           ENDELSE
+       ENDIF
+    ENDIF
+    IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
+     fill = Keyword_Set(fill)
     irregular = Keyword_Set(irregular)
     IF N_Elements(label) EQ 0 THEN label = 1
     IF N_Elements(resolution) EQ 0 THEN resolution=[41,41]

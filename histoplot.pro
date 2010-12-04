@@ -190,6 +190,7 @@
 ;       Default axis color name changed from "Navy" to "Black". 28 October 2010. DWF.
 ;       Fixed a problem with restoring color tables in PostScript. 24 Nov 2010. DWF.
 ;       Added OPROBABILITY, PROBCOLOR, and PROBABILITY keywords. 24 Nov 2010. DWF.
+;       Changed the way I find a default axis color. 3 Dec 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2010, by Fanning Software Consulting, Inc.                           ;
@@ -346,9 +347,30 @@ PRO HistoPlot , $                   ; The program name.
    ENDELSE
 
    ; Check for keywords.
-   IF N_Elements(dataColorName) EQ 0 THEN dataColorName = "Indian Red"
-   IF N_Elements(axisColorName) EQ 0 THEN axisColorName = "Black"
    IF N_Elements(backColorName) EQ 0 THEN backColorName = "White"
+   IF N_Elements(dataColorName) EQ 0 THEN dataColorName = "Indian Red"
+   
+   ; Choose an axis color.
+   IF N_Elements(axisColorName) EQ 0 AND N_Elements(saxescolor) NE 0 THEN axisColorName = saxescolor
+   IF N_Elements(axisColorName) EQ 0 THEN BEGIN
+       IF (Size(backColorName, /TNAME) EQ 'STRING') && (StrUpCase(backColorName) EQ 'WHITE') THEN BEGIN
+            IF !P.Multi[0] EQ 0 THEN axisColorName = 'BLACK'
+       ENDIF
+       IF N_Elements(axisColorName) EQ 0 THEN BEGIN
+           IF !D.Name EQ 'PS' THEN BEGIN
+                axisColorName = 'BLACK' 
+           ENDIF ELSE BEGIN
+                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    IF Total(pixel) EQ 765 THEN axisColorName = 'BLACK'
+                    IF Total(pixel) EQ 0 THEN axisColorName = 'WHITE'
+                    IF N_Elements(axisColorName) EQ 0 THEN axisColorName = 'OPPOSITE'
+                ENDIF ELSE axisColorName = 'OPPOSITE'
+           ENDELSE
+       ENDIF
+   ENDIF
+   IF N_Elements(axisColorName) EQ 0 THEN axisColor = !P.Color ELSE axisColor = axisColorName
+    
    IF N_Elements(polycolorname) EQ 0 THEN polycolorname = "Rose"
    IF N_Elements(probColorname) EQ 0 THEN probColorname = "Blue"
    frequency = Keyword_Set(frequency)

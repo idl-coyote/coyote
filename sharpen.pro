@@ -37,7 +37,7 @@
 ; INPUT KEYWORDS:
 ;
 ;       KERNEL -- By default the image is convolved with this 3-by-3 Laplacian kernel:
-;           [ [-1, -1, -1], [-1, +8, -1], [-1, -1, -1] ].  You can pass in any square kernel
+;           [ [-1, -1, -1], [-1, +8, -1], [-1, -1, -1] ].  You can pass in any  kernel
 ;           of odd width. The filtered image is added back to the original image to provide
 ;           the sharpening effect.
 ;
@@ -65,6 +65,7 @@
 ; MODIFICATION HISTORY:
 ;
 ;       Written by David W. Fanning, January 2003.
+;       Updated slightly to use Coyote Library routines. 3 Dec. 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -224,7 +225,7 @@ IF Size(image, /N_Dimensions) NE 2 THEN Message, 'Image must be a 2D array in th
 
    ; Resize the image, if required.
 
-previewSize = 256
+previewSize = 512
 wxsize = previewSize
 wysize = previewSize
 
@@ -235,7 +236,6 @@ IF N_Elements(kernel) EQ 0 THEN BEGIN
    k[1,1] = 8
 ENDIF ELSE BEGIN
    s = Size(kernel, /Dimensions)
-   IF s[0] NE s[1] THEN Message, 'Kernel must be a square array.'
    IF s[0] MOD 2 NE 1 THEN Message, 'Kernel must be an odd width.'
    k = kernel
 ENDELSE
@@ -265,14 +265,15 @@ ENDIF ELSE needresize = 0
 
    ; Need a resize?
 
-IF needresize THEN thisImage = Byte(Congrid(image, wxsize, wysize, /Interp)) ELSE $
+IF needresize THEN thisImage = Byte(Congrid(image, wxsize, wysize)) ELSE $
    thisImage = image
 
    ; Display the original image.
 
 IF Keyword_Set(display) THEN BEGIN $
-   TV, thisImage, 0, 0
-   XYOUTS, wxsize/2, 10,  /Device, 'Original Image', Font=0, Alignment=0.5
+   TVIMAGE, thisImage, 0, 0, /TV
+   XYOUTS, wxsize/2, 10,  /Device, 'Original Image', Font=0, $
+      Alignment=0.5, Color=FSC_Color('red6')
 ENDIF
 
    ; Create the Laplacian filtered image.
@@ -283,8 +284,9 @@ filteredImage = Convol(Float(thisImage), k, Center=1, /Edge_Truncate, /NAN)
 
 IF Keyword_Set(display) THEN BEGIN
    fimage = Convol(thisImage, k, Center=1, /Edge_Truncate, /NAN)
-   TV, fimage, wxsize, wysize
-   XYOUTS, (2*wxsize/4)*3, wysize + 10, /Device, 'Filtered Image', Font=0, Alignment=0.5
+   TVImage, fimage, wxsize, wysize, /TV
+   XYOUTS, (2*wxsize/4)*3, wysize + 10, /Device, 'Filtered Image', Font=0, $
+      Alignment=0.5, Color=FSC_Color('red6')
 ENDIF
 
    ; Scale the Laplacian filtered image. Note conversion of
@@ -293,8 +295,9 @@ ENDIF
 filteredImage = filteredImage - (Min(filteredImage))
 filteredImage = filteredImage * (255./Max(filteredImage))
 IF Keyword_Set(display) THEN BEGIN
-   TV, filteredImage, 0, wysize
-   XYOUTS, wxsize/2, wysize + 10, /Device, 'Scaled Filter', Font=0, Alignment=0.5
+   TVImage, filteredImage, 0, wysize, /TV
+   XYOUTS, wxsize/2, wysize + 10, /Device, 'Scaled Filter', Font=0, $
+      Alignment=0.5, Color=FSC_Color('red6')
 ENDIF
 
    ; Create the sharpened image by adding the Laplacian filtered image
@@ -311,8 +314,9 @@ adjusted = Sharpen_HistoMatch(sharpened, image)
    ; Display the adjusted image.
 
 IF Keyword_Set(display) THEN BEGIN
-   TV, BytScl(adjusted), wxsize, 0
-   XYOUTS, (2*wxsize/4)*3, 10, /Device, 'Sharpened Image', Font=0, Alignment=0.5
+   TVImage, BytScl(adjusted), wxsize, 0, /TV
+   XYOUTS, (2*wxsize/4)*3, 10, /Device, 'Sharpened Image', Font=0, $
+      Alignment=0.5, Color=FSC_Color('red6')
 ENDIF
 
 RETURN, adjusted
@@ -321,13 +325,12 @@ END
 
 PRO Example
 
-filename = FILEPATH(SUBDIR=['examples', 'data'], 'mr_knee.dcm')
-image = Read_DICOM(filename)
-image = Reverse(BytScl(image),2)
+image = LoadData(13)
+s = Size(image, /Dimensions)
 LoadCT, 0, /Silent
-Window, /Free, XSize=512, YSize=256, Title='Image Sharpening'
-TV, image, 0
-XYOuts, 0.25, 0.9, /Normal, Alignment=0.5, 'Original Image', Font=0
-TV, Sharpen(image), 1
-XYOuts, 0.75, 0.9, /Normal, Alignment=0.5, 'Sharpened Image', Font=0
+Window, /Free, XSize=s[0]*2, YSize=s[1], Title='Image Sharpening'
+TVImage, image, 0, /TV
+XYOuts, 0.25, 0.1, /Normal, Alignment=0.5, 'Original Image', Font=0, Color=FSC_Color('red6')
+TVImage, Sharpen(image), 1, /TV
+XYOuts, 0.75, 0.1, /Normal, Alignment=0.5, 'Sharpened Image', Font=0, Color=FSC_Color('red6')
 END

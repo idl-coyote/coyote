@@ -133,6 +133,8 @@
 ;       Now allow a single row vector to be passed into program and displayed. 20 May 2009. DWF.
 ;       Added NOCLIP=0 keyword to PLOTS command when drawing outliers. 15 July 2009. DWF.
 ;       Minor adjustment of the X axis label position. 28 October 2010. DWF.
+;       Add the ability to change the label character size and thickness via the normal
+;          XCHARSIZE and XTHICK keywords you would use for a plot. 3 Dec 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -352,6 +354,8 @@
         OVERPLOT=overplot, $
         ROTATE=rotate, $
         STATS=stats, $
+        XCHARSIZE=xcharsize, $
+        XTHICK=xthick, $
         _EXTRA=extra
         
       ; Error handling.
@@ -422,7 +426,8 @@
          ENDIF
          Plot, xrange, yrange, /NODATA, _STRICT_EXTRA=extra, $
             XMINOR=1, XTICKS=numbox+1, YSTYLE=1, BACKGROUND=FSC_Color(background_color), $
-            COLOR=FSC_Color(axes_color), XTICK_GET=xloc, XTICKFORMAT='(A1)'
+            COLOR=FSC_Color(axes_color), XTICK_GET=xloc, XTICKFORMAT='(A1)', $
+            XCHARSIZE=xcharsize, XTHICK=xthick
             
          ; Put the labels on the plots.
          CASE 1 OF
@@ -437,7 +442,7 @@
              xy = Convert_Coord(xloc[j], !Y.CRange[0], /DATA, /TO_NORMAL)
              XYOUTS, xy[0], xy[1] - 0.0375, /NORMAL, plotlabels[j], $
                 ALIGNMENT=alignment, COLOR=FSC_Color(axes_color), $
-                ORIENTATION=rotate
+                ORIENTATION=rotate, CHARSIZE=xcharsize, THICK=xthick
          ENDFOR
          IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState
       ENDIF

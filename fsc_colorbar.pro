@@ -242,6 +242,8 @@
 ;             color model with SetDecomposedState command. DWF.
 ;      1 Dec 2010. Set COLOR=1 and BITS_PER_PIXEL=8 in PostScript device. Tired of getting
 ;             e-mails that "your damn colorbar doesn't work!". DWF.
+;      6 Dec 2010. I was always setting COLOR to ANNOTATECOLOR. I should only do that if
+;             COLOR is undefined. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -453,6 +455,9 @@ PRO FSC_COLORBAR, $
    ; Restore the decomposed state if needed.
    IF currentState THEN SetDecomposedState, 1
 
+    ; Get the current colortable.
+    TVLCT, rr, gg, bb, /GET
+    
     ; Annotate the color bar.
     IF (!D.Name EQ 'PS') AND N_Elements(annotateColor) EQ 0 THEN BEGIN
         annotateColor = 'black'
@@ -467,16 +472,20 @@ PRO FSC_COLORBAR, $
                 ENDIF ELSE BEGIN
                      IF Size(color, /TNAME) EQ 'STRING' THEN annotateColor = color
                 ENDELSE
-            ENDIF ELSE annotateColor = 'white'
+            ENDIF ELSE annotateColor = 'opposite'
         ENDIF 
     ENDELSE
-    IF N_Elements(annotateColor) EQ 0 THEN annotateColor = 'white'
+    IF N_Elements(annotateColor) EQ 0 THEN annotateColor = 'opposite'
     
-    ; Get the current colortable.
-    TVLCT, rr, gg, bb, /GET
+    ; If color is undefined, use the annotate color.
+    IF N_Elements(color) EQ 0 THEN BEGIN
+        IF Size(annotateColor, /TNAME) EQ 'STRING' THEN BEGIN
+            color = FSC_Color(annotateColor)
+        ENDIF ELSE BEGIN
+            color = annotateColor
+        ENDELSE
+    ENDIF 
     
-    IF N_Elements(annotateColor) NE 0 THEN color = FSC_Color(annotateColor)
-
     IF KEYWORD_SET(vertical) THEN BEGIN
 
        IF KEYWORD_SET(right) THEN BEGIN

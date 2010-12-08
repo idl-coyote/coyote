@@ -113,6 +113,8 @@
 ;        If the IRREGULAR keyword is set, this keyword specifies the X and Y resolution
 ;        in a two element integer array of the final gridded data that is sent to the 
 ;        contour plot.
+;     window: in, optional, type=boolean, default=0
+;         Set this keyword if you want to display the plot in a resizable graphics window.
 ;     xstyle: in, optional, type=integer, default=1
 ;        If unused in the program, set to 1 to force exact axis scaling.
 ;     ystyle: in, optional, type=integer, default=1
@@ -151,6 +153,7 @@
 ;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
 ;        Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
 ;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
+;        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -172,6 +175,7 @@ PRO FSC_Contour, data, x, y, $
     MISSINGVALUE=missingvalue, $
     OVERPLOT=overplot, $
     RESOLUTION=resolution, $
+    WINDOW=window, $
     XSTYLE=xstyle, $
     YSTYLE=ystyle, $
     _Extra=extra
@@ -187,6 +191,33 @@ PRO FSC_Contour, data, x, y, $
     
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
+    ; Do they want this plot in a resizeable graphics window?
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) AND (Keyword_Set(overplot) EQ 0) THEN BEGIN
+    
+        FSC_Window, 'FSC_Contour', data, x, y, $
+            AXISCOLOR=saxiscolor, $
+            AXESCOLOR=saxescolor, $
+            BACKGROUND=sbackground, $
+            C_COLORS=c_colors, $
+            C_LABELS=c_labels, $
+            CELL_FILL=cell_fill, $
+            COLOR=scolor, $
+            FILL=fill, $
+            IRREGULAR=irregular, $
+            LABEL=label, $
+            LEVELS=levels, $
+            NLEVELS=nlevels, $
+            NOERASE=noerase, $
+            MISSINGVALUE=missingvalue, $
+            OVERPLOT=overplot, $
+            RESOLUTION=resolution, $
+            XSTYLE=xstyle, $
+            YSTYLE=ystyle, $
+            _Extra=extra
+            
+         RETURN
+    ENDIF
     
     ; Check parameters.
     IF N_Elements(data) EQ 0 THEN BEGIN

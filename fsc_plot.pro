@@ -89,6 +89,8 @@
 ;     symcolor: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the symbol color. By default, 'black'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     window: in, optional, type=boolean, default=0
+;         Set this keyword if you want to display the plot in a resizable graphics window.
 ;     _extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot command is allowed in the program.
 ;
@@ -120,6 +122,7 @@
 ;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
 ;        Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
 ;        Changes so that color inputs don't change type. 23 Nov 2010. DWF.
+;        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
 ;        
 ;
 ; :Copyright:
@@ -138,6 +141,7 @@ PRO FSC_Plot, x, y, $
     POSITION=position, $
     PSYM=psym, $
     SYMCOLOR=ssymcolor, $
+    WINDOW=window, $
     _Extra=extra
     
     Compile_Opt idl2
@@ -156,6 +160,27 @@ PRO FSC_Plot, x, y, $
     IF N_Params() EQ 0 THEN BEGIN
         Print, 'USE SYNTAX: FSC_Plot, x, y'
         RETURN
+    ENDIF
+    
+    ; Do they want this plot in a resizeable graphics window?
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) AND (Keyword_Set(overplot) EQ 0) THEN BEGIN
+    
+        FSC_Window, 'FSC_Plot', x, y, $
+            ASPECT=aspect, $
+            AXISCOLOR=saxiscolor, $
+            AXESCOLOR=saxescolor, $
+            BACKGROUND=sbackground, $
+            COLOR=scolor, $
+            ISOTROPIC=isotropic, $
+            NODATA=nodata, $
+            NOERASE=noerase, $
+            OVERPLOT=overplot, $
+            POSITION=position, $
+            PSYM=psym, $
+            SYMCOLOR=ssymcolor, $
+           _Extra=extra
+            
+         RETURN
     ENDIF
     
     ; Sort out which is the dependent and which is independent data.

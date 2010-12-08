@@ -84,6 +84,10 @@
 ;     noerase: in, optional, type=boolean, default=0
 ;        Set this keyword to prevent the window from erasing the contents before displaying
 ;        the surface plot.
+;     rotx: in, optional, type=float, default=30
+;        The rotation about the X axis.
+;     rotz: in, optional, type=float, default=30
+;        The rotation about the Z axis.
 ;     shaded: in, optional, type=boolean, default=0
 ;        Set this keyword if you wish to display a shaded surface. To display shaded surfaces
 ;        in a device-independent way, the shading values are confined to indices 0 to 253 with
@@ -106,6 +110,8 @@
 ;        The title Y spacing. This should be a number, between 0 and 1 that is the fraction 
 ;        of the distance between !Y.Window[1] and !Y.Window[0] to locate the title above 
 ;        !Y.Window[1]. When Total(!P.MULTI) EQ 0, the default is 0.005, and it is 0.0025 otherwise.
+;     window: in, optional, type=boolean, default=0
+;         Set this keyword if you want to display the plot in a resizable graphics window.
 ;     xstyle: in, hidden
 ;         The normal XSTYLE keyword.
 ;     ystyle: in, hidden
@@ -143,6 +149,9 @@
 ;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
 ;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
 ;        Added ELEVATION_SHADING keyword. 26 Nov 2010. DWF.
+;        I had keyword conflicts with the AX and AZ rotation keywords. Now perform rotation with
+;           ROTX and ROTZ keywords. 7 Dec 2010. DWF.
+;        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -157,12 +166,15 @@ PRO FSC_Surf, data, x, y, $
     ELEVATION_SHADING=elevation_shading, $
     FONT=font, $
     NOERASE=noerase, $
+    ROTX=rotx, $
+    ROTZ=rotz, $
     SHADED=shaded, $
     SHADES=shades, $
     SKIRT=skirt, $
     TITLE=title, $
     TSIZE=tsize, $
     TSPACE=tspace, $
+    WINDOW=window, $
     XSTYLE=xstyle, $
     YSTYLE=ystyle, $
     ZSTYLE=zstyle, $
@@ -179,6 +191,35 @@ PRO FSC_Surf, data, x, y, $
     
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
+    ; Do they want this plot in a resizeable graphics window?
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    
+        FSC_Window, 'FSC_Surf', data, x, y, $
+            AXISCOLOR=saxiscolor, $
+            AXESCOLOR=saxescolor, $
+            BACKGROUND=sbackground, $
+            BOTTOM=sbottom, $
+            CHARSIZE=charsize, $
+            COLOR=scolor, $
+            ELEVATION_SHADING=elevation_shading, $
+            FONT=font, $
+            NOERASE=noerase, $
+            ROTX=rotx, $
+            ROTZ=rotz, $
+            SHADED=shaded, $
+            SHADES=shades, $
+            SKIRT=skirt, $
+            TITLE=title, $
+            TSIZE=tsize, $
+            TSPACE=tspace, $
+            XSTYLE=xstyle, $
+            YSTYLE=ystyle, $
+            ZSTYLE=zstyle, $
+            _Extra=extra
+            
+         RETURN
+    ENDIF
     
     ; Check parameters.
     IF N_Elements(data) EQ 0 THEN BEGIN
@@ -225,6 +266,8 @@ PRO FSC_Surf, data, x, y, $
         IF (!P.Charsize EQ 0) AND ((font EQ 1) OR (!P.FONT EQ 1)) THEN charsize = 1.75
     END
     noerase = Keyword_Set(noerase)
+    IF N_Elements(rotx) EQ 0 THEN rotx = 30
+    IF N_Elements(rotz) EQ 0 THEN rotz = 30
     IF N_Elements(xstyle) EQ 0 THEN xstyle = 0
     IF N_Elements(ystyle) EQ 0 THEN ystyle = 0
     IF N_Elements(zstyle) EQ 0 THEN zstyle = 0
@@ -301,7 +344,8 @@ PRO FSC_Surf, data, x, y, $
                 
                 ; Draw the plot that doesn't draw anything.
                 Surface, data, x, y, XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
-                    CHARSIZE=charsize, SKIRT=skirt, _STRICT_EXTRA=extra  
+                    CHARSIZE=charsize, SKIRT=skirt, _STRICT_EXTRA=extra, $
+                    AX=rotx, AZ=rotz  
                 
                 ; Save the "after plot" system variables. Will use later. 
                 afterx = !X
@@ -333,7 +377,8 @@ PRO FSC_Surf, data, x, y, $
     ; Draw the surface axes.
     Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
         /NODATA, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
-        FONT=font, CHARSIZE=charsize, NOERASE=tempNoErase, _STRICT_EXTRA=extra
+        FONT=font, CHARSIZE=charsize, NOERASE=tempNoErase, _STRICT_EXTRA=extra, $
+        AX=rotx, AZ=rotz  
         
     ; Draw the title, if you have one.
     IF N_Elements(title) NE 0 THEN BEGIN
@@ -405,7 +450,7 @@ PRO FSC_Surf, data, x, y, $
         ; Shaded surface plot.
          Shade_Surf, data, x, y, /NOERASE, COLOR=color, BOTTOM=bottom, SHADES=checkShades, $
             XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, _STRICT_EXTRA=extra, $
-            BACKGROUND=shadebackground
+            BACKGROUND=shadebackground, AX=rotx, AZ=rotz  
             
         ; Have to repair the axes. Do this in decomposed color mode, if possible.
         ; If its not possible, you have to reload the color table that has the drawing
@@ -413,7 +458,7 @@ PRO FSC_Surf, data, x, y, $
         IF currentState THEN Device, Decomposed=1 ELSE TVLCT, rl, gl, bl
         Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
             /NODATA, /NOERASE, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
-            FONT=font, CHARSIZE=charsize, SKIRT=skirt, _STRICT_EXTRA=extra
+            FONT=font, CHARSIZE=charsize, SKIRT=skirt, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz 
             
         ; Have to repair the title, too.
         IF N_Elements(title) NE 0 THEN BEGIN
@@ -446,13 +491,13 @@ PRO FSC_Surf, data, x, y, $
             TVLCT, rr, gg, bb
             Surface, data, x, y, NOERASE=1, SHADES=shades, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
-                FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra        
+                FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz         
         ENDIF ELSE BEGIN
             IF currentState THEN Device, Decomposed=1 ELSE TVLCT, rl, gl, bl
             Surface, data, x, y, NOERASE=1, COLOR=color, BOTTOM=bottom, $
                 BACKGROUND=background, SHADES=shades, SKIRT=skirt, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
-                FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra
+                FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz 
         ENDELSE
         
     ENDELSE

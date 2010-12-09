@@ -191,6 +191,8 @@
 ;       Fixed a problem with restoring color tables in PostScript. 24 Nov 2010. DWF.
 ;       Added OPROBABILITY, PROBCOLOR, and PROBABILITY keywords. 24 Nov 2010. DWF.
 ;       Changed the way I find a default axis color. 3 Dec 2010. DWF.
+;       Expanded search for "integers" from in BINSIZE calculation from DataType LE 3 
+;             to include DataType GE 12, too. 8 Dec 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2010, by Fanning Software Consulting, Inc.                           ;
@@ -332,7 +334,7 @@ PRO HistoPlot , $                   ; The program name.
       range = Max(_dataToHistogram, /NAN) - Min(_dataToHistogram, /NAN)
       IF N_Elements(nbins) EQ 0 THEN BEGIN  ; Scott's Choice
          binsize = (3.5D * StdDev(_dataToHistogram, /NAN))/N_Elements(_dataToHistogram)^(1./3.0D) 
-         IF dataType LE 3 THEN binsize = Round(binsize) > 1
+         IF (dataType LE 3) OR (dataType GE 12) THEN binsize = Round(binsize) > 1
          binsize = Convert_To_Type(binsize, dataType)
       ENDIF ELSE BEGIN
         binsize = range / (nbins -1)

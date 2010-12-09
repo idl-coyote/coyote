@@ -195,7 +195,6 @@ PRO DCBar, colors, $
     ENDIF 
     
     ; Check parameters and keywords.
-;    IF N_Elements(color) EQ 0 THEN color = (!D.Name EQ 'PS') ? "BLACK" : "WHITE"
     IF (!D.Name EQ 'PS') AND N_Elements(color) EQ 0 THEN BEGIN
         color = 'black'
     ENDIF ELSE BEGIN
@@ -204,9 +203,9 @@ PRO DCBar, colors, $
             IF N_ELEMENTS(color) EQ 0 THEN BEGIN
                 color = 'white'
                 IF Total(pixel) EQ 765 THEN color = 'black'
-                IF Total(pixel) EQ 0 THEN color = 'white'
+                IF Total(pixel) EQ 0 THEN color = 'opposite'
             ENDIF 
-        ENDIF ELSE color = 'white'
+        ENDIF ELSE color = 'opposite'
     ENDELSE
     IF N_Elements(barcolor) EQ 0 THEN   barcolor = color
     IF N_Elements(charsize) EQ 0 THEN charsize = !P.Charsize

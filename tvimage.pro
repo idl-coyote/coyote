@@ -458,6 +458,8 @@
 ;            with centered pixels, and allows nearest neightbor resampling of true-color images.
 ;            20 November 2010. DWF.
 ;       Incorporated TVSCALE functionality into TVIMAGE. 22 November 2010. DWF.
+;       Problem fixed when displaying alpha image when POSITION and ALPHABACKGROUND keywords used
+;            simultaneously. 8 Dec 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -574,7 +576,7 @@ FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
     Set_Plot, 'Z'
     Device, Get_Decomposed=theState
     Device, Set_Resolution=sb[0:1], Decomposed=1, Set_Pixel_Depth=24
-    TV, bImage, TRUE=3
+    TVImage, bImage, POSITION=position, /NOINTERP
                 
     ; Calculate the parameters for taking a snapshot of the
     ; relevant portion of the window.

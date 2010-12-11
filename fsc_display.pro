@@ -48,18 +48,18 @@
 ;    Graphics
 ;    
 ; :Params:
-;    windowindex: in, optional, type=integer, default=0
-;         The window index number of the graphics window you would like to create.
 ;    xsize: in, optional, type=integer, default=640
 ;         The X size of the graphics window created. By default, 640.
 ;    ysize: in, optional, type=integer, default=512
 ;         The Y size of the graphics window created. By default, 512.
 ;         
 ; :Keywords:
-;     color: in, optional, type=string/integer, default='white'
+;    color: in, optional, type=string/integer, default='white'
 ;        If this keyword is a string, the name of the data color. By default, 'white'.
 ;        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table.
+;    wid: in, optional, type=integer, default=0
+;         The window index number of the IDL graphics window to create.
 ;    xsize: in, optional, type=integer, default=640
 ;         The X size of the graphics window created. By default, 640. The XSIZE parameter 
 ;         is used in preference to the XSIZE keyword value.
@@ -72,7 +72,7 @@
 ; :Examples:
 ;    Use like the IDL WINDOW command::
 ;       IDL> FSC_Display, /Free, XSIZE=500 YSIZE=400
-;       IDL> FSC_Display, 1, 500, 500, COLOR='gray'
+;       IDL> FSC_Display, 500, 500, WID=1, COLOR='gray'
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -87,12 +87,14 @@
 ;     Change History::
 ;        Written, 15 November 2010. DWF.
 ;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
+;        Moved the window index argument to the WID keyword. 9 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Display, windowIndex, pxsize, pysize, $
+PRO FSC_Display, pxsize, pysize, $
     COLOR=scolor, $
+    WID=windowIndex, $
     XSIZE=xsize, $
     YSIZE=ysize, $
     _EXTRA=extra
@@ -117,11 +119,6 @@ PRO FSC_Display, windowIndex, pxsize, pysize, $
     IF N_Elements(ysize) EQ 0 THEN ysize = 512
     IF N_Elements(pxsize) EQ 0 THEN pxsize = xsize
     IF N_Elements(pysize) EQ 0 THEN pysize = ysize
-    IF windowIndex GT 127 THEN BEGIN
-        pysize = pxsize
-        pxsize = windowIndex
-        windowIndex = 0
-    ENDIF
     
     IF (!D.Flags AND 256) NE 0 THEN BEGIN
         Window, windowIndex, XSIZE=pxsize, YSIZE=pysize, _STRICT_EXTRA=extra

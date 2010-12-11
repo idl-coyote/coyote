@@ -104,6 +104,7 @@
 ;        Written, 19 November 2010. DWF.
 ;        Corrected a problem with setting text color and added PLACE and OUTLOC 
 ;            keywords. 25 Nov 2010. DWF.
+;        Humm, that text color problem got reset to the old way! Sheesh! Fixed. 9 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -196,7 +197,7 @@ PRO FSC_Text, xloc, yloc, text, $
                 IF Total(pixel) EQ 0 THEN color = 'white'
                 IF N_Elements(color) EQ 0 THEN color = 'opposite'
             ENDIF
-        ENDIF ELSE color = !P.Color
+        ENDIF 
     ENDELSE 
     IF N_Elements(color) EQ 0 THEN color = !P.Color
      

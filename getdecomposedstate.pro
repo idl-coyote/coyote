@@ -1,12 +1,11 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   SetDecomposedState
+;   GetDecomposedState
 ;
 ; PURPOSE:
-;   Provides a device-independent way to set the color decomposition state of the
-;   current graphics device. Devices that do not have a DECOMPOSED keyword to the
-;   DEVICE command are assumed to be in indexed color mode always.
+;   Provides a device-independent way to get the color decomposition state of the
+;   current graphics device. 
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -38,27 +37,22 @@
 ;
 ;+
 ; :Description:
-;   Provides a device-independent way to set the color decomposition state of the
-;   current graphics device. Devices that do not have a DECOMPOSED keyword to the
-;   DEVICE command are assumed to be in indexed color mode always.
+;   Provides a device-independent way to get the color decomposition state of the
+;   current graphics device. 
 ;
 ; :Categories:
 ;    Graphics, Utilities
 ;    
 ; :Params:
-;    state: in, required, type=integer, default=0
-;         Set to 1 to set the current graphics device to decomposed color. Set to 0 
-;         to set the current graphics device to indexed color. Devices lacking a 
-;         DECOMPOSED keyword are assumed to be perpetually in indexed color mode.
+;    none
 ;       
 ; :Keywords:
-;     CurrentState: out, optional, type=integer
-;         The current decomposition state of the current graphics device when the
-;         program is called. A 1 indicates decomposed color. A 0 indicates indexed 
-;         color.
+;     Detph: out, optional, type=integer
+;         The depth of the color display. Typically 8 for indexed color devices
+;         and 24 for true-color devices.
 ;          
 ; :Examples:
-;       IDL> SetDecomposedState, 0, CurrentState=mode
+;       IDL> currentState = GetDecomposedState()
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -71,50 +65,15 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 16 November 2010. DWF.
-;        Changes to include SET_PIXEL_DEPTH in Z-graphics buffer. 19 Nov 2010. DWF.
-;        Allow PostScript 7.0 to set the decomposition keyword. 12 Dec 2010. DWF.
+;        Written, 12 December 2010 as a better named wrapper for DECOMPOSEDCOLOR program. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO SetDecomposedState, state, CURRENTSTATE=currentState
+FUNCTION GetDecomposedState, DEPTH=depth
 
     Compile_Opt idl2
     
-    ; Set to indexed color if you are not told differently.
-    state = Keyword_Set(state)
-    
-    ; Need to know the current state?
-    IF Arg_Present(currentState) THEN currentState = DecomposedColor()
-    
-    ; Set the decomposition state, if you are able. Otherwise assume
-    ; indexed color mode.
-    CASE StrUpCase(!D.Name) OF
-    
-       'PS': BEGIN ; PostScript
-             IF Float(!Version.Release) GE 7.0 THEN Device, Decomposed=state
-             END
-             
-        'Z': BEGIN ; Z-Graphics Buffer
-             IF Float(!Version.Release) GE 6.4 THEN BEGIN
-                CASE state OF
-                    0: Device, Decomposed=state, Set_Pixel_Depth=8
-                    1: Device, Decomposed=state, Set_Pixel_Depth=24
-                 ENDCASE
-             ENDIF
-             END
-             
-        'MAC': BEGIN
-             IF (Float(!Version.Release) GE 5.2) THEN Device, Decomposed=state
-             END
-             
-         'X': Device, Decomposed=state
-         
-         'WIN': Device, Decomposed=state
-         
-         ELSE: Message, 'Unrecognized device. Assuming indexed color state.', /INFORMATIONAL
-         
-    ENDCASE
+    RETURN, DecomposedColor(Depth=depth)
     
 END    

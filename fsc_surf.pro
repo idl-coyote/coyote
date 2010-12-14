@@ -384,10 +384,10 @@ PRO FSC_Surf, data, x, y, $
     IF N_Elements(title) NE 0 THEN BEGIN
        IF N_Elements(tsize) EQ 0 THEN BEGIN
            IF (!P.Charsize EQ 0) AND (N_Elements(charsize) EQ 0) THEN BEGIN
-                titleSize = 1.25 
+                titleSize = 1.10 
            ENDIF ELSE BEGIN
-               IF (!P.Charsize NE 0) THEN titleSize = !P.Charsize * 1.25
-               IF (N_Elements(charsize) NE 0) THEN titleSize = charsize * 1.25
+               IF (!P.Charsize NE 0) THEN titleSize = !P.Charsize * 1.10
+               IF (N_Elements(charsize) NE 0) THEN titleSize = charsize * 1.10
            ENDELSE
        ENDIF ELSE titleSize = tsize
        xloc = (!X.Window[1] - !X.Window[0]) / 2.0 + !X.Window[0]
@@ -463,10 +463,10 @@ PRO FSC_Surf, data, x, y, $
         ; Have to repair the title, too.
         IF N_Elements(title) NE 0 THEN BEGIN
            IF (!P.Charsize EQ 0) AND (N_Elements(charsize) EQ 0) THEN BEGIN
-                titleSize = 1.25 
+                titleSize = 1.10 
            ENDIF ELSE BEGIN
-               IF (!P.Charsize NE 0) THEN titleSize = !P.Charsize * 1.25
-               IF (N_Elements(charsize) NE 0) THEN titleSize = charsize * 1.25
+               IF (!P.Charsize NE 0) THEN titleSize = !P.Charsize * 1.10
+               IF (N_Elements(charsize) NE 0) THEN titleSize = charsize * 1.10
            ENDELSE
            xloc = (!X.Window[1] - !X.Window[0]) / 2.0 + !X.Window[0]
            distance = !Y.Window[1] - !Y.Window[0]

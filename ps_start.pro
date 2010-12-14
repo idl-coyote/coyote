@@ -36,7 +36,7 @@
 ; 
 ;       CHARSIZE:     If this keyword is set, the !P.Charsize variable is set to this
 ;                     value until PS_END is called.
-;
+;                     
 ;       FONT:         Set this to the type of font you want. A -1 selects Hershey 
 ;                     fonts, a 0 selects hardware fonts (Helvetica, normally), and
 ;                     a 1 selects a True-Type font. Set to 0 by default.
@@ -258,7 +258,7 @@ PRO PS_START, $
       IF !D.X_Size GT !D.Y_Size THEN landscape = 1 ELSE landscape = 0
       sizes = PSWindow(_Extra=extra, LANDSCAPE=landscape)
       keywords = PSConfig(_Extra=extra, INCHES=sizes.inches, XSIZE=sizes.xsize, YSIZE=sizes.ysize, $
-         XOFFSET=sizes.xoffset, YOFFSET=sizes.yoffset, Cancel=cancelled, NOGUI=(~gui), LANDSCAPE=landscape)
+         XOFFSET=sizes.xoffset, YOFFSET=sizes.yoffset, Cancel=cancelled, NOGUI=(~gui), LANDSCAPE=sizes.landscape)
    ENDIF ELSE BEGIN
       keywords = PSConfig(_Extra=extra, Cancel=cancelled, NOGUI=(~gui))
    ENDELSE

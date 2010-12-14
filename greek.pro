@@ -7,8 +7,9 @@
 ;   This function provides a device-independent way to ask for a Greek letter as
 ;   a string that can be included, for example, in a plot title. It uses the Greek
 ;   simplex font (!4) when used with Hershey fonts, and the Symbol font (!9) when
-;   used with PostScript or True-Type fonts. Updated now to return the UNICODE
-;   values for Greek characters for those fonts that support them.
+;   used with PostScript or True-Type fonts. Selects the type of Greek character to 
+;   return based on value of !P.FONT. Updated now to return the UNICODE values for 
+;   Greek characters for those fonts that support them (Macintosh?).
 ;   
 ; AUTHOR:
 ;
@@ -84,8 +85,8 @@
 ; RESTRICTIONS:
 ; 
 ;  For this program to work correctly on your graphics display, you should be using
-;  Hershey fonts (!P.Font = -1 or the FONT keyword set to -1). It will work correctly
-;  in PostScript with either harwarde fonts (!P.Font=0) or True-Type fonts (!P.Font=1).
+;  Hershey fonts (!P.Font=-1). It will work correctly in PostScript with either 
+;  hardware fonts (!P.Font=0) or True-Type fonts (!P.Font=1).
 ;  
 ; MODIFICATION HISTORY:
 ;
@@ -94,6 +95,8 @@
 ;     the Greek name uppercase. (Maarten Sneep's suggestion!) 11 Jan 2010. DWF
 ;  Had the wrong value for the PostScript version of Phi. 26 January 2010. DWF
 ;  Added UNICODE keyword and values for Greek characters. 11 June 2010. DWF.
+;  Changed the branching from !D.NAME EQ 'PS' to !P.FONT NE -1. (This is actually
+;      what the documentation says, and what I intended. 13 Dec 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc.                                ;
@@ -221,10 +224,10 @@ FUNCTION Greek, letter, CAPITAL=capital, EXAMPLE=example, UNICODE=unicode
        
     ENDIF
     
-    IF !D.NAME EQ 'PS' THEN BEGIN
+    IF !P.FONT NE -1  THEN BEGIN
     
         ; Make sure ISOLATIN1 encoding is turned on.
-        DEVICE, /ISOLATIN1
+        IF (!D.Name EQ 'PS') THEN DEVICE, /ISOLATIN1
         
         CASE StrLowCase(letter) OF
             'alpha':   greekLetter = (capital) ? '!9' + String("101B) + '!X' : '!9' + String("141B) + '!X'

@@ -54,7 +54,8 @@
 ; MODIFICATION HISTORY:
 ;
 ;  Written by: David W. Fanning, May 24, 2009.
-
+;  Modified the way decomposition was obtained for PostScript devices IDL 7.1 and higher. 12 Dec 2010. DWF.
+;
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -102,21 +103,28 @@ FUNCTION DecomposedColor, device, DEPTH=depth
     CASE !D.NAME OF
     
         'PS': BEGIN ; PostScript
-           IF Float(!Version.Release) GE 7.1 THEN BEGIN
-                Help, /DEVICE, OUTPUT=outstr
-                psinfo = outstr[4]
-                parts = StrSplit(psinfo, ':', /EXTRACT)
-                IF StrUpCase(StrCompress(parts[1], /REMOVE_ALL)) EQ 'DECOMPOSED' THEN BEGIN
-                    decomposed = 1
-                    depth = 24
-                ENDIF ELSE BEGIN
+           CASE 1 OF
+                Float(!Version.Release) EQ 7.0: BEGIN
+                    Help, /DEVICE, OUTPUT=outstr
+                    psinfo = outstr[4]
+                    parts = StrSplit(psinfo, ':', /EXTRACT)
+                    IF StrUpCase(StrCompress(parts[1], /REMOVE_ALL)) EQ 'DECOMPOSED' THEN BEGIN
+                        decomposed = 1
+                        depth = 24
+                    ENDIF ELSE BEGIN
+                        decomposed = 0
+                        depth = 8
+                    ENDELSE
+                END
+                Float(!Version.Release) GE 7.1: BEGIN
+                    Device, GET_DECOMPOSED=decomposed
+                    IF decomposed THEN depth = 24 ELSE depth = 8
+                    END
+                ELSE: BEGIN
                     decomposed = 0
                     depth = 8
-                ENDELSE
-           ENDIF ELSE BEGIN
-                decomposed = 0
-                depth = 8
-           ENDELSE
+                    END
+            ENDCASE
            END
            
         'Z': BEGIN ; Z-graphics buffer.

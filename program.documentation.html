@@ -13,7 +13,7 @@ this routine, refer to the IDL Online Help Navigator
 or type: <P>
 <PRE>     ? mk_html_help</PRE>
 <P>at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Sat Nov 27 08:46:32 2010.<P>
+<STRONG>Last modified: </STRONG>Tue Dec 14 06:37:54 2010.<P>
  
 <HR>
  
@@ -108,6 +108,7 @@ or type: <P>
 <LI><A HREF="#FSC_ZIMAGE">FSC_ZIMAGE</A>
 <LI><A HREF="#FSC_ZPLOT">FSC_ZPLOT</A>
 <LI><A HREF="#GAUSSSCL">GAUSSSCL</A>
+<LI><A HREF="#GETDECOMPOSEDSTATE">GETDECOMPOSEDSTATE</A>
 <LI><A HREF="#GETIMAGE">GETIMAGE</A>
 <LI><A HREF="#GET_OBJECT_ID">GET_OBJECT_ID</A>
 <LI><A HREF="#GMASCL">GMASCL</A>
@@ -1429,6 +1430,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        Now allow a single row vector to be passed into program and displayed. 20 May 2009. DWF.
        Added NOCLIP=0 keyword to PLOTS command when drawing outliers. 15 July 2009. DWF.
        Minor adjustment of the X axis label position. 28 October 2010. DWF.
+       Add the ability to change the label character size and thickness via the normal
+          XCHARSIZE and XTHICK keywords you would use for a plot. 3 Dec 2010. DWF.
 </PRE><P>
 <STRONG>(See boxplot.pro)</STRONG><P>
 <HR>
@@ -2768,6 +2771,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  MODIFICATION HISTORY:
 
   Written by: David W. Fanning, May 24, 2009.
+  Modified the way decomposition was obtained for PostScript devices IDL 7.1 and higher. 12 Dec 2010. DWF.
 
 </PRE><P>
 <STRONG>(See decomposedcolor.pro)</STRONG><P>
@@ -5546,6 +5550,14 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                      the bar.
 
        CHARSIZE:     The character size of the color bar annotations. Default is !P.Charsize.
+       
+       CLAMP:        A two-element array in data units. The color bar is clamped to these
+                     two values. This is mostly of interest if you are "window-leveling"
+                     an image. The clamp is set to the "window" of the color bar.
+                     Normally, when you are doing this, you would like the colors outside
+                     the "window" to be set to a neutral color. Use the NEUTRALINDEX keyword
+                     to set the netural color index in the color bar. (See the Example section
+                     for more information.
 
        COLOR:        The color index of the bar outline and characters. Default
                      is !P.Color. To display the color bar in a device indpendent
@@ -5569,6 +5581,13 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        MINOR:        The number of minor tick divisions. Default is 2.
 
        NCOLORS:      This is the number of colors in the color bar.
+       
+       NEUTRALINDEX: This is the color index to use for color bar values outside the
+                     clamping range when clamping the color bar with the CLAMP keyword.
+                     If this keyword is absent, the highest color table value is used
+                     for low range values and the lowest color table value is used
+                     for high range values, in order to provide contrast with the
+                     clamped region. See the Example section for more information.
 
        NODISPLAY:    FSC_COLORBAR uses FSC_COLOR to specify some of it colors. Normally, 
                      FSC_COLOR loads "system" colors as part of its palette of colors.
@@ -5629,6 +5648,13 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        CONTOUR, DIST(31,41), POSITION=[0.15, 0.15, 0.95, 0.75], $
           C_COLORS=INDGEN(25)*4, NLEVELS=25
        FSC_COLORBAR, NCOLORS=100, POSITION=[0.15, 0.85, 0.95, 0.90]
+       
+       Example using the CLAMP and NEUTRALINDEX keywords.
+       
+       LOADCT, 33, NCOLORS=254
+       TVLCT, FSC_COLOR('gray', /TRIPLE), 255
+       FSC_COLORBAR, NCOLORS=254, NEUTRALINDEX=255, RANGE=[0,1500], $
+           DIVISIONS=8, CLAMP=[400, 800]
 
  MODIFICATION HISTORY:
 
@@ -5699,6 +5725,12 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
              to "black" if it of the COLOR keyword is not currently set to some other color. 
              If the pixel is "black" then ANNOTATECOLOR is set to "white". DWF.
       19 Nov 2010. Fixed a small problem when choosing an AnnnotateColor. DWF.
+      29 Nov 2010. Added CLAMP and NEUTRALINDEX keywords, updated ability to set
+             color model with SetDecomposedState command. DWF.
+      1 Dec 2010. Set COLOR=1 and BITS_PER_PIXEL=8 in PostScript device. Tired of getting
+             e-mails that "your damn colorbar doesn't work!". DWF.
+      6 Dec 2010. I was always setting COLOR to ANNOTATECOLOR. I should only do that if
+             COLOR is undefined. DWF.
 </PRE><P>
 <STRONG>(See fsc_colorbar.pro)</STRONG><P>
 <HR>
@@ -6079,6 +6111,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         If the IRREGULAR keyword is set, this keyword specifies the X and Y resolution
         in a two element integer array of the final gridded data that is sent to the 
         contour plot.
+     window: in, optional, type=boolean, default=0
+         Set this keyword if you want to display the plot in a resizable graphics window.
      xstyle: in, optional, type=integer, default=1
         If unused in the program, set to 1 to force exact axis scaling.
      ystyle: in, optional, type=integer, default=1
@@ -6117,6 +6151,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
         Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
         Changes so that color variables don't change type. 23 Nov 2010. DWF.
+        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -6140,18 +6175,18 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
     Graphics
     
  :Params:
-    windowindex: in, optional, type=integer, default=0
-         The window index number of the graphics window you would like to create.
     xsize: in, optional, type=integer, default=640
          The X size of the graphics window created. By default, 640.
     ysize: in, optional, type=integer, default=512
          The Y size of the graphics window created. By default, 512.
          
  :Keywords:
-     color: in, optional, type=string/integer, default='white'
+    color: in, optional, type=string/integer, default='white'
         If this keyword is a string, the name of the data color. By default, 'white'.
         Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
         to be a color index into the current color table.
+    wid: in, optional, type=integer, default=0
+         The window index number of the IDL graphics window to create.
     xsize: in, optional, type=integer, default=640
          The X size of the graphics window created. By default, 640. The XSIZE parameter 
          is used in preference to the XSIZE keyword value.
@@ -6164,7 +6199,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  :Examples:
     Use like the IDL WINDOW command::
        IDL> FSC_Display, /Free, XSIZE=500 YSIZE=400
-       IDL> FSC_Display, 1, 500, 500, COLOR='gray'
+       IDL> FSC_Display, 500, 500, WID=1, COLOR='gray'
        
  :Author:
        FANNING SOFTWARE CONSULTING::
@@ -6179,6 +6214,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      Change History::
         Written, 15 November 2010. DWF.
         Changes so that color variables don't change type. 23 Nov 2010. DWF.
+        Moved the window index argument to the WID keyword. 9 Dec 2010. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -7417,6 +7453,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      symcolor: in, optional, type=string/integer, default='black'
         If this keyword is a string, the name of the symbol color. By default, 'black'.
         Otherwise, the keyword is assumed to be a color index into the current color table.
+     window: in, optional, type=boolean, default=0
+         Set this keyword if you want to display the plot in a resizable graphics window.
      _extra: in, optional, type=any
         Any keyword appropriate for the IDL Plot command is allowed in the program.
 
@@ -7448,6 +7486,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
         Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
         Changes so that color inputs don't change type. 23 Nov 2010. DWF.
+        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
         
 
  :Copyright:
@@ -7674,6 +7713,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
    Filename - Set thie keyword to the name of the PostScript file. The default is "idl.ps".
    Inches - Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters. Set by European keyword by default.
    Landscape - Set this keyword to select Landscape page output. Portrait page output is the default.
+   Language_Level - Set this keyword to select the Language Level interpreter. Default is 1.
    PageType - Set this keyword to the "type" of page. Possible values are:
        "Letter" - 8.5 by 11 inches. (Default, unless the European keyword is set.)
        "Legal" - 8.5 by 14 inches.
@@ -7769,6 +7809,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
    Updated for IDL 7.1 and 24-bit color PostScript support. 24 May 2009. DWF.
    Added PAGETYPE field to returned structure to allow PostScript page type to be determined. 8 August 2009. DWF.
    Fixed a problem with 24-bit color support that allowed only IDL 7 versions to work correctly. 20 Sept 2009. DWF.
+   Added a LANGUAGE_LEVEL keyword. 13 Dec 2010. DWF.
 </PRE><P>
 <STRONG>(See fsc_psconfig__define.pro)</STRONG><P>
 <HR>
@@ -7932,6 +7973,10 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      noerase: in, optional, type=boolean, default=0
         Set this keyword to prevent the window from erasing the contents before displaying
         the surface plot.
+     rotx: in, optional, type=float, default=30
+        The rotation about the X axis.
+     rotz: in, optional, type=float, default=30
+        The rotation about the Z axis.
      shaded: in, optional, type=boolean, default=0
         Set this keyword if you wish to display a shaded surface. To display shaded surfaces
         in a device-independent way, the shading values are confined to indices 0 to 253 with
@@ -7954,6 +7999,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         The title Y spacing. This should be a number, between 0 and 1 that is the fraction 
         of the distance between !Y.Window[1] and !Y.Window[0] to locate the title above 
         !Y.Window[1]. When Total(!P.MULTI) EQ 0, the default is 0.005, and it is 0.0025 otherwise.
+     window: in, optional, type=boolean, default=0
+         Set this keyword if you want to display the plot in a resizable graphics window.
      xstyle: in, hidden
          The normal XSTYLE keyword.
      ystyle: in, hidden
@@ -7991,6 +8038,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
         Changes so that color variables don't change type. 23 Nov 2010. DWF.
         Added ELEVATION_SHADING keyword. 26 Nov 2010. DWF.
+        I had keyword conflicts with the AX and AZ rotation keywords. Now perform rotation with
+           ROTX and ROTZ keywords. 7 Dec 2010. DWF.
+        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -8008,8 +8058,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
    The purpose of FSC_Surface is to create a window where a surface is displayed. Surfaces
    can be wire-framed, shaded surfaces, and surfaces with texture maps draped on top of
    them, among other types of surfaces. LEFT mouse button rotates the surface, MIDDLE
-   mouse button zooms into the surface, RIGHT mouse button zoom out of the surface. 
-   Clicking on the surface title allows the user to drag the title to a better location.
+   mouse button zooms out from the surface, RIGHT mouse button zoom into the surface. 
+   Clicking on the surface axes will allow the user to move or translate the surface, and 
+   clicking on the plot title will allow the user to move the title.
 
  :Categories:
     Graphics
@@ -8076,12 +8127,18 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      tsize: in, optional, type=float, default=1.25*CHARSIZE
         The character size for the title. By default, the title character size is 1.25 times
         the character size of the surface annotation.
+     xoffset: in, optional, type=integer, default=50
+         The number of pixels the surface window should be offset in the X direction
+         from the upper-left corner of the display.
      xsize: in, optional, type=interger, default=640
          The X size of the initial surface window. By default, 640 pixels.
      xstyle: in, hidden
          The normal XSTYLE keyword.
      xtitle: in, optional, type=string
          The text for the X axis of the surface plot.
+     yoffset: in, optional, type=integer, default=25
+         The number of pixels the surface window should be offset in the Y direction
+         from the upper-left corner of the display.
      ysize: in, optional, type=integer, default=512
          The Y size of the initial surface window. By default, 640 pixels.
      ystyle: in, hidden
@@ -8118,6 +8175,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  :History:
      Change History::
         Completely re-written, 26 November 2010 from old FSC_SURFACE program. DWF.
+        Added ability to translate the surface by clicking on an axis. 28 Nov 2010. DWF.
+        Fixed a problem with light controls in which the light controls didn't show the
+            current light color. 28 Nov 2010. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -8199,6 +8259,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Written, 19 November 2010. DWF.
         Corrected a problem with setting text color and added PLACE and OUTLOC 
             keywords. 25 Nov 2010. DWF.
+        Humm, that text color problem got reset to the old way! Sheesh! Fixed. 9 Dec 2010. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -8637,7 +8698,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A NAME="GAUSSSCL">
 <H2>GAUSSSCL</H2></A>
 <A HREF="#FSC_ZPLOT">[Previous Routine]</A>
-<A HREF="#GETIMAGE">[Next Routine]</A>
+<A HREF="#GETDECOMPOSEDSTATE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -8716,9 +8777,52 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See gaussscl.pro)</STRONG><P>
 <HR>
  
+<A NAME="GETDECOMPOSEDSTATE">
+<H2>GETDECOMPOSEDSTATE</H2></A>
+<A HREF="#GAUSSSCL">[Previous Routine]</A>
+<A HREF="#GETIMAGE">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   Provides a device-independent way to get the color decomposition state of the
+   current graphics device. 
+
+ :Categories:
+    Graphics, Utilities
+    
+ :Params:
+    none
+       
+ :Keywords:
+     Detph: out, optional, type=integer
+         The depth of the color display. Typically 8 for indexed color devices
+         and 24 for true-color devices.
+          
+ :Examples:
+       IDL> currentState = GetDecomposedState()
+       
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ :History:
+     Change History::
+        Written, 12 December 2010 as a better named wrapper for DECOMPOSEDCOLOR program. DWF.
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See getdecomposedstate.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="GETIMAGE">
 <H2>GETIMAGE</H2></A>
-<A HREF="#GAUSSSCL">[Previous Routine]</A>
+<A HREF="#GETDECOMPOSEDSTATE">[Previous Routine]</A>
 <A HREF="#GET_OBJECT_ID">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -9028,8 +9132,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
    This function provides a device-independent way to ask for a Greek letter as
    a string that can be included, for example, in a plot title. It uses the Greek
    simplex font (!4) when used with Hershey fonts, and the Symbol font (!9) when
-   used with PostScript or True-Type fonts. Updated now to return the UNICODE
-   values for Greek characters for those fonts that support them.
+   used with PostScript or True-Type fonts. Selects the type of Greek character to 
+   return based on value of !P.FONT. Updated now to return the UNICODE values for 
+   Greek characters for those fonts that support them (Macintosh?).
    
  AUTHOR:
 
@@ -9105,8 +9210,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  RESTRICTIONS:
  
   For this program to work correctly on your graphics display, you should be using
-  Hershey fonts (!P.Font = -1 or the FONT keyword set to -1). It will work correctly
-  in PostScript with either harwarde fonts (!P.Font=0) or True-Type fonts (!P.Font=1).
+  Hershey fonts (!P.Font=-1). It will work correctly in PostScript with either 
+  hardware fonts (!P.Font=0) or True-Type fonts (!P.Font=1).
   
  MODIFICATION HISTORY:
 
@@ -9115,6 +9220,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      the Greek name uppercase. (Maarten Sneep's suggestion!) 11 Jan 2010. DWF
   Had the wrong value for the PostScript version of Phi. 26 January 2010. DWF
   Added UNICODE keyword and values for Greek characters. 11 June 2010. DWF.
+  Changed the branching from !D.NAME EQ 'PS' to !P.FONT NE -1. (This is actually
+      what the documentation says, and what I intended. 13 Dec 2010. DWF.
 </PRE><P>
 <STRONG>(See greek.pro)</STRONG><P>
 <HR>
@@ -9738,6 +9845,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        Default axis color name changed from "Navy" to "Black". 28 October 2010. DWF.
        Fixed a problem with restoring color tables in PostScript. 24 Nov 2010. DWF.
        Added OPROBABILITY, PROBCOLOR, and PROBABILITY keywords. 24 Nov 2010. DWF.
+       Changed the way I find a default axis color. 3 Dec 2010. DWF.
+       Expanded search for "integers" from in BINSIZE calculation from DataType LE 3 
+             to include DataType GE 12, too. 8 Dec 2010. DWF.
 </PRE><P>
 <STRONG>(See histoplot.pro)</STRONG><P>
 <HR>
@@ -9796,13 +9906,13 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  INPUT KEYWORDS:
 
    BMP -- Set this keyword to select BMP files.
+   
+   DEMO -- If this keyword is set, the program changes directory to !DIR/examples/data.
 
    DICOM -- Set this keyword to select DICOM files.
 
    DIRECTORY -- The initial input directory name. The current directory by default.
    
-   EXAMPLES -- If this keyword is set, the program changes directory to !DIR/examples/data.
-
    EXCLUDE -- A list of filenames that should excluded from the file selection list.
 
    FILENAME -- The initial filename. If the initial directory has image files of the
@@ -9943,6 +10053,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
    Updated for reading transparent images. 13 May 2009. DWF.
    Provided check for PNG images with more than 8 bits per channel. 5 August 2009. DWF.
    Fixed a problem in which the starting directory was changed on exit. 20 Nov 2010. DWF.
+   Change EXAMPLES to more easily remembered DEMO keyword. 29 Nov 2010. DWF.
    
 </PRE><P>
 <STRONG>(See imageselect.pro)</STRONG><P>
@@ -15662,6 +15773,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        Added CURRENTCOLOR keyword. 3 July 2003. DWF.
        Added BREWER keyword. 15 May 2008. DWF.
        Fixed a couple of problems with outline color. 19 May 2008. DWF.
+       Added all the colors available from FSC_COLOR. 28 Nov 2010. DWF.
 </PRE><P>
 <STRONG>(See pickcolor.pro)</STRONG><P>
 <HR>
@@ -16406,8 +16518,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
     window that has the same aspect ratio (ratio of height to
     width) as the current display graphics window. It creates
     the largest possible PostScript output window with the
-    desired aspect ratio. This assures that graphics output
-    looks similar, if not identical, to PostScript output.
+    desired aspect ratio. This assures that PostScript output
+    looks similar, if not identical, to normal graphics output
+    on the display.
 
  AUTHOR:
 
@@ -16432,21 +16545,36 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
     None.
 
  KEYWORD PARAMETERS:
+ 
+    ASPECTRATIO: Normally the aspect ratio is matched to the
+    aspect ratio (ratio of height divided by width) of the current
+    graphics window. However, this keyword can be used to select
+    a particular aspect ratio for the PostScript window. This should
+    be a floating point value.
 
     CM: Normally the structure value that is returned from this
     function reports its values in inches. Setting this keyword
     causes the return values to be in units of centimeters.
+    
+    EUROPEAN: If this keyword is set, the program defaults change
+    so that the CM keyword is set to 1 and the PAGESIZE keyword is
+    set to "A4".
 
     FUDGE: A quick way to set symetrical XFUDGE and YFUDGE factors.
     If this keyword is set to a value, XFUDGE and YFUDGE keywords are
-    set to the same value.
+    set to the same value. Fudge factors are used only with some
+    printers and generally only when output is being sent to the
+    PRINTER device. (See the description of the XFUDGE and YFUDGE
+    keywords for additional information.)
 
-    LANDSCAPE: Normally this function assumes a PostScript window
-    in Portrait mode. Setting this keyword assumes you want
-    the graphic in Landscape mode.
+    LANDSCAPE: Normally, a landscape page is selected if the current 
+    graphics window is wider than it is tall. If you prefer a landscape
+    aspect window on a Portrait page, set the LANDSCAPE keywword to 0. 
+    Setting  this keyword to 1 will result in a landscape page no 
+    matter the size of the current graphics window.
 
     MARGIN:  The margin around the edges of the plot. The value must be
-    a floating point value between 0.0 and 0.5. It is expressed in
+    a floating point value between 0.0 and 0.35. It is expressed in
     normalized coordinate units. The default margin is 0.05.
 
     PAGESIZE: Set this keyword to a string indicating the type
@@ -16538,6 +16666,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
           calculated from the printable area of the paper, rather than the corner
           of the paper. 8 AUG 2000. DWF.
        Changed the default margin to 0.05 from 0.15. 29 Nov 2004, DWF.
+       Added EUROPEAN keyword and set LANDSCAPE mode if window wider than higher
+           as the default if LANDSCAPE is not set. 13 Dec 2010. DWF.
+       Added ASPECTRATIO keyword to allow user-specified window aspect ratio. 13 Dec 2010. DWF.
 </PRE><P>
 <STRONG>(See pswindow.pro)</STRONG><P>
 <HR>
@@ -16782,7 +16913,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  
        CHARSIZE:     If this keyword is set, the !P.Charsize variable is set to this
                      value until PS_END is called.
-
+                     
        FONT:         Set this to the type of font you want. A -1 selects Hershey 
                      fonts, a 0 selects hardware fonts (Helvetica, normally), and
                      a 1 selects a True-Type font. Set to 0 by default.
@@ -17737,6 +17868,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      Change History::
         Written, 16 November 2010. DWF.
         Changes to include SET_PIXEL_DEPTH in Z-graphics buffer. 19 Nov 2010. DWF.
+        Allow PostScript 7.0 to set the decomposition keyword. 12 Dec 2010. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -18165,7 +18297,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  INPUT KEYWORDS:
 
        KERNEL -- By default the image is convolved with this 3-by-3 Laplacian kernel:
-           [ [-1, -1, -1], [-1, +8, -1], [-1, -1, -1] ].  You can pass in any square kernel
+           [ [-1, -1, -1], [-1, +8, -1], [-1, -1, -1] ].  You can pass in any  kernel
            of odd width. The filtered image is added back to the original image to provide
            the sharpening effect.
 
@@ -18193,6 +18325,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  MODIFICATION HISTORY:
 
        Written by David W. Fanning, January 2003.
+       Updated slightly to use Coyote Library routines. 3 Dec. 2010. DWF.
 </PRE><P>
 <STRONG>(See sharpen.pro)</STRONG><P>
 <HR>
@@ -19424,6 +19557,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
             with centered pixels, and allows nearest neightbor resampling of true-color images.
             20 November 2010. DWF.
        Incorporated TVSCALE functionality into TVIMAGE. 22 November 2010. DWF.
+       Problem fixed when displaying alpha image when POSITION and ALPHABACKGROUND keywords used
+            simultaneously. 8 Dec 2010. DWF.
 </PRE><P>
 <STRONG>(See tvimage.pro)</STRONG><P>
 <HR>
@@ -20115,85 +20250,51 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A HREF="#XCD">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
- NAME:
-   WINDOWIMAGE
+ :Description:
+   Allows the user to interactively adjust image contrast by means of "windowing and
+   leveling" the image. Move the cursor vertically in the window to adjust the image
+   stretch "window". Move the cursor horizontally in the window to adjust the image
+   "level".
 
- PURPOSE:
+ :Categories:
+    Graphics
+    
+ :Params:
+    image: in, required, type=any
+         Any 2D array that you wish to adjust the contrast of.
+       
+ :Keywords:
+     brewer: in, optional, type=boolean, default=0
+         Set this keyword to indicate a Brewer color table is desired.
+     colortable: in, optional, type=integer, default=0
+          The index number of a color table to load with CTLOAD.
+     neutralcolor: in, optional, type=string
+         The name of the color to use for values outside the image "window" in
+         the color table. If a default grayscale color table is loaded, the default
+         color is "rose", otherwise the default is "black".
+     reverse: in, optional, type=boolean, default=0
+         Set this keyword if you wish to reverse the color table.
+         
+ :Examples:
+    To see a demonstation::
+       IDL> WindowImage
+       
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
 
-       The purpose of this routine is to demonstrate how to interactively
-       adjust the contrast and brightness (also called the window and level)
-       of an image.
+ :History:
+     Change History::
+        Written, 29 November 2010. DWF. 
+        Added color protection to the program. 30 Nov 2010. DWF.
 
- AUTHOR:
-
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
-
- CATEGORY:
-
-       Graphics, Widgets.
-
- CALLING SEQUENCE:
-
-       WINDOWIMAGE, image
-
- INPUTS:
-
-       image:    A 2D image array. Typically, the image will be a 16-bit medical
-                 image of some type. If this parameter is not present, a 16-bit
-                 dicom image from the examples/data directory will be selected.
-
- KEYWORD PARAMETERS:
-
-       COLORTABLE:    The index of an IDL-supplied color table to load. Gray-scale by default.
-
-       LEVEL:         The window level.
-
-       WIDTH:         The half-width of the window. This value will be subtracted from the
-                      the window LEVEL to form the lower window value, and added to the window
-                      LEVEL to form the upper window value.
-
-
- COMMON BLOCKS:
-
-       None.
-
- SIDE EFFECTS:
-
-       None.
-
- RESTRICTIONS:
-
-       The TVIMAGE, COLORBAR__DEFINE, and ERROR_MESSAGE programs from the Coyote Library are
-       required to run this program:
-
-          http://www.dfanning.com/programs/tvimage.pro
-          http://www.dfanning.com/programs/colorbar__define.pro
-          http://www.dfanning.com/programs/error_message.pro
-
- EXAMPLE:
-
-       To display a 16-bit medical image, type:
-
-       IDL> WINDOWIMAGE
-
- MODIFICATION HISTORY:
-
-       Written by: David W. Fanning, 7 November 2001.
-       Modified the windowing algorithm to keep the window within
-          the data range. Added colorbar and pixmap for smoother
-          updating. 18 Nov 2001. DWF.
-       Fixed a small problem with object cleanup. Added window and
-          level readouts, window resizing. 23 Nov 2001. DWF.
-       Added LEVEL and WIDTH keywords. Changed output formatting to
-          accommodate floating integer values. 28 Nov 2005. DWF.
-       Renamed Colorbar object to FSC_Colorbar to avoid conflict with IDL 8 Colorbar object.
-        26 September 2010. DWF.
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
 </PRE><P>
 <STRONG>(See windowimage.pro)</STRONG><P>
 <HR>

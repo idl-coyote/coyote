@@ -158,6 +158,7 @@
 ;   Added PAGETYPE field to returned structure to allow PostScript page type to be determined. 8 August 2009. DWF.
 ;   Fixed a problem with 24-bit color support that allowed only IDL 7 versions to work correctly. 20 Sept 2009. DWF.
 ;   Added a LANGUAGE_LEVEL keyword. 13 Dec 2010. DWF.
+;   Added the FONTYPE value to the keyword return structure. 14 Dec 2010. DWF.
 ;-
 
 ;******************************************************************************************;
@@ -803,7 +804,8 @@ struct = { $
    xsize: self.xsizeSet, $
    yoffset: yoffset, $
    ysize: self.ysizeSet, $
-   pagetype: StrUpCase(self.pageType)}
+   pagetype: StrUpCase(self.pageType), $
+   fonttype: self.fonttypeSet}
 
    ; Addition of CMYK keyword implies LANGUAGE_LEVEL keyword set to 2.
    

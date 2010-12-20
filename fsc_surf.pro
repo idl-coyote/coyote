@@ -104,7 +104,7 @@
 ;     title: in, optional, type=string
 ;        The title of the plot. It will be written "flat to the screen", rather than rotated.
 ;     tsize: in, optional, type=float
-;        The character size for the title. Normally, the title character size is 1.25 times
+;        The character size for the title. Normally, the title character size is 1.1 times
 ;        the character size of the surface annotation.
 ;     tspace: in, optional, type=float
 ;        The title Y spacing. This should be a number, between 0 and 1 that is the fraction 
@@ -152,6 +152,7 @@
 ;        I had keyword conflicts with the AX and AZ rotation keywords. Now perform rotation with
 ;           ROTX and ROTZ keywords. 7 Dec 2010. DWF.
 ;        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
+;        Changed the Title size to 1.1 times the character size of the plot. 14 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.

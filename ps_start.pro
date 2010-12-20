@@ -56,7 +56,7 @@
 ;
 ;       SCALE_FACTOR: Set this to the PostScript scale factor. By default: 1.
 ;
-;       TT_FONT:      The name of a true-type font to use if FONT=1. By default, "TIMES".
+;       TT_FONT:      The name of a true-type font to use if FONT=1. By default, "HELVETICA".
 ;
 ;       Any keyword supported by PSCONFIG can be used to configure the PostScript device.
 ;       Common keywords would include FILENAME, XSIZE, YSIZE, XOFFSET, YOFFSET, etc. See

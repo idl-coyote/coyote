@@ -65,6 +65,8 @@
 ;        Output file was created, even if not used. Now deleting file and issuing messages to
 ;           explain why output file was not created. 1 November 2010. DWF.
 ;        Added SUCCESS and QUIET keywords. 15 Novemember 2010. DWF.
+;        PostScript file structure changed in IDL 8. Made adjustment to find the 
+;            PageBoundingBox line. 19 Dec 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -223,7 +225,9 @@ PRO FIXPS, in_filename, out_filename, $
   out_lines[1] = rtcmd
   
   ; Calculate the new bounding box boundaries.
-  bbox = StrMid(in_lines[4], 18)
+  bbox_line_num = Where(StrMid(in_lines, 0, 17) EQ '%%PageBoundingBox', bbox_count)
+  IF bbox_count EQ 0 THEN Message, 'Cannot find PageBoundingBox line in file.'
+  bbox = StrMid(in_lines[bbox_line_num[0]], 18)
   x0 = 0
   x1 = 0
   y0 = 0

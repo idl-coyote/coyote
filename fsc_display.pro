@@ -4,10 +4,11 @@
 ;   FSC_Display
 ;
 ; PURPOSE:
-;   The purpose of FSC_Display is to open a graphics window on graphics devices that
-;   support windows. Using FSC_Display to open a graphics window means you no longer
-;   have to "protect" your Window command in devices, like the PostScript device, that
-;   do not support windows. Basically, a smarter Window command.
+;   The purpose of FSC_Display is to open a graphics window on the display, or in the
+;   PostScript device, or in the Z-graphics buffer, depending upon the current graphics
+;   device. In PostScript a window of the proper aspect ratio is created with PSWindow.
+;   Using FSC_Display to open "windows" will allow you to more easily write device-independent
+;   IDL programs.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -39,10 +40,11 @@
 ;
 ;+
 ; :Description:
-;   The purpose of FSC_Display is to open a graphics window on graphics devices that
-;   support windows. Using FSC_Display to open a graphics window means you no longer
-;   have to "protect" your Window command in devices, like the PostScript device, that
-;   do not support windows. Basically, a smarter Window command.
+;   The purpose of FSC_Display is to open a graphics window on the display, or in the
+;   PostScript device, or in the Z-graphics buffer, depending upon the current graphics
+;   device. In PostScript a window of the proper aspect ratio is created with PSWindow.
+;   Using FSC_Display to open "windows" will allow you to more easily write device-independent
+;   IDL programs.
 ;
 ; :Categories:
 ;    Graphics
@@ -57,7 +59,8 @@
 ;    color: in, optional, type=string/integer, default='white'
 ;        If this keyword is a string, the name of the data color. By default, 'white'.
 ;        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
-;        to be a color index into the current color table.
+;        to be a color index into the current color table. The color is not used if
+;        the "window" is opened in PostScript on the Z-graphics buffer.
 ;    wid: in, optional, type=integer, default=0
 ;         The window index number of the IDL graphics window to create.
 ;    xsize: in, optional, type=integer, default=640
@@ -71,7 +74,7 @@
 ;         
 ; :Examples:
 ;    Use like the IDL WINDOW command::
-;       IDL> FSC_Display, /Free, XSIZE=500 YSIZE=400
+;       IDL> FSC_Display, XSIZE=500 YSIZE=400
 ;       IDL> FSC_Display, 500, 500, WID=1, COLOR='gray'
 ;       
 ; :Author:
@@ -88,6 +91,7 @@
 ;        Written, 15 November 2010. DWF.
 ;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
 ;        Moved the window index argument to the WID keyword. 9 Dec 2010. DWF.
+;        Modified to produce a window in PostScript and the Z-buffer, too. 15 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -123,5 +127,11 @@ PRO FSC_Display, pxsize, pysize, $
     IF (!D.Flags AND 256) NE 0 THEN BEGIN
         Window, windowIndex, XSIZE=pxsize, YSIZE=pysize, _STRICT_EXTRA=extra
         FSC_Erase, color   
-    ENDIF
+    ENDIF ELSE BEGIN
+        CASE !D.Name OF
+            'PS': Device, _Extra=PSWindow(AspectRatio=Float(pysize)/pxsize)
+            'Z': Device, Set_Resolution=[pxsize,pysize]
+            ELSE:
+        ENDCASE
+    ENDELSE
 END

@@ -91,6 +91,8 @@
 ;   Filename - Set thie keyword to the name of the PostScript file. The default is "idl.ps".
 ;   Inches - Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters. Set by European keyword by default.
 ;   Landscape - Set this keyword to select Landscape page output. Portrait page output is the default.
+;   Match - If this keyword is set, the initial PostScript window will match the aspect ratio of the current graphics window.
+;   NoGUI - Set this keyword if you don't want a graphical user interface, but just want to get the return structure.
 ;   PageType - Set this keyword to the "type" of page. Possible values are:
 ;       "Letter" - 8.5 by 11 inches. (Default, unless the European keyword is set.)
 ;       "Legal" - 8.5 by 14 inches.
@@ -148,6 +150,7 @@
 ;     user interaction. 11 Oct 2004. DWF.
 ;   Added CMYK option 24 August 2007. Requires LANGUAGE_LEVEL=2 printer. L. Anderson
 ;   Updated for IDL 7.1 and 24-bt color PostScript support. 24 May 2009. DWF.
+;   Added MATCH keyword. 14 Dec 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
@@ -208,6 +211,7 @@ FUNCTION PSConfig,                    $
    Isolatin=isolatin,                 $ ; Set this keyword to select ISOlatin1 encoding.
    Landscape=landscape,               $ ; Set this keyword to select Landscape output.
    Light=light,                       $ ; Set this keyword to select the Light font style.
+   Match=match,                       $ ; Set this keyword to match the aspect ratio of the current graphics window.
    Medium=medium,                     $ ; Set this keyword to select the Medium font style.
    Name=name,                         $ ; The "name" of the object.
    Narrow=narrow,                     $ ; Set this keyword to select the Narrow font style.
@@ -229,6 +233,27 @@ FUNCTION PSConfig,                    $
    ZapfDingbats=zapfdingbats            ; Set this keyword to select the ZapfDingbats font.
 
 On_Error, 2
+
+; Did the user ask us to match the aspect ratio of the current graphics window?
+IF Keyword_Set(match) THEN BEGIN
+    
+    ; Is this a device that supports windows?
+    IF (!D.Flags AND 256) NE 0 THEN BEGIN
+    
+        ; Is there a current graphics window?
+        IF !D.Window GE 0 THEN BEGIN
+            IF N_Elements(inches) NE 0 THEN cm = 1 - Keyword_Set(inches)
+            keywords = PSWindow(Landscape=landscape, CM=cm, European=european)
+            xsize = keywords.xsize
+            ysize = keywords.ysize
+            xoffset = keywords.xoffset
+            yoffset = keywords.yoffset
+            inches = keywords.inches
+            landscape = keywords.landscape
+            portrait = keywords.portrait
+        ENDIF
+    ENDIF
+ENDIF
 
 IF N_Elements(psObject) EQ 0 THEN BEGIN
    psObject = Obj_New('FSC_PSCONFIG', $

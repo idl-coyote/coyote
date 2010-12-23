@@ -89,6 +89,9 @@
 ;     symcolor: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the symbol color. By default, 'black'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     traditional: in, optional, type=boolean, default=0
+;         If this keyword is set, the traditional color scheme of a black background for
+;         graphics windows on the display is used and PostScript files always use a white background.
 ;     window: in, optional, type=boolean, default=0
 ;         Set this keyword if you want to display the plot in a resizable graphics window.
 ;     _extra: in, optional, type=any
@@ -141,6 +144,7 @@ PRO FSC_Plot, x, y, $
     POSITION=position, $
     PSYM=psym, $
     SYMCOLOR=ssymcolor, $
+    TRADITIONAL=traditional, $
     WINDOW=window, $
     _Extra=extra
     
@@ -178,6 +182,7 @@ PRO FSC_Plot, x, y, $
             POSITION=position, $
             PSYM=psym, $
             SYMCOLOR=ssymcolor, $
+            TRADITIONAL=traditional, $
            _Extra=extra
             
          RETURN
@@ -202,7 +207,11 @@ PRO FSC_Plot, x, y, $
     TVLCT, rr, gg, bb, /GET
     
     ; Check the keywords.
-    IF N_Elements(sbackground) EQ 0 THEN background = 'WHITE' ELSE background = sbackground
+    IF N_Elements(sbackground) EQ 0 THEN BEGIN
+        IF Keyword_Set(traditional) THEN BEGIN
+            IF ((!D.Flags AND 256) NE 0) THEN background = 'BLACK' ELSE background = 'WHITE'
+        ENDIF ELSE background = 'WHITE' 
+    ENDIF ELSE background = sbackground
     
     ; Choose an axis color.
     IF N_Elements(saxisColor) EQ 0 AND N_Elements(saxescolor) NE 0 THEN saxiscolor = saxescolor
@@ -212,12 +221,13 @@ PRO FSC_Plot, x, y, $
        ENDIF
        IF N_Elements(saxiscolor) EQ 0 THEN BEGIN
            IF !D.Name EQ 'PS' THEN BEGIN
+                IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
                 saxisColor = 'BLACK' 
            ENDIF ELSE BEGIN
                 IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF Total(pixel) EQ 765 THEN saxisColor = 'BLACK'
-                    IF Total(pixel) EQ 0 THEN saxisColor = 'WHITE'
+                    IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN saxisColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN saxisColor = 'WHITE'
                     IF N_Elements(saxisColor) EQ 0 THEN saxisColor = 'OPPOSITE'
                 ENDIF ELSE saxisColor = 'OPPOSITE'
            ENDELSE
@@ -232,12 +242,13 @@ PRO FSC_Plot, x, y, $
        ENDIF
        IF N_Elements(sColor) EQ 0 THEN BEGIN
            IF !D.Name EQ 'PS' THEN BEGIN
+                IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
                 sColor = 'BLACK' 
            ENDIF ELSE BEGIN
                 IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF Total(pixel) EQ 765 THEN sColor = 'BLACK'
-                    IF Total(pixel) EQ 0 THEN sColor = 'WHITE'
+                    IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN sColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN sColor = 'WHITE'
                     IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
                 ENDIF ELSE sColor = 'OPPOSITE'
            ENDELSE

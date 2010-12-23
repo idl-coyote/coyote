@@ -103,6 +103,9 @@
 ;        Set this keyword to a Z value where a skirt will be drawn for the surface.
 ;     title: in, optional, type=string
 ;        The title of the plot. It will be written "flat to the screen", rather than rotated.
+;     traditional: in, optional, type=boolean, default=0
+;         If this keyword is set, the traditional color scheme of a black background for
+;         graphics windows on the display is used and PostScript files always use a white background.
 ;     tsize: in, optional, type=float
 ;        The character size for the title. Normally, the title character size is 1.1 times
 ;        the character size of the surface annotation.
@@ -173,6 +176,7 @@ PRO FSC_Surf, data, x, y, $
     SHADES=shades, $
     SKIRT=skirt, $
     TITLE=title, $
+    TRADITIONAL=traditional, $
     TSIZE=tsize, $
     TSPACE=tspace, $
     WINDOW=window, $
@@ -212,6 +216,7 @@ PRO FSC_Surf, data, x, y, $
             SHADES=shades, $
             SKIRT=skirt, $
             TITLE=title, $
+            TRADITIONAL=traditional, $
             TSIZE=tsize, $
             TSPACE=tspace, $
             XSTYLE=xstyle, $
@@ -237,7 +242,11 @@ PRO FSC_Surf, data, x, y, $
     TVLCT, rr, gg, bb, /GET
     
     ; Check the keywords.
-    IF N_Elements(sbackground) EQ 0 THEN background = 'WHITE' ELSE background = sbackground
+    IF N_Elements(sbackground) EQ 0 THEN BEGIN
+        IF Keyword_Set(traditional) THEN BEGIN
+            IF ((!D.Flags AND 256) NE 0) THEN background = 'BLACK' ELSE background = 'WHITE'
+        ENDIF ELSE background = 'WHITE' 
+    ENDIF ELSE background = sbackground
  
     ; Choose an axis color.
     IF N_Elements(saxisColor) EQ 0 AND N_Elements(saxescolor) NE 0 THEN saxiscolor = saxescolor
@@ -247,19 +256,45 @@ PRO FSC_Surf, data, x, y, $
        ENDIF
        IF N_Elements(saxiscolor) EQ 0 THEN BEGIN
            IF !D.Name EQ 'PS' THEN BEGIN
+                IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
                 saxisColor = 'BLACK' 
            ENDIF ELSE BEGIN
                 IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF Total(pixel) EQ 765 THEN saxisColor = 'BLACK'
-                    IF Total(pixel) EQ 0 THEN saxisColor = 'WHITE'
+                    IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN saxisColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN saxisColor = 'WHITE'
                     IF N_Elements(saxisColor) EQ 0 THEN saxisColor = 'OPPOSITE'
                 ENDIF ELSE saxisColor = 'OPPOSITE'
            ENDELSE
        ENDIF
     ENDIF
     IF N_Elements(saxisColor) EQ 0 THEN axisColor = !P.Color ELSE axisColor = saxisColor
-    IF N_Elements(scolor) EQ 0 THEN color = 'blu6' ELSE color = scolor
+    
+    ; Choose a color.
+    IF N_Elements(sColor) EQ 0 THEN BEGIN
+       IF (Size(background, /TNAME) EQ 'STRING') && (StrUpCase(background) EQ 'WHITE') THEN BEGIN
+            IF !P.Multi[0] EQ 0 THEN BEGIN
+                IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE sColor = 'BLU6' 
+            ENDIF
+       ENDIF
+       IF N_Elements(sColor) EQ 0 THEN BEGIN
+           IF !D.Name EQ 'PS' THEN BEGIN
+                IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
+                IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE sColor = 'BLU6' 
+           ENDIF ELSE BEGIN
+                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN BEGIN
+                        IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE sColor = 'BLU6' 
+                    ENDIF
+                    IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN sColor = 'WHITE'
+                    IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
+                ENDIF ELSE sColor = 'OPPOSITE'
+           ENDELSE
+       ENDIF
+    ENDIF
+    IF N_Elements(sColor) EQ 0 THEN color = 'BLU6' ELSE  color = sColor
+
     IF N_Elements(sbottom) EQ 0 THEN bottom = color ELSE bottom = sbottom
     elevation_shading = Keyword_Set(elevation_shading)
     IF N_Elements(font) EQ 0 THEN IF (!D.Name EQ 'PS') THEN font = 1 ELSE font = !P.font

@@ -113,6 +113,9 @@
 ;        If the IRREGULAR keyword is set, this keyword specifies the X and Y resolution
 ;        in a two element integer array of the final gridded data that is sent to the 
 ;        contour plot.
+;     traditional: in, optional, type=boolean, default=0
+;         If this keyword is set, the traditional color scheme of a black background for
+;         graphics windows on the display is used and PostScript files always use a white background.
 ;     window: in, optional, type=boolean, default=0
 ;         Set this keyword if you want to display the plot in a resizable graphics window.
 ;     xstyle: in, optional, type=integer, default=1
@@ -175,6 +178,7 @@ PRO FSC_Contour, data, x, y, $
     MISSINGVALUE=missingvalue, $
     OVERPLOT=overplot, $
     RESOLUTION=resolution, $
+    TRADITIONAL=traditional, $
     WINDOW=window, $
     XSTYLE=xstyle, $
     YSTYLE=ystyle, $
@@ -212,6 +216,7 @@ PRO FSC_Contour, data, x, y, $
             MISSINGVALUE=missingvalue, $
             OVERPLOT=overplot, $
             RESOLUTION=resolution, $
+            TRADITIONAL=traditional, $
             XSTYLE=xstyle, $
             YSTYLE=ystyle, $
             _Extra=extra
@@ -219,6 +224,9 @@ PRO FSC_Contour, data, x, y, $
          RETURN
     ENDIF
     
+    ; Set up PostScript device for working with colors.
+    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+
     ; Check parameters.
     IF N_Elements(data) EQ 0 THEN BEGIN
         Print, 'USE SYNTAX: FSC_Contour, data, x, y, NLEVELS=10'
@@ -242,7 +250,12 @@ PRO FSC_Contour, data, x, y, $
     TVLCT, rr, gg, bb, /GET
     
     ; Check the keywords.
-    IF N_Elements(sbackground) EQ 0 THEN background = 'WHITE' ELSE background = sbackground
+    IF N_Elements(sbackground) EQ 0 THEN BEGIN
+        IF Keyword_Set(traditional) THEN BEGIN
+            IF ((!D.Flags AND 256) NE 0) THEN background = 'BLACK' ELSE background = 'WHITE'
+        ENDIF ELSE background = 'WHITE' 
+    ENDIF ELSE background = sbackground
+
     ; Choose an axis color.
     IF N_Elements(saxisColor) EQ 0 AND N_Elements(saxescolor) NE 0 THEN saxiscolor = saxescolor
     IF N_Elements(saxiscolor) EQ 0 THEN BEGIN
@@ -251,12 +264,13 @@ PRO FSC_Contour, data, x, y, $
        ENDIF
        IF N_Elements(saxiscolor) EQ 0 THEN BEGIN
            IF !D.Name EQ 'PS' THEN BEGIN
+                IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
                 saxisColor = 'BLACK' 
            ENDIF ELSE BEGIN
                 IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF Total(pixel) EQ 765 THEN saxisColor = 'BLACK'
-                    IF Total(pixel) EQ 0 THEN saxisColor = 'WHITE'
+                    IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN saxisColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN saxisColor = 'WHITE'
                     IF N_Elements(saxisColor) EQ 0 THEN saxisColor = 'OPPOSITE'
                 ENDIF ELSE saxisColor = 'OPPOSITE'
            ENDELSE
@@ -271,19 +285,21 @@ PRO FSC_Contour, data, x, y, $
        ENDIF
        IF N_Elements(sColor) EQ 0 THEN BEGIN
            IF !D.Name EQ 'PS' THEN BEGIN
+                IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
                 sColor = 'BLACK' 
            ENDIF ELSE BEGIN
                 IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF Total(pixel) EQ 765 THEN sColor = 'BLACK'
-                    IF Total(pixel) EQ 0 THEN sColor = 'WHITE'
+                    IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN sColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN sColor = 'WHITE'
                     IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
                 ENDIF ELSE sColor = 'OPPOSITE'
            ENDELSE
        ENDIF
     ENDIF
     IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
-     fill = Keyword_Set(fill)
+
+    fill = Keyword_Set(fill)
     irregular = Keyword_Set(irregular)
     IF N_Elements(label) EQ 0 THEN label = 1
     IF N_Elements(resolution) EQ 0 THEN resolution=[41,41]

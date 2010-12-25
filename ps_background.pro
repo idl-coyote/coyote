@@ -62,6 +62,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 17 November 2010. DWF.
+;        Modified to use FSC_ColorFill so that color is done with decomposed color. 24 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -77,16 +78,10 @@ PRO PS_Background, color
    
    ; Create a background color.
    TVLCT, rr, gg, bb, /GET
-   IF Size(color, /TNAME) EQ 'STRING' THEN BEGIN
-       IF StrUpCase(color) NE 'WHITE' THEN BEGIN
-          POLYFILL, [1, 1, !D.X_Size, !D.X_Size, 1], $
-                    [1, !D.Y_Size, !D.Y_Size, 1, 1], $
-                    /DEVICE, COLOR=FSC_Color(color)
-       ENDIF
-   ENDIF ELSE BEGIN
-      POLYFILL, [1, 1, !D.X_Size-1, !D.X_Size-1, 1], $
-                [1, !D.Y_Size-1, !D.Y_Size-1, 1, 1], $
-                /DEVICE, COLOR=color
-   ENDELSE
+   IF StrUpCase(color) NE 'WHITE' THEN BEGIN
+      FSC_COLORFILL, [1, 1, !D.X_Size, !D.X_Size, 1], $
+                     [1, !D.Y_Size, !D.Y_Size, 1, 1], $
+                     /DEVICE, COLOR=color
+   ENDIF
    TVLCT, rr, gg, bb
 END

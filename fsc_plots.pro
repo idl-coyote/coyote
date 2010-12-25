@@ -99,6 +99,7 @@
 ;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
 ;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
 ;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
+;        Modified to use decomposed color, if possible. 24 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -131,22 +132,30 @@ PRO FSC_PlotS, x, y, z, $
     
     ; Choose a color.
     IF N_Elements(sColor) EQ 0 THEN BEGIN
-        IF !D.Name EQ 'PS' THEN BEGIN
+       IF (Size(background, /TNAME) EQ 'STRING') && (StrUpCase(background) EQ 'WHITE') THEN BEGIN
+            IF !P.Multi[0] EQ 0 THEN sColor = 'BLACK'
+       ENDIF
+       IF N_Elements(sColor) EQ 0 THEN BEGIN
+           IF !D.Name EQ 'PS' THEN BEGIN
+                IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
                 sColor = 'BLACK' 
-        ENDIF ELSE BEGIN
-             IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
-                 pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                 IF Total(pixel) EQ 765 THEN sColor = 'BLACK'
-                 IF Total(pixel) EQ 0 THEN sColor = 'WHITE'
-                 IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
-             ENDIF ELSE sColor = 'OPPOSITE'
-        ENDELSE
+           ENDIF ELSE BEGIN
+                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN sColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN sColor = 'WHITE'
+                    IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
+                ENDIF ELSE sColor = 'OPPOSITE'
+           ENDELSE
+       ENDIF
     ENDIF
     IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
+    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(color,2)
     
     ; Check parameters and keywords.
     IF N_Elements(psym) EQ 0 THEN psym = 0
     IF N_Elements(ssymcolor) EQ 0 THEN symcolor = color ELSE symcolor = ssymcolor
+    IF Size(symcolor, /TYPE) LE 2 THEN symcolor = StrTrim(symcolor,2)
     IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
    
     ; Be sure the vectors are the right length.
@@ -171,8 +180,8 @@ PRO FSC_PlotS, x, y, z, $
    ; Get current color table vectors.
    TVLCT, rr, gg, bb, /Get
 
-   ; Going to draw the axes in indexed color.
-   SetDecomposedState, 0, CurrentState=currentState
+   ; Going to draw the lines in decomposed color, if possible
+   SetDecomposedState, 1, CurrentState=currentState
     
    ; Draw the line or symbol.
    IF N_Elements(color) EQ 1 THEN BEGIN
@@ -240,7 +249,7 @@ PRO FSC_PlotS, x, y, z, $
    ENDIF 
    
    ; Restore the decomposed state if you can.
-   IF currentState THEN SetDecomposedState, 1
+   SetDecomposedState, currentState
    
    ; Restore the color table. Can't do this for the Z-buffer or
    ; the snap shot will be incorrect.

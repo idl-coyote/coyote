@@ -376,6 +376,7 @@
 ;            in the upper right hand corner of the display, if a window is open and the pixel
 ;            color can be determined. Otherwise, it is black in PostScript and white everywhere
 ;            else. 19 Nov 2010. DWF.
+;       Made sure the ColorIndex that is returned is always an INTEGER. 24 Dec 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -543,7 +544,7 @@ FUNCTION FSC_Color, theColour, colorIndex, $
     ; or greater than 57, then this is a "number" string and you should
     ; assume the current color table is being used.
     bytecheck = Byte(theColor[0])
-    i = Where(bytecheck LT 40, lessthan)
+    i = Where(bytecheck LT 48, lessthan)
     i = Where(bytecheck GT 57, greaterthan)
     IF (lessthan + greaterthan) EQ 0 THEN useCurrentColors = 1 ELSE useCurrentColors = 0
     
@@ -868,19 +869,19 @@ FUNCTION FSC_Color, theColour, colorIndex, $
              theColor = PickColorName(Filename=filename, _Extra=extra, Cancel=cancelled, BREWER=brewer)
              IF cancelled THEN RETURN, !P.Color
              IF theDepth GT 8 AND (decomposedState EQ 1) THEN BEGIN
-                   colorIndex = !P.Color < (!D.Table_Size - 1)
+                   colorIndex = Fix(!P.Color < (!D.Table_Size - 1))
              ENDIF ELSE BEGIN
                    colorIndex = Where(StrUpCase(colors) EQ StrUpCase(StrCompress(theColor, /Remove_All)), count) + offset
-                   colorIndex = colorIndex[0]
+                   colorIndex = Fix(colorIndex[0])
                    IF count EQ 0 THEN Message, 'Cannot find color: ' + StrUpCase(theColor), /NoName
              ENDELSE
     
              END
           1: BEGIN
              IF Size(theColor, /TName) NE 'STRING' THEN BEGIN
-                colorIndex = theColor
+                colorIndex = Fix(theColor)
                 theColor = brewer ? 'WT1' : 'White'
-             ENDIF ELSE colorIndex = !P.Color < 255
+             ENDIF ELSE colorIndex = Fix(!P.Color < 255)
              theColor = PickColorName(theColor, Filename=filename, _Extra=extra, Cancel=cancelled, BREWER=brewer)
              IF cancelled THEN RETURN, !P.Color
              END
@@ -897,13 +898,13 @@ FUNCTION FSC_Color, theColour, colorIndex, $
              theColor = brewer ? 'WT1' : 'White'
              IF N_Elements(colorIndex) EQ 0 THEN BEGIN
                 IF theDepth GT 8 THEN BEGIN
-                   colorIndex = !P.Color < (!D.Table_Size - 1)
+                   colorIndex = Fix(!P.Color < (!D.Table_Size - 1))
                 ENDIF ELSE BEGIN
                    colorIndex = Where(colors EQ theColor, count) + offset
-                   colorIndex = colorIndex[0]
+                   colorIndex = Fix(colorIndex[0])
                    IF count EQ 0 THEN Message, 'Cannot find color: ' + theColor, /NoName
                 ENDELSE
-             ENDIF ELSE colorIndex = 0 > colorIndex < (!D.Table_Size - 1)
+             ENDIF ELSE colorIndex = 0S > colorIndex < Fix((!D.Table_Size - 1))
           ENDCASE
     
        1: BEGIN
@@ -912,13 +913,13 @@ FUNCTION FSC_Color, theColour, colorIndex, $
              theColor = theColor[0] ; Make it a scalar or you run into a WHERE function "feature". :-(
              IF N_Elements(colorIndex) EQ 0 THEN BEGIN
                 IF (theDepth GT 8) AND (decomposedState EQ 1) THEN BEGIN
-                   colorIndex = !P.Color < (!D.Table_Size - 1)
+                   colorIndex = Fix(!P.Color < (!D.Table_Size - 1))
                 ENDIF ELSE BEGIN
                    colorIndex = Where(colors EQ theColor, count) + offset
-                   colorIndex = colorIndex[0]
+                   colorIndex = Fix(colorIndex[0])
                    IF count EQ 0 THEN Message, 'Cannot find color: ' + theColor, /NoName
                 ENDELSE
-             ENDIF ELSE colorIndex = 0 > colorIndex < (!D.Table_Size - 1)
+             ENDIF ELSE colorIndex = 0S > colorIndex < Fix(!D.Table_Size - 1)
              ENDCASE
     
        ELSE: BEGIN
@@ -926,8 +927,8 @@ FUNCTION FSC_Color, theColour, colorIndex, $
              IF type NE 'STRING' THEN Message, 'The colors must be expressed as color names.'
              ncolors = N_Elements(theColor)
              CASE N_Elements(colorIndex) OF
-                0: colorIndex = Indgen(ncolors) + (!D.Table_Size - (ncolors + 1))
-                1: colorIndex = Indgen(ncolors) + colorIndex
+                0: colorIndex = Fix(Indgen(ncolors) + (!D.Table_Size - (ncolors + 1)))
+                1: colorIndex = Fix(Indgen(ncolors) + colorIndex)
                 ELSE: IF N_Elements(colorIndex) NE ncolors THEN $
                    Message, 'Index vector must be the same length as color name vector.'
              ENDCASE
@@ -1014,11 +1015,11 @@ FUNCTION FSC_Color, theColour, colorIndex, $
              FOR j=1, ncolors-1 DO colorStructure = Create_Struct(colorStructure, theNames[j], theColors[j])
           ENDIF
     
-          IF N_Elements(colorIndex) EQ 0 THEN colorIndex = !D.Table_Size - ncolors - 2
+          IF N_Elements(colorIndex) EQ 0 THEN colorIndex = Fix(!D.Table_Size - ncolors - 2)
           IF colorIndex LT 0 THEN $
              Message, 'Number of colors exceeds available color table values. Returning.', /NoName
           IF (colorIndex + ncolors) GT 255 THEN BEGIN
-             colorIndex = !D.Table_Size - ncolors - 2
+             colorIndex = Fix(!D.Table_Size - ncolors - 2)
           ENDIF
           IF !D.Name NE 'PRINTER' THEN TVLCT, rvalue, gvalue, bvalue, colorIndex
           RETURN, IndGen(ncolors) + colorIndex
@@ -1030,7 +1031,7 @@ FUNCTION FSC_Color, theColour, colorIndex, $
           ENDIF
     
           IF !D.Name NE 'PRINTER' THEN TVLCT, rvalue[theIndex], gvalue[theIndex], bvalue[theIndex], colorIndex
-          RETURN, colorIndex
+          RETURN, Fix(colorIndex)
        ENDELSE
     
     

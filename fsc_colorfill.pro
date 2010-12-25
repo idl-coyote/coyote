@@ -1,11 +1,11 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_Erase
+;   FSC_ColorFill
 ;
 ; PURPOSE:
-;   Provides a device-independent and color-model-independent way to erase a graphics
-;   window with a particular color.
+;   Provides a device-independent and color-model-independent way to fill a polygon
+;   with a particular color.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -37,28 +37,43 @@
 ;
 ;+
 ; :Description:
-;   Provides a device-independent and color-model-independent way to erase a graphics
-;   window with a particular color.
+;   Provides a device-independent and color-model-independent way to fill a polygon
+;   with a particular color. This is a wrapper to the PolyFill command in IDL.
 ;
 ; :Categories:
 ;    Graphics
 ;    
 ; :Params:
-;    background_color: in, optional, type=string/integer/long, default='white'
-;         The color to use in erasing the graphics window. Default is "white."
-;         Color names are those used with FSC_Color.
-;       
+;     x: in, required, type=number
+;         A vector argument providing the X coordinates of the points to be connected. 
+;         The vector must contain at least three elements. If only one argument is 
+;         specified, X must be an array of either two or three vectors (i.e., (2,*) 
+;         or (3,*)). In this special case, the vector X[0,*] specifies the X values, 
+;         X[1,*] specifies Y, and X[2,*] contain the Z values.       
+;     y: in, required, type=number
+;         A vector argument providing the Y coordinates of the points to be connected. 
+;         Y must contain at least three elements.
+;     z: in, optional, type=number
+;         An optional vector argument providing the Z coordinates of the points to be 
+;         connected. Z must contain at least three elements.
+;
 ; :Keywords:
-;     color: in, optional, type=string/integer/long, default='white'
-;         An alternative way to specify the color to use in erasing the graphics window.
-;         Color names are those used with FSC_Color. This parameter is used in
-;         preference to the background_color parameter.
+;     color: in, optional, type=string/integer/long, default='rose'
+;         The name of the fill color. Color names are those used with FSC_Color. 
+;         This value can also be a long integer or an index into the current color
+;         table.
+;     device: in, optioinal, type=boolean, default=0
+;         Set to indicate the polygon vertices are in device coordinates.
+;     normalized: in, optioinal, type=boolean, default=0
+;         Set to indicate the polygon vertices are in normalized coordinates.
+;     other: in, optional, type=appropriate
+;         Any other keywords to the IDL POLYFILL command may be used.
+;     
 ;          
 ; :Examples:
-;    Used like the IDL Erase command::
-;       IDL> FSC_Erase
-;       IDL> FSC_Erase, 'gray'
-;       IDL> FSC_Erase, COLOR='charcoal'
+;    Used like the IDL Polyfill command::
+;       IDL> FSC_ColorFill, [0.25, 0.25, 0.75, 0.75, 0.25], [0.25, 0.75, 0.75, 0.25, 0.25], $
+;                 /NORMAL, COLOR='blue'
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -71,23 +86,27 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 12 November 2010. DWF.
-;        Modified so that input variables are not changed. 18 Nov 2010. DWF.
-;        Got my color selection algorithm right. COLOR keyword takes precedence
-;          over the parameter. 18 Nov 2010. DWF.
-;        Modified to erase in decomposed color, if possible.
+;        Written, 24 December 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Erase, background_color, COLOR=color
+PRO FSC_ColorFill, x, y, z, COLOR=color, NORMAL=normal, DEVICE=device, _EXTRA=extra
+
+    Compile_Opt idl2
+
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
 
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
-    ; Get a color for erasing.
-    IF N_Elements(background_color) EQ 0 THEN thisColor = 'white' ELSE thisColor = background_color
-    IF N_Elements(color) NE 0 THEN thisColor = color 
+    ; Need a color?
+    IF N_Elements(color) EQ 0 THEN thisColor = 'rose' ELSE thisColor = color
     IF Size(thisColor, /TYPE) LE 2 THEN thisColor = StrTrim(thisColor,2)
 
     ; Get the current color vectors.
@@ -96,8 +115,12 @@ PRO FSC_Erase, background_color, COLOR=color
     ; Do this in decomposed color, if possible.
     SetDecomposedState, 1, CURRENTSTATE=currentState
     
+    ; Fill the polygon.
     IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(thisColor)
-    Erase, Color=thisColor
+    CASE N_Elements(z) OF
+        0: PolyFill, x, y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _STRICT_EXTRA=extra
+        ELSE: PolyFill, x, y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _STRICT_EXTRA=extra
+    ENDCASE
     
     ; Clean up.
     SetDecomposedState, currentState

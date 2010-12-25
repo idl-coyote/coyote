@@ -126,6 +126,8 @@
 ;        Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
 ;        Changes so that color inputs don't change type. 23 Nov 2010. DWF.
 ;        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
+;        Modifications to allow FSC_Plot to be drop-in replacement for old PLOT commands in 
+;            indexed color mode. 24 Dec 2010. DWF.
 ;        
 ;
 ; :Copyright:
@@ -212,6 +214,7 @@ PRO FSC_Plot, x, y, $
             IF ((!D.Flags AND 256) NE 0) THEN background = 'BLACK' ELSE background = 'WHITE'
         ENDIF ELSE background = 'WHITE' 
     ENDIF ELSE background = sbackground
+    IF Size(background, /TYPE) LE 2 THEN background = StrTrim(background,2)
     
     ; Choose an axis color.
     IF N_Elements(saxisColor) EQ 0 AND N_Elements(saxescolor) NE 0 THEN saxiscolor = saxescolor
@@ -224,16 +227,19 @@ PRO FSC_Plot, x, y, $
                 IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
                 saxisColor = 'BLACK' 
            ENDIF ELSE BEGIN
-                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    IF !D.Window LT 0 THEN Window
+                    IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN saxisColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN saxisColor = 'WHITE'
                     IF N_Elements(saxisColor) EQ 0 THEN saxisColor = 'OPPOSITE'
                 ENDIF ELSE saxisColor = 'OPPOSITE'
-           ENDELSE
+          ENDELSE
        ENDIF
     ENDIF
     IF N_Elements(saxisColor) EQ 0 THEN axisColor = !P.Color ELSE axisColor = saxisColor
+    IF Size(axisColor, /TYPE) LE 2 THEN axisColor = StrTrim(axisColor,2)
     
     ; Choose a color.
     IF N_Elements(sColor) EQ 0 THEN BEGIN
@@ -245,7 +251,9 @@ PRO FSC_Plot, x, y, $
                 IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
                 sColor = 'BLACK' 
            ENDIF ELSE BEGIN
-                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    IF !D.Window LT 0 THEN Window
+                    IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN sColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN sColor = 'WHITE'
@@ -255,8 +263,21 @@ PRO FSC_Plot, x, y, $
        ENDIF
     ENDIF
     IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
+    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Fix(color)
+    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(color,2)
+    
+    ; If color is the same as background, do something.
+    IF ColorsAreIdentical(background, color) THEN BEGIN
+        IF ((!D.Flags AND 256) NE 0) THEN IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
+        color = 'OPPOSITE'
+    ENDIF
+    IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
+        IF ((!D.Flags AND 256) NE 0) THEN IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
+        axiscolor = 'OPPOSITE'
+    ENDIF
     
     IF N_Elements(ssymcolor) EQ 0 THEN symcolor = color ELSE symcolor = ssymcolor
+    IF Size(symcolor, /TYPE) LE 2 THEN symcolor = StrTrim(symcolor,2)
     IF Keyword_Set(isotropic) THEN aspect = 1.0
     noerase = Keyword_Set(noerase)
     IF N_Elements(psym) EQ 0 THEN psym = 0
@@ -264,16 +285,6 @@ PRO FSC_Plot, x, y, $
         position = Aspect(aspect)
     ENDIF
            
-     ; Load the drawing colors, if needed.
-    IF Size(axiscolor, /TNAME) EQ 'STRING' THEN $
-        axiscolor = FSC_Color(axiscolor, DECOMPOSED=0, 254)
-    IF Size(color, /TNAME) EQ 'STRING' THEN $
-        color = FSC_Color(color, DECOMPOSED=0, 253)
-    IF Size(background, /TNAME) EQ 'STRING' THEN $
-        background = FSC_Color(background, DECOMPOSED=0, 252)
-    IF Size(symcolor, /TNAME) EQ 'STRING' THEN $
-        symcolor = FSC_Color(symcolor, DECOMPOSED=0, 251)
-    
     ; Do you need a PostScript background color? Lot's of problems here!
     ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a
     ; plot of any sort erases the background color. So, I have to draw a 
@@ -316,8 +327,14 @@ PRO FSC_Plot, x, y, $
         ENDIF ELSE tempNoErase = noerase
      ENDIF ELSE tempNoErase = noerase
  
-     ; Going to have to do all of this in indexed color.
-    SetDecomposedState, 0, CURRENTSTATE=currentState
+     ; Going to do this in decomposed color, if possible.
+    SetDecomposedState, 1, CURRENTSTATE=currentState
+    
+     ; Load the drawing colors, if needed.
+    IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = FSC_Color(axiscolor)
+    IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)
+    IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
+    IF Size(symcolor, /TNAME) EQ 'STRING' THEN symcolor = FSC_Color(symcolor)
     
     ; Draw the plot.
     IF Keyword_Set(overplot) THEN BEGIN
@@ -343,7 +360,7 @@ PRO FSC_Plot, x, y, $
     ENDIF
 
     ; Restore the decomposed color state if you can.
-    IF currentState THEN SetDecomposedState, 1
+    SetDecomposedState, currentState
     
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.

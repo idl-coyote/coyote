@@ -157,6 +157,8 @@
 ;        Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
 ;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
 ;        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
+;        Modifications to allow FSC_Contour to be drop-in replacement for old Contour commands in 
+;            indexed color mode. 24 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -255,6 +257,8 @@ PRO FSC_Contour, data, x, y, $
             IF ((!D.Flags AND 256) NE 0) THEN background = 'BLACK' ELSE background = 'WHITE'
         ENDIF ELSE background = 'WHITE' 
     ENDIF ELSE background = sbackground
+    IF Size(background, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN background = Fix(background)
+    IF Size(background, /TYPE) LE 2 THEN background = StrTrim(background,2)
 
     ; Choose an axis color.
     IF N_Elements(saxisColor) EQ 0 AND N_Elements(saxescolor) NE 0 THEN saxiscolor = saxescolor
@@ -267,16 +271,20 @@ PRO FSC_Contour, data, x, y, $
                 IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
                 saxisColor = 'BLACK' 
            ENDIF ELSE BEGIN
-                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    IF !D.Window LT 0 THEN Window
+                    IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN saxisColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN saxisColor = 'WHITE'
                     IF N_Elements(saxisColor) EQ 0 THEN saxisColor = 'OPPOSITE'
                 ENDIF ELSE saxisColor = 'OPPOSITE'
-           ENDELSE
+          ENDELSE
        ENDIF
     ENDIF
     IF N_Elements(saxisColor) EQ 0 THEN axisColor = !P.Color ELSE axisColor = saxisColor
+    IF Size(saxisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN saxisColor = Fix(saxisColor)
+    IF Size(axisColor, /TYPE) LE 2 THEN axisColor = StrTrim(axisColor,2)
     
     ; Choose a color.
     IF N_Elements(sColor) EQ 0 THEN BEGIN
@@ -288,7 +296,9 @@ PRO FSC_Contour, data, x, y, $
                 IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
                 sColor = 'BLACK' 
            ENDIF ELSE BEGIN
-                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    IF !D.Window LT 0 THEN Window
+                    IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN sColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN sColor = 'WHITE'
@@ -298,7 +308,19 @@ PRO FSC_Contour, data, x, y, $
        ENDIF
     ENDIF
     IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
-
+    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Fix(color)
+    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(color,2)
+    
+    ; If color is the same as background, do something.
+    IF ColorsAreIdentical(background, color) THEN BEGIN
+        IF ((!D.Flags AND 256) NE 0) THEN IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
+        color = 'OPPOSITE'
+    ENDIF
+    IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
+        IF ((!D.Flags AND 256) NE 0) THEN IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
+        axiscolor = 'OPPOSITE'
+    ENDIF
+    
     fill = Keyword_Set(fill)
     irregular = Keyword_Set(irregular)
     IF N_Elements(label) EQ 0 THEN label = 1
@@ -340,6 +362,13 @@ PRO FSC_Contour, data, x, y, $
         levels = ((maxData - minData) / Float(nlevels)) * Indgen(nlevels) + minData
     ENDIF
     
+    ; Need to make sure contour colors are integers if they are indices. 
+    IF N_Elements(c_colors) NE 0 THEN BEGIN
+        IF Size(c_colors, /TNAME) NE 'STRING' THEN BEGIN
+           IF Max(c_colors) LE 255 THEN c_colors = Fix(c_colors)
+        ENDIF
+    ENDIF
+    
     ; Set up the appropriate contour labeling. Only can do if C_LABELS not passed in.
     IF N_Elements(c_labels) EQ 0 THEN BEGIN
         indices = Indgen(N_Elements(levels))
@@ -348,21 +377,15 @@ PRO FSC_Contour, data, x, y, $
         ENDIF ELSE c_labels = Reverse((indices MOD label) EQ 0)
     ENDIF
 
-    ; Load the drawing colors, if needed.
-    IF Size(axiscolor, /TNAME) EQ 'STRING' THEN $
-        axiscolor = FSC_Color(axiscolor, DECOMPOSED=0, 254)
-    IF Size(color, /TNAME) EQ 'STRING' THEN $
-        color = FSC_Color(color, DECOMPOSED=0, 253)
-    IF Size(background, /TNAME) EQ 'STRING' THEN $
-        background = FSC_Color(background, DECOMPOSED=0, 252)
-    IF Size(c_colors, /TNAME) EQ 'STRING' THEN BEGIN
-      tempcolors = c_colors
-      c_colors = BytArr(N_Elements(c_colors))
-      FOR j=1,N_Elements(c_colors) DO c_colors[j-1] = FSC_Color(tempcolors[j-1], DECOMPOSED=0, j)
-    ENDIF
-       
     ; Going to have to do all of this in indexed color.
-    SetDecomposedState, 0, CURRENTSTATE=currentState
+    SetDecomposedState, 1, CURRENTSTATE=currentState
+    
+    ; Load the drawing colors, if needed.
+    IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = FSC_Color(axiscolor)
+    IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)
+    IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
+    IF (Size(c_colors, /TYPE) LE 2) AND (Size(c_colors, /TYPE) NE 0) THEN c_colors = StrTrim(c_colors,2)
+    IF Size(c_colors, /TNAME) EQ 'STRING' THEN c_colors = FSC_Color(c_colors)
     
     ; Do you need a PostScript background color? Lot's of problems here!
     ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a
@@ -471,7 +494,7 @@ PRO FSC_Contour, data, x, y, $
     ENDIF
     
     ; Restore the decomposed color state if you can.
-    IF currentState THEN SetDecomposedState, 1
+    SetDecomposedState, currentState
     
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.

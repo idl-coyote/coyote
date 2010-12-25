@@ -156,6 +156,8 @@
 ;           ROTX and ROTZ keywords. 7 Dec 2010. DWF.
 ;        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
 ;        Changed the Title size to 1.1 times the character size of the plot. 14 Dec 2010. DWF.
+;        Modifications to allow FSC_Surf to be drop-in replacement for old Surface commands in 
+;            indexed color mode. 24 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -247,7 +249,9 @@ PRO FSC_Surf, data, x, y, $
             IF ((!D.Flags AND 256) NE 0) THEN background = 'BLACK' ELSE background = 'WHITE'
         ENDIF ELSE background = 'WHITE' 
     ENDIF ELSE background = sbackground
- 
+    IF Size(background, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN background = Fix(background)
+    IF Size(background, /TYPE) LE 2 THEN background = StrTrim(background,2)
+
     ; Choose an axis color.
     IF N_Elements(saxisColor) EQ 0 AND N_Elements(saxescolor) NE 0 THEN saxiscolor = saxescolor
     IF N_Elements(saxiscolor) EQ 0 THEN BEGIN
@@ -259,16 +263,21 @@ PRO FSC_Surf, data, x, y, $
                 IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
                 saxisColor = 'BLACK' 
            ENDIF ELSE BEGIN
-                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    IF !D.Window LT 0 THEN Window
+                    IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN saxisColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN saxisColor = 'WHITE'
                     IF N_Elements(saxisColor) EQ 0 THEN saxisColor = 'OPPOSITE'
                 ENDIF ELSE saxisColor = 'OPPOSITE'
-           ENDELSE
+          ENDELSE
        ENDIF
     ENDIF
     IF N_Elements(saxisColor) EQ 0 THEN axisColor = !P.Color ELSE axisColor = saxisColor
+    IF Size(axisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN axisColor = Fix(axisColor)
+    IF Size(axisColor, /TYPE) LE 2 THEN axisColor = StrTrim(axisColor,2)
+
     
     ; Choose a color.
     IF N_Elements(sColor) EQ 0 THEN BEGIN
@@ -282,20 +291,40 @@ PRO FSC_Surf, data, x, y, $
                 IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
                 IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE sColor = 'BLU6' 
            ENDIF ELSE BEGIN
-                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    IF !D.Window LT 0 THEN Window
+                    IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN BEGIN
-                        IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE sColor = 'BLU6' 
+                        IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE sColor = 'BLU6'
                     ENDIF
                     IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN sColor = 'WHITE'
-                    IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
+                    IF N_Elements(sColor) EQ 0 THEN BEGIN
+                        IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE sColor = 'BLU6' 
+                    ENDIF
                 ENDIF ELSE sColor = 'OPPOSITE'
            ENDELSE
        ENDIF
     ENDIF
-    IF N_Elements(sColor) EQ 0 THEN color = 'BLU6' ELSE  color = sColor
+    IF N_Elements(sColor) EQ 0 THEN BEGIN
+        IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE color = 'BLU6' 
+    ENDIF ELSE  color = sColor
+    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Fix(color)
+    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(color,2)
+
+    ; If color is the same as background, do something.
+    IF ColorsAreIdentical(background, color) THEN BEGIN
+        IF ((!D.Flags AND 256) NE 0) THEN IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
+        color = 'OPPOSITE'
+    ENDIF
+    IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
+        IF ((!D.Flags AND 256) NE 0) THEN IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
+        axiscolor = 'OPPOSITE'
+    ENDIF
 
     IF N_Elements(sbottom) EQ 0 THEN bottom = color ELSE bottom = sbottom
+    IF Size(bottom, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN bottom = Fix(bottom)
+    IF Size(bottom, /TYPE) LE 2 THEN bottom = StrTrim(bottom,2)
     elevation_shading = Keyword_Set(elevation_shading)
     IF N_Elements(font) EQ 0 THEN IF (!D.Name EQ 'PS') THEN font = 1 ELSE font = !P.font
     IF N_Elements(charsize) EQ 0 THEN BEGIN
@@ -310,7 +339,7 @@ PRO FSC_Surf, data, x, y, $
             
     ; Load the drawing colors, if needed. These drawing colors will be done
     ; using decomposed color, so we don't have to "dirty" the color table.
-    currentState = DecomposedColor()
+    SetDecomposedState, 1, CURRENTSTATE=currentState
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN BEGIN
         axiscolor = FSC_Color(axiscolor)
     ENDIF ELSE BEGIN
@@ -460,7 +489,7 @@ PRO FSC_Surf, data, x, y, $
     IF Keyword_Set(shaded) THEN BEGIN
     
         ; All shaded surfaces have to be done in indexed color mode.
-        Device, Decomposed=0
+        SetDecomposedState, 0
         
         ; We have to get the background color out of the surface color
         ; range to do this in a device independent way.
@@ -491,7 +520,7 @@ PRO FSC_Surf, data, x, y, $
         ; Have to repair the axes. Do this in decomposed color mode, if possible.
         ; If its not possible, you have to reload the color table that has the drawing
         ; colors in it.
-        IF currentState THEN Device, Decomposed=1 ELSE TVLCT, rl, gl, bl
+        IF currentState THEN SetDecomposedState, 1 ELSE TVLCT, rl, gl, bl
         Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
             /NODATA, /NOERASE, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
             FONT=font, CHARSIZE=charsize, SKIRT=skirt, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz 
@@ -523,13 +552,13 @@ PRO FSC_Surf, data, x, y, $
         ; We can draw the surface in decomposed color mode, unless the SHADES
         ; keyword is being used. Then we have to use indexed color mode.         
         IF N_Elements(shades) NE 0 THEN BEGIN
-            Device, Decomposed=0
+            SetDecomposedState, 0
             TVLCT, rr, gg, bb
             Surface, data, x, y, NOERASE=1, SHADES=shades, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
                 FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz         
         ENDIF ELSE BEGIN
-            IF currentState THEN Device, Decomposed=1 ELSE TVLCT, rl, gl, bl
+            IF currentState THEN SetDecomposedState, 1 ELSE TVLCT, rl, gl, bl
             Surface, data, x, y, NOERASE=1, COLOR=color, BOTTOM=bottom, $
                 BACKGROUND=background, SHADES=shades, SKIRT=skirt, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
@@ -548,7 +577,7 @@ PRO FSC_Surf, data, x, y, $
     ENDIF
 
     ; Restore the decomposed color state to the input state.
-    IF currentState THEN SetDecomposedState, 1
+    SetDecomposedState, currentState
 
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.

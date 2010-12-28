@@ -128,6 +128,7 @@
 ;        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
 ;        Modifications to allow FSC_Plot to be drop-in replacement for old PLOT commands in 
 ;            indexed color mode. 24 Dec 2010. DWF.
+;        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
 ;        
 ;
 ; :Copyright:
@@ -210,9 +211,22 @@ PRO FSC_Plot, x, y, $
     
     ; Check the keywords.
     IF N_Elements(sbackground) EQ 0 THEN BEGIN
-        IF Keyword_Set(traditional) THEN BEGIN
-            IF ((!D.Flags AND 256) NE 0) THEN background = 'BLACK' ELSE background = 'WHITE'
-        ENDIF ELSE background = 'WHITE' 
+        IF Keyword_Set(overplot) THEN BEGIN
+           IF !D.Name EQ 'PS' THEN BEGIN
+                background = 'WHITE' 
+           ENDIF ELSE BEGIN
+                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    IF (Total(pixel) EQ 765) THEN background = 'WHITE'
+                    IF (Total(pixel) EQ 0) THEN background = 'BLACK'
+                    IF N_Elements(background) EQ 0 THEN background = 'OPPOSITE'
+                ENDIF ELSE background = 'OPPOSITE'
+           ENDELSE
+        ENDIF ELSE BEGIN
+           IF Keyword_Set(traditional) THEN BEGIN
+              IF ((!D.Flags AND 256) NE 0) THEN background = 'BLACK' ELSE background = 'WHITE'
+           ENDIF ELSE background = 'WHITE' 
+        ENDELSE
     ENDIF ELSE background = sbackground
     IF Size(background, /TYPE) LE 2 THEN background = StrTrim(background,2)
     
@@ -229,7 +243,7 @@ PRO FSC_Plot, x, y, $
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF !D.Window LT 0 THEN Window
-                    IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
+                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot)) THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN saxisColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN saxisColor = 'WHITE'
@@ -253,7 +267,7 @@ PRO FSC_Plot, x, y, $
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF !D.Window LT 0 THEN Window
-                    IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
+                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot)) THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN sColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN sColor = 'WHITE'
@@ -268,11 +282,15 @@ PRO FSC_Plot, x, y, $
     
     ; If color is the same as background, do something.
     IF ColorsAreIdentical(background, color) THEN BEGIN
-        IF ((!D.Flags AND 256) NE 0) THEN IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
+        IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot)) THEN FSC_Erase, background
+        ENDIF
         color = 'OPPOSITE'
     ENDIF
     IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
-        IF ((!D.Flags AND 256) NE 0) THEN IF !P.Multi[0] EQ 0 THEN FSC_Erase, background
+        IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot)) THEN FSC_Erase, background
+        ENDIF
         axiscolor = 'OPPOSITE'
     ENDIF
     

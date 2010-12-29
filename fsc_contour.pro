@@ -160,6 +160,7 @@
 ;        Modifications to allow FSC_Contour to be drop-in replacement for old Contour commands in 
 ;            indexed color mode. 24 Dec 2010. DWF.
 ;        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
+;        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -344,7 +345,7 @@ PRO FSC_Contour, data, x, y, $
     IF N_Elements(label) EQ 0 THEN label = 1
     IF N_Elements(resolution) EQ 0 THEN resolution=[41,41]
     IF (N_Elements(nlevels) EQ 0) AND (N_Elements(levels) EQ 0) THEN nlevels = 6
-    noerase = Keyword_Set(noerase)
+    IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
     IF N_Elements(xstyle) EQ 0 THEN xstyle=1
     IF N_Elements(ystyle) EQ 0 THEN ystyle=1
     IF N_Elements(missingvalue) NE 0 THEN BEGIN

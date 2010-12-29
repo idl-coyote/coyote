@@ -159,6 +159,7 @@
 ;        Modifications to allow FSC_Surf to be drop-in replacement for old Surface commands in 
 ;            indexed color mode. 24 Dec 2010. DWF.
 ;        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
+;        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -349,7 +350,7 @@ PRO FSC_Surf, data, x, y, $
     IF N_Elements(charsize) EQ 0 THEN BEGIN
         IF (!P.Charsize EQ 0) AND ((font EQ 1) OR (!P.FONT EQ 1)) THEN charsize = 1.75
     END
-    noerase = Keyword_Set(noerase)
+    IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
     IF N_Elements(rotx) EQ 0 THEN rotx = 30
     IF N_Elements(rotz) EQ 0 THEN rotz = 30
     IF N_Elements(xstyle) EQ 0 THEN xstyle = 0

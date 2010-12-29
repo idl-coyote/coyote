@@ -129,6 +129,7 @@
 ;        Modifications to allow FSC_Plot to be drop-in replacement for old PLOT commands in 
 ;            indexed color mode. 24 Dec 2010. DWF.
 ;        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
+;        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
 ;        
 ;
 ; :Copyright:
@@ -297,7 +298,7 @@ PRO FSC_Plot, x, y, $
     IF N_Elements(ssymcolor) EQ 0 THEN symcolor = color ELSE symcolor = ssymcolor
     IF Size(symcolor, /TYPE) LE 2 THEN symcolor = StrTrim(symcolor,2)
     IF Keyword_Set(isotropic) THEN aspect = 1.0
-    noerase = Keyword_Set(noerase)
+    IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
     IF N_Elements(psym) EQ 0 THEN psym = 0
     IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
         position = Aspect(aspect)

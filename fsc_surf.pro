@@ -160,7 +160,8 @@
 ;            indexed color mode. 24 Dec 2010. DWF.
 ;        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
 ;        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
-;
+;        Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.;        Change to DECOMPOSED color was using incorrect color tables. 29 Dec 2010. DWF.
+;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -247,11 +248,15 @@ PRO FSC_Surf, data, x, y, $
     
     ; Check the keywords.
     IF N_Elements(sbackground) EQ 0 THEN BEGIN
-        IF Keyword_Set(overplot) THEN BEGIN
+        IF Keyword_Set(overplot) || Keyword_Set(noerase) THEN BEGIN
            IF !D.Name EQ 'PS' THEN BEGIN
                 background = 'WHITE' 
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    IF (!D.Window LT 0) &&  Keyword_Set(noerase) THEN BEGIN
+                        Window
+                        IF ~Keyword_Set(traditional) THEN FSC_Erase, 'WHITE'
+                    ENDIF
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) THEN background = 'WHITE'
                     IF (Total(pixel) EQ 0) THEN background = 'BLACK'
@@ -280,7 +285,7 @@ PRO FSC_Surf, data, x, y, $
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF !D.Window LT 0 THEN Window
-                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot)) THEN FSC_Erase, background
+                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN saxisColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN saxisColor = 'WHITE'
@@ -308,7 +313,7 @@ PRO FSC_Surf, data, x, y, $
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF !D.Window LT 0 THEN Window
-                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot)) THEN FSC_Erase, background
+                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN BEGIN
                         IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE sColor = 'BLU6'
@@ -331,13 +336,13 @@ PRO FSC_Surf, data, x, y, $
     ; If color is the same as background, do something.
     IF ColorsAreIdentical(background, color) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot)) THEN FSC_Erase, background
+            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
         ENDIF
         color = 'OPPOSITE'
     ENDIF
     IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot)) THEN FSC_Erase, background
+            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
         ENDIF
         axiscolor = 'OPPOSITE'
     ENDIF

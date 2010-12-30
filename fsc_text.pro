@@ -105,13 +105,15 @@
 ;        Corrected a problem with setting text color and added PLACE and OUTLOC 
 ;            keywords. 25 Nov 2010. DWF.
 ;        Humm, that text color problem got reset to the old way! Sheesh! Fixed. 9 Dec 2010. DWF.
+;        Modified the way the default color is selected. Drawing with DECOMPOSED 
+;             if possible. 30 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO FSC_Text, xloc, yloc, text, $
     ALIGNMENT=alignment, $
-    COLOR=color, $
+    COLOR=scolor, $
     DATA=data, $
     DEVICE=device, $
     FONT=font, $
@@ -186,25 +188,29 @@ PRO FSC_Text, xloc, yloc, text, $
     ; Get the input color table.
     TVLCT, rr, gg, bb, /Get
 
-    ; Choose a default color
-    IF (!D.Name EQ 'PS') AND N_Elements(color) EQ 0 THEN BEGIN
-        color = 'black'
-    ENDIF ELSE BEGIN
-        IF N_Elements(color) EQ 0 THEN BEGIN
-            IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
-                pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                IF Total(pixel) EQ 765 THEN color = 'black'
-                IF Total(pixel) EQ 0 THEN color = 'white'
-                IF N_Elements(color) EQ 0 THEN color = 'opposite'
-            ENDIF
-        ENDIF 
-    ENDELSE 
-    IF N_Elements(color) EQ 0 THEN color = !P.Color
+    ; Choose a color.
+    IF N_Elements(sColor) EQ 0 THEN BEGIN
+           IF !D.Name EQ 'PS' THEN BEGIN
+                sColor = 'OPPOSITE' 
+           ENDIF ELSE BEGIN
+                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    IF (Total(pixel) EQ 765) THEN sColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) THEN sColor = 'WHITE'
+                    IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
+                ENDIF ELSE sColor = 'OPPOSITE'
+           ENDELSE
+     ENDIF
+    IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
+    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Byte(color)
+    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
      
-    ; Write the text.
+    ; Write the text. Do this in Decomposed color, if possible.
+    SetDecomposedState, 1, CURRENTSTATE=currentState
     IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(color) ELSE thisColor = color
     XYOutS, x, y, textStr, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
         DATA=data, DEVICE=device, NORMAL=normal, _STRICT_EXTRA=extra
+   SetDecomposedState, currentState
    
    ; Restore the color tables.
    IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb

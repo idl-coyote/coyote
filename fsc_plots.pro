@@ -101,6 +101,8 @@
 ;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
 ;        Modified to use decomposed color, if possible. 24 Dec 2010. DWF.
 ;        Whoops! Programming is like herding cats! 29 Dec 2010. DWF.
+;        In some cases, I was turning BYTE values to strings without converting to 
+;            INTEGERS first. 30 Dec 2010. DWF.        
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -145,12 +147,14 @@ PRO FSC_PlotS, x, y, z, $
            ENDELSE
      ENDIF
     IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
-    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(color,2)
+    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Byte(color)
+    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
     
     ; Check parameters and keywords.
     IF N_Elements(psym) EQ 0 THEN psym = 0
     IF N_Elements(ssymcolor) EQ 0 THEN symcolor = color ELSE symcolor = ssymcolor
-    IF Size(symcolor, /TYPE) LE 2 THEN symcolor = StrTrim(symcolor,2)
+    IF Size(symcolor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN symcolor = Byte(symcolor)
+    IF Size(symcolor, /TYPE) LE 2 THEN symcolor = StrTrim(Fix(symcolor),2)
     IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
    
     ; Be sure the vectors are the right length.

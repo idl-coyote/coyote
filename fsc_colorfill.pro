@@ -87,6 +87,8 @@
 ; :History:
 ;     Change History::
 ;        Written, 24 December 2010. DWF.
+;        In some cases, I was turning BYTE values to strings without converting to 
+;            INTEGERS first. 30 Dec 2010. DWF.        
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -107,7 +109,8 @@ PRO FSC_ColorFill, x, y, z, COLOR=color, NORMAL=normal, DEVICE=device, _EXTRA=ex
     
     ; Need a color?
     IF N_Elements(color) EQ 0 THEN thisColor = 'rose' ELSE thisColor = color
-    IF Size(thisColor, /TYPE) LE 2 THEN thisColor = StrTrim(thisColor,2)
+    IF Size(thisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN thisColor = Byte(thisColor)
+    IF Size(thisColor, /TYPE) LE 2 THEN thisColor = StrTrim(Fix(thisColor),2)
 
     ; Get the current color vectors.
     TVLCT, rr, gg, bb, /Get

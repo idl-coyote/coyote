@@ -76,6 +76,8 @@
 ;        Got my color selection algorithm right. COLOR keyword takes precedence
 ;          over the parameter. 18 Nov 2010. DWF.
 ;        Modified to erase in decomposed color, if possible.
+;        In some cases, I was turning BYTE values to strings without converting to 
+;            INTEGERS first. 30 Dec 2010. DWF.        
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -88,7 +90,8 @@ PRO FSC_Erase, background_color, COLOR=color
     ; Get a color for erasing.
     IF N_Elements(background_color) EQ 0 THEN thisColor = 'white' ELSE thisColor = background_color
     IF N_Elements(color) NE 0 THEN thisColor = color 
-    IF Size(thisColor, /TYPE) LE 2 THEN thisColor = StrTrim(thisColor,2)
+    IF Size(thisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN thisColor = Byte(thisColor)
+    IF Size(thisColor, /TYPE) LE 2 THEN thisColor = StrTrim(Fix(thisColor),2)
 
     ; Get the current color vectors.
     TVLCT, rr, gg, bb, /Get

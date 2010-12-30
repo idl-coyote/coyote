@@ -131,7 +131,8 @@
 ;        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
 ;        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
 ;        Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.
-;        
+;        In some cases, I was turning BYTE values to strings without converting to 
+;            INTEGERS first. 30 Dec 2010. DWF.        
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -235,7 +236,8 @@ PRO FSC_Plot, x, y, $
            ENDIF ELSE background = 'WHITE' 
         ENDELSE
     ENDIF ELSE background = sbackground
-    IF Size(background, /TYPE) LE 2 THEN background = StrTrim(background,2)
+    IF Size(background, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN background = Byte(background)
+    IF Size(background, /TYPE) LE 2 THEN background = StrTrim(Fix(background),2)
     
     ; Choose an axis color.
     IF N_Elements(saxisColor) EQ 0 AND N_Elements(saxescolor) NE 0 THEN saxiscolor = saxescolor
@@ -260,7 +262,8 @@ PRO FSC_Plot, x, y, $
        ENDIF
     ENDIF
     IF N_Elements(saxisColor) EQ 0 THEN axisColor = !P.Color ELSE axisColor = saxisColor
-    IF Size(axisColor, /TYPE) LE 2 THEN axisColor = StrTrim(axisColor,2)
+    IF Size(axisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN axisColor = Byte(axisColor)
+    IF Size(axisColor, /TYPE) LE 2 THEN axisColor = StrTrim(Fix(axisColor),2)
     
     ; Choose a color.
     IF N_Elements(sColor) EQ 0 THEN BEGIN
@@ -284,8 +287,8 @@ PRO FSC_Plot, x, y, $
        ENDIF
     ENDIF
     IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
-    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Fix(color)
-    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(color,2)
+    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Byte(color)
+    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
     
     ; If color is the same as background, do something.
     IF ColorsAreIdentical(background, color) THEN BEGIN
@@ -302,7 +305,8 @@ PRO FSC_Plot, x, y, $
     ENDIF
     
     IF N_Elements(ssymcolor) EQ 0 THEN symcolor = color ELSE symcolor = ssymcolor
-    IF Size(symcolor, /TYPE) LE 2 THEN symcolor = StrTrim(symcolor,2)
+    IF Size(symcolor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN symcolor = Byte(symcolor)
+    IF Size(symcolor, /TYPE) LE 2 THEN symcolor = StrTrim(Fix(symcolor),2)
     IF Keyword_Set(isotropic) THEN aspect = 1.0
     IF N_Elements(psym) EQ 0 THEN psym = 0
     IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN

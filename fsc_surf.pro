@@ -160,7 +160,10 @@
 ;            indexed color mode. 24 Dec 2010. DWF.
 ;        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
 ;        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
-;        Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.;        Change to DECOMPOSED color was using incorrect color tables. 29 Dec 2010. DWF.
+;        Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.
+;        Change to DECOMPOSED color was using incorrect color tables. 29 Dec 2010. DWF.
+;        In some cases, I was turning BYTE values to strings without converting to 
+;            INTEGERS first. 30 Dec 2010. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -269,8 +272,8 @@ PRO FSC_Surf, data, x, y, $
            ENDIF ELSE background = 'WHITE' 
         ENDELSE
     ENDIF ELSE background = sbackground
-    IF Size(background, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN background = Fix(background)
-    IF Size(background, /TYPE) LE 2 THEN background = StrTrim(background,2)
+    IF Size(background, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN background = Byte(background)
+    IF Size(background, /TYPE) LE 2 THEN background = StrTrim(Fix(background),2)
 
     ; Choose an axis color.
     IF N_Elements(saxisColor) EQ 0 AND N_Elements(saxescolor) NE 0 THEN saxiscolor = saxescolor
@@ -295,8 +298,8 @@ PRO FSC_Surf, data, x, y, $
        ENDIF
     ENDIF
     IF N_Elements(saxisColor) EQ 0 THEN axisColor = !P.Color ELSE axisColor = saxisColor
-    IF Size(axisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN axisColor = Fix(axisColor)
-    IF Size(axisColor, /TYPE) LE 2 THEN axisColor = StrTrim(axisColor,2)
+    IF Size(axisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN axisColor = Byte(axisColor)
+    IF Size(axisColor, /TYPE) LE 2 THEN axisColor = StrTrim(Fix(axisColor),2)
 
     
     ; Choose a color.
@@ -329,8 +332,8 @@ PRO FSC_Surf, data, x, y, $
     IF N_Elements(sColor) EQ 0 THEN BEGIN
         IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE color = 'BLU6' 
     ENDIF ELSE  color = sColor
-    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Fix(color)
-    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(color,2)
+    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Byte(color)
+    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
 
     ; If color is the same as background, do something.
     ; If color is the same as background, do something.
@@ -348,8 +351,8 @@ PRO FSC_Surf, data, x, y, $
     ENDIF
 
     IF N_Elements(sbottom) EQ 0 THEN bottom = color ELSE bottom = sbottom
-    IF Size(bottom, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN bottom = Fix(bottom)
-    IF Size(bottom, /TYPE) LE 2 THEN bottom = StrTrim(bottom,2)
+    IF Size(bottom, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN bottom = Byte(bottom)
+    IF Size(bottom, /TYPE) LE 2 THEN bottom = StrTrim(Fix(bottom),2)
     elevation_shading = Keyword_Set(elevation_shading)
     IF N_Elements(font) EQ 0 THEN IF (!D.Name EQ 'PS') THEN font = 1 ELSE font = !P.font
     IF N_Elements(charsize) EQ 0 THEN BEGIN

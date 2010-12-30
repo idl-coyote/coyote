@@ -163,7 +163,9 @@
 ;        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
 ;        Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.
 ;        Change to DECOMPOSED color was using incorrect color tables. 29 Dec 2010. DWF.
-;
+;        In some cases, I was turning BYTE values to strings without converting to 
+;            INTEGERS first. 30 Dec 2010. DWF.
+;         
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -277,8 +279,8 @@ PRO FSC_Contour, data, x, y, $
            ENDIF ELSE background = 'WHITE' 
         ENDELSE
     ENDIF ELSE background = sbackground
-    IF Size(background, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN background = Fix(background)
-    IF Size(background, /TYPE) LE 2 THEN background = StrTrim(background,2)
+    IF Size(background, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN background = Byte(background)
+    IF Size(background, /TYPE) LE 2 THEN background = StrTrim(Fix(background),2)
 
     ; Choose an axis color.
     IF N_Elements(saxisColor) EQ 0 AND N_Elements(saxescolor) NE 0 THEN saxiscolor = saxescolor
@@ -303,8 +305,8 @@ PRO FSC_Contour, data, x, y, $
        ENDIF
     ENDIF
     IF N_Elements(saxisColor) EQ 0 THEN axisColor = !P.Color ELSE axisColor = saxisColor
-    IF Size(saxisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN saxisColor = Fix(saxisColor)
-    IF Size(axisColor, /TYPE) LE 2 THEN axisColor = StrTrim(axisColor,2)
+    IF Size(saxisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN saxisColor = Byte(saxisColor)
+    IF Size(axisColor, /TYPE) LE 2 THEN axisColor = StrTrim(Fix(axisColor),2)
     
     ; Choose a color.
     IF N_Elements(sColor) EQ 0 THEN BEGIN
@@ -328,8 +330,8 @@ PRO FSC_Contour, data, x, y, $
        ENDIF
     ENDIF
     IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
-    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Fix(color)
-    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(color,2)
+    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Byte(color)
+    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
     
     ; If color is the same as background, do something.
     IF ColorsAreIdentical(background, color) THEN BEGIN
@@ -414,7 +416,7 @@ PRO FSC_Contour, data, x, y, $
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = FSC_Color(axiscolor)
     IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)
     IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
-    IF (Size(c_colors, /TYPE) LE 2) AND (Size(c_colors, /TYPE) NE 0) THEN c_colors = StrTrim(c_colors,2)
+    IF (Size(c_colors, /TYPE) LE 2) AND (Size(c_colors, /TYPE) NE 0) THEN c_colors = StrTrim(Fix(c_colors),2)
     IF Size(c_colors, /TNAME) EQ 'STRING' THEN c_colors = FSC_Color(c_colors)
     
     ; Do you need a PostScript background color? Lot's of problems here!

@@ -377,6 +377,7 @@
 ;            color can be determined. Otherwise, it is black in PostScript and white everywhere
 ;            else. 19 Nov 2010. DWF.
 ;       Made sure the ColorIndex that is returned is always an INTEGER. 24 Dec 2010. DWF.
+;       Changed the default "unknown" color from WHITE to OPPOSITE. 30 Dec 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -959,12 +960,11 @@ FUNCTION FSC_Color, theColour, colorIndex, $
     theIndex = Where(theNames EQ StrUpCase(StrCompress(theColor, /Remove_All)), foundIt)
     theIndex = theIndex[0]
     
-    ; If the color can't be found, report it and continue with
-    ; the first color in the color names array.
+    ; If the color can't be found, report it and continue with the color set to "OPPOSITE."
     IF foundIt EQ 0 THEN BEGIN
-       Message, "Can't find color " + theColor + ". Substituting " + StrUpCase(colors[0]) + ".", /Informational
-       theColor = theNames[0]
-       theIndex = 0
+       Message, "Can't find color " + theColor + ". Substituting 'OPPOSITE'.", /Informational
+       theColor = 'OPPOSITE'
+       theIndex = Where(StrUpCase(colors) EQ 'OPPOSITE')
     ENDIF
     
     ; Get the color triple for this color.

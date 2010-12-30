@@ -100,6 +100,7 @@
 ;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
 ;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
 ;        Modified to use decomposed color, if possible. 24 Dec 2010. DWF.
+;        Whoops! Programming is like herding cats! 29 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -132,23 +133,17 @@ PRO FSC_PlotS, x, y, z, $
     
     ; Choose a color.
     IF N_Elements(sColor) EQ 0 THEN BEGIN
-       IF (Size(background, /TNAME) EQ 'STRING') && (StrUpCase(background) EQ 'WHITE') THEN BEGIN
-            IF !P.Multi[0] EQ 0 THEN sColor = 'BLACK'
-       ENDIF
-       IF N_Elements(sColor) EQ 0 THEN BEGIN
            IF !D.Name EQ 'PS' THEN BEGIN
-                IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
-                sColor = 'BLACK' 
+                sColor = 'OPPOSITE' 
            ENDIF ELSE BEGIN
                 IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN sColor = 'BLACK'
-                    IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN sColor = 'WHITE'
+                    IF (Total(pixel) EQ 765) THEN sColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) THEN sColor = 'WHITE'
                     IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
                 ENDIF ELSE sColor = 'OPPOSITE'
            ENDELSE
-       ENDIF
-    ENDIF
+     ENDIF
     IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
     IF Size(color, /TYPE) LE 2 THEN color = StrTrim(color,2)
     

@@ -52,13 +52,24 @@
 ;         DECOMPOSED keyword are assumed to be perpetually in indexed color mode.
 ;       
 ; :Keywords:
-;     CurrentState: out, optional, type=integer
+;     currentstate: out, optional, type=integer
 ;         The current decomposition state of the current graphics device when the
 ;         program is called. A 1 indicates decomposed color. A 0 indicates indexed 
 ;         color.
+;     depth: out, optional, type=integer
+;         The currnet pixel depth of the graphics device. 
+;     zdepth: in, optional, type=integer
+;         The pixel depth of the Z-graphics device. Set to 8 or 24. Applies ONLY 
+;         when setting the Z-graphics device state to 0. If undefined, the current 
+;         depth of the Z-graphics device is unchanged from its current state.
 ;          
 ; :Examples:
 ;       IDL> SetDecomposedState, 0, CurrentState=mode
+;       
+; : Restrictions:
+;       If you set color decomposition on in the Z-graphics buffer, the pixel depth
+;       automatically gets set to 24. It does not change back to 8 if color decomposition
+;       is turned off.
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -74,19 +85,22 @@
 ;        Written, 16 November 2010. DWF.
 ;        Changes to include SET_PIXEL_DEPTH in Z-graphics buffer. 19 Nov 2010. DWF.
 ;        Allow PostScript 7.0 to set the decomposition keyword. 12 Dec 2010. DWF.
+;        Added DEPTH and ZDEPTH keywords. 31 Dec 2010. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO SetDecomposedState, state, CURRENTSTATE=currentState
+PRO SetDecomposedState, state, CURRENTSTATE=currentState, DEPTH=depth, ZDEPTH=zdepth
 
     Compile_Opt idl2
+    
+    On_Error, 2
     
     ; Set to indexed color if you are not told differently.
     state = Keyword_Set(state)
     
-    ; Need to know the current state?
-    IF Arg_Present(currentState) THEN currentState = DecomposedColor()
+    ; Get the current state and pixel depth.
+    currentState = DecomposedColor(DEPTH=depth)
     
     ; Set the decomposition state, if you are able. Otherwise assume
     ; indexed color mode.
@@ -98,8 +112,11 @@ PRO SetDecomposedState, state, CURRENTSTATE=currentState
              
         'Z': BEGIN ; Z-Graphics Buffer
              IF Float(!Version.Release) GE 6.4 THEN BEGIN
+             IF N_Elements(zdepth) NE 0 THEN BEGIN
+                IF (zdepth NE 8) AND (zdepth NE 24) THEN Message, 'ZDEPTH must be set to 8 or 24.'
+             ENDIF
                 CASE state OF
-                    0: Device, Decomposed=state, Set_Pixel_Depth=8
+                    0: Device, Decomposed=state;, Set_Pixel_Depth=zdepth
                     1: Device, Decomposed=state, Set_Pixel_Depth=24
                  ENDCASE
              ENDIF

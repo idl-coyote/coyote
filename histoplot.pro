@@ -233,7 +233,7 @@ PRO HistoPlot , $                   ; The program name.
    MIN_VALUE=min_value, $           ; The minimum value to plot.
    MISSING=missing, $               ; The value that indicates "missing" data to be excluded from the histgram.
    OPLOT=overplot, $                ; Set if you want overplotting.
-   OPROB=oprob, $                   ; Overplot the cummulative probability distribution.
+   OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
    OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
    PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
    THICK=thick, $                   ; Set to draw thicker lines and axes.

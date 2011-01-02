@@ -165,6 +165,8 @@
 ;        Change to DECOMPOSED color was using incorrect color tables. 29 Dec 2010. DWF.
 ;        In some cases, I was turning BYTE values to strings without converting to 
 ;            INTEGERS first. 30 Dec 2010. DWF.
+;         Still working on getting contour colors to work in decomposed color mode in all 
+;             circumstances. 2 Jan 2011. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -393,12 +395,9 @@ PRO FSC_Contour, data, x, y, $
            IF (Size(c_colors, /TYPE) EQ 3) && (Max(c_colors) LE 255) THEN c_colors = Fix(c_colors)
         ENDIF
     ENDIF ELSE BEGIN
-        TVLCT, rrr, ggg, bbb, /Get
-        rc = Congrid(rrr, nlevels)
-        gc = Congrid(ggg, nlevels)
-        bc = Congrid(bbb, nlevels)
-        c_colors = LonArr(nlevels)
-        FOR j=0,nlevels-1 DO c_colors[j] = Color24([rc[j], gc[j], bc[j]])
+        c_colors = Replicate(color, nlevels)
+        IF Size(c_colors, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN c_colors = Byte(c_colors)
+        IF Size(c_colors, /TYPE) LE 2 THEN c_colors = StrTrim(Fix(c_colors),2)
     ENDELSE
     
     ; Set up the appropriate contour labeling. Only can do if C_LABELS not passed in.

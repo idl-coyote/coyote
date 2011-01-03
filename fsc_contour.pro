@@ -170,6 +170,7 @@
 ;         Fixed problem with FILL when no contour colors (C_COLORS) are specified. 3 Jan 2011. DWF.
 ;         Fixed a problem that preventing output keyword (e.g., PATH_INFO) from being returned properly. 
 ;             3 Jan 2011. DWF.
+;         Fixed a problem calculating NLEVELS when LEVELS keyword was used instead. 3 Jan 2011. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -356,7 +357,9 @@ PRO FSC_Contour, data, x, y, $
     irregular = Keyword_Set(irregular)
     IF N_Elements(label) EQ 0 THEN label = 1
     IF N_Elements(resolution) EQ 0 THEN resolution=[41,41]
-    IF (N_Elements(nlevels) EQ 0) AND (N_Elements(levels) EQ 0) THEN nlevels = 6
+    IF N_Elements(nlevels) EQ 0 THEN BEGIN
+        IF N_Elements(levels) EQ 0 THEN nlevels = 6 ELSE nlevels = N_Elements(levels)
+    ENDIF    
     IF N_Elements(xstyle) EQ 0 THEN xstyle=1
     IF N_Elements(ystyle) EQ 0 THEN ystyle=1
     IF N_Elements(missingvalue) NE 0 THEN BEGIN

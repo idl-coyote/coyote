@@ -167,6 +167,9 @@
 ;            INTEGERS first. 30 Dec 2010. DWF.
 ;         Still working on getting contour colors to work in decomposed color mode in all 
 ;             circumstances. 2 Jan 2011. DWF.
+;         Fixed problem with FILL when no contour colors (C_COLORS) are specified. 3 Jan 2011. DWF.
+;         Fixed a problem that preventing output keyword (e.g., PATH_INFO) from being returned properly. 
+;             3 Jan 2011. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -192,7 +195,7 @@ PRO FSC_Contour, data, x, y, $
     WINDOW=window, $
     XSTYLE=xstyle, $
     YSTYLE=ystyle, $
-    _Extra=extra
+    _REF_EXTRA=extra
     
     Compile_Opt idl2
 
@@ -395,11 +398,19 @@ PRO FSC_Contour, data, x, y, $
            IF (Size(c_colors, /TYPE) EQ 3) && (Max(c_colors) LE 255) THEN c_colors = Fix(c_colors)
         ENDIF
     ENDIF ELSE BEGIN
-        c_colors = Replicate(color, nlevels)
+        IF Keyword_Set(fill) THEN BEGIN
+            TVLCT, rrr, ggg, bbb, /Get
+            rrr = Congrid(rrr, nlevels)
+            ggg = Congrid(ggg, nlevels)
+            bbb = Congrid(bbb, nlevels)
+            TVLCT, rrr, ggg, bbb, 1
+            c_colors = StrTrim(Indgen(nlevels)+1,2)
+        ENDIF ELSE BEGIN
+            c_colors = Replicate(color, nlevels)
+        ENDELSE
         IF Size(c_colors, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN c_colors = Byte(c_colors)
         IF Size(c_colors, /TYPE) LE 2 THEN c_colors = StrTrim(Fix(c_colors),2)
     ENDELSE
-    
     ; Set up the appropriate contour labeling. Only can do if C_LABELS not passed in.
     IF N_Elements(c_labels) EQ 0 THEN BEGIN
         indices = Indgen(N_Elements(levels))

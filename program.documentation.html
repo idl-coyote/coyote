@@ -13,7 +13,7 @@ this routine, refer to the IDL Online Help Navigator
 or type: <P>
 <PRE>     ? mk_html_help</PRE>
 <P>at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Tue Dec 14 06:37:54 2010.<P>
+<STRONG>Last modified: </STRONG>Mon Jan 03 12:24:29 2011.<P>
  
 <HR>
  
@@ -45,6 +45,7 @@ or type: <P>
 <LI><A HREF="#CLIPSCL">CLIPSCL</A>
 <LI><A HREF="#COLOR24">COLOR24</A>
 <LI><A HREF="#COLORBUTTONBITMAP">COLORBUTTONBITMAP</A>
+<LI><A HREF="#COLORSAREIDENTICAL">COLORSAREIDENTICAL</A>
 <LI><A HREF="#CONTRASTZOOM">CONTRASTZOOM</A>
 <LI><A HREF="#CONVERT_TO_TYPE">CONVERT_TO_TYPE</A>
 <LI><A HREF="#CTLOAD">CTLOAD</A>
@@ -86,6 +87,7 @@ or type: <P>
 <LI><A HREF="#FSC_COLOR">FSC_COLOR</A>
 <LI><A HREF="#FSC_COLORBAR">FSC_COLORBAR</A>
 <LI><A HREF="#FSC_COLORBAR__DEFINE">FSC_COLORBAR__DEFINE</A>
+<LI><A HREF="#FSC_COLORFILL">FSC_COLORFILL</A>
 <LI><A HREF="#FSC_COLORSELECT">FSC_COLORSELECT</A>
 <LI><A HREF="#FSC_CONTOUR">FSC_CONTOUR</A>
 <LI><A HREF="#FSC_DISPLAY">FSC_DISPLAY</A>
@@ -2036,7 +2038,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A NAME="COLORBUTTONBITMAP">
 <H2>COLORBUTTONBITMAP</H2></A>
 <A HREF="#COLOR24">[Previous Routine]</A>
-<A HREF="#CONTRASTZOOM">[Next Routine]</A>
+<A HREF="#COLORSAREIDENTICAL">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -2108,9 +2110,55 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See colorbuttonbitmap.pro)</STRONG><P>
 <HR>
  
+<A NAME="COLORSAREIDENTICAL">
+<H2>COLORSAREIDENTICAL</H2></A>
+<A HREF="#COLORBUTTONBITMAP">[Previous Routine]</A>
+<A HREF="#CONTRASTZOOM">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   Returns a 1 if the two input colors refer to the same color, otherwise returns a 0.
+
+ :Categories:
+    Graphics Utility
+    
+ :Params:
+    color_1: in, required, type=string/integer/long
+         The first color to compare for "equality".
+    color_2: in, required, type=string/integer/long
+         The second color to compare for "equality".
+       
+ :Keywords:
+     None.
+          
+ :Examples:
+    Used to compare if two different colors are the same color::
+       IDL> Print, ColorsAreIdentical('white', FSC_Color('white'))
+       IDL> Print, ColorsAreIdentical(252, !P.Color)
+       IDL> Print, ColorsAreIdentical('white', '255')
+       
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ :History:
+     Change History::
+        Written, 24 December 2010. DWF.
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See colorsareidentical.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="CONTRASTZOOM">
 <H2>CONTRASTZOOM</H2></A>
-<A HREF="#COLORBUTTONBITMAP">[Previous Routine]</A>
+<A HREF="#COLORSAREIDENTICAL">[Previous Routine]</A>
 <A HREF="#CONVERT_TO_TYPE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -3453,7 +3501,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                       
      COLORS:          The name of a color to draw the shapefile polygon in. This
                       may be a string array of the same size as ATTRVALUES. Color names
-                      correspond to the colors available in FSC_COLOR. By default, "Sky Blue".
+                      correspond to the colors available in FSC_COLOR. By default, "blu4".
                       
      FCOLORS:         The name of the color to draw filled polygons in. If undefined,
                       the same as COLOR. This may be a string array of the same size as 
@@ -3518,12 +3566,17 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        Map_Grid, LatDel = 2.0, LonDel = 2.0, /Box_Axes, Color=FSC_Color('charcoal'), $
             Map_Structure=mapCoord->GetMapStructure()
 
+  Example drawing the states.shp file automatically.
+  
+       DrawShapes, Filepath(subdir=['examples','data'], 'states.shp'), /Autodraw
+       
  MODIFICATION HISTORY:
 
        Written by David W. Fanning by modifiying DrawStates to be more
           general, 13 May 2010. DWF.
        Added the AUTODRAW keyword for automatic drawing. 15 May 2010. DWF.
        Added COMPILE_OPT idl2 to make sure all loop variables are longs. 5 July 2010. DWF.
+       Corrected an aspect ratio problem with AUTODRAW and upgraded to Coyote Graphics. 3 January 2011. DWF.
 </PRE><P>
 <STRONG>(See drawshapes.pro)</STRONG><P>
 <HR>
@@ -4790,6 +4843,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Output file was created, even if not used. Now deleting file and issuing messages to
            explain why output file was not created. 1 November 2010. DWF.
         Added SUCCESS and QUIET keywords. 15 Novemember 2010. DWF.
+        PostScript file structure changed in IDL 8. Made adjustment to find the 
+            PageBoundingBox line. 19 Dec 2010. DWF.
 </PRE><P>
 <STRONG>(See fixps.pro)</STRONG><P>
 <HR>
@@ -5476,6 +5531,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
             in the upper right hand corner of the display, if a window is open and the pixel
             color can be determined. Otherwise, it is black in PostScript and white everywhere
             else. 19 Nov 2010. DWF.
+       Made sure the ColorIndex that is returned is always an INTEGER. 24 Dec 2010. DWF.
+       Changed the default "unknown" color from WHITE to OPPOSITE. 30 Dec 2010. DWF.
 </PRE><P>
 <STRONG>(See fsc_color.pro)</STRONG><P>
 <HR>
@@ -5738,7 +5795,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A NAME="FSC_COLORBAR__DEFINE">
 <H2>FSC_COLORBAR__DEFINE</H2></A>
 <A HREF="#FSC_COLORBAR">[Previous Routine]</A>
-<A HREF="#FSC_COLORSELECT">[Next Routine]</A>
+<A HREF="#FSC_COLORFILL">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -5887,9 +5944,75 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See fsc_colorbar__define.pro)</STRONG><P>
 <HR>
  
+<A NAME="FSC_COLORFILL">
+<H2>FSC_COLORFILL</H2></A>
+<A HREF="#FSC_COLORBAR__DEFINE">[Previous Routine]</A>
+<A HREF="#FSC_COLORSELECT">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   Provides a device-independent and color-model-independent way to fill a polygon
+   with a particular color. This is a wrapper to the PolyFill command in IDL.
+
+ :Categories:
+    Graphics
+    
+ :Params:
+     x: in, required, type=number
+         A vector argument providing the X coordinates of the points to be connected. 
+         The vector must contain at least three elements. If only one argument is 
+         specified, X must be an array of either two or three vectors (i.e., (2,*) 
+         or (3,*)). In this special case, the vector X[0,*] specifies the X values, 
+         X[1,*] specifies Y, and X[2,*] contain the Z values.       
+     y: in, required, type=number
+         A vector argument providing the Y coordinates of the points to be connected. 
+         Y must contain at least three elements.
+     z: in, optional, type=number
+         An optional vector argument providing the Z coordinates of the points to be 
+         connected. Z must contain at least three elements.
+
+ :Keywords:
+     color: in, optional, type=string/integer/long, default='rose'
+         The name of the fill color. Color names are those used with FSC_Color. 
+         This value can also be a long integer or an index into the current color
+         table.
+     device: in, optioinal, type=boolean, default=0
+         Set to indicate the polygon vertices are in device coordinates.
+     normalized: in, optioinal, type=boolean, default=0
+         Set to indicate the polygon vertices are in normalized coordinates.
+     other: in, optional, type=appropriate
+         Any other keywords to the IDL POLYFILL command may be used.
+     
+          
+ :Examples:
+    Used like the IDL Polyfill command::
+       IDL> FSC_ColorFill, [0.25, 0.25, 0.75, 0.75, 0.25], [0.25, 0.75, 0.75, 0.25, 0.25], $
+                 /NORMAL, COLOR='blue'
+       
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ :History:
+     Change History::
+        Written, 24 December 2010. DWF.
+        In some cases, I was turning BYTE values to strings without converting to 
+            INTEGERS first. 30 Dec 2010. DWF.        
+
+ :Copyright:
+     Copyright (c) 2010, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See fsc_colorfill.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="FSC_COLORSELECT">
 <H2>FSC_COLORSELECT</H2></A>
-<A HREF="#FSC_COLORBAR__DEFINE">[Previous Routine]</A>
+<A HREF="#FSC_COLORFILL">[Previous Routine]</A>
 <A HREF="#FSC_CONTOUR">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -6111,6 +6234,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         If the IRREGULAR keyword is set, this keyword specifies the X and Y resolution
         in a two element integer array of the final gridded data that is sent to the 
         contour plot.
+     traditional: in, optional, type=boolean, default=0
+         If this keyword is set, the traditional color scheme of a black background for
+         graphics windows on the display is used and PostScript files always use a white background.
      window: in, optional, type=boolean, default=0
          Set this keyword if you want to display the plot in a resizable graphics window.
      xstyle: in, optional, type=integer, default=1
@@ -6152,7 +6278,17 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
         Changes so that color variables don't change type. 23 Nov 2010. DWF.
         Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
-
+        Modifications to allow FSC_Contour to be drop-in replacement for old Contour commands in 
+            indexed color mode. 24 Dec 2010. DWF.
+        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
+        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
+        Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.
+        Change to DECOMPOSED color was using incorrect color tables. 29 Dec 2010. DWF.
+        In some cases, I was turning BYTE values to strings without converting to 
+            INTEGERS first. 30 Dec 2010. DWF.
+         Still working on getting contour colors to work in decomposed color mode in all 
+             circumstances. 2 Jan 2011. DWF.
+         
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
 </PRE><P>
@@ -6166,10 +6302,11 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  :Description:
-   The purpose of FSC_Display is to open a graphics window on graphics devices that
-   support windows. Using FSC_Display to open a graphics window means you no longer
-   have to "protect" your Window command in devices, like the PostScript device, that
-   do not support windows. Basically, a smarter Window command.
+   The purpose of FSC_Display is to open a graphics window on the display, or in the
+   PostScript device, or in the Z-graphics buffer, depending upon the current graphics
+   device. In PostScript a window of the proper aspect ratio is created with PSWindow.
+   Using FSC_Display to open "windows" will allow you to more easily write device-independent
+   IDL programs.
 
  :Categories:
     Graphics
@@ -6184,7 +6321,11 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
     color: in, optional, type=string/integer, default='white'
         If this keyword is a string, the name of the data color. By default, 'white'.
         Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
-        to be a color index into the current color table.
+        to be a color index into the current color table. The color is not used if
+        the "window" is opened in PostScript on the Z-graphics buffer.
+    free: in, optional, type=boolean, default=0
+         Set this keyword to open a window with a free or unused window index number.
+         This keyword applied only to graphics windows created on the computer display.
     wid: in, optional, type=integer, default=0
          The window index number of the IDL graphics window to create.
     xsize: in, optional, type=integer, default=640
@@ -6198,7 +6339,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
          
  :Examples:
     Use like the IDL WINDOW command::
-       IDL> FSC_Display, /Free, XSIZE=500 YSIZE=400
+       IDL> FSC_Display, XSIZE=500 YSIZE=400
        IDL> FSC_Display, 500, 500, WID=1, COLOR='gray'
        
  :Author:
@@ -6215,6 +6356,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Written, 15 November 2010. DWF.
         Changes so that color variables don't change type. 23 Nov 2010. DWF.
         Moved the window index argument to the WID keyword. 9 Dec 2010. DWF.
+        Modified to produce a window in PostScript and the Z-buffer, too. 15 Dec 2010. DWF.
+        Added the FREE keyword. 3 January 2011. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -6432,6 +6575,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Modified so that input variables are not changed. 18 Nov 2010. DWF.
         Got my color selection algorithm right. COLOR keyword takes precedence
           over the parameter. 18 Nov 2010. DWF.
+        Modified to erase in decomposed color, if possible.
+        In some cases, I was turning BYTE values to strings without converting to 
+            INTEGERS first. 30 Dec 2010. DWF.        
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -7453,6 +7599,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      symcolor: in, optional, type=string/integer, default='black'
         If this keyword is a string, the name of the symbol color. By default, 'black'.
         Otherwise, the keyword is assumed to be a color index into the current color table.
+     traditional: in, optional, type=boolean, default=0
+         If this keyword is set, the traditional color scheme of a black background for
+         graphics windows on the display is used and PostScript files always use a white background.
      window: in, optional, type=boolean, default=0
          Set this keyword if you want to display the plot in a resizable graphics window.
      _extra: in, optional, type=any
@@ -7487,7 +7636,13 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
         Changes so that color inputs don't change type. 23 Nov 2010. DWF.
         Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
-        
+        Modifications to allow FSC_Plot to be drop-in replacement for old PLOT commands in 
+            indexed color mode. 24 Dec 2010. DWF.
+        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
+        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
+        Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.
+        In some cases, I was turning BYTE values to strings without converting to 
+            INTEGERS first. 30 Dec 2010. DWF.        
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -7563,6 +7718,10 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
         Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
         Changes so that color variables don't change type. 23 Nov 2010. DWF.
+        Modified to use decomposed color, if possible. 24 Dec 2010. DWF.
+        Whoops! Programming is like herding cats! 29 Dec 2010. DWF.
+        In some cases, I was turning BYTE values to strings without converting to 
+            INTEGERS first. 30 Dec 2010. DWF.        
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -7810,6 +7969,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
    Added PAGETYPE field to returned structure to allow PostScript page type to be determined. 8 August 2009. DWF.
    Fixed a problem with 24-bit color support that allowed only IDL 7 versions to work correctly. 20 Sept 2009. DWF.
    Added a LANGUAGE_LEVEL keyword. 13 Dec 2010. DWF.
+   Added the FONTYPE value to the keyword return structure. 14 Dec 2010. DWF.
 </PRE><P>
 <STRONG>(See fsc_psconfig__define.pro)</STRONG><P>
 <HR>
@@ -7992,8 +8152,11 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Set this keyword to a Z value where a skirt will be drawn for the surface.
      title: in, optional, type=string
         The title of the plot. It will be written "flat to the screen", rather than rotated.
+     traditional: in, optional, type=boolean, default=0
+         If this keyword is set, the traditional color scheme of a black background for
+         graphics windows on the display is used and PostScript files always use a white background.
      tsize: in, optional, type=float
-        The character size for the title. Normally, the title character size is 1.25 times
+        The character size for the title. Normally, the title character size is 1.1 times
         the character size of the surface annotation.
      tspace: in, optional, type=float
         The title Y spacing. This should be a number, between 0 and 1 that is the fraction 
@@ -8041,7 +8204,16 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         I had keyword conflicts with the AX and AZ rotation keywords. Now perform rotation with
            ROTX and ROTZ keywords. 7 Dec 2010. DWF.
         Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
-
+        Changed the Title size to 1.1 times the character size of the plot. 14 Dec 2010. DWF.
+        Modifications to allow FSC_Surf to be drop-in replacement for old Surface commands in 
+            indexed color mode. 24 Dec 2010. DWF.
+        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
+        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
+        Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.
+        Change to DECOMPOSED color was using incorrect color tables. 29 Dec 2010. DWF.
+        In some cases, I was turning BYTE values to strings without converting to 
+            INTEGERS first. 30 Dec 2010. DWF.
+        
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
 </PRE><P>
@@ -8260,6 +8432,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Corrected a problem with setting text color and added PLACE and OUTLOC 
             keywords. 25 Nov 2010. DWF.
         Humm, that text color problem got reset to the old way! Sheesh! Fixed. 9 Dec 2010. DWF.
+        Modified the way the default color is selected. Drawing with DECOMPOSED 
+             if possible. 30 Dec 2010. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -16442,6 +16616,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
    Filename - Set thie keyword to the name of the PostScript file. The default is "idl.ps".
    Inches - Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters. Set by European keyword by default.
    Landscape - Set this keyword to select Landscape page output. Portrait page output is the default.
+   Match - If this keyword is set, the initial PostScript window will match the aspect ratio of the current graphics window.
+   NoGUI - Set this keyword if you don't want a graphical user interface, but just want to get the return structure.
    PageType - Set this keyword to the "type" of page. Possible values are:
        "Letter" - 8.5 by 11 inches. (Default, unless the European keyword is set.)
        "Legal" - 8.5 by 14 inches.
@@ -16499,6 +16675,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      user interaction. 11 Oct 2004. DWF.
    Added CMYK option 24 August 2007. Requires LANGUAGE_LEVEL=2 printer. L. Anderson
    Updated for IDL 7.1 and 24-bt color PostScript support. 24 May 2009. DWF.
+   Added MATCH keyword. 14 Dec 2010. DWF.
 </PRE><P>
 <STRONG>(See psconfig.pro)</STRONG><P>
 <HR>
@@ -16706,6 +16883,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  :History:
      Change History::
         Written, 17 November 2010. DWF.
+        Modified to use FSC_ColorFill so that color is done with decomposed color. 24 Dec 2010. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -16933,7 +17111,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 
        SCALE_FACTOR: Set this to the PostScript scale factor. By default: 1.
 
-       TT_FONT:      The name of a true-type font to use if FONT=1. By default, "TIMES".
+       TT_FONT:      The name of a true-type font to use if FONT=1. By default, "HELVETICA".
 
        Any keyword supported by PSCONFIG can be used to configure the PostScript device.
        Common keywords would include FILENAME, XSIZE, YSIZE, XOFFSET, YOFFSET, etc. See
@@ -17847,13 +18025,24 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
          DECOMPOSED keyword are assumed to be perpetually in indexed color mode.
        
  :Keywords:
-     CurrentState: out, optional, type=integer
+     currentstate: out, optional, type=integer
          The current decomposition state of the current graphics device when the
          program is called. A 1 indicates decomposed color. A 0 indicates indexed 
          color.
+     depth: out, optional, type=integer
+         The currnet pixel depth of the graphics device. 
+     zdepth: in, optional, type=integer
+         The pixel depth of the Z-graphics device. Set to 8 or 24. Applies ONLY 
+         when setting the Z-graphics device state to 0. If undefined, the current 
+         depth of the Z-graphics device is unchanged from its current state.
           
  :Examples:
        IDL> SetDecomposedState, 0, CurrentState=mode
+       
+ : Restrictions:
+       If you set color decomposition on in the Z-graphics buffer, the pixel depth
+       automatically gets set to 24. It does not change back to 8 if color decomposition
+       is turned off.
        
  :Author:
        FANNING SOFTWARE CONSULTING::
@@ -17869,6 +18058,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Written, 16 November 2010. DWF.
         Changes to include SET_PIXEL_DEPTH in Z-graphics buffer. 19 Nov 2010. DWF.
         Allow PostScript 7.0 to set the decomposition keyword. 12 Dec 2010. DWF.
+        Added DEPTH and ZDEPTH keywords. 31 Dec 2010. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.

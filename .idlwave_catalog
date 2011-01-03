@@ -1,7 +1,7 @@
 ;;
 ;; IDLWAVE catalog for library coyote
 ;; Automatically Generated -- do not edit.
-;; Created by idlwave_catalog on Tue Dec 14 06:37:55 2010
+;; Created by idlwave_catalog on Mon Jan  3 12:24:30 2011
 ;;
 (setq idlwave-library-catalog-libname "coyote")
 (setq idlwave-library-catalog-routines
@@ -41,6 +41,7 @@
    ("ClipScl" fun nil (lib "clipscl.pro" nil "coyote") "Result = %s(image, clip)" (nil ("NEGATIVE") ("OMAX") ("OMIN") ("THRESHOLD")))
    ("COLOR24" fun nil (lib "color24.pro" nil "coyote") "Result = %s(color)" (nil))
    ("ColorButtonBitmap" fun nil (lib "colorbuttonbitmap.pro" nil "coyote") "Result = %s(theText)" (nil ("BGColor") ("FGColor")))
+   ("ColorsAreIdentical" fun nil (lib "colorsareidentical.pro" nil "coyote") "Result = %s(color_1, color_2)" (nil))
    ("Clamp" pro "ContrastZoom_VColorBar" (lib "contrastzoom.pro" nil "coyote") "Obj ->[%s::]%s, datarange" (nil))
    ("INIT" fun "ContrastZoom_VColorBar" (lib "contrastzoom.pro" nil "coyote") "Result = Obj ->[%s::]%s" (nil ("_Extra") ("Color") ("Major") ("Minor") ("Name") ("NColors") ("Palette") ("Position") ("Range") ("Title")))
    ("Cleanup" pro "ContrastZoom_VColorBar" (lib "contrastzoom.pro" nil "coyote") "Obj ->[%s::]%s" (nil))
@@ -138,6 +139,7 @@
    ("CleanUp" pro "FSC_Colorbar" (lib "fsc_colorbar__define.pro" nil "coyote") "Obj ->[%s::]%s" (nil))
    ("Init" fun "FSC_Colorbar" (lib "fsc_colorbar__define.pro" nil "coyote") "Result = Obj ->[%s::]%s" (nil ("Background") ("Bottom") ("Charsize") ("Color") ("Font") ("Format") ("Index") ("Major") ("Minor") ("MinusOne") ("NColors") ("Neighbor") ("Position") ("Range") ("TickLen") ("TickV") ("Title") ("Vertical") ("XEraseBox") ("YEraseBox")))
    ("FSC_Colorbar__Define" pro nil (lib "fsc_colorbar__define.pro" nil "coyote") "%s" (nil))
+   ("FSC_ColorFill" pro nil (lib "fsc_colorfill.pro" nil "coyote") "%s, x, y, z" (nil ("_EXTRA") ("COLOR") ("DEVICE") ("NORMAL")))
    ("FSC_COLORSELECT_WidgetFont" fun nil (lib "fsc_colorselect.pro" nil "coyote") "Result = %s" (nil ("DEFAULT")))
    ("GetTextID" fun "FSC_COLORSELECT" (lib "fsc_colorselect.pro" nil "coyote") "Result = Obj ->[%s::]%s" (nil))
    ("Resize" pro "FSC_COLORSELECT" (lib "fsc_colorselect.pro" nil "coyote") "Obj ->[%s::]%s, newsize" (nil))
@@ -161,8 +163,8 @@
    ("FSC_ColorSelect" fun nil (lib "fsc_colorselect.pro" nil "coyote") "Result = %s(parent)" (nil ("_Extra") ("Brewer") ("Button_Text") ("CFont") ("Color") ("CT_Index") ("CT_NColors") ("Event_Func") ("Event_Pro") ("Frame") ("LabelAlign") ("LabelFont") ("LabelSize") ("Name") ("Scr_XSize") ("Scr_YSize") ("Style") ("Title") ("UValue") ("XSize")))
    ("Example_Event" pro nil (lib "fsc_colorselect.pro" nil "coyote") "%s, event" (nil))
    ("Example" pro nil (lib "fsc_colorselect.pro" nil "coyote") "%s" (nil))
-   ("FSC_Contour" pro nil (lib "fsc_contour.pro" nil "coyote") "%s, data, x, y" (nil ("_Extra") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("C_COLORS") ("C_LABELS") ("CELL_FILL") ("COLOR") ("FILL") ("IRREGULAR") ("LABEL") ("LEVELS") ("MISSINGVALUE") ("NLEVELS") ("NOERASE") ("OVERPLOT") ("RESOLUTION") ("WINDOW") ("XSTYLE") ("YSTYLE")))
-   ("FSC_Display" pro nil (lib "fsc_display.pro" nil "coyote") "%s, pxsize, pysize" (nil ("_EXTRA") ("COLOR") ("WID") ("XSIZE") ("YSIZE")))
+   ("FSC_Contour" pro nil (lib "fsc_contour.pro" nil "coyote") "%s, data, x, y" (nil ("_Extra") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("C_COLORS") ("C_LABELS") ("CELL_FILL") ("COLOR") ("FILL") ("IRREGULAR") ("LABEL") ("LEVELS") ("MISSINGVALUE") ("NLEVELS") ("NOERASE") ("OVERPLOT") ("RESOLUTION") ("TRADITIONAL") ("WINDOW") ("XSTYLE") ("YSTYLE")))
+   ("FSC_Display" pro nil (lib "fsc_display.pro" nil "coyote") "%s, pxsize, pysize" (nil ("_EXTRA") ("COLOR") ("FREE") ("WID") ("XSIZE") ("YSIZE")))
    ("FSC_Droplist_Kill_Notify" pro nil (lib "fsc_droplist.pro" nil "coyote") "%s, droplistID" (nil))
    ("EventHandler" fun "FSC_Droplist" (lib "fsc_droplist.pro" nil "coyote") "Result = Obj ->[%s::]%s(event)" (nil))
    ("FSC_Droplist_Events" fun nil (lib "fsc_droplist.pro" nil "coyote") "Result = %s(event)" (nil))
@@ -274,7 +276,7 @@
    ("Example" pro nil (lib "fsc_inputfield.pro" nil "coyote") "%s" (nil))
    ("FSC_Normalize" fun nil (lib "fsc_normalize.pro" nil "coyote") "Result = %s(range)" (nil ("Position")))
    ("FSC_Pickfile" fun nil (lib "fsc_pickfile.pro" nil "coyote") "Result = %s" (nil ("_REF_EXTRA") ("DATA") ("DEMO") ("HDF") ("JPEG") ("LAST_FILE") ("LIDAR") ("NCDF") ("PNG") ("TIFF")))
-   ("FSC_Plot" pro nil (lib "fsc_plot.pro" nil "coyote") "%s, x, y" (nil ("_Extra") ("ASPECT") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("COLOR") ("ISOTROPIC") ("NODATA") ("NOERASE") ("OVERPLOT") ("POSITION") ("PSYM") ("SYMCOLOR") ("WINDOW")))
+   ("FSC_Plot" pro nil (lib "fsc_plot.pro" nil "coyote") "%s, x, y" (nil ("_Extra") ("ASPECT") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("COLOR") ("ISOTROPIC") ("NODATA") ("NOERASE") ("OVERPLOT") ("POSITION") ("PSYM") ("SYMCOLOR") ("TRADITIONAL") ("WINDOW")))
    ("FSC_PlotS" pro nil (lib "fsc_plots.pro" nil "coyote") "%s, x, y, z" (nil ("_EXTRA") ("COLOR") ("PSYM") ("SYMCOLOR") ("SYMSIZE")))
    ("FSC_PLOTWINDOW_Error_Message" fun nil (lib "fsc_plotwindow.pro" nil "coyote") "Result = %s(theMessage)" (nil ("NoName") ("Traceback")))
    ("FSC_PLOTWINDOW_Normalize" fun nil (lib "fsc_plotwindow.pro" nil "coyote") "Result = %s(range)" (nil ("Position")))
@@ -349,7 +351,7 @@
    ("FSC_PSCONFIG__DEFINE" pro nil (lib "fsc_psconfig__define.pro" nil "coyote") "%s" (nil))
    ("FSC_PS_SETUP__DEFINE" pro nil (lib "fsc_ps_setup__define.pro" nil "coyote") "%s" (nil))
    ("FSC_Resize_Image" fun nil (lib "fsc_resize_image.pro" nil "coyote") "Result = %s(image, cols, rows)" (nil ("INTERPOLATE") ("MINUS_ONE")))
-   ("FSC_Surf" pro nil (lib "fsc_surf.pro" nil "coyote") "%s, data, x, y" (nil ("_Extra") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("BOTTOM") ("CHARSIZE") ("COLOR") ("ELEVATION_SHADING") ("FONT") ("NOERASE") ("ROTX") ("ROTZ") ("SHADED") ("SHADES") ("SKIRT") ("TITLE") ("TSIZE") ("TSPACE") ("WINDOW") ("XSTYLE") ("YSTYLE") ("ZSTYLE")))
+   ("FSC_Surf" pro nil (lib "fsc_surf.pro" nil "coyote") "%s, data, x, y" (nil ("_Extra") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("BOTTOM") ("CHARSIZE") ("COLOR") ("ELEVATION_SHADING") ("FONT") ("NOERASE") ("ROTX") ("ROTZ") ("SHADED") ("SHADES") ("SKIRT") ("TITLE") ("TRADITIONAL") ("TSIZE") ("TSPACE") ("WINDOW") ("XSTYLE") ("YSTYLE") ("ZSTYLE")))
    ("CW_Light_Control_Intensity_Events" pro nil (lib "fsc_surface.pro" nil "coyote") "%s, event" (nil))
    ("CW_Light_Control_Events" pro nil (lib "fsc_surface.pro" nil "coyote") "%s, event" (nil))
    ("CW_Light_Control" fun nil (lib "fsc_surface.pro" nil "coyote") "Result = %s(parent, theLight)" (nil ("Color") ("Event_Pro") ("Index") ("LabelSize") ("Name") ("SETCOLOR_NAME") ("UValue")))
@@ -425,7 +427,7 @@
    ("HISTOMATCH_ERROR_MESSAGE" fun nil (lib "histomatch.pro" nil "coyote") "Result = %s(theMessage)" (nil ("_Extra") ("Error") ("Informational") ("NoName") ("Title") ("Traceback")))
    ("HISTOMATCH" fun nil (lib "histomatch.pro" nil "coyote") "Result = %s(image, histogram_to_match)" (nil))
    ("Example" pro nil (lib "histomatch.pro" nil "coyote") "%s" (nil))
-   ("HistoPlot" pro nil (lib "histoplot.pro" nil "coyote") "%s, dataToHistogram" (nil ("_REF_EXTRA") ("AXISCOLORNAME") ("BACKCOLORNAME") ("BINSIZE") ("DATACOLORNAME") ("FILE") ("FILLPOLYGON") ("FREQUENCY") ("HISTDATA") ("L64") ("LINE_FILL") ("LOCATIONS") ("MAX_VALUE") ("MAXINPUT") ("MIN_VALUE") ("MININPUT") ("MISSING") ("NAN") ("NBINS") ("OMAX") ("OMIN") ("OPLOT") ("OPROB") ("ORIENTATION") ("OUTLINE") ("PATTERN") ("POLYCOLOR") ("PROBABLITY_FUNCTION") ("PROBCOLORNAME") ("REVERSE_INDICES") ("SPACING") ("THICK")))
+   ("HistoPlot" pro nil (lib "histoplot.pro" nil "coyote") "%s, dataToHistogram" (nil ("_REF_EXTRA") ("AXISCOLORNAME") ("BACKCOLORNAME") ("BINSIZE") ("DATACOLORNAME") ("FILE") ("FILLPOLYGON") ("FREQUENCY") ("HISTDATA") ("L64") ("LINE_FILL") ("LOCATIONS") ("MAX_VALUE") ("MAXINPUT") ("MIN_VALUE") ("MININPUT") ("MISSING") ("NAN") ("NBINS") ("OMAX") ("OMIN") ("OPLOT") ("OPROBABILITY") ("ORIENTATION") ("OUTLINE") ("PATTERN") ("POLYCOLOR") ("PROBABLITY_FUNCTION") ("PROBCOLORNAME") ("REVERSE_INDICES") ("SPACING") ("THICK")))
    ("ImageSelect_WindowSize" fun nil (lib "imageselect.pro" nil "coyote") "Result = %s(image)" (nil ("XSIZE") ("YSIZE")))
    ("ImageSelect_Action" pro nil (lib "imageselect.pro" nil "coyote") "%s, event" (nil))
    ("ImageSelect_BSort" fun nil (lib "imageselect.pro" nil "coyote") "Result = %s(Array, Asort)" (nil ("INFO") ("REVERSE")))
@@ -746,7 +748,7 @@
    ("CLEANUP" pro "PROGRESSBAR" (lib "progressbar__define.pro" nil "coyote") "Obj ->[%s::]%s" (nil))
    ("INIT" fun "PROGRESSBAR" (lib "progressbar__define.pro" nil "coyote") "Result = Obj ->[%s::]%s" (nil ("ACCEPT") ("BACKGROUND") ("COLOR") ("FAST_LOOP") ("GROUP_LEADER") ("NOCANCEL") ("PERCENT") ("START") ("TEXT") ("TITLE") ("XOFFSET") ("XSIZE") ("YOFFSET") ("YSIZE")))
    ("PROGRESSBAR__DEFINE" pro nil (lib "progressbar__define.pro" nil "coyote") "%s" (nil))
-   ("PSConfig" fun nil (lib "psconfig.pro" nil "coyote") "Result = %s(psObject)" (nil ("AvantGarde") ("Bits_per_Pixel") ("Bkman") ("Bold") ("BookStyle") ("Cancel") ("CMYK") ("Color") ("Courier") ("Debug") ("Decomposed") ("DefaultSetup") ("Demi") ("Directory") ("Encapsulate") ("European") ("Filename") ("FontInfo") ("FontSize") ("FontType") ("Group_Leader") ("Helvetica") ("Inches") ("Isolatin") ("Italic") ("Landscape") ("Light") ("Medium") ("Name") ("Narrow") ("NOGUI") ("Palatino") ("Preview") ("Schoolbook") ("Set_Font") ("Symbol") ("Times") ("TrueType") ("XOffset") ("XSize") ("YOffset") ("YSize") ("ZapfChancery") ("ZapfDingbats")))
+   ("PSConfig" fun nil (lib "psconfig.pro" nil "coyote") "Result = %s(psObject)" (nil ("AvantGarde") ("Bits_per_Pixel") ("Bkman") ("Bold") ("BookStyle") ("Cancel") ("CMYK") ("Color") ("Courier") ("Debug") ("Decomposed") ("DefaultSetup") ("Demi") ("Directory") ("Encapsulate") ("European") ("Filename") ("FontInfo") ("FontSize") ("FontType") ("Group_Leader") ("Helvetica") ("Inches") ("Isolatin") ("Italic") ("Landscape") ("Light") ("Match") ("Medium") ("Name") ("Narrow") ("NOGUI") ("Palatino") ("Preview") ("Schoolbook") ("Set_Font") ("Symbol") ("Times") ("TrueType") ("XOffset") ("XSize") ("YOffset") ("YSize") ("ZapfChancery") ("ZapfDingbats")))
    ("PSWINDOW_ASPECT" fun nil (lib "pswindow.pro" nil "coyote") "Result = %s(aspectRatio)" (nil ("MARGIN") ("WindowAspect")))
    ("PSWINDOW" fun nil (lib "pswindow.pro" nil "coyote") "Result = %s" (nil ("ASPECTRATIO") ("CM") ("EUROPEAN") ("FUDGE") ("LANDSCAPE") ("MARGIN") ("PAGESIZE") ("PRINTER") ("XFUDGE") ("YFUDGE")))
    ("PS_Background" pro nil (lib "ps_background.pro" nil "coyote") "%s, color" (nil))
@@ -780,7 +782,7 @@
    ("Select_Cleanup" pro nil (lib "select_objects.pro" nil "coyote") "%s, tlb" (nil))
    ("Select_Resize" pro nil (lib "select_objects.pro" nil "coyote") "%s, event" (nil))
    ("Select_Objects" pro nil (lib "select_objects.pro" nil "coyote") "%s" (nil))
-   ("SetDecomposedState" pro nil (lib "setdecomposedstate.pro" nil "coyote") "%s, state" (nil ("CURRENTSTATE")))
+   ("SetDecomposedState" pro nil (lib "setdecomposedstate.pro" nil "coyote") "%s, state" (nil ("CURRENTSTATE") ("DEPTH") ("ZDEPTH")))
    ("SetDefaultValue" pro nil (lib "setdefaultvalue.pro" nil "coyote") "%s, argument, defaultValue" (nil ("BOOLEAN")))
    ("SetDifference" fun nil (lib "setdifference.pro" nil "coyote") "Result = %s(set_a, set_b)" (nil ("NORESULT") ("SUCCESS")))
    ("SetIntersection" fun nil (lib "setintersection.pro" nil "coyote") "Result = %s(set_a, set_b)" (nil ("NORESULT") ("SUCCESS")))

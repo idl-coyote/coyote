@@ -61,6 +61,9 @@
 ;        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table. The color is not used if
 ;        the "window" is opened in PostScript on the Z-graphics buffer.
+;    free: in, optional, type=boolean, default=0
+;         Set this keyword to open a window with a free or unused window index number.
+;         This keyword applied only to graphics windows created on the computer display.
 ;    wid: in, optional, type=integer, default=0
 ;         The window index number of the IDL graphics window to create.
 ;    xsize: in, optional, type=integer, default=640
@@ -92,12 +95,14 @@
 ;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
 ;        Moved the window index argument to the WID keyword. 9 Dec 2010. DWF.
 ;        Modified to produce a window in PostScript and the Z-buffer, too. 15 Dec 2010. DWF.
+;        Added the FREE keyword. 3 January 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO FSC_Display, pxsize, pysize, $
     COLOR=scolor, $
+    FREE=free, $
     WID=windowIndex, $
     XSIZE=xsize, $
     YSIZE=ysize, $
@@ -117,6 +122,7 @@ PRO FSC_Display, pxsize, pysize, $
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
     ; Check parameters and keywords.
+    free = Keyword_Set(free)
     IF N_Elements(scolor) EQ 0 THEN color = 'white' ELSE color = scolor
     IF N_Elements(windowIndex) EQ 0 THEN windowIndex = 0
     IF N_Elements(xsize) EQ 0 THEN xsize = 640
@@ -125,7 +131,10 @@ PRO FSC_Display, pxsize, pysize, $
     IF N_Elements(pysize) EQ 0 THEN pysize = ysize
     
     IF (!D.Flags AND 256) NE 0 THEN BEGIN
-        Window, windowIndex, XSIZE=pxsize, YSIZE=pysize, _STRICT_EXTRA=extra
+        Window, windowIndex, XSIZE=pxsize, YSIZE=pysize, FREE=free, _STRICT_EXTRA=extra
+        
+        ; FSC_Erase will take care of sorting out what kind of "color" indicator
+        ; we are using. No need to do it here.
         FSC_Erase, color   
     ENDIF ELSE BEGIN
         CASE !D.Name OF

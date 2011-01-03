@@ -58,7 +58,7 @@
 ;                      
 ;     COLORS:          The name of a color to draw the shapefile polygon in. This
 ;                      may be a string array of the same size as ATTRVALUES. Color names
-;                      correspond to the colors available in FSC_COLOR. By default, "Sky Blue".
+;                      correspond to the colors available in FSC_COLOR. By default, "blu4".
 ;                      
 ;     FCOLORS:         The name of the color to draw filled polygons in. If undefined,
 ;                      the same as COLOR. This may be a string array of the same size as 
@@ -123,12 +123,17 @@
 ;       Map_Grid, LatDel = 2.0, LonDel = 2.0, /Box_Axes, Color=FSC_Color('charcoal'), $
 ;            Map_Structure=mapCoord->GetMapStructure()
 ;
+;  Example drawing the states.shp file automatically.
+;  
+;       DrawShapes, Filepath(subdir=['examples','data'], 'states.shp'), /Autodraw
+;       
 ; MODIFICATION HISTORY:
 ;
 ;       Written by David W. Fanning by modifiying DrawStates to be more
 ;          general, 13 May 2010. DWF.
 ;       Added the AUTODRAW keyword for automatic drawing. 15 May 2010. DWF.
 ;       Added COMPILE_OPT idl2 to make sure all loop variables are longs. 5 July 2010. DWF.
+;       Corrected an aspect ratio problem with AUTODRAW and upgraded to Coyote Graphics. 3 January 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -202,10 +207,10 @@ PRO DrawShapes_DrawEntity, entity, $
                    y = (*entity.vertices)[1, cuts[j]:cuts[j+1]-1]
                ENDELSE
                CASE fill OF
-                  0: PlotS, x, y, COLOR=FSC_Color(color), LINESTYLE=linestyle, THICK=thick, NOCLIP=0
+                  0: FSC_PlotS, x, y, COLOR=color, LINESTYLE=linestyle, THICK=thick, NOCLIP=0
                   1: BEGIN
-                     PolyFill, x, y, COLOR=FSC_Color(fcolor), NOCLIP=0
-                     PlotS, x, y, COLOR=FSC_Color(color), LINESTYLE=linestyle, THICK=thick, NOCLIP=0
+                     FSC_ColorFill, x, y, COLOR=fcolor, NOCLIP=0
+                     FSC_PlotS, x, y, COLOR=color, LINESTYLE=linestyle, THICK=thick, NOCLIP=0
                      END
                ENDCASE
             ENDFOR
@@ -235,10 +240,10 @@ PRO DrawShapes_DrawEntity, entity, $
                    y = (*entity.vertices)[1, cuts[j]:cuts[j+1]-1]
                ENDELSE
                CASE fill OF
-                  0: PlotS, x, y, COLOR=FSC_Color(color), LINESTYLE=linestyle, THICK=thick, NOCLIP=0
+                  0: FSC_PlotS, x, y, COLOR=color, LINESTYLE=linestyle, THICK=thick, NOCLIP=0
                   1: BEGIN
-                     PolyFill, x, y, COLOR=FSC_Color(fcolor), NOCLIP=0
-                     PlotS, x, y, COLOR=FSC_Color(color), LINESTYLE=linestyle, THICK=thick, NOCLIP=0
+                     FSC_ColorFill, x, y, COLOR=fcolor, NOCLIP=0
+                     FSC_PlotS, x, y, COLOR=color, LINESTYLE=linestyle, THICK=thick, NOCLIP=0
                      END
                ENDCASE
             ENDFOR
@@ -286,7 +291,7 @@ PRO DrawShapes, shapeFile, $
          IF shapeFile EQ "" THEN RETURN
       ENDELSE
    ENDIF
-   IF N_Elements(colors) EQ 0 THEN colors = 'Sky Blue'
+   IF N_Elements(colors) EQ 0 THEN colors = 'blu4'
    IF N_Elements(fcolors) EQ 0 THEN fcolors = colors
    IF N_Elements(fill) EQ 0 THEN fill = Keyword_Set(fill)
    IF N_Elements(linestyle) EQ 0 THEN linestyle = 0
@@ -360,13 +365,12 @@ PRO DrawShapes, shapeFile, $
       aspectRatio = Abs(yrange[1] - yrange[0]) / Abs(xrange[1]-xrange[0])
       IF (!D.Flags AND 256) NE 0 THEN BEGIN
           IF aspectRatio LE 1 THEN BEGIN
-             Window, XSize=700, YSize=700*aspectRatio, /FREE, Title='Shapefile Contents'
+             FSC_Display, 700, 700*aspectRatio, /FREE, Title='Shapefile Contents'
           ENDIF ELSE BEGIN
-             Window, XSize=700*aspectRatio, YSize=700, /FREE, Title='Shapefile Contents'
+             FSC_Display, 700/aspectRatio, 700, /FREE, Title='Shapefile Contents'
           ENDELSE
-          Erase, Color=FSC_Color('snow')
       ENDIF
-      PLOT, xrange, yrange, XSTYLE=1, YSTYLE=1, $
+      FSC_PLOT, xrange, yrange, XSTYLE=1, YSTYLE=1, $
          Position=Aspect(aspectRatio), /NoData
    ENDIF
    

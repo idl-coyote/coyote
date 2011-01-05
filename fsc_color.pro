@@ -378,6 +378,7 @@
 ;            else. 19 Nov 2010. DWF.
 ;       Made sure the ColorIndex that is returned is always an INTEGER. 24 Dec 2010. DWF.
 ;       Changed the default "unknown" color from WHITE to OPPOSITE. 30 Dec 2010. DWF.
+;       TVLCT commands protected from NULL device. 4 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -532,7 +533,7 @@ FUNCTION FSC_Color, theColour, colorIndex, $
     IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
        opixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
        IF N_Elements(opixel) NE 3 THEN BEGIN
-            TVLCT, rrr, ggg, bbb, /Get
+            IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, /Get
             opixel = [rrr[opixel], ggg[opixel], bbb[opixel]]
        ENDIF
     ENDIF ELSE BEGIN
@@ -820,7 +821,7 @@ FUNCTION FSC_Color, theColour, colorIndex, $
        
     ; Load the colors from the current color table, if you need them.
     IF useCurrentColors THEN BEGIN
-        TVLCT, rrr, ggg, bbb, /GET
+        IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, /GET
         IF decomposedState EQ 0 THEN BEGIN
             colors = SIndgen(256)
             rvalue = rrr
@@ -1021,7 +1022,7 @@ FUNCTION FSC_Color, theColour, colorIndex, $
           IF (colorIndex + ncolors) GT 255 THEN BEGIN
              colorIndex = Fix(!D.Table_Size - ncolors - 2)
           ENDIF
-          IF !D.Name NE 'PRINTER' THEN TVLCT, rvalue, gvalue, bvalue, colorIndex
+          IF (!D.Name NE 'PRINTER') AND (!D.Name NE 'NULL') THEN TVLCT, rvalue, gvalue, bvalue, colorIndex
           RETURN, IndGen(ncolors) + colorIndex
        ENDIF ELSE BEGIN
     
@@ -1030,7 +1031,8 @@ FUNCTION FSC_Color, theColour, colorIndex, $
              colorStructure = Create_Struct(theColor,  colorIndex)
           ENDIF
     
-          IF !D.Name NE 'PRINTER' THEN TVLCT, rvalue[theIndex], gvalue[theIndex], bvalue[theIndex], colorIndex
+          IF (!D.Name NE 'PRINTER') AND (!D.Name NE 'NULL') THEN $
+              TVLCT, rvalue[theIndex], gvalue[theIndex], bvalue[theIndex], colorIndex
           RETURN, Fix(colorIndex)
        ENDELSE
     

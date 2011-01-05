@@ -86,6 +86,7 @@
 ;        Changes to include SET_PIXEL_DEPTH in Z-graphics buffer. 19 Nov 2010. DWF.
 ;        Allow PostScript 7.0 to set the decomposition keyword. 12 Dec 2010. DWF.
 ;        Added DEPTH and ZDEPTH keywords. 31 Dec 2010. DWF.
+;        Added a do-nothing NULL device to Case statement. 4 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -129,6 +130,8 @@ PRO SetDecomposedState, state, CURRENTSTATE=currentState, DEPTH=depth, ZDEPTH=zd
          'X': Device, Decomposed=state
          
          'WIN': Device, Decomposed=state
+         
+         'NULL':
          
          ELSE: Message, 'Unrecognized device. Assuming indexed color state.', /INFORMATIONAL
          

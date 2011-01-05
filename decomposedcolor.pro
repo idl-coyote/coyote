@@ -55,6 +55,7 @@
 ;
 ;  Written by: David W. Fanning, May 24, 2009.
 ;  Modified the way decomposition was obtained for PostScript devices IDL 7.1 and higher. 12 Dec 2010. DWF.
+;  Fixed a problem in the CASE statement with ELSE clause and added a NULL device segment. 4 Jan 2011. DWF.
 ;
 ;-
 ;******************************************************************************************;
@@ -150,7 +151,14 @@ FUNCTION DecomposedColor, device, DEPTH=depth
             ENDELSE
             END
             
-        'ELSE': BEGIN ; All other devices are 8-bit oldsters.
+         'NULL': BEGIN ; Setting up in decomposed mode will make sure
+                       ; drawing colors are never loaded, which is not
+                       ; allowed for the NULL device.
+            decomposed = 1
+            depth = 24
+            END
+            
+        ELSE: BEGIN ; All other devices are 8-bit oldsters.
             decomposed = 0
             depth = 8
             END

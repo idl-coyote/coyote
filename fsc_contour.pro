@@ -165,12 +165,13 @@
 ;        Change to DECOMPOSED color was using incorrect color tables. 29 Dec 2010. DWF.
 ;        In some cases, I was turning BYTE values to strings without converting to 
 ;            INTEGERS first. 30 Dec 2010. DWF.
-;         Still working on getting contour colors to work in decomposed color mode in all 
+;        Still working on getting contour colors to work in decomposed color mode in all 
 ;             circumstances. 2 Jan 2011. DWF.
-;         Fixed problem with FILL when no contour colors (C_COLORS) are specified. 3 Jan 2011. DWF.
-;         Fixed a problem that preventing output keyword (e.g., PATH_INFO) from being returned properly. 
+;        Fixed problem with FILL when no contour colors (C_COLORS) are specified. 3 Jan 2011. DWF.
+;        Fixed a problem that preventing output keyword (e.g., PATH_INFO) from being returned properly. 
 ;             3 Jan 2011. DWF.
-;         Fixed a problem calculating NLEVELS when LEVELS keyword was used instead. 3 Jan 2011. DWF.
+;        Fixed a problem calculating NLEVELS when LEVELS keyword was used instead. 3 Jan 2011. DWF.
+;        TVLCT commands protected from NULL device. 4 Jan 2011. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -260,7 +261,7 @@ PRO FSC_Contour, data, x, y, $
     ENDCASE
     
     ; Get the current color table vectors.
-    TVLCT, rr, gg, bb, /GET
+    IF (!D.Name NE 'NULL') THEN TVLCT, rr, gg, bb, /GET
     
     ; Check the keywords.
     IF N_Elements(sbackground) EQ 0 THEN BEGIN
@@ -402,11 +403,11 @@ PRO FSC_Contour, data, x, y, $
         ENDIF
     ENDIF ELSE BEGIN
         IF Keyword_Set(fill) THEN BEGIN
-            TVLCT, rrr, ggg, bbb, /Get
+            IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, /Get
             rrr = Congrid(rrr, nlevels)
             ggg = Congrid(ggg, nlevels)
             bbb = Congrid(bbb, nlevels)
-            TVLCT, rrr, ggg, bbb, 1
+            IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, 1
             c_colors = StrTrim(Indgen(nlevels)+1,2)
         ENDIF ELSE BEGIN
             c_colors = Replicate(color, nlevels)
@@ -543,7 +544,7 @@ PRO FSC_Contour, data, x, y, $
     
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.
-    IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb
+    IF (!D.Name NE 'Z') AND (!D.Name NE 'NULL') THEN TVLCT, rr, gg, bb
      
 END
     

@@ -68,6 +68,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 24 December 2010. DWF.
+;        Fixed a typo when first color is INTEGER and second color is STRING. 3 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -129,7 +130,7 @@ FUNCTION ColorsAreIdentical, color_1, color_2
            ; First color an INTEGER, second color a STRING.    
            (Size(c1, /TYPE) LE 2) AND (Size(c2, /TYPE) EQ 7): BEGIN
                 v1 = Transpose(FSC_Color(c2, /TRIPLE))
-                v2 = [r[c2], g[c2], b[c2]]
+                v2 = [r[c1], g[c1], b[c1]]
                 answer = Array_Equal(v1, v2)
                 END
 

@@ -276,6 +276,46 @@ END
 ;-------------------------------------------------------------------------
 
 
+PRO FSC_Surface_Axes_OnOff, event
+
+    ; This event handler turns the surface axes on or off.
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
+    ENDIF
+
+    Widget_Control, event.top, Get_UValue=info, /No_Copy
+    Widget_Control, event.id, Get_Value=buttonValue, Get_UValue=uvalue
+    Widget_Control, event.id, Set_Value=uvalue, Set_UValue=buttonValue
+    
+    CASE buttonValue OF
+    
+       'Turn Axes ON': BEGIN
+            info.xaxis -> SetProperty, HIDE=0
+            info.yaxis -> SetProperty, HIDE=0
+            info.zaxis -> SetProperty, HIDE=0         
+        END
+        
+       ; Not at all sure why this works!
+       'Turn Axes OFF': BEGIN
+            info.xaxis -> SetProperty, HIDE=1
+            info.yaxis -> SetProperty, HIDE=1
+            info.zaxis -> SetProperty, HIDE=1         
+        END
+    
+    ENDCASE
+    
+    ; Draw the graphic display.
+    info.thisWindow -> Draw, info.thisView
+    Widget_Control, event.top, Set_UValue=info, /No_Copy
+    
+END ;------------------------------------------------------------------------------
+
+
 PRO FSC_Surface_Bottom_OnOff, event
 
     ; This event handler turns the bottom color on or off.
@@ -1101,6 +1141,8 @@ END ;---------------------------------------------------------------------------
 ;        Added ability to translate the surface by clicking on an axis. 28 Nov 2010. DWF.
 ;        Fixed a problem with light controls in which the light controls didn't show the
 ;            current light color. 28 Nov 2010. DWF.
+;        I was ANDing [XYZ]Style keywords with 8 instead of 4 for hidded axes. Fixed. 4 Jan 2011. DWF.
+;        Added Axes ON/OFF button. 4 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -1376,17 +1418,17 @@ PRO FSC_Surface, data, x, y, $
     ; Create axes objects for the surface. Axes are created after the surface 
     ; so the range can be set correctly. Note how I set the font.
     xAxis = Obj_New("IDLgrAxis", 0, Color=axisColor, Ticklen=0.1, $
-       Minor=4, Title=xtitle, Range=xrange, Exact=(xstyle AND 1), Hide=(xstyle AND 8))
+       Minor=4, Title=xtitle, Range=xrange, Exact=(xstyle AND 1), Hide=(xstyle AND 4))
     xAxis->GetProperty, Ticktext=xAxisText
     xAxisText->SetProperty, Font=axisFont
     
     yAxis = Obj_New("IDLgrAxis", 1, Color=axisColor, Ticklen=0.1, $
-       Minor=4, Title=ytitle, Range=yrange, Exact=(ystyle AND 1), Hide=(ystyle AND 8))
+       Minor=4, Title=ytitle, Range=yrange, Exact=(ystyle AND 1), Hide=(ystyle AND 4))
     yAxis->GetProperty, Ticktext=yAxisText
     yAxisText->SetProperty, Font=axisFont
     
     zAxis = Obj_New("IDLgrAxis", 2, Color=axisColor, Ticklen=0.1, $
-       Minor=4, Title=ztitle, Range=zrange, Exact=(zstyle AND 1), Hide=(zstyle AND 8))
+       Minor=4, Title=ztitle, Range=zrange, Exact=(zstyle AND 1), Hide=(zstyle AND 4))
     zAxis->GetProperty, Ticktext=zAxisText
     zAxisText->SetProperty, Font=axisFont
     
@@ -1569,6 +1611,10 @@ PRO FSC_Surface, data, x, y, $
           /Separator, UValue='Bottom Color ON', $
           Event_Pro='FSC_Surface_Bottom_OnOff')
     ENDELSE
+    
+    void = Widget_Button(style, Value='Turn Axes OFF', $
+          /Separator, UValue='Turn Axes ON', $
+          Event_Pro='FSC_Surface_Axes_OnOff')
     
     IF N_Elements(skirt) GT 0 THEN BEGIN
         skirtID = Widget_Button(style, Value='Turn Skirt OFF', $

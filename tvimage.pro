@@ -460,6 +460,7 @@
 ;       Incorporated TVSCALE functionality into TVIMAGE. 22 November 2010. DWF.
 ;       Problem fixed when displaying alpha image when POSITION and ALPHABACKGROUND keywords used
 ;            simultaneously. 8 Dec 2010. DWF.
+;       More sophisticated selection of axis color. 5 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -616,7 +617,7 @@ END
 
 
 PRO TVIMAGE, image, x, y, $
-   ACOLOR=acolor, $
+   ACOLOR=acolorname, $
    ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
    AXIS=axis, $
    AXES=axes, $
@@ -712,7 +713,7 @@ PRO TVIMAGE, image, x, y, $
     
     ; Check the drawing colors for background and axes.
     IF Keyword_Set(white) THEN BEGIN
-       IF N_Elements(acolor) EQ 0 THEN acolor = 'black'
+       IF N_Elements(acolorname) EQ 0 THEN acolorname = 'black'
        background = 'white'
        eraseit = 1
     ENDIF
@@ -720,12 +721,28 @@ PRO TVIMAGE, image, x, y, $
     IF N_Elements(background) EQ 0 THEN background = !P.Background
     IF Size(background, /TNAME) EQ 'STRING' THEN BEGIN
         IF StrUpCase(background) EQ 'WHITE' THEN BEGIN
-           IF N_Elements(acolor) EQ 0 THEN acolor = 'black 
+           IF N_Elements(acolorname) EQ 0 THEN acolorname = 'black 
         ENDIF 
     ENDIF
-    IF N_Elements(acolor) EQ 0 THEN acolor = !P.Color
     noerase = Keyword_Set(noerase) ; Don't change, used in PS output.
     
+    ; Choose an axis color.
+    IF N_Elements(acolorname) EQ 0 THEN BEGIN
+           IF !D.Name EQ 'PS' THEN BEGIN
+                acolorname = 'OPPOSITE' 
+           ENDIF ELSE BEGIN
+                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    IF (Total(pixel) EQ 765) THEN acolorname = 'BLACK'
+                    IF (Total(pixel) EQ 0) THEN acolorname = 'WHITE'
+                    IF N_Elements(acolorname) EQ 0 THEN acolorname = 'OPPOSITE'
+                ENDIF ELSE acolorname = 'OPPOSITE'
+           ENDELSE
+     ENDIF
+    IF N_Elements(acolorname) EQ 0 THEN acolor = !P.Color ELSE acolor = acolorname
+    IF Size(acolor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN acolor = Byte(color)
+    IF Size(acolor, /TYPE) LE 2 THEN acolor = StrTrim(Fix(acolor),2)
+ 
     ; Before you do anything, get the current color table vectors
     ; so they can be restored later.
     TVLCT, rr, gg, bb, /Get
@@ -1259,10 +1276,8 @@ PRO TVIMAGE, image, x, y, $
     ; If the user wanted axes, draw them now.
     IF axes THEN BEGIN
     
-        ; If axes color is a string, convert it.
-        IF Size(acolor, /TNAME) EQ 'STRING' THEN acolor = FSC_COLOR(acolor)    
-        PLOT, [0], /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
-            XSTYLE=1, YSTYLE=1, POSITION=position, COLOR=acolor, _STRICT_EXTRA=axkeywords
+        FSC_PLOT, [0], /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
+            XSTYLE=1, YSTYLE=1, POSITION=position, AXISCOLOR=acolor, _STRICT_EXTRA=axkeywords
             
     ENDIF ELSE BEGIN
     

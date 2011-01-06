@@ -82,7 +82,7 @@
 ;
 ;       FILENAME:      If no image is supplied as a positional parameter, this keyword can be
 ;                      used to specify the name of an image file. The image must be capable of
-;                      being read by SELECTIMAGE, so that means these kinds of files with these
+;                      being read by IMAGESELECT, so that means these kinds of files with these
 ;                      file extensions:
 ;
 ;                      TYPE      FILE EXTENSION
@@ -306,6 +306,7 @@
 ;        Fixed another problem with integer data types and bin size. 23 April 2010. DWF.
 ;        Fixed a problem with the display image when starting with a Square Root stretch. 23 April 2010. DWF.
 ;        Added ADAPTIVE EQUALIZATION stretch and changed default colors. 24 Nov 2010. DWF.
+;        Changed SELECTIMAGE references to Coyote Library routine IMAGESELECT. 6 Jan 2011. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -1173,7 +1174,7 @@ PRO XSTRETCH_OPENIMAGE, event
 
       'Formatted Image File...': BEGIN
 
-         newImage = SelectImage(Cancel=cancelled, Palette=palette, Group_Leader=event.top)
+         newImage = ImageSelect(Cancel=cancelled, Palette=palette, Group_Leader=event.top)
          IF cancelled THEN RETURN
          END
 
@@ -2441,7 +2442,7 @@ PRO XSTRETCH, theImage, $
    ; Did you specify a filename?
    IF N_Elements(filename) NE 0 AND N_Elements(theImage) EQ 0 THEN BEGIN
       IF filename NE "" THEN BEGIN
-         theImage = SelectImage(Filename=filename, Cancel=cancelled, Palette=palette, /Silent)
+         theImage = ImageSelect(Filename=filename, Cancel=cancelled, Palette=palette, /Silent)
          IF cancelled THEN RETURN
       ENDIF
    ENDIF

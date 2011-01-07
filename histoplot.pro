@@ -424,9 +424,6 @@ PRO HistoPlot , $                   ; The program name.
    ENDIF
 
    ; Calculate the range of the plot output.
-;   ymin = 0
-;   ymax = Max(histData)
-;   ymax = ymax + (ymax * 0.05)
    IF N_Elements(min_value) EQ 0 THEN min_value = 0
    IF N_Elements(max_value) EQ 0 THEN max_value = Max(histData) * 1.05
    ymin = min_value

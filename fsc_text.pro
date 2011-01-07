@@ -81,6 +81,9 @@
 ;          alignment.
 ;     tt_font: in, optional, type=string
 ;         The true-type font to use for the text. Only used if FONT=1.
+;     width: out, optional, type=float
+;         Set this keyword to a named variable in which to return the width of the text string, 
+;         in normalized coordinate units.
 ;     _extra: in, optional
 ;          Any keywords appropriate for the XYOUTS command.
 ;     
@@ -107,6 +110,7 @@
 ;        Humm, that text color problem got reset to the old way! Sheesh! Fixed. 9 Dec 2010. DWF.
 ;        Modified the way the default color is selected. Drawing with DECOMPOSED 
 ;             if possible. 30 Dec 2010. DWF.
+;        Keywords collected with _REF_EXTRA so WIDTH can be returned. Added WIDTH keyword. 6 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -121,7 +125,8 @@ PRO FSC_Text, xloc, yloc, text, $
     OUTLOC=outloc, $
     PLACE=place, $
     TT_FONT=tt_font, $
-    _EXTRA=extra
+    WIDTH=width, $
+    _REF_EXTRA=extra
     
     Compile_Opt idl2
     
@@ -209,7 +214,7 @@ PRO FSC_Text, xloc, yloc, text, $
     SetDecomposedState, 1, CURRENTSTATE=currentState
     IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(color) ELSE thisColor = color
     XYOutS, x, y, textStr, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
-        DATA=data, DEVICE=device, NORMAL=normal, _STRICT_EXTRA=extra
+        DATA=data, DEVICE=device, NORMAL=normal, WIDTH=width, _STRICT_EXTRA=extra
    SetDecomposedState, currentState
    
    ; Restore the color tables.

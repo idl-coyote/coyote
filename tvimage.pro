@@ -62,6 +62,12 @@
 ;               This keyword is only used if an alpha channel image is passed to the 
 ;               program via the image parameter. The AlphaBackgroundImage does not need
 ;               to have the same dimensions as the alpha channel image.
+;             
+;     ALPHABGPOSITION: Normally, the alpha background image is displayed in the current graphics
+;               window, or is taken from the current graphics window. This is not always correct.
+;               Sometimes you want to actually position both the background and foreground image
+;               in a window. If this keyword is used to specify a position, the alphabackground image
+;               will be positioned at this location before the blending occurs.
 ;
 ;     AXES:     Set this keyword to draw a set of axes around the image. Setting this
 ;               keyword also sets SAVE=1, unless told otherwise.
@@ -461,6 +467,9 @@
 ;       Problem fixed when displaying alpha image when POSITION and ALPHABACKGROUND keywords used
 ;            simultaneously. 8 Dec 2010. DWF.
 ;       More sophisticated selection of axis color. 5 Jan 2011. DWF.
+;       The fix on 8 Dec 2010 was causing problems with positioning of normal alpha images.
+;            I have now solved the original problem with a new ALPHABGPOSITION keyword, while
+;            restoring functionality that was lost in the 8 Dec 2010 fix. 10 January 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -490,6 +499,7 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
+    ALPHABGPOSITION=alphapos, $
     NOINTERP=nointerp, $
     TV=tv
 
@@ -577,8 +587,13 @@ FUNCTION TVIMAGE_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
     Set_Plot, 'Z'
     Device, Get_Decomposed=theState
     Device, Set_Resolution=sb[0:1], Decomposed=1, Set_Pixel_Depth=24
-    TVImage, bImage, POSITION=position, /NOINTERP
-                
+   
+    IF N_Elements(alphapos) EQ 0 THEN BEGIN
+        TVImage, bImage, /NOINTERP
+    ENDIF ELSE BEGIN
+        TVImage, bImage, Position=alphapos, /NOINTERP
+    ENDELSE
+    
     ; Calculate the parameters for taking a snapshot of the
     ; relevant portion of the window.
     xstart = position[0]*sb[0]
@@ -619,6 +634,7 @@ END
 PRO TVIMAGE, image, x, y, $
    ACOLOR=acolorname, $
    ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
+   ALPHABGPOSITION=alphapos, $
    AXIS=axis, $
    AXES=axes, $
    AXKEYWORDS=axkeywords, $
@@ -1014,7 +1030,8 @@ PRO TVIMAGE, image, x, y, $
          IF N_Elements(y) EQ 0 THEN y = 0
          IF Keyword_Set(normal) THEN BEGIN
             IF alphaImage THEN BEGIN
-               outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, TV=1)
+               outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, $
+                    TV=1, ALPHABGPOSITION=alphapos)
                TV, outImage, x, y, True=3, _STRICT_EXTRA=extra, /Normal
             ENDIF ELSE BEGIN
                CASE scale OF
@@ -1025,7 +1042,8 @@ PRO TVIMAGE, image, x, y, $
             ENDELSE
          ENDIF ELSE BEGIN
             IF alphaImage THEN BEGIN
-               outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, TV=1)
+               outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, $
+                    TV=1, ALPHABGPOSITION=alphapos)
                TV, outImage, x, y, True=3, _STRICT_EXTRA=extra, /Device
             ENDIF ELSE BEGIN
                CASE scale OF
@@ -1039,7 +1057,8 @@ PRO TVIMAGE, image, x, y, $
          IF N_Params() EQ 2 THEN BEGIN
             IF Keyword_Set(normal) THEN BEGIN
                 IF alphaImage THEN BEGIN
-                   outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, TV=1)
+                   outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, $
+                       TV=1, ALPHABGPOSITION=alphapos)
                    TV, outImage, x,  True=3, _STRICT_EXTRA=extra, /Normal
                 ENDIF ELSE BEGIN
                    CASE scale OF 
@@ -1050,7 +1069,8 @@ PRO TVIMAGE, image, x, y, $
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
-                   outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, TV=1)
+                   outImage = TVImage_Prepare_Alpha(image, position, alphaBackgroundImage, $
+                        TV=1, ALPHABGPOSITION=alphapos)
                    TV, outImage, x,  True=3, _STRICT_EXTRA=extra, /Device
                 ENDIF ELSE BEGIN
                    CASE scale OF 

@@ -109,6 +109,9 @@
 ;     overplot: in, optional, type=boolean
 ;        Set this keyword to overplot the contours onto a previously established
 ;        data coordinate system.
+;     position: in, optional, type=float
+;        Set this keyword to a four-element [x0,y0,x1,y1] array giving the contour plot
+;        position in normalized coordinates. 
 ;     resolution: in, optional, type=integer array, default=[41\,41]
 ;        If the IRREGULAR keyword is set, this keyword specifies the X and Y resolution
 ;        in a two element integer array of the final gridded data that is sent to the 
@@ -172,6 +175,8 @@
 ;             3 Jan 2011. DWF.
 ;        Fixed a problem calculating NLEVELS when LEVELS keyword was used instead. 3 Jan 2011. DWF.
 ;        TVLCT commands protected from NULL device. 4 Jan 2011. DWF.
+;        Fixed a no color problem when CELL_FILL was set. 11 Jan 2011. DWF.
+;        Fixed a problem with overlaying filled contours with /OVERPLOT. 11 Jan 2011. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -192,11 +197,14 @@ PRO FSC_Contour, data, x, y, $
     NOERASE=noerase, $
     MISSINGVALUE=missingvalue, $
     OVERPLOT=overplot, $
+    POSITION=position, $
     RESOLUTION=resolution, $
     TRADITIONAL=traditional, $
     WINDOW=window, $
     XSTYLE=xstyle, $
+    XTHICK=xthick, $
     YSTYLE=ystyle, $
+    YTHICK=ythick, $
     _REF_EXTRA=extra
     
     Compile_Opt idl2
@@ -230,10 +238,13 @@ PRO FSC_Contour, data, x, y, $
             NOERASE=noerase, $
             MISSINGVALUE=missingvalue, $
             OVERPLOT=overplot, $
+            POSITION=position, $
             RESOLUTION=resolution, $
             TRADITIONAL=traditional, $
             XSTYLE=xstyle, $
+            XTHICK=xthick, $
             YSTYLE=ystyle, $
+            YTHICK=ythick, $
             _Extra=extra
             
          RETURN
@@ -402,7 +413,7 @@ PRO FSC_Contour, data, x, y, $
            IF (Size(c_colors, /TYPE) EQ 3) && (Max(c_colors) LE 255) THEN c_colors = Fix(c_colors)
         ENDIF
     ENDIF ELSE BEGIN
-        IF Keyword_Set(fill) THEN BEGIN
+        IF Keyword_Set(fill) OR Keyword_Set(cell_fill) THEN BEGIN
             IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, /Get
             rrr = Congrid(rrr, nlevels)
             ggg = Congrid(ggg, nlevels)
@@ -459,7 +470,7 @@ PRO FSC_Contour, data, x, y, $
                     ; Draw the plot that doesn't draw anything.
                      Contour, contourData, xgrid, ygrid, COLOR=axiscolor, $
                         BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=xstyle, $
-                        _STRICT_EXTRA=extra, /NODATA
+                        POSITION=position, _STRICT_EXTRA=extra, XTHICK=xthick, YTHICK=ythick, /NODATA
                     
                     ; Save the "after plot" system variables. Will use later. 
                     afterx = !X
@@ -495,14 +506,15 @@ PRO FSC_Contour, data, x, y, $
     
         Contour, contourData, xgrid, ygrid, COLOR=axiscolor, $
             BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
-            _STRICT_EXTRA=extra, /NODATA, NOERASE=tempNoErase
+            POSITION=position, _STRICT_EXTRA=extra, /NODATA, NOERASE=tempNoErase, $
+            XTHICK=xthick, YTHICK=ythick
                     
     ENDIF
     
     ; This is where we actually draw the data.
     Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
-        LEVELS=levels, C_Labels=c_labels, C_COLORS=c_colors, $
-        XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, /OVERPLOT
+        LEVELS=levels, C_Labels=c_labels, C_COLORS=c_colors, XTHICK=xthick, YTHICK=ythick, $
+        POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, /OVERPLOT
         
     ; If this is the first plot in PS, then we have to make it appear that we have
     ; drawn a plot, even though we haven't.
@@ -512,31 +524,12 @@ PRO FSC_Contour, data, x, y, $
         !P = afterP
     ENDIF
         
-    ; If you filled the contour plot, you will need to repair the axes. We have
-    ; to be careful that we don't advance a !P.MULTI plot when we do this. Thus,
-    ; we have to take care with the system variables again.
-    IF Keyword_Set(fill) OR Keyword_Set(cell_fill) THEN BEGIN
-        
-        ; Get the current system variables, so we can restore them later.
-        newx = !X
-        newy = !y
-        newP = !P
-        
-        ; Set the system variables to their original values.
-        !X = bangx
-        !Y = bangy
-        !P = bangp
-        
-        ; Repair the plot.
-        Contour, contourData, xgrid, ygrid, COLOR=axiscolor, C_COLORS=c_colors, $
-           BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
-           _STRICT_EXTRA=extra, /NODATA, NOERASE=1
-          
-        ; Restore the system variables so that it appears we didn't do what we just did.
-        !X = newx 
-        !y = newy 
-        !P = newP
-
+    ; If we filled the contour plot, we need to repair the axes. 
+    IF Keyword_Set(fill) OR Keyword_Set(cell_fill) THEN BEGIN  
+       FSC_PlotS, [!X.CRange[0], !X.CRange[0]], !Y.CRange, COLOR=axiscolor, THICK=ythick
+       FSC_PlotS, !X.CRange, [!Y.CRange[1], !Y.CRange[1]], COLOR=axiscolor, THICK=xthick
+       FSC_PlotS, [!X.CRange[1], !X.CRange[1]], !Y.CRange, COLOR=axiscolor, THICK=ythick
+       FSC_PlotS, !X.CRange, [!Y.CRange[0], !Y.CRange[0]], COLOR=axiscolor, THICK=xthick
     ENDIF
     
     ; Restore the decomposed color state if you can.

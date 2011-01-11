@@ -1195,6 +1195,12 @@ PRO FSC_Surface, data, x, y, $
         RETURN
     ENDIF
   
+    ; Did the user pass parameters?
+    IF N_Params() EQ 0 THEN BEGIN
+        Print, 'USE SYNTAX: FSC_Surface, data, x, y'
+        RETURN
+    ENDIF
+    
     ; We can only do this on devices that support windows.
     IF (!D.Flags AND 256) EQ 0 THEN $
         Message, 'This program only works on devices that support windows.'

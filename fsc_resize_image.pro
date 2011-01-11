@@ -64,9 +64,8 @@
 ;     interpolate: in, optional, type=boolean, default=0
 ;         Is set, bilinear interpolation is used to resize the image. Otherwise,
 ;         nearest neighbor sampling is used instead.
-;      minus_one: in, optional, type=boolean, default=1
-;          Identical to CONGRID MINUS_ONE keyword. Default is set to 1 to avoid
-;          extrapolating one column or row beyond the bounds of the input image.
+;      minus_one: in, optional, type=boolean, default=0
+;          Identical to CONGRID MINUS_ONE keyword. 
 ;          
 ; :Examples:
 ;    Used in a similar fashion to the Congrid command, but for images::
@@ -88,6 +87,10 @@
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
+;     I have been convinced (conversations with Wayne Landsman) that if the 
+;         CENTER keyword is set, the MINUS_ONE keyword is not needed, since 
+;         it was created to solve the same problem. So, I have changed the 
+;         default setting of MINUS_ONE to 0. 11 Jan 2011. DWF.
 ;-
 FUNCTION FSC_Resize_Image, image, cols, rows, $
     INTERPOLATE=interp, $
@@ -95,6 +98,12 @@ FUNCTION FSC_Resize_Image, image, cols, rows, $
 
     Compile_Opt idl2
     
+     ; Check parameters.
+    IF N_Params() EQ 0 THEN BEGIN
+        Print, 'USE SYNTAX: FSC_Resize_Image, image, cols, rows'
+        RETURN, "FSC_Resize_Image Syntax Error"
+    ENDIF
+ 
     ; Return to the caller on an error.
     On_Error, 2   
     
@@ -106,7 +115,7 @@ FUNCTION FSC_Resize_Image, image, cols, rows, $
     
     ; Check for keywords. Default for minus_one is 1.
     interp = Keyword_Set(interp)
-    IF N_Elements(minus_one) EQ 0 THEN minus_one = 1
+    IF N_Elements(minus_one) EQ 0 THEN minus_one = 0
     m1 = Keyword_Set(minus_one)
     
     ; 2D images are immediately passed to IDL's Congrid command, with 

@@ -88,7 +88,7 @@
 ;           Thistle            Tomato         Turquoise            Violet        Violet Red             Wheat
 ;             White            Yellow
 ;
-;           The color WHITE is used if this parameter is absent or a color name is mis-spelled. To see a list
+;           The color OPPOSITE is used if this parameter is absent or a color name is mis-spelled. To see a list
 ;           of the color names available in the program, type this:
 ;
 ;              IDL> Print, FSC_Color(/Names), Format='(6A18)'
@@ -511,7 +511,7 @@ FUNCTION FSC_Color, theColour, colorIndex, $
     
     ; I don't want to change the original variable.
     IF N_Elements(theColour) NE 0 THEN theColor = theColour ELSE $
-        theColor = Keyword_Set(brewer) ? 'WT1' : 'WHITE'
+        theColor = 'OPPOSITE'
         
     ; Make sure the color parameter is a string.
     varInfo = Size(theColor)
@@ -525,7 +525,7 @@ FUNCTION FSC_Color, theColour, colorIndex, $
            /Preserve_Null), ' ')
     ENDFOR
     
-    ; Make sure the color is compressed anduppercase.   
+    ; Make sure the color is compressed and uppercase.   
     theColor = StrUpCase(StrCompress(StrTrim(theColor,2), /Remove_All))
     
     ; Get the pixel value of the "opposite" color. This is the pixel color

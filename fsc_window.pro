@@ -750,6 +750,12 @@ IF theError NE 0 THEN BEGIN
    RETURN
 ENDIF
 
+; Check parameters.
+IF N_Params() EQ 0 THEN BEGIN
+     Print, 'USE SYNTAX: FSC_Window, "command", p1, p2, p3'
+     RETURN
+ENDIF
+
    ; Check for availability of GIF files.
 
 thisVersion = Float(!Version.Release)

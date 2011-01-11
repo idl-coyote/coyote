@@ -67,10 +67,9 @@
 ;     bottom: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the bottom color. By default, same as COLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
-;     charsize: in, optional, type=float
-;        The character size of the surface annotation. If the current graphics device is 
-;        PostScript, and this keyword is undefined, and the font keyword is set to 1, then
-;        the character size is set to 1.75 to produce "normal" true-type characters.
+;     charsize: in, optional, type=float, default=FSC_DefCharSize*1.25
+;        The character size for axes annotations. Uses FSC_DefCharSize()*1.25 to select default
+;        character size, unless !P.Charsize is set, in which case !P.Charsize*1.25 is always used.
 ;     color: in, optional, type=string/integer, default='blu6'
 ;        If this keyword is a string, the name of the data color. By default, "BLU6".
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -202,6 +201,12 @@ PRO FSC_Surf, data, x, y, $
         RETURN
     ENDIF
     
+    ; Did user pass parameters?
+    IF N_Elements(data) EQ 0 THEN BEGIN
+        Print, 'USE SYNTAX: FSC_Surf, data, x, y, [SHADED=1]'
+        RETURN
+    ENDIF
+    
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
@@ -236,10 +241,6 @@ PRO FSC_Surf, data, x, y, $
     ENDIF
     
     ; Check parameters.
-    IF N_Elements(data) EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_Surf, data, x, y, [SHADED=1]'
-        RETURN
-    ENDIF
     ndims = Size(data, /N_DIMENSIONS)
     IF ndims NE 2 THEN Message, 'Data must be 2D.'
     s = Size(data, /DIMENSIONS)
@@ -355,9 +356,7 @@ PRO FSC_Surf, data, x, y, $
     IF Size(bottom, /TYPE) LE 2 THEN bottom = StrTrim(Fix(bottom),2)
     elevation_shading = Keyword_Set(elevation_shading)
     IF N_Elements(font) EQ 0 THEN IF (!D.Name EQ 'PS') THEN font = 1 ELSE font = !P.font
-    IF N_Elements(charsize) EQ 0 THEN BEGIN
-        IF (!P.Charsize EQ 0) AND ((font EQ 1) OR (!P.FONT EQ 1)) THEN charsize = 1.75
-    END
+    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font) * 1.25
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
     IF N_Elements(rotx) EQ 0 THEN rotx = 30
     IF N_Elements(rotz) EQ 0 THEN rotz = 30

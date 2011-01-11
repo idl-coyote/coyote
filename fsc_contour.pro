@@ -79,9 +79,14 @@
 ;        Set to indicate filled contours should be created using the "cell fill" method.
 ;        This keyword should always be set if displaying filled contours on map projections
 ;        or if missing data is present in the data you are contouring.
+;     charsize: in, optional, type=float, default=FSC_DefCharSize()
+;         The character size for axes annotations. Uses FSC_DefCharSize to select default
+;         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     font: in, optional, type=integer, default=!P.Font
+;        The type of font desired for axis annotation.
 ;     fill: in, optional, type=boolean, default=0
 ;        Set to indicate filled contours should be created.
 ;     irregular: in, optional, type=boolean
@@ -177,6 +182,7 @@
 ;        TVLCT commands protected from NULL device. 4 Jan 2011. DWF.
 ;        Fixed a no color problem when CELL_FILL was set. 11 Jan 2011. DWF.
 ;        Fixed a problem with overlaying filled contours with /OVERPLOT. 11 Jan 2011. DWF.
+;        Selecting character size now with FSC_DefCharSize. 11 Jan 2011. DWF.      
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -188,8 +194,10 @@ PRO FSC_Contour, data, x, y, $
     C_COLORS=c_colors, $
     C_LABELS=c_labels, $
     CELL_FILL=cell_fill, $
+    CHARSIZE=charsize, $
     COLOR=scolor, $
     FILL=fill, $
+    FONT=font, $
     IRREGULAR=irregular, $
     LABEL=label, $
     LEVELS=levels, $
@@ -219,6 +227,12 @@ PRO FSC_Contour, data, x, y, $
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
+    ; Check parameters.
+    IF N_Params() EQ 0 THEN BEGIN
+        Print, 'USE SYNTAX: FSC_Contour, data, x, y'
+        RETURN
+    ENDIF
+
     ; Do they want this plot in a resizeable graphics window?
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) AND (Keyword_Set(overplot) EQ 0) THEN BEGIN
     
@@ -229,6 +243,7 @@ PRO FSC_Contour, data, x, y, $
             C_COLORS=c_colors, $
             C_LABELS=c_labels, $
             CELL_FILL=cell_fill, $
+            CHARSIZE=charsize, $
             COLOR=scolor, $
             FILL=fill, $
             IRREGULAR=irregular, $
@@ -255,6 +270,8 @@ PRO FSC_Contour, data, x, y, $
         Print, 'USE SYNTAX: FSC_Contour, data, x, y, NLEVELS=10'
         RETURN
     ENDIF
+    IF N_Elements(font) EQ 0 THEN font = !P.Font
+    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
     
     ndims = Size(data, /N_DIMENSIONS)
@@ -468,9 +485,10 @@ PRO FSC_Contour, data, x, y, $
                     IF BitGet(ystyle, 2) NE 1 THEN yystyle = xstyle + 4 ELSE yystyle = ystyle
                     
                     ; Draw the plot that doesn't draw anything.
-                     Contour, contourData, xgrid, ygrid, COLOR=axiscolor, $
+                     Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
                         BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=xstyle, $
-                        POSITION=position, _STRICT_EXTRA=extra, XTHICK=xthick, YTHICK=ythick, /NODATA
+                        POSITION=position, _STRICT_EXTRA=extra, XTHICK=xthick, YTHICK=ythick, $
+                        FONT=font, /NODATA
                     
                     ; Save the "after plot" system variables. Will use later. 
                     afterx = !X
@@ -504,17 +522,18 @@ PRO FSC_Contour, data, x, y, $
     ; drawn here, no data.
     IF Keyword_Set(overplot) EQ 0 THEN BEGIN
     
-        Contour, contourData, xgrid, ygrid, COLOR=axiscolor, $
+        Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
             BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
             POSITION=position, _STRICT_EXTRA=extra, /NODATA, NOERASE=tempNoErase, $
-            XTHICK=xthick, YTHICK=ythick
+            XTHICK=xthick, YTHICK=ythick, FONT=font 
                     
     ENDIF
     
     ; This is where we actually draw the data.
     Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
         LEVELS=levels, C_Labels=c_labels, C_COLORS=c_colors, XTHICK=xthick, YTHICK=ythick, $
-        POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, /OVERPLOT
+        POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, CHARSIZE=charsize, $
+        FONT=font, /OVERPLOT
         
     ; If this is the first plot in PS, then we have to make it appear that we have
     ; drawn a plot, even though we haven't.

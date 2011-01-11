@@ -118,6 +118,12 @@ PRO FSC_Display, pxsize, pysize, $
         RETURN
     ENDIF
     
+    ; Did the user pass parameters?
+    IF N_Params() EQ 0 THEN BEGIN
+        Print, 'USE SYNTAX: FSC_Display, xsize, ysize'
+        RETURN
+    ENDIF
+    
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     

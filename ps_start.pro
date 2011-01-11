@@ -215,25 +215,7 @@ PRO PS_START, $
    IF ps_struct.p.charthick EQ 0 THEN !P.Charthick = 2
    IF ps_struct.p.charsize EQ 0 THEN BEGIN
         IF N_Elements(charsize) EQ 0 THEN BEGIN
-        
-            CASE StrUpCase(!Version.OS_Family) OF
-            
-                'WINDOWS': BEGIN
-                    IF Total(!P.MULTI) EQ 0 THEN !P.Charsize = 1.25 ELSE !P.Charsize = 1.00
-                    IF (font EQ 1) THEN BEGIN
-                        IF Total(!P.MULTI) EQ 0 THEN !P.Charsize = 1.50 ELSE !P.Charsize = 1.25
-                    ENDIF
-                    END
-                    
-                ELSE: BEGIN
-                    IF Total(!P.MULTI) EQ 0 THEN !P.Charsize = 1.50 ELSE !P.Charsize = 1.25
-                    IF (font EQ 1) THEN BEGIN
-                        IF Total(!P.MULTI) EQ 0 THEN !P.Charsize = 1.50 ELSE !P.Charsize = 1.25
-                    ENDIF
-                    END
-            
-            ENDCASE
-             
+            !P.Charsize = FSC_DefCharsize(FONT=font)
         ENDIF ELSE !P.Charsize = charsize
    ENDIF ELSE BEGIN
         IF N_Elements(charsize) NE 0 THEN !P.Charsize = charsize

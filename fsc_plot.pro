@@ -67,10 +67,15 @@
 ;     background: in, optional, type=string/integer, default='white'
 ;        If this keyword is a string, the name of the background color. By default, 'white'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     charsize: in, optional, type=float, default=FSC_DefCharSize()
+;         The character size for axes annotations. Uses FSC_DefCharSize to select default
+;         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, 'black'.
 ;        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table.
+;     font: in, optional, type=integer, default=!P.Font
+;        The type of font desired for axis annotation.
 ;     isotropic: in, optional, type=boolean, default=0
 ;         A short-hand way of setting the ASPECT keyword to 1.
 ;     nodata: in, optional, type=boolean, default=0
@@ -132,7 +137,8 @@
 ;        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
 ;        Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.
 ;        In some cases, I was turning BYTE values to strings without converting to 
-;            INTEGERS first. 30 Dec 2010. DWF.        
+;            INTEGERS first. 30 Dec 2010. DWF.  
+;         Selecting character size now with FSC_DefCharSize. 11 Jan 2011. DWF.      
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -142,7 +148,9 @@ PRO FSC_Plot, x, y, $
     AXISCOLOR=saxiscolor, $
     AXESCOLOR=saxescolor, $
     BACKGROUND=sbackground, $
+    CHARSIZE=charsize, $
     COLOR=scolor, $
+    FONT=font, $
     ISOTROPIC=isotropic, $
     NODATA=nodata, $
     NOERASE=noerase, $
@@ -181,7 +189,9 @@ PRO FSC_Plot, x, y, $
             AXISCOLOR=saxiscolor, $
             AXESCOLOR=saxescolor, $
             BACKGROUND=sbackground, $
+            CHARSIZE=charsize, $
             COLOR=scolor, $
+            FONT=font, $
             ISOTROPIC=isotropic, $
             NODATA=nodata, $
             NOERASE=noerase, $
@@ -304,6 +314,8 @@ PRO FSC_Plot, x, y, $
         axiscolor = 'OPPOSITE'
     ENDIF
     
+    IF N_Elements(font) EQ 0 THEN font = !P.Font
+    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
     IF N_Elements(ssymcolor) EQ 0 THEN symcolor = color ELSE symcolor = ssymcolor
     IF Size(symcolor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN symcolor = Byte(symcolor)
     IF Size(symcolor, /TYPE) LE 2 THEN symcolor = StrTrim(Fix(symcolor),2)
@@ -332,7 +344,8 @@ PRO FSC_Plot, x, y, $
                     bangp = !P
                     
                     ; Draw the plot that doesn't draw anything.
-                    Plot, indep, dep, POSITION=position, /NODATA, _STRICT_EXTRA=extra  
+                    Plot, indep, dep, POSITION=position, CHARSIZE=charsize, /NODATA, $
+                        FONT=font, _STRICT_EXTRA=extra  
                     
                     ; Save the "after plot" system variables. Will use later. 
                     afterx = !X
@@ -368,8 +381,8 @@ PRO FSC_Plot, x, y, $
     IF Keyword_Set(overplot) THEN BEGIN
        IF psym LE 0 THEN OPlot, indep, dep, COLOR=color, _STRICT_EXTRA=extra
     ENDIF ELSE BEGIN
-      Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, $
-            POSITION=position, /NODATA, NOERASE=tempNoErase, _STRICT_EXTRA=extra
+      Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
+            POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, _STRICT_EXTRA=extra
         IF psym LE 0 THEN BEGIN
            IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=color, _EXTRA=extra  
         ENDIF  

@@ -42,10 +42,7 @@
 ;
 ; KEYWORD PARAMETERS:
 ;
-;     ACOLOR:   Set this keyword to the axis color. If a byte or integer value,
-;               it will assume you are using INDEXED color mode. If a long integer
-;               is will assume you are using DECOMPOSED color mode. If a string,
-;               is will pass the string color name along to FSC_COLOR for processing.
+;     ACOLOR:   This keyword has been depreciated in favor of the COLOR keyword.
 ;               
 ;     ALPHABACKGROUNDIMAGE: Normally, when a image with an alpha channel is displayed,
 ;               the image is blended with the image currently in the display window.
@@ -77,10 +74,11 @@
 ;               PLOT command that draws the axes for the image. Ignored unless the
 ;               AXES keyword is set. For example,
 ;
-;               TVImage, image, /AXES, AXKEYWORDS={CHARSIZE:1.5, FONT=1, TICKLEN:-0.025}
+;               TVImage, image, /AXES, AXKEYWORDS={TICKLEN:-0.025}
 ;               
-;               The axis color, range, and title must be set with TVIMAGE keywords
-;               ACOLOR, [XY]RANGE, and [XY]TITLE.
+;               The axis color, range, title, font and character size must be 
+;               set with TVIMAGE keywords ACOLOR, [XY]RANGE, [XY]TITLE, FONT, and
+;               CHARSIZE.
 ;
 ;     BACKGROUND:   This keyword specifies the background color. Note that
 ;               the keyword ONLY has effect if the ERASE keyword is also
@@ -112,9 +110,19 @@
 ;               The value of BOTTOM is 0 by default.
 ;
 ;     BREWER:   Obsolete and not used.
+;     
+;     COLOR:    Set this keyword to the axis color. If a byte or integer value,
+;               it will assume you are using INDEXED color mode. If a long integer
+;               is will assume you are using DECOMPOSED color mode. If a string,
+;               is will pass the string color name along to FSC_COLOR for processing.
+;     
+;     CHARSIZE: Sets the character size. Used only if the AXES keyword is also set.
 ;
 ;     ERASE:    If this keyword is set an ERASE command is issued
 ;               before the image is displayed. 
+;               
+;     FONT:     Set this to the type of font wanted on axis annotation. By default
+;               FONT = !P.Font. Used only if the AXES keyword is also set.
 ;
 ;     _EXTRA:   This keyword picks up any TV keywords you wish to use.
 ;
@@ -245,11 +253,13 @@
 ;    SCALE:     Set this keyword to byte scale the image before display. If this
 ;               keyword is not set, the image is not scaled before display.
 ;               
-;     TOP:      IF SCALE=1, the image is scaled so that all displayed pixels have values
+;    TITLE:     The title annotation. Used only if the keyword AXES is set.
+;               
+;    TOP:       IF SCALE=1, the image is scaled so that all displayed pixels have values
 ;               greater than or equal to BOTTOM and less than or equal to TOP.
 ;               The value of TOP is !D.Table_Size by default.
 ;
-;     TV:       Setting this keyword makes the TVIMAGE command work much
+;    TV:        Setting this keyword makes the TVIMAGE command work much
 ;               like the TV command, although better. That is to say, it
 ;               will still set the correct DECOMPOSED state depending upon
 ;               the kind of image to be displayed (8-bit or 24-bit). It will
@@ -478,9 +488,11 @@
 ;            I have now solved the original problem with a new ALPHABGPOSITION keyword, while
 ;            restoring functionality that was lost in the 8 Dec 2010 fix. 10 January 2011. DWF.
 ;        Added XTITLE and YTITLE keywords to add titles to image axes. 10 January 2011. DWF.
+;        Added FONT, CHARSIZE, and TITLE keywords. 11 Jan 2011. DWF.
+;        Depreciated ACOLOR keyword in favor of new COLOR keyword. 11 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
-;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
+;  Copyright (c) 2008-2011, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -649,6 +661,7 @@ PRO TVIMAGE, image, x, y, $
    BACKGROUND=background, $
    BREWER=brewer, $ ; Obsolete and not used.
    BOTTOM=bottom, $
+   COLOR=color, $
    ERASE=eraseit, $
    HALF_HALF=half_half, $ ; Obsolete and not used.
    KEEP_ASPECT_RATIO=keep, $
@@ -682,6 +695,12 @@ PRO TVIMAGE, image, x, y, $
        RETURN
     ENDIF
     
+    ; Check parameters.
+    IF N_Params() EQ 0 THEN BEGIN
+        Print, 'USE SYNTAX: TVIMAGE, image'
+        RETURN
+    ENDIF
+    
     ; Set up a common block as input to TVINFO.
     COMMON FSC_$TVIMAGE, _tvimage_xsize, _tvimage_ysize, $
                          _tvimage_winxsize, _tvimage_winysize, $
@@ -691,8 +710,14 @@ PRO TVIMAGE, image, x, y, $
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
+    ; Depreciated ACOLOR keyword in favor of COLOR keyword.
+    IF N_Elements(acolorname) EQ 0 THEN IF N_Elements(color) NE 0 THEN acolorname = color
+    
     ; Which release of IDL is this?
     thisRelease = Float(!Version.Release)
+    
+    IF N_Elements(font) EQ 0 THEN font = !P.Font
+    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
     
     ; If the background color is specified, then ERASEIT should be automatically set.
     IF N_Elements(background) NE 0 THEN eraseit = 1
@@ -1308,7 +1333,8 @@ PRO TVIMAGE, image, x, y, $
     
         FSC_PLOT, [0], /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
             XSTYLE=1, YSTYLE=1, POSITION=position, AXISCOLOR=acolor, $
-            XTITLE=plotxtitle, YTITLE=plotytitle, _STRICT_EXTRA=axkeywords
+            XTITLE=plotxtitle, YTITLE=plotytitle, TITLE=title, CHARSIZE=charsize, $
+            FONT=font, _STRICT_EXTRA=axkeywords
             
     ENDIF ELSE BEGIN
     

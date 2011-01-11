@@ -57,6 +57,9 @@
 ;         x and y location. 0 is left aligned, 0.5 is centered, and 1.0 is right aligned.
 ;         The alignment is set to 0.5 if PLACE is set and ALIGNMENT is unspecified. 
 ;         Otherwise, the default is 0.
+;     charsize: in, optional, type=float, default=FSC_DefCharSize()
+;         The character size for axes annotations. Uses FSC_DefCharSize to select default
+;         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
 ;     color: in, optional, type=string/integer/long
 ;         The color of the text. Color names are those used with FSC_Color. By default,
 ;         "black", unless the upper-right hand pixel in the display is black, then "white".
@@ -65,7 +68,7 @@
 ;         are the default, unless DEVICE or NORMAL is set.
 ;     device: in, optional, type=boolean
 ;         Set this keyword to indicate xloc and yloc are in device coordinates.
-;     font: in, optional, type=integer
+;     font: in, optional, type=integer, default=!P.Font
 ;         The type of font desired. By default, !P.Font.
 ;     normal: in, optional, type=boolean
 ;         Set this keyword to indicate xloc and yloc are in normalized coordinates.
@@ -117,6 +120,7 @@
 ;-
 PRO FSC_Text, xloc, yloc, text, $
     ALIGNMENT=alignment, $
+    CHARSIZE=charsize, $
     COLOR=scolor, $
     DATA=data, $
     DEVICE=device, $
@@ -135,6 +139,12 @@ PRO FSC_Text, xloc, yloc, text, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        RETURN
+    ENDIF
+    
+    ; Did the user pass parameters?
+    IF N_Params() EQ 0 THEN BEGIN
+        Print, 'USE SYNTAX: FSC_Text, xlocation, ylocation, text'
         RETURN
     ENDIF
     
@@ -184,6 +194,7 @@ PRO FSC_Text, xloc, yloc, text, $
     
     ; Check keywords.
     IF N_Elements(font) EQ 0 THEN font = !P.FONT
+    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
     IF N_Elements(tt_font) NE 0 THEN BEGIN
         IF font EQ 1 THEN BEGIN
             Device, Set_Font=tt_font, /TT_FONT
@@ -213,7 +224,7 @@ PRO FSC_Text, xloc, yloc, text, $
     ; Write the text. Do this in Decomposed color, if possible.
     SetDecomposedState, 1, CURRENTSTATE=currentState
     IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(color) ELSE thisColor = color
-    XYOutS, x, y, textStr, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
+    XYOutS, x, y, textStr, CHARSIZE=charsize, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
         DATA=data, DEVICE=device, NORMAL=normal, WIDTH=width, _STRICT_EXTRA=extra
    SetDecomposedState, currentState
    

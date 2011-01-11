@@ -124,6 +124,7 @@
 ;          HEADDATA, ENDIAN, DATATYPE, DIMENSIONS keywords added.
 ;          Now dependent on FSC_FIELD, ERROR_MESSAGE, and CENTER_TLB from Coyote Library.
 ;       Added ability to parse fully qualified file names passed from Dialog_Pickfile. 30 Oct 2010. DWF.
+;       IF a file name is not passed into the program, it asks the user to select one now. 10 Jan 2011. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -244,7 +245,7 @@ PRO GETIMAGE_EVENT, event
          startDirectory = startDirectory[0]
 
          ; If this directory doesn't exist, use the current directory.
-         test = Findfile(startDirectory, Count=foundfile)
+         test = File_Search(startDirectory, Count=foundfile)
          IF foundfile NE 1 THEN CD, Current=startDirectory
 
          ; Use PICKFILE to pick a name.
@@ -355,8 +356,10 @@ FUNCTION GETIMAGE, filename, Directory=directory, DataType=datatype, Dimensions=
    IF N_Elements(parent) NE 0 THEN group_leader = parent
 
    ; Check for parameters and keywords.
-   IF N_Params() EQ 0 THEN filename='ctscan.dat'
-   IF filename EQ "" THEN filename = 'ctscan.dat'
+   IF N_Elements(filename) EQ 0 THEN BEGIN
+        filename=Dialog_Pickfile()
+        IF filename EQ "" THEN RETURN, ""
+   ENDIF
    
    ; Does the file name have a directory? Is so, use it.
    fileDir = File_Dirname(filename)
@@ -375,7 +378,7 @@ FUNCTION GETIMAGE, filename, Directory=directory, DataType=datatype, Dimensions=
        directory = File_DirName(Filepath(Subdirectory=['examples', 'data'], 'nonesense.dat'))
    ENDIF 
    startDirectory = directory
-
+   
    ; Check for size and header keywords. These probably come in as
    ; numbers and you need strings to put them into text widgets.
    IF N_Elements(endian) EQ 0 THEN endian = 0 ELSE endian = 0 > endian < 2

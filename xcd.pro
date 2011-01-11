@@ -86,7 +86,8 @@ case !version.os_family of
 ;
 ;Obtain listing of location's contents.
 ;
-listing = findfile()
+listing = Findfile()
+;listing = File_Search('*')
 if n_elements(location) gt 0 then $
    popd
 ;

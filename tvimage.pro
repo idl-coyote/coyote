@@ -77,8 +77,10 @@
 ;               PLOT command that draws the axes for the image. Ignored unless the
 ;               AXES keyword is set. For example,
 ;
-;               TVImage, image, /AXES, AXKEYWORDS={CHARSIZE:1.5, XTITLE:'Distance (mm)', $
-;                    YTITLE:'Signal', TICKLEN:-0.025}, ACOLOR='NAVY'
+;               TVImage, image, /AXES, AXKEYWORDS={CHARSIZE:1.5, FONT=1, TICKLEN:-0.025}
+;               
+;               The axis color, range, and title must be set with TVIMAGE keywords
+;               ACOLOR, [XY]RANGE, and [XY]TITLE.
 ;
 ;     BACKGROUND:   This keyword specifies the background color. Note that
 ;               the keyword ONLY has effect if the ERASE keyword is also
@@ -268,10 +270,15 @@
 ;               
 ;      XRANGE:  If the AXES keyword is set, this keyword is a two-element vector
 ;               giving the X axis range. By default, [0, size of image in X].
+;            
+;      XTITLE:  The X title string to use for the X image axis. Used only if the AXES
+;               keyword is set.
 ;
 ;      YRANGE:  If the AXES keyword is set, this keyword is a two-element vector
 ;               giving the Y axis range. By default, [0, size of image in Y].
 ;
+;      YTITLE:  The Y title string to use for the Y image axis. Used only if the AXES
+;               keyword is set.
 ; OUTPUTS:
 ;     None.
 ;
@@ -470,6 +477,7 @@
 ;       The fix on 8 Dec 2010 was causing problems with positioning of normal alpha images.
 ;            I have now solved the original problem with a new ALPHABGPOSITION keyword, while
 ;            restoring functionality that was lost in the 8 Dec 2010 fix. 10 January 2011. DWF.
+;        Added XTITLE and YTITLE keywords to add titles to image axes. 10 January 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -661,7 +669,9 @@ PRO TVIMAGE, image, x, y, $
    TV=tv, $
    WHITE=white, $
    XRANGE=plotxrange, $
+   XTITLE=plotxtitle, $
    YRANGE=plotyrange, $
+   YTITLE=plotytitle, $
    _EXTRA=extra
 
     ; Error handling.
@@ -720,7 +730,7 @@ PRO TVIMAGE, image, x, y, $
     ; If axes are set and MARGIN and POSITION are NOT set and you are NOT
     ; doing multiplots, then set a normal "plot" margin.
     IF Keyword_Set(axes) AND ((N_Elements(margin) EQ 0) AND (N_Elements(position) EQ 0) $
-        AND (multi EQ 0)) THEN margin = 0.075
+        AND (multi EQ 0)) THEN margin = 0.1
     
     ; Check other keywords.
     interp = 1.0 - Keyword_Set(nointerp)
@@ -1297,7 +1307,8 @@ PRO TVIMAGE, image, x, y, $
     IF axes THEN BEGIN
     
         FSC_PLOT, [0], /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
-            XSTYLE=1, YSTYLE=1, POSITION=position, AXISCOLOR=acolor, _STRICT_EXTRA=axkeywords
+            XSTYLE=1, YSTYLE=1, POSITION=position, AXISCOLOR=acolor, $
+            XTITLE=plotxtitle, YTITLE=plotytitle, _STRICT_EXTRA=axkeywords
             
     ENDIF ELSE BEGIN
     

@@ -138,7 +138,9 @@
 ;        Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.
 ;        In some cases, I was turning BYTE values to strings without converting to 
 ;            INTEGERS first. 30 Dec 2010. DWF.  
-;         Selecting character size now with FSC_DefCharSize. 11 Jan 2011. DWF.      
+;         Selecting character size now with FSC_DefCharSize. 11 Jan 2011. DWF.   
+;         Moved setting to decomposed color before color selection process to avoid PostScript
+;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -223,6 +225,9 @@ PRO FSC_Plot, x, y, $
     ; Get the current color table vectors.
     TVLCT, rr, gg, bb, /GET
     
+    ; Going to do this in decomposed color, if possible.
+    SetDecomposedState, 1, CURRENTSTATE=currentState
+
     ; Check the keywords.
     IF N_Elements(sbackground) EQ 0 THEN BEGIN
         IF Keyword_Set(overplot) || Keyword_Set(noerase) THEN BEGIN
@@ -368,8 +373,6 @@ PRO FSC_Plot, x, y, $
         ENDIF ELSE tempNoErase = noerase
      ENDIF ELSE tempNoErase = noerase
  
-     ; Going to do this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
     
      ; Load the drawing colors, if needed.
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = FSC_Color(axiscolor)

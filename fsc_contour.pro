@@ -183,6 +183,8 @@
 ;        Fixed a no color problem when CELL_FILL was set. 11 Jan 2011. DWF.
 ;        Fixed a problem with overlaying filled contours with /OVERPLOT. 11 Jan 2011. DWF.
 ;        Selecting character size now with FSC_DefCharSize. 11 Jan 2011. DWF.      
+;        Moved setting to decomposed color before color selection process to avoid PostScript
+;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -270,6 +272,10 @@ PRO FSC_Contour, data, x, y, $
         Print, 'USE SYNTAX: FSC_Contour, data, x, y, NLEVELS=10'
         RETURN
     ENDIF
+    
+    ; Going to have to do all of this in decomposed color, if possible.
+    SetDecomposedState, 1, CURRENTSTATE=currentState
+    
     IF N_Elements(font) EQ 0 THEN font = !P.Font
     IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
@@ -451,9 +457,6 @@ PRO FSC_Contour, data, x, y, $
         ENDIF ELSE c_labels = Reverse((indices MOD label) EQ 0)
     ENDIF
 
-    ; Going to have to do all of this in indexed color.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
-    
     ; Load the drawing colors, if needed.
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = FSC_Color(axiscolor)
     IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)

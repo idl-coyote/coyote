@@ -87,6 +87,7 @@
 ;        Allow PostScript 7.0 to set the decomposition keyword. 12 Dec 2010. DWF.
 ;        Added DEPTH and ZDEPTH keywords. 31 Dec 2010. DWF.
 ;        Added a do-nothing NULL device to Case statement. 4 Jan 2011. DWF.
+;        Changed PostScript version that accepts DECOMPOSED keyword from 7.0 to 7.1. 12 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -108,7 +109,18 @@ PRO SetDecomposedState, state, CURRENTSTATE=currentState, DEPTH=depth, ZDEPTH=zd
     CASE StrUpCase(!D.Name) OF
     
        'PS': BEGIN ; PostScript
-             IF Float(!Version.Release) GE 7.0 THEN Device, Decomposed=state
+             CASE 1 OF
+             
+                Float(!Version.Release) GE 7.1: Device, Decomposed=state
+                
+                ; Windows allowed the DECOMPOSED keyword in 7.0, but UNIX did not.
+                (StrUpCase(!Version.OS_Family) EQ 'WINDOWS') && $
+                (Float(!Version.Release) GE 7.0) && $
+                (Float(!Version.Release) LT 7.1): Device, Decomposed=state
+                
+                ELSE:
+                
+             ENDCASE
              END
              
         'Z': BEGIN ; Z-Graphics Buffer
@@ -117,7 +129,15 @@ PRO SetDecomposedState, state, CURRENTSTATE=currentState, DEPTH=depth, ZDEPTH=zd
                 IF (zdepth NE 8) AND (zdepth NE 24) THEN Message, 'ZDEPTH must be set to 8 or 24.'
              ENDIF
                 CASE state OF
-                    0: Device, Decomposed=state;, Set_Pixel_Depth=zdepth
+                    0: BEGIN
+                    
+                        ; Set depth if you have it, otherwise, just leave it alone.
+                        IF N_Elements(zdepth) NE 0 THEN BEGIN
+                            Device, Decomposed=state, Set_Pixel_Depth=zdepth
+                        ENDIF ELSE BEGIN
+                            Device, Decomposed=state
+                        ENDELSE
+                        END
                     1: Device, Decomposed=state, Set_Pixel_Depth=24
                  ENDCASE
              ENDIF

@@ -89,6 +89,8 @@
 ;        Written, 24 December 2010. DWF.
 ;        In some cases, I was turning BYTE values to strings without converting to 
 ;            INTEGERS first. 30 Dec 2010. DWF.        
+;        Moved setting to decomposed color before color selection process to avoid PostScript
+;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -112,6 +114,9 @@ PRO FSC_ColorFill, x, y, z, COLOR=color, NORMAL=normal, DEVICE=device, _EXTRA=ex
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
+    ; Do this in decomposed color, if possible.
+    SetDecomposedState, 1, CURRENTSTATE=currentState
+    
     ; Need a color?
     IF N_Elements(color) EQ 0 THEN thisColor = 'rose' ELSE thisColor = color
     IF Size(thisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN thisColor = Byte(thisColor)
@@ -119,9 +124,6 @@ PRO FSC_ColorFill, x, y, z, COLOR=color, NORMAL=normal, DEVICE=device, _EXTRA=ex
 
     ; Get the current color vectors.
     TVLCT, rr, gg, bb, /Get
-    
-    ; Do this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
     
     ; Fill the polygon.
     IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(thisColor)

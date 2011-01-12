@@ -114,6 +114,8 @@
 ;        Modified the way the default color is selected. Drawing with DECOMPOSED 
 ;             if possible. 30 Dec 2010. DWF.
 ;        Keywords collected with _REF_EXTRA so WIDTH can be returned. Added WIDTH keyword. 6 Jan 2011. DWF.
+;        Moved setting to decomposed color before color selection process to avoid PostScript
+;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -201,6 +203,9 @@ PRO FSC_Text, xloc, yloc, text, $
         ENDIF
     ENDIF
 
+    ; Write the text. Do this in Decomposed color, if possible.
+    SetDecomposedState, 1, CURRENTSTATE=currentState
+
     ; Get the input color table.
     TVLCT, rr, gg, bb, /Get
 
@@ -221,8 +226,7 @@ PRO FSC_Text, xloc, yloc, text, $
     IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Byte(color)
     IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
      
-    ; Write the text. Do this in Decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    ; Draw the text.
     IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(color) ELSE thisColor = color
     XYOutS, x, y, textStr, CHARSIZE=charsize, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
         DATA=data, DEVICE=device, NORMAL=normal, WIDTH=width, _STRICT_EXTRA=extra

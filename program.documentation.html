@@ -13,7 +13,7 @@ this routine, refer to the IDL Online Help Navigator
 or type: <P>
 <PRE>     ? mk_html_help</PRE>
 <P>at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Mon Jan 03 12:24:29 2011.<P>
+<STRONG>Last modified: </STRONG>Tue Jan 11 13:55:48 2011.<P>
  
 <HR>
  
@@ -83,6 +83,7 @@ or type: <P>
 <LI><A HREF="#FLOATS_EQUAL">FLOATS_EQUAL</A>
 <LI><A HREF="#FPUFIX">FPUFIX</A>
 <LI><A HREF="#FSC_ARROW">FSC_ARROW</A>
+<LI><A HREF="#FSC_BARPLOT">FSC_BARPLOT</A>
 <LI><A HREF="#FSC_BASE_FILENAME">FSC_BASE_FILENAME</A>
 <LI><A HREF="#FSC_COLOR">FSC_COLOR</A>
 <LI><A HREF="#FSC_COLORBAR">FSC_COLORBAR</A>
@@ -90,6 +91,7 @@ or type: <P>
 <LI><A HREF="#FSC_COLORFILL">FSC_COLORFILL</A>
 <LI><A HREF="#FSC_COLORSELECT">FSC_COLORSELECT</A>
 <LI><A HREF="#FSC_CONTOUR">FSC_CONTOUR</A>
+<LI><A HREF="#FSC_DEFCHARSIZE">FSC_DEFCHARSIZE</A>
 <LI><A HREF="#FSC_DISPLAY">FSC_DISPLAY</A>
 <LI><A HREF="#FSC_DROPLIST">FSC_DROPLIST</A>
 <LI><A HREF="#FSC_ERASE">FSC_ERASE</A>
@@ -244,6 +246,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <LI><A HREF="#RANGEOF">RANGEOF</A>
 <LI><A HREF="#REPMAT">REPMAT</A>
 <LI><A HREF="#RESOLVE_OBJECT">RESOLVE_OBJECT</A>
+<LI><A HREF="#REVERSEINDICES">REVERSEINDICES</A>
 <LI><A HREF="#REVERSE_AXES">REVERSE_AXES</A>
 <LI><A HREF="#SAVETOMAIN">SAVETOMAIN</A>
 <LI><A HREF="#SCALEMODIS">SCALEMODIS</A>
@@ -2149,6 +2152,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
  :History:
      Change History::
         Written, 24 December 2010. DWF.
+        Fixed a typo when first color is INTEGER and second color is STRING. 3 Jan 2011. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -2820,6 +2824,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 
   Written by: David W. Fanning, May 24, 2009.
   Modified the way decomposition was obtained for PostScript devices IDL 7.1 and higher. 12 Dec 2010. DWF.
+  Fixed a problem in the CASE statement with ELSE clause and added a NULL device segment. 4 Jan 2011. DWF.
 
 </PRE><P>
 <STRONG>(See decomposedcolor.pro)</STRONG><P>
@@ -4995,7 +5000,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A NAME="FSC_ARROW">
 <H2>FSC_ARROW</H2></A>
 <A HREF="#FPUFIX">[Previous Routine]</A>
-<A HREF="#FSC_BASE_FILENAME">[Next Routine]</A>
+<A HREF="#FSC_BARPLOT">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  :Description:
@@ -5065,9 +5070,99 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See fsc_arrow.pro)</STRONG><P>
 <HR>
  
+<A NAME="FSC_BARPLOT">
+<H2>FSC_BARPLOT</H2></A>
+<A HREF="#FSC_ARROW">[Previous Routine]</A>
+<A HREF="#FSC_BASE_FILENAME">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ NAME:
+       FSC_Barplot
+
+ PURPOSE:
+
+       This program is used to draw a a bar plot in an IDL direct graphics window.
+
+ AUTHOR:
+
+       FANNING SOFTWARE CONSULTING
+       David Fanning, Ph.D.
+       1645 Sheely Drive
+       Fort Collins, CO 80526 USA
+       Phone: 970-221-0438
+       E-mail: davidf@dfanning.com
+       Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ CATEGORY:
+
+       Graphics
+
+ CALLING SEQUENCE:
+
+      FSC_Barplot, depData
+      FSC_Barplot, indepData, depData
+
+ ARGUMENTS:
+
+       depData:         The dependent data to plot.
+       
+       indepData:       The independent data to plot.
+
+ INPUT KEYWORDS:
+
+       AXISCOLOR:       The name of the axis color. Default: "Black". (All color names
+                        derived from FSC_COLOR.)
+
+       BACKGROUND:      The name of the background color. Default: "White".
+       
+       BARCOLOR:        The name of the color to fill the bars. Default: "Gray".
+
+
+       COLOR:            The name of the data color for drawing the histogram outlines.
+                         Default: "Black".
+
+       FILL:             Set this keyword to fill the bars with a color.
+
+       LINE_FILL:        If set, the polygons are filled with lines instead of solid color. If
+                         this keyword is set, the following keywords can also be used.
+
+                         ORIENTATION:  The orientation of the lines in line-filled polygons in degrees.
+                         PATTERN:      Set to rectangular array of pixel giving fill pattern.
+                         BARCOLOR:     The name, or vector of names, of line colors.
+                                       If a vector, the names are cycled though, as needed.
+                         SPACING:      The spacing, in centimeters, between parallel lines.
+
+       OPLOT:            Set this keyword if you want to overplot data on already established axes.
+       
+       OUTLINE:          Set this keyword if you wish to draw only the outline of the histogram plot,
+                         in a manner similar to setting PSYM=10 on a PLOT command.
+                         
+       THICK:            Set this keyword to a value greater than 1 to draw thicker axes and lines.
+
+       The user may also enter any other keywords suitable for the PLOT and POLYFILL commands in IDL.
+
+ EXAMPLES:
+
+      IDL> Histoplot, Dist(256)
+      IDL> Histoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['charcoal', 'steel blue'], /FILLPOLYGON
+      IDL> Histoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['navy', 'forest green'], /LINE_FILL, ORIENTATION=[45,-45]
+
+ REQUIRES:
+
+     Requires programs from the Coyote Library:
+
+        http://www.dfanning.com/programs/coyotelibrary.zip
+        
+ MODIFICATION HISTORY:
+
+       Written by:  David W. Fanning, 3 January 2011.
+</PRE><P>
+<STRONG>(See fsc_barplot.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="FSC_BASE_FILENAME">
 <H2>FSC_BASE_FILENAME</H2></A>
-<A HREF="#FSC_ARROW">[Previous Routine]</A>
+<A HREF="#FSC_BARPLOT">[Previous Routine]</A>
 <A HREF="#FSC_COLOR">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -5243,7 +5338,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
            Thistle            Tomato         Turquoise            Violet        Violet Red             Wheat
              White            Yellow
 
-           The color WHITE is used if this parameter is absent or a color name is mis-spelled. To see a list
+           The color OPPOSITE is used if this parameter is absent or a color name is mis-spelled. To see a list
            of the color names available in the program, type this:
 
               IDL> Print, FSC_Color(/Names), Format='(6A18)'
@@ -5533,6 +5628,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
             else. 19 Nov 2010. DWF.
        Made sure the ColorIndex that is returned is always an INTEGER. 24 Dec 2010. DWF.
        Changed the default "unknown" color from WHITE to OPPOSITE. 30 Dec 2010. DWF.
+       TVLCT commands protected from NULL device. 4 Jan 2011. DWF.
 </PRE><P>
 <STRONG>(See fsc_color.pro)</STRONG><P>
 <HR>
@@ -6157,7 +6253,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A NAME="FSC_CONTOUR">
 <H2>FSC_CONTOUR</H2></A>
 <A HREF="#FSC_COLORSELECT">[Previous Routine]</A>
-<A HREF="#FSC_DISPLAY">[Next Routine]</A>
+<A HREF="#FSC_DEFCHARSIZE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  :Description:
@@ -6200,9 +6296,14 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Set to indicate filled contours should be created using the "cell fill" method.
         This keyword should always be set if displaying filled contours on map projections
         or if missing data is present in the data you are contouring.
+     charsize: in, optional, type=float, default=FSC_DefCharSize()
+         The character size for axes annotations. Uses FSC_DefCharSize to select default
+         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
      color: in, optional, type=string/integer, default='black'
         If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
         Otherwise, the keyword is assumed to be a color index into the current color table.
+     font: in, optional, type=integer, default=!P.Font
+        The type of font desired for axis annotation.
      fill: in, optional, type=boolean, default=0
         Set to indicate filled contours should be created.
      irregular: in, optional, type=boolean
@@ -6230,6 +6331,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      overplot: in, optional, type=boolean
         Set this keyword to overplot the contours onto a previously established
         data coordinate system.
+     position: in, optional, type=float
+        Set this keyword to a four-element [x0,y0,x1,y1] array giving the contour plot
+        position in normalized coordinates. 
      resolution: in, optional, type=integer array, default=[41\,41]
         If the IRREGULAR keyword is set, this keyword specifies the X and Y resolution
         in a two element integer array of the final gridded data that is sent to the 
@@ -6286,8 +6390,16 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Change to DECOMPOSED color was using incorrect color tables. 29 Dec 2010. DWF.
         In some cases, I was turning BYTE values to strings without converting to 
             INTEGERS first. 30 Dec 2010. DWF.
-         Still working on getting contour colors to work in decomposed color mode in all 
+        Still working on getting contour colors to work in decomposed color mode in all 
              circumstances. 2 Jan 2011. DWF.
+        Fixed problem with FILL when no contour colors (C_COLORS) are specified. 3 Jan 2011. DWF.
+        Fixed a problem that preventing output keyword (e.g., PATH_INFO) from being returned properly. 
+             3 Jan 2011. DWF.
+        Fixed a problem calculating NLEVELS when LEVELS keyword was used instead. 3 Jan 2011. DWF.
+        TVLCT commands protected from NULL device. 4 Jan 2011. DWF.
+        Fixed a no color problem when CELL_FILL was set. 11 Jan 2011. DWF.
+        Fixed a problem with overlaying filled contours with /OVERPLOT. 11 Jan 2011. DWF.
+        Selecting character size now with FSC_DefCharSize. 11 Jan 2011. DWF.      
          
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -6295,9 +6407,48 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See fsc_contour.pro)</STRONG><P>
 <HR>
  
+<A NAME="FSC_DEFCHARSIZE">
+<H2>FSC_DEFCHARSIZE</H2></A>
+<A HREF="#FSC_CONTOUR">[Previous Routine]</A>
+<A HREF="#FSC_DISPLAY">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   Defines a default character size for Coyote Graphics routines (FSC_Plot, FSC_Contour, etc.)
+   IF !P.Charsize is set, the function simply returns !P.Charsize.
+
+ :Categories:
+    Graphics, Utilities
+    
+ :Params:
+    None.
+       
+ :Keywords:
+     font: in, optional, type=integer, default=!P.Font
+        The font type: -1 = Hershey, 0 = hardware, 1 = true-type. 
+          
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ :History:
+     Change History::
+        Written, 11 January 2011. DWF.        
+
+ :Copyright:
+     Copyright (c) 2011, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See fsc_defcharsize.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="FSC_DISPLAY">
 <H2>FSC_DISPLAY</H2></A>
-<A HREF="#FSC_CONTOUR">[Previous Routine]</A>
+<A HREF="#FSC_DEFCHARSIZE">[Previous Routine]</A>
 <A HREF="#FSC_DROPLIST">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -7577,10 +7728,15 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      background: in, optional, type=string/integer, default='white'
         If this keyword is a string, the name of the background color. By default, 'white'.
         Otherwise, the keyword is assumed to be a color index into the current color table.
+     charsize: in, optional, type=float, default=FSC_DefCharSize()
+         The character size for axes annotations. Uses FSC_DefCharSize to select default
+         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
      color: in, optional, type=string/integer, default='black'
         If this keyword is a string, the name of the data color. By default, 'black'.
         Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
         to be a color index into the current color table.
+     font: in, optional, type=integer, default=!P.Font
+        The type of font desired for axis annotation.
      isotropic: in, optional, type=boolean, default=0
          A short-hand way of setting the ASPECT keyword to 1.
      nodata: in, optional, type=boolean, default=0
@@ -7642,7 +7798,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
         Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.
         In some cases, I was turning BYTE values to strings without converting to 
-            INTEGERS first. 30 Dec 2010. DWF.        
+            INTEGERS first. 30 Dec 2010. DWF.  
+         Selecting character size now with FSC_DefCharSize. 11 Jan 2011. DWF.      
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -8052,9 +8209,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      interpolate: in, optional, type=boolean, default=0
          Is set, bilinear interpolation is used to resize the image. Otherwise,
          nearest neighbor sampling is used instead.
-      minus_one: in, optional, type=boolean, default=1
-          Identical to CONGRID MINUS_ONE keyword. Default is set to 1 to avoid
-          extrapolating one column or row beyond the bounds of the input image.
+      minus_one: in, optional, type=boolean, default=0
+          Identical to CONGRID MINUS_ONE keyword. 
           
  :Examples:
     Used in a similar fashion to the Congrid command, but for images::
@@ -8076,6 +8232,10 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
+     I have been convinced (conversations with Wayne Landsman) that if the 
+         CENTER keyword is set, the MINUS_ONE keyword is not needed, since 
+         it was created to solve the same problem. So, I have changed the 
+         default setting of MINUS_ONE to 0. 11 Jan 2011. DWF.
 </PRE><P>
 <STRONG>(See fsc_resize_image.pro)</STRONG><P>
 <HR>
@@ -8116,10 +8276,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
      bottom: in, optional, type=string/integer, default='black'
         If this keyword is a string, the name of the bottom color. By default, same as COLOR.
         Otherwise, the keyword is assumed to be a color index into the current color table.
-     charsize: in, optional, type=float
-        The character size of the surface annotation. If the current graphics device is 
-        PostScript, and this keyword is undefined, and the font keyword is set to 1, then
-        the character size is set to 1.75 to produce "normal" true-type characters.
+     charsize: in, optional, type=float, default=FSC_DefCharSize*1.25
+        The character size for axes annotations. Uses FSC_DefCharSize()*1.25 to select default
+        character size, unless !P.Charsize is set, in which case !P.Charsize*1.25 is always used.
      color: in, optional, type=string/integer, default='blu6'
         If this keyword is a string, the name of the data color. By default, "BLU6".
         Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -8350,6 +8509,8 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Added ability to translate the surface by clicking on an axis. 28 Nov 2010. DWF.
         Fixed a problem with light controls in which the light controls didn't show the
             current light color. 28 Nov 2010. DWF.
+        I was ANDing [XYZ]Style keywords with 8 instead of 4 for hidded axes. Fixed. 4 Jan 2011. DWF.
+        Added Axes ON/OFF button. 4 Jan 2011. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -8384,6 +8545,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
          x and y location. 0 is left aligned, 0.5 is centered, and 1.0 is right aligned.
          The alignment is set to 0.5 if PLACE is set and ALIGNMENT is unspecified. 
          Otherwise, the default is 0.
+     charsize: in, optional, type=float, default=FSC_DefCharSize()
+         The character size for axes annotations. Uses FSC_DefCharSize to select default
+         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
      color: in, optional, type=string/integer/long
          The color of the text. Color names are those used with FSC_Color. By default,
          "black", unless the upper-right hand pixel in the display is black, then "white".
@@ -8392,7 +8556,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
          are the default, unless DEVICE or NORMAL is set.
      device: in, optional, type=boolean
          Set this keyword to indicate xloc and yloc are in device coordinates.
-     font: in, optional, type=integer
+     font: in, optional, type=integer, default=!P.Font
          The type of font desired. By default, !P.Font.
      normal: in, optional, type=boolean
          Set this keyword to indicate xloc and yloc are in normalized coordinates.
@@ -8408,6 +8572,9 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
           alignment.
      tt_font: in, optional, type=string
          The true-type font to use for the text. Only used if FONT=1.
+     width: out, optional, type=float
+         Set this keyword to a named variable in which to return the width of the text string, 
+         in normalized coordinate units.
      _extra: in, optional
           Any keywords appropriate for the XYOUTS command.
      
@@ -8434,6 +8601,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Humm, that text color problem got reset to the old way! Sheesh! Fixed. 9 Dec 2010. DWF.
         Modified the way the default color is selected. Drawing with DECOMPOSED 
              if possible. 30 Dec 2010. DWF.
+        Keywords collected with _REF_EXTRA so WIDTH can be returned. Added WIDTH keyword. 6 Jan 2011. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -9125,6 +9293,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
           HEADDATA, ENDIAN, DATATYPE, DIMENSIONS keywords added.
           Now dependent on FSC_FIELD, ERROR_MESSAGE, and CENTER_TLB from Coyote Library.
        Added ability to parse fully qualified file names passed from Dialog_Pickfile. 30 Oct 2010. DWF.
+       IF a file name is not passed into the program, it asks the user to select one now. 10 Jan 2011. DWF.
 </PRE><P>
 <STRONG>(See getimage.pro)</STRONG><P>
 <HR>
@@ -17478,7 +17647,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <A NAME="RESOLVE_OBJECT">
 <H2>RESOLVE_OBJECT</H2></A>
 <A HREF="#REPMAT">[Previous Routine]</A>
-<A HREF="#REVERSE_AXES">[Next Routine]</A>
+<A HREF="#REVERSEINDICES">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -17536,9 +17705,70 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 <STRONG>(See resolve_object.pro)</STRONG><P>
 <HR>
  
+<A NAME="REVERSEINDICES">
+<H2>REVERSEINDICES</H2></A>
+<A HREF="#RESOLVE_OBJECT">[Previous Routine]</A>
+<A HREF="#REVERSE_AXES">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   Provides a simple way to obtain the data indices from a Histogram REVERSE_INDICES
+   vector. Returns a -1 if no indices are available. Check the COUNT keyword for the
+   number of indices returned.
+
+ :Categories:
+    Utilities
+    
+ :Params:
+    reverse_indices: in, required, type=integer
+         The REVERSE_INDICES vector that is returned from the HISTOGRAM command.
+    index: in, required, type=integer
+         The zero-based index into the REVERSE_INDICES vector from which to obtain
+         the indices. For example, and index value of 4 will return the indices in
+         the 5th bin (zero based counting) of the histogram. 
+       
+ :Keywords:
+     count: out, optional, type=Long
+         The number of indices returned by the function.
+         
+ :Return Value:
+      indices:
+         The indices that were put into the indexth bin of the histogram. A -1
+         is returned if no indices are in that particular bin.
+          
+ :Examples:
+    Used with the HISTOGRAM command::
+       IDL> image = LoadData(7)
+       IDL> h = Histogram(image, REVERSE_INDICES=ri)
+       IDL> indices = ReverseIndices(ri, 4, COUNT=cnt)
+       IDL> Help, indices, cnt, h[4]
+       INDICES         LONG      = Array[948]
+       CNT             LONG      =          948
+       <Expression>    LONG      =          948
+       IDL> image[indices] = 0
+
+       
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: davidf@dfanning.com
+           Coyote's Guide to IDL Programming: http://www.dfanning.com
+
+ :History:
+     Written by David W. Fanning at suggestion of Ben Tupper. 7 January 2011.
+     
+ :Copyright:
+     Copyright (c) 2011, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See reverseindices.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="REVERSE_AXES">
 <H2>REVERSE_AXES</H2></A>
-<A HREF="#RESOLVE_OBJECT">[Previous Routine]</A>
+<A HREF="#REVERSEINDICES">[Previous Routine]</A>
 <A HREF="#SAVETOMAIN">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -18059,6 +18289,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Changes to include SET_PIXEL_DEPTH in Z-graphics buffer. 19 Nov 2010. DWF.
         Allow PostScript 7.0 to set the decomposition keyword. 12 Dec 2010. DWF.
         Added DEPTH and ZDEPTH keywords. 31 Dec 2010. DWF.
+        Added a do-nothing NULL device to Case statement. 4 Jan 2011. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -19331,10 +19562,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 
  KEYWORD PARAMETERS:
 
-     ACOLOR:   Set this keyword to the axis color. If a byte or integer value,
-               it will assume you are using INDEXED color mode. If a long integer
-               is will assume you are using DECOMPOSED color mode. If a string,
-               is will pass the string color name along to FSC_COLOR for processing.
+     ACOLOR:   This keyword has been depreciated in favor of the COLOR keyword.
                
      ALPHABACKGROUNDIMAGE: Normally, when a image with an alpha channel is displayed,
                the image is blended with the image currently in the display window.
@@ -19351,6 +19579,12 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                This keyword is only used if an alpha channel image is passed to the 
                program via the image parameter. The AlphaBackgroundImage does not need
                to have the same dimensions as the alpha channel image.
+             
+     ALPHABGPOSITION: Normally, the alpha background image is displayed in the current graphics
+               window, or is taken from the current graphics window. This is not always correct.
+               Sometimes you want to actually position both the background and foreground image
+               in a window. If this keyword is used to specify a position, the alphabackground image
+               will be positioned at this location before the blending occurs.
 
      AXES:     Set this keyword to draw a set of axes around the image. Setting this
                keyword also sets SAVE=1, unless told otherwise.
@@ -19360,8 +19594,11 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                PLOT command that draws the axes for the image. Ignored unless the
                AXES keyword is set. For example,
 
-               TVImage, image, /AXES, AXKEYWORDS={CHARSIZE:1.5, XTITLE:'Distance (mm)', $
-                    YTITLE:'Signal', TICKLEN:-0.025}, ACOLOR='NAVY'
+               TVImage, image, /AXES, AXKEYWORDS={TICKLEN:-0.025}
+               
+               The axis color, range, title, font and character size must be 
+               set with TVIMAGE keywords ACOLOR, [XY]RANGE, [XY]TITLE, FONT, and
+               CHARSIZE.
 
      BACKGROUND:   This keyword specifies the background color. Note that
                the keyword ONLY has effect if the ERASE keyword is also
@@ -19393,9 +19630,19 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                The value of BOTTOM is 0 by default.
 
      BREWER:   Obsolete and not used.
+     
+     COLOR:    Set this keyword to the axis color. If a byte or integer value,
+               it will assume you are using INDEXED color mode. If a long integer
+               is will assume you are using DECOMPOSED color mode. If a string,
+               is will pass the string color name along to FSC_COLOR for processing.
+     
+     CHARSIZE: Sets the character size. Used only if the AXES keyword is also set.
 
      ERASE:    If this keyword is set an ERASE command is issued
                before the image is displayed. 
+               
+     FONT:     Set this to the type of font wanted on axis annotation. By default
+               FONT = !P.Font. Used only if the AXES keyword is also set.
 
      _EXTRA:   This keyword picks up any TV keywords you wish to use.
 
@@ -19526,11 +19773,13 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
     SCALE:     Set this keyword to byte scale the image before display. If this
                keyword is not set, the image is not scaled before display.
                
-     TOP:      IF SCALE=1, the image is scaled so that all displayed pixels have values
+    TITLE:     The title annotation. Used only if the keyword AXES is set.
+               
+    TOP:       IF SCALE=1, the image is scaled so that all displayed pixels have values
                greater than or equal to BOTTOM and less than or equal to TOP.
                The value of TOP is !D.Table_Size by default.
 
-     TV:       Setting this keyword makes the TVIMAGE command work much
+    TV:        Setting this keyword makes the TVIMAGE command work much
                like the TV command, although better. That is to say, it
                will still set the correct DECOMPOSED state depending upon
                the kind of image to be displayed (8-bit or 24-bit). It will
@@ -19551,10 +19800,15 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
                
       XRANGE:  If the AXES keyword is set, this keyword is a two-element vector
                giving the X axis range. By default, [0, size of image in X].
+            
+      XTITLE:  The X title string to use for the X image axis. Used only if the AXES
+               keyword is set.
 
       YRANGE:  If the AXES keyword is set, this keyword is a two-element vector
                giving the Y axis range. By default, [0, size of image in Y].
 
+      YTITLE:  The Y title string to use for the Y image axis. Used only if the AXES
+               keyword is set.
  OUTPUTS:
      None.
 
@@ -19749,6 +20003,13 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
        Incorporated TVSCALE functionality into TVIMAGE. 22 November 2010. DWF.
        Problem fixed when displaying alpha image when POSITION and ALPHABACKGROUND keywords used
             simultaneously. 8 Dec 2010. DWF.
+       More sophisticated selection of axis color. 5 Jan 2011. DWF.
+       The fix on 8 Dec 2010 was causing problems with positioning of normal alpha images.
+            I have now solved the original problem with a new ALPHABGPOSITION keyword, while
+            restoring functionality that was lost in the 8 Dec 2010 fix. 10 January 2011. DWF.
+        Added XTITLE and YTITLE keywords to add titles to image axes. 10 January 2011. DWF.
+        Added FONT, CHARSIZE, and TITLE keywords. 11 Jan 2011. DWF.
+        Depreciated ACOLOR keyword in favor of new COLOR keyword. 11 Jan 2011. DWF.
 </PRE><P>
 <STRONG>(See tvimage.pro)</STRONG><P>
 <HR>
@@ -21464,7 +21725,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
 
        FILENAME:      If no image is supplied as a positional parameter, this keyword can be
                       used to specify the name of an image file. The image must be capable of
-                      being read by SELECTIMAGE, so that means these kinds of files with these
+                      being read by IMAGESELECT, so that means these kinds of files with these
                       file extensions:
 
                       TYPE      FILE EXTENSION
@@ -21688,6 +21949,7 @@ RANDOMNUMBERGENERATOR::GETRANDOMNUMBERS</A>
         Fixed another problem with integer data types and bin size. 23 April 2010. DWF.
         Fixed a problem with the display image when starting with a Square Root stretch. 23 April 2010. DWF.
         Added ADAPTIVE EQUALIZATION stretch and changed default colors. 24 Nov 2010. DWF.
+        Changed SELECTIMAGE references to Coyote Library routine IMAGESELECT. 6 Jan 2011. DWF.
 </PRE><P>
 <STRONG>(See xstretch.pro)</STRONG><P>
 <HR>

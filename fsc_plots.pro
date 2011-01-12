@@ -103,6 +103,8 @@
 ;        Whoops! Programming is like herding cats! 29 Dec 2010. DWF.
 ;        In some cases, I was turning BYTE values to strings without converting to 
 ;            INTEGERS first. 30 Dec 2010. DWF.        
+;        Moved setting to decomposed color before color selection process to avoid PostScript
+;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -138,6 +140,9 @@ PRO FSC_PlotS, x, y, z, $
         Print, 'USE SYNTAX: FSC_PlotS, x, y, [z]'
         RETURN
     ENDIF
+    
+    ; Going to draw the lines in decomposed color, if possible
+    SetDecomposedState, 1, CurrentState=currentState
     
     ; Choose a color.
     IF N_Elements(sColor) EQ 0 THEN BEGIN
@@ -185,9 +190,6 @@ PRO FSC_PlotS, x, y, z, $
    ; Get current color table vectors.
    TVLCT, rr, gg, bb, /Get
 
-   ; Going to draw the lines in decomposed color, if possible
-   SetDecomposedState, 1, CurrentState=currentState
-    
    ; Draw the line or symbol.
    IF N_Elements(color) EQ 1 THEN BEGIN
    

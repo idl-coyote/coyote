@@ -163,6 +163,8 @@
 ;        Change to DECOMPOSED color was using incorrect color tables. 29 Dec 2010. DWF.
 ;        In some cases, I was turning BYTE values to strings without converting to 
 ;            INTEGERS first. 30 Dec 2010. DWF.
+;        Moved setting to decomposed color before color selection process to avoid PostScript
+;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -240,6 +242,9 @@ PRO FSC_Surf, data, x, y, $
          RETURN
     ENDIF
     
+    ; Going to draw in decomposed color, if possible to avoid dirtying the color table.
+    SetDecomposedState, 1, CURRENTSTATE=currentState
+
     ; Check parameters.
     ndims = Size(data, /N_DIMENSIONS)
     IF ndims NE 2 THEN Message, 'Data must be 2D.'
@@ -364,9 +369,6 @@ PRO FSC_Surf, data, x, y, $
     IF N_Elements(ystyle) EQ 0 THEN ystyle = 0
     IF N_Elements(zstyle) EQ 0 THEN zstyle = 0
             
-    ; Load the drawing colors, if needed. These drawing colors will be done
-    ; using decomposed color, so we don't have to "dirty" the color table.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN BEGIN
         axiscolor = FSC_Color(axiscolor)
     ENDIF ELSE BEGIN

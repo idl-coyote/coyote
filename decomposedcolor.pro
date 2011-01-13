@@ -56,6 +56,8 @@
 ;  Written by: David W. Fanning, May 24, 2009.
 ;  Modified the way decomposition was obtained for PostScript devices IDL 7.1 and higher. 12 Dec 2010. DWF.
 ;  Fixed a problem in the CASE statement with ELSE clause and added a NULL device segment. 4 Jan 2011. DWF.
+;  It now appears 24-bit PostScript support was added in IDL 7.1, although the Get_Decomposed keyword
+;      didn't work until IDL 7.1.1. 13 January 2011. DWF
 ;
 ;-
 ;******************************************************************************************;
@@ -105,7 +107,7 @@ FUNCTION DecomposedColor, device, DEPTH=depth
     
         'PS': BEGIN ; PostScript
            CASE 1 OF
-                Float(!Version.Release) EQ 7.0: BEGIN
+                Float(!Version.Release) EQ 7.1: BEGIN
                     Help, /DEVICE, OUTPUT=outstr
                     psinfo = outstr[4]
                     parts = StrSplit(psinfo, ':', /EXTRACT)
@@ -117,7 +119,7 @@ FUNCTION DecomposedColor, device, DEPTH=depth
                         depth = 8
                     ENDELSE
                 END
-                Float(!Version.Release) GE 7.1: BEGIN
+                Float(!Version.Release) GT 7.1: BEGIN
                     Device, GET_DECOMPOSED=decomposed
                     IF decomposed THEN depth = 24 ELSE depth = 8
                     END

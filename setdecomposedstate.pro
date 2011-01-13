@@ -87,7 +87,6 @@
 ;        Allow PostScript 7.0 to set the decomposition keyword. 12 Dec 2010. DWF.
 ;        Added DEPTH and ZDEPTH keywords. 31 Dec 2010. DWF.
 ;        Added a do-nothing NULL device to Case statement. 4 Jan 2011. DWF.
-;        Changed PostScript version that accepts DECOMPOSED keyword from 7.0 to 7.1. 12 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -108,21 +107,8 @@ PRO SetDecomposedState, state, CURRENTSTATE=currentState, DEPTH=depth, ZDEPTH=zd
     ; indexed color mode.
     CASE StrUpCase(!D.Name) OF
     
-       'PS': BEGIN ; PostScript
-             CASE 1 OF
-             
-                Float(!Version.Release) GE 7.1: Device, Decomposed=state
-                
-                ; Windows allowed the DECOMPOSED keyword in 7.0, but UNIX did not.
-                (StrUpCase(!Version.OS_Family) EQ 'WINDOWS') && $
-                (Float(!Version.Release) GE 7.0) && $
-                (Float(!Version.Release) LT 7.1): Device, Decomposed=state
-                
-                ELSE:
-                
-             ENDCASE
-             END
-             
+       'PS': IF (!Version.Release GE 7.1) THEN Device, Decomposed=state
+                             
         'Z': BEGIN ; Z-Graphics Buffer
              IF Float(!Version.Release) GE 6.4 THEN BEGIN
              IF N_Elements(zdepth) NE 0 THEN BEGIN

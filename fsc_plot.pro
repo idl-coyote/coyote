@@ -140,7 +140,9 @@
 ;            INTEGERS first. 30 Dec 2010. DWF.  
 ;         Selecting character size now with FSC_DefCharSize. 11 Jan 2011. DWF.   
 ;         Moved setting to decomposed color before color selection process to avoid PostScript
-;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
+;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF. 
+;         Changed _EXTRA to _REF_EXTRA on procedure definition statement to be able to return
+;             plot keywords such as XGET_TICKS. 13 Jan 2011. DWF.  
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -162,7 +164,7 @@ PRO FSC_Plot, x, y, $
     SYMCOLOR=ssymcolor, $
     TRADITIONAL=traditional, $
     WINDOW=window, $
-    _Extra=extra
+    _REF_EXTRA=extra
     
     Compile_Opt idl2
 
@@ -336,7 +338,7 @@ PRO FSC_Plot, x, y, $
     ; plot, store the new system variables, then draw my background, etc.
     ; I have tried LOTS of options. This is the only one that worked.
     IF !D.Name EQ 'PS' THEN BEGIN
-       IF ~noerase THEN BEGIN
+         IF ~noerase THEN BEGIN
        
            ; I only have to do this, if this is the first plot.
            IF !P.MULTI[0] EQ 0 THEN BEGIN

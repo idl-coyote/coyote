@@ -142,7 +142,7 @@ FUNCTION SymCat, theSymbol, THICK=thick, COLOR=color
 
    ; Error checking.
    IF N_Elements(theSymbol) EQ 0 THEN RETURN, 0
-   IF N_Elements(thick) EQ 0 THEN thick = 1
+   IF N_Elements(thick) EQ 0 THEN thick = (!P.Thick EQ 0) ? 1 : !P.Thick
    IF (theSymbol LT 0) OR (theSymbol GT 46) THEN Message, 'Symbol number out of defined range.'
    theSymbol = Fix(theSymbol)
 

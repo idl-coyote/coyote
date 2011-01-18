@@ -43,6 +43,10 @@
 ;                     string is automatically added to the ImageMagick call unless this keyword
 ;                     is set, in which case the string is not added and the image background will
 ;                     be transparent.  (See RESTRICTIONS note below for more information.) 
+;                 
+;       DELETE_PS:    This keyword will delete the PostScript file that is created to make
+;                     other raster file types. It is only used if the PostScript file is being
+;                     converted to a raster file type with ImageMagick.
 ;
 ;       DENSITY:      The horizontal and vertical density of the image when the PostScript file
 ;                     is converted to an image format by ImageMagick. By default, 300. Use this
@@ -146,10 +150,12 @@
 ;       Fixed a problem in not checking the GIF keyword properly. 4 December 2009. DWF.
 ;       Added NOFIX keyword to the program. 1 November 2010. DWF.
 ;       Added better handing of errors coming from FIXPS after update to FIXPS. 15 November 2010. DWF.
+;       Added DELETE_PS keyword. 16 Jan 2011. DWF.
+;       Better protection of code from not finding ImageMagick. 17 Jan 2011. DWF.
 ;- 
 ;
 ;******************************************************************************************;
-;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
+;  Copyright (c) 2008-2011, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -177,6 +183,8 @@
 ;******************************************************************************************;
 PRO PS_END, $
     ALLOW_TRANSPARENT=allow_transparent, $
+    BMP=bmp, $
+    DELETE_PS=delete_ps, $
     DENSITY=density, $
     IM_OPTIONS=im_options, $
     GIF=gif, $
@@ -193,6 +201,7 @@ PRO PS_END, $
    
    ; Close the PostScript file, if this is PostScript device.
    IF !D.Name EQ 'PS' THEN Device, /CLOSE_FILE
+   ps_filename = ps_struct.filename
    
    ; If the file is in landscape mode, then fix it so that the plot
    ; is right-side up.
@@ -205,6 +214,7 @@ PRO PS_END, $
    
    ; Need to convert with ImageMagick?
    allow_transparent = Keyword_Set(allow_transparent)
+   IF Keyword_Set(bmp) THEN ps_struct.convert = 'BMP'
    IF Keyword_Set(gif) THEN ps_struct.convert = 'GIF'
    IF Keyword_Set(png) THEN ps_struct.convert = 'PNG'
    IF Keyword_Set(jpeg) THEN ps_struct.convert = 'JPEG'
@@ -223,48 +233,52 @@ PRO PS_END, $
         ENDCASE
         IF N_Elements(outfilename) NE "" THEN BEGIN
         
-            ; Find out what version of ImageMagick you are using.
-            Spawn, 'convert -version', result
-            parts = StrSplit(result[0], /EXTRACT)
-            version = parts[2]
-            vp = StrSplit(version, '.', /EXTRACT)
-            vp[2] = StrMid(vp[2],0,1)
-            version_number = Fix(vp[0]) * 100 + Fix(vp[1])*10 + vp[2]
-            IF version_number GT 634 THEN allowAlphaCmd = 1 ELSE allowAlphaCmd = 0
-        
-            ; Set up for various ImageMagick convert options.
-            IF allowAlphaCmd THEN alpha_cmd =  allow_transparent ? '' : ' -alpha off' 
-            density_cmd = ' -density ' + StrTrim(density,2)
-            resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
+            ; ImageMagick is required for this section of the code.
+            available = HasImageMagick(Version=version)
+            IF available THEN BEGIN
+                vp = StrSplit(version, '.', /EXTRACT)
+                vp[2] = StrMid(vp[2],0,1)
+                version_number = Fix(vp[0]) * 100 + Fix(vp[1])*10 + vp[2]
+                IF version_number GT 634 THEN allowAlphaCmd = 1 ELSE allowAlphaCmd = 0
             
-            ; Start ImageMagick convert command.
-            cmd = 'convert'
-            
-            ; Add various command options.
-            IF N_Elements(alpha_cmd) NE 0 THEN cmd = cmd + alpha_cmd
-            IF N_Elements(density_cmd) NE 0 THEN cmd = cmd + density_cmd
-            
-             ; Add the input filename.
-            cmd = cmd +  ' "' + ps_struct.filename + '"' 
-            
-            
-            IF N_Elements(resize_cmd) NE 0 THEN cmd = cmd + resize_cmd
-            cmd = cmd +  ' -flatten '
-            IF N_Elements(im_options) NE 0 THEN BEGIN
-                IF StrMid(im_options, 0, 1) NE " " THEN im_options = " " + im_options
-                cmd = cmd + im_options
-            ENDIF
-            
-            ; If the landscape mode is set, rotate by 90 to allow the 
-            ; resulting file to be in landscape mode.
-            IF ps_struct.landscape THEN cmd = cmd + ' -rotate 90'
-            
-            ; Add the output filename. Make sure PNG files are 24-bit images.
-            IF ps_struct.convert EQ 'PNG' $
-                THEN cmd = cmd + ' "' + 'PNG24:' +outfilename + '"' $
-                ELSE cmd = cmd + ' "' + outfilename + '"'
-            IF ~ps_struct.quiet THEN Print, 'ImageMagick CONVERT command: ',  cmd
-            SPAWN, cmd
+                ; Set up for various ImageMagick convert options.
+                IF allowAlphaCmd THEN alpha_cmd =  allow_transparent ? '' : ' -alpha off' 
+                density_cmd = ' -density ' + StrTrim(density,2)
+                resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
+                
+                ; Start ImageMagick convert command.
+                cmd = 'convert'
+                
+                ; Add various command options.
+                IF N_Elements(alpha_cmd) NE 0 THEN cmd = cmd + alpha_cmd
+                IF N_Elements(density_cmd) NE 0 THEN cmd = cmd + density_cmd
+                
+                 ; Add the input filename.
+                cmd = cmd +  ' "' + ps_struct.filename + '"' 
+                
+                IF N_Elements(resize_cmd) NE 0 THEN cmd = cmd + resize_cmd
+                cmd = cmd +  ' -flatten '
+                IF N_Elements(im_options) NE 0 THEN BEGIN
+                    IF StrMid(im_options, 0, 1) NE " " THEN im_options = " " + im_options
+                    cmd = cmd + im_options
+                ENDIF
+                
+                ; If the landscape mode is set, rotate by 90 to allow the 
+                ; resulting file to be in landscape mode.
+                IF ps_struct.landscape THEN cmd = cmd + ' -rotate 90'
+                
+                ; Add the output filename. Make sure PNG files are 24-bit images.
+                IF ps_struct.convert EQ 'PNG' $
+                    THEN cmd = cmd + ' "' + 'PNG24:' +outfilename + '"' $
+                    ELSE cmd = cmd + ' "' + outfilename + '"'
+                IF ~ps_struct.quiet THEN Print, 'ImageMagick CONVERT command: ',  cmd
+                SPAWN, cmd
+                
+                ; Have you been asked to delete the PostScript file?
+                IF Keyword_Set(delete_ps) THEN BEGIN
+                    IF outfilename NE ps_filename THEN File_Delete, ps_filename
+                ENDIF
+            ENDIF ELSE Message, 'ImageMagick could not be found. No conversion to raster was possible.', /Informational
         ENDIF
         
    ENDIF

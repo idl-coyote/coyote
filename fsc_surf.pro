@@ -251,6 +251,7 @@ PRO FSC_Surf, data, x, y, $
     s = Size(data, /DIMENSIONS)
     IF N_Elements(x) EQ 0 THEN x = Findgen(s[0])
     IF N_Elements(y) EQ 0 THEN y = Findgen(s[1])
+    noerase = Keyword_Set(noerase)
     
     ; Get the current color table vectors.
     TVLCT, rr, gg, bb, /GET
@@ -544,7 +545,7 @@ PRO FSC_Surf, data, x, y, $
         ; Shaded surface plot.
          Shade_Surf, data, x, y, /NOERASE, COLOR=color, BOTTOM=bottom, SHADES=checkShades, $
             XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, _STRICT_EXTRA=extra, $
-            BACKGROUND=shadebackground, AX=rotx, AZ=rotz  
+            BACKGROUND=shadebackground, AX=rotx, AZ=rotz, CHARSIZE=charsize  
             
         ; Have to repair the axes. Do this in decomposed color mode, if possible.
         ; If its not possible, you have to reload the color table that has the drawing

@@ -94,6 +94,8 @@
 ;     symcolor: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the symbol color. By default, 'black'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     symsize: in, optional, type=float, default=1.0
+;        The symbol size.
 ;     traditional: in, optional, type=boolean, default=0
 ;         If this keyword is set, the traditional color scheme of a black background for
 ;         graphics windows on the display is used and PostScript files always use a white background.
@@ -143,6 +145,7 @@
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF. 
 ;         Changed _EXTRA to _REF_EXTRA on procedure definition statement to be able to return
 ;             plot keywords such as XGET_TICKS. 13 Jan 2011. DWF.  
+;         Added SYMSIZE keyword. 16 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -162,6 +165,7 @@ PRO FSC_Plot, x, y, $
     POSITION=position, $
     PSYM=psym, $
     SYMCOLOR=ssymcolor, $
+    SYMSIZE=symsize, $
     TRADITIONAL=traditional, $
     WINDOW=window, $
     _REF_EXTRA=extra
@@ -203,6 +207,7 @@ PRO FSC_Plot, x, y, $
             POSITION=position, $
             PSYM=psym, $
             SYMCOLOR=ssymcolor, $
+            SYMSIZE=symsize, $
             TRADITIONAL=traditional, $
            _Extra=extra
             
@@ -324,6 +329,7 @@ PRO FSC_Plot, x, y, $
     IF N_Elements(font) EQ 0 THEN font = !P.Font
     IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
     IF N_Elements(ssymcolor) EQ 0 THEN symcolor = color ELSE symcolor = ssymcolor
+    IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
     IF Size(symcolor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN symcolor = Byte(symcolor)
     IF Size(symcolor, /TYPE) LE 2 THEN symcolor = StrTrim(Fix(symcolor),2)
     IF Keyword_Set(isotropic) THEN aspect = 1.0
@@ -394,7 +400,7 @@ PRO FSC_Plot, x, y, $
     ENDELSE
     IF Abs(psym) GT 0 THEN BEGIN
         IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=symcolor, $
-            PSYM=SymCat(Abs(psym)), _EXTRA=extra
+            PSYM=SymCat(Abs(psym)), SYMSIZE=symsize, _EXTRA=extra
     ENDIF 
          
     ; If this is the first plot in PS, then we have to make it appear that we have

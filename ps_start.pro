@@ -34,6 +34,9 @@
 ;
 ; KEYWORD PARAMETERS FOR PS_START:
 ; 
+;       CANCEL:       An output keyword that is set to 1 if the user cancelled from
+;                     PS_Config. Otherwise, set to 0.
+; 
 ;       CHARSIZE:     If this keyword is set, the !P.Charsize variable is set to this
 ;                     value until PS_END is called.
 ;                     
@@ -45,6 +48,9 @@
 ;                     PostScript device silently. If you wish to allow the user
 ;                     to interatively configure the PostScript device, set this
 ;                     keyword.
+;                     
+;       KEYWORDS:     This output keyword contains the keyword structure returned 
+;                     from PS_Config.
 ;                     
 ;       NOMATCH:      Normally, PS_Start will try to "match" the aspect ratio of the
 ;                     PostScript file "window" to the current display window. If this
@@ -145,6 +151,7 @@
 ;       Added NoFix keyword to PS_END calls to repair previous, but unused set-ups. 1 Nov 2010. DWF.
 ;       Added Charsize keyword to PS_START. 14 Nov 2010. DWF.
 ;       Changed the way default character sizes are set. 19 Nov 2010. DWF.
+;       Added CANCEL and KEYWORDS output keywords. 16 Jan 2011. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -175,9 +182,11 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 PRO PS_START, $
+    CANCEL=cancelled, $
     CHARSIZE=charsize, $
     FONT=font , $
     GUI=gui, $
+    KEYWORDS=keywords, $
     NOMATCH=nomatch, $
     QUIET=quiet, $
     SCALE_FACTOR=scale_factor, $

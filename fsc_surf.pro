@@ -164,7 +164,8 @@
 ;        In some cases, I was turning BYTE values to strings without converting to 
 ;            INTEGERS first. 30 Dec 2010. DWF.
 ;        Moved setting to decomposed color before color selection process to avoid PostScript
-;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
+;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF. 
+;        Fixed a problem in which I assumed the background color was a string. 18 Jan 2011. DWF.  
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -297,8 +298,8 @@ PRO FSC_Surf, data, x, y, $
                     IF !D.Window LT 0 THEN Window
                     IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN saxisColor = 'BLACK'
-                    IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN saxisColor = 'WHITE'
+                    IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN saxisColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN saxisColor = 'WHITE'
                     IF N_Elements(saxisColor) EQ 0 THEN saxisColor = 'OPPOSITE'
                 ENDIF ELSE saxisColor = 'OPPOSITE'
           ENDELSE
@@ -325,10 +326,10 @@ PRO FSC_Surf, data, x, y, $
                     IF !D.Window LT 0 THEN Window
                     IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN BEGIN
+                    IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN BEGIN
                         IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE sColor = 'BLU6'
                     ENDIF
-                    IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN sColor = 'WHITE'
+                    IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN sColor = 'WHITE'
                     IF N_Elements(sColor) EQ 0 THEN BEGIN
                         IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE sColor = 'BLU6' 
                     ENDIF

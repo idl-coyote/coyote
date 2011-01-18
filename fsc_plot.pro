@@ -146,6 +146,7 @@
 ;         Changed _EXTRA to _REF_EXTRA on procedure definition statement to be able to return
 ;             plot keywords such as XGET_TICKS. 13 Jan 2011. DWF.  
 ;         Added SYMSIZE keyword. 16 Jan 2011. DWF.
+;         Fixed a problem in which I assumed the background color was a string. 18 Jan 2011. DWF.  
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -276,8 +277,8 @@ PRO FSC_Plot, x, y, $
                     IF !D.Window LT 0 THEN Window
                     IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN saxisColor = 'BLACK'
-                    IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN saxisColor = 'WHITE'
+                    IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN saxisColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN saxisColor = 'WHITE'
                     IF N_Elements(saxisColor) EQ 0 THEN saxisColor = 'OPPOSITE'
                 ENDIF ELSE saxisColor = 'OPPOSITE'
           ENDELSE
@@ -301,8 +302,8 @@ PRO FSC_Plot, x, y, $
                     IF !D.Window LT 0 THEN Window
                     IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF (Total(pixel) EQ 765) OR (background EQ 'WHITE') THEN sColor = 'BLACK'
-                    IF (Total(pixel) EQ 0) OR (background EQ 'BLACK') THEN sColor = 'WHITE'
+                    IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN sColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN sColor = 'WHITE'
                     IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
                 ENDIF ELSE sColor = 'OPPOSITE'
            ENDELSE

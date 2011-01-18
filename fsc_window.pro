@@ -99,6 +99,12 @@
 ;    werase: in, optional, type=boolean, default=0
 ;       Set this keyword to cause the window to be erased before graphics commands 
 ;       are drawn. This may need to be set, for example, to display images.
+;    winid: in, optional, type=integer
+;       Use this keyword to select the window FSC_Window identifier (the number between
+;       the parentheses in the title bar of FSC_Window). The AddCmd, ReplaceCmd, ListCmd,
+;       and DeleteCmd keywords will all apply to the commands in the last FSC_Window
+;       created unless this keyword is used to select another FSC_Window to apply the 
+;       commands to.
 ;    wmulti: in, optional, type=intarr(5)
 ;        Set this keyword in exactly the same way you would set the !P.Multi keyword.
 ;        It will allow you to display multi-plots in the FSC_Window graphics window.
@@ -267,7 +273,8 @@ PRO FSC_CmdWindow::ReplaceCommand, command, cmdIndex
     ENDIF
 
     IF N_Elements(cmdIndex) EQ 0 THEN BEGIN
-        self.cmds -> Delete_Nodes
+        self.cmds -> Delete, /ALL, /Destroy
+        self.pmulti = IntArr(5)
         self.cmds -> Add, command
     ENDIF ELSE BEGIN
         oldcmd = self.cmds -> Get_Item(cmdIndex, /DEREFERENCE)

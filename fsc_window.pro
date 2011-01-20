@@ -130,7 +130,7 @@
 ;       FSC_Window, 'FSC_Plot', data, PSYM=2, /Overplot, COLOR='dodger blue', /AddCmd
 ;       FSC_WIndow, 'FSC_Plot', Loaddata(17), color='olive', linestyle = 2, /Overplot, /AddCmd
 ;       FSC_Window, /ListCmd
-;       FSC_Window, 'FSC_Plot', data, PSYM=-4, COLOR='purple', /ReplaceCMD, CMDINDEX=1
+;       FSC_Window, 'FSC_Plot', data, COLOR='purple', /ReplaceCMD, CMDINDEX=0
 ;       
 ;       Additional examples can be found here:
 ;       
@@ -187,11 +187,16 @@
 ; :History:
 ;     Change History::
 ;        Written, 17 January 2011. DWF.
+;        Fixed a problem with the example code, and added EMPTY to end of Draw method
+;           to force UNIX machines to empty the graphics buffer after CALL_PROCEDURE. 20 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Improved documentation and error handling. 19 Jan 2011. DWF.
 ;-
-PRO FSC_CmdWindow::ListCommand, command
+PRO FSC_CmdWindow::ListCommand, cmdIndex
+
+    ; List the commands in the command window.
 
     Compile_Opt idl2
     
@@ -203,16 +208,31 @@ PRO FSC_CmdWindow::ListCommand, command
         RETURN
     ENDIF
 
+    ; How many commands are there?
     count = self.cmds -> Get_Count()
-    FOR j = 0, count-1 DO BEGIN
-        thisCmdObj = self.cmds -> Get_Item(j, /DEREFERENCE)
-        thisCmdObj -> List, StrTrim(j,2) + '.'
-    ENDFOR
+    
+    IF N_Elements(cmdIndex) EQ 0 THEN BEGIN
+        FOR j = 0, count-1 DO BEGIN
+            thisCmdObj = self.cmds -> Get_Item(j, /DEREFERENCE)
+        
+            ; Preface the commands with their index number.
+            thisCmdObj -> List, StrTrim(j,2) + '.'
+        ENDFOR
+    ENDIF ELSE BEGIN
+        IF cmdIndex LT (count-1) THEN BEGIN
+            thisCmdObj = self.cmds -> Get_Item(cmdIndex, /DEREFERENCE)
+        
+            ; Preface the commands with their index number.
+            thisCmdObj -> List, StrTrim(cmdIndex,2) + '.'
+        ENDIF ELSE Message, 'The command index is out of range of the number of commands.'
+    ENDELSE
 
 END ;----------------------------------------------------------------------------------------------------------------
 
 
 PRO FSC_CmdWindow::AddCommand, command
+
+    ; Add a command to the command list.
 
     Compile_Opt idl2
     
@@ -230,6 +250,9 @@ END ;---------------------------------------------------------------------------
 
 
 PRO FSC_CmdWindow::DeleteCommand, cmdIndex
+
+    ; Delete a command from the command list. If cmdIndex
+    ; not used, delete the last command in the list.
 
     Compile_Opt idl2
     
@@ -252,15 +275,18 @@ PRO FSC_CmdWindow::DeleteCommand, cmdIndex
     ; Do we have a command with this command number?
     IF cmdIndex GT (count-1) THEN Message, 'A command with index ' + StrTrim(cmdIndex,2) + ' does not exist.'
     
-    IF cmdIndex GT 0 THEN BEGIN
+    IF cmdIndex GE 0 THEN BEGIN
         self.cmds -> Delete, cmdIndex, /Destroy
         self -> ExecuteCommands
-    ENDIF ELSE Message, 'The last command in FSC_Window cannot be deleted. Use ReplaceCmd instead.'
+    ENDIF ELSE Message, 'A negative command index number is not allowed.'
     
 END ;----------------------------------------------------------------------------------------------------------------
 
 
 PRO FSC_CmdWindow::ReplaceCommand, command, cmdIndex
+
+    ; Replace a command in the command list. If cmdImdex is missing,
+    ; replace all the commands in the command list.
 
     Compile_Opt idl2
     
@@ -272,11 +298,14 @@ PRO FSC_CmdWindow::ReplaceCommand, command, cmdIndex
         RETURN
     ENDIF
 
+    ; If cmdIndex is missing, remove all the current commands with this one.
     IF N_Elements(cmdIndex) EQ 0 THEN BEGIN
         self.cmds -> Delete, /ALL, /Destroy
-        self.pmulti = IntArr(5)
+        self.pmulti = IntArr(5) ; Reset !P.Multi.
         self.cmds -> Add, command
     ENDIF ELSE BEGIN
+    
+        ; Get the old command first, so you can destroy it properly.
         oldcmd = self.cmds -> Get_Item(cmdIndex, /DEREFERENCE)
         self.cmds -> Replace_Item, cmdIndex, command
         Obj_Destroy, oldcmd
@@ -297,10 +326,14 @@ PRO FSC_CmdWindow::CreatePostScriptFile, event
         RETURN
     ENDIF
 
+    ; Allow the user to configure the PostScript file.
     PS_Start, /GUI, CANCEL=cancelled
     IF cancelled THEN RETURN
     
+    ; Draw the graphics.
     self -> ExecuteCommands
+    
+    ; Clean up.
     PS_End
 
 END ;----------------------------------------------------------------------------------------------------------------
@@ -352,12 +385,17 @@ PRO FSC_CmdWindow::SaveAsRaster, event
            void = TVRead(TYPE=fileType, FILENAME=outname, /NODIALOG)
            END
            
+        ; Raster via ImageMagick.
         1: BEGIN
            
+           ; Create a PostScript file first.
            thisname = outname + '.ps'
            PS_Start, FILENAME=thisname
+           
+           ; Draw the graphics.
            self -> ExecuteCommands
            
+           ; Close the file and convert to proper file type.
            CASE filetype OF
                 'BMP':  PS_END, /BMP,  /DELETE_PS
                 'GIF':  PS_END, /GIF,  /DELETE_PS
@@ -424,6 +462,8 @@ PRO FSC_CmdWindow::ExecuteCommands
         Catch, /CANCEL
         void = Error_Message()
         !P.Multi = thisMulti
+        IF N_Elements(rr) NE 0 THEN TVLCT, rr, gg, bb
+        IF (!D.Flags AND 256) NE 0 THEN WSet, -1
         RETURN
     ENDIF
     
@@ -451,10 +491,26 @@ PRO FSC_CmdWindow::ExecuteCommands
     ; How many commands are there?
     n_cmds = self.cmds -> Get_Count()
     
+    ; Issue an informative message if there are no commands to execute.
+    IF n_cmds EQ 0 THEN Message, 'There are currently no graphics commands to execute.', /INFORMATIONAL
+    
     ; Execute the commands.
     FOR j=0,n_cmds-1 DO BEGIN
         thisCmdObj = self.cmds -> Get_Item(j, /DEREFERENCE)
-        thisCmdObj -> Draw
+        thisCmdObj -> Draw, SUCCESS=success
+        
+        ; Did you successfully draw this command?
+        IF ~success THEN BEGIN
+        
+            self -> ListCommand, j
+            answer = Dialog_Message('Problem executing command ' + $
+                StrTrim(j,2) + '. Delete command?', /QUESTION)
+            IF StrUpCase(answer) EQ 'YES' THEN BEGIN
+                self -> DeleteCommand, j
+                RETURN
+            ENDIF
+        
+        ENDIF
     ENDFOR
     
     ; Restore the colors in effect when we entered.
@@ -709,7 +765,7 @@ PRO FSC_Window_Command::List, prefix
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-PRO FSC_Window_Command::Draw
+PRO FSC_Window_Command::Draw, SUCCESS=success
 
     Compile_Opt idl2
     
@@ -717,9 +773,13 @@ PRO FSC_Window_Command::Draw
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        success = 0
         RETURN
     ENDIF
     
+    ; Assume success.
+    success = 1
+
     ; What kind of command is this?
     CASE self.type OF 
     
@@ -766,6 +826,11 @@ PRO FSC_Window_Command::Draw
            END
     
     ENDCASE
+    
+    ; For some reason, CALL_PROCEDURE does not flush the graphics buffer on UNIX machines.
+    ; We have to do it ourself to get the program to resize correctly on UNIX machines.
+    EMPTY
+    
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -964,6 +1029,12 @@ PRO FSC_Window, $
                 ENDELSE
                 thisWindowStruct = structs[winID]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
+                    
+                    ; Check command components.
+                    IF Size(command, /TNAME) NE 'STRING' THEN $
+                        Message, 'The first positional argument must be a command string.'
+                    IF N_Params() GT 4 THEN $
+                        Message, 'The maximum number of positional command parameters allowed is three.'
                     newCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=Keyword_Set(method))
                         

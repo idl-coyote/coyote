@@ -224,9 +224,7 @@
 ;   30 Jun 2004.  Added /ALL to GET_ITEM function.  Henry Throop, SWRI.
 ;   23 Nov 2004.  Fixed GET_ITEM, /ALL to accomodate structures and empty
 ;      lists.  Henry Throop.
-;   17 Jan 2011. Fixed a problem with deleting the last node in the list. DWF.
 ;-
-;
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
 ;  All rights reserved.                                                                    ;
@@ -593,28 +591,21 @@ BEGIN
 ENDIF
 Ptr_Free, (*currentNode).item
 
-
    ; Is this the last node?
-IF index EQ (self.count - 1) THEN BEGIN
-    self->Delete_Last_Node, DESTROY=destroy
-    RETURN
-ENDIF
-
+IF index EQ (self.count - 1) THEN self->Delete_Last_Node, DESTROY=destroy
 
     ; Is this the first node in the list?
-IF Ptr_Valid(currentNode) THEN BEGIN
-    IF NOT Ptr_Valid((*currentNode).previous) THEN BEGIN
+IF NOT Ptr_Valid((*currentNode).previous) THEN BEGIN
         nextNode = (*currentNode).next
         Ptr_Free, (*nextNode).previous
         (*nextNode).previous = Ptr_New()
         self.head = nextNode
-    ENDIF ELSE BEGIN
+ENDIF ELSE BEGIN
         previousNode = (*currentNode).previous
         nextNode = (*currentNode).next
         (*nextNode).previous = previousNode
         (*previousNode).next = nextNode
-    ENDELSE
-ENDIF
+ENDELSE
 
    ; Release the currentNode pointer.
 Ptr_Free, currentNode

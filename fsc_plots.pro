@@ -73,6 +73,8 @@
 ;     symsize: in, optional, type=float/vector, default=1.0
 ;        A scalar or vector of symbol sizes. Default is 1.0. May be a vector of the same 
 ;        length as X.
+;     window: in, optional, type=boolean, default=0
+;         Set this keyword to add the command to the current FSC_Window application.
 ;     _extra: in, optional, type=any
 ;        Any keywords supported by the PLOTS command are allowed.
 ;         
@@ -104,7 +106,8 @@
 ;        In some cases, I was turning BYTE values to strings without converting to 
 ;            INTEGERS first. 30 Dec 2010. DWF.        
 ;        Moved setting to decomposed color before color selection process to avoid PostScript
-;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
+;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.  
+;        Added WINDOW keyword. 24 Jan 2011. DWF. 
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -114,6 +117,7 @@ PRO FSC_PlotS, x, y, z, $
     PSYM=psym, $
     SYMCOLOR=ssymcolor, $
     SYMSIZE=symsize, $
+    WINDOW=window, $
     _EXTRA=extra
 
     Compile_Opt idl2
@@ -130,6 +134,20 @@ PRO FSC_PlotS, x, y, z, $
     IF N_Params() EQ 0 THEN BEGIN
         Print, 'USE SYNTAX: FSC_PlotS, x, y, [z]'
         RETURN
+    ENDIF
+    
+    ; Should this be added to a resizeable graphics window?
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    
+        FSC_Window, 'FSC_PlotS', x, y, z, $
+            COLOR=scolor, $
+            PSYM=psym, $
+            SYMCOLOR=ssymcolor, $
+            SYMSIZE=symsize, $
+            ADDCMD=1, $
+            _EXTRA=extra
+            
+         RETURN
     ENDIF
     
     ; Set up PostScript device for working with colors.

@@ -6,9 +6,13 @@
 ;
 ;       The purpose of this function is to read a selection of standard
 ;       data sets that are found in the normal IDL distribution in the
-;       subdirectory $IDL_DIR/examples/data. At least 17 data sets are
+;       subdirectory $IDL_DIR/examples/data. At least 25 data sets are
 ;       available in all categories of data. The user selects one of the
-;       possible data sets with the mouse.
+;       possible data sets with the mouse. Several of the data sets 
+;       simply create data used to illustrate graphics commands (numbers 1-3), 
+;       and two of the data sets produce random data. Data set 17 produces 
+;       a random vector of 101 elements. Data set 18 produces a 2D array of 
+;       random values, suitable for display as a contour plot or image.
 ;
 ; CATEGORY:
 ;
@@ -41,7 +45,7 @@
 ; OPTIONAL INPUTS:
 ;
 ;       selection : The number of the data selection. Values start at 1,
-;           and go up to the number of data sets available (currently 17).
+;           and go up to the number of data sets available (currently 25).
 ;
 ; KEYWORD PARAMETERS:
 ;

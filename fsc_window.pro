@@ -65,7 +65,13 @@
 ;    addcmd: in, optional, type=boolean, default=0
 ;       Set this keyword to add an additional graphics command to an FSC_Window.
 ;       The command is added to the last created FSC_Window, unless the WinID
-;       keyword is used to select another FSC_Window.
+;       keyword is used to select another FSC_Window. Adding a command causes
+;       all the commands in the window to be immediately executed. If this is
+;       not behavior you desire, use the LOADCMD keyword instead.
+;    cmddelay: in, optional, type=float
+;       If this keyword is set to a value other than zero, there will be a 
+;       delay of this many seconds between command execution. This will permit
+;       "movies" of command sequences to be displayed.
 ;    cmdindex: in, optional, type=integer
 ;       This keyword is used to select which command in an FSC_Window to act on
 ;       when the DeleteCmd or ReplaceCmd keywords are used. See the descriptions
@@ -76,10 +82,19 @@
 ;       deleted. It is not possible to delete the last command in the window.
 ;       Use WinID to identify the FSC_Window you are interested in. If WinID 
 ;       is undefined, the last FSC_Window created is used.
+;    executecmd: in, optional, type=boolean, default=0
+;       Set this keyword to immediate execute all the commands in an FSC_Window.
+;       Normally, this is used after commands have been loaded with LOADCMD.
 ;    listcmd: in, optional, type=boolean, default=0
 ;       If this keyword is set, the commands currently in the FSC_Window are
 ;       listed. Use WinID to identify the FSC_Window you are interested in.
 ;       If WinID is undefined, the last FSC_Window created is used.
+;    loadcmd: in, optional, type=boolean, default=0
+;       Set this keyword to add an additional graphics command to an FSC_Window.
+;       The command is added to the last created FSC_Window, unless the WinID
+;       keyword is used to select another FSC_Window. Loaded commands are not
+;       automatically executed. Set the EXECUTECMD keyword at the end of loading
+;       to execute the loaded commands. 
 ;    replacecmd: in, optional, type=boolean, default=0
 ;       Set this keyword to replace a graphics command from an FSC_Window.
 ;       If CmdIndex is undefined, *all* commands in the window are replaced. Use 
@@ -249,10 +264,11 @@ PRO FSC_CmdWindow::AddCommand, command
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-PRO FSC_CmdWindow::DeleteCommand, cmdIndex
+PRO FSC_CmdWindow::DeleteCommand, cmdIndex, ALL=all
 
     ; Delete a command from the command list. If cmdIndex
-    ; not used, delete the last command in the list.
+    ; not used, delete the last command in the list. If ALL
+    ; is set, delete all the commands.
 
     Compile_Opt idl2
     
@@ -266,6 +282,12 @@ PRO FSC_CmdWindow::DeleteCommand, cmdIndex
 
     ; Get the command count.
     count = self.cmds -> Get_Count()
+    
+    ; Delete all the commands?
+    IF Keyword_Set(all) THEN BEGIN
+        self.cmds -> Delete_Nodes, /DESTROY
+        RETURN
+    ENDIF
     
     ; Need a command index?
     IF N_Elements(cmdIndex) EQ 0 THEN BEGIN
@@ -492,7 +514,7 @@ PRO FSC_CmdWindow::ExecuteCommands
     n_cmds = self.cmds -> Get_Count()
     
     ; Issue an informative message if there are no commands to execute.
-    IF n_cmds EQ 0 THEN Message, 'There are currently no graphics commands to execute.', /INFORMATIONAL
+    ;IF n_cmds EQ 0 THEN Message, 'There are currently no graphics commands to execute.', /INFORMATIONAL
     
     ; Execute the commands.
     FOR j=0,n_cmds-1 DO BEGIN
@@ -511,6 +533,9 @@ PRO FSC_CmdWindow::ExecuteCommands
             ENDIF
         
         ENDIF
+        
+        ; Need to delay?
+        IF self.delay NE 0 THEN Wait, self.delay
     ENDFOR
     
     ; Restore the colors in effect when we entered.
@@ -541,6 +566,7 @@ FUNCTION FSC_CmdWindow::Init, $
    _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
    Group_Leader = group_leader, $   ; The group leader of the FSC_Window program.
    AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface.
+   CmdDelay=cmdDelay, $             ; Set this keyword to a value to "wait" before executing the next command.
    Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
    ReplaceCmd=replacecmd, $         ; Replace the current command and execute in the current window.
    WEraseIt = Weraseit, $           ; Set this keyword to erase the display before executing the command.
@@ -577,7 +603,8 @@ FUNCTION FSC_CmdWindow::Init, $
     IF N_Elements(wxpos) EQ 0 THEN xpos = -1 ELSE xpos = wxpos
     IF N_Elements(wypos) EQ 0 THEN ypos = -1 ELSE ypos = wypos
     IF N_Elements(wbackground) EQ 0 THEN BEGIN
-        background=!P.Background 
+        background='white'
+        IF N_Elements(command) EQ 0 THEN eraseit = 1
     ENDIF ELSE BEGIN
         background = wbackground
         eraseit = 1
@@ -587,9 +614,13 @@ FUNCTION FSC_CmdWindow::Init, $
     ; The commands will be placed in a linked list for execution.
     self.cmds = Obj_New('LinkedList')
     IF Obj_Valid(self.cmds) EQ 0 THEN Message, 'Failed to make the LinkedList for the commands.'
-    thisCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
-            P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=method)
-    IF Obj_Valid(thisCommand) THEN self.cmds -> Add, thisCommand ELSE Message, 'Failed to make command object.'
+    
+    ; Add a command, if you have one. Otherwise, just make the window.
+    IF (N_Elements(command) NE 0) THEN BEGIN
+        thisCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
+                P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=method)
+        IF Obj_Valid(thisCommand) THEN self.cmds -> Add, thisCommand ELSE Message, 'Failed to make command object.'
+    ENDIF 
     
     ; Store the current color table vectors
     TVLCT, rr, gg, bb, /Get
@@ -652,19 +683,22 @@ FUNCTION FSC_CmdWindow::Init, $
     Widget_Control, self.drawID, Get_Value=wid
     self.wid = wid
     
-    IF N_Elements(wtitle) EQ 0 THEN wtitle = "Resizeable Graphics Window"
-    wtitle = wtitle + ' (' + StrTrim(wid,2) + ')'
+    IF N_Elements(wtitle) EQ 0 THEN BEGIN
+        wtitle = "Resizeable Graphics Window"
+        wtitle = wtitle + ' (' + StrTrim(wid,2) + ')'
+    ENDIF
     Widget_Control, self.tlb, TLB_Set_Title=wtitle
 
     ; Load object properties.
     self.background = Ptr_New(background)
+    IF N_Elements(cmdDelay) NE 0 THEN self.delay = cmdDelay
     self.eraseIt = eraseIt
     IF N_Elements(wmulti) NE 0 THEN BEGIN
        FOR j=0,N_Elements(wmulti)-1 DO self.pmulti[j] = wmulti[j]
     ENDIF
 
     ; Execute the commands.
-    self -> ExecuteCommands
+    self -> ExecuteCommands 
     
     ; Get it running.
     WIDGET_CONTROL, /MANAGED, self.tlb
@@ -682,13 +716,13 @@ FUNCTION FSC_CmdWindow::Init, $
     IF ~exists THEN BEGIN
         fsc_window_list = Obj_New("LinkedList")
         DefSysV, '!FSC_WINDOW_LIST', fsc_window_list 
-        fsc_window_list -> Add, {FSC_WINDOW_ID, self.tlb, wid, self}
+        fsc_window_list -> Add, {FSC_WINDOW_ID, self.tlb, wid, wtitle, self}
     ENDIF ELSE BEGIN
         IF Obj_Valid(!FSC_WINDOW_LIST) THEN BEGIN
-            !FSC_WINDOW_LIST -> Add, {FSC_WINDOW_ID, self.tlb, wid, self}
+            !FSC_WINDOW_LIST -> Add, {FSC_WINDOW_ID, self.tlb, wid, wtitle, self}
         ENDIF ELSE BEGIN
             !FSC_WINDOW_LIST = Obj_New('LinkedList')
-            !FSC_WINDOW_LIST-> Add, {FSC_WINDOW_ID, self.tlb, wid, self}
+            !FSC_WINDOW_LIST-> Add, {FSC_WINDOW_ID, self.tlb, wid, wtitle, self}
         ENDELSE
     ENDELSE
     
@@ -891,6 +925,7 @@ PRO FSC_Window_ID__Define
    struct = { FSC_WINDOW_ID, $
                  tlb: 0L, $
                  wid: 0L, $
+                 title: "", $
                  windowObj: Obj_New() $
              }
 END ;----------------------------------------------------------------------------------------------------------------
@@ -905,6 +940,7 @@ PRO FSC_CmdWindow__Define, class
               b: BytArr(256), $             ; The blue color table vector.
               pmulti: LonArr(5), $          ; Identical to !P.Multi.
               cmds: Obj_New(), $            ; A linkedlist object containing the graphics commands.
+              delay: 0.0, $                 ; The command delay.
               background: Ptr_New(), $      ; The background color.
               eraseit: 0B, $                ; Do we need to erase the display.
               wid: 0L, $                    ; The window index number of the graphics window.
@@ -929,10 +965,13 @@ PRO FSC_Window, $
    WXPos = wxpos, $                 ; The X offset of the window on the display. The window is centered if not set.
    WYPos = wypos, $                 ; The Y offset of the window on the display. The window is centered if not set.
    
-   AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface.
+   AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface and immediate execute commands.
+   CmdDelay=cmdDelay, $             ; Set this keyword to a value to "wait" before executing the next command.
    CmdIndex=cmdIndex, $             ; Set this keyword to identify the index of the command to manipulate.
    DeleteCmd=deletecmd, $           ; Set the keyword to delete a command.
+   ExecuteCmd=executecmd, $         ; Set this keyword to execute the commands in the window.
    ListCmd=listCmd, $               ; Set this keyword to list the commands in the window.
+   LoadCmd=loadCmd, $               ; Set this keyword to load commands in the window, but not execute them.
    ReplaceCmd=replacecmd, $         ; Set this keyword to replace a command in the window.
    WinID=winid, $                   ; Set this keyword to select an FSC_Window.
    WObject=wobject                  ; The FSC_CMDWindow object. A return value.
@@ -1050,6 +1089,38 @@ PRO FSC_Window, $
     
     ENDIF 
    
+   IF Keyword_Set(loadCmd) THEN BEGIN
+
+      ; Does the self object exist somewhere?
+      DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists
+      IF exists THEN BEGIN
+           theList = !FSC_WINDOW_LIST
+           IF Obj_Valid(theList) THEN BEGIN
+                structs = theList -> Get_Item(/ALL, /DEREFERENCE)
+                IF Size(structs, /TNAME) EQ 'POINTER' THEN RETURN
+                IF N_Elements(winID) EQ 0 THEN BEGIN
+                    winID = N_Elements(structs) - 1
+                ENDIF ELSE BEGIN
+                    index = Where(structs.wid[*] EQ winID, count)
+                    IF count GT 0 THEN winID = index[0] ELSE BEGIN
+                        Message, 'Cannot find an FSC_Window with window index ' + StrTrim(winID, 2) + '.'
+                    ENDELSE
+                ENDELSE
+                thisWindowStruct = structs[winID]
+                IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
+                    newCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
+                        P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=Keyword_Set(method))
+                    thisWindowStruct.windowObj -> AddCommand, newCommand
+                    ;thisWindowStruct.windowObj -> ExecuteCommands
+                ENDIF ELSE BEGIN
+                    Message, 'The specified FSC_Window object is not a valid window object.'
+                ENDELSE
+                RETURN
+           ENDIF ELSE Message, 'The FSC_Window object is not a valid window object.'
+       ENDIF ELSE Message, 'An FSC_Window does not exist to add a command to.'
+    
+    ENDIF 
+   
    IF Keyword_Set(addCmd) THEN BEGIN
 
       ; Does the self object exist somewhere?
@@ -1082,11 +1153,12 @@ PRO FSC_Window, $
     
     ENDIF 
    
-   ; Othersize, make the command object.
+   ; Otherwise, make the command object.
    wobject = Obj_New('FSC_CmdWindow', $
        command, $                       ; The graphics "command" to execute.
        p1, p2, p3, $                    ; The three allowed positional parameters.
        _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
+       CmdDelay = cmdDelay, $           ; The amount of time to "wait" between commands.
        Group_Leader = group_leader, $   ; The group leader of the FSC_Window program.
        Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
        WBackground = wbackground, $     ; The background color. Not used unless set.

@@ -135,6 +135,9 @@
 ;
 ;       VERTICAL:     Setting this keyword give a vertical color bar. The default
 ;                     is a horizontal color bar.
+;                     
+;       WINDOW:       Set this keyword if you want to add the FSC_Colorbar command to
+;                     the current FSC_Window application.
 ;
 ; COMMON BLOCKS:
 ;
@@ -244,6 +247,7 @@
 ;             e-mails that "your damn colorbar doesn't work!". DWF.
 ;      6 Dec 2010. I was always setting COLOR to ANNOTATECOLOR. I should only do that if
 ;             COLOR is undefined. DWF.
+;      24 Jan 2011. Added WINDOW keyword. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -299,6 +303,7 @@ PRO FSC_COLORBAR, $
     VERTICAL=vertical, $
     XLOG=xlog, $
     YLOG=ylog, $
+    WINDOW=window, $
     _EXTRA=extra
 
     Compile_Opt idl2
@@ -309,6 +314,45 @@ PRO FSC_COLORBAR, $
         Catch, /CANCEL
         void = Error_Message()
         RETURN
+    ENDIF
+
+    ; Should this be added to a resizeable graphics window?
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    
+        void = FSC_QueryWin(COUNT=wincnt)
+        IF wincnt EQ 0 THEN FSC_Window
+        FSC_Window, 'FSC_Colorbar', $
+            ANNOTATECOLOR=annotatecolor, $
+            BOTTOM=bottom, $
+            CHARSIZE=charsize, $
+            CLAMP=clamp, $
+            COLOR=color, $
+            DIVISIONS=divisions, $
+            FONT=font, $
+            FORMAT=format, $
+            INVERTCOLORS=invertcolors, $
+            MAXRANGE=maxrange, $
+            MINOR=minor, $
+            MINRANGE=minrange, $
+            NCOLORS=ncolors, $
+            NEUTRALINDEX=neutralIndex, $
+            NODISPLAY=nodisplay, $
+            POSITION=position, $
+            RANGE=range, $
+            REVERSE=reverse, $
+            RIGHT=right, $
+            TICKLEN=ticklen, $
+            TICKNAMES=ticknames, $
+            TITLE=title, $
+            TOP=top, $
+            VERTICAL=vertical, $
+            XLOG=xlog, $
+            YLOG=ylog, $
+            ADDCMD=1, $
+             _EXTRA=extra
+
+            
+         RETURN
     ENDIF
 
     ; Set up PostScript device for working with colors.

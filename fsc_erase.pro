@@ -53,6 +53,9 @@
 ;         An alternative way to specify the color to use in erasing the graphics window.
 ;         Color names are those used with FSC_Color. This parameter is used in
 ;         preference to the background_color parameter.
+;     window: in, optional, type=boolean, default=0
+;         Set this keyword to erase the current FSC_Window application. "Erasing" in
+;         this case means removing all the current commands.
 ;          
 ; :Examples:
 ;    Used like the IDL Erase command::
@@ -82,7 +85,19 @@
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Erase, background_color, COLOR=color
+PRO FSC_Erase, background_color, COLOR=color, WINDOW=window
+
+    ; Are we erasing an FSC_Window application?
+    IF Keyword_Set(window) THEN BEGIN
+    
+        currentID = FSC_QueryWin(COUNT=wincnt, OBJECTREF=currentObj, /Current)
+        IF wincnt GT 0 THEN BEGIN
+            currentObj -> DeleteCommand, /All
+            currentObj -> ExecuteCommands
+        ENDIF
+        RETURN
+        
+    ENDIF
 
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8

@@ -167,6 +167,9 @@
 ;       Have done some work on parsing HDF-EOS swath files, but currently unused in code. 15 May 2010. DWF.
 ;       Modified the ReadVariable method to check for 0 length dimensions when reading variables
 ;           from HDF files. 21 July 2010. DWF.
+;       Modified the global attribute structure so that the "filename" field, which holds the
+;           name of the netCDF of HDF file is now named "ncdf_filename" or "hdf_filename". This
+;           will avoid conflicts with global attributes with "filename". 20 January 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -2021,7 +2024,7 @@ FUNCTION NCDF_DATA::ReadGlobalAttr, SUCCESS=success
         HDF_SD_Fileinfo, fileID, num_vars, num_attr
    
        ; Create a structure to hold the global attribute values.
-       attrStruct = Create_Struct('filename', self.filename)
+       attrStruct = Create_Struct('hdf_filename', self.filename)
        FOR j=0,num_attr-1 DO BEGIN
            HDF_SD_ATTRINFO, fileID, j, DATA=value, NAME=name
            
@@ -2044,7 +2047,7 @@ FUNCTION NCDF_DATA::ReadGlobalAttr, SUCCESS=success
        info = NCDF_Inquire(fileID)
     
        ; Create a structure to hold the global attribute values.
-       attrStruct = Create_Struct('filename', self.filename)
+       attrStruct = Create_Struct('ncdf_filename', self.filename)
        FOR j=0,info.ngatts-1 DO BEGIN
           name = NCDF_AttName(fileID, j, /GLOBAL)
           NCDF_AttGet, fileID, name, value, /GLOBAL

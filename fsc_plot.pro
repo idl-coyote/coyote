@@ -191,8 +191,9 @@ PRO FSC_Plot, x, y, $
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
     
     ; Do they want this plot in a resizeable graphics window?
-    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) AND (Keyword_Set(overplot) EQ 0) THEN BEGIN
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
+        IF Keyword_Set(overplot) THEN BEGIN
         FSC_Window, 'FSC_Plot', x, y, $
             ASPECT=aspect, $
             AXISCOLOR=saxiscolor, $
@@ -210,6 +211,32 @@ PRO FSC_Plot, x, y, $
             SYMCOLOR=ssymcolor, $
             SYMSIZE=symsize, $
             TRADITIONAL=traditional, $
+            ADDCMD=1, $
+           _Extra=extra
+             RETURN
+       ENDIF
+        
+    
+        currentWindow = FSC_QueryWin(/CURRENT, COUNT=wincnt)
+        IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
+        FSC_Window, 'FSC_Plot', x, y, $
+            ASPECT=aspect, $
+            AXISCOLOR=saxiscolor, $
+            AXESCOLOR=saxescolor, $
+            BACKGROUND=sbackground, $
+            CHARSIZE=charsize, $
+            COLOR=scolor, $
+            FONT=font, $
+            ISOTROPIC=isotropic, $
+            NODATA=nodata, $
+            NOERASE=noerase, $
+            OVERPLOT=overplot, $
+            POSITION=position, $
+            PSYM=psym, $
+            SYMCOLOR=ssymcolor, $
+            SYMSIZE=symsize, $
+            TRADITIONAL=traditional, $
+            REPLACECMD=replaceCmd, $
            _Extra=extra
             
          RETURN

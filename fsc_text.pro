@@ -87,6 +87,8 @@
 ;     width: out, optional, type=float
 ;         Set this keyword to a named variable in which to return the width of the text string, 
 ;         in normalized coordinate units.
+;     window: in, optional, type=boolean
+;         Set this keyword to add the command to the in the current FSC_Window application.
 ;     _extra: in, optional
 ;          Any keywords appropriate for the XYOUTS command.
 ;     
@@ -116,6 +118,7 @@
 ;        Keywords collected with _REF_EXTRA so WIDTH can be returned. Added WIDTH keyword. 6 Jan 2011. DWF.
 ;        Moved setting to decomposed color before color selection process to avoid PostScript
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
+;        Added Window keyword. 24 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -132,6 +135,7 @@ PRO FSC_Text, xloc, yloc, text, $
     PLACE=place, $
     TT_FONT=tt_font, $
     WIDTH=width, $
+    WINDOW=window, $
     _REF_EXTRA=extra
     
     Compile_Opt idl2
@@ -148,6 +152,29 @@ PRO FSC_Text, xloc, yloc, text, $
     IF N_Params() EQ 0 THEN BEGIN
         Print, 'USE SYNTAX: FSC_Text, xlocation, ylocation, text'
         RETURN
+    ENDIF
+    
+    ; Should this be added to a resizeable graphics window?
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    
+        void = FSC_QueryWin(COUNT=wincnt)
+        IF wincnt EQ 0 THEN FSC_Window
+        FSC_Window, 'FSC_Text', xloc, yloc, text, $
+            ALIGNMENT=alignment, $
+            CHARSIZE=charsize, $
+            COLOR=scolor, $
+            DATA=data, $
+            DEVICE=device, $
+            FONT=font, $
+            NORMAL=normal, $
+            OUTLOC=outloc, $
+            PLACE=place, $
+            TT_FONT=tt_font, $
+            WIDTH=width, $
+            ADDCMD=1, $
+            _REF_EXTRA=extra
+            
+         RETURN
     ENDIF
     
     ; Set up PostScript device for working with colors.

@@ -237,8 +237,40 @@ PRO FSC_Contour, data, x, y, $
     ENDIF
 
     ; Do they want this plot in a resizeable graphics window?
-    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) AND (Keyword_Set(overplot) EQ 0) THEN BEGIN
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
+        IF Keyword_Set(overplot) THEN BEGIN
+            FSC_Window, 'FSC_Contour', data, x, y, $
+                AXISCOLOR=saxiscolor, $
+                AXESCOLOR=saxescolor, $
+                BACKGROUND=sbackground, $
+                C_COLORS=c_colors, $
+                C_LABELS=c_labels, $
+                CELL_FILL=cell_fill, $
+                CHARSIZE=charsize, $
+                COLOR=scolor, $
+                FILL=fill, $
+                IRREGULAR=irregular, $
+                LABEL=label, $
+                LEVELS=levels, $
+                NLEVELS=nlevels, $
+                NOERASE=noerase, $
+                MISSINGVALUE=missingvalue, $
+                OVERPLOT=overplot, $
+                POSITION=position, $
+                RESOLUTION=resolution, $
+                TRADITIONAL=traditional, $
+                XSTYLE=xstyle, $
+                XTHICK=xthick, $
+                YSTYLE=ystyle, $
+                YTHICK=ythick, $
+                ADDCMD=1, $
+                _Extra=extra
+             RETURN
+       ENDIF
+        
+        currentWindow = FSC_QueryWin(/CURRENT, COUNT=wincnt)
+        IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
         FSC_Window, 'FSC_Contour', data, x, y, $
             AXISCOLOR=saxiscolor, $
             AXESCOLOR=saxescolor, $
@@ -263,6 +295,7 @@ PRO FSC_Contour, data, x, y, $
             XTHICK=xthick, $
             YSTYLE=ystyle, $
             YTHICK=ythick, $
+            REPLACECMD=replaceCmd, $
             _Extra=extra
             
          RETURN

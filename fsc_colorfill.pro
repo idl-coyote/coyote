@@ -62,11 +62,13 @@
 ;         The name of the fill color. Color names are those used with FSC_Color. 
 ;         This value can also be a long integer or an index into the current color
 ;         table.
-;     device: in, optioinal, type=boolean, default=0
+;     device: in, optional, type=boolean, default=0
 ;         Set to indicate the polygon vertices are in device coordinates.
-;     normalized: in, optioinal, type=boolean, default=0
+;     normalized: in, optional, type=boolean, default=0
 ;         Set to indicate the polygon vertices are in normalized coordinates.
-;     other: in, optional, type=appropriate
+;     window: in, optional, type=boolean, default=0
+;         Set this keyword to add the command to the current FSC_Window application.
+;     _extra: in, optional, type=appropriate
 ;         Any other keywords to the IDL POLYFILL command may be used.
 ;     
 ;          
@@ -91,11 +93,17 @@
 ;            INTEGERS first. 30 Dec 2010. DWF.        
 ;        Moved setting to decomposed color before color selection process to avoid PostScript
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
+;        Added WINDOW keyword. 24 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_ColorFill, x, y, z, COLOR=color, NORMAL=normal, DEVICE=device, _EXTRA=extra
+PRO FSC_ColorFill, x, y, z, $
+    COLOR=color, $
+    NORMAL=normal, $
+    DEVICE=device, $
+    WINDOW=window, $
+     _EXTRA=extra
 
     Compile_Opt idl2
 
@@ -111,6 +119,20 @@ PRO FSC_ColorFill, x, y, z, COLOR=color, NORMAL=normal, DEVICE=device, _EXTRA=ex
         Print, 'USE SYNTAX: FSC_ColorFill, x, y, [z]'
         RETURN
     ENDIF
+    
+    ; Should this be added to a resizeable graphics window?
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    
+        FSC_Window, 'FSC_ColorFill', x, y, z, $
+            COLOR=color, $
+            NORMAL=normal, $
+            DEVICE=device, $
+            ADDCMD=1, $
+            _EXTRA=extra
+            
+         RETURN
+    ENDIF
+    
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     

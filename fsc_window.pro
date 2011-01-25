@@ -37,7 +37,909 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+;+
+; :Description:
+;     Adds a command object of class IDL_WINDOW_COMMAND to the command list 
+;     maintained by the window.
 ;
+; :Params:
+;     command: in, required, type=object
+;         A command object of class IDL_WINDOW_COMMAND.
+;-
+PRO FSC_CmdWindow::AddCommand, command
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    ; If the command is a valid object, add it to the command list.
+    IF Obj_Valid(command) THEN self.cmds -> Add, command
+
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     Sends the window commands to a PostScript file.
+;
+; :Params:
+;     event: in, required, type=structure
+;         An event structure.
+;-
+PRO FSC_CmdWindow::CreatePostScriptFile, event
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    ; Allow the user to configure the PostScript file.
+    PS_Start, /GUI, CANCEL=cancelled
+    IF cancelled THEN RETURN
+    
+    ; Execute the graphics commands.
+    self -> ExecuteCommands
+    
+    ; Clean up.
+    PS_End
+
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     Deletes a command object from the command list maintained by the window.
+;
+; :Params:
+;     cmdIndex: in, optional, type=integer
+;         The zero-based index of the command to delete. If undefined, the
+;         index of the last command in the window is used.
+;
+; :Keywords:
+;     all: in, optional, type=boolean
+;         If set, all the commands in the command list are deleted.
+;-
+PRO FSC_CmdWindow::DeleteCommand, cmdIndex, ALL=all
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    ; Get the command count.
+    count = self.cmds -> Get_Count()
+    
+    ; Delete all the commands? Is so, delete and RETURN.
+    IF Keyword_Set(all) THEN BEGIN
+        self.cmds -> Delete_Nodes, /DESTROY
+        RETURN
+    ENDIF
+    
+    ; Need a command index?
+    IF N_Elements(cmdIndex) EQ 0 THEN BEGIN
+        cmdIndex = count - 1
+    ENDIF 
+    
+    ; Do we have a command with this command number?
+    IF cmdIndex GT (count-1) THEN Message, 'A command with index ' + StrTrim(cmdIndex,2) + ' does not exist.'
+    
+    IF cmdIndex GE 0 THEN BEGIN
+        self.cmds -> Delete, cmdIndex, /Destroy
+        self -> ExecuteCommands
+    ENDIF ELSE Message, 'A negative command index number is not allowed.'
+    
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     All widget events come here and are dispatched to the proper object method.
+;
+; :Params:
+;     event: in, required, type=structure
+;         An event structure.
+;-
+PRO FSC_CmdWindow_Dispatch_Events, event
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    ; Get the window object.
+    Widget_Control, event.top, GET_UVALUE=self
+    
+    ; Get the event type. If the type is an object, then
+    ; this must be a resize event from the TLB.
+    Widget_Control, event.id, GET_UVALUE=eventType
+    IF Obj_Valid(eventType) THEN eventType = 'TLB_RESIZE'
+    
+    ; Dispatch the events to the proper method.
+    CASE eventType OF   
+        'TLB_RESIZE': self -> Resize, event
+        'POSTSCRIPT': self -> CreatePostscriptFile, event
+        ELSE: self -> SaveAsRaster, event
+    ENDCASE
+    
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     This method executes the commands on the command list.
+;-
+PRO FSC_CmdWindow::ExecuteCommands
+
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        ;void = Dialog_Message(!Error_State.MSG)
+        !P.Multi = thisMulti
+        IF N_Elements(rr) NE 0 THEN TVLCT, rr, gg, bb
+        IF (!D.Flags AND 256) NE 0 THEN WSet, -1
+        RETURN
+    ENDIF
+    
+    ; Store the current !P.MULTI state.
+    thisMulti = !P.Multi
+
+    ; Make this window the current graphics window.
+    IF (!D.Flags AND 256) NE 0 THEN BEGIN
+        currentWindow = !D.Window
+        WSet, self.wid
+    ENDIF
+    
+    ; Get the current color table vectors so they can be restored.
+    TVLCT, rr, gg, bb, /GET
+    
+    ; Load the color vectors.
+    TVLCT, *self.r, *self.g, *self.b
+    
+    ; Erase the window.
+    IF self.eraseit THEN FSC_Erase, *self.background 
+    
+    ; Are we doing multiple commands?
+    IF Total(self.pmulti) NE 0 THEN !P.Multi = self.pmulti
+        
+    ; How many commands are there?
+    n_cmds = self.cmds -> Get_Count()
+    
+    ; Issue an informative message if there are no commands to execute.
+    ;IF n_cmds EQ 0 THEN Message, 'There are currently no graphics commands to execute.', /INFORMATIONAL
+    
+    ; Execute the commands.
+    FOR j=0,n_cmds-1 DO BEGIN
+        thisCmdObj = self.cmds -> Get_Item(j, /DEREFERENCE)
+        thisCmdObj -> Draw, SUCCESS=success
+        
+        ; Did you successfully draw this command?
+        IF ~success THEN BEGIN
+        
+            self -> ListCommand, j
+            answer = Dialog_Message('Problem executing command ' + $
+                StrTrim(j,2) + '. Delete command?', /QUESTION)
+            IF StrUpCase(answer) EQ 'YES' THEN BEGIN
+                self -> DeleteCommand, j
+                !P.Multi = thisMulti
+                IF N_Elements(rr) NE 0 THEN TVLCT, rr, gg, bb
+                IF (!D.Flags AND 256) NE 0 THEN WSet, -1
+                RETURN
+            ENDIF
+        
+        ENDIF
+        
+        ; Need to delay?
+        IF self.delay NE 0 THEN Wait, self.delay
+    ENDFOR
+    
+    ; Restore the colors in effect when we entered.
+    TVLCT, rr, gg, bb
+    
+    ; Set the !P.Multi system variable back to its original values.
+    !P.Multi = thisMulti
+    
+    ; Reset the current graphics window, if possible.
+    IF (!D.Flags AND 256) NE 0 THEN BEGIN
+       IF (currentWindow GE 0) && WindowAvailable(currentWindow) THEN BEGIN
+            WSet, currentWindow
+       ENDIF ELSE WSet, -1
+    ENDIF
+
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     This method retrieves properties from the object.
+;-
+PRO FSC_CmdWindow::GetProperty, $
+    BACKGROUND=background, $
+    COLORPALETTE=colorPalette, $
+    COMMANDS=commands, $
+    DELAY=delay, $
+    ERASEIT=eraseit, $
+    MULTI=multi, $
+    TLB=tlb, $
+    WID=wid
+    
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    IF Arg_Present(background) THEN background = *self.background
+    IF Arg_Present(colorPalette) THEN BEGIN
+        len = N_Elements(*self.r)
+        palette = BytArr(len,3)
+        palette[*,0] = *self.r
+        palette[*,1] = *self.g
+        palette[*,2] = *self.b
+        colorPalette = palette
+    ENDIF
+    IF Arg_Present(commands) THEN commands = self.cmds
+    IF Arg_Present(delay) THEN delay = self.delay
+    IF Arg_Present(eraseit) THEN eraseit = self.eraseit
+    IF Arg_Present(multi) THEN multi = self.pmulti
+    IF Arg_Present(tlb) THEN tlb = self.tlb
+    IF Arg_Present(wid) THEN wid = self.wid
+    
+
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     This method lists the command indicated by the command index. In the
+;     absence of the command index, all commands are listed.
+;-
+PRO FSC_CmdWindow::ListCommand, cmdIndex
+
+    ; List the commands in the command window.
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    ; How many commands are there?
+    count = self.cmds -> Get_Count()
+    
+    IF N_Elements(cmdIndex) EQ 0 THEN BEGIN
+        FOR j = 0, count-1 DO BEGIN
+            thisCmdObj = self.cmds -> Get_Item(j, /DEREFERENCE)
+        
+            ; Preface the commands with their index number.
+            thisCmdObj -> List, StrTrim(j,2) + '.'
+        ENDFOR
+    ENDIF ELSE BEGIN
+        IF cmdIndex LT (count-1) THEN BEGIN
+            thisCmdObj = self.cmds -> Get_Item(cmdIndex, /DEREFERENCE)
+        
+            ; Preface the commands with their index number.
+            thisCmdObj -> List, StrTrim(cmdIndex,2) + '.'
+        ENDIF ELSE Message, 'The command index is out of range of the number of commands.'
+    ENDELSE
+
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     This method replaces a command in the command list. If cmdImdex is missing,
+;     replace all the commands in the command list.
+;-
+PRO FSC_CmdWindow::ReplaceCommand, command, cmdIndex
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    ; If cmdIndex is missing, remove all the current commands with this one.
+    IF N_Elements(cmdIndex) EQ 0 THEN BEGIN
+        self.cmds -> Delete, /ALL, /Destroy
+        self.pmulti = IntArr(5) ; Reset !P.Multi.
+        self.cmds -> Add, command
+    ENDIF ELSE BEGIN
+    
+        ; Get the old command first, so you can destroy it properly.
+        oldcmd = self.cmds -> Get_Item(cmdIndex, /DEREFERENCE)
+        self.cmds -> Replace_Item, cmdIndex, command
+        Obj_Destroy, oldcmd
+    ENDELSE
+    
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     This method resizes the graphics window and executes the commands again.
+;-
+PRO FSC_CmdWindow::Resize, event
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    Widget_Control, self.drawID, DRAW_XSIZE=event.x, DRAW_YSIZE=event.y
+    self -> ExecuteCommands
+    
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     This method saves the graphics window as a raster image file.
+;-
+PRO FSC_CmdWindow::SaveAsRaster, event
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    ; On going in here for down event.
+    IF event.select NE 1 THEN RETURN
+    
+    Widget_Control, event.ID, Get_UValue=buttonValue
+    
+    ; Determine if this is normal raster (o) or ImageMagick raster (1).
+    IF StrMid(buttonValue, 0, 6) EQ 'RASTER' THEN BEGIN
+        fileType = StrMid(buttonValue, 7)
+        rasterType = 0 
+    ENDIF ELSE BEGIN
+        filetype = StrMid(buttonValue, 12)
+        rasterType = 1
+    ENDELSE
+    
+    CASE filetype OF
+       'BMP':  filename = FSC_Pickfile(FILE='fsc_window.bmp', /WRITE, TITLE='Select an Output File...')
+       'GIF':  filename = FSC_Pickfile(FILE='fsc_window.gif', /WRITE, TITLE='Select an Output File...')
+       'JPEG': filename = FSC_Pickfile(FILE='fsc_window.jpg', /WRITE, TITLE='Select an Output File...')
+       'PNG':  filename = FSC_Pickfile(FILE='fsc_window.png', /WRITE, TITLE='Select an Output File...')
+       'TIFF': filename = FSC_Pickfile(FILE='fsc_window.tif', /WRITE, TITLE='Select an Output File...')
+    ENDCASE
+    IF filename EQ "" THEN RETURN
+    root_name = FSC_Base_Filename(filename, DIRECTORY=dirName)
+    outname = Filepath(ROOT_DIR=dirname, root_name)
+    
+    ; What kind of raster file.
+    CASE rasterType OF
+    
+        ; Normal raster.
+        0: BEGIN
+           WSet, self.wid
+           void = TVRead(TYPE=fileType, FILENAME=outname, /NODIALOG)
+           END
+           
+        ; Raster via ImageMagick.
+        1: BEGIN
+           
+           ; Create a PostScript file first.
+           thisname = outname + '.ps'
+           PS_Start, FILENAME=thisname
+           
+           ; Draw the graphics.
+           self -> ExecuteCommands
+           
+           ; Close the file and convert to proper file type.
+           CASE filetype OF
+                'BMP':  PS_END, /BMP,  /DELETE_PS
+                'GIF':  PS_END, /GIF,  /DELETE_PS
+                'JPEG': PS_END, /JPEG, /DELETE_PS
+                'PNG':  PS_END, /PNG,  /DELETE_PS
+                'TIFF': PS_END, /TIFF, /DELETE_PS
+           ENDCASE
+        
+           END
+    
+    ENDCASE
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     This method sets properties of the window object.
+;-
+PRO FSC_CmdWindow::SetProperty, $
+    BACKGROUND=background, $
+    DELAY=delay, $
+    ERASEIT=eraseit, $
+    COLORPALETTE=colorPalette, $
+    MULTI=multi
+    
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    IF N_Elements(background) NE 0 THEN BEGIN
+        IF Ptr_Valid(self.background) $
+            THEN *self.background = background $
+            ELSE self.background = Ptr_New(background)
+    ENDIF 
+    IF N_Elements(colorpalette) NE 0 THEN BEGIN
+        IF Size(colorpalette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
+        dims = Size(colorpalette, /DIMENIONS)
+        threeIndex = Where(dims EQ 3)
+        IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
+        IF threeIndex EQ 0 THEN colorPalette = Transpose(colorPalette)
+        *self.r = colorPalette[*,0]
+        *self.g = colorPalette[*,1]
+        *self.b = colorPalette[*,2]
+    ENDIF   
+    IF N_Elements(delay) NE 0 THEN self.delay = delay
+    IF N_Elements(eraseit) NE 0 THEN self.eraseit = Keyword_Set(eraseit)
+    IF N_Elements(multi) NE 0 THEN BEGIN
+        FOR j=0,N_Elements(multi)-1 DO self.pmulti[j] = multi[j]
+    ENDIF
+
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+PRO FSC_CmdWindow_Cleanup, tlb
+    Widget_Control, tlb, Get_UValue=self
+    Obj_Destroy, self
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     This method initializes the object that is at the heart of FSC_Window.
+;     It takes most of the same arguments as FSC_Window.
+;-
+FUNCTION FSC_CmdWindow::Init, $
+   command, $                       ; The graphics "command" to execute.
+   p1, p2, p3, $                    ; The three allowed positional parameters.
+   _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
+   Group_Leader = group_leader, $   ; The group leader of the FSC_Window program.
+   AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface.
+   CmdDelay=cmdDelay, $             ; Set this keyword to a value to "wait" before executing the next command.
+   Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
+   ReplaceCmd=replacecmd, $         ; Replace the current command and execute in the current window.
+   WEraseIt = Weraseit, $           ; Set this keyword to erase the display before executing the command.
+   WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
+   WXSize = wxsize, $               ; The X size of the FSC_Window graphics window in pixels. By default: 400.
+   WYSize = wysize, $               ; The Y size of the FSC_Window graphics window in pixels. By default: 400.
+   WTitle = wtitle, $               ; The window title.
+   WXPos = wxpos, $                 ; The X offset of the window on the display. The window is centered if not set.
+   WYPos = wypos, $                 ; The Y offset of the window on the display. The window is centered if not set.
+   WBackground = wbackground        ; The background color. Set to !P.Background by default.
+
+    Compile_Opt idl2
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN, 0
+    ENDIF
+   
+    ; Check keywords.
+    method = Keyword_Set(method)
+    
+    ; If method is set, the first positional parameter must be present,
+    ; and it must be a valid object reference.
+    IF method THEN BEGIN
+        IF N_Elements(p1) EQ 0 THEN $
+            Message, 'The first positional parameter must be present to make a method call.'
+        IF ~Obj_Valid(p1) THEN $
+            Message, 'The first positional parameter must be a valid object reference when making method calls.'
+    ENDIF
+    IF N_Elements(wxsize) EQ 0 THEN xsize = 640 ELSE xsize = wxsize
+    IF N_Elements(wysize) EQ 0 THEN ysize = 512 ELSE ysize = wysize
+    IF N_Elements(wxpos) EQ 0 THEN xpos = -1 ELSE xpos = wxpos
+    IF N_Elements(wypos) EQ 0 THEN ypos = -1 ELSE ypos = wypos
+    IF N_Elements(wbackground) EQ 0 THEN BEGIN
+        background='white'
+        IF N_Elements(command) EQ 0 THEN eraseit = 1
+    ENDIF ELSE BEGIN
+        background = wbackground
+        eraseit = 1
+    ENDELSE
+    IF N_Elements(eraseIt) EQ 0 THEN eraseIt = Keyword_Set(weraseit)
+
+    ; The commands will be placed in a linked list for execution.
+    self.cmds = Obj_New('LinkedList')
+    IF Obj_Valid(self.cmds) EQ 0 THEN Message, 'Failed to make the LinkedList for the commands.'
+    
+    ; Add a command, if you have one. Otherwise, just make the window.
+    IF (N_Elements(command) NE 0) THEN BEGIN
+        thisCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
+                P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=method)
+        IF Obj_Valid(thisCommand) THEN self.cmds -> Add, thisCommand ELSE Message, 'Failed to make command object.'
+    ENDIF 
+    
+    ; Store the current color table vectors
+    TVLCT, rr, gg, bb, /Get
+    self.r = Ptr_New(rr)
+    self.g = Ptr_New(gg)
+    self.b = Ptr_New(bb)
+    
+    ; Create the widgets for the program.
+    self.tlb = Widget_Base(/TLB_SIZE_EVENTS, MBar=menuID)
+    
+    saveID = Widget_Button(menuID, Value='Save As...')
+    button = Widget_Button(saveID, Value='PostScript File', UVALUE='POSTSCRIPT')
+    raster = Widget_Button(saveID, Value='Raster Image File', /MENU)
+    
+    button = Widget_Button(raster, Value='BMP', UVALUE='RASTER_BMP')
+    button = Widget_Button(raster, Value='GIF', UVALUE='RASTER_GIF')
+    button = Widget_Button(raster, Value='JPEG', UVALUE='RASTER_JPEG')
+    button = Widget_Button(raster, Value='PNG', UVALUE='RASTER_PNG')
+    button = Widget_Button(raster, Value='TIFF', UVALUE='RASTER_TIFF')
+    
+    ; If you can find ImageMagick on this machine, you can convert to better
+    ; looking raster files.
+    IF HasImageMagick() EQ 1 THEN BEGIN
+        imraster = Widget_Button(saveID, Value='Raster Image File via ImageMagick', /MENU)
+        button = Widget_Button(imraster, Value='BMP', UVALUE='IMAGEMAGICK_BMP')
+        button = Widget_Button(imraster, Value='GIF', UVALUE='IMAGEMAGICK_GIF')
+        button = Widget_Button(imraster, Value='JPEG', UVALUE='IMAGEMAGICK_JPEG')
+        button = Widget_Button(imraster, Value='PNG', UVALUE='IMAGEMAGICK_PNG')
+        button = Widget_Button(imraster, Value='TIFF', UVALUE='IMAGEMAGICK_TIFF')
+    ENDIF
+    
+    ; Create draw widget.
+    retain = (StrUpCase(!Version.OS_Family) EQ 'UNIX') ? 2 : 1
+    self.drawID = Widget_Draw(self.tlb, XSIZE=xsize, YSize=ysize, RETAIN=retain) 
+    
+    ; Do we need to center the widget?
+    IF (xpos EQ -1) AND (ypos EQ -1) THEN BEGIN
+        DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists
+        IF ~exists THEN BEGIN
+           xpos = 5
+           ypos = 5
+        ENDIF ELSE BEGIN
+            IF Obj_Valid(!FSC_WINDOW_LIST) THEN BEGIN
+                count = !FSC_WINDOW_LIST -> Get_Count()
+                xpos = 5 + (30*count)
+                ypos = 5 + (25*count)
+            ENDIF ELSE BEGIN
+                xpos = 5
+                ypos = 5           
+            ENDELSE
+        ENDELSE
+        CenterTLB, self.tlb, xpos, ypos, /NOCENTER, /DEVICE
+    ENDIF ELSE BEGIN
+        CenterTLB, self.tlb, xpos, ypos, /NOCENTER, /DEVICE
+    ENDELSE
+    
+    ; Display the widget and get window index number.
+    currentWindow = !D.Window
+    Widget_Control, self.tlb, /Realize
+    Widget_Control, self.drawID, Get_Value=wid
+    self.wid = wid
+    
+    IF N_Elements(wtitle) EQ 0 THEN BEGIN
+        wtitle = "Resizeable Graphics Window"
+        wtitle = wtitle + ' (' + StrTrim(wid,2) + ')'
+    ENDIF
+    Widget_Control, self.tlb, TLB_Set_Title=wtitle
+
+    ; Load object properties.
+    self.background = Ptr_New(background)
+    IF N_Elements(cmdDelay) NE 0 THEN self.delay = cmdDelay
+    self.eraseIt = eraseIt
+    IF N_Elements(wmulti) NE 0 THEN BEGIN
+       FOR j=0,N_Elements(wmulti)-1 DO self.pmulti[j] = wmulti[j]
+    ENDIF
+
+    ; Execute the commands.
+    self -> ExecuteCommands 
+    
+    ; Get it running.
+    WIDGET_CONTROL, /MANAGED, self.tlb
+    XManager, 'fsc_window', self.tlb, /No_Block, $
+        Event_Handler='FSC_CmdWindow_Dispatch_Events', $
+        Cleanup = 'FSC_CmdWindow_Cleanup', $
+        Group_Leader=group_leader
+    
+    ; Store the self reference in the UVALUE of the TLB.
+    Widget_Control, self.tlb, SET_UValue=self
+    
+    ; Each instance of FSC_Window will store evidence of its
+    ; existance in a linked list.
+    DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists
+    IF ~exists THEN BEGIN
+        fsc_window_list = Obj_New("LinkedList")
+        DefSysV, '!FSC_WINDOW_LIST', fsc_window_list 
+        fsc_window_list -> Add, {FSC_WINDOW_ID, self.tlb, wid, wtitle, self}
+    ENDIF ELSE BEGIN
+        IF Obj_Valid(!FSC_WINDOW_LIST) THEN BEGIN
+            !FSC_WINDOW_LIST -> Add, {FSC_WINDOW_ID, self.tlb, wid, wtitle, self}
+        ENDIF ELSE BEGIN
+            !FSC_WINDOW_LIST = Obj_New('LinkedList')
+            !FSC_WINDOW_LIST-> Add, {FSC_WINDOW_ID, self.tlb, wid, wtitle, self}
+        ENDELSE
+    ENDELSE
+    
+    ; Restore the current graphics window, if you can.
+    IF (currentWindow GE 0) && WindowAvailable(currentWindow) THEN BEGIN
+       WSet, currentWindow
+    ENDIF ELSE WSet, -1
+    RETURN, 1
+
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+PRO FSC_CmdWindow::Cleanup
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    ; Free any pointers.
+    Ptr_Free, self.background
+    Ptr_Free, self.r
+    Ptr_Free, self.g
+    Ptr_Free, self.b
+    
+    ; Destroy the command objects.
+    count = self.cmds -> Get_Count()
+    FOR j=0,count-1 DO Obj_Destroy, self.cmds -> Get_Item(j, /DEREFERENCE)
+    Obj_Destroy, self.cmds
+    
+    ; You have to remove yourself from the list of valid FSC_Windows.
+    theList = !FSC_WINDOW_LIST
+    IF Obj_Valid(theList) THEN BEGIN
+        structs = theList -> Get_Item(/ALL, /DEREFERENCE)
+        index = Where(structs.windowObj[*] EQ self, count)
+        IF count GT 0 THEN theList -> Delete, index[0]
+    ENDIF 
+    
+    ; If the list doesn't have any more FSC_Windows objects in it,
+    ; delete the list so it doesn't waste memory.
+    IF theList -> Get_Count() EQ 0 THEN Obj_Destroy, theList
+    
+    ; If your widget ID is valid, destroy the widget program.
+    IF Widget_Info(self.tlb, /VALID_ID) THEN Widget_Control, self.tlb, /Destroy
+    
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+PRO FSC_CmdWindow__Define, class
+
+    class = { FSC_CMDWINDOW, $
+              tlb: 0L, $                    ; The identifier of the top-level base widget.
+              r: Ptr_New(), $               ; The red color table vector.
+              g: Ptr_New(), $               ; The green color table vector.
+              b: Ptr_New(), $               ; The blue color table vector.
+              pmulti: LonArr(5), $          ; Identical to !P.Multi.
+              cmds: Obj_New(), $            ; A linkedlist object containing the graphics commands.
+              delay: 0.0, $                 ; The command delay.
+              background: Ptr_New(), $      ; The background color.
+              eraseit: 0B, $                ; Do we need to erase the display.
+              wid: 0L, $                    ; The window index number of the graphics window.
+              drawid: 0L $                  ; The identifier of the draw widget.
+            }
+            
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+PRO FSC_Window_Command::Draw, SUCCESS=success
+
+    Compile_Opt idl2
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        success = 0
+        RETURN
+    ENDIF
+    
+    ; Assume success.
+    success = 1
+
+    ; What kind of command is this?
+    CASE self.type OF 
+    
+        ; Command calls a procedure.
+        0: BEGIN
+        
+             IF Ptr_Valid(self.keywords) THEN BEGIN
+                 CASE self.nparams OF
+                     0: Call_Procedure, self.command, _Extra=*self.keywords
+                     1: Call_Procedure, self.command, *self.p1, _Extra=*self.keywords
+                     2: Call_Procedure, self.command, *self.p1, *self.p2, _Extra=*self.keywords
+                     3: Call_Procedure, self.command, *self.p1, *self.p2, *self.p3, _Extra=*self.keywords
+                 ENDCASE
+             ENDIF ELSE BEGIN
+                 CASE self.nparams OF
+                     0: Call_Procedure, self.command
+                     1: Call_Procedure, self.command, *self.p1
+                     2: Call_Procedure, self.command, *self.p1, *self.p2
+                     3: Call_Procedure, self.command, *self.p1, *self.p2, *self.p3
+                 ENDCASE
+             ENDELSE
+             
+             END
+             
+        ; Command calls a method.
+        1: BEGIN
+
+             IF Ptr_Valid(self.keywords) THEN BEGIN
+                 CASE self.nparams OF
+                     0: Call_Method, self.command, _Extra=*self.keywords
+                     1: Call_Method, self.command, *self.p1, _Extra=*self.keywords
+                     2: Call_Method, self.command, *self.p1, *self.p2, _Extra=*self.keywords
+                     3: Call_Method, self.command, *self.p1, *self.p2, *self.p3, _Extra=*self.keywords
+                 ENDCASE
+             ENDIF ELSE BEGIN
+                 CASE self.nparams OF
+                     0: Call_Method, self.command
+                     1: Call_Method, self.command, *self.p1
+                     2: Call_Method, self.command, *self.p1, *self.p2
+                     3: Call_Method, self.command, *self.p1, *self.p2, *self.p3
+                 ENDCASE
+             ENDELSE
+             
+           END
+    
+    ENDCASE
+    
+    ; For some reason, CALL_PROCEDURE does not flush the graphics buffer on UNIX machines.
+    ; We have to do it ourself to get the program to resize correctly on UNIX machines.
+    EMPTY
+    
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+
+PRO FSC_Window_Command::List, prefix
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    cmdString = self.command
+    CASE self.nparams OF
+        0:
+        1: cmdString = cmdString + ', p1'
+        2: cmdString = cmdString + ', p1, p2'
+        3: cmdString = cmdString + ', p1, p2, p3'
+    ENDCASE
+    IF Ptr_Valid(self.keywords) THEN BEGIN
+        tags = Tag_Names(*self.keywords)
+        FOR j=0,N_Elements(tags)-1 DO BEGIN
+            cmdString = cmdString + ', ' + tags[j] + '=value'
+        ENDFOR
+    ENDIF
+    
+    IF N_Elements(prefix) NE 0 THEN prefix = '   ' + prefix + ' ' ELSE prefix = '   '
+    
+    Print, prefix + cmdString
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+PRO FSC_Window_Command::Cleanup
+    Ptr_Free, self.p1
+    Ptr_Free, self.p2
+    Ptr_Free, self.p3
+    Ptr_Free, self.keywords
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+FUNCTION FSC_Window_Command::INIT, $
+    COMMAND=command, $
+    P1=p1, P2=p2, P3=p3, $
+    KEYWORDS=keywords, $
+    TYPE=type
+    
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN, 0
+    ENDIF
+
+    self.command = command
+    IF N_Elements(p1) NE 0 THEN self.p1 = Ptr_New(p1)
+    IF N_Elements(p2) NE 0 THEN self.p2 = Ptr_New(p2)
+    IF N_Elements(p3) NE 0 THEN self.p3 = Ptr_New(p3)
+    IF N_Elements(keywords) NE 0 THEN self.keywords = Ptr_New(keywords)
+    self.type = type
+    self.nparams = (N_Elements(p1) NE 0) + (N_Elements(p2) NE 0) + (N_Elements(p3) NE 0)
+    RETURN, 1
+    
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+PRO FSC_Window_Command__Define
+
+   ; The definition of the command object.
+   class = { FSC_Window_Command, $
+              command: "", $         ; The command to execute.
+              p1: Ptr_New(), $       ; The first parameter.
+              p2: Ptr_New(), $       ; The second parameter.
+              p3: Ptr_New(), $       ; The third parameter.
+              nparams: 0, $          ; The number of parameters.
+              keywords: Ptr_New(), $ ; The command keywords.
+              type: 0 $              ; =0 call_procedure =1 call_method
+            }
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+PRO FSC_Window_ID__Define
+
+   struct = { FSC_WINDOW_ID, $
+                 tlb: 0L, $
+                 wid: 0L, $
+                 title: "", $
+                 windowObj: Obj_New() $
+             }
+END ;----------------------------------------------------------------------------------------------------------------
+
+
 ;+
 ; :Description:
 ;   Creates a resizeable graphics window for IDL traditional commands (Plot, Contour, 
@@ -209,747 +1111,6 @@
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;     Improved documentation and error handling. 19 Jan 2011. DWF.
 ;-
-PRO FSC_CmdWindow::ListCommand, cmdIndex
-
-    ; List the commands in the command window.
-
-    Compile_Opt idl2
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        RETURN
-    ENDIF
-
-    ; How many commands are there?
-    count = self.cmds -> Get_Count()
-    
-    IF N_Elements(cmdIndex) EQ 0 THEN BEGIN
-        FOR j = 0, count-1 DO BEGIN
-            thisCmdObj = self.cmds -> Get_Item(j, /DEREFERENCE)
-        
-            ; Preface the commands with their index number.
-            thisCmdObj -> List, StrTrim(j,2) + '.'
-        ENDFOR
-    ENDIF ELSE BEGIN
-        IF cmdIndex LT (count-1) THEN BEGIN
-            thisCmdObj = self.cmds -> Get_Item(cmdIndex, /DEREFERENCE)
-        
-            ; Preface the commands with their index number.
-            thisCmdObj -> List, StrTrim(cmdIndex,2) + '.'
-        ENDIF ELSE Message, 'The command index is out of range of the number of commands.'
-    ENDELSE
-
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_CmdWindow::AddCommand, command
-
-    ; Add a command to the command list.
-
-    Compile_Opt idl2
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        RETURN
-    ENDIF
-
-    self.cmds -> Add, command
-
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_CmdWindow::DeleteCommand, cmdIndex, ALL=all
-
-    ; Delete a command from the command list. If cmdIndex
-    ; not used, delete the last command in the list. If ALL
-    ; is set, delete all the commands.
-
-    Compile_Opt idl2
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        RETURN
-    ENDIF
-
-    ; Get the command count.
-    count = self.cmds -> Get_Count()
-    
-    ; Delete all the commands?
-    IF Keyword_Set(all) THEN BEGIN
-        self.cmds -> Delete_Nodes, /DESTROY
-        RETURN
-    ENDIF
-    
-    ; Need a command index?
-    IF N_Elements(cmdIndex) EQ 0 THEN BEGIN
-        cmdIndex = count - 1
-    ENDIF 
-    
-    ; Do we have a command with this command number?
-    IF cmdIndex GT (count-1) THEN Message, 'A command with index ' + StrTrim(cmdIndex,2) + ' does not exist.'
-    
-    IF cmdIndex GE 0 THEN BEGIN
-        self.cmds -> Delete, cmdIndex, /Destroy
-        self -> ExecuteCommands
-    ENDIF ELSE Message, 'A negative command index number is not allowed.'
-    
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_CmdWindow::ReplaceCommand, command, cmdIndex
-
-    ; Replace a command in the command list. If cmdImdex is missing,
-    ; replace all the commands in the command list.
-
-    Compile_Opt idl2
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        RETURN
-    ENDIF
-
-    ; If cmdIndex is missing, remove all the current commands with this one.
-    IF N_Elements(cmdIndex) EQ 0 THEN BEGIN
-        self.cmds -> Delete, /ALL, /Destroy
-        self.pmulti = IntArr(5) ; Reset !P.Multi.
-        self.cmds -> Add, command
-    ENDIF ELSE BEGIN
-    
-        ; Get the old command first, so you can destroy it properly.
-        oldcmd = self.cmds -> Get_Item(cmdIndex, /DEREFERENCE)
-        self.cmds -> Replace_Item, cmdIndex, command
-        Obj_Destroy, oldcmd
-    ENDELSE
-    
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_CmdWindow::CreatePostScriptFile, event
-
-    Compile_Opt idl2
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        RETURN
-    ENDIF
-
-    ; Allow the user to configure the PostScript file.
-    PS_Start, /GUI, CANCEL=cancelled
-    IF cancelled THEN RETURN
-    
-    ; Draw the graphics.
-    self -> ExecuteCommands
-    
-    ; Clean up.
-    PS_End
-
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_CmdWindow::SaveAsRaster, event
-
-    Compile_Opt idl2
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        RETURN
-    ENDIF
-
-    ; On going in here for down event.
-    IF event.select NE 1 THEN RETURN
-    
-    Widget_Control, event.ID, Get_UValue=buttonValue
-    
-    ; Determine if this is normal raster (o) or ImageMagick raster (1).
-    IF StrMid(buttonValue, 0, 6) EQ 'RASTER' THEN BEGIN
-        fileType = StrMid(buttonValue, 7)
-        rasterType = 0 
-    ENDIF ELSE BEGIN
-        filetype = StrMid(buttonValue, 12)
-        rasterType = 1
-    ENDELSE
-    
-    CASE filetype OF
-       'BMP':  filename = FSC_Pickfile(FILE='fsc_window.bmp', /WRITE, TITLE='Select an Output File...')
-       'GIF':  filename = FSC_Pickfile(FILE='fsc_window.gif', /WRITE, TITLE='Select an Output File...')
-       'JPEG': filename = FSC_Pickfile(FILE='fsc_window.jpg', /WRITE, TITLE='Select an Output File...')
-       'PNG':  filename = FSC_Pickfile(FILE='fsc_window.png', /WRITE, TITLE='Select an Output File...')
-       'TIFF': filename = FSC_Pickfile(FILE='fsc_window.tif', /WRITE, TITLE='Select an Output File...')
-    ENDCASE
-    IF filename EQ "" THEN RETURN
-    root_name = FSC_Base_Filename(filename, DIRECTORY=dirName)
-    outname = Filepath(ROOT_DIR=dirname, root_name)
-    
-    ; What kind of raster file.
-    CASE rasterType OF
-    
-        ; Normal raster.
-        0: BEGIN
-           WSet, self.wid
-           void = TVRead(TYPE=fileType, FILENAME=outname, /NODIALOG)
-           END
-           
-        ; Raster via ImageMagick.
-        1: BEGIN
-           
-           ; Create a PostScript file first.
-           thisname = outname + '.ps'
-           PS_Start, FILENAME=thisname
-           
-           ; Draw the graphics.
-           self -> ExecuteCommands
-           
-           ; Close the file and convert to proper file type.
-           CASE filetype OF
-                'BMP':  PS_END, /BMP,  /DELETE_PS
-                'GIF':  PS_END, /GIF,  /DELETE_PS
-                'JPEG': PS_END, /JPEG, /DELETE_PS
-                'PNG':  PS_END, /PNG,  /DELETE_PS
-                'TIFF': PS_END, /TIFF, /DELETE_PS
-           ENDCASE
-        
-           END
-    
-    ENDCASE
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_CmdWindow::Resize, event
-
-    Compile_Opt idl2
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        RETURN
-    ENDIF
-
-    Widget_Control, self.drawID, DRAW_XSIZE=event.x, DRAW_YSIZE=event.y
-    self -> ExecuteCommands
-    
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_CmdWindow_Dispatch_Events, event
-
-    Compile_Opt idl2
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        RETURN
-    ENDIF
-
-    Widget_Control, event.top, GET_UVALUE=self
-    Widget_Control, event.id, GET_UVALUE=eventType
-    IF Obj_Valid(eventType) THEN eventType = 'TLB_RESIZE'
-    
-    CASE eventType OF 
-        
-        'TLB_RESIZE': self -> Resize, event
-        'POSTSCRIPT': self -> CreatePostscriptFile, event
-        ELSE: self -> SaveAsRaster, event
-    
-    ENDCASE
-    
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_CmdWindow::ExecuteCommands
-
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        !P.Multi = thisMulti
-        IF N_Elements(rr) NE 0 THEN TVLCT, rr, gg, bb
-        IF (!D.Flags AND 256) NE 0 THEN WSet, -1
-        RETURN
-    ENDIF
-    
-    ; Store the current !P.MULTI state.
-    thisMulti = !P.Multi
-
-    ; Make this window the current graphics window.
-    IF (!D.Flags AND 256) NE 0 THEN BEGIN
-        currentWindow = !D.Window
-        WSet, self.wid
-    ENDIF
-    
-    ; Get the current color table vectors so they can be restored.
-    TVLCT, rr, gg, bb, /GET
-    
-    ; Load the color vectors.
-    TVLCT, self.r, self.g, self.b
-    
-    ; Erase the window.
-    IF self.eraseit THEN FSC_Erase, *self.background 
-    
-    ; Are we doing multiple commands?
-    IF Total(self.pmulti) NE 0 THEN !P.Multi = self.pmulti
-        
-    ; How many commands are there?
-    n_cmds = self.cmds -> Get_Count()
-    
-    ; Issue an informative message if there are no commands to execute.
-    ;IF n_cmds EQ 0 THEN Message, 'There are currently no graphics commands to execute.', /INFORMATIONAL
-    
-    ; Execute the commands.
-    FOR j=0,n_cmds-1 DO BEGIN
-        thisCmdObj = self.cmds -> Get_Item(j, /DEREFERENCE)
-        thisCmdObj -> Draw, SUCCESS=success
-        
-        ; Did you successfully draw this command?
-        IF ~success THEN BEGIN
-        
-            self -> ListCommand, j
-            answer = Dialog_Message('Problem executing command ' + $
-                StrTrim(j,2) + '. Delete command?', /QUESTION)
-            IF StrUpCase(answer) EQ 'YES' THEN BEGIN
-                self -> DeleteCommand, j
-                RETURN
-            ENDIF
-        
-        ENDIF
-        
-        ; Need to delay?
-        IF self.delay NE 0 THEN Wait, self.delay
-    ENDFOR
-    
-    ; Restore the colors in effect when we entered.
-    TVLCT, rr, gg, bb
-    
-    ; Set the !P.Multi system variable back to its original values.
-    !P.Multi = thisMulti
-    
-    ; Reset the current graphics window, if possible.
-    IF (!D.Flags AND 256) NE 0 THEN BEGIN
-       IF (currentWindow GE 0) && WindowAvailable(currentWindow) THEN BEGIN
-            WSet, currentWindow
-       ENDIF ELSE WSet, -1
-    ENDIF
-
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_CmdWindow_Cleanup, tlb
-    Widget_Control, tlb, Get_UValue=self
-    Obj_Destroy, self
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-FUNCTION FSC_CmdWindow::Init, $
-   command, $                       ; The graphics "command" to execute.
-   p1, p2, p3, $                    ; The three allowed positional parameters.
-   _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
-   Group_Leader = group_leader, $   ; The group leader of the FSC_Window program.
-   AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface.
-   CmdDelay=cmdDelay, $             ; Set this keyword to a value to "wait" before executing the next command.
-   Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
-   ReplaceCmd=replacecmd, $         ; Replace the current command and execute in the current window.
-   WEraseIt = Weraseit, $           ; Set this keyword to erase the display before executing the command.
-   WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
-   WXSize = wxsize, $               ; The X size of the FSC_Window graphics window in pixels. By default: 400.
-   WYSize = wysize, $               ; The Y size of the FSC_Window graphics window in pixels. By default: 400.
-   WTitle = wtitle, $               ; The window title.
-   WXPos = wxpos, $                 ; The X offset of the window on the display. The window is centered if not set.
-   WYPos = wypos, $                 ; The Y offset of the window on the display. The window is centered if not set.
-   WBackground = wbackground        ; The background color. Set to !P.Background by default.
-
-    Compile_Opt idl2
-    
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        RETURN, 0
-    ENDIF
-   
-    ; Check keywords.
-    method = Keyword_Set(method)
-    
-    ; If method is set, the first positional parameter must be present,
-    ; and it must be a valid object reference.
-    IF method THEN BEGIN
-        IF N_Elements(p1) EQ 0 THEN $
-            Message, 'The first positional parameter must be present to make a method call.'
-        IF ~Obj_Valid(p1) THEN $
-            Message, 'The first positional parameter must be a valid object reference when making method calls.'
-    ENDIF
-    IF N_Elements(wxsize) EQ 0 THEN xsize = 640 ELSE xsize = wxsize
-    IF N_Elements(wysize) EQ 0 THEN ysize = 512 ELSE ysize = wysize
-    IF N_Elements(wxpos) EQ 0 THEN xpos = -1 ELSE xpos = wxpos
-    IF N_Elements(wypos) EQ 0 THEN ypos = -1 ELSE ypos = wypos
-    IF N_Elements(wbackground) EQ 0 THEN BEGIN
-        background='white'
-        IF N_Elements(command) EQ 0 THEN eraseit = 1
-    ENDIF ELSE BEGIN
-        background = wbackground
-        eraseit = 1
-    ENDELSE
-    IF N_Elements(eraseIt) EQ 0 THEN eraseIt = Keyword_Set(weraseit)
-
-    ; The commands will be placed in a linked list for execution.
-    self.cmds = Obj_New('LinkedList')
-    IF Obj_Valid(self.cmds) EQ 0 THEN Message, 'Failed to make the LinkedList for the commands.'
-    
-    ; Add a command, if you have one. Otherwise, just make the window.
-    IF (N_Elements(command) NE 0) THEN BEGIN
-        thisCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
-                P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=method)
-        IF Obj_Valid(thisCommand) THEN self.cmds -> Add, thisCommand ELSE Message, 'Failed to make command object.'
-    ENDIF 
-    
-    ; Store the current color table vectors
-    TVLCT, rr, gg, bb, /Get
-    self.r = rr
-    self.g = gg
-    self.b = bb
-    
-    ; Create the widgets for the program.
-    self.tlb = Widget_Base(/TLB_SIZE_EVENTS, MBar=menuID)
-    
-    saveID = Widget_Button(menuID, Value='Save As...')
-    button = Widget_Button(saveID, Value='PostScript File', UVALUE='POSTSCRIPT')
-    raster = Widget_Button(saveID, Value='Raster Image File', /MENU)
-    
-    button = Widget_Button(raster, Value='BMP', UVALUE='RASTER_BMP')
-    button = Widget_Button(raster, Value='GIF', UVALUE='RASTER_GIF')
-    button = Widget_Button(raster, Value='JPEG', UVALUE='RASTER_JPEG')
-    button = Widget_Button(raster, Value='PNG', UVALUE='RASTER_PNG')
-    button = Widget_Button(raster, Value='TIFF', UVALUE='RASTER_TIFF')
-    
-    ; If you can find ImageMagick on this machine, you can convert to better
-    ; looking raster files.
-    IF HasImageMagick() EQ 1 THEN BEGIN
-        imraster = Widget_Button(saveID, Value='Raster Image File via ImageMagick', /MENU)
-        button = Widget_Button(imraster, Value='BMP', UVALUE='IMAGEMAGICK_BMP')
-        button = Widget_Button(imraster, Value='GIF', UVALUE='IMAGEMAGICK_GIF')
-        button = Widget_Button(imraster, Value='JPEG', UVALUE='IMAGEMAGICK_JPEG')
-        button = Widget_Button(imraster, Value='PNG', UVALUE='IMAGEMAGICK_PNG')
-        button = Widget_Button(imraster, Value='TIFF', UVALUE='IMAGEMAGICK_TIFF')
-    ENDIF
-    
-    ; Create draw widget.
-    retain = (StrUpCase(!Version.OS_Family) EQ 'UNIX') ? 2 : 1
-    self.drawID = Widget_Draw(self.tlb, XSIZE=xsize, YSize=ysize, RETAIN=retain) 
-    
-    ; Do we need to center the widget?
-    IF (xpos EQ -1) AND (ypos EQ -1) THEN BEGIN
-        DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists
-        IF ~exists THEN BEGIN
-           xpos = 5
-           ypos = 5
-        ENDIF ELSE BEGIN
-            IF Obj_Valid(!FSC_WINDOW_LIST) THEN BEGIN
-                count = !FSC_WINDOW_LIST -> Get_Count()
-                xpos = 5 + (30*count)
-                ypos = 5 + (25*count)
-            ENDIF ELSE BEGIN
-                xpos = 5
-                ypos = 5           
-            ENDELSE
-        ENDELSE
-        CenterTLB, self.tlb, xpos, ypos, /NOCENTER, /DEVICE
-    ENDIF ELSE BEGIN
-        CenterTLB, self.tlb, xpos, ypos, /NOCENTER, /DEVICE
-    ENDELSE
-    
-    ; Display the widget and get window index number.
-    currentWindow = !D.Window
-    Widget_Control, self.tlb, /Realize
-    Widget_Control, self.drawID, Get_Value=wid
-    self.wid = wid
-    
-    IF N_Elements(wtitle) EQ 0 THEN BEGIN
-        wtitle = "Resizeable Graphics Window"
-        wtitle = wtitle + ' (' + StrTrim(wid,2) + ')'
-    ENDIF
-    Widget_Control, self.tlb, TLB_Set_Title=wtitle
-
-    ; Load object properties.
-    self.background = Ptr_New(background)
-    IF N_Elements(cmdDelay) NE 0 THEN self.delay = cmdDelay
-    self.eraseIt = eraseIt
-    IF N_Elements(wmulti) NE 0 THEN BEGIN
-       FOR j=0,N_Elements(wmulti)-1 DO self.pmulti[j] = wmulti[j]
-    ENDIF
-
-    ; Execute the commands.
-    self -> ExecuteCommands 
-    
-    ; Get it running.
-    WIDGET_CONTROL, /MANAGED, self.tlb
-    XManager, 'fsc_window', self.tlb, /No_Block, $
-        Event_Handler='FSC_CmdWindow_Dispatch_Events', $
-        Cleanup = 'FSC_CmdWindow_Cleanup', $
-        Group_Leader=group_leader
-    
-    ; Store the self reference in the UVALUE of the TLB.
-    Widget_Control, self.tlb, SET_UValue=self
-    
-    ; Each instance of FSC_Window will store evidence of its
-    ; existance in a linked list.
-    DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists
-    IF ~exists THEN BEGIN
-        fsc_window_list = Obj_New("LinkedList")
-        DefSysV, '!FSC_WINDOW_LIST', fsc_window_list 
-        fsc_window_list -> Add, {FSC_WINDOW_ID, self.tlb, wid, wtitle, self}
-    ENDIF ELSE BEGIN
-        IF Obj_Valid(!FSC_WINDOW_LIST) THEN BEGIN
-            !FSC_WINDOW_LIST -> Add, {FSC_WINDOW_ID, self.tlb, wid, wtitle, self}
-        ENDIF ELSE BEGIN
-            !FSC_WINDOW_LIST = Obj_New('LinkedList')
-            !FSC_WINDOW_LIST-> Add, {FSC_WINDOW_ID, self.tlb, wid, wtitle, self}
-        ENDELSE
-    ENDELSE
-    
-    ; Restore the current graphics window, if you can.
-    IF (currentWindow GE 0) && WindowAvailable(currentWindow) THEN BEGIN
-            WSet, currentWindow
-    ENDIF ELSE WSet, -1
-    RETURN, 1
-
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_CmdWindow::Cleanup
-
-    Compile_Opt idl2
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        RETURN
-    ENDIF
-
-    Ptr_Free, self.background
-    count = self.cmds -> Get_Count()
-    FOR j=0,count-1 DO Obj_Destroy, self.cmds -> Get_Item(j, /DEREFERENCE)
-    Obj_Destroy, self.cmds
-    
-    ; You have to remove yourself from the list of valid FSC_Windows.
-    theList = !FSC_WINDOW_LIST
-    IF Obj_Valid(theList) THEN BEGIN
-        structs = theList -> Get_Item(/ALL, /DEREFERENCE)
-        index = Where(structs.windowObj[*] EQ self, count)
-        IF count GT 0 THEN theList -> Delete, index[0]
-    ENDIF 
-    
-    ; If the list doesn't have any more FSC_Windows objects in it,
-    ; delete the list so it doesn't waste memory.
-    IF theList -> Get_Count() EQ 0 THEN Obj_Destroy, theList
-    
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_Window_Command::List, prefix
-
-    Compile_Opt idl2
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        RETURN
-    ENDIF
-
-    cmdString = self.command
-    CASE self.nparams OF
-        0:
-        1: cmdString = cmdString + ', p1'
-        2: cmdString = cmdString + ', p1, p2'
-        3: cmdString = cmdString + ', p1, p2, p3'
-    ENDCASE
-    IF Ptr_Valid(self.keywords) THEN BEGIN
-        tags = Tag_Names(*self.keywords)
-        FOR j=0,N_Elements(tags)-1 DO BEGIN
-            cmdString = cmdString + ', ' + tags[j] + '=value'
-        ENDFOR
-    ENDIF
-    
-    IF N_Elements(prefix) NE 0 THEN prefix = '   ' + prefix + ' ' ELSE prefix = '   '
-    
-    Print, prefix + cmdString
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_Window_Command::Draw, SUCCESS=success
-
-    Compile_Opt idl2
-    
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        success = 0
-        RETURN
-    ENDIF
-    
-    ; Assume success.
-    success = 1
-
-    ; What kind of command is this?
-    CASE self.type OF 
-    
-        ; Command calls a procedure.
-        0: BEGIN
-        
-             IF Ptr_Valid(self.keywords) THEN BEGIN
-                 CASE self.nparams OF
-                     0: Call_Procedure, self.command, _Extra=*self.keywords
-                     1: Call_Procedure, self.command, *self.p1, _Extra=*self.keywords
-                     2: Call_Procedure, self.command, *self.p1, *self.p2, _Extra=*self.keywords
-                     3: Call_Procedure, self.command, *self.p1, *self.p2, *self.p3, _Extra=*self.keywords
-                 ENDCASE
-             ENDIF ELSE BEGIN
-                 CASE self.nparams OF
-                     0: Call_Procedure, self.command
-                     1: Call_Procedure, self.command, *self.p1
-                     2: Call_Procedure, self.command, *self.p1, *self.p2
-                     3: Call_Procedure, self.command, *self.p1, *self.p2, *self.p3
-                 ENDCASE
-             ENDELSE
-             
-             END
-             
-        ; Command calls a method.
-        1: BEGIN
-
-             IF Ptr_Valid(self.keywords) THEN BEGIN
-                 CASE self.nparams OF
-                     0: Call_Method, self.command, _Extra=*self.keywords
-                     1: Call_Method, self.command, *self.p1, _Extra=*self.keywords
-                     2: Call_Method, self.command, *self.p1, *self.p2, _Extra=*self.keywords
-                     3: Call_Method, self.command, *self.p1, *self.p2, *self.p3, _Extra=*self.keywords
-                 ENDCASE
-             ENDIF ELSE BEGIN
-                 CASE self.nparams OF
-                     0: Call_Method, self.command
-                     1: Call_Method, self.command, *self.p1
-                     2: Call_Method, self.command, *self.p1, *self.p2
-                     3: Call_Method, self.command, *self.p1, *self.p2, *self.p3
-                 ENDCASE
-             ENDELSE
-             
-           END
-    
-    ENDCASE
-    
-    ; For some reason, CALL_PROCEDURE does not flush the graphics buffer on UNIX machines.
-    ; We have to do it ourself to get the program to resize correctly on UNIX machines.
-    EMPTY
-    
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-
-PRO FSC_Window_Command::Cleanup
-    Ptr_Free, self.p1
-    Ptr_Free, self.p2
-    Ptr_Free, self.p3
-    Ptr_Free, self.keywords
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-FUNCTION FSC_Window_Command::INIT, $
-    COMMAND=command, $
-    P1=p1, P2=p2, P3=p3, $
-    KEYWORDS=keywords, $
-    TYPE=type
-    
-    Compile_Opt idl2
-    
-    ; Error handling.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Catch, /CANCEL
-        void = Error_Message()
-        RETURN, 0
-    ENDIF
-
-    self.command = command
-    IF N_Elements(p1) NE 0 THEN self.p1 = Ptr_New(p1)
-    IF N_Elements(p2) NE 0 THEN self.p2 = Ptr_New(p2)
-    IF N_Elements(p3) NE 0 THEN self.p3 = Ptr_New(p3)
-    IF N_Elements(keywords) NE 0 THEN self.keywords = Ptr_New(keywords)
-    self.type = type
-    self.nparams = (N_Elements(p1) NE 0) + (N_Elements(p2) NE 0) + (N_Elements(p3) NE 0)
-    RETURN, 1
-    
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_Window_Command__Define
-
-   ; The definition of the command object.
-   class = { FSC_Window_Command, $
-              command: "", $         ; The command to execute.
-              p1: Ptr_New(), $       ; The first parameter.
-              p2: Ptr_New(), $       ; The second parameter.
-              p3: Ptr_New(), $       ; The third parameter.
-              nparams: 0, $          ; The number of parameters.
-              keywords: Ptr_New(), $ ; The command keywords.
-              type: 0 $              ; =0 call_procedure =1 call_method
-            }
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_Window_ID__Define
-
-   struct = { FSC_WINDOW_ID, $
-                 tlb: 0L, $
-                 wid: 0L, $
-                 title: "", $
-                 windowObj: Obj_New() $
-             }
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-PRO FSC_CmdWindow__Define, class
-
-    class = { FSC_CMDWINDOW, $
-              tlb: 0L, $                    ; The identifier of the top-level base widget.
-              r: BytArr(256), $             ; The red color table vector.
-              g: BytArr(256), $             ; The green color table vector.
-              b: BytArr(256), $             ; The blue color table vector.
-              pmulti: LonArr(5), $          ; Identical to !P.Multi.
-              cmds: Obj_New(), $            ; A linkedlist object containing the graphics commands.
-              delay: 0.0, $                 ; The command delay.
-              background: Ptr_New(), $      ; The background color.
-              eraseit: 0B, $                ; Do we need to erase the display.
-              wid: 0L, $                    ; The window index number of the graphics window.
-              drawid: 0L $                  ; The identifier of the draw widget.
-            }
-            
-END ;----------------------------------------------------------------------------------------------------------------
-
-
 PRO FSC_Window, $
    command, $                       ; The graphics "command" to execute.
    p1, p2, p3, $                    ; The three allowed positional parameters.
@@ -985,6 +1146,36 @@ PRO FSC_Window, $
         RETURN
     ENDIF
     
+    ; Did the user want to execute the commands in the window?
+    IF N_Elements(executeCmd) NE 0 THEN BEGIN
+   
+      ; Does the self object exist somewhere?
+      DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists
+      IF exists THEN BEGIN
+           theList = !FSC_WINDOW_LIST
+           IF Obj_Valid(theList) THEN BEGIN
+                structs = theList -> Get_Item(/ALL, /DEREFERENCE)
+                IF Size(structs, /TNAME) EQ 'POINTER' THEN RETURN
+                IF N_Elements(winID) EQ 0 THEN BEGIN
+                    winID = N_Elements(structs) - 1
+                ENDIF ELSE BEGIN
+                    index = Where(structs.wid[*] EQ winID, count)
+                    IF count GT 0 THEN winID = index[0] ELSE BEGIN
+                        Message, 'Cannot find an FSC_Window with window index ' + StrTrim(winID, 2) + '.'
+                    ENDELSE
+                ENDELSE
+                thisWindowStruct = structs[winID]
+                IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
+                    thisWindowStruct.windowObj -> ExecuteCommands
+                ENDIF ELSE BEGIN
+                    Message, 'The specified FSC_Window object is not a valid window object.'
+                ENDELSE
+                RETURN
+           ENDIF ELSE Message, 'The FSC_Window object is not a valid window object.'
+       ENDIF ELSE Message, 'An FSC_Window object not exist to add a command to.'
+    ENDIF
+    
+    ; Did the user want to list the commands in a FSC_Window?
     IF N_Elements(listCmd) NE 0 THEN BEGIN
    
       ; Does the self object exist somewhere?
@@ -1011,9 +1202,9 @@ PRO FSC_Window, $
                 RETURN
            ENDIF ELSE Message, 'The FSC_Window object is not a valid window object.'
        ENDIF ELSE Message, 'An FSC_Window object not exist to add a command to.'
-   ENDIF
+    ENDIF
     
-    
+    ; Did the user want to delete a command in the window?
     IF N_Elements(deleteCmd) NE 0 THEN BEGIN
    
       ; Does the self object exist somewhere?
@@ -1035,7 +1226,6 @@ PRO FSC_Window, $
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                 
                     ; If the cmdIndex is undefined, the last entered command is deleted.
-                    ; It is impossible to delete all commands from the window.
                     thisWindowStruct.windowObj -> DeleteCommand, cmdIndex
                 ENDIF ELSE BEGIN
                     Message, 'The specified FSC_Window object is not a valid window object.'
@@ -1045,7 +1235,7 @@ PRO FSC_Window, $
        ENDIF ELSE Message, 'An FSC_Window object not exist to add a command to.'
    ENDIF
 
-
+   ; Did the user want to replace a command or commands in the window?
    IF Keyword_Set(replaceCmd) THEN BEGIN
       
       ; Must have a command to replace current command with.
@@ -1089,6 +1279,7 @@ PRO FSC_Window, $
     
     ENDIF 
    
+   ; Did the user want to load commands without executing them?
    IF Keyword_Set(loadCmd) THEN BEGIN
 
       ; Does the self object exist somewhere?
@@ -1111,7 +1302,6 @@ PRO FSC_Window, $
                     newCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=Keyword_Set(method))
                     thisWindowStruct.windowObj -> AddCommand, newCommand
-                    ;thisWindowStruct.windowObj -> ExecuteCommands
                 ENDIF ELSE BEGIN
                     Message, 'The specified FSC_Window object is not a valid window object.'
                 ENDELSE
@@ -1121,6 +1311,7 @@ PRO FSC_Window, $
     
     ENDIF 
    
+   ; Did the user want to add a command to the window?
    IF Keyword_Set(addCmd) THEN BEGIN
 
       ; Does the self object exist somewhere?

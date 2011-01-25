@@ -103,6 +103,8 @@
 ;                         on the plot.  Default: "Blue".
 ;       
 ;       THICK:            Set this keyword to a value greater than 1 to draw thicker axes and lines.
+;       
+;       WINDOW:           Set this keyword to display the plot in a resizeable FSC_Window program.
 ;
 ;       The user may also enter any other keywords suitable for the PLOT and POLYFILL commands in IDL.
 ;
@@ -193,6 +195,7 @@
 ;       Changed the way I find a default axis color. 3 Dec 2010. DWF.
 ;       Expanded search for "integers" from in BINSIZE calculation from DataType LE 3 
 ;             to include DataType GE 12, too. 8 Dec 2010. DWF.
+;       Added WINDOW keyword. 24 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2010, by Fanning Software Consulting, Inc.                           ;
@@ -221,7 +224,7 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-PRO HistoPlot , $                   ; The program name.
+PRO HistoPlot, $                    ; The program name.
    dataToHistogram, $               ; The data to draw a histogram of.
    AXISCOLORNAME=axisColorName, $   ; The axis color.
    BACKCOLORNAME=backcolorName, $   ; The background color.
@@ -263,7 +266,9 @@ PRO HistoPlot , $                   ; The program name.
    MAXINPUT=maxinput, $             ; The maximum value to HISTOGRAM.
    MININPUT=mininput, $             ; The minimum value to HISTOGRAM.
    NAN=nan, $                       ; Check for NAN.
-   NBINS=nbins                      ; The number of bins to display.
+   NBINS=nbins, $                   ; The number of bins to display.
+   
+   WINDOW=window                    ; Display this in an FSC_Window.
 
 
    ; Catch any error in the HistoPlot program.
@@ -281,6 +286,109 @@ PRO HistoPlot , $                   ; The program name.
       RETURN
    ENDIF
 
+    ; Should this be added to a resizeable graphics window?
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    
+        IF Keyword_Set(overplot) THEN BEGIN
+            void = FSC_QueryWin(COUNT=wincnt)
+            IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
+            FSC_Window, 'Histoplot', $                    ; The program name.
+               dataToHistogram, $               ; The data to draw a histogram of.
+               AXISCOLORNAME=axisColorName, $   ; The axis color.
+               BACKCOLORNAME=backcolorName, $   ; The background color.
+               DATACOLORNAME=datacolorName, $   ; The data color.
+               _REF_EXTRA=extra, $              ; For passing extra keywords.
+               FILE=file, $                     ; For specifying a color name file.
+               FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
+               MAX_VALUE=max_value, $           ; The maximum value to plot.
+               MIN_VALUE=min_value, $           ; The minimum value to plot.
+               MISSING=missing, $               ; The value that indicates "missing" data to be excluded from the histgram.
+               OPLOT=overplot, $                ; Set if you want overplotting.
+               OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
+               OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
+               PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
+               THICK=thick, $                   ; Set to draw thicker lines and axes.
+               ;
+               ; POLYFILL KEYWORDS
+               ;
+               FILLPOLYGON=fillpolygon, $       ; Set if you want filled polygons
+               LINE_FILL=line_fill, $           ; Set if you want line-filled polygons.
+               ORIENTATION=orientation, $       ; The orientation of the lines.
+               PATTERN=pattern, $               ; The fill pattern.
+               POLYCOLOR=polycolorname, $           ; The name of the polygon draw/fill color.
+               SPACING=spacing, $               ; The spacing of filled lines.
+               ;
+               ; HISTOGRAM OUTPUT KEYWORDS
+               ;
+               HISTDATA=histdata, $
+               LOCATIONS=locations, $
+               OMAX=omax, $
+               OMIN=omin, $
+               PROBABLITY_FUNCTION=probability, $
+               REVERSE_INDICES=ri, $
+               ;
+               ; HISTOGRAM INPUT KEYWORDS
+               ;
+               BINSIZE=binsize, $               ; The histogram bin size.
+               L64=l64, $                       ; Input for HISTOGRAM.
+               MAXINPUT=maxinput, $             ; The maximum value to HISTOGRAM.
+               MININPUT=mininput, $             ; The minimum value to HISTOGRAM.
+               NAN=nan, $                       ; Check for NAN.
+               NBINS=nbins, $                   ; The number of bins to display.
+               ADDCMD=1
+            RETURN
+        ENDIF
+        
+        void = FSC_QueryWin(COUNT=wincnt)
+        IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
+        FSC_Window, 'Histoplot', $                    ; The program name.
+           dataToHistogram, $               ; The data to draw a histogram of.
+           AXISCOLORNAME=axisColorName, $   ; The axis color.
+           BACKCOLORNAME=backcolorName, $   ; The background color.
+           DATACOLORNAME=datacolorName, $   ; The data color.
+           _REF_EXTRA=extra, $              ; For passing extra keywords.
+           FILE=file, $                     ; For specifying a color name file.
+           FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
+           MAX_VALUE=max_value, $           ; The maximum value to plot.
+           MIN_VALUE=min_value, $           ; The minimum value to plot.
+           MISSING=missing, $               ; The value that indicates "missing" data to be excluded from the histgram.
+           OPLOT=overplot, $                ; Set if you want overplotting.
+           OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
+           OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
+           PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
+           THICK=thick, $                   ; Set to draw thicker lines and axes.
+           ;
+           ; POLYFILL KEYWORDS
+           ;
+           FILLPOLYGON=fillpolygon, $       ; Set if you want filled polygons
+           LINE_FILL=line_fill, $           ; Set if you want line-filled polygons.
+           ORIENTATION=orientation, $       ; The orientation of the lines.
+           PATTERN=pattern, $               ; The fill pattern.
+           POLYCOLOR=polycolorname, $           ; The name of the polygon draw/fill color.
+           SPACING=spacing, $               ; The spacing of filled lines.
+           ;
+           ; HISTOGRAM OUTPUT KEYWORDS
+           ;
+           HISTDATA=histdata, $
+           LOCATIONS=locations, $
+           OMAX=omax, $
+           OMIN=omin, $
+           PROBABLITY_FUNCTION=probability, $
+           REVERSE_INDICES=ri, $
+           ;
+           ; HISTOGRAM INPUT KEYWORDS
+           ;
+           BINSIZE=binsize, $               ; The histogram bin size.
+           L64=l64, $                       ; Input for HISTOGRAM.
+           MAXINPUT=maxinput, $             ; The maximum value to HISTOGRAM.
+           MININPUT=mininput, $             ; The minimum value to HISTOGRAM.
+           NAN=nan, $                       ; Check for NAN.
+           NBINS=nbins, $                   ; The number of bins to display.
+           REPLACECMD=replaceCMD
+            
+         RETURN
+    ENDIF
+    
    ; Set up PostScript device for working with colors.
    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     

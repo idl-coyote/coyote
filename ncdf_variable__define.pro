@@ -793,6 +793,7 @@ FUNCTION NCDF_Variable::GetValue, $
     
     ; Does this variable contain "missing" values. If so, identify and return
     ; the missing data indices so they can be identified after scaling.
+    missingCount = 0
     IF self -> HasAttr('missing_value') THEN BEGIN
         missingValue = self -> GetAttrValue('missing_value')
         missingIndices = Where(data EQ missingValue, missingCount)
@@ -809,8 +810,7 @@ FUNCTION NCDF_Variable::GetValue, $
         IF self -> HasAttr('scale_factor') THEN scale_factor = self -> GetAttrValue('scale_factor') ELSE scale_factor = 1B
         IF self -> HasAttr('add_offset') THEN add_offset = self -> GetAttrValue('add_offset') ELSE add_offset = 0B
         data = (data * scale_factor) + add_offset
-        IF N_Elements(missingIndices) NE 0 AND missingCount GT 0 THEN $
-            data[missingIndices] = missingValue
+        IF missingCount GT 0 THEN data[missingIndices] = missingValue
     ENDIF
     
     ; Is this CHAR data? If so, convert it back to a string.

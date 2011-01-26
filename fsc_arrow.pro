@@ -79,6 +79,8 @@
 ;          Set this keyword to draw solid, filled arrows.
 ;     thick: in, optional, type=float, default=1.0
 ;         The thickness of the line drawing the shaft of the arrow. 
+;     window: in, optional, type=boolean, default=0
+;         Set this keyword to add the command to an FSC_Window application.
 ;         
 ; :Examples:
 ;    Used to draw arrows::
@@ -95,7 +97,8 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 23 November 2010. DWF. Bases on old Arrow routine in IDL.
+;        Written, 23 November 2010. DWF. Based on old Arrow routine in IDL.
+;        Added Window keyword 24 January 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -109,6 +112,7 @@ PRO FSC_Arrow, x0, y0, x1, y1, $
     NORMAL = normal, $
     SOLID = solid, $
     THICK = thick, $
+    WINDOW=window, $
     _EXTRA=extra
 
     Compile_Opt idl2
@@ -121,13 +125,48 @@ PRO FSC_Arrow, x0, y0, x1, y1, $
         RETURN
     ENDIF
     
+    ; Should this be added to a resizeable graphics window?
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    
+        void = FSC_QueryWin(COUNT=wincnt)
+        IF wincnt EQ 0 THEN FSC_Window
+        FSC_Window, 'FSC_Arrow', x0, y0, x1, y1, $
+            COLOR = scolor, $
+            DATA = data, $
+            HSIZE = hsize, $
+            HTHICK = hthick, $
+            LINESTYLE=linestyle, $
+            NORMAL = normal, $
+            SOLID = solid, $
+            THICK = thick, $
+            _REF_EXTRA=extra
+            
+         RETURN
+    ENDIF
+    
     ; Get the current color table vectors.
     TVLCT, rr, gg, bb, /Get
     
     ; Set up keyword parameters.
     IF N_Elements(thick) EQ 0 THEN thick = 1.
     IF N_Elements(hthick) EQ 0 THEN hthick = thick
-    IF N_Elements(scolor) EQ 0 THEN color = "black" ELSE color = scolor
+    
+    ; Choose a color.
+    IF N_Elements(sColor) EQ 0 THEN BEGIN
+           IF !D.Name EQ 'PS' THEN BEGIN
+                sColor = 'OPPOSITE' 
+           ENDIF ELSE BEGIN
+                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    IF (Total(pixel) EQ 765) THEN sColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) THEN sColor = 'WHITE'
+                    IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
+                ENDIF ELSE sColor = 'OPPOSITE'
+           ENDELSE
+    ENDIF
+    IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE color = sColor
+    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Byte(color)
+    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
     
     ; Head size in device units
     IF N_Elements(hsize) EQ 0 $
@@ -181,13 +220,13 @@ PRO FSC_Arrow, x0, y0, x1, y1, $
        yyp0 = yp1 + a * (dx*msint + dy * mcost)
        xxp1 = xp1 + a * (dx*mcost - dy * sint)
        yyp1 = yp1 + a * (dx*sint  + dy * mcost)
-    
+     
+       SetDecomposedState, 1, CURRENT=currentState
        IF Keyword_Set(solid) THEN BEGIN   ;Use polyfill?
          b = a * mcost*.9d ; End of arrow shaft (Fudge to force join)
          FSC_PlotS, [xp0, xp1+b*dx], [yp0, yp1+b*dy], /DEVICE, $
             COLOR=color, THICK=thick, LINESTYLE=linestyle, _Extra=extra
-         IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)
-         Polyfill, [xxp0, xxp1, xp1, xxp0], [yyp0, yyp1, yp1, yyp0], $
+         FSC_ColorFill, [xxp0, xxp1, xp1, xxp0], [yyp0, yyp1, yp1, yyp0], $
             /DEVICE, COLOR = color
        ENDIF ELSE BEGIN
          FSC_PlotS, [xp0, xp1], [yp0, yp1], /DEVICE, COLOR=color, THICK=thick, $
@@ -195,6 +234,7 @@ PRO FSC_Arrow, x0, y0, x1, y1, $
          FSC_PlotS, [xxp0,xp1,xxp1],[yyp0,yp1,yyp1], /DEVICE, COLOR=color, $
             THICK=hthick, LINESTYLE=linestyle, _Extra=extra
        ENDELSE
+       SetDecomposedState, currentState
        ENDFOR
        
        ; Restore the input colors.

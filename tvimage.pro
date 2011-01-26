@@ -43,6 +43,12 @@
 ; KEYWORD PARAMETERS:
 ;
 ;     ACOLOR:   This keyword has been depreciated in favor of the COLOR keyword.
+;     
+;     ADDCMD:   Set this keyword to add the TVImage command to an FSC_Window
+;               command list. Setting this command will force ERASEIT to be set
+;               to 0, so the TVImage command can exist peacefully with other commands
+;               in an FSC_Window command list. Setting this keyword automatically sets
+;               the WINDOW keyword.
 ;               
 ;     ALPHABACKGROUNDIMAGE: Normally, when a image with an alpha channel is displayed,
 ;               the image is blended with the image currently in the display window.
@@ -279,6 +285,9 @@
 ;               it is already set to something else.
 ;               
 ;      WINDOW:  Set this keyword to add the command to an FSC_Window application.
+;               Setting this keyword ALWAYS sets the ERASEIT keyword. If you want
+;               to add an image to an FSC_Window without the ERASEIT keyword set,
+;               use the ADDCMD keyword.
 ;               
 ;      XRANGE:  If the AXES keyword is set, this keyword is a two-element vector
 ;               giving the X axis range. By default, [0, size of image in X].
@@ -492,6 +501,7 @@
 ;        Added XTITLE and YTITLE keywords to add titles to image axes. 10 January 2011. DWF.
 ;        Added FONT, CHARSIZE, and TITLE keywords. 11 Jan 2011. DWF.
 ;        Depreciated ACOLOR keyword in favor of new COLOR keyword. 11 Jan 2011. DWF.
+;        Added ADDCMD and WINDOW keywords to allow TVIMAGE to work with FSC_Window. 26 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2011, by Fanning Software Consulting, Inc.                           ;
@@ -655,6 +665,7 @@ END
 
 PRO TVIMAGE, image, x, y, $
    ACOLOR=acolorname, $
+   ADDCMD=addcmd, $
    ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
    ALPHABGPOSITION=alphapos, $
    AXIS=axis, $
@@ -711,8 +722,52 @@ PRO TVIMAGE, image, x, y, $
                          _tvimage_current
     
     ; Add the command to FSC_Window?
+    IF Keyword_Set(addcmd) THEN window = 1
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
+        currentWindow = FSC_QueryWin(/CURRENT, COUNT=wincnt)
+        IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
+        eraseit = 1 ; Must always erase in FSC_Window, unless you are adding TVIMAGE to FSC_Window
+        IF Keyword_Set(addcmd) THEN BEGIN
+            eraseit = 0
+            FSC_Window, 'TVImage', image, x, y, $
+               ACOLOR=acolorname, $
+               ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
+               ALPHABGPOSITION=alphapos, $
+               AXIS=axis, $
+               AXES=axes, $
+               AXKEYWORDS=axkeywords, $
+               BACKGROUND=background, $
+               BREWER=brewer, $ ; Obsolete and not used.
+               BOTTOM=bottom, $
+               COLOR=color, $
+               ERASE=eraseit, $
+               HALF_HALF=half_half, $ ; Obsolete and not used.
+               KEEP_ASPECT_RATIO=keep, $
+               MARGIN=margin, $
+               MAXVALUE=max, $
+               MINUS_ONE=minusOne, $
+               MINVALUE=min, $
+               MULTIMARGIN=multimargin, $
+               NCOLORS=ncolors, $
+               NOINTERPOLATION=nointerp, $
+               NORMAL=normal, $
+               POSITION=position, $
+               OVERPLOT=overplot, $
+               QUIET=quiet, $
+               SAVE=save, $
+               SCALE=scale, $
+               TOP=top, $
+               TV=tv, $
+               WHITE=white, $
+               XRANGE=plotxrange, $
+               XTITLE=plotxtitle, $
+               YRANGE=plotyrange, $
+               YTITLE=plotytitle, $
+               ADDCMD=1, $
+               _EXTRA=extra
+                 RETURN
+        ENDIF
         FSC_Window, 'TVImage', image, x, y, $
            ACOLOR=acolorname, $
            ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
@@ -747,6 +802,7 @@ PRO TVIMAGE, image, x, y, $
            XTITLE=plotxtitle, $
            YRANGE=plotyrange, $
            YTITLE=plotytitle, $
+           REPLACECMD=replacecmd, $
            _EXTRA=extra
              RETURN
     ENDIF

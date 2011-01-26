@@ -56,6 +56,10 @@
 ;         surface grid.
 ;       
 ; :Keywords:
+;     addcmd: in, optional, type=boolean, default=0
+;        Set this keyword to add the command to an FSC_Window. Setting this keyword
+;        automatically sets the WINDOW keyword, but the command does not erase the
+;        graphics window as it would normally.
 ;     axiscolor: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the axis color. By default, 'black'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -166,11 +170,13 @@
 ;        Moved setting to decomposed color before color selection process to avoid PostScript
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF. 
 ;        Fixed a problem in which I assumed the background color was a string. 18 Jan 2011. DWF.  
+;        Added ADDCMD keyword. 26 Jan 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO FSC_Surf, data, x, y, $
+    ADDCMD=addcmd, $
     AXISCOLOR=saxiscolor, $
     AXESCOLOR=saxescolor, $
     BACKGROUND=sbackground, $
@@ -214,10 +220,43 @@ PRO FSC_Surf, data, x, y, $
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
     ; Do they want this plot in a resizeable graphics window?
+    IF Keyword_Set(addcmd) THEN window = 1
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
         currentWindow = FSC_QueryWin(/CURRENT, COUNT=wincnt)
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
+        
+        ; If adding a command, have to do this differently.
+        IF Keyword_Set(addcmd) THEN BEGIN
+            FSC_Window, 'FSC_Surf', data, x, y, $
+                AXISCOLOR=saxiscolor, $
+                AXESCOLOR=saxescolor, $
+                BACKGROUND=sbackground, $
+                BOTTOM=sbottom, $
+                CHARSIZE=charsize, $
+                COLOR=scolor, $
+                ELEVATION_SHADING=elevation_shading, $
+                FONT=font, $
+                NOERASE=noerase, $
+                ROTX=rotx, $
+                ROTZ=rotz, $
+                SHADED=shaded, $
+                SHADES=shades, $
+                SKIRT=skirt, $
+                TITLE=title, $
+                TRADITIONAL=traditional, $
+                TSIZE=tsize, $
+                TSPACE=tspace, $
+                XSTYLE=xstyle, $
+                YSTYLE=ystyle, $
+                ZSTYLE=zstyle, $
+                ADDCMD=1, $
+                _Extra=extra
+                
+            RETURN
+        ENDIF
+        
+        ; Otherwise, we are just replacing the commands in a new or existing window.
         FSC_Window, 'FSC_Surf', data, x, y, $
             AXISCOLOR=saxiscolor, $
             AXESCOLOR=saxescolor, $

@@ -54,6 +54,10 @@
 ;         A vector representing the dependent values to be plotted.
 ;       
 ; :Keywords:
+;     addcmd: in, optional, type=boolean, default=0
+;        Set this keyword to add the command to an FSC_Window. Setting this keyword
+;        automatically sets the WINDOW keyword, but the command does not erase the
+;        graphics window as it would normally.
 ;     aspect: in, optional, type=float, default=none
 ;        Set this keyword to a floating point ratio that represents the aspect ratio 
 ;        (ysize/xsize) of the resulting plot. The plot position may change as a result
@@ -147,11 +151,13 @@
 ;             plot keywords such as XGET_TICKS. 13 Jan 2011. DWF.  
 ;         Added SYMSIZE keyword. 16 Jan 2011. DWF.
 ;         Fixed a problem in which I assumed the background color was a string. 18 Jan 2011. DWF.  
+;         Added ADDCMD keyword. 26 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO FSC_Plot, x, y, $
+    ADDCMD=addcmd, $
     ASPECT=aspect, $
     AXISCOLOR=saxiscolor, $
     AXESCOLOR=saxescolor, $
@@ -191,9 +197,10 @@ PRO FSC_Plot, x, y, $
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
     
     ; Do they want this plot in a resizeable graphics window?
+    IF Keyword_Set(addcmd) THEN window = 1
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-        IF Keyword_Set(overplot) THEN BEGIN
+        IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
         FSC_Window, 'FSC_Plot', x, y, $
             ASPECT=aspect, $
             AXISCOLOR=saxiscolor, $

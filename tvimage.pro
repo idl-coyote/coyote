@@ -278,6 +278,8 @@
 ;               keyword to "white. Also sets the ACOLOR keyword to "black," unless
 ;               it is already set to something else.
 ;               
+;      WINDOW:  Set this keyword to add the command to an FSC_Window application.
+;               
 ;      XRANGE:  If the AXES keyword is set, this keyword is a two-element vector
 ;               giving the X axis range. By default, [0, size of image in X].
 ;            
@@ -681,6 +683,7 @@ PRO TVIMAGE, image, x, y, $
    TOP=top, $
    TV=tv, $
    WHITE=white, $
+   WINDOW=window, $
    XRANGE=plotxrange, $
    XTITLE=plotxtitle, $
    YRANGE=plotyrange, $
@@ -706,6 +709,47 @@ PRO TVIMAGE, image, x, y, $
                          _tvimage_winxsize, _tvimage_winysize, $
                          _tvimage_position, _tvimage_winID, $
                          _tvimage_current
+    
+    ; Add the command to FSC_Window?
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    
+        FSC_Window, 'TVImage', image, x, y, $
+           ACOLOR=acolorname, $
+           ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
+           ALPHABGPOSITION=alphapos, $
+           AXIS=axis, $
+           AXES=axes, $
+           AXKEYWORDS=axkeywords, $
+           BACKGROUND=background, $
+           BREWER=brewer, $ ; Obsolete and not used.
+           BOTTOM=bottom, $
+           COLOR=color, $
+           ERASE=eraseit, $
+           HALF_HALF=half_half, $ ; Obsolete and not used.
+           KEEP_ASPECT_RATIO=keep, $
+           MARGIN=margin, $
+           MAXVALUE=max, $
+           MINUS_ONE=minusOne, $
+           MINVALUE=min, $
+           MULTIMARGIN=multimargin, $
+           NCOLORS=ncolors, $
+           NOINTERPOLATION=nointerp, $
+           NORMAL=normal, $
+           POSITION=position, $
+           OVERPLOT=overplot, $
+           QUIET=quiet, $
+           SAVE=save, $
+           SCALE=scale, $
+           TOP=top, $
+           TV=tv, $
+           WHITE=white, $
+           XRANGE=plotxrange, $
+           XTITLE=plotxtitle, $
+           YRANGE=plotyrange, $
+           YTITLE=plotytitle, $
+           _EXTRA=extra
+             RETURN
+    ENDIF
     
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8

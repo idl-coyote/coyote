@@ -62,11 +62,12 @@
 ;         If this keyword is set, the selection is assumed to be a widget identifier.
 ;          
 ; :Examples:
-;    Used as a query routine::
+;    Used with query routine::
 ;       IDL> wids = FSC_QueryWin(TITLE=titles, COUNT=count)
 ;       IDL> index = Where(StrUpCase(titles) EQ 'PLOT WINDOW', tcnt)
 ;       IDL> IF tcnt GT 0 THEN FSC_WSet, wids[index]
 ;       IDL> FSC_Window, 'Oplot', thisData, /AddCmd
+;       IDL> FSC_WSet ; Bring current window forwad on display
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -80,6 +81,8 @@
 ; :History:
 ;     Change History::
 ;        Written, 23 January 2011. DWF.
+;        If selection match isn't provided, as like WShow to bring the current 
+;           window forward on display. 26 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -96,8 +99,15 @@ PRO FSC_WSet, selectMatch, OBJECT=object, WIDGETID=widgetID, TITLE=title
         RETURN
    ENDIF
    
-   ; Check the match criteria.
-   IF N_Elements(selectMatch) EQ 0 THEN Message, 'Must provide a window index number for selecting.'
+   ; If there is no selection match, then act like WSHOW an bring the window
+   ; forward on the display.
+   IF N_Elements(selectMatch) EQ 0 THEN BEGIN
+      void = FSC_QueryWin(WIDGETID=tlb, /CURRENT)
+      Widget_Control, tlb, /Show
+      RETURN
+   ENDIF
+   
+   ; Try to do the right thing here.
    IF Size(selectMatch, /TNAME) EQ 'OBJREF' THEN object = 1
    IF Size(selectMatch, /TNAME) EQ 'STRING' THEN title = 1
    

@@ -287,6 +287,10 @@
 ;            IDL> XColors, NColors=100, Bottom=0, Title='First 100 Colors'
 ;            IDL> XColors, NColors=100, Bottom=100, Title='Second 100 Colors'
 ;
+;       WINDOW: Set this keyword to send the colors to an FSC_Window program.
+;       
+;       WINID: The window index number of an FSC_Window to receive the color vectors.
+;
 ;       XOFFSET: This is the X offset of the program on the display. The
 ;          program will be placed approximately in the middle of the display
 ;          by default.
@@ -408,6 +412,7 @@
 ;       26 November 2010. Fixed a problem I noticed when starting the program with reversed
 ;            color tables. The initial colors were incorrect on subsequent calls. Also made
 ;            a modification so that color index -1 as input is handled properly (ignored). DWF.
+;       26 January 2011. Added WINDOW and WINID keywords. DWF.
 ;
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
@@ -1126,6 +1131,8 @@ PRO XCOLORS, $
     Object_Data=object_data, $
     Reverse=reverse, $
     Title=title, $
+    Window=window, $
+    WinID=winID, $
     XOffset=xoffset, $
     YOffset=yoffset, $
     _EXTRA=extra
@@ -1167,6 +1174,41 @@ IF locatedBrewerFile AND Keyword_Set(brewer) $
    ELSE IF userfile NE "" THEN colortabletype = 'USER-DEFINED' ELSE colortabletype = 'IDL'
 object_data = Keyword_Set(object_data)
 IF N_Elements(notifyID) EQ 0 THEN notifyID = [-1L, -1L]
+IF StrUpCase(colortabletype) EQ 'BREWER' THEN brewer = 1 ELSE brewer = 0
+
+; Is the window keyword set? If so, you will be sending this to
+; an FSC_Window to load the colors.
+IF Keyword_Set(window) THEN BEGIN
+  
+      ; Does a window object exist somewhere?
+      DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists
+      IF exists THEN BEGIN
+           theList = !FSC_WINDOW_LIST
+           IF Obj_Valid(theList) THEN BEGIN
+                structs = theList -> Get_Item(/ALL, /DEREFERENCE)
+                IF Size(structs, /TNAME) EQ 'POINTER' THEN RETURN
+                IF N_Elements(winID) EQ 0 THEN BEGIN
+                    winID = N_Elements(structs) - 1
+                ENDIF ELSE BEGIN
+                    index = Where(structs.wid[*] EQ winID, count)
+                    IF count GT 0 THEN winID = index[0] ELSE BEGIN
+                        Message, 'Cannot find an FSC_Window with window index ' + StrTrim(winID, 2) + '.'
+                    ENDELSE
+                ENDELSE
+                thisWindowStruct = structs[winID]
+                IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
+                     thisStruct = {XCOLORS_NOTIFYOBJ, thisWindowStruct.windowObj, 'LoadColors'}
+                     object_data = 1
+                    IF N_Elements(notifyObj) EQ 0 THEN BEGIN
+                       notifyObj = thisStruct
+                    ENDIF ELSE BEGIN
+                       notifyObj = [notifyObj, thisStruct]
+                    ENDELSE
+                ENDIF 
+           ENDIF 
+       ENDIF 
+ENDIF
+
 IF N_Elements(notifyObj) EQ 0 THEN BEGIN
    notifyObj = {object:Obj_New(), method:'', wid:-1}
 ENDIF
@@ -1175,7 +1217,6 @@ IF Size(notifyObj, /Type) NE 8 THEN BEGIN
       'be structures. Returning...'])
    RETURN
 END
-IF StrUpCase(colortabletype) EQ 'BREWER' THEN brewer = 1 ELSE brewer = 0
 nelements = Size(notifyObj, /N_Elements)
 FOR j=0,nelements-1 DO BEGIN
    tags = Tag_Names(notifyObj[j])

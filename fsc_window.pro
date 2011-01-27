@@ -46,7 +46,7 @@
 ;     command: in, required, type=object
 ;         A command object of class IDL_WINDOW_COMMAND.
 ;-
-PRO FSC_CmdWindow::AddCommand, command
+PRO FSC_CmdWindow::AddCommand, command,  INDEX=index
 
     Compile_Opt idl2
     
@@ -59,7 +59,7 @@ PRO FSC_CmdWindow::AddCommand, command
     ENDIF
 
     ; If the command is a valid object, add it to the command list.
-    IF Obj_Valid(command) THEN self.cmds -> Add, command
+    IF Obj_Valid(command) THEN self.cmds -> Add, command, index, /Before
 
 END ;----------------------------------------------------------------------------------------------------------------
 
@@ -352,6 +352,40 @@ PRO FSC_CmdWindow::ListCommand, cmdIndex
         ENDIF ELSE Message, 'The command index is out of range of the number of commands.'
     ENDELSE
 
+END ;----------------------------------------------------------------------------------------------------------------
+
+;+
+; :Description:
+;     This method loads color table vectors into the program.
+;     The XCOLORS_DATA keyword is required to get color vector
+;     information from XCOLORS.
+;-
+PRO FSC_CmdWindow::LoadColors, r, g, b, XCOLORS_DATA=colorData
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    ; Load the vectors
+    IF N_Elements(r) NE 0 THEN *self.r = r
+    IF N_Elements(g) NE 0 THEN *self.g = g
+    IF N_Elements(b) NE 0 THEN *self.b = b
+    
+    IF N_Elements(colorData) NE 0 THEN BEGIN
+       *self.r = colorData.r
+       *self.g = colorData.g
+       *self.b = colorData.b
+    ENDIF
+    
+    ; Execute the commands.
+    self -> ExecuteCommands
+    
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -979,15 +1013,18 @@ END ;---------------------------------------------------------------------------
 ;       The command is added to the last created FSC_Window, unless the WinID
 ;       keyword is used to select another FSC_Window. Adding a command causes
 ;       all the commands in the window to be immediately executed. If this is
-;       not behavior you desire, use the LOADCMD keyword instead.
+;       not behavior you desire, use the LOADCMD keyword instead. If CMDINDEX
+;       is used to select a command index, the new command is added before
+;       the command currently occuping that index in the command list.
 ;    cmddelay: in, optional, type=float
 ;       If this keyword is set to a value other than zero, there will be a 
 ;       delay of this many seconds between command execution. This will permit
 ;       "movies" of command sequences to be displayed.
 ;    cmdindex: in, optional, type=integer
 ;       This keyword is used to select which command in an FSC_Window to act on
-;       when the DeleteCmd or ReplaceCmd keywords are used. See the descriptions
-;       of these keywords for details on what happens when CmdIndex is missing.
+;       when the AllCmd, DeleteCmd, LoadCmd and ReplaceCmd keywords are used. 
+;       See the descriptions of these keywords for details on what happens when 
+;       CmdIndex is missing.
 ;    deletecmd: in, optional, type=boolean, default=0
 ;       Set this keyword to delete a graphics command from an FSC_Window.
 ;       If CmdIndex is undefined the last command entered into the window is
@@ -1006,7 +1043,9 @@ END ;---------------------------------------------------------------------------
 ;       The command is added to the last created FSC_Window, unless the WinID
 ;       keyword is used to select another FSC_Window. Loaded commands are not
 ;       automatically executed. Set the EXECUTECMD keyword at the end of loading
-;       to execute the loaded commands. 
+;       to execute the loaded commands. If CMDINDEX is used to select a command 
+;       index, the new command is loaded before the command currently occuping 
+;       that index in the command list.
 ;    replacecmd: in, optional, type=boolean, default=0
 ;       Set this keyword to replace a graphics command from an FSC_Window.
 ;       If CmdIndex is undefined, *all* commands in the window are replaced. Use 
@@ -1312,7 +1351,7 @@ PRO FSC_Window, $
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     newCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=Keyword_Set(method))
-                    thisWindowStruct.windowObj -> AddCommand, newCommand
+                    thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                 ENDIF ELSE BEGIN
                     Message, 'The FSC_Window referred to does not exist.'
                 ENDELSE
@@ -1344,7 +1383,7 @@ PRO FSC_Window, $
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     newCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=Keyword_Set(method))
-                    thisWindowStruct.windowObj -> AddCommand, newCommand
+                    thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                     thisWindowStruct.windowObj -> ExecuteCommands
                 ENDIF ELSE BEGIN
                     Message, 'The FSC_Window referred to does not exist.'

@@ -98,6 +98,10 @@
 ;
 ;       SILENT:       This keyword is provided ONLY for compatibility with LOADCT. *All*
 ;                     color table manipulations are handled silently.
+;                     
+;       WINDOW:       Set this keyword to send the colors to an FSC_Window program.
+;       
+;       WINID:        The window index number of an FSC_Window to receive the color vectors.
 ;
 ; EXAMPLES:
 ;
@@ -130,6 +134,7 @@
 ;          26 September 2010. DWF.
 ;       Added ROW keyword to transpose color table vectors for new graphics functions 
 ;          in IDL 8. 23 Nov 2010. DWF.
+;       Added WINDOW and WINID keywords. 26 January 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -168,7 +173,9 @@ PRO CTLOAD, table, $
    NCOLORS=ncolors, $
    REVERSE=reverse, $
    ROW=row, $
-   SILENT=silent
+   SILENT=silent, $
+   WINDOW=window, $
+   WINID=winID
 
    COMMON colors, r_orig, g_orig, b_orig, r_curr, g_curr, b_curr
    Compile_Opt idl2
@@ -280,5 +287,31 @@ PRO CTLOAD, table, $
      b_curr = b_orig
      TVLCT, r, g, b, bottom
   ENDELSE
-
+  
+  ; If the WINDOW keyword is set, send these colors to an FSC_Window object.
+  IF Keyword_Set(window) THEN BEGIN
+  
+      ; Does a window object exist somewhere?
+      DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists
+      IF exists THEN BEGIN
+           theList = !FSC_WINDOW_LIST
+           IF Obj_Valid(theList) THEN BEGIN
+                structs = theList -> Get_Item(/ALL, /DEREFERENCE)
+                IF Size(structs, /TNAME) EQ 'POINTER' THEN RETURN
+                IF N_Elements(winID) EQ 0 THEN BEGIN
+                    winID = N_Elements(structs) - 1
+                ENDIF ELSE BEGIN
+                    index = Where(structs.wid[*] EQ winID, count)
+                    IF count GT 0 THEN winID = index[0] ELSE BEGIN
+                        Message, 'Cannot find an FSC_Window with window index ' + StrTrim(winID, 2) + '.'
+                    ENDELSE
+                ENDELSE
+                thisWindowStruct = structs[winID]
+                IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
+                    thisWindowStruct.windowObj -> LoadColors, r, g, b
+                ENDIF 
+                RETURN
+           ENDIF 
+       ENDIF 
+  ENDIF
 END

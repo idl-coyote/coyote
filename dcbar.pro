@@ -84,7 +84,7 @@
 ;                     over this location. The default spacing is 1.0. The location "spacer" is
 ;                     multiplied by this amount. So, for example, to move the labels a little
 ;                     further away from the color bar, make this number greater than 1 (e.g, 1.25).
-;                      To move the labels a little closer, use a number less than 1 (e.g, 0.75).
+;                     To move the labels a little closer, use a number less than 1 (e.g, 0.75).
 ;
 ;       TITLE:        This is title for the color bar. The default is to have no title.
 ;
@@ -92,6 +92,8 @@
 ;
 ;       VERTICAL:     Setting this keyword give a vertical color bar. The default
 ;                     is a horizontal color bar.
+;                     
+;       WINDOW:       Set this keyword to add the color bar to an FSC_Window display.
 ;
 ; COMMON BLOCKS:
 ;
@@ -142,6 +144,7 @@
 ;           23 Apr 2010. DWF.
 ;       Modified the spacing of the labels on the color bar, specifically for the 
 ;           PostScript device. 3 November 2010. DWF.
+;       Added Window keyword. 28 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009-2010, by Fanning Software Consulting, Inc.                           ;
@@ -184,7 +187,8 @@ PRO DCBar, colors, $
     SPACING=spacing, $
     TITLE=title, $
     TCHARSIZE=tcharsize, $
-    VERTICAL=vertical
+    VERTICAL=vertical, $
+    WINDOW=window
 
     ; Standard error handling.
     Catch, theError
@@ -194,6 +198,30 @@ PRO DCBar, colors, $
         RETURN
     ENDIF 
     
+    ; Should this be added to a resizeable graphics window?
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    
+        void = FSC_QueryWin(COUNT=wincnt)
+        IF wincnt EQ 0 THEN FSC_Window
+        FSC_Window, 'DCBar', colors, $
+            BARCOLOR=barcolor, $
+            BOTTOM=bottom, $
+            CHARSIZE=charsize, $
+            COLOR=color, $
+            FILE=file, $
+            FONT=font, $
+            LABELS=labels, $
+            NCOLORS=ncolors, $
+            POSITION=position, $
+            ROTATE=rotate, $
+            SPACING=spacing, $
+            TITLE=title, $
+            TCHARSIZE=tcharsize, $
+            VERTICAL=vertical, $
+            ADDCMD=1
+         RETURN
+    ENDIF
+
     ; Check parameters and keywords.
     IF (!D.Name EQ 'PS') AND N_Elements(color) EQ 0 THEN BEGIN
         color = 'black'

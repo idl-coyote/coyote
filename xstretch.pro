@@ -217,9 +217,7 @@
 ;
 ;       Requires a number of files from the Coyote Library:
 ;
-;       http://www.dfanning.com/programs/xstretch.zip
-;          or
-;       http://www.dfanning.com/programs/coyoteprograms.zip
+;           http://www.idlcoyote.com/programs/coyoteprograms.zip
 ;
 ;
 ; EXAMPLE:

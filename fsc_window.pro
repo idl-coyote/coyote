@@ -128,6 +128,7 @@ PRO FSC_CmdWindow::DeleteCommand, cmdIndex, ALL=all
     ; Delete all the commands? Is so, delete and RETURN.
     IF Keyword_Set(all) THEN BEGIN
         self.cmds -> Delete_Nodes, /DESTROY
+        self -> ExecuteCommands
         RETURN
     ENDIF
     
@@ -394,7 +395,7 @@ END ;---------------------------------------------------------------------------
 ;     This method replaces a command in the command list. If cmdImdex is missing,
 ;     replace all the commands in the command list.
 ;-
-PRO FSC_CmdWindow::ReplaceCommand, command, cmdIndex
+PRO FSC_CmdWindow::ReplaceCommand, command, cmdIndex, MULTI=multi
 
     Compile_Opt idl2
     
@@ -409,7 +410,11 @@ PRO FSC_CmdWindow::ReplaceCommand, command, cmdIndex
     ; If cmdIndex is missing, remove all the current commands with this one.
     IF N_Elements(cmdIndex) EQ 0 THEN BEGIN
         self.cmds -> Delete, /ALL, /Destroy
-        self.pmulti = IntArr(5) ; Reset !P.Multi.
+        IF N_Elements(multi) NE 0 THEN BEGIN
+            self.pmulti = multi ; Reset !P.Multi to new value.
+        ENDIF ELSE BEGIN
+            self.pmulti = Intarr(5) ; Reset !P.Multi to zero.
+        ENDELSE
         self.cmds -> Add, command
     ENDIF ELSE BEGIN
     
@@ -524,11 +529,12 @@ END ;---------------------------------------------------------------------------
 ;     This method sets properties of the window object.
 ;-
 PRO FSC_CmdWindow::SetProperty, $
-    BACKGROUND=background, $
-    DELAY=delay, $
-    ERASEIT=eraseit, $
-    COLORPALETTE=colorPalette, $
-    MULTI=multi
+    BACKGROUND=background, $       ; The background color of the window.
+    DELAY=delay, $                 ; The delay between command execution.
+    ERASEIT=eraseit, $             ; Set the erase flag for the window
+    COLORPALETTE=colorPalette, $   ; Change window color table vectors.
+    MULTI=multi, $                 ; Change the !P.MULTI setting for the window.
+    UPDATE=update                  ; Set if you want the commands to be updated after peoperty change.
     
     Compile_Opt idl2
     
@@ -547,7 +553,7 @@ PRO FSC_CmdWindow::SetProperty, $
     ENDIF 
     IF N_Elements(colorpalette) NE 0 THEN BEGIN
         IF Size(colorpalette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
-        dims = Size(colorpalette, /DIMENIONS)
+        dims = Size(colorpalette, /DIMENSIONS)
         threeIndex = Where(dims EQ 3)
         IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
         IF threeIndex EQ 0 THEN colorPalette = Transpose(colorPalette)
@@ -558,9 +564,12 @@ PRO FSC_CmdWindow::SetProperty, $
     IF N_Elements(delay) NE 0 THEN self.delay = delay
     IF N_Elements(eraseit) NE 0 THEN self.eraseit = Keyword_Set(eraseit)
     IF N_Elements(multi) NE 0 THEN BEGIN
+        IF (N_Elements(multi) EQ 1) && (multi EQ 0) THEN multi = IntArr(5)
         FOR j=0,N_Elements(multi)-1 DO self.pmulti[j] = multi[j]
     ENDIF
 
+    ; Update now?
+    IF Keyword_Set(update) THEN self -> ExecuteCommands
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -620,6 +629,7 @@ FUNCTION FSC_CmdWindow::Init, $
     IF N_Elements(wbackground) EQ 0 THEN BEGIN
         background='white'
         IF N_Elements(command) EQ 0 THEN eraseit = 1
+        IF (N_Elements(command) NE 0) && (StrUpCase(StrMid(command,0,3)) EQ 'FSC') THEN eraseit = 1
     ENDIF ELSE BEGIN
         background = wbackground
         eraseit = 1
@@ -1274,7 +1284,6 @@ PRO FSC_Window, $
                 ENDELSE
                 thisWindowStruct = structs[winID]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
-                
                     ; If the cmdIndex is undefined, the last entered command is deleted.
                     thisWindowStruct.windowObj -> DeleteCommand, cmdIndex
                 ENDIF ELSE BEGIN
@@ -1318,7 +1327,7 @@ PRO FSC_Window, $
                         P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=Keyword_Set(method))
                         
                     ; If the cmdIndex is undefined, ALL current commands in the window are replaced.
-                    thisWindowStruct.windowObj -> ReplaceCommand, newCommand, cmdIndex
+                    thisWindowStruct.windowObj -> ReplaceCommand, newCommand, cmdIndex, MULTI=wmulti
                     thisWindowStruct.windowObj -> ExecuteCommands
                 ENDIF ELSE BEGIN
                     Message, 'The FSC_Window referred to does not exist.'

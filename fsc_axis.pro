@@ -93,7 +93,8 @@
 ;          
 ; :Examples:
 ;    Used like the IDL AXIS command::
-;       IDL> FSC_Axis, /XAxis, Color='red'
+;       IDL> FSC_Plot, Loaddata(1), YStyle=8, Position=[0.1, 0.1, 0.85, 0.9], /Window
+;       IDL> FSC_Axis, /YAxis, Color='red', YRange=[-500, 500], /Save, /Window
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -112,23 +113,26 @@
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
 PRO FSC_Axis, xloc, yloc, zloc, $
-    CHARSIZE=charsize, $
-    COLOR=scolor, $
-    DATA=data, $
-    DEVICE=device, $
-    FONT=font, $
-    NORMAL=normal, $
-    SAVE=save, $
-    WINDOW=window, $
-    XAXIS=xaxis, $
-    XLOG=xlog, $
-    YAXIS=yaxis, $
-    YLOG=ylog, $
-    YNOZERO=ynozero, $
-    ZAXIS=zaxis, $
-    ZLOG=zlog, $
-    _REF_EXTRA=extra
-    
+            CHARSIZE=charsize, $
+            COLOR=scolor, $
+            DATA=data, $
+            DEVICE=device, $
+            FONT=font, $
+            NORMAL=normal, $
+            SAVE=save, $
+            TITLE=title, $
+            XAXIS=xaxis, $
+            XLOG=xlog, $
+            XTITLE=xtitle, $
+            YAXIS=yaxis, $
+            YLOG=ylog, $
+            YTITLE=ytitle, $
+            YNOZERO=ynozero, $
+            ZAXIS=zaxis, $
+            ZLOG=zlog, $
+            ZTITLE=ztitle, $
+            WINDOW=window, $
+            _REF_EXTRA=extra    
     Compile_Opt idl2
     
     ; Catch the error.
@@ -138,13 +142,7 @@ PRO FSC_Axis, xloc, yloc, zloc, $
         void = Error_Message()
         RETURN
     ENDIF
-    
-    ; Did the user pass parameters?
-    IF N_Params() EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_Axis, xlocation, ylocation, /XAxis'
-        RETURN
-    ENDIF
-    
+        
     ; Should this be added to a resizeable graphics window?
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
@@ -158,16 +156,44 @@ PRO FSC_Axis, xloc, yloc, zloc, $
             FONT=font, $
             NORMAL=normal, $
             SAVE=save, $
+            TITLE=title, $
             XAXIS=xaxis, $
             XLOG=xlog, $
+            XTITLE=xtitle, $
             YAXIS=yaxis, $
             YLOG=ylog, $
+            YTITLE=ytitle, $
             YNOZERO=ynozero, $
             ZAXIS=zaxis, $
             ZLOG=zlog, $
-            _REF_EXTRA=extra
+            ZTITLE=ztitle, $
+            ADDCMD=1, $
+            _EXTRA=extra
             
          RETURN
+    ENDIF
+    
+    yreverse = 1
+    ; AXIS command is a little brain dead. Have to define values for the parameters.
+    IF N_Elements(xloc) EQ 0 THEN BEGIN
+        xloc = Keyword_Set(xaxis) ? !X.CRange[0] : !X.CRange[1]
+    ENDIF
+    IF N_Elements(yloc) EQ 0 THEN BEGIN
+        yloc = Keyword_Set(yaxis) ? !Y.CRange[0] : !Y.CRange[1]
+    ENDIF
+    IF N_Elements(zloc) EQ 0 THEN BEGIN
+        zloc = Keyword_Set(zaxis) ? !Z.CRange[0] : !Z.CRange[1]
+    ENDIF
+    
+    ; Did the user specify a title with the TITLE keyword?
+    IF (N_Elements(xtitle) EQ 0) && (N_Elements(title) NE 0) THEN xtitle = title
+    IF (N_Elements(ytitle) EQ 0) && (N_Elements(title) NE 0) THEN ytitle = title
+    IF (N_Elements(ztitle) EQ 0) && (N_Elements(title) NE 0) THEN ztitle = title
+    
+    ; Do you need to reverse the Y title?
+    IF (N_Elements(ytitle) NE 0) && Keyword_Set(yreverse) THEN BEGIN
+        reverseTitle = ytitle
+        ytitle = ""
     ENDIF
     
     ; Set up PostScript device for working with colors.
@@ -203,22 +229,51 @@ PRO FSC_Axis, xloc, yloc, zloc, $
     ; Draw the axis.
     IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(color) ELSE thisColor = color
     Axis, xloc, yloc, zloc, $
-        CHARSIZE=charsize, $
-        COLOR=thisColor, $
-        DATA=data, $
-        DEVICE=device, $
-        FONT=font, $
-        NORMAL=normal, $
-        SAVE=save, $
-        XAXIS=xaxis, $
-        XLOG=xlog, $
-        YAXIS=yaxis, $
-        YLOG=ylog, $
-        YNOZERO=ynozero, $
-        ZAXIS=zaxis, $
-        ZLOG=zlog, $
-        _STRICT_EXTRA=extra
-   SetDecomposedState, currentState
+          CHARSIZE=charsize, $
+          COLOR=thisColor, $
+          DATA=data, $
+          DEVICE=device, $
+          FONT=font, $
+          NORMAL=normal, $
+          SAVE=save, $
+          XAXIS=xaxis, $
+          XLOG=xlog, $
+          XTITLE=xtitle, $
+          YAXIS=yaxis, $
+          YLOG=ylog, $
+          YTITLE=ytitle, $
+          YNOZERO=ynozero, $
+          ZAXIS=zaxis, $
+          ZLOG=zlog, $
+          ZTITLE=ztitle, $
+          _STRICT_EXTRA=extra
+          
+;    IF Keyword_Set(yreverse) THEN BEGIN
+;    
+;        ; What is the width of a character in normalized units?
+;        ncharsize = Float(!D.Y_Ch_Size)/!D.X_Size
+;        
+;        ; What is the width of the Y labels in normalized units.
+;        IF N_Elements(yrange) EQ 0 THEN yrange = !Y.CRange
+;        IF N_Elements(ytickformat) EQ 0 THEN BEGIN
+;           largest_y =String( Max( Ceil( Abs(yrange) ) ), FORMAT='(I0)')
+;           slength = StrLen(largest_y) + 1.5
+;           slength = (Min(yrange) LT 0) ? slength - 0.5 : slength 
+;           print, 'SLength: ', slength
+;        ENDIF ELSE BEGIN
+;           IF
+;        ENDELSE
+;        xwidth = slength * ncharsize * charsize
+;        
+;        ; Draw the text.
+;        xpos = !X.Window[1] + xwidth
+;        ypos = (!Y.Window[1] - !Y.Window[0]) / 2.0 + !Y.Window[0]
+;        FSC_Text, xpos, ypos, reverseTitle, /NORMAL, ALIGNMENT=0.5, $
+;            COLOR=scolor, Charsize=charsize, ORIENTATION=-90.0
+;        
+;    ENDIF
+    
+    SetDecomposedState, currentState
    
    ; Restore the color tables.
    IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb

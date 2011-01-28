@@ -1,12 +1,11 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_WSet
+;   FSC_WControl
 ;
 ; PURPOSE:
-;   Allows the user to select the FSC_Window application to be the "current" application.
-;   Selection can be made based on window index number, widget identifier, object reference,
-;   or window title.
+;   Allows the user to set various properties of an FSC_Window object. This is essentially
+;   a wrapper to the FSC_Window SetProperty method.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -38,9 +37,8 @@
 ;
 ;+
 ; :Description:
-;   Allows the user to select the FSC_Window application to be the "current" application.
-;   Selection can be made based on window index number, widget identifier, object reference,
-;   or window title.
+;   Allows the user to set various properties of an FSC_Window object. This is essentially
+;   a wrapper to the FSC_Window SetProperty method.
 ;
 ; :Categories:
 ;    Graphics
@@ -49,25 +47,50 @@
 ;    selection: in, required, type=varies
 ;       Normally, a window index number of an FSC_Window application. But, the selection
 ;       can be a widget identifier, an object reference, or a window title, depending on
-;       which keywords are set. The FSC_Window matching the selection is made the "current"
-;       FSC_Window and the application is moved forward on the display.
+;       which keywords are set. The FSC_Window matching the selection has its properties set.
 ;       
 ; :Keywords:
+;     all: in, optional, type=boolean
+;         This keyword applies only to keywords that manipulate commands in the command
+;         list (e.g., DeleteCmd). It will select all the commands in the command list to
+;         apply the action to.
+;     background: in, optional, type=string
+;         The background color of the window. Only use if the ERASEIT property is also set.
+;     cmdindex: in, optional, type=integer
+;         This keyword applies only to keywords that manipulate commands in the command
+;         list (e.g., DeleteCmd). It specifies the command index number of the command 
+;         for which the action is desired.
+;     colorpalette: in, optional, type=BytArr(N,3)
+;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
+;         R, G, and B vectors of a color table. It is probably easier to use CTLOAD or
+;         XCOLORS to load color tables for the window, but this is provided as another option.
+;     delay: in, optional, type=float
+;         Set this keyword to the amount of "delay" you want between commands in the command list.
+;     deletecmd: in, optional, type=boolean
+;          Set this keyword to delete a command in the FSC_Window. The keywords cmdIndex and All
+;          are used in deleting the specified command.
+;     eraseit: in, optional, type=boolean
+;         If this property is set, the FSC_Window erases with the background color before
+;         displaying the commands in the window's command list.
+;     multi: in, optional, type=Intarr(5)
+;         Set this keyword to the !P.MULTI setting you want to use for the window.
+;         !P.MULTI is set to this setting before command execution, and set back to
+;         it's default value when the commands are finished executing.
 ;     object: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be an object reference.
 ;     title: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be a window title. All
 ;         matching is done in uppercase characters.
+;     update: in, optional, type=boolean
+;         Set this keyword if you want the window commands to be immediately executed 
+;         after the property change.
 ;     widgetid: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be a widget identifier.
 ;          
 ; :Examples:
-;    Used with query routine::
-;       IDL> wids = FSC_QueryWin(TITLE=titles, COUNT=count)
-;       IDL> index = Where(StrUpCase(titles) EQ 'PLOT WINDOW', tcnt)
-;       IDL> IF tcnt GT 0 THEN FSC_WSet, wids[index]
-;       IDL> FSC_Window, 'Oplot', thisData, /AddCmd
-;       IDL> FSC_WSet ; Bring current window forwad on display
+;    Used to set FSC_Window properties::
+;       IDL> FSC_WControl, Background='gray', EraseIt=1
+;       IDL> FSC_WControl, Multi=[0,2,2]
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -80,31 +103,44 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 23 January 2011. DWF.
-;        If selection match isn't provided, as like WShow to bring the current 
-;           window forward on display. 26 Jan 2011. DWF.
+;        Written, 28 January 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_WSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
-
+PRO FSC_WControl, selection, $
+    ALL=all, $
+    BACKGROUND=background, $
+    CMDINDEX=cmdIndex, $
+    COLORPALETTE=colorPalette, $
+    DELAY=delay, $
+    DELETECMD = deleteCmd, $
+    ERASEIT=eraseit, $
+    LISTCMD=listCmd, $
+    MULTI=multi, $
+    OBJECT=object, $
+    TITLE=title, $
+    UPDATE=update, $
+    WIDGETID=widgetID
+    
    Compile_Opt idl2
     
    ; Error handling.
    Catch, theError
    IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        ok = Dialog_Message(!Error_State.MSG)
+        void = Error_Message()
         RETURN
    ENDIF
    
-   ; If there is no selection match, then act like WSHOW an bring the window
-   ; forward on the display.
+   ; If there is no selection match, use the current window. If there
+   ; is no current window, create one.
    IF N_Elements(selection) EQ 0 THEN BEGIN
-      void = FSC_QueryWin(WIDGETID=tlb, /CURRENT)
-      Widget_Control, tlb, /Show
-      RETURN
+        selection = FSC_QueryWin(/CURRENT, COUNT=count)
+        IF count EQ 0 THEN BEGIN
+            FSC_Window
+            selection = FSC_QueryWin(/CURRENT, COUNT=count)
+        ENDIF
    ENDIF
    
    ; Try to do the right thing here.
@@ -113,10 +149,7 @@ PRO FSC_WSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
    
    ; Get the values you need.
    wid = FSC_QueryWin(WIDGETID=tlb, OBJECT=objref, TITLE=titles, COUNT=count)
-   IF count EQ 0 THEN BEGIN
-        Message, 'There are no FSC_Window objects currently on the display.', /INFORMATIONAL
-        RETURN
-   ENDIF
+   IF count EQ 0 THEN Message, 'There are no FSC_Windows currently on the display.', /Infomational
    
    ; Get the window list.
    list = !FSC_Window_List
@@ -126,22 +159,26 @@ PRO FSC_WSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
    
         Keyword_Set(widgetID): BEGIN
             index = Where(tlb EQ selection, selectCount)
-            IF selectCount EQ 0 THEN Message, 'No FSC_Window matches the selection criteria.'
+            IF selectCount EQ 0 THEN $
+                Message, 'No FSC_Window matches the selection criteria.', /Infomational
             END
             
         Keyword_Set(object): BEGIN
             index = Where(objref EQ selection, selectCount)
-            IF selectCount EQ 0 THEN Message, 'No FSC_Window matches the selection criteria.'
+            IF selectCount EQ 0 THEN $
+                Message, 'No FSC_Window matches the selection criteria.', /Infomational
             END
             
         Keyword_Set(title): BEGIN
             index = Where(StrUpCase(titles) EQ StrUpCase(selection), selectCount)
-            IF selectCount EQ 0 THEN Message, 'No FSC_Window matches the selection criteria.'
+            IF selectCount EQ 0 THEN $
+                Message, 'No FSC_Window matches the selection criteria.', /Infomational
             END
 
         ELSE: BEGIN
             index = Where(wid EQ selection, selectCount)
-            IF selectCount EQ 0 THEN Message, 'No FSC_Window matches the selection criteria.'
+            IF selectCount EQ 0 THEN $
+                Message, 'No FSC_Window matches the selection criteria.', /Infomational
             END
    
    ENDCASE
@@ -149,10 +186,24 @@ PRO FSC_WSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
    ; Make sure the index is a scalar.
    index = index[0]
    
-   ; Move the window forward on the display.
-   Widget_Control, tlb[index], /Show
+   ; Are you deleting commands?
+   IF N_Elements(deleteCmd) NE 0 THEN BEGIN
+        objref[index] -> DeleteCommand, cmdIndex, ALL=Keyword_Set(all)
+   ENDIF
+
+   ; Are you listing the commands?
+   IF N_Elements(listCmd) NE 0 THEN BEGIN
+        objref[index] -> ListCommand, cmdIndex
+   ENDIF
    
-   ; Move the matched node to the end of the list.
-   list -> Move_Node, index
-   
-END
+   ; Set the properties of the window.
+   objref[index] -> SetProperty, $
+        BACKGROUND=background, $
+        DELAY=delay, $
+        ERASEIT=eraseit, $
+        COLORPALETTE=colorPalette, $
+        MULTI=multi, $
+        UPDATE=update
+    
+    
+END 

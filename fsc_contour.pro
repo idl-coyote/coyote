@@ -103,6 +103,13 @@
 ;        no contour levels are labelled. A 1 (the default) means all contour levels are
 ;        labelled. A 2 means label every 2nd contour level is labelled. A 3 means every 
 ;        3rd contour level is labelled, and so on.
+;     layout: in, optional, type=intarr(3)
+;         This keyword specifies a grid with a graphics window and determines where the
+;         graphic should appear. The syntax of LAYOUT is three numbers: [ncolumns, nrows, location].
+;         The grid is determined by the number of columns (ncolumns) by the number of 
+;         rows (nrows). The location of the graphic is determined by the third number. The
+;         grid numbering starts in the upper left (1) and goes sequentually by column and then
+;         by row.
 ;     levels: in, optional, type=any
 ;         A vector of data levels to contour. If used, NLEVELS is ignored. If missing, 
 ;         NLEVELS is used to construct N equally-spaced contour levels.
@@ -191,6 +198,7 @@
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
 ;        Fixed a problem in which I assumed the background color was a string. 18 Jan 2011. DWF.  
 ;        Added ADDCMD keyword. 26 Jan 2011. DWF.
+;        Added LAYOUT keyword. 28 Jan 2011. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -209,6 +217,7 @@ PRO FSC_Contour, data, x, y, $
     FONT=font, $
     IRREGULAR=irregular, $
     LABEL=label, $
+    LAYOUT=layout, $
     LEVELS=levels, $
     NLEVELS=nlevels, $
     NOERASE=noerase, $
@@ -230,6 +239,7 @@ PRO FSC_Contour, data, x, y, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
         RETURN
     ENDIF
     
@@ -246,6 +256,9 @@ PRO FSC_Contour, data, x, y, $
     IF Keyword_Set(addcmd) THEN window = 1
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
+        ; If you are using a layout, you can't ever erase.
+        IF N_Elements(layout) NE 0 THEN noerase = 1
+            
         IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
             FSC_Window, 'FSC_Contour', data, x, y, $
                 AXISCOLOR=saxiscolor, $
@@ -259,6 +272,7 @@ PRO FSC_Contour, data, x, y, $
                 FILL=fill, $
                 IRREGULAR=irregular, $
                 LABEL=label, $
+                LAYOUT=layout, $
                 LEVELS=levels, $
                 NLEVELS=nlevels, $
                 NOERASE=noerase, $
@@ -290,6 +304,7 @@ PRO FSC_Contour, data, x, y, $
             FILL=fill, $
             IRREGULAR=irregular, $
             LABEL=label, $
+            LAYOUT=layout, $
             LEVELS=levels, $
             NLEVELS=nlevels, $
             NOERASE=noerase, $
@@ -317,10 +332,28 @@ PRO FSC_Contour, data, x, y, $
     ; Going to have to do all of this in decomposed color, if possible.
     SetDecomposedState, 1, CURRENTSTATE=currentState
     
-    IF N_Elements(font) EQ 0 THEN font = !P.Font
-    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
+    ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
+    ; done BEFORE checking the LAYOUT properties.
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
     
+    ; Set up the layout, if necessary.
+    IF N_Elements(layout) NE 0 THEN BEGIN
+       thisMulti = !P.Multi
+       totalPlots = layout[0]*layout[1]
+       !P.Multi = [0,layout[0], layout[1], 0, 0]
+       IF layout[2] EQ 1 THEN BEGIN
+            noerase = 1
+            !P.Multi[0] = 0
+       ENDIF ELSE BEGIN
+            !P.Multi[0] = totalPlots - layout[2] + 1
+       ENDELSE
+    ENDIF
+
+    ; Character size has to be determined *after* the layout has been decided.
+    IF N_Elements(font) EQ 0 THEN font = !P.Font
+    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
+    
+    ; Handle data properly.
     ndims = Size(data, /N_DIMENSIONS)
     s = Size(data, /DIMENSIONS)
     CASE ndims OF
@@ -602,5 +635,8 @@ PRO FSC_Contour, data, x, y, $
     ; the snap shot will be incorrect.
     IF (!D.Name NE 'Z') AND (!D.Name NE 'NULL') THEN TVLCT, rr, gg, bb
      
+    ; Clean up if you are using a layout.
+    IF N_Elements(layout) NE 0 THEN !P.Multi = thisMulti
+
 END
     

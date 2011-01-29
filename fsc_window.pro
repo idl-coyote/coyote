@@ -205,6 +205,8 @@ PRO FSC_CmdWindow::ExecuteCommands
     
     ; Store the current !P.MULTI state.
     thisMulti = !P.Multi
+    thisXOmargin = !X.OMargin
+    thisYOmargin = !Y.OMargin
 
     ; Make this window the current graphics window.
     IF (!D.Flags AND 256) NE 0 THEN BEGIN
@@ -244,6 +246,8 @@ PRO FSC_CmdWindow::ExecuteCommands
             IF StrUpCase(answer) EQ 'YES' THEN BEGIN
                 self -> DeleteCommand, j
                 !P.Multi = thisMulti
+                !X.OMargin = thisOXmargin
+                !Y.OMargin = thisOYmargin
                 IF N_Elements(rr) NE 0 THEN TVLCT, rr, gg, bb
                 IF (!D.Flags AND 256) NE 0 THEN WSet, -1
                 RETURN
@@ -258,8 +262,10 @@ PRO FSC_CmdWindow::ExecuteCommands
     ; Restore the colors in effect when we entered.
     TVLCT, rr, gg, bb
     
-    ; Set the !P.Multi system variable back to its original values.
+    ; Set the !P.Multi and outside margin system variables back to its original values.
     !P.Multi = thisMulti
+    !X.OMargin = thisXOmargin
+    !Y.OMargin = thisYOmargin
     
     ; Reset the current graphics window, if possible.
     IF (!D.Flags AND 256) NE 0 THEN BEGIN
@@ -283,7 +289,9 @@ PRO FSC_CmdWindow::GetProperty, $
     ERASEIT=eraseit, $
     MULTI=multi, $
     TLB=tlb, $
-    WID=wid
+    WID=wid, $
+    XOMARGIN=xomargin, $
+    YOMARGIN=yomargin
     
     Compile_Opt idl2
     
@@ -310,6 +318,8 @@ PRO FSC_CmdWindow::GetProperty, $
     IF Arg_Present(multi) THEN multi = self.pmulti
     IF Arg_Present(tlb) THEN tlb = self.tlb
     IF Arg_Present(wid) THEN wid = self.wid
+    IF Arg_Present(xomargin) THEN xomargin = self.xomargin
+    IF Arg_Present(yomargin) THEN yomargin = self.yomargin
     
 
 END ;----------------------------------------------------------------------------------------------------------------
@@ -479,6 +489,11 @@ PRO FSC_CmdWindow::SaveAsRaster, event
         rasterType = 1
     ENDELSE
     
+    ; Make this window the current graphics windows.
+    currentWindow = !D.Window
+    WSet, self.wid
+
+    ; Get a filename from the user.
     CASE filetype OF
        'BMP':  filename = FSC_Pickfile(FILE='fsc_window.bmp', /WRITE, TITLE='Select an Output File...')
        'GIF':  filename = FSC_Pickfile(FILE='fsc_window.gif', /WRITE, TITLE='Select an Output File...')
@@ -495,13 +510,12 @@ PRO FSC_CmdWindow::SaveAsRaster, event
     
         ; Normal raster.
         0: BEGIN
-           WSet, self.wid
            void = TVRead(TYPE=fileType, FILENAME=outname, /NODIALOG)
            END
            
         ; Raster via ImageMagick.
         1: BEGIN
-           
+        
            ; Create a PostScript file first.
            thisname = outname + '.ps'
            PS_Start, FILENAME=thisname
@@ -521,6 +535,9 @@ PRO FSC_CmdWindow::SaveAsRaster, event
            END
     
     ENDCASE
+    
+    ; Set the window index number back.
+    IF WindowAvailable(curentWindow) THEN WSet, currentWindow ELSE WSet, -1
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -532,9 +549,11 @@ PRO FSC_CmdWindow::SetProperty, $
     BACKGROUND=background, $       ; The background color of the window.
     DELAY=delay, $                 ; The delay between command execution.
     ERASEIT=eraseit, $             ; Set the erase flag for the window
-    COLORPALETTE=colorPalette, $   ; Change window color table vectors.
+    PALETTE=palette, $             ; Change window color table vectors.
     MULTI=multi, $                 ; Change the !P.MULTI setting for the window.
-    UPDATE=update                  ; Set if you want the commands to be updated after peoperty change.
+    XOMARGIN=xomargin, $           ; Change the !X.OMargin setting for the winow.
+    YOMARGIN=yomargin, $           ; Change the !Y.OMargin setting for the window.
+    UPDATE=update                  ; Set if you want the commands to be updated after property change.
     
     Compile_Opt idl2
     
@@ -551,15 +570,15 @@ PRO FSC_CmdWindow::SetProperty, $
             THEN *self.background = background $
             ELSE self.background = Ptr_New(background)
     ENDIF 
-    IF N_Elements(colorpalette) NE 0 THEN BEGIN
-        IF Size(colorpalette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
-        dims = Size(colorpalette, /DIMENSIONS)
+    IF N_Elements(palette) NE 0 THEN BEGIN
+        IF Size(palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
+        dims = Size(palette, /DIMENSIONS)
         threeIndex = Where(dims EQ 3)
         IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
-        IF threeIndex EQ 0 THEN colorPalette = Transpose(colorPalette)
-        *self.r = colorPalette[*,0]
-        *self.g = colorPalette[*,1]
-        *self.b = colorPalette[*,2]
+        IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
+        *self.r = palette[*,0]
+        *self.g = palette[*,1]
+        *self.b = palette[*,2]
     ENDIF   
     IF N_Elements(delay) NE 0 THEN self.delay = delay
     IF N_Elements(eraseit) NE 0 THEN self.eraseit = Keyword_Set(eraseit)
@@ -567,6 +586,9 @@ PRO FSC_CmdWindow::SetProperty, $
         IF (N_Elements(multi) EQ 1) && (multi EQ 0) THEN multi = IntArr(5)
         FOR j=0,N_Elements(multi)-1 DO self.pmulti[j] = multi[j]
     ENDIF
+    IF N_Elements(xomargin) NE 0 THEN self.xomargin = xomargin
+    IF N_Elements(yomargin) NE 0 THEN self.yomargin = yomargin
+    
 
     ; Update now?
     IF Keyword_Set(update) THEN self -> ExecuteCommands
@@ -595,6 +617,8 @@ FUNCTION FSC_CmdWindow::Init, $
    ReplaceCmd=replacecmd, $         ; Replace the current command and execute in the current window.
    WEraseIt = Weraseit, $           ; Set this keyword to erase the display before executing the command.
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
+   WOXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
+   WOYMargin = woymargin, $         ; Set the !Y.OMargin. A two element array
    WXSize = wxsize, $               ; The X size of the FSC_Window graphics window in pixels. By default: 400.
    WYSize = wysize, $               ; The Y size of the FSC_Window graphics window in pixels. By default: 400.
    WTitle = wtitle, $               ; The window title.
@@ -629,7 +653,7 @@ FUNCTION FSC_CmdWindow::Init, $
     IF N_Elements(wbackground) EQ 0 THEN BEGIN
         background='white'
         IF N_Elements(command) EQ 0 THEN eraseit = 1
-        IF (N_Elements(command) NE 0) && (StrUpCase(StrMid(command,0,3)) EQ 'FSC') THEN eraseit = 1
+        IF (N_Elements(command) NE 0) && CoyoteGraphic(command) THEN eraseit = 1
     ENDIF ELSE BEGIN
         background = wbackground
         eraseit = 1
@@ -721,6 +745,8 @@ FUNCTION FSC_CmdWindow::Init, $
     IF N_Elements(wmulti) NE 0 THEN BEGIN
        FOR j=0,N_Elements(wmulti)-1 DO self.pmulti[j] = wmulti[j]
     ENDIF
+    IF N_Elements(wxomargin) NE 0 THEN self.xomargin = wxomargin
+    IF N_Elements(wyomargin) NE 0 THEN self.yomargin = wyomargin
 
     ; Execute the commands.
     self -> ExecuteCommands 
@@ -809,6 +835,8 @@ PRO FSC_CmdWindow__Define, class
               g: Ptr_New(), $               ; The green color table vector.
               b: Ptr_New(), $               ; The blue color table vector.
               pmulti: LonArr(5), $          ; Identical to !P.Multi.
+              xomargin: FltArr(2), $        ; Identical to !X.OMargin
+              yomargin: FltArr(2), $        ; Identical to !Y.OMargin
               cmds: Obj_New(), $            ; A linkedlist object containing the graphics commands.
               delay: 0.0, $                 ; The command delay.
               background: Ptr_New(), $      ; The background color.
@@ -1165,11 +1193,13 @@ END ;---------------------------------------------------------------------------
 ;        Written, 17 January 2011. DWF.
 ;        Fixed a problem with the example code, and added EMPTY to end of Draw method
 ;           to force UNIX machines to empty the graphics buffer after CALL_PROCEDURE. 20 Jan 2011. DWF.
+;        Improved documentation and error handling. 19 Jan 2011. DWF.
+;        More improved error handling and messages. 26 Jan 2011. DWF.
+;        Made changes to accommodate the new FSC_WControl routine. 27 Jan 2011. DWF.
+;        Added WXOMARGIN and WYOMARGIN keywords. 28 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
-;     Improved documentation and error handling. 19 Jan 2011. DWF.
-;     More improved error handling and messages. 26 Jan 2011. DWF.
 ;-
 PRO FSC_Window, $
    command, $                       ; The graphics "command" to execute.
@@ -1180,6 +1210,8 @@ PRO FSC_Window, $
    WBackground = wbackground, $     ; The background color. Set to !P.Background by default.
    WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.   
+   WOXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
+   WOYMargin = woymargin, $         ; Set the !Y.OMargin. A two element array
    WXSize = wxsize, $               ; The X size of the FSC_Window graphics window in pixels. By default: 400.
    WYSize = wysize, $               ; The Y size of the FSC_Window graphics window in pixels. By default: 400.
    WTitle = wtitle, $               ; The window title.

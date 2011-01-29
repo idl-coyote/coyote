@@ -1,11 +1,11 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   WhoCalledMe
+;   WhoAmI
 ;
 ; PURPOSE:
-;   This is a function that will identify the caller of the program module
-;   that contains this funciton.
+;   This is a function that will identify the name of the procedure or function which
+;   calls this function.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -37,8 +37,8 @@
 ;
 ;+
 ; :Description:
-;   This is a function that will identify the caller of the program module
-;   that contains this funciton.
+;   This is a function that will identify the name of the procedure or function which
+;   calls this function.
 ;
 ; :Categories:
 ;    Utilities
@@ -51,21 +51,21 @@
 ;     
 ; : Return Value:
 ;     caller:
-;         A string in uppercase letters identifying the caller of the program
-;         module from which this program was called.
+;         A string in uppercase letters identifying the name of the program
+;         module containing this function.
 ;         
 ; :Examples:
-;    Used to determine which module called this module containing WhoCalledMe::
-;       IDL> Print, WhoCalledMe()
+;    Used to a module by name::
+;       IDL> Print, WhoAmI()
 ;       
 ;       ; Compile and run the following main level program.
 ;       ;***************************
 ;       PRO junker
-;          Print, WhoCalledMe()
+;          Print, WhoAmI()
 ;       END
 ;       
 ;       PRO junk
-;          Print, WhoCalledMe()
+;          Print, WhoAmI()
 ;       END
 ;       
 ;       junk
@@ -73,8 +73,8 @@
 ;       ;**************************
 
 ;       IDL> .go
-;            $MAIN$
 ;            JUNK
+;            JUNKER
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -87,12 +87,12 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 16 January 2011. DWF. 
+;        Written, 28 January 2011. DWF. 
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-FUNCTION WhoCalledMe
+FUNCTION WhoAmI
 
    Compile_Opt idl2
 
@@ -104,11 +104,11 @@ FUNCTION WhoCalledMe
    
    ; Find where I am in the call stack. The calling program is up
    ; two levels from there. Unless, of course, I am close to $MAIN$.
-   index = Where(StrMid(callstack, 0, 11) EQ 'WHOCALLEDME', count)
+   index = Where(StrMid(callstack, 0, 6) EQ 'WHOAMI', count)
    IF count GE 1 THEN index = (Reverse(index))[0] 
-   callingRoutine = (StrSplit(StrCompress(callStack[(index-1) > 0])," ", /Extract))[0]
+   thisRoutine = (StrSplit(StrCompress(callStack[(index-1) > 0])," ", /Extract))[0]
    
    ; Return the answer.
-   RETURN, callingRoutine
+   RETURN, thisRoutine
    
 END

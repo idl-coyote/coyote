@@ -1,15 +1,16 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   WhoCalledMe
+;   CoyoteGraphic
 ;
 ; PURPOSE:
-;   This is a function that will identify the caller of the program module
-;   that contains this funciton.
+;   This simple just identifies a routine as a Coyote Graphic routine. It is written
+;   primarily so I can identify such routines before I assign a background color to
+;   a graphics window.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
-;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
+;  Copyright (c) 2010, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -37,44 +38,22 @@
 ;
 ;+
 ; :Description:
-;   This is a function that will identify the caller of the program module
-;   that contains this funciton.
+;   This simple just identifies a routine as a Coyote Graphic routine. It is written
+;   primarily so I can identify such routines before I assign a background color to
+;   a graphics window.
 ;
 ; :Categories:
-;    Utilities
+;    Graphics
 ;    
 ; :Params:
-;    none
+;    None.
 ;       
 ; :Keywords:
-;     none
-;     
-; : Return Value:
-;     caller:
-;         A string in uppercase letters identifying the caller of the program
-;         module from which this program was called.
-;         
+;     None.
+;          
 ; :Examples:
-;    Used to determine which module called this module containing WhoCalledMe::
-;       IDL> Print, WhoCalledMe()
-;       
-;       ; Compile and run the following main level program.
-;       ;***************************
-;       PRO junker
-;          Print, WhoCalledMe()
-;       END
-;       
-;       PRO junk
-;          Print, WhoCalledMe()
-;       END
-;       
-;       junk
-;       END
-;       ;**************************
-
-;       IDL> .go
-;            $MAIN$
-;            JUNK
+;    Used in graphics programs::
+;       IDL> IF CoyoteGraphic() THEN background = 'white'
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -87,28 +66,43 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 16 January 2011. DWF. 
+;        Written, 18 January 2011. DWF.      
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-FUNCTION WhoCalledMe
+FUNCTION CoyoteGraphic, routine
 
-   Compile_Opt idl2
-
-   ; Return to caller on error.
-   On_Error, 2
-
-   ; Get the call stack and the calling routine's name.
-   callStack = Scope_Traceback()
-   
-   ; Find where I am in the call stack. The calling program is up
-   ; two levels from there. Unless, of course, I am close to $MAIN$.
-   index = Where(StrMid(callstack, 0, 11) EQ 'WHOCALLEDME', count)
-   IF count GE 1 THEN index = (Reverse(index))[0] 
-   callingRoutine = (StrSplit(StrCompress(callStack[(index-1) > 0])," ", /Extract))[0]
-   
-   ; Return the answer.
-   RETURN, callingRoutine
+    list = [ $
+      'CTLOAD', $
+      'DCBAR', $
+      'FSC_ARROW', $
+      'FSC_AXIS', $
+      'FSC_COLOR', $
+      'FSC_COLORBAR', $
+      'FSC_COLORFILL', $
+      'FSC_COLORSELECT', $
+      'FSC_CONTOUR', $
+      'FSC_DISPLAY', $
+      'FSC_ERASE', $
+      'FSC_PLOT', $
+      'FSC_PLOTS', $
+      'FSC_SURF', $
+      'FSC_SURFACE', $
+      'FSC_TEXT', $
+      'FSC_WCONTROL', $
+      'FSC_WDELETE', $
+      'FSC_WINDOW', $
+      'FSC_WSET', $  
+      'HISTOPLOT', $
+      'TVIMAGE', $
+      'TVSCALE', $
+      'XCOLORS' $
+      ]
+      
+   ; Can you find the routine in the list.
+   index = Where(list EQ StrUpCase(routine), count)
+   RETURN, count
    
 END
+      

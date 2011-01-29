@@ -149,6 +149,14 @@
 ;               in the window. You can recover these new position coordinates
 ;               as the output from the POSITION keyword.
 ;
+;    LAYOUT:    This keyword specifies a grid with a graphics window and determines 
+;               where the graphic should appear. The syntax of LAYOUT is a 3-element 
+;               array: [ncolumns, nrows, location]. The grid is determined by the 
+;               number of columns (ncolumns) by the number of rows (nrows). The location 
+;               of the graphic is determined by the third number. The grid numbering 
+;               starts in the upper left (1) and goes sequentually by column and then
+;               by row.
+;               
 ;     MARGIN:   A single value, expressed as a normalized coordinate, that
 ;               can easily be used to calculate a position in the window.
 ;               The margin is used to calculate a POSITION that gives
@@ -219,6 +227,14 @@
 ;                    Plot, Findgen(11), Position=[0.1, 0.3, 0.8, 0.95]
 ;                    TVImage, image, /Overplot
 ;
+;     PALETTE:  Set this keyword to a 3 x N or N x 3 byte array containing
+;               the RGB color vectors to be loaded before the image is displayed.
+;               Such vectors can be obtained, for example, from CTLOAD with the
+;               RGB_TABLE keyword:
+;               
+;                    CTLoad, 4, /BREWER, /REVERSE, RGB_TABLE=palette
+;                    TVImage, LoadData(7), PALETTE=palette
+;                    
 ;     POSITION: The location of the image in the output window. This is
 ;               a four-element floating array of normalized coordinates of
 ;               the type given by !P.POSITION or the POSITION keyword to
@@ -502,6 +518,7 @@
 ;        Added FONT, CHARSIZE, and TITLE keywords. 11 Jan 2011. DWF.
 ;        Depreciated ACOLOR keyword in favor of new COLOR keyword. 11 Jan 2011. DWF.
 ;        Added ADDCMD and WINDOW keywords to allow TVIMAGE to work with FSC_Window. 26 Jan 2011. DWF.
+;        Added LAYOUT and PALETTE keywords. 28 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2011, by Fanning Software Consulting, Inc.                           ;
@@ -678,6 +695,7 @@ PRO TVIMAGE, image, x, y, $
    ERASE=eraseit, $
    HALF_HALF=half_half, $ ; Obsolete and not used.
    KEEP_ASPECT_RATIO=keep, $
+   LAYOUT=layout, $
    MARGIN=margin, $
    MAXVALUE=max, $
    MINUS_ONE=minusOne, $
@@ -686,6 +704,7 @@ PRO TVIMAGE, image, x, y, $
    NCOLORS=ncolors, $
    NOINTERPOLATION=nointerp, $
    NORMAL=normal, $
+   PALETTE=palette, $
    POSITION=position, $
    OVERPLOT=overplot, $
    QUIET=quiet, $
@@ -706,6 +725,7 @@ PRO TVIMAGE, image, x, y, $
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
        ok = Error_Message()
+       IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
        RETURN
     ENDIF
     
@@ -729,6 +749,9 @@ PRO TVIMAGE, image, x, y, $
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
         eraseit = 1 ; Must always erase in FSC_Window, unless you are adding TVIMAGE to FSC_Window
         
+        ; If you are using a layout, you can't ever erase.
+        IF N_Elements(layout) NE 0 THEN eraseit = 0
+        
         ; If we are adding a command, we have to do something different.
         IF Keyword_Set(addcmd) THEN BEGIN
             eraseit = 0
@@ -746,6 +769,7 @@ PRO TVIMAGE, image, x, y, $
                ERASE=eraseit, $
                HALF_HALF=half_half, $ ; Obsolete and not used.
                KEEP_ASPECT_RATIO=keep, $
+               LAYOUT=layout, $
                MARGIN=margin, $
                MAXVALUE=max, $
                MINUS_ONE=minusOne, $
@@ -754,6 +778,7 @@ PRO TVIMAGE, image, x, y, $
                NCOLORS=ncolors, $
                NOINTERPOLATION=nointerp, $
                NORMAL=normal, $
+               PALETTE=palette, $
                POSITION=position, $
                OVERPLOT=overplot, $
                QUIET=quiet, $
@@ -786,6 +811,7 @@ PRO TVIMAGE, image, x, y, $
            ERASE=eraseit, $
            HALF_HALF=half_half, $ ; Obsolete and not used.
            KEEP_ASPECT_RATIO=keep, $
+           LAYOUT=layout, $
            MARGIN=margin, $
            MAXVALUE=max, $
            MINUS_ONE=minusOne, $
@@ -794,6 +820,7 @@ PRO TVIMAGE, image, x, y, $
            NCOLORS=ncolors, $
            NOINTERPOLATION=nointerp, $
            NORMAL=normal, $
+           PALETTE=palette, $
            POSITION=position, $
            OVERPLOT=overplot, $
            QUIET=quiet, $
@@ -820,11 +847,26 @@ PRO TVIMAGE, image, x, y, $
     ; Which release of IDL is this?
     thisRelease = Float(!Version.Release)
     
-    IF N_Elements(font) EQ 0 THEN font = !P.Font
-    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
-    
     ; If the background color is specified, then ERASEIT should be automatically set.
     IF N_Elements(background) NE 0 THEN eraseit = 1
+    
+    ; Set up the layout, if necessary.
+    IF N_Elements(layout) NE 0 THEN BEGIN
+       thisMulti = !P.Multi
+       totalPlots = layout[0]*layout[1]
+       !P.Multi = [0,layout[0], layout[1], 0, 0]
+       IF layout[2] EQ 1 THEN BEGIN
+            eraseit = 0
+            overplot = 0
+            !P.Multi[0] = 0
+       ENDIF ELSE BEGIN
+            !P.Multi[0] = totalPlots - layout[2] + 1
+       ENDELSE
+    ENDIF
+
+     ; Character size has to be determined *after* the layout has been decided.
+    IF N_Elements(font) EQ 0 THEN font = !P.Font
+    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
     
     ; Doing multiple plots?
     IF Total(!P.Multi) GT 0 THEN multi = 1 ELSE multi = 0
@@ -901,9 +943,17 @@ PRO TVIMAGE, image, x, y, $
     ; Before you do anything, get the current color table vectors
     ; so they can be restored later.
     TVLCT, rr, gg, bb, /Get
+    IF N_Elements(palette) NE 0 THEN BEGIN
+        IF Size(palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
+        dims = Size(palette, /DIMENSIONS)
+        threeIndex = Where(dims EQ 3)
+        IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
+        IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
+        TVLCT, palette
+    ENDIF
     
     ; Do you need to erase the window before image display?
-    IF Keyword_Set(eraseit) AND (!P.MULTI[0] EQ 0) THEN BEGIN
+    IF Keyword_Set(eraseit) && (!P.MULTI[0] EQ 0) && (N_Elements(layout) EQ 0) THEN BEGIN
          IF (!D.Flags AND 256) NE 0 THEN BEGIN
             FSC_Erase, background
          ENDIF ELSE BEGIN
@@ -1005,7 +1055,7 @@ PRO TVIMAGE, image, x, y, $
     
     ; If a window is not open, open one, otherwise in X devices you get incorrect
     ; window size information the first time you call TVIMAGE.
-    IF (!D.FLAGS AND 256) NE 0 THEN IF (!D.Window EQ -1) THEN Window
+    IF (!D.FLAGS AND 256) NE 0 THEN IF (!D.Window EQ -1) THEN FSC_Display
     
     ; Check for position and overplot keywords.
     IF N_Elements(position) EQ 0 THEN BEGIN
@@ -1013,7 +1063,8 @@ PRO TVIMAGE, image, x, y, $
           ; Draw the invisible plot to get plot position.
           IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
           Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
-             XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]], NOERASE=tempNoErase
+             XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]], $
+             NOERASE=N_Elements(layout) EQ 0 ? tempNoErase : 1
           position = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
           TVLCT, rr, gg, bb
        ENDIF ELSE BEGIN
@@ -1026,7 +1077,8 @@ PRO TVIMAGE, image, x, y, $
           ; Draw the invisible plot to get plot position.
           IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
           Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
-              XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]], NOERASE=tempNoErase
+              XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]], $
+             NOERASE=N_Elements(layout) EQ 0 ? tempNoErase : 1
           TVLCT, rr, gg, bb
           ; Use position coordinates to indicate position in this set of coordinates.
           xrange = !X.Window[1] - !X.Window[0]
@@ -1457,5 +1509,8 @@ PRO TVIMAGE, image, x, y, $
         !X = bangx
         !Y = bangy
     ENDIF
+
+    ; Clean up if you are using a layout.
+    IF N_Elements(layout) NE 0 THEN !P.Multi = thisMulti
 
 END

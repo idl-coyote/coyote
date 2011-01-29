@@ -58,6 +58,8 @@
 ;         drawn or connected.
 ;         
 ; :Keywords:
+;     addcmd: in, optional, type=boolean, default=0
+;        Set this keyword to add the command to an FSC_Window display.
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, 'black'.
 ;        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
@@ -113,6 +115,7 @@
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO FSC_PlotS, x, y, z, $
+    ADDCMD=addcmd, $
     COLOR=scolor, $
     PSYM=psym, $
     SYMCOLOR=ssymcolor, $
@@ -137,7 +140,7 @@ PRO FSC_PlotS, x, y, z, $
     ENDIF
     
     ; Should this be added to a resizeable graphics window?
-    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    IF (Keyword_Set(window) OR Keyword_Set(addcmd)) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
         FSC_Window, 'FSC_PlotS', x, y, z, $
             COLOR=scolor, $

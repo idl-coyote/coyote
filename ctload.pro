@@ -37,6 +37,9 @@
 ;
 ; KEYWORDS:
 ;
+;       ADDCMD:        Set this keyword to add the CTLOAD command to the current FSC_Window
+;                      command list. 
+;               
 ;       BOTTOM:        The first color table index. Set to 0 by default.
 ;
 ;       BREWER:        Set this keyword if you wish to use the Brewer Colors, as
@@ -135,6 +138,7 @@
 ;       Added ROW keyword to transpose color table vectors for new graphics functions 
 ;          in IDL 8. 23 Nov 2010. DWF.
 ;       Added WINDOW and WINID keywords. 26 January 2011. DWF.
+;       Added ADDCMD keyword. 29 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -195,6 +199,34 @@ PRO CTLOAD, table, $
       IF N_Elements(lun) NE 0 THEN Free_Lun, lun
       RETURN
    ENDIF
+   
+    ; Are you adding this command to an FSC_Window command list?
+    ; Should this be added to a resizeable graphics window?
+    IF Keyword_Set(addcmd) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    
+        windowIDs = FSC_QueryWin(COUNT=wincnt)
+        IF N_Elements(winid) NE 0 THEN BEGIN
+            IF (wincnt GT 0) THEN BEGIN
+                index = Where(windowIDs EQ winID)
+                IF index[0] NE -1 THEN FSC_WSet, winid
+            ENDIF
+        ENDIF
+        IF wincnt EQ 0 THEN FSC_Window
+        FSC_Window, 'CTLoad', table, $
+           BREWER=brewer, $
+           BOTTOM=bottom, $
+           CLIP = clip, $
+           RGB_TABLE=color_table, $
+           FILE=file, $
+           GET_NAMES=get_names, $
+           NCOLORS=ncolors, $
+           REVERSE=reverse, $
+           ROW=row, $
+           SILENT=silent, $
+           WINID=winID
+           ADDCMD=1
+         RETURN
+    ENDIF
 
    ; Check keywords and arguments.
    IF N_Elements(table) EQ 0 THEN table = 0

@@ -67,6 +67,14 @@
 ;       L64:              If set, the return value of HISTOGRAM are 64-bit integers, rather than
 ;                         the default 32-bit integers.
 ;
+;       LAYOUT:           This keyword specifies a grid with a graphics window and determines 
+;                         where the graphic should appear. The syntax of LAYOUT is a 3-element 
+;                         array: [ncolumns, nrows, location]. The grid is determined by the 
+;                         number of columns (ncolumns) by the number of rows (nrows). The location 
+;                         of the graphic is determined by the third number. The grid numbering 
+;                         starts in the upper left (1) and goes sequentually by column and then
+;                         by row.
+;               
 ;       LINE_FILL:        If set, the polygons are filled with lines instead of solid color. If
 ;                         this keyword is set, the following keywords can also be used.
 ;
@@ -201,6 +209,7 @@
 ;             to include DataType GE 12, too. 8 Dec 2010. DWF.
 ;       Added WINDOW keyword. 24 Jan 2011. DWF.
 ;       Added ADDCMD keyword. 26 Jan 2011. DWF.
+;       Added LAYOUT keyword. 28 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2011, by Fanning Software Consulting, Inc.                           ;
@@ -238,8 +247,10 @@ PRO HistoPlot, $                    ; The program name.
    _REF_EXTRA=extra, $              ; For passing extra keywords.
    FILE=file, $                     ; For specifying a color name file.
    FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
+   LAYOUT=layout, $                 ; Select the grid layout.
    MAX_VALUE=max_value, $           ; The maximum value to plot.
    MIN_VALUE=min_value, $           ; The minimum value to plot.
+   NOERASE=noerase, $               ; Set this keyword to avoid erasing when plot is drawn.
    MISSING=missing, $               ; The value that indicates "missing" data to be excluded from the histgram.
    OPLOT=overplot, $                ; Set if you want overplotting.
    OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
@@ -289,6 +300,7 @@ PRO HistoPlot, $                    ; The program name.
                 IF N_Elements(_dataToHistogram) NE 0 THEN dataToHistogram = Temporary(_dataToHistogram)
             ENDIF
       ENDELSE
+      IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
       RETURN
    ENDIF
 
@@ -296,6 +308,9 @@ PRO HistoPlot, $                    ; The program name.
     IF Keyword_Set(addcmd) THEN window = 1
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
+        ; If you are using a layout, you can't ever erase.
+        IF N_Elements(layout) NE 0 THEN noerase = 1
+        
         ; Have to do something different if we are overplotting or adding a command.
         IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
             FSC_Window, 'Histoplot', $          ; The program name.
@@ -306,10 +321,11 @@ PRO HistoPlot, $                    ; The program name.
                _REF_EXTRA=extra, $              ; For passing extra keywords.
                FILE=file, $                     ; For specifying a color name file.
                FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
+               LAYOUT=layout, $
                MAX_VALUE=max_value, $           ; The maximum value to plot.
                MIN_VALUE=min_value, $           ; The minimum value to plot.
                MISSING=missing, $               ; The value that indicates "missing" data to be excluded from the histgram.
-               OPLOT=overplot, $                ; Set if you want overplotting.
+               NOERASE=noerase, $               ; Set this keyword to avoid erasing when plot is drawn.               OPLOT=overplot, $                ; Set if you want overplotting.
                OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
                OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
                PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
@@ -356,9 +372,11 @@ PRO HistoPlot, $                    ; The program name.
                _REF_EXTRA=extra, $              ; For passing extra keywords.
                FILE=file, $                     ; For specifying a color name file.
                FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
+               LAYOUT=layout, $
                MAX_VALUE=max_value, $           ; The maximum value to plot.
                MIN_VALUE=min_value, $           ; The minimum value to plot.
                MISSING=missing, $               ; The value that indicates "missing" data to be excluded from the histgram.
+               NOERASE=noerase, $               ; Set this keyword to avoid erasing when plot is drawn.               OPLOT=overplot, $                ; Set if you want overplotting.
                OPLOT=overplot, $                ; Set if you want overplotting.
                OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
                OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
@@ -466,6 +484,19 @@ PRO HistoPlot, $                    ; The program name.
    IF N_Elements(backColorName) EQ 0 THEN backColorName = "White"
    IF N_Elements(dataColorName) EQ 0 THEN dataColorName = "Indian Red"
    
+    ; Set up the layout, if necessary.
+    IF N_Elements(layout) NE 0 THEN BEGIN
+       thisMulti = !P.Multi
+       totalPlots = layout[0]*layout[1]
+       !P.Multi = [0,layout[0], layout[1], 0, 0]
+       IF layout[2] EQ 1 THEN BEGIN
+            noerase = 1
+            !P.Multi[0] = 0
+       ENDIF ELSE BEGIN
+            !P.Multi[0] = totalPlots - layout[2] + 1
+       ENDELSE
+    ENDIF
+
    ; Choose an axis color.
    IF N_Elements(axisColorName) EQ 0 AND N_Elements(saxescolor) NE 0 THEN axisColorName = saxescolor
    IF N_Elements(axisColorName) EQ 0 THEN BEGIN
@@ -563,6 +594,7 @@ PRO HistoPlot, $                    ; The program name.
              Background=backColor, $
              Color=axisColor, $                       ; The color of the axes.
              NoData=1, $                              ; Draw the axes only. No data.
+             NOERASE=noerase, $
              XTHICK=thick, $                          ; Axes thicker, if needed.
              YTHICK=thick, $
              XStyle=5, $                              ; Exact axis scaling. No autoscaled axes.
@@ -697,5 +729,7 @@ PRO HistoPlot, $                    ; The program name.
    ; Clean up. But you really can't do this in the Z-buffer. 
    IF !D.Name NE 'Z' THEN TVLCT, r, g, b
    
+    ; Clean up if you are using a layout.
+    IF N_Elements(layout) NE 0 THEN !P.Multi = thisMulti
 
 END

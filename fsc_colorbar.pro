@@ -37,6 +37,9 @@
 ;
 ; KEYWORD PARAMETERS:
 ;
+;       ADDCMD:       Set this keyword to add the FSC_Colorbar command to the current FSC_Window
+;                     command list. 
+;               
 ;       ANNOTATECOLOR: The name of the "annotation color" to use. The names are those for
 ;                     FSC_COLOR, and using the keyword implies that FSC_COLOR is also in
 ;                     your !PATH. If this keyword is used, the annotation color is loaded
@@ -248,6 +251,7 @@
 ;      6 Dec 2010. I was always setting COLOR to ANNOTATECOLOR. I should only do that if
 ;             COLOR is undefined. DWF.
 ;      24 Jan 2011. Added WINDOW keyword. DWF.
+;      29 Jan 2011. Added ADDCMD keyword. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -277,6 +281,7 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 PRO FSC_COLORBAR, $
+    ADDCMD=addcmd, $
     ANNOTATECOLOR=annotatecolor, $
     BOTTOM=bottom, $
     CHARSIZE=charsize, $
@@ -317,8 +322,9 @@ PRO FSC_COLORBAR, $
     ENDIF
 
     ; Should this be added to a resizeable graphics window?
-    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    IF (Keyword_Set(window) OR Keyword_Set(addcmd)) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
+        IF Keyword_Set(addcmd) THEN window = 0
         void = FSC_QueryWin(COUNT=wincnt)
         IF wincnt EQ 0 THEN FSC_Window
         FSC_Window, 'FSC_Colorbar', $
@@ -348,7 +354,8 @@ PRO FSC_COLORBAR, $
             VERTICAL=vertical, $
             XLOG=xlog, $
             YLOG=ylog, $
-            ADDCMD=1, $
+            REPLACECMD=Keyword_Set(window), $
+            ADDCMD=Keyword_Set(addcmd), $
              _EXTRA=extra
 
             

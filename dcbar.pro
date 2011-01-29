@@ -38,6 +38,9 @@
 ;
 ; KEYWORD PARAMETERS:
 ;
+;       ADDCMD:       Set this keyword to add the DCBar command to the current FSC_Window
+;                     command list. 
+;               
 ;       BARCOLOR:     This is the name of a color known to FSC_COLOR that can be
 ;                     used to draw the color bar outlines. By default, the same as
 ;                     specified with the COLOR keyword.
@@ -144,7 +147,7 @@
 ;           23 Apr 2010. DWF.
 ;       Modified the spacing of the labels on the color bar, specifically for the 
 ;           PostScript device. 3 November 2010. DWF.
-;       Added Window keyword. 28 Jan 2011. DWF.
+;       Added Window and AddCmd keywords. 28 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009-2010, by Fanning Software Consulting, Inc.                           ;
@@ -174,6 +177,7 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 PRO DCBar, colors, $
+    ADDCMD=addcmd, $
     BARCOLOR=barcolor, $
     BOTTOM=bottom, $
     CHARSIZE=charsize, $
@@ -199,8 +203,9 @@ PRO DCBar, colors, $
     ENDIF 
     
     ; Should this be added to a resizeable graphics window?
-    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    IF (Keyword_Set(window) OR Keyword_Set(addcmd)) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
+        IF Keyword_Set(addcmd) THEN window = 0
         void = FSC_QueryWin(COUNT=wincnt)
         IF wincnt EQ 0 THEN FSC_Window
         FSC_Window, 'DCBar', colors, $
@@ -218,7 +223,8 @@ PRO DCBar, colors, $
             TITLE=title, $
             TCHARSIZE=tcharsize, $
             VERTICAL=vertical, $
-            ADDCMD=1
+            REPLACECMD=Keyword_Set(window), $
+            ADDCMD=Keyword_Set(addcmd)
          RETURN
     ENDIF
 

@@ -82,6 +82,13 @@
 ;        The type of font desired for axis annotation.
 ;     isotropic: in, optional, type=boolean, default=0
 ;         A short-hand way of setting the ASPECT keyword to 1.
+;     layout: in, optional, type=intarr(3)
+;         This keyword specifies a grid with a graphics window and determines where the
+;         graphic should appear. The syntax of LAYOUT is three numbers: [ncolumns, nrows, location].
+;         The grid is determined by the number of columns (ncolumns) by the number of 
+;         rows (nrows). The location of the graphic is determined by the third number. The
+;         grid numbering starts in the upper left (1) and goes sequentually by column and then
+;         by row.
 ;     nodata: in, optional, type=boolean, default=0
 ;         Set this keyword to draw axes, but no data.
 ;     noerase: in, optional, type=boolean, default=0
@@ -152,6 +159,7 @@
 ;         Added SYMSIZE keyword. 16 Jan 2011. DWF.
 ;         Fixed a problem in which I assumed the background color was a string. 18 Jan 2011. DWF.  
 ;         Added ADDCMD keyword. 26 Jan 2011. DWF.
+;         Added LAYOUT keyword. 28 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -166,6 +174,7 @@ PRO FSC_Plot, x, y, $
     COLOR=scolor, $
     FONT=font, $
     ISOTROPIC=isotropic, $
+    LAYOUT=layout, $
     NODATA=nodata, $
     NOERASE=noerase, $
     OVERPLOT=overplot, $
@@ -183,6 +192,7 @@ PRO FSC_Plot, x, y, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
         RETURN
     ENDIF
     
@@ -194,12 +204,19 @@ PRO FSC_Plot, x, y, $
         Print, 'USE SYNTAX: FSC_Plot, x, y'
         RETURN
     ENDIF
+    
+    ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
+    ; done BEFORE checking the LAYOUT properties.
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
     
     ; Do they want this plot in a resizeable graphics window?
     IF Keyword_Set(addcmd) THEN window = 1
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
+        ; If you are using a layout, you can't ever erase.
+        IF N_Elements(layout) NE 0 THEN noerase = 1
+        
+        ; Special treatment for overplotting or adding a command.
         IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
         FSC_Window, 'FSC_Plot', x, y, $
             ASPECT=aspect, $
@@ -210,6 +227,7 @@ PRO FSC_Plot, x, y, $
             COLOR=scolor, $
             FONT=font, $
             ISOTROPIC=isotropic, $
+            LAYOUT=layout, $
             NODATA=nodata, $
             NOERASE=noerase, $
             OVERPLOT=overplot, $
@@ -223,7 +241,7 @@ PRO FSC_Plot, x, y, $
              RETURN
        ENDIF
         
-    
+        ; Open a new window or replace the current commands, as required.
         currentWindow = FSC_QueryWin(/CURRENT, COUNT=wincnt)
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
         FSC_Window, 'FSC_Plot', x, y, $
@@ -235,6 +253,7 @@ PRO FSC_Plot, x, y, $
             COLOR=scolor, $
             FONT=font, $
             ISOTROPIC=isotropic, $
+            LAYOUT=layout, $
             NODATA=nodata, $
             NOERASE=noerase, $
             OVERPLOT=overplot, $
@@ -269,6 +288,19 @@ PRO FSC_Plot, x, y, $
     
     ; Going to do this in decomposed color, if possible.
     SetDecomposedState, 1, CURRENTSTATE=currentState
+    
+    ; Set up the layout, if necessary.
+    IF N_Elements(layout) NE 0 THEN BEGIN
+       thisMulti = !P.Multi
+       totalPlots = layout[0]*layout[1]
+       !P.Multi = [0,layout[0], layout[1], 0, 0]
+       IF layout[2] EQ 1 THEN BEGIN
+            noerase = 1
+            !P.Multi[0] = 0
+       ENDIF ELSE BEGIN
+            !P.Multi[0] = totalPlots - layout[2] + 1
+       ENDELSE
+    ENDIF
 
     ; Check the keywords.
     IF N_Elements(sbackground) EQ 0 THEN BEGIN
@@ -361,8 +393,11 @@ PRO FSC_Plot, x, y, $
         axiscolor = 'OPPOSITE'
     ENDIF
     
+    ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font
     IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
+    
+    ; Other keywords.
     IF N_Elements(ssymcolor) EQ 0 THEN symcolor = color ELSE symcolor = ssymcolor
     IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
     IF Size(symcolor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN symcolor = Byte(symcolor)
@@ -452,6 +487,9 @@ PRO FSC_Plot, x, y, $
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.
     IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb
+    
+    ; Clean up if you are using a layout.
+    IF N_Elements(layout) NE 0 THEN !P.Multi = thisMulti
     
 END
     

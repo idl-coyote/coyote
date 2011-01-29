@@ -84,9 +84,24 @@
 ;        the FONT keyword will be set to 1, indicating true-type fonts. The FONT keyword must
 ;        be set to -1 (Hershey fonts) or 1 (true-type fonts) for surface annotations to be
 ;        rotated correctly in PostScript output.
+;     layout: in, optional, type=intarr(3)
+;         This keyword specifies a grid with a graphics window and determines where the
+;         graphic should appear. The syntax of LAYOUT is three numbers: [ncolumns, nrows, location].
+;         The grid is determined by the number of columns (ncolumns) by the number of 
+;         rows (nrows). The location of the graphic is determined by the third number. The
+;         grid numbering starts in the upper left (1) and goes sequentually by column and then
+;         by row.
 ;     noerase: in, optional, type=boolean, default=0
 ;        Set this keyword to prevent the window from erasing the contents before displaying
 ;        the surface plot.
+;     palette: in, optional, type=bytarr(3,N)
+;         Set this keyword to a 3 x N or N x 3 byte array containing the RGB color vectors 
+;         to be loaded before the surface is displayed. Such vectors can be obtained, for 
+;         example, from CTLOAD with the RGB_TABLE keyword:
+;               
+;             CTLoad, 33, RGB_TABLE=palette
+;             FSC_Surf, Loaddata(2), PALETTE=palette, /Elevation
+;                    
 ;     rotx: in, optional, type=float, default=30
 ;        The rotation about the X axis.
 ;     rotz: in, optional, type=float, default=30
@@ -171,6 +186,7 @@
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF. 
 ;        Fixed a problem in which I assumed the background color was a string. 18 Jan 2011. DWF.  
 ;        Added ADDCMD keyword. 26 Jan 2011. DWF.
+;        Added LAYOUT keyword. 28 Jan 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -185,7 +201,9 @@ PRO FSC_Surf, data, x, y, $
     COLOR=scolor, $
     ELEVATION_SHADING=elevation_shading, $
     FONT=font, $
+    LAYOUT=layout, $
     NOERASE=noerase, $
+    PALETTE=palette, $
     ROTX=rotx, $
     ROTZ=rotz, $
     SHADED=shaded, $
@@ -207,6 +225,7 @@ PRO FSC_Surf, data, x, y, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
         RETURN
     ENDIF
     
@@ -223,6 +242,9 @@ PRO FSC_Surf, data, x, y, $
     IF Keyword_Set(addcmd) THEN window = 1
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
+        ; If you are using a layout, you can't ever erase.
+        IF N_Elements(layout) NE 0 THEN noerase = 1
+        
         currentWindow = FSC_QueryWin(/CURRENT, COUNT=wincnt)
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
         
@@ -237,7 +259,9 @@ PRO FSC_Surf, data, x, y, $
                 COLOR=scolor, $
                 ELEVATION_SHADING=elevation_shading, $
                 FONT=font, $
+                LAYOUT=layout, $
                 NOERASE=noerase, $
+                PALETTE=palette, $
                 ROTX=rotx, $
                 ROTZ=rotz, $
                 SHADED=shaded, $
@@ -266,7 +290,9 @@ PRO FSC_Surf, data, x, y, $
             COLOR=scolor, $
             ELEVATION_SHADING=elevation_shading, $
             FONT=font, $
+            LAYOUT=layout, $
             NOERASE=noerase, $
+            PALETTE=palette, $
             ROTX=rotx, $
             ROTZ=rotz, $
             SHADED=shaded, $
@@ -288,6 +314,23 @@ PRO FSC_Surf, data, x, y, $
     ; Going to draw in decomposed color, if possible to avoid dirtying the color table.
     SetDecomposedState, 1, CURRENTSTATE=currentState
 
+    ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
+    ; done BEFORE checking the LAYOUT properties.
+    IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
+
+    ; Set up the layout, if necessary.
+    IF N_Elements(layout) NE 0 THEN BEGIN
+       thisMulti = !P.Multi
+       totalPlots = layout[0]*layout[1]
+       !P.Multi = [0,layout[0], layout[1], 0, 0]
+       IF layout[2] EQ 1 THEN BEGIN
+            noerase = 1
+            !P.Multi[0] = 0
+       ENDIF ELSE BEGIN
+            !P.Multi[0] = totalPlots - layout[2] + 1
+       ENDELSE
+    ENDIF
+
     ; Check parameters.
     ndims = Size(data, /N_DIMENSIONS)
     IF ndims NE 2 THEN Message, 'Data must be 2D.'
@@ -298,6 +341,14 @@ PRO FSC_Surf, data, x, y, $
     
     ; Get the current color table vectors.
     TVLCT, rr, gg, bb, /GET
+    IF N_Elements(palette) NE 0 THEN BEGIN
+        IF Size(palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
+        dims = Size(palette, /DIMENSIONS)
+        threeIndex = Where(dims EQ 3)
+        IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
+        IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
+        TVLCT, palette
+    ENDIF
     
     ; Check the keywords.
     IF N_Elements(sbackground) EQ 0 THEN BEGIN
@@ -404,9 +455,12 @@ PRO FSC_Surf, data, x, y, $
     IF Size(bottom, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN bottom = Byte(bottom)
     IF Size(bottom, /TYPE) LE 2 THEN bottom = StrTrim(Fix(bottom),2)
     elevation_shading = Keyword_Set(elevation_shading)
+    
+    ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN IF (!D.Name EQ 'PS') THEN font = 1 ELSE font = !P.font
     IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font) * 1.25
-    IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
+    
+    ; Other properties.
     IF N_Elements(rotx) EQ 0 THEN rotx = 30
     IF N_Elements(rotz) EQ 0 THEN rotz = 30
     IF N_Elements(xstyle) EQ 0 THEN xstyle = 0
@@ -554,7 +608,7 @@ PRO FSC_Surf, data, x, y, $
     IF BitGet(zstyle, 2) NE 1 THEN zzstyle = zstyle + 4 ELSE zzstyle = zstyle
          
     ; Make absolutely sure the colors are fresh.
-    TVLCT, rr, gg, bb
+    IF N_Elements(palette) NE 0 THEN TVLCT, palette ELSE TVLCT, rr, gg, bb
     
     ; Draw either a wire mesh or shaded surface. Care has to be taken if
     ; the SHADES keyword is used, because this also has to be done in indexed
@@ -575,7 +629,11 @@ PRO FSC_Surf, data, x, y, $
             ELSE TVLCT, Reform(origialbg), 254
             
         ; Restrict the current color table vectors to the range 0-253.
-        TVLCT, Congrid(rr,254), Congrid(gg,254), Congrid(bb,254)
+        IF N_Elements(palette) NE 0 THEN BEGIN
+            TVLCT, Congrid(palette[*,0],254), Congrid(palette[*,1],254), Congrid(palette[*,2],254)
+        ENDIF ELSE BEGIN
+            TVLCT, Congrid(rr,254), Congrid(gg,254), Congrid(bb,254)
+        ENDELSE
         
         ; If shades is defined, then we have to make sure the values there
         ; are in the range 0-253.
@@ -593,7 +651,11 @@ PRO FSC_Surf, data, x, y, $
         ; Have to repair the axes. Do this in decomposed color mode, if possible.
         ; If its not possible, you have to reload the color table that has the drawing
         ; colors in it.
-        IF currentState THEN SetDecomposedState, 1 ELSE TVLCT, rl, gl, bl
+        IF currentState THEN BEGIN
+            SetDecomposedState, 1 
+        ENDIF ELSE BEGIN
+            IF N_Elements(palette) NE 0 THEN TVLCT, palette ELSE TVLCT, rl, gl, bl
+        ENDELSE
         Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
             /NODATA, /NOERASE, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
             FONT=font, CHARSIZE=charsize, SKIRT=skirt, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz 
@@ -626,12 +688,16 @@ PRO FSC_Surf, data, x, y, $
         ; keyword is being used. Then we have to use indexed color mode.         
         IF N_Elements(shades) NE 0 THEN BEGIN
             SetDecomposedState, 0
-            TVLCT, rr, gg, bb
+            IF N_Elements(palette) NE 0 THEN TVLCT, palette ELSE TVLCT, rr, gg, bb
             Surface, data, x, y, NOERASE=1, SHADES=shades, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
                 FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz         
         ENDIF ELSE BEGIN
-            IF currentState THEN SetDecomposedState, 1 ELSE TVLCT, rl, gl, bl
+            IF currentState THEN BEGIN
+                SetDecomposedState, 1 
+            ENDIF ELSE BEGIN
+                IF N_Elements(palette) NE 0 THEN TVLCT, palette ELSE TVLCT, rl, gl, bl
+            ENDELSE
             Surface, data, x, y, NOERASE=1, COLOR=color, BOTTOM=bottom, $
                 BACKGROUND=background, SHADES=shades, SKIRT=skirt, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
@@ -661,6 +727,9 @@ PRO FSC_Surf, data, x, y, $
     !Y = newy 
     !Z = newz 
     !P = newP
+
+    ; Clean up if you are using a layout.
+    IF N_Elements(layout) NE 0 THEN !P.Multi = thisMulti
 
 END
     

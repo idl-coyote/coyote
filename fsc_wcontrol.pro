@@ -60,24 +60,43 @@
 ;         This keyword applies only to keywords that manipulate commands in the command
 ;         list (e.g., DeleteCmd). It specifies the command index number of the command 
 ;         for which the action is desired.
-;     colorpalette: in, optional, type=BytArr(N,3)
-;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
-;         R, G, and B vectors of a color table. It is probably easier to use CTLOAD or
-;         XCOLORS to load color tables for the window, but this is provided as another option.
 ;     delay: in, optional, type=float
 ;         Set this keyword to the amount of "delay" you want between commands in the command list.
+;     delete_ps: in, optional, type=boolean, default=1
+;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
+;         when making raster file output.
 ;     deletecmd: in, optional, type=boolean
 ;          Set this keyword to delete a command in the FSC_Window. The keywords cmdIndex and All
 ;          are used in deleting the specified command.
+;     encapsulated: in, optional, type=boolean, default=0
+;          Set this keyword to configure PSCONFIG to produce encapsulated PostScript output by default.
+;     european: in, optional, type=boolean, default=0
+;          Set this keyword to configure PSCONFIG to use European-style values in its interface.
 ;     eraseit: in, optional, type=boolean
 ;         If this property is set, the FSC_Window erases with the background color before
 ;         displaying the commands in the window's command list.
+;     im_allow_transparent: in, optional, type=boolean, default=0
+;         Set this keyword to allow ImageMagick to create transparent backgrounds when it
+;         makes raster image files from PostScript output.
+;     im_density: in, optional, type=integer, default=300
+;         Set this keyword to the sampling density when ImageMagick creates raster image
+;         file from PostScript outout.
+;     im_options: in, optional, type=string, default=""
+;         Set this keyword to any ImageMagick options you would like to pass along to the
+;         ImageMagick convert command when creating raster image files from PostScript output.
+;     im_resize: in, optional, type=integer, default=25
+;         Set this keyword to percentage that the raster image file created my ImageMagick
+;         from PostScript output should be resized.
 ;     multi: in, optional, type=Intarr(5)
 ;         Set this keyword to the !P.MULTI setting you want to use for the window.
 ;         !P.MULTI is set to this setting before command execution, and set back to
 ;         it's default value when the commands are finished executing.
 ;     object: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be an object reference.
+;     palette: in, optional, type=BytArr(N,3)
+;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
+;         R, G, and B vectors of a color table. It is probably easier to use CTLOAD or
+;         XCOLORS to load color tables for the window, but this is provided as another option.
 ;     title: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be a window title. All
 ;         matching is done in uppercase characters.
@@ -112,16 +131,23 @@ PRO FSC_WControl, selection, $
     ALL=all, $
     BACKGROUND=background, $
     CMDINDEX=cmdIndex, $
-    COLORPALETTE=colorPalette, $
+    PALETTE=palette, $
     DELAY=delay, $
-    DELETECMD = deleteCmd, $
+    DELETECMD=deleteCmd, $
     ERASEIT=eraseit, $
     LISTCMD=listCmd, $
     MULTI=multi, $
     OBJECT=object, $
     TITLE=title, $
     UPDATE=update, $
-    WIDGETID=widgetID
+    WIDGETID=widgetID, $
+    IM_ALLOW_TRANSPARENT=im_allow_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+    IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+    IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+    IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+    DELETE_PS=delete_ps, $                        ; Delete the PostScript file when making IM files.
+    EUROPEAN=european, $                          ; Select European measurements in PostScript output.
+    ENCAPSULATED=encapsulated                     ; Create Encapsulated PostScript output.
     
    Compile_Opt idl2
     
@@ -201,9 +227,17 @@ PRO FSC_WControl, selection, $
         BACKGROUND=background, $
         DELAY=delay, $
         ERASEIT=eraseit, $
-        COLORPALETTE=colorPalette, $
+        PALETTE=palette, $
         MULTI=multi, $
-        UPDATE=update
+        UPDATE=update, $
+        IM_ALLOW_TRANSPARENT = im_allow_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+        IM_DENSITY = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+        IM_RESIZE = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+        IM_OPTIONS = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+        DELETE_PS = delete_ps, $                        ; Delete the PostScript file when making IM files.
+        EUROPEAN = european, $                          ; Select European measurements in PostScript output.
+        ENCAPSULATED = encapsulated                     ; Create Encapsulated PostScript output.
+        
     
     
 END 

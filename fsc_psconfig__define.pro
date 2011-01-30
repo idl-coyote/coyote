@@ -56,7 +56,7 @@
 ;       "Color (Landscape)" - A "centered" landscape plot, with color turned on.
 ;
 ;   Directory - Set this keyword to the name of the starting directory. The current directory is used by default.
-;   Encapsulate - Set this keyword to select Encapsulated PostScript output. Turned off by default.
+;   Encapsulated - Set this keyword to select Encapsulated PostScript output. Turned off by default.
 ;   European - Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units). Turned off by default.
 ;   Filename - Set thie keyword to the name of the PostScript file. The default is "idl.ps".
 ;   Inches - Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters. Set by European keyword by default.

@@ -86,7 +86,7 @@
 ;       "Color (Landscape)" - A "centered" landscape plot, with color turned on.
 ;
 ;   Directory - Set this keyword to the name of the starting directory. The current directory is used by default.
-;   Encapsulate - Set this keyword to select Encapsulated PostScript output. Turned off by default.
+;   Encapsulated - Set this keyword to select Encapsulated PostScript output. Turned off by default.
 ;   European - Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units). Turned off by default.
 ;   Filename - Set thie keyword to the name of the PostScript file. The default is "idl.ps".
 ;   Inches - Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters. Set by European keyword by default.
@@ -151,6 +151,7 @@
 ;   Added CMYK option 24 August 2007. Requires LANGUAGE_LEVEL=2 printer. L. Anderson
 ;   Updated for IDL 7.1 and 24-bt color PostScript support. 24 May 2009. DWF.
 ;   Added MATCH keyword. 14 Dec 2010. DWF.
+;   Changed ENCAPSULATE keyword to ENCAPSULATED, which is what I always type! 29 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
@@ -198,7 +199,7 @@ FUNCTION PSConfig,                    $
    DefaultSetup=defaultsetup,         $ ; Set this keyword to the "name" of a default style.
    Demi=demi,                         $ ; Set this keyword to select the Demi font style.
    Directory=directory,               $ ; Set thie keyword to the name of the starting directory. Current directory by default.
-   Encapsulate=encapsulate,           $ ; Set this keyword to select Encapsulated PostScript output.
+   Encapsulated=encapsulated,          $ ; Set this keyword to select Encapsulated PostScript output.
    European=european,                 $ ; Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units).
    Filename=filename,                 $ ; Set this keyword to the name of the file. Default: 'idl.ps'
    FontInfo=fontinfo,                 $ ; Set this keyword if you want font information in the FSC_PSCONFIG GUI.
@@ -270,7 +271,7 @@ IF N_Elements(psObject) EQ 0 THEN BEGIN
       DefaultSetup=defaultsetup,         $
       Demi=demi,                         $
       Directory=directory,               $
-      Encapsulate=encapsulate,           $
+      Encapsulated=encapsulated,         $
       European=european,                 $
       Filename=filename,                 $
       FontSize=fontsize,                 $

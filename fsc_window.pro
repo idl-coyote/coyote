@@ -85,14 +85,18 @@ PRO FSC_CmdWindow::CreatePostScriptFile, event
     ENDIF
 
     ; Allow the user to configure the PostScript file.
-    PS_Start, /GUI, CANCEL=cancelled
+    PS_Start, /GUI, CANCEL=cancelled, EUROPEAN=self.european, ENCAPSULATED=self.encapsulated 
     IF cancelled THEN RETURN
     
     ; Execute the graphics commands.
     self -> ExecuteCommands
     
     ; Clean up.
-    PS_End
+    PS_End, $
+        ALLOW_TRANSPARENT=self.im_allow_transparent, $
+        DENSITY=self.im_density, $
+        RESIZE=self.im_resize, $
+        IM_OPTIONS=self.im_options
 
 END ;----------------------------------------------------------------------------------------------------------------
 
@@ -553,7 +557,14 @@ PRO FSC_CmdWindow::SetProperty, $
     MULTI=multi, $                 ; Change the !P.MULTI setting for the window.
     XOMARGIN=xomargin, $           ; Change the !X.OMargin setting for the winow.
     YOMARGIN=yomargin, $           ; Change the !Y.OMargin setting for the window.
-    UPDATE=update                  ; Set if you want the commands to be updated after property change.
+    UPDATE=update, $               ; Set if you want the commands to be updated after property change.
+    IM_ALLOW_TRANSPARENT=im_allow_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+    IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+    IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+    IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+    DELETE_PS=delete_ps, $                        ; Delete the PostScript file when making IM raster files.
+    EUROPEAN=european, $                          ; Select European measurements in PostScript output.
+    ENCAPSULATED=encapsulated 
     
     Compile_Opt idl2
     
@@ -588,6 +599,13 @@ PRO FSC_CmdWindow::SetProperty, $
     ENDIF
     IF N_Elements(xomargin) NE 0 THEN self.xomargin = xomargin
     IF N_Elements(yomargin) NE 0 THEN self.yomargin = yomargin
+    IF N_Elements(im_allow_transparent) NE 0 THEN self.im_allow_transparent = im_allow_transparent
+    IF N_Elements(im_density) NE 0 THEN self.im_density = im_density
+    IF N_Elements(im_resize) NE 0 THEN self.im_resize = im_resize
+    IF N_Elements(im_options) NE 0 THEN self.im_options = im_options
+    IF N_Elements(delete_ps) NE 0 THEN self.delete_ps = delete_ps
+    IF N_Elements(european) NE 0 THEN self.european = european
+    IF N_Elements(encapsulated) NE 0 THEN self.encapsulated = encapsulated
     
 
     ; Update now?
@@ -638,6 +656,31 @@ FUNCTION FSC_CmdWindow::Init, $
     ; Check keywords.
     method = Keyword_Set(method)
     
+    ; Get the global defaults.
+    FSC_Window_Get_Defaults, $
+       Background = d_background, $                      ; The background color. 
+       EraseIt = d_eraseit, $                            ; Set this keyword to erase the display before executing the commands.
+       Multi = d_multi, $                                ; Set this in the same way !P.Multi is used.   
+       XOMargin = d_xomargin, $                          ; Set the !X.OMargin. A two element array.
+       YOMargin = d_yomargin, $                          ; Set the !Y.OMargin. A two element array
+       XSize = d_xsize, $                                ; The X size of the FSC_Window graphics window.
+       YSize = d_ysize, $                                ; The Y size of the FSC_Window graphics window.
+       Title = d_title, $                                ; The window title.
+       XPos = d_xpos, $                                  ; The X offset of the window on the display.
+       YPos = d_ypos, $                                  ; The Y offset of the window on the display. 
+       Palette = d_palette, $                            ; The color table palette to use for the window.
+       
+       ; ImageMagick Properties.
+       IM_Allow_Transparent = d_im_allow_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+       IM_Density = d_im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+       IM_Resize = d_im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+       IM_Options = d_im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+       
+       ; PostScript properties.
+       Delete_ps = d_delete_ps, $                        ; Delete PS file when making IM raster.
+       European = d_european, $                          ; Select European measurements in PostScript output.
+       Encapsulated = d_encapsulated                     ; Create Encapsulated PostScript output.    
+        
     ; If method is set, the first positional parameter must be present,
     ; and it must be a valid object reference.
     IF method THEN BEGIN
@@ -646,20 +689,20 @@ FUNCTION FSC_CmdWindow::Init, $
         IF ~Obj_Valid(p1) THEN $
             Message, 'The first positional parameter must be a valid object reference when making method calls.'
     ENDIF
-    IF N_Elements(wxsize) EQ 0 THEN xsize = 640 ELSE xsize = wxsize
-    IF N_Elements(wysize) EQ 0 THEN ysize = 512 ELSE ysize = wysize
-    IF N_Elements(wxpos) EQ 0 THEN xpos = -1 ELSE xpos = wxpos
-    IF N_Elements(wypos) EQ 0 THEN ypos = -1 ELSE ypos = wypos
+    IF N_Elements(wxsize) EQ 0 THEN xsize = d_xsize ELSE xsize = wxsize
+    IF N_Elements(wysize) EQ 0 THEN ysize = d_ysize ELSE ysize = wysize
+    IF N_Elements(wxpos) EQ 0 THEN xpos = d_xpos ELSE xpos = wxpos
+    IF N_Elements(wypos) EQ 0 THEN ypos = d_ypos ELSE ypos = wypos
     IF N_Elements(wbackground) EQ 0 THEN BEGIN
-        background='white'
+        background = d_background
         IF N_Elements(command) EQ 0 THEN eraseit = 1
         IF (N_Elements(command) NE 0) && CoyoteGraphic(command) THEN eraseit = 1
     ENDIF ELSE BEGIN
         background = wbackground
         eraseit = 1
     ENDELSE
-    IF N_Elements(eraseIt) EQ 0 THEN eraseIt = Keyword_Set(weraseit)
-
+    IF N_Elements(eraseIt) EQ 0 THEN eraseIt = d_eraseit ELSE eraseIt = Keyword_Set(eraseIt)
+    
     ; The commands will be placed in a linked list for execution.
     self.cmds = Obj_New('LinkedList')
     IF Obj_Valid(self.cmds) EQ 0 THEN Message, 'Failed to make the LinkedList for the commands.'
@@ -671,11 +714,22 @@ FUNCTION FSC_CmdWindow::Init, $
         IF Obj_Valid(thisCommand) THEN self.cmds -> Add, thisCommand ELSE Message, 'Failed to make command object.'
     ENDIF 
     
-    ; Store the current color table vectors
-    TVLCT, rr, gg, bb, /Get
-    self.r = Ptr_New(rr)
-    self.g = Ptr_New(gg)
-    self.b = Ptr_New(bb)
+    ; If there is a palette, use it. Otherwise, use the current color table vectors.
+    IF Total(d_palette) NE 0 THEN BEGIN
+        IF Size(d_palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
+        dims = Size(d_palette, /DIMENSIONS)
+        threeIndex = Where(dims EQ 3)
+        IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
+        IF threeIndex[0] EQ 0 THEN d_palette = Transpose(d_palette)
+        self.r = Ptr_New(d_palette[*,0])
+        self.g = Ptr_New(d_palette[*,1])
+        self.b = Ptr_New(d_palette[*,2])
+    ENDIF ELSE BEGIN
+        TVLCT, rr, gg, bb, /Get
+        self.r = Ptr_New(rr)
+        self.g = Ptr_New(gg)
+        self.b = Ptr_New(bb)
+    ENDELSE
     
     ; Create the widgets for the program.
     self.tlb = Widget_Base(/TLB_SIZE_EVENTS, MBar=menuID)
@@ -733,7 +787,7 @@ FUNCTION FSC_CmdWindow::Init, $
     self.wid = wid
     
     IF N_Elements(wtitle) EQ 0 THEN BEGIN
-        wtitle = "Resizeable Graphics Window"
+        wtitle = d_title
         wtitle = wtitle + ' (' + StrTrim(wid,2) + ')'
     ENDIF
     Widget_Control, self.tlb, TLB_Set_Title=wtitle
@@ -744,9 +798,16 @@ FUNCTION FSC_CmdWindow::Init, $
     self.eraseIt = eraseIt
     IF N_Elements(wmulti) NE 0 THEN BEGIN
        FOR j=0,N_Elements(wmulti)-1 DO self.pmulti[j] = wmulti[j]
-    ENDIF
-    IF N_Elements(wxomargin) NE 0 THEN self.xomargin = wxomargin
-    IF N_Elements(wyomargin) NE 0 THEN self.yomargin = wyomargin
+    ENDIF ELSE self.pmulti = d_multi
+    IF N_Elements(wxomargin) NE 0 THEN self.xomargin = wxomargin ELSE self.xomargin = d_xomargin
+    IF N_Elements(wyomargin) NE 0 THEN self.yomargin = wyomargin ELSE self.yomargin = d_yomargin
+    self.im_allow_transparent = d_im_allow_transparent
+    self.im_density = d_im_density
+    self.im_options = d_im_options
+    self.im_resize = d_im_resize
+    self.delete_ps = d_delete_ps
+    self.encapsulated = d_encapsulated
+    self.european = d_european
 
     ; Execute the commands.
     self -> ExecuteCommands 
@@ -831,18 +892,31 @@ PRO FSC_CmdWindow__Define, class
 
     class = { FSC_CMDWINDOW, $
               tlb: 0L, $                    ; The identifier of the top-level base widget.
-              r: Ptr_New(), $               ; The red color table vector.
-              g: Ptr_New(), $               ; The green color table vector.
-              b: Ptr_New(), $               ; The blue color table vector.
+              cmds: Obj_New(), $            ; A linkedlist object containing the graphics commands.
+              wid: 0L, $                    ; The window index number of the graphics window.
+              drawid: 0L, $                 ; The identifier of the draw widget.
+              
+              ; FSC_Window parameters
+              background: Ptr_New(), $      ; The background color.
+              delay: 0.0, $                 ; The command delay.
+              eraseit: 0B, $                ; Do we need to erase the display.
               pmulti: LonArr(5), $          ; Identical to !P.Multi.
               xomargin: FltArr(2), $        ; Identical to !X.OMargin
               yomargin: FltArr(2), $        ; Identical to !Y.OMargin
-              cmds: Obj_New(), $            ; A linkedlist object containing the graphics commands.
-              delay: 0.0, $                 ; The command delay.
-              background: Ptr_New(), $      ; The background color.
-              eraseit: 0B, $                ; Do we need to erase the display.
-              wid: 0L, $                    ; The window index number of the graphics window.
-              drawid: 0L $                  ; The identifier of the draw widget.
+              r: Ptr_New(), $               ; The red color table vector.
+              g: Ptr_New(), $               ; The green color table vector.
+              b: Ptr_New(), $               ; The blue color table vector.
+              
+              ; PostScript options.
+              delete_ps: 0L, $              ; Delete the PS file when making IM image file.
+              encapsulated: 0L, $           ; Encapsulated PostScript
+              european: 0L, $               ; European measurements.
+
+              ; ImageMagick output parameters.
+              im_allow_transparent: 0B, $   ; Sets the "alpha" keyword on ImageMagick convert command.
+              im_density: 0L, $             ; Sets the density parameter on ImageMagick convert command.
+              im_resize: 0L, $              ; Sets the resize parameter on ImageMagick convert command.
+              im_options: "" $              ; Sets extra ImageMagick options on the ImageMagick convert command.
             }
             
 END ;----------------------------------------------------------------------------------------------------------------
@@ -1212,11 +1286,11 @@ PRO FSC_Window, $
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.   
    WOXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
    WOYMargin = woymargin, $         ; Set the !Y.OMargin. A two element array
-   WXSize = wxsize, $               ; The X size of the FSC_Window graphics window in pixels. By default: 400.
-   WYSize = wysize, $               ; The Y size of the FSC_Window graphics window in pixels. By default: 400.
+   WXSize = wxsize, $               ; The X size of the FSC_Window graphics window in pixels. By default: 640.
+   WYSize = wysize, $               ; The Y size of the FSC_Window graphics window in pixels. By default: 512.
    WTitle = wtitle, $               ; The window title.
-   WXPos = wxpos, $                 ; The X offset of the window on the display. The window is centered if not set.
-   WYPos = wypos, $                 ; The Y offset of the window on the display. The window is centered if not set.
+   WXPos = wxpos, $                 ; The X offset of the window on the display. The window is tiled if not set.
+   WYPos = wypos, $                 ; The Y offset of the window on the display. The window is tiled if not set.
    
    AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface and immediate execute commands.
    CmdDelay=cmdDelay, $             ; Set this keyword to a value to "wait" before executing the next command.

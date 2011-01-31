@@ -85,18 +85,21 @@ PRO FSC_CmdWindow::CreatePostScriptFile, event
     ENDIF
 
     ; Allow the user to configure the PostScript file.
-    PS_Start, /GUI, CANCEL=cancelled, EUROPEAN=self.european, ENCAPSULATED=self.encapsulated 
+    PS_Start, /GUI, $
+        CANCEL=cancelled, $
+        EUROPEAN=self.ps_metric, $
+        ENCAPSULATED=self.ps_encapsulated, $
+        SCALE_FACTOR=self.ps_scale_factor, $
+        CHARSIZE=self.ps_charsize, $
+        FONT=self.ps_font, $
+        TT_FONT=self.ps_tt_font
     IF cancelled THEN RETURN
     
     ; Execute the graphics commands.
     self -> ExecuteCommands
     
     ; Clean up.
-    PS_End, $
-        ALLOW_TRANSPARENT=self.im_allow_transparent, $
-        DENSITY=self.im_density, $
-        RESIZE=self.im_resize, $
-        IM_OPTIONS=self.im_options
+    PS_End
 
 END ;----------------------------------------------------------------------------------------------------------------
 
@@ -295,7 +298,18 @@ PRO FSC_CmdWindow::GetProperty, $
     TLB=tlb, $
     WID=wid, $
     XOMARGIN=xomargin, $
-    YOMARGIN=yomargin
+    YOMARGIN=yomargin, $
+    IM_TRANSPARENT=im_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+    IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+    IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+    IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+    PS_DELETE=ps_delete, $
+    PS_ENCAPSULATED=ps_encapsulated, $
+    PS_METRIC=ps_metric, $
+    PS_FONT=ps_font, $                            ; Select the font for PostScript output.
+    PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
+    PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
+    PS_TT_FONT=ps_tt_font                         ; Select the true-type font to use for PostScript output.
     
     Compile_Opt idl2
     
@@ -307,6 +321,7 @@ PRO FSC_CmdWindow::GetProperty, $
         RETURN
     ENDIF
 
+    ; Window properties.
     IF Arg_Present(background) THEN background = *self.background
     IF Arg_Present(colorPalette) THEN BEGIN
         len = N_Elements(*self.r)
@@ -325,7 +340,20 @@ PRO FSC_CmdWindow::GetProperty, $
     IF Arg_Present(xomargin) THEN xomargin = self.xomargin
     IF Arg_Present(yomargin) THEN yomargin = self.yomargin
     
-
+     ; PostScript properties.
+     ps_charsize = self.ps_charsize
+     ps_delete = self.ps_delete
+     ps_encapsulated = self.ps_encapsulated
+     ps_metric = self.ps_metric
+     ps_font = self.ps_font
+     ps_scale_factor = self.ps_scale_factor
+     ps_tt_font = self.ps_tt_font
+     
+     ; ImageMagick properties.
+     im_transparent = self.im_transparent
+     im_density = self.im_density
+     im_options = self.im_options
+     im_resize = self.im_resize
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -522,18 +550,38 @@ PRO FSC_CmdWindow::SaveAsRaster, event
         
            ; Create a PostScript file first.
            thisname = outname + '.ps'
-           PS_Start, FILENAME=thisname
+           PS_Start, $
+                EUROPEAN=self.ps_metric, $
+                SCALE_FACTOR=self.ps_scale_factor, $
+                CHARSIZE=self.ps_charsize, $
+                FONT=self.ps_font, $
+                TT_FONT=self.ps_tt_font
            
            ; Draw the graphics.
            self -> ExecuteCommands
            
            ; Close the file and convert to proper file type.
            CASE filetype OF
-                'BMP':  PS_END, /BMP,  /DELETE_PS
-                'GIF':  PS_END, /GIF,  /DELETE_PS
-                'JPEG': PS_END, /JPEG, /DELETE_PS
-                'PNG':  PS_END, /PNG,  /DELETE_PS
-                'TIFF': PS_END, /TIFF, /DELETE_PS
+                'BMP':  PS_END, /BMP, DELETE_PS=self.ps_delete, $
+                            ALLOW_TRANSPARENT=self.im_transparent, $
+                            DENSITY=self.im_density, RESIZE=self.im_resize, $
+                            IM_OPTIONS=self.im_options
+                'GIF':  PS_END, /GIF, DELETE_PS=self.ps_delete, $
+                            ALLOW_TRANSPARENT=self.im_transparent, $
+                            DENSITY=self.im_density, RESIZE=self.im_resize, $
+                            IM_OPTIONS=self.im_options
+                'JPEG': PS_END, /JPEG, DELETE_PS=self.ps_delete, $
+                            ALLOW_TRANSPARENT=self.im_transparent, $
+                            DENSITY=self.im_density, RESIZE=self.im_resize, $
+                            IM_OPTIONS=self.im_options
+                'PNG':  PS_END, /PNG,  DELETE_PS=self.ps_delete, $
+                            ALLOW_TRANSPARENT=self.im_transparent, $
+                            DENSITY=self.im_density, RESIZE=self.im_resize, $
+                            IM_OPTIONS=self.im_options
+                'TIFF': PS_END, /TIFF, DELETE_PS=self.ps_delete, $
+                            ALLOW_TRANSPARENT=self.im_transparent, $
+                            DENSITY=self.im_density, RESIZE=self.im_resize, $
+                            IM_OPTIONS=self.im_options
            ENDCASE
         
            END
@@ -558,13 +606,17 @@ PRO FSC_CmdWindow::SetProperty, $
     XOMARGIN=xomargin, $           ; Change the !X.OMargin setting for the winow.
     YOMARGIN=yomargin, $           ; Change the !Y.OMargin setting for the window.
     UPDATE=update, $               ; Set if you want the commands to be updated after property change.
-    IM_ALLOW_TRANSPARENT=im_allow_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+    IM_TRANSPARENT=im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
     IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
-    DELETE_PS=delete_ps, $                        ; Delete the PostScript file when making IM raster files.
-    EUROPEAN=european, $                          ; Select European measurements in PostScript output.
-    ENCAPSULATED=encapsulated 
+    PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
+    PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
+    PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
+    PS_FONT=ps_font, $                            ; Select the font for PostScript output.
+    PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
+    PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
+    PS_TT_FONT=ps_tt_font                         ; Select the true-type font to use for PostScript output.
     
     Compile_Opt idl2
     
@@ -599,15 +651,18 @@ PRO FSC_CmdWindow::SetProperty, $
     ENDIF
     IF N_Elements(xomargin) NE 0 THEN self.xomargin = xomargin
     IF N_Elements(yomargin) NE 0 THEN self.yomargin = yomargin
-    IF N_Elements(im_allow_transparent) NE 0 THEN self.im_allow_transparent = im_allow_transparent
+    IF N_Elements(im_transparent) NE 0 THEN self.im_transparent = im_transparent
     IF N_Elements(im_density) NE 0 THEN self.im_density = im_density
     IF N_Elements(im_resize) NE 0 THEN self.im_resize = im_resize
     IF N_Elements(im_options) NE 0 THEN self.im_options = im_options
-    IF N_Elements(delete_ps) NE 0 THEN self.delete_ps = delete_ps
-    IF N_Elements(european) NE 0 THEN self.european = european
-    IF N_Elements(encapsulated) NE 0 THEN self.encapsulated = encapsulated
+    IF N_Elements(ps_delete) NE 0 THEN self.ps_delete = ps_delete
+    IF N_Elements(ps_metric) NE 0 THEN self.ps_metric = ps_metric
+    IF N_Elements(ps_encapsulated) NE 0 THEN self.ps_encapsulated = ps_encapsulated
+    IF N_Elements(ps_charsize) NE 0 THEN self.ps_charsize = ps_charsize
+    IF N_Elements(ps_font) NE 0 THEN self.ps_font = ps_font
+    IF N_Elements(ps_scale_factor) NE 0 THEN self.ps_scale_factor = ps_scale_factor
+    IF N_Elements(ps_tt_font) NE 0 THEN self.ps_tt_font = ps_tt_font
     
-
     ; Update now?
     IF Keyword_Set(update) THEN self -> ExecuteCommands
 END ;----------------------------------------------------------------------------------------------------------------
@@ -659,6 +714,7 @@ FUNCTION FSC_CmdWindow::Init, $
     ; Get the global defaults.
     FSC_Window_Get_Defaults, $
        Background = d_background, $                      ; The background color. 
+       Delay = d_delay, $                                ; The amount of delay between command execution.
        EraseIt = d_eraseit, $                            ; Set this keyword to erase the display before executing the commands.
        Multi = d_multi, $                                ; Set this in the same way !P.Multi is used.   
        XOMargin = d_xomargin, $                          ; Set the !X.OMargin. A two element array.
@@ -671,15 +727,19 @@ FUNCTION FSC_CmdWindow::Init, $
        Palette = d_palette, $                            ; The color table palette to use for the window.
        
        ; ImageMagick Properties.
-       IM_Allow_Transparent = d_im_allow_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+       IM_Transparent = d_im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
        IM_Density = d_im_density, $                      ; Sets the density parameter on ImageMagick convert command.
        IM_Resize = d_im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
        IM_Options = d_im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
        
        ; PostScript properties.
-       Delete_ps = d_delete_ps, $                        ; Delete PS file when making IM raster.
-       European = d_european, $                          ; Select European measurements in PostScript output.
-       Encapsulated = d_encapsulated                     ; Create Encapsulated PostScript output.    
+       PS_Delete = d_ps_delete, $                        ; Delete PS file when making IM raster.
+       PS_Metric = d_ps_metric, $                        ; Select metric measurements in PostScript output.
+       PS_Encapsulated = d_ps_encapsulated, $            ; Create Encapsulated PostScript output.    
+       PS_FONT = d_ps_font, $                            ; Select the font for PostScript output.
+       PS_CHARSIZE = d_ps_charsize, $                    ; Select the character size for PostScript output.
+       PS_SCALE_FACTOR = d_ps_scale_factor, $            ; Select the scale factor for PostScript output.
+       PS_TT_FONT = d_ps_tt_font                         ; Select the true-type font to use for PostScript output.
         
     ; If method is set, the first positional parameter must be present,
     ; and it must be a valid object reference.
@@ -694,14 +754,13 @@ FUNCTION FSC_CmdWindow::Init, $
     IF N_Elements(wxpos) EQ 0 THEN xpos = d_xpos ELSE xpos = wxpos
     IF N_Elements(wypos) EQ 0 THEN ypos = d_ypos ELSE ypos = wypos
     IF N_Elements(wbackground) EQ 0 THEN BEGIN
-        background = d_background
-        IF N_Elements(command) EQ 0 THEN eraseit = 1
-        IF (N_Elements(command) NE 0) && CoyoteGraphic(command) THEN eraseit = 1
+        wbackground = d_background
+        IF N_Elements(command) EQ 0 THEN weraseit = 1
+        IF (N_Elements(command) NE 0) && CoyoteGraphic(command) THEN weraseit = 1
     ENDIF ELSE BEGIN
-        background = wbackground
-        eraseit = 1
+        weraseit = 1
     ENDELSE
-    IF N_Elements(eraseIt) EQ 0 THEN eraseIt = d_eraseit ELSE eraseIt = Keyword_Set(eraseIt)
+    IF N_Elements(weraseIt) EQ 0 THEN weraseIt = d_eraseit ELSE weraseIt = Keyword_Set(weraseIt)
     
     ; The commands will be placed in a linked list for execution.
     self.cmds = Obj_New('LinkedList')
@@ -793,21 +852,25 @@ FUNCTION FSC_CmdWindow::Init, $
     Widget_Control, self.tlb, TLB_Set_Title=wtitle
 
     ; Load object properties.
-    self.background = Ptr_New(background)
-    IF N_Elements(cmdDelay) NE 0 THEN self.delay = cmdDelay
-    self.eraseIt = eraseIt
+    self.background = Ptr_New(wbackground)
+    IF N_Elements(cmdDelay) NE 0 THEN self.delay = cmdDelay ELSE self.delay = d_delay
+    self.eraseIt = weraseIt
     IF N_Elements(wmulti) NE 0 THEN BEGIN
        FOR j=0,N_Elements(wmulti)-1 DO self.pmulti[j] = wmulti[j]
     ENDIF ELSE self.pmulti = d_multi
     IF N_Elements(wxomargin) NE 0 THEN self.xomargin = wxomargin ELSE self.xomargin = d_xomargin
     IF N_Elements(wyomargin) NE 0 THEN self.yomargin = wyomargin ELSE self.yomargin = d_yomargin
-    self.im_allow_transparent = d_im_allow_transparent
+    self.im_transparent = d_im_transparent
     self.im_density = d_im_density
     self.im_options = d_im_options
     self.im_resize = d_im_resize
-    self.delete_ps = d_delete_ps
-    self.encapsulated = d_encapsulated
-    self.european = d_european
+    self.ps_delete = d_ps_delete
+    self.ps_encapsulated = d_ps_encapsulated
+    self.ps_metric = d_ps_metric
+    self.ps_charsize = d_ps_charsize
+    self.ps_font = d_ps_font
+    self.ps_scale_factor = d_ps_scale_factor
+    self.ps_tt_font = d_ps_tt_font
 
     ; Execute the commands.
     self -> ExecuteCommands 
@@ -908,12 +971,16 @@ PRO FSC_CmdWindow__Define, class
               b: Ptr_New(), $               ; The blue color table vector.
               
               ; PostScript options.
-              delete_ps: 0L, $              ; Delete the PS file when making IM image file.
-              encapsulated: 0L, $           ; Encapsulated PostScript
-              european: 0L, $               ; European measurements.
+              ps_delete: 0L, $              ; Delete the PS file when making IM image file.
+              ps_encapsulated: 0L, $        ; Encapsulated PostScript
+              ps_metric: 0L, $              ; Metric measurements in PostScript.
+              ps_charsize: 0.0, $           ; The character size to use for PostScript output.
+              ps_font: 0, $                 ; The PostScript font to use.
+              ps_scale_factor: 0, $         ; The PostScript scale factor.
+              ps_tt_font: "", $             ; The name of a true-type font to use for PostScript output.
 
               ; ImageMagick output parameters.
-              im_allow_transparent: 0B, $   ; Sets the "alpha" keyword on ImageMagick convert command.
+              im_transparent: 0B, $         ; Sets the "alpha" keyword on ImageMagick convert command.
               im_density: 0L, $             ; Sets the density parameter on ImageMagick convert command.
               im_resize: 0L, $              ; Sets the resize parameter on ImageMagick convert command.
               im_options: "" $              ; Sets extra ImageMagick options on the ImageMagick convert command.

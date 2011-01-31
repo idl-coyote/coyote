@@ -151,7 +151,6 @@ FUNCTION FSC_QueryWin, $
         windowIndex = windowIndex[0]
     ENDIF
     
-    
     RETURN, windowIndex
     
 END

@@ -57,16 +57,17 @@
 ;
 ;   Directory - Set this keyword to the name of the starting directory. The current directory is used by default.
 ;   Encapsulated - Set this keyword to select Encapsulated PostScript output. Turned off by default.
-;   European - Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units). Turned off by default.
+;   European - This keyword has been depreciated in favor of METRIC.
 ;   Filename - Set thie keyword to the name of the PostScript file. The default is "idl.ps".
-;   Inches - Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters. Set by European keyword by default.
+;   Inches - Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters. Set by Metric keyword by default.
 ;   Landscape - Set this keyword to select Landscape page output. Portrait page output is the default.
 ;   Language_Level - Set this keyword to select the Language Level interpreter. Default is 1.
+;   Metric - Set this keyword to indicate metric mode (i.e., A4 page and centimeter units). Turned off by default.
 ;   PageType - Set this keyword to the "type" of page. Possible values are:
-;       "Letter" - 8.5 by 11 inches. (Default, unless the European keyword is set.)
+;       "Letter" - 8.5 by 11 inches. (Default, unless the Metric keyword is set.)
 ;       "Legal" - 8.5 by 14 inches.
 ;       "Ledger" - 11 by 17 inches.
-;       "A4" - 21.0 by 29.7 centimeters. (Default, if the European keyword is set.)
+;       "A4" - 21.0 by 29.7 centimeters. (Default, if the Metric keyword is set.)
 ;   XOffset - Set this keyword to the X Offset. Uses "System (Portrait)" defaults. (Note: offset calculated from lower-left corner of page.)
 ;   XSize - Set this keyword to the X size of the PostScript "window". Uses "System (Portrait)" defaults.
 ;   YOffset - Set this keyword to the Y Offset. Uses "System (Portrait)" defaults. (Note: offset calculated from lower-left corner of page.)
@@ -332,7 +333,7 @@ PRO FSC_PSCONFIG_Events, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = FSC_PSConfig_Error_Message()
    RETURN
 ENDIF
 
@@ -713,14 +714,14 @@ END ;---------------------------------------------------------------------------
 
 
 
-PRO FSC_PSCONFIG::EuroStyle, event
+PRO FSC_PSCONFIG::MetricStyle, event
 
-; This event handler sets and unset the "European Style" button.
+; This event handler sets and unset the "Metric Style" button.
 
 IF event.select EQ 1 THEN BEGIN
 
    Widget_Control, event.top, Update=0
-   self.european = 1
+   self.metric = 1
    IF self.inchesSet EQ 1 THEN BEGIN
       sizes = self->GetSizes()
       self.xsizeSet = sizes[0] * 2.54
@@ -736,7 +737,7 @@ IF event.select EQ 1 THEN BEGIN
 ENDIF ELSE BEGIN
 
    Widget_Control, event.top, Update=0
-   self.european = 0
+   self.metric = 0
    IF self.inchesSet EQ 0 THEN BEGIN
       sizes = self->GetSizes()
       self.xsizeSet = sizes[0] / 2.54
@@ -1042,8 +1043,8 @@ self.defaultsID = FSC_Droplist(controlBase, Value=values, Title='Setups:', $
 self.defaultsID->SetSelection, self.defaultsSet
 
 euroBase = Widget_Base(controlBase, row=1, /NonExclusive)
-euroSetUPID = Widget_Button(euroBase, Value='European Style', UValue={Method:'EUROSTYLE', Object:self})
-IF self.european THEN Widget_Control, euroSetUpID, /Set_Button
+euroSetUPID = Widget_Button(euroBase, Value='Metric Style', UValue={Method:'METRICSTYLE', Object:self})
+IF self.metric THEN Widget_Control, euroSetUpID, /Set_Button
 IF self.inchesSet THEN unit = 'INCHES' ELSE unit = 'CENTIMETERS'
 
 windowDims = self->PageDimensions()
@@ -1349,8 +1350,8 @@ self.defaultsID = FSC_Droplist(controlBase, Value=values, Title='Setups:', $
    UValue={Method:'DEFAULTS', Object:self}, Event_Pro='FSC_PSCONFIG_Events')
 self.defaultsID->SetSelection, self.defaultsSet
 
-euroSetUpID = Widget_Button(euroBase, Value='European Style', UValue={Method:'EUROSTYLE', Object:self})
-IF self.european THEN Widget_Control, euroSetUpID, /Set_Button
+euroSetUpID = Widget_Button(euroBase, Value='Metric Style', UValue={Method:'METRICSTYLE', Object:self})
+IF self.metric THEN Widget_Control, euroSetUpID, /Set_Button
 IF self.inchesSet THEN unit = 'INCHES' ELSE unit = 'CENTIMETERS'
 
 windowDims = self->PageDimensions()
@@ -1812,7 +1813,7 @@ ENDIF
 
    ; Set the page type and page units here, based on EUROPEAN setting.
 
-IF self.european THEN BEGIN
+IF self.metric THEN BEGIN
    pagetype = 'A4'
    units = 0
 ENDIF ELSE BEGIN
@@ -1898,10 +1899,10 @@ CASE thisDefault OF
          self.pagetype = pagetype                    ; Sets the page type. Possible values include "Letter", "A4", etc.
          self.previewSet = 0                         ; Sets the Preview keyword.
          self.truetypeSet = 0                        ; Sets the TT_Font keyword.
-         IF self.european THEN self.xoffsetSet = 1.61 ELSE self.xoffsetSet = 0.75 ; Sets the XOffset keyword.
-         IF self.european THEN self.yoffsetSet = 14.65 ELSE self.yoffsetSet = 5.0 ; Sets the YOffset keyword.
-         IF self.european THEN self.xsizeSet = 17.80 ELSE self.xsizeSet = 7.0     ; Sets the XSize keyword.
-         IF self.european THEN self.ysizeSet = 12.70 ELSE self.ysizeSet = 5.0     ; Sets the YSize keyword.
+         IF self.metric THEN self.xoffsetSet = 1.61 ELSE self.xoffsetSet = 0.75 ; Sets the XOffset keyword.
+         IF self.metric THEN self.yoffsetSet = 14.65 ELSE self.yoffsetSet = 5.0 ; Sets the YOffset keyword.
+         IF self.metric THEN self.xsizeSet = 17.80 ELSE self.xsizeSet = 7.0     ; Sets the XSize keyword.
+         IF self.metric THEN self.ysizeSet = 12.70 ELSE self.ysizeSet = 5.0     ; Sets the YSize keyword.
          self.defaultsSet = 'System (Portrait)'
       ENDCASE
 
@@ -1923,10 +1924,10 @@ CASE thisDefault OF
          self.pagetype = pagetype
          self.previewSet = 0
          self.truetypeSet = 0
-         IF self.european THEN self.xoffsetSet = 1.76 ELSE self.xoffsetSet = 0.75
-         IF self.european THEN self.yoffsetSet = 1.69 ELSE self.yoffsetSet = 0.75
-         IF self.european THEN self.xsizeSet = 26.25 ELSE self.xsizeSet = 9.5
-         IF self.european THEN self.ysizeSet = 17.63 ELSE self.ysizeSet = 7.0
+         IF self.metric THEN self.xoffsetSet = 1.76 ELSE self.xoffsetSet = 0.75
+         IF self.metric THEN self.yoffsetSet = 1.69 ELSE self.yoffsetSet = 0.75
+         IF self.metric THEN self.xsizeSet = 26.25 ELSE self.xsizeSet = 9.5
+         IF self.metric THEN self.ysizeSet = 17.63 ELSE self.ysizeSet = 7.0
          self.defaultsSet = 'System (Landscape)'
      ENDCASE
 
@@ -1948,10 +1949,10 @@ CASE thisDefault OF
          self.pagetype = pagetype
          self.previewSet = 0
          self.truetypeSet = 0
-         IF self.european THEN self.xoffsetSet = 3.51 ELSE self.xoffsetSet = 1.5
-         IF self.european THEN self.yoffsetSet = 3.68 ELSE self.yoffsetSet = 1.5
-         IF self.european THEN self.xsizeSet = 14.00 ELSE self.xsizeSet = 5.5
-         IF self.european THEN self.ysizeSet = 22.40 ELSE self.ysizeSet = 8.0
+         IF self.metric THEN self.xoffsetSet = 3.51 ELSE self.xoffsetSet = 1.5
+         IF self.metric THEN self.yoffsetSet = 3.68 ELSE self.yoffsetSet = 1.5
+         IF self.metric THEN self.xsizeSet = 14.00 ELSE self.xsizeSet = 5.5
+         IF self.metric THEN self.ysizeSet = 22.40 ELSE self.ysizeSet = 8.0
          self.defaultsSet = 'Centered (Portrait)'
       ENDCASE
 
@@ -1973,10 +1974,10 @@ CASE thisDefault OF
          self.pagetype = pagetype
          self.previewSet = 0
          self.truetypeSet = 0
-         IF self.european THEN self.xoffsetSet = 3.66 ELSE self.xoffsetSet = 1.5
-         IF self.european THEN self.yoffsetSet = 3.52 ELSE self.yoffsetSet = 1.5
-         IF self.european THEN self.xsizeSet = 22.43 ELSE self.xsizeSet = 8.0
-         IF self.european THEN self.ysizeSet = 13.97 ELSE self.ysizeSet = 5.5
+         IF self.metric THEN self.xoffsetSet = 3.66 ELSE self.xoffsetSet = 1.5
+         IF self.metric THEN self.yoffsetSet = 3.52 ELSE self.yoffsetSet = 1.5
+         IF self.metric THEN self.xsizeSet = 22.43 ELSE self.xsizeSet = 8.0
+         IF self.metric THEN self.ysizeSet = 13.97 ELSE self.ysizeSet = 5.5
          self.defaultsSet = 'Centered (Landscape)'
       ENDCASE
 
@@ -1998,10 +1999,10 @@ CASE thisDefault OF
          self.pagetype = pagetype
          self.previewSet = 0
          self.truetypeSet = 0
-         IF self.european THEN self.xoffsetSet = 2.26 ELSE self.xoffsetSet = 1.0
-         IF self.european THEN self.yoffsetSet = 6.63 ELSE self.yoffsetSet = 2.25
-         IF self.european THEN self.xsizeSet = 16.50 ELSE self.xsizeSet = 6.5
-         IF self.european THEN self.ysizeSet = 16.50 ELSE self.ysizeSet = 6.5
+         IF self.metric THEN self.xoffsetSet = 2.26 ELSE self.xoffsetSet = 1.0
+         IF self.metric THEN self.yoffsetSet = 6.63 ELSE self.yoffsetSet = 2.25
+         IF self.metric THEN self.xsizeSet = 16.50 ELSE self.xsizeSet = 6.5
+         IF self.metric THEN self.ysizeSet = 16.50 ELSE self.ysizeSet = 6.5
          self.defaultsSet = 'Square (Portrait)'
       ENDCASE
 
@@ -2023,10 +2024,10 @@ CASE thisDefault OF
          self.pagetype = pagetype
          self.previewSet = 0
          self.truetypeSet = 0
-         IF self.european THEN self.xoffsetSet = 6.63 ELSE self.xoffsetSet = 2.25
-         IF self.european THEN self.yoffsetSet = 2.26 ELSE self.yoffsetSet = 1.0
-         IF self.european THEN self.xsizeSet = 16.50 ELSE self.xsizeSet = 6.5
-         IF self.european THEN self.ysizeSet = 16.50 ELSE self.ysizeSet = 6.5
+         IF self.metric THEN self.xoffsetSet = 6.63 ELSE self.xoffsetSet = 2.25
+         IF self.metric THEN self.yoffsetSet = 2.26 ELSE self.yoffsetSet = 1.0
+         IF self.metric THEN self.xsizeSet = 16.50 ELSE self.xsizeSet = 6.5
+         IF self.metric THEN self.ysizeSet = 16.50 ELSE self.ysizeSet = 6.5
          self.defaultsSet = 'Square (Landscape)'
       ENDCASE
 
@@ -2048,10 +2049,10 @@ CASE thisDefault OF
          self.pagetype = pagetype
          self.previewSet = 2
          self.truetypeSet = 0
-         IF self.european THEN self.xoffsetSet = 6.06 ELSE self.xoffsetSet = 2.5
-         IF self.european THEN self.yoffsetSet = 11.71 ELSE self.yoffsetSet = 4.25
-         IF self.european THEN self.xsizeSet = 8.89 ELSE self.xsizeSet = 3.5
-         IF self.european THEN self.ysizeSet = 6.35 ELSE self.ysizeSet = 2.5
+         IF self.metric THEN self.xoffsetSet = 6.06 ELSE self.xoffsetSet = 2.5
+         IF self.metric THEN self.yoffsetSet = 11.71 ELSE self.yoffsetSet = 4.25
+         IF self.metric THEN self.xsizeSet = 8.89 ELSE self.xsizeSet = 3.5
+         IF self.metric THEN self.ysizeSet = 6.35 ELSE self.ysizeSet = 2.5
          self.defaultsSet = 'Figure (Small)'
       ENDCASE
 
@@ -2073,10 +2074,10 @@ CASE thisDefault OF
          self.pagetype = pagetype
          self.previewSet = 2
          self.truetypeSet = 0
-         IF self.european THEN self.xoffsetSet = 4.16 ELSE self.xoffsetSet = 1.75
-         IF self.european THEN self.yoffsetSet = 9.8 ELSE self.yoffsetSet = 3.5
-         IF self.european THEN self.xsizeSet = 12.70 ELSE self.xsizeSet = 5.0
-         IF self.european THEN self.ysizeSet = 10.16 ELSE self.ysizeSet = 4.0
+         IF self.metric THEN self.xoffsetSet = 4.16 ELSE self.xoffsetSet = 1.75
+         IF self.metric THEN self.yoffsetSet = 9.8 ELSE self.yoffsetSet = 3.5
+         IF self.metric THEN self.xsizeSet = 12.70 ELSE self.xsizeSet = 5.0
+         IF self.metric THEN self.ysizeSet = 10.16 ELSE self.ysizeSet = 4.0
          self.defaultsSet = 'Figure (Large)'
       ENDCASE
 
@@ -2098,10 +2099,10 @@ CASE thisDefault OF
          self.pagetype = pagetype
          self.previewSet = 0
          self.truetypeSet = 0
-         IF self.european THEN self.xoffsetSet = 3.51 ELSE self.xoffsetSet = 1.5
-         IF self.european THEN self.yoffsetSet = 3.68 ELSE self.yoffsetSet = 1.5
-         IF self.european THEN self.xsizeSet = 14.00 ELSE self.xsizeSet = 5.5
-         IF self.european THEN self.ysizeSet = 22.40 ELSE self.ysizeSet = 8.0
+         IF self.metric THEN self.xoffsetSet = 3.51 ELSE self.xoffsetSet = 1.5
+         IF self.metric THEN self.yoffsetSet = 3.68 ELSE self.yoffsetSet = 1.5
+         IF self.metric THEN self.xsizeSet = 14.00 ELSE self.xsizeSet = 5.5
+         IF self.metric THEN self.ysizeSet = 22.40 ELSE self.ysizeSet = 8.0
          self.defaultsSet = 'Color (Portrait)'
       ENDCASE
 
@@ -2123,10 +2124,10 @@ CASE thisDefault OF
          self.pagetype = pagetype
          self.previewSet = 0
          self.truetypeSet = 0
-         IF self.european THEN self.xoffsetSet = 3.66 ELSE self.xoffsetSet = 1.5
-         IF self.european THEN self.yoffsetSet = 3.52 ELSE self.yoffsetSet = 1.5
-         IF self.european THEN self.xsizeSet = 22.43 ELSE self.xsizeSet = 8.0
-         IF self.european THEN self.ysizeSet = 13.97 ELSE self.ysizeSet = 5.5
+         IF self.metric THEN self.xoffsetSet = 3.66 ELSE self.xoffsetSet = 1.5
+         IF self.metric THEN self.yoffsetSet = 3.52 ELSE self.yoffsetSet = 1.5
+         IF self.metric THEN self.xsizeSet = 22.43 ELSE self.xsizeSet = 8.0
+         IF self.metric THEN self.ysizeSet = 13.97 ELSE self.ysizeSet = 5.5
          self.defaultsSet = 'Color (Landscape)'
       ENDCASE
 
@@ -2409,7 +2410,7 @@ PRO FSC_PSCONFIG::SetProperty,        $ ; The SetProperty method of the object.
    Demi=demi,                         $ ; Set this keyword to select the Demi font style.
    Directory=directory,               $ ; Set thie keyword to the name of the starting directory. Current directory by default.
    Encapsulated=encapsulated,         $ ; Set this keyword to select Encapsulated PostScript output.
-   European=european,                 $ ; Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units).
+;   European=european,                 $ ; Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units).
    Filename=filename,                 $ ; Set this keyword to the name of the file. Default: 'idl.ps'
    FontSize=fontsize,                 $ ; Set this keyword to the font size. Between 6 and 36. Default is 12.
    FontType=fonttype,                 $ ; Set this keyword to select the font type: -1 is Hershey, 0 is hardward, 1 is true-type.
@@ -2421,6 +2422,7 @@ PRO FSC_PSCONFIG::SetProperty,        $ ; The SetProperty method of the object.
    LanguageLevel=langlevel,           $ ; Set this keyword to the Language Level of the PostScript interpreter.
    Light=light,                       $ ; Set this keyword to select the Light font style.
    Medium=medium,                     $ ; Set this keyword to select the Medium font style.
+   Metric=metric,                     $ ; Set this keyword to indicate "metric" mode (i.e., A4 page and centimeter units).
    Name=name,                         $ ; This is the "name" of the object.
    Narrow=narrow,                     $ ; Set this keyword to select the Narrow font style.
    Oblique=oblique, $                 $ ; Set this keyword to select the Oblique font style.
@@ -2489,13 +2491,14 @@ cmyk = Keyword_Set(cmyk)
 courier = Keyword_Set(courier)
 demi = Keyword_Set(demi)
 encapsulated = Keyword_Set(encapsulated)
-european = Keyword_Set(european)
+;european = Keyword_Set(european)
 helvetica = Keyword_Set(helvetica)
 isolatin = Keyword_Set(isolatin)
 italic = Keyword_Set(italic)
 landscape = Keyword_Set(landscape)
 light = Keyword_Set(light)
 medium = Keyword_Set(medium)
+metric = Keyword_Set(metric)
 narrow = Keyword_Set(narrow)
 oblique = Keyword_Set(oblique)
 palatino = Keyword_Set(palatino)
@@ -2554,7 +2557,7 @@ FUNCTION FSC_PSCONFIG::INIT,          $ ; The INIT method of the FSC_PSCONFIG ob
    Demi=demi,                         $ ; Set this keyword to select the Demi font style.
    Directory=directory,               $ ; Set thie keyword to the name of the starting directory. Current directory by default.
    Encapsulated=encapsulated,         $ ; Set this keyword to select Encapsulated PostScript output.
-   European=european,                 $ ; Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units).
+;   European=european,                 $ ; Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units).
    Filename=filename,                 $ ; Set this keyword to the name of the file. Default: 'idl.ps'
    FontSize=fontsize,                 $ ; Set this keyword to the font size. Between 6 and 36. Default is 12.
    FontType=fonttype,                 $ ; Set this keyword to select the font type: -1 is Hershey, 0 is hardward, 1 is true-type.
@@ -2566,6 +2569,7 @@ FUNCTION FSC_PSCONFIG::INIT,          $ ; The INIT method of the FSC_PSCONFIG ob
    LanguageLevel=langlevel, $         $ ; Set this keyword to select the language level (1 or 2).
    Light=light,                       $ ; Set this keyword to select the Light font style.
    Medium=medium,                     $ ; Set this keyword to select the Medium font style.
+   Metric=metric,                     $ ; Set this keyword to indicate metric mode (i.e., A4 page and centimeter units).
    Name=name,                         $ ; The "name" of the object. Objects with different names can have their
                                         ; graphical user interfaces appear simultaneously on the display.
    Narrow=narrow,                     $ ; Set this keyword to select the Narrow font style.
@@ -2620,8 +2624,8 @@ fontname = "Helvetica"
 IF N_Elements(fonttype) EQ 0 THEN fonttype = 2
 IF N_Elements(filename) NE 0 THEN self.filenameSet = filename
 
-   ; European style
-self.european = Keyword_Set(european)
+   ; Metric style
+self.metric = Keyword_Set(metric)
 
    ; Set default values if a default setup was not asked for.
 
@@ -2640,9 +2644,9 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
         IF directory EQ "" THEN CD, Current=directory ELSE filename = basename + '.' + ext
    ENDIF
    IF N_Elements(fontsize) EQ 0 THEN fontsize = 12
-   IF Keyword_Set(inches) EQ 0 THEN IF Keyword_Set(european) THEN inches = 0 ELSE inches = 1
+   IF Keyword_Set(inches) EQ 0 THEN IF Keyword_Set(metric) THEN inches = 0 ELSE inches = 1
    IF N_Elements(name) EQ 0 THEN name = ""
-   IF N_Elements(pagetype) EQ 0 THEN IF Keyword_Set(european) THEN pagetype = "A4" ELSE pagetype = "LETTER"
+   IF N_Elements(pagetype) EQ 0 THEN IF Keyword_Set(metric) THEN pagetype = "A4" ELSE pagetype = "LETTER"
    IF N_Elements(preview) EQ 0 THEN preview = 0
    IF N_Elements(set_font) EQ 0 THEN set_font = ""
    IF N_Elements(xoffset) EQ 0 THEN BEGIN
@@ -2683,12 +2687,13 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
    courier = Keyword_Set(courier)
    demi = Keyword_Set(demi)
    encapsulated = Keyword_Set(encapsulated)
-   european = Keyword_Set(european)
+;   european = Keyword_Set(european)
    helvetica = Keyword_Set(helvetica)
    IF N_Elements(isolatin) EQ 0 THEN isolatin = 1 ELSE isolatin = Keyword_Set(isolatin)
    italic = Keyword_Set(italic)
    light = Keyword_Set(light)
    medium = Keyword_Set(medium)
+   metric = Keyword_Set(metric)
    narrow = Keyword_Set(narrow)
    oblique = Keyword_Set(oblique)
    palatino = Keyword_Set(palatino)
@@ -2718,7 +2723,7 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
    self.cmykSet = cmyk
    self.colorSet = color
    self.directorySet = directory
-   self.european = european
+   self.metric = metric
    self.encapsulationSet = encapsulated
    self.filenameSet = filename
    self.fonttypeSet = -1 > fonttype < 1
@@ -2832,11 +2837,12 @@ PRO FSC_PSCONFIG__DEFINE
 
                   ; Data values and flags.
 
-               debug: 0,             $ ; Set if debugging in turned on.
+               debug: 0,             $ ; Set if debugging is turned on.
                fontInfo: 0,          $ ; Set if the user wants font information on GUI.
                fontnames: Ptr_New(), $ ; The allowed font names.
-               european: 0,          $ ; Set if European units and page size are in effect.
+;               european: 0,          $ ; Set if European units and page size are in effect.
                pagetype: "",         $ ; The current page size or type.
+               metric: 0,            $ ; Set if metric units and page size are in effect.
                name: "",             $ ; The "name" of the object.
                noblock: 0,           $ ; A flag that tells whether the GUI is in NOBLOCK state.
                cancel: 0,            $ ; A flag that tells the status of the Cancel button.

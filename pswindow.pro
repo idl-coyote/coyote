@@ -46,9 +46,7 @@
 ;    function reports its values in inches. Setting this keyword
 ;    causes the return values to be in units of centimeters.
 ;    
-;    EUROPEAN: If this keyword is set, the program defaults change
-;    so that the CM keyword is set to 1 and the PAGESIZE keyword is
-;    set to "A4".
+;    EUROPEAN: This keyword is depreciated in favor of METRIC.
 ;
 ;    FUDGE: A quick way to set symetrical XFUDGE and YFUDGE factors.
 ;    If this keyword is set to a value, XFUDGE and YFUDGE keywords are
@@ -66,6 +64,10 @@
 ;    MARGIN:  The margin around the edges of the plot. The value must be
 ;    a floating point value between 0.0 and 0.35. It is expressed in
 ;    normalized coordinate units. The default margin is 0.05.
+;
+;    METRIC: If this keyword is set, the program defaults change
+;    so that the CM keyword is set to 1 and the PAGESIZE keyword is
+;    set to "A4".
 ;
 ;    PAGESIZE: Set this keyword to a string indicating the type
 ;    of PostScript page size you want. Current values are "LETTER",
@@ -159,6 +161,7 @@
 ;       Added EUROPEAN keyword and set LANDSCAPE mode if window wider than higher
 ;           as the default if LANDSCAPE is not set. 13 Dec 2010. DWF.
 ;       Added ASPECTRATIO keyword to allow user-specified window aspect ratio. 13 Dec 2010. DWF.
+;       Depreciated EUROPEAN keyword in favor of METRIC. 31 Jan 2011. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -248,13 +251,17 @@ FUNCTION PSWINDOW, $
     FUDGE=fudge, $
     LANDSCAPE=landscape, $
     MARGIN=margin, $
+    METRIC=metric, $
     PAGESIZE=pagesize, $
     PRINTER=printer, $
     XFUDGE=xfudge, $
     YFUDGE=yfudge
 
+    ; Depreciated keywords.
+    IF N_Elements(metric) EQ 0 THEN metric = Keyword_Set(european) ELSE metric = Keyword_Set(metric)
+
     ; Set up default values and check keywords.
-    IF Keyword_Set(european) THEN BEGIN
+    IF Keyword_Set(metric) THEN BEGIN
         cm = 1
         pagesize = 'A4'
     ENDIF

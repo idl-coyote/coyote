@@ -47,16 +47,10 @@
 ; :Keywords:
 ;     background: out, optional, type=string
 ;         The background color of the window.
-;     delete_ps: out, optional, type=boolean
-;         The delete PostScript file status of the window.
-;     encapsulated: out, optional, type=boolean
-;          The encapsulated status of the window.
-;     european: out, optional, type=boolean
-;          The European status of the window.
+;     delay: out, optional, type=float
+;          The amount of delay between command execution.
 ;     eraseit: out, optional, type=boolean
 ;         The Erase status of the window.
-;     im_allow_transparent: out, optional, type=boolean
-;         The transparent background setting.
 ;     im_density: out, optional, type=integer
 ;         The sampling density.
 ;         file from PostScript outout.
@@ -64,10 +58,18 @@
 ;         Current ImageMagick convert options.
 ;     im_resize: out, optional, type=integer
 ;         The amount PostScript output is resized.
+;     im_transparent: out, optional, type=boolean
+;         The transparent background setting.
 ;     multi: out, optional, type=Intarr(5)
 ;         The !P.MULTI setting for the window.
 ;     palette: out, optional, type=BytArr(N,3)
 ;         The window color palette.
+;     ps_delete: out, optional, type=boolean
+;         The delete PostScript file status of the window.
+;     ps_encapsulated: out, optional, type=boolean
+;          The PostScript encapsulated status of the window.
+;     ps_metric: out, optional, type=boolean
+;          The metric status of the window.
 ;     title: out, optional, type=boolean
 ;         The window title. 
 ;     xomargin: out, optional, type=intarr(2)
@@ -84,12 +86,8 @@
 ;         The starting Y size of the window.
 ;          
 ; :Examples:
-;    Used to set FSC_Window global properties::
-;       IDL> CTLoad, 5, RGB_TABLE=palette
-;       IDL> FSC_Window_Set_Defaults, PALETTE=palette, $
-;               ERASEIT=1, XSIZE=800, YSIZE=400, XPOS=100, YPOS=200, $
-;               ENCAPSULATED=1, EUROPEAN=1
-;       IDL> TVImage, LoadData(7), /WINDOW, /KEEP, /WHITE
+;    Used to get FSC_Window global properties::
+;       IDL> FSC_Window_Get_Defaults, PALETTE=palette, PS_ENCAPSULATED=encap, PS_METRIC=metric
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -109,6 +107,7 @@
 ;-
 PRO FSC_Window_Get_Defaults, $
    Background = background, $                      ; The background color. 
+   Delay = delay, $                                ; The amount of delay between command execution.
    EraseIt = eraseit, $                            ; Set this keyword to erase the display before executing the commands.
    Multi = multi, $                                ; Set this in the same way !P.Multi is used.   
    XOMargin = xomargin, $                          ; Set the !X.OMargin. A two element array.
@@ -121,15 +120,19 @@ PRO FSC_Window_Get_Defaults, $
    Palette = palette, $                            ; The color table palette to use for the window.
    
    ; ImageMagick Properties.
-   IM_Allow_Transparent = im_allow_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+   IM_Transparent = im_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
    IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
    IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
    
    ; PostScript properties.
-   Delete_PS = delete_ps, $                        ; Delete the PostScript file when making IM files.
-   European = european, $                          ; Select European measurements in PostScript output.
-   Encapsulated = encapsulated                     ; Create Encapsulated PostScript output.
+   PS_Delete = ps_delete, $                        ; Delete the PostScript file when making IM files.
+   PS_Metric = ps_metric, $                        ; Select metric measurements in PostScript output.
+   PS_Encapsulated = ps_encapsulated, $            ; Create Encapsulated PostScript output.
+   PS_FONT=ps_font, $                              ; Select the font for PostScript output.
+   PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.
+   PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
+   PS_TT_FONT=ps_tt_font                           ; Select the true-type font to use for PostScript output.
    
    Compile_Opt idl2
    
@@ -142,6 +145,7 @@ PRO FSC_Window_Get_Defaults, $
    
    ; If the user asked for the default, give it to them.
    IF Arg_Present(background) THEN background = !FSC_WINDOW_DEFAULTS.background
+   IF Arg_Present(delay) THEN delay = !FSC_WINDOW_DEFAULTS.delay
    IF Arg_Present(eraseit) THEN eraseit = !FSC_WINDOW_DEFAULTS.eraseit
    IF Arg_Present(multi) THEN multi = !FSC_WINDOW_DEFAULTS.multi
    IF Arg_Present(xomargin) THEN xomargin = !FSC_WINDOW_DEFAULTS.xomargin
@@ -152,12 +156,16 @@ PRO FSC_Window_Get_Defaults, $
    IF Arg_Present(xpos) THEN xpos = !FSC_WINDOW_DEFAULTS.xpos
    IF Arg_Present(ypos) THEN ypos = !FSC_WINDOW_DEFAULTS.ypos
    IF Arg_Present(palette) THEN palette = !FSC_WINDOW_DEFAULTS.palette
-   IF Arg_Present(im_allow_transparent) THEN im_allow_transparent = !FSC_WINDOW_DEFAULTS.im_allow_transparent
+   IF Arg_Present(im_transparent) THEN im_transparent = !FSC_WINDOW_DEFAULTS.im_transparent
    IF Arg_Present(im_density) THEN im_density = !FSC_WINDOW_DEFAULTS.im_density
    IF Arg_Present(im_resize) THEN im_resize = !FSC_WINDOW_DEFAULTS.im_resize
    IF Arg_Present(im_options) THEN im_options = !FSC_WINDOW_DEFAULTS.im_options
-   IF Arg_Present(delete_ps) THEN delete_ps = !FSC_WINDOW_DEFAULTS.delete_ps
-   IF Arg_Present(european) THEN european = !FSC_WINDOW_DEFAULTS.european
-   IF Arg_Present(encapsulated) THEN encapsulated =!FSC_WINDOW_DEFAULTS.encapsulated
+   IF Arg_Present(ps_delete) THEN ps_delete = !FSC_WINDOW_DEFAULTS.ps_delete
+   IF Arg_Present(ps_metric) THEN ps_metric = !FSC_WINDOW_DEFAULTS.ps_metric
+   IF Arg_Present(ps_encapsulated) THEN ps_encapsulated =!FSC_WINDOW_DEFAULTS.ps_encapsulated
+   IF Arg_Present(ps_charsize) THEN ps_charsize =!FSC_WINDOW_DEFAULTS.ps_charsize
+   IF Arg_Present(ps_font) THEN ps_font =!FSC_WINDOW_DEFAULTS.ps_font
+   IF Arg_Present(ps_scale_factor) THEN ps_scale_factor =!FSC_WINDOW_DEFAULTS.ps_scale_factor
+   IF Arg_Present(ps_tt_font) THEN ps_tt_font =!FSC_WINDOW_DEFAULTS.ps_tt_font
    
 END

@@ -87,17 +87,18 @@
 ;
 ;   Directory - Set this keyword to the name of the starting directory. The current directory is used by default.
 ;   Encapsulated - Set this keyword to select Encapsulated PostScript output. Turned off by default.
-;   European - Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units). Turned off by default.
+;   European - This keyword is depreciated in favor or "METRIC".
 ;   Filename - Set thie keyword to the name of the PostScript file. The default is "idl.ps".
-;   Inches - Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters. Set by European keyword by default.
+;   Inches - Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters. Set by Metric keyword by default.
 ;   Landscape - Set this keyword to select Landscape page output. Portrait page output is the default.
 ;   Match - If this keyword is set, the initial PostScript window will match the aspect ratio of the current graphics window.
+;   Metric - Set this keyword to indicate metric mode (i.e., A4 page and centimeter units). Turned off by default.
 ;   NoGUI - Set this keyword if you don't want a graphical user interface, but just want to get the return structure.
 ;   PageType - Set this keyword to the "type" of page. Possible values are:
-;       "Letter" - 8.5 by 11 inches. (Default, unless the European keyword is set.)
+;       "Letter" - 8.5 by 11 inches. (Default, unless the Metric keyword is set.)
 ;       "Legal" - 8.5 by 14 inches.
 ;       "Ledger" - 11 by 17 inches.
-;       "A4" - 21.0 by 29.7 centimeters. (Default, if the European keyword is set.)
+;       "A4" - 21.0 by 29.7 centimeters. (Default, if the Metric keyword is set.)
 ;   XOffset - Set this keyword to the X Offset. Uses "System (Portrait)" defaults. (Note: offset calculated from lower-left corner of page.)
 ;   XSize - Set this keyword to the X size of the PostScript "window". Uses "System (Portrait)" defaults.
 ;   YOffset - Set this keyword to the Y Offset. Uses "System (Portrait)" defaults. (Note: offset calculated from lower-left corner of page.)
@@ -152,6 +153,7 @@
 ;   Updated for IDL 7.1 and 24-bt color PostScript support. 24 May 2009. DWF.
 ;   Added MATCH keyword. 14 Dec 2010. DWF.
 ;   Changed ENCAPSULATE keyword to ENCAPSULATED, which is what I always type! 29 Jan 2011. DWF.
+;   Depreciated EUROPEAN keyword in favor of METRIC. 31 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
@@ -199,8 +201,8 @@ FUNCTION PSConfig,                    $
    DefaultSetup=defaultsetup,         $ ; Set this keyword to the "name" of a default style.
    Demi=demi,                         $ ; Set this keyword to select the Demi font style.
    Directory=directory,               $ ; Set thie keyword to the name of the starting directory. Current directory by default.
-   Encapsulated=encapsulated,          $ ; Set this keyword to select Encapsulated PostScript output.
-   European=european,                 $ ; Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units).
+   Encapsulated=encapsulated,         $ ; Set this keyword to select Encapsulated PostScript output.
+   European=european,                 $ ; This keyword depreciated in favor of "metric".
    Filename=filename,                 $ ; Set this keyword to the name of the file. Default: 'idl.ps'
    FontInfo=fontinfo,                 $ ; Set this keyword if you want font information in the FSC_PSCONFIG GUI.
    FontSize=fontsize,                 $ ; Set this keyword to the font size. Between 6 and 36. Default is 12.
@@ -214,6 +216,7 @@ FUNCTION PSConfig,                    $
    Light=light,                       $ ; Set this keyword to select the Light font style.
    Match=match,                       $ ; Set this keyword to match the aspect ratio of the current graphics window.
    Medium=medium,                     $ ; Set this keyword to select the Medium font style.
+   Metric=metric,                     $ ; Set this keyword to indicate metric mode (i.e., A4 page and centimeter units).
    Name=name,                         $ ; The "name" of the object.
    Narrow=narrow,                     $ ; Set this keyword to select the Narrow font style.
    NOGUI=nogui, $                     $ ; Return the default keywords directly, without user interaction.
@@ -235,6 +238,9 @@ FUNCTION PSConfig,                    $
 
 On_Error, 2
 
+; Depreciated keywords.
+IF N_Elements(metric) EQ 0 THEN metric = Keyword_Set(european) ELSE metric = Keyword_Set(metric)
+
 ; Did the user ask us to match the aspect ratio of the current graphics window?
 IF Keyword_Set(match) THEN BEGIN
     
@@ -244,7 +250,7 @@ IF Keyword_Set(match) THEN BEGIN
         ; Is there a current graphics window?
         IF !D.Window GE 0 THEN BEGIN
             IF N_Elements(inches) NE 0 THEN cm = 1 - Keyword_Set(inches)
-            keywords = PSWindow(Landscape=landscape, CM=cm, European=european)
+            keywords = PSWindow(Landscape=landscape, CM=cm, Metric=metric)
             xsize = keywords.xsize
             ysize = keywords.ysize
             xoffset = keywords.xoffset
@@ -272,7 +278,6 @@ IF N_Elements(psObject) EQ 0 THEN BEGIN
       Demi=demi,                         $
       Directory=directory,               $
       Encapsulated=encapsulated,         $
-      European=european,                 $
       Filename=filename,                 $
       FontSize=fontsize,                 $
       FontType=fonttype,                 $
@@ -283,6 +288,7 @@ IF N_Elements(psObject) EQ 0 THEN BEGIN
       Landscape=landscape,               $
       Light=light,                       $
       Medium=medium,                     $
+      Metric=metric,                     $
       Name=name,                         $
       Narrow=narrow,                     $
       Oblique=oblique,                   $

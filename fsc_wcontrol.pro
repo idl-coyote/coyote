@@ -62,20 +62,21 @@
 ;         for which the action is desired.
 ;     delay: in, optional, type=float
 ;         Set this keyword to the amount of "delay" you want between commands in the command list.
-;     delete_ps: in, optional, type=boolean, default=1
-;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
-;         when making raster file output.
 ;     deletecmd: in, optional, type=boolean
 ;          Set this keyword to delete a command in the FSC_Window. The keywords cmdIndex and All
 ;          are used in deleting the specified command.
-;     encapsulated: in, optional, type=boolean, default=0
-;          Set this keyword to configure PSCONFIG to produce encapsulated PostScript output by default.
-;     european: in, optional, type=boolean, default=0
-;          Set this keyword to configure PSCONFIG to use European-style values in its interface.
+;     destroy: in, optional, type=boolean
+;          Set this keyword to destroy the FSC_Window program. This keyword should not be used
+;          with other keywords.
 ;     eraseit: in, optional, type=boolean
 ;         If this property is set, the FSC_Window erases with the background color before
 ;         displaying the commands in the window's command list.
-;     im_allow_transparent: in, optional, type=boolean, default=0
+;     execute: in, optional, type=boolean
+;         Set this keyword to exectute the commands in the window's command list. Use UPDATE if you
+;         want commands executed after changing their properties. This command should not be used
+;         with other keywwords. It's primary purpose is to execute commands after then have been
+;         silently loaded into the window.
+;     im_transparent: in, optional, type=boolean, default=0
 ;         Set this keyword to allow ImageMagick to create transparent backgrounds when it
 ;         makes raster image files from PostScript output.
 ;     im_density: in, optional, type=integer, default=300
@@ -97,14 +98,25 @@
 ;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
 ;         R, G, and B vectors of a color table. It is probably easier to use CTLOAD or
 ;         XCOLORS to load color tables for the window, but this is provided as another option.
+;     ps_delete: in, optional, type=boolean, default=1
+;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
+;         when making raster file output.
+;     ps_encapsulated: in, optional, type=boolean, default=0
+;          Set this keyword to configure PSCONFIG to produce encapsulated PostScript output by default.
+;     ps_metric: in, optional, type=boolean, default=0
+;          Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
 ;     title: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be a window title. All
 ;         matching is done in uppercase characters.
-;     update: in, optional, type=boolean
-;         Set this keyword if you want the window commands to be immediately executed 
-;         after the property change.
+;     update: in, optional, type=boolean, default=1
+;         Set this keyword to zero if you do not want the updates to be done immediately
+;         after the properties are changed.
 ;     widgetid: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be a widget identifier.
+;     xomargin: in, optional, type=intarr(2)
+;         Sets the !X.OMargin system variable when multiple plots are displayed in the window.
+;     yomargin: in, optional, type=intarr(2)
+;         Sets the !Y.OMargin system variable when multiple plots are displayed in the window.
 ;          
 ; :Examples:
 ;    Used to set FSC_Window properties::
@@ -128,26 +140,34 @@
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
 PRO FSC_WControl, selection, $
-    ALL=all, $
-    BACKGROUND=background, $
-    CMDINDEX=cmdIndex, $
-    PALETTE=palette, $
-    DELAY=delay, $
-    DELETECMD=deleteCmd, $
-    ERASEIT=eraseit, $
-    LISTCMD=listCmd, $
-    MULTI=multi, $
-    OBJECT=object, $
-    TITLE=title, $
-    UPDATE=update, $
-    WIDGETID=widgetID, $
-    IM_ALLOW_TRANSPARENT=im_allow_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+    ALL=all, $                                    ; Apply the command operation to all the commands (i.e., DeleteCMD)
+    BACKGROUND=background, $                      ; Sets the background color of the window
+    CMDINDEX=cmdIndex, $                          ; Apply the command operation to this command only.
+    PALETTE=palette, $                            ; The color palette (color vectors) associated with this window.
+    DELAY=delay, $                                ; Set the delay between command execution.
+    DELETECMD=deleteCmd, $                        ; Delete a command. If ALL is set, delete all commands.
+    DESTROY=destroy, $                            ; Destroy the window. Should be called alone or with the ALL keyword.
+    ERASEIT=eraseit, $                            ; Set the erase feature of the window.
+    EXECUTE=execute, $                            ; Execute the commands immediately. Should be called alone. Use UPDATE otherwise.
+    LISTCMD=listCmd, $                            ; List a command or ALL commands.
+    MULTI=multi, $                                ; Set the multiple property of the window. Identical to !P.Multi.
+    OBJECT=object, $                              ; If this keyword is set, the selection is an object reference.
+    TITLE=title, $                                ; If this keyword is set, the selection is the title.
+    UPDATE=update, $                              ; If this keyword is set, the commands are immediately executed after properties are set.
+    WIDGETID=widgetID, $                          ; If this keyword is set, the selection is a widget ID.
+    XOMARGIN=xomargin, $                          ; Change the !X.OMargin setting for the winow.
+    YOMARGIN=yomargin, $                          ; Change the !Y.OMargin setting for the window.
+    IM_TRANSPARENT=im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
     IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
-    DELETE_PS=delete_ps, $                        ; Delete the PostScript file when making IM files.
-    EUROPEAN=european, $                          ; Select European measurements in PostScript output.
-    ENCAPSULATED=encapsulated                     ; Create Encapsulated PostScript output.
+    PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM files.
+    PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
+    PS_ENCAPSULATED=ps_encapsulated, $            ; Create Encapsulated PostScript output.
+    PS_FONT=ps_font, $                            ; Select the font for PostScript output.
+    PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
+    PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
+    PS_TT_FONT=ps_tt_font                         ; Select the true-type font to use for PostScript output.
     
    Compile_Opt idl2
     
@@ -158,6 +178,13 @@ PRO FSC_WControl, selection, $
         void = Error_Message()
         RETURN
    ENDIF
+   
+   ; Always update, unless told otherwise.
+   IF N_Elements(update) EQ 0 THEN update = 1
+   
+   ; If you are updating, then turn execute off, otherwise you will
+   ; draw the graphics twice.
+   IF Keyword_Set(update) THEN execute=0
    
    ; If there is no selection match, use the current window. If there
    ; is no current window, create one.
@@ -214,30 +241,51 @@ PRO FSC_WControl, selection, $
    
    ; Are you deleting commands?
    IF N_Elements(deleteCmd) NE 0 THEN BEGIN
-        objref[index] -> DeleteCommand, cmdIndex, ALL=Keyword_Set(all)
+        IF Obj_Valid(objref[index]) THEN objref[index] -> DeleteCommand, cmdIndex, ALL=Keyword_Set(all)
    ENDIF
 
    ; Are you listing the commands?
    IF N_Elements(listCmd) NE 0 THEN BEGIN
-        objref[index] -> ListCommand, cmdIndex
+        IF Obj_Valid(objref[index]) THEN objref[index] -> ListCommand, cmdIndex
+   ENDIF
+   
+   ; Are you destroying the window?
+   IF Keyword_Set(destroy) THEN BEGIN
+       IF Keyword_Set(all) THEN BEGIN
+            FOR j=0,count-1 DO IF Widget_Info(wid[j], /Valid_ID) THEN Widget_Control, wid[j], /Destroy
+       ENDIF ELSE BEGIN
+            IF Widget_Info(wid[index], /Valid_ID) THEN Widget_Control, wid[index], /Destroy
+       ENDELSE
+       RETURN
    ENDIF
    
    ; Set the properties of the window.
-   objref[index] -> SetProperty, $
+   IF Obj_Valid(objref[index]) THEN objref[index] -> SetProperty, $
         BACKGROUND=background, $
         DELAY=delay, $
         ERASEIT=eraseit, $
         PALETTE=palette, $
         MULTI=multi, $
         UPDATE=update, $
-        IM_ALLOW_TRANSPARENT = im_allow_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+        XOMARGIN=xomargin, $                            ; Change the !X.OMargin setting for the winow.
+        YOMARGIN=yomargin, $                            ; Change the !Y.OMargin setting for the window.
+        IM_TRANSPARENT = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
         IM_DENSITY = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
         IM_RESIZE = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
         IM_OPTIONS = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
-        DELETE_PS = delete_ps, $                        ; Delete the PostScript file when making IM files.
-        EUROPEAN = european, $                          ; Select European measurements in PostScript output.
-        ENCAPSULATED = encapsulated                     ; Create Encapsulated PostScript output.
+        PS_DELETE = ps_delete, $                        ; Delete the PostScript file when making IM files.
+        PS_METRIC = ps_metric, $                        ; Select metric measurements in PostScript output.
+        PS_ENCAPSULATED = ps_encapsulated, $            ; Create encapsulated PostScript output.
+        PS_FONT=ps_font, $                              ; Select the font for PostScript output.
+        PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.
+        PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
+        PS_TT_FONT=ps_tt_font                           ; Select the true-type font to use for PostScript output.
         
-    
+   ; Are you executing commands immediately?
+   IF Keyword_Set(execute) THEN BEGIN
+        IF Obj_Valid(objref[index]) THEN objref[index] -> ExecuteCommands
+   ENDIF
+   
+     
     
 END 

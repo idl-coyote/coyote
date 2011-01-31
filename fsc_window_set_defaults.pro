@@ -47,17 +47,12 @@
 ; :Keywords:
 ;     background: in, optional, type=string
 ;         The background color of the window. Only use if the ERASEIT property is also set.
-;     delete_ps: in, optional, type=boolean, default=1
-;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
-;         when making raster file output.
-;     encapsulated: in, optional, type=boolean, default=0
-;          Set this keyword to configure PSCONFIG to produce encapsulated PostScript output by default.
-;     european: in, optional, type=boolean, default=0
-;          Set this keyword to configure PSCONFIG to use European-style values in its interface.
+;     delay: in, optional, type=float, default=0
+;         Set this keyword to the amount of delay desired between command execution. 0
 ;     eraseit: in, optional, type=boolean
 ;         If this property is set, the FSC_Window erases with the background color before
 ;         displaying the commands in the window's command list.
-;     im_allow_transparent: in, optional, type=boolean, default=0
+;     im_transparent: in, optional, type=boolean, default=0
 ;         Set this keyword to allow ImageMagick to create transparent backgrounds when it
 ;         makes raster image files from PostScript output.
 ;     im_density: in, optional, type=integer, default=300
@@ -77,6 +72,13 @@
 ;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
 ;         R, G, and B vectors of a color table. It is probably easier to use CTLOAD or
 ;         XCOLORS to load color tables for the window, but this is provided as another option.
+;     ps_delete: in, optional, type=boolean, default=1
+;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
+;         when making raster file output.
+;     ps_encapsulated: in, optional, type=boolean, default=0
+;          Set this keyword to configure PSCONFIG to produce encapsulated PostScript output by default.
+;     ps_metric: in, optional, type=boolean, default=0
+;          Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
 ;     title: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be a window title. All
 ;         matching is done in uppercase characters.
@@ -98,8 +100,8 @@
 ;       IDL> CTLoad, 5, RGB_TABLE=palette
 ;       IDL> FSC_Window_Set_Defaults, PALETTE=palette, $
 ;               ERASEIT=1, XSIZE=800, YSIZE=400, XPOS=100, YPOS=200, $
-;               ENCAPSULATED=1, EUROPEAN=1
-;       IDL> TVImage, LoadData(7), /WINDOW, /KEEP, /WHITE
+;               PS_ENCAPSULATED=1, PS_METRIC=1
+;       IDL> TVImage, LoadData(7), /WINDOW, MARGIN=0.1
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -122,6 +124,7 @@ PRO FSC_Window_Set_Defaults, $
    
    ; FSC_Window properties.
    Background = background, $                      ; The background color. 
+   Delay = delay, $                                ; The delay between command execution.
    EraseIt = eraseit, $                            ; Set this keyword to erase the display before executing the commands.
    Multi = multi, $                                ; Set this in the same way !P.Multi is used.   
    XOMargin = xomargin, $                          ; Set the !X.OMargin. A two element array.
@@ -134,15 +137,19 @@ PRO FSC_Window_Set_Defaults, $
    Palette = palette, $                            ; The color table palette to use for the window.
    
    ; ImageMagick Properties.
-   IM_Allow_Transparent = im_allow_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+   IM_Transparent = im_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
    IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
    IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
    
    ; PostScript properties.
-   Delete_PS = delete_ps, $                        ; Delete the PostScript file when making IM files.
-   European = european, $                          ; Select European measurements in PostScript output.
-   Encapsulated = encapsulated                     ; Create Encapsulated PostScript output.
+   PS_Delete = ps_delete, $                        ; Delete the PostScript file when making IM files.
+   PS_Metric = ps_metric, $                        ; Select metric measurements in PostScript output.
+   PS_Encapsulated = ps_encapsulated, $            ; Create Encapsulated PostScript output.
+   PS_FONT=ps_font, $                              ; Select the font for PostScript output.
+   PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.
+   PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
+   PS_TT_FONT=ps_tt_font                           ; Select the true-type font to use for PostScript output.
    
    Compile_Opt idl2
    
@@ -155,6 +162,7 @@ PRO FSC_Window_Set_Defaults, $
    
         ; Check the various keywords. Create defaults.
         IF N_Elements(background) EQ 0 THEN background = 'white'
+        IF N_Elements(delay) EQ 0 THEN delay = 0
         IF N_Elements(eraseit) EQ 0 THEN eraseit = 0
         IF N_Elements(multi) EQ 0 THEN multi = Intarr(5)
         IF N_Elements(xomargin) EQ 0 THEN xomargin = FltArr(2)
@@ -165,17 +173,22 @@ PRO FSC_Window_Set_Defaults, $
         IF N_Elements(xpos) EQ 0 THEN xpos = -1
         IF N_Elements(ypos) EQ 0 THEN ypos = -1
         IF N_Elements(palette) EQ 0 THEN palette = BytArr(256,3)
-        IF N_Elements(im_allow_transparent) EQ 0 THEN im_allow_transparent = Keyword_Set(im_allow_transparent)
+        IF N_Elements(im_transparent) EQ 0 THEN im_transparent = 0
         IF N_Elements(im_density) EQ 0 THEN im_density = 300
         IF N_Elements(im_resize) EQ 0 THEN im_resize = 25
         IF N_Elements(im_options) EQ 0 THEN im_options = ""
-        IF N_Elements(delete_ps) EQ 0 THEN delete_ps = 1
-        IF N_Elements(european) EQ 0 THEN european = Keyword_Set(european)
-        IF N_Elements(encapsulated) EQ 0 THEN encapsulated = Keyword_Set(encapsulated)
+        IF N_Elements(ps_delete) EQ 0 THEN ps_delete = 1
+        IF N_Elements(ps_metric) EQ 0 THEN ps_metric = 0
+        IF N_Elements(ps_encapsulated) EQ 0 THEN ps_encapsulated = 0
+        IF N_Elements(ps_charsize) EQ 0 THEN ps_charsize = 0.0
+        IF N_Elements(ps_font) EQ 0 THEN ps_font = 0
+        IF N_Elements(ps_scale_factor) EQ 0 THEN ps_scale_factor = 1.0
+        IF N_Elements(ps_tt_font) EQ 0 THEN ps_tt_font = 'Helvetica'
 
         ; Define the default structure.
         fsc_window_defaults = { _$_FSC_WINDOW_DEFAULTS, $
            Background:background, $                      ; The background color. 
+           Delay: delay, $                               ; Set this keyword to the delay between command execution.
            EraseIt:eraseit, $                            ; Set this keyword to erase the display before executing the commands.
            Multi:multi, $                                ; Set this in the same way !P.Multi is used.   
            xomargin:xomargin, $                          ; Set the !X.OMargin. A two element array.
@@ -186,13 +199,17 @@ PRO FSC_Window_Set_Defaults, $
            XPos:xpos, $                                  ; The X offset of the window on the display.
            YPos:ypos, $                                  ; The Y offset of the window on the display. 
            Palette:palette, $                            ; The color table palette to use for the window.
-           IM_Allow_Transparent:im_allow_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+           IM_Transparent:im_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
            IM_Density:im_density, $                      ; Sets the density parameter on ImageMagick convert command.
            IM_Resize:im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
            IM_Options:im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
-           Delete_PS:delete_ps, $                        ; Delete the PostScript file when making IM files.
-           European:european, $                          ; Select European measurements in PostScript output.
-           Encapsulated:encapsulated  }                  ; Create Encapsulated PostScript output.
+           PS_Delete:ps_delete, $                        ; Delete the PostScript file when making IM files.
+           PS_Metric:ps_metric, $                        ; Select metric measurements in PostScript output.
+           PS_Encapsulated:ps_encapsulated, $            ; Create Encapsulated PostScript output.
+           PS_Charsize:ps_charsize, $                    ; PostScript character size.
+           PS_Font:ps_font, $                            ; PostScript font to use.
+           PS_Scale_Factor:ps_scale_factor, $            ; PostScript scale_factor
+           PS_TT_Font:ps_tt_font }                       ; PostScript true-type font.
            
         IF Keyword_Set(reset) THEN BEGIN
             !FSC_WINDOW_DEFAULTS = fsc_window_defaults
@@ -202,6 +219,7 @@ PRO FSC_Window_Set_Defaults, $
    ENDIF ELSE BEGIN
     
         IF N_Elements(background) NE 0 THEN !FSC_WINDOW_DEFAULTS.background = background
+        IF N_Elements(delay) NE 0 THEN !FSC_WINDOW_DEFAULTS.delay = delay
         IF N_Elements(eraseit) NE 0 THEN !FSC_WINDOW_DEFAULTS.eraseit = eraseit
         IF N_Elements(multi) NE 0 THEN !FSC_WINDOW_DEFAULTS.multi = multi
         IF N_Elements(xomargin) NE 0 THEN !FSC_WINDOW_DEFAULTS.xomargin = xomargin
@@ -212,13 +230,17 @@ PRO FSC_Window_Set_Defaults, $
         IF N_Elements(xpos) NE 0 THEN !FSC_WINDOW_DEFAULTS.xpos = xpos
         IF N_Elements(ypos) NE 0 THEN !FSC_WINDOW_DEFAULTS.ypos = ypos
         IF N_Elements(palette) NE 0 THEN !FSC_WINDOW_DEFAULTS.palette = palette
-        IF N_Elements(im_allow_transparent) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_allow_transparent = Keyword_Set(im_allow_transparent)
+        IF N_Elements(im_transparent) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_transparent = Keyword_Set(im_transparent)
         IF N_Elements(im_density) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_density = density
         IF N_Elements(im_resize) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_resize = resize
         IF N_Elements(im_options) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_options = im_options
-        IF N_Elements(delete_ps) NE 0 THEN !FSC_WINDOW_DEFAULTS.delete_ps = Keyword_Set(delete_ps)
-        IF N_Elements(european) NE 0 THEN !FSC_WINDOW_DEFAULTS.european = Keyword_Set(european)
-        IF N_Elements(encapsulated) NE 0 THEN !FSC_WINDOW_DEFAULTS.encapsulated = Keyword_Set(encapsulated)
+        IF N_Elements(ps_delete) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_delete = Keyword_Set(ps_delete)
+        IF N_Elements(ps_metric) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_metric = Keyword_Set(ps_metric)
+        IF N_Elements(ps_encapsulated) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_encapsulated = Keyword_Set(ps_encapsulated)
+        IF N_Elements(ps_charsize) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_charsize = ps_charsize
+        IF N_Elements(ps_font) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_font = ps_font
+        IF N_Elements(ps_scale_factor) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_scale_factor = ps_scale_factor
+        IF N_Elements(ps_tt_font) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_tt_font = ps_tt_font
         
    ENDELSE
    

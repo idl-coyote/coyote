@@ -72,13 +72,23 @@
 ;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
 ;         R, G, and B vectors of a color table. It is probably easier to use CTLOAD or
 ;         XCOLORS to load color tables for the window, but this is provided as another option.
+;     ps_charsize: in, optional, type=float, default=0.0
+;         Set this value to the !P.Charsize value to use when creating PostScript output. This
+;         value is not used if !P.Charsize is set to anything other than 0.0.
 ;     ps_delete: in, optional, type=boolean, default=1
 ;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
 ;         when making raster file output.
 ;     ps_encapsulated: in, optional, type=boolean, default=0
 ;          Set this keyword to configure PSCONFIG to produce encapsulated PostScript output by default.
+;     ps_font: in, optional, type=integer, default=0
+;          Set this to the !P.Font value to use for creating PostScript files.
 ;     ps_metric: in, optional, type=boolean, default=0
 ;          Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
+;     ps_scale_factor: in, optional, type=float, default=1.0
+;          Set this keyword to the PostScript scale factor you want to use for PostScript output.
+;     ps_tt_font: in, optional, type=string, default="Helvetica"
+;          Set this keyword to the name of the PostScript true-type font to use for PostScript output.
+;          Not used, unless !P.Font=1.
 ;     title: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be a window title. All
 ;         matching is done in uppercase characters.
@@ -137,7 +147,7 @@ PRO FSC_Window_Set_Defaults, $
    Palette = palette, $                            ; The color table palette to use for the window.
    
    ; ImageMagick Properties.
-   IM_Transparent = im_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+   IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
    IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
    IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
@@ -199,7 +209,7 @@ PRO FSC_Window_Set_Defaults, $
            XPos:xpos, $                                  ; The X offset of the window on the display.
            YPos:ypos, $                                  ; The Y offset of the window on the display. 
            Palette:palette, $                            ; The color table palette to use for the window.
-           IM_Transparent:im_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+           IM_Transparent:im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
            IM_Density:im_density, $                      ; Sets the density parameter on ImageMagick convert command.
            IM_Resize:im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
            IM_Options:im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.

@@ -53,15 +53,29 @@
 ;         An alternative way to specify the color to use in erasing the graphics window.
 ;         Color names are those used with FSC_Color. This parameter is used in
 ;         preference to the background_color parameter.
+;     layout: in, optional, type=intarr(3)
+;         This keyword specifies a grid with a graphics window and determines where the
+;         graphic should appear. The syntax of LAYOUT is three numbers: [ncolumns, nrows, location].
+;         The grid is determined by the number of columns (ncolumns) by the number of 
+;         rows (nrows). The location of the graphic is determined by the third number. The
+;         grid numbering starts in the upper left (1) and goes sequentually by column and then
+;         by row. If this keyword is used, only this portion of the window is erased.
 ;     window: in, optional, type=boolean, default=0
 ;         Set this keyword to erase the current FSC_Window application. "Erasing" in
 ;         this case means removing all the current commands.
 ;          
 ; :Examples:
-;    Used like the IDL Erase command::
+;    Used to "erase" various things::
 ;       IDL> FSC_Erase
 ;       IDL> FSC_Erase, 'gray'
 ;       IDL> FSC_Erase, COLOR='charcoal'
+;       
+;       IDL> FSC_Plot, Loaddata(1), /Window
+;       IDL> FSC_Erase, /Window
+;       
+;       IDL> FSC_Plot, Loaddata(17), Layout=[2,2,1]
+;       IDL> FSC_Plot, Loaddata(17), Layout=[2,2,4]
+;       IDL> FSC_Erase, Layout=[2,2,1]
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -80,12 +94,14 @@
 ;          over the parameter. 18 Nov 2010. DWF.
 ;        Modified to erase in decomposed color, if possible.
 ;        In some cases, I was turning BYTE values to strings without converting to 
-;            INTEGERS first. 30 Dec 2010. DWF.        
+;            INTEGERS first. 30 Dec 2010. DWF.   
+;         Added WINDOW keyword. 26 Jan 2011. DWF. 
+;         Added LAYOUT keyword. 1 Feb 2011. DWF.    
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Erase, background_color, COLOR=color, WINDOW=window
+PRO FSC_Erase, background_color, COLOR=color, LAYOUT=layout, WINDOW=window
 
     ; Are we erasing an FSC_Window application?
     IF Keyword_Set(window) THEN BEGIN
@@ -115,7 +131,31 @@ PRO FSC_Erase, background_color, COLOR=color, WINDOW=window
     SetDecomposedState, 1, CURRENTSTATE=currentState
     
     IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(thisColor)
-    Erase, Color=thisColor
+    
+    ; Set up the layout, if necessary.
+    IF N_Elements(layout) NE 0 THEN BEGIN
+       thisMulti = !P.Multi
+       totalPlots = layout[0]*layout[1]
+       !P.Multi = [0,layout[0], layout[1], 0, 0]
+       IF layout[2] EQ 1 THEN BEGIN
+            noerase = 1
+            !P.Multi[0] = 0
+       ENDIF ELSE BEGIN
+            !P.Multi[0] = totalPlots - layout[2] + 1
+       ENDELSE
+       
+       ; Draw an invisible plot in this space.
+       Plot, [0,1], XStyle=4, YStyle=4, /NoErase
+       
+       ; Fill the plot area with the color.
+       x = !X.Region
+       y = !Y.Region
+       PolyFill, [x[0], x[0], x[1], x[1]], $
+                 [y[0], y[1], y[1], y[0]], /FIll, $
+                 Color=thisColor, /Normal
+       !P.Multi = thisMulti
+    ENDIF ELSE Erase, Color=thisColor
+
     
     ; Clean up.
     SetDecomposedState, currentState

@@ -205,6 +205,8 @@ PRO FSC_CmdWindow::ExecuteCommands
         void = Error_Message()
         ;void = Dialog_Message(!Error_State.MSG)
         !P.Multi = thisMulti
+        !X.OMargin = thisXOmargin
+        !Y.OMargin = thisYOmargin
         IF N_Elements(rr) NE 0 THEN TVLCT, rr, gg, bb
         IF (!D.Flags AND 256) NE 0 THEN WSet, -1
         RETURN
@@ -253,8 +255,8 @@ PRO FSC_CmdWindow::ExecuteCommands
             IF StrUpCase(answer) EQ 'YES' THEN BEGIN
                 self -> DeleteCommand, j
                 !P.Multi = thisMulti
-                !X.OMargin = thisOXmargin
-                !Y.OMargin = thisOYmargin
+                !X.OMargin = thisXOmargin
+                !Y.OMargin = thisYOmargin
                 IF N_Elements(rr) NE 0 THEN TVLCT, rr, gg, bb
                 IF (!D.Flags AND 256) NE 0 THEN WSet, -1
                 RETURN

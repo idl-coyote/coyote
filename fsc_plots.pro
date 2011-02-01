@@ -130,6 +130,7 @@ PRO FSC_PlotS, x, y, z, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        IF Keyword_Set(dataSwitch) THEN x = Temporar(y)
         RETURN
     ENDIF
     
@@ -155,6 +156,18 @@ PRO FSC_PlotS, x, y, z, $
     
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
+    ; The PLOTS command requires at least two positional parameters.
+    ; If we only have one, then we will fake it, as we do in a line
+    ; plot.
+    n_params = N_Params()
+    IF (n_params EQ 1) && Size(x, /N_DIMENSIONS) EQ 1 THEN BEGIN
+        temp = x
+        x = Indgen(N_Elements(x))
+        y = Temporary(temp)
+        n_params = 2
+        dataSwitch = 1
+    ENDIF
     
     ; Going to draw the lines in decomposed color, if possible
     SetDecomposedState, 1, CurrentState=currentState
@@ -184,7 +197,7 @@ PRO FSC_PlotS, x, y, z, $
     IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
    
     ; Be sure the vectors are the right length.
-    CASE N_Params() OF
+    CASE n_params OF
         1: xsize = N_Elements(x[0,*])
         ELSE: xsize = N_Elements(x)
     ENDCASE
@@ -210,7 +223,7 @@ PRO FSC_PlotS, x, y, z, $
    
        ; Load a color, if needed.
        IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)
-       CASE N_Params() OF
+       CASE n_params OF
             1: IF psym[0] LE 0 THEN PlotS, x, Color=color, _STRICT_EXTRA=extra
             2: IF psym[0] LE 0 THEN PlotS, x, y, Color=color, _STRICT_EXTRA=extra
             3: IF psym[0] LE 0 THEN PlotS, x, y, z, Color=color, _STRICT_EXTRA=extra
@@ -220,7 +233,7 @@ PRO FSC_PlotS, x, y, z, $
    
         FOR j=0,xsize-2 DO BEGIN
             thisColor = color[j]
-            CASE N_Params() OF
+            CASE n_params OF
                 1: IF psym[0] LE 0 THEN BEGIN
                        PlotS, [x[0,j],x[0,j+1]], [x[1,j],x[1,j+1]], [x[2,j],x[2,j+1]], $
                            Color=thisColor, _STRICT_EXTRA=extra
@@ -247,7 +260,7 @@ PRO FSC_PlotS, x, y, z, $
           IF N_Elements(symcolor) GT 1 THEN thisColor = symcolor[j] ELSE thisColor = symcolor
           IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(thisColor)
           IF N_Elements(symsize) GT 1 THEN thisSize = symsize[j] ELSE thisSize = symsize
-          CASE N_Params() OF
+          CASE n_params OF
               
                 1: BEGIN
                    PlotS, x[*,j], COLOR=thisColor, PSYM=SymCat(Abs(psym)), $
@@ -276,5 +289,8 @@ PRO FSC_PlotS, x, y, z, $
    ; Restore the color table. Can't do this for the Z-buffer or
    ; the snap shot will be incorrect.
    IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb
+   
+   ; If you switched data, switch it back.
+   IF Keyword_Set(dataSwitch) THEN x = Temporary(y)
    
 END

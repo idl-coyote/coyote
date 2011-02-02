@@ -35,7 +35,7 @@
 ;                         the WINDOW keyword.
 ;                         
 ;       AXISCOLORNAME:    The name of the axis color. Default: "Black". (All color names
-;                         derived from FSC_COLOR.)
+;                         derived from cgCOLOR.)
 ;
 ;       BACKCOLORNAME:    The name of the background color. Default: "White".
 ;
@@ -52,7 +52,7 @@
 ;       DATACOLORNAME:    The name of the data color for drawing the histogram outlines.
 ;                         Default: "Indian Red".
 ;
-;       FILE:             The name of a color name file to use with FSC_COLOR.
+;       FILE:             The name of a color name file to use with cgCOLOR.
 ;
 ;       FILLPOLYGON:      Set this keyword to fill the histogram polygons. If this keyword
 ;                         is set, the following keyword can also be used.
@@ -116,7 +116,7 @@
 ;       
 ;       THICK:            Set this keyword to a value greater than 1 to draw thicker axes and lines.
 ;       
-;       WINDOW:           Set this keyword to display the plot in a resizeable FSC_Window program.
+;       WINDOW:           Set this keyword to display the plot in a resizeable cgWindow program.
 ;
 ;       The user may also enter any other keywords suitable for the PLOT and POLYFILL commands in IDL.
 ;
@@ -146,7 +146,7 @@
 ;
 ;        http://www.dfanning.com/programs/convert_to_type.pro
 ;        http://www.dfanning.com/programs/error_message.pro
-;        http://www.dfanning.com/programs/fsc_color.pro
+;        http://www.dfanning.com/programs/cgcolor.pro
 ;        
 ; NOTE:
 ; 
@@ -240,7 +240,7 @@
 ;******************************************************************************************;
 PRO HistoPlot, $                    ; The program name.
    dataToHistogram, $               ; The data to draw a histogram of.
-   ADDCMD=addcmd, $                 ; Add this command to an FSC_Window.
+   ADDCMD=addcmd, $                 ; Add this command to an cgWindow.
    AXISCOLORNAME=axisColorName, $   ; The axis color.
    BACKCOLORNAME=backcolorName, $   ; The background color.
    DATACOLORNAME=datacolorName, $   ; The data color.
@@ -285,7 +285,7 @@ PRO HistoPlot, $                    ; The program name.
    NAN=nan, $                       ; Check for NAN.
    NBINS=nbins, $                   ; The number of bins to display.
    
-   WINDOW=window                    ; Display this in an FSC_Window.
+   WINDOW=window                    ; Display this in an cgWindow.
 
 
    ; Catch any error in the HistoPlot program.
@@ -313,7 +313,7 @@ PRO HistoPlot, $                    ; The program name.
         
         ; Have to do something different if we are overplotting or adding a command.
         IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
-            FSC_Window, 'Histoplot', $          ; The program name.
+            cgWindow, 'Histoplot', $          ; The program name.
                dataToHistogram, $               ; The data to draw a histogram of.
                AXISCOLORNAME=axisColorName, $   ; The axis color.
                BACKCOLORNAME=backcolorName, $   ; The background color.
@@ -362,9 +362,9 @@ PRO HistoPlot, $                    ; The program name.
         ENDIF 
         
         ; Otherwise, we are just replacing the commands in a new or existing window.
-            void = FSC_QueryWin(COUNT=wincnt)
-            IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
-            FSC_Window, 'Histoplot', $          ; The program name.
+            void = cgQuery(COUNT=wincnt)
+            IF wincnt EQ 0 THEN replaceCmd=0 ELSE replaceCmd=1
+            cgWindow, 'Histoplot', $          ; The program name.
                dataToHistogram, $               ; The data to draw a histogram of.
                AXISCOLORNAME=axisColorName, $   ; The axis color.
                BACKCOLORNAME=backcolorName, $   ; The background color.
@@ -534,11 +534,11 @@ PRO HistoPlot, $                    ; The program name.
 
    ; Load plot colors.
    TVLCT, r, g, b, /GET
-   axisColor = FSC_Color(axisColorName, FILE=file)
-   dataColor = FSC_Color(datacolorName, FILE=file)
-   backColor = FSC_Color(backColorName, FILE=file)
-   polyColor = FSC_Color(polyColorName, FILE=file)
-   probColor = FSC_Color(probColorName, FILE=file)
+   axisColor = cgColor(axisColorName, FILE=file)
+   dataColor = cgColor(datacolorName, FILE=file)
+   backColor = cgColor(backColorName, FILE=file)
+   polyColor = cgColor(polyColorName, FILE=file)
+   probColor = cgColor(probColorName, FILE=file)
 
    ; Set up some labels.
    IF frequency THEN BEGIN

@@ -68,7 +68,7 @@ PRO FSC_ZPlot_Resize, event
      Widget_Control, info.drawID, Draw_XSize=(event.x > 200), Draw_YSize=(event.y > 150)
     
      ; Draw the plot in both windows.
-     FSC_Plot, info.indep, info.dep, $
+     cgPlot, info.indep, info.dep, $
         AXISCOLOR=info.axiscolor, $
         BACKGROUND=info.background, $
         COLOR=info.color, $
@@ -81,7 +81,7 @@ PRO FSC_ZPlot_Resize, event
         _EXTRA=*info.extraKeywords
     
      WSet, info.drawIndex
-     FSC_Plot, info.indep, info.dep, $
+     cgPlot, info.indep, info.dep, $
         AXISCOLOR=info.axiscolor, $
         BACKGROUND=info.background, $
         COLOR=info.color, $
@@ -212,7 +212,7 @@ PRO FSC_ZPlot_Drawbox, event
 
      ; Draw the "zoomed" plot in both the draw widget and the pixmap.
      ; Draw the plot in both windows.
-     FSC_Plot, info.indep, info.dep, $
+     cgPlot, info.indep, info.dep, $
         AXISCOLOR=info.axiscolor, $
         BACKGROUND=info.background, $
         COLOR=info.color, $
@@ -225,7 +225,7 @@ PRO FSC_ZPlot_Drawbox, event
         _EXTRA=*info.extraKeywords
 
      WSet, info.pixIndex
-     FSC_Plot, info.indep, info.dep, $
+     cgPlot, info.indep, info.dep, $
         AXISCOLOR=info.axiscolor, $
         BACKGROUND=info.background, $
         COLOR=info.color, $
@@ -292,16 +292,16 @@ PRO FSC_ZPlot_Drawbox, event
     ENDELSE
 
     ; Draw the arrow box.
-    FSC_Arrow, x1, y1, x2, y1, /Data, Color=info.arrowColor, /Solid, HSize=12, THICK=2
+    cgArrow, x1, y1, x2, y1, /Data, Color=info.arrowColor, /Solid, HSize=12, THICK=2
     IF info.ylog THEN BEGIN
-       FSC_PlotS, [x1, x1], [10^!Y.CRange[0], 10^!Y.CRange[1]], $
+       cgPlotS, [x1, x1], [10^!Y.CRange[0], 10^!Y.CRange[1]], $
             Color=info.arrowColor, THICK=2
-       FSC_PlotS, [x2, x2], [10^!Y.CRange[0], 10^!Y.CRange[1]], $
+       cgPlotS, [x2, x2], [10^!Y.CRange[0], 10^!Y.CRange[1]], $
             Color=info.arrowColor, THICK=2
     ENDIF ELSE BEGIN
-       FSC_PlotS, [x1, x1], [!Y.CRange[0], !Y.CRange[1]], $
+       cgPlotS, [x1, x1], [!Y.CRange[0], !Y.CRange[1]], $
             Color=info.arrowColor, THICK=2
-       FSC_PlotS, [x2, x2], [!Y.CRange[0], !Y.CRange[1]], $
+       cgPlotS, [x2, x2], [!Y.CRange[0], !Y.CRange[1]], $
             Color=info.arrowColor, THICK=2
     ENDELSE
 
@@ -340,13 +340,13 @@ END ; -----------------------------------------------------------------------
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, 'black'.
-;        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
+;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table.
 ;     group_leader: in, optional, type=long
 ;         The Group Leader widget identifier for this widget program.
 ;     symcolor: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the symbol color. By default, 'black'.
-;        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
+;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table.
 ;     xlog: in, optional, type=integer, default=0
 ;         Set this keyword if you want the X axis to be a log axis.
@@ -357,7 +357,7 @@ END ; -----------------------------------------------------------------------
 ;     ysize: in, optional, type=integer, default=512    
 ;         The Y size of the initial plot window.
 ;     _extra: in, optional
-;         Any keywords appropriate for the FSC_Plot command.
+;         Any keywords appropriate for the cgPlot command.
 ;          
 ; :Examples:
 ;    Code examples::
@@ -458,7 +458,7 @@ PRO FSC_ZPlot, x, y, $
     xrange = [Min(indep), Max(indep)]
     yrange=[Min(dep),Max(dep)]
     
-    FSC_Plot, indep, dep, $
+    cgPlot, indep, dep, $
         AXISCOLOR=axiscolor, $
         BACKGROUND=background, $
         COLOR=color, $
@@ -472,7 +472,7 @@ PRO FSC_ZPlot, x, y, $
     ; plot you just put in the draw widget in the pixmap window.
     Window, /Free, XSize=xsize, YSize=ysize, /Pixmap
     pixIndex = !D.Window
-    FSC_Plot, indep, dep, $
+    cgPlot, indep, dep, $
         AXISCOLOR=axiscolor, $
         BACKGROUND=background, $
         COLOR=color, $

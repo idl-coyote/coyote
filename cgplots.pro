@@ -1,10 +1,10 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_PlotS
+;   cgPlotS
 ;
 ; PURPOSE:
-;   The purpose of FSC_PlotS is to create a wrapper for the traditional IDL graphics
+;   The purpose of cgPlotS is to create a wrapper for the traditional IDL graphics
 ;   command, PlotS. The primary purpose of this is to create plot commands that work
 ;   and look identically both on the display and in PostScript files.
 ;
@@ -38,7 +38,7 @@
 ;
 ;+
 ; :Description:
-;   The purpose of FSC_PlotS is to create a wrapper for the traditional IDL graphics
+;   The purpose of cgPlotS is to create a wrapper for the traditional IDL graphics
 ;   command, PlotS. The primary purpose of this is to create plot commands that work
 ;   and look identically both on the display and in PostScript files.
 ;
@@ -59,10 +59,10 @@
 ;         
 ; :Keywords:
 ;     addcmd: in, optional, type=boolean, default=0
-;        Set this keyword to add the command to an FSC_Window display.
+;        Set this keyword to add the command to an cgWindow display.
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, 'black'.
-;        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
+;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table. May be a vector of the same
 ;        length as X.
 ;     psym: in, optional, type=integer
@@ -76,14 +76,14 @@
 ;        A scalar or vector of symbol sizes. Default is 1.0. May be a vector of the same 
 ;        length as X.
 ;     window: in, optional, type=boolean, default=0
-;         Set this keyword to add the command to the current FSC_Window application.
+;         Set this keyword to add the command to the current cgWindow application.
 ;     _extra: in, optional, type=any
 ;        Any keywords supported by the PLOTS command are allowed.
 ;         
 ; :Examples:
 ;    Use like the IDL PLOTS command::
-;       IDL> FSC_Plot, Findgen(11)
-;       IDL> FSC_PlotS, !X.CRange, [5,5], LINESTYLE=2, THICK=2, COLOR='red'
+;       IDL> cgPlot, Findgen(11)
+;       IDL> cgPlotS, !X.CRange, [5,5], LINESTYLE=2, THICK=2, COLOR='red'
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -114,7 +114,7 @@
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_PlotS, x, y, z, $
+PRO cgPlotS, x, y, z, $
     ADDCMD=addcmd, $
     COLOR=scolor, $
     PSYM=psym, $
@@ -136,14 +136,14 @@ PRO FSC_PlotS, x, y, z, $
     
     ; Did the user pass parameters?
     IF N_Params() EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_PlotS, x, y, [z]'
+        Print, 'USE SYNTAX: cgPlotS, x, y, [z]'
         RETURN
     ENDIF
     
     ; Should this be added to a resizeable graphics window?
     IF (Keyword_Set(window) OR Keyword_Set(addcmd)) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-        FSC_Window, 'FSC_PlotS', x, y, z, $
+        cgWindow, 'cgPlotS', x, y, z, $
             COLOR=scolor, $
             PSYM=psym, $
             SYMCOLOR=ssymcolor, $
@@ -222,7 +222,7 @@ PRO FSC_PlotS, x, y, z, $
    IF N_Elements(color) EQ 1 THEN BEGIN
    
        ; Load a color, if needed.
-       IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)
+       IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
        CASE n_params OF
             1: IF psym[0] LE 0 THEN PlotS, x, Color=color, _STRICT_EXTRA=extra
             2: IF psym[0] LE 0 THEN PlotS, x, y, Color=color, _STRICT_EXTRA=extra
@@ -258,7 +258,7 @@ PRO FSC_PlotS, x, y, z, $
       
           ; Get information about the symbol you are drawing.
           IF N_Elements(symcolor) GT 1 THEN thisColor = symcolor[j] ELSE thisColor = symcolor
-          IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(thisColor)
+          IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = cgColor(thisColor)
           IF N_Elements(symsize) GT 1 THEN thisSize = symsize[j] ELSE thisSize = symsize
           CASE n_params OF
               

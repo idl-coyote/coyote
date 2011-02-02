@@ -1,12 +1,12 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_WDelete
+;   cgSet
 ;
 ; PURPOSE:
-;   Allows the user to delete one or more FSC_Window applications. The FSC_Window can
-;   be identifed by window index number, widget identifier, title, or object reference,
-;   depending on which keywords are set.
+;   Allows the user to select the cgWindow application to be the "current" application.
+;   Selection can be made based on window index number, widget identifier, object reference,
+;   or window title.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -38,24 +38,21 @@
 ;
 ;+
 ; :Description:
-;   Allows the user to delete one or more FSC_Window applications. The FSC_Window can
-;   be identifed by window index number, widget identifier, title, or object reference,
-;   depending on which keywords are set.
+;   Allows the user to select the cgWindow application to be the "current" application.
+;   Selection can be made based on window index number, widget identifier, object reference,
+;   or window title.
 ;
 ; :Categories:
 ;    Graphics
 ;    
 ; :Params:
-;    selection: in, optional, type=varies
-;       Normally, a window index number of an FSC_Window application. But, the selection
+;    selection: in, required, type=varies
+;       Normally, a window index number of an cgWindow application. But, the selection
 ;       can be a widget identifier, an object reference, or a window title, depending on
-;       which keywords are set. The FSC_Window matching the selection is deleted. If not
-;       provided, the current FSC_Window is deleted.
+;       which keywords are set. The cgWindow matching the selection is made the "current"
+;       cgWindow and the application is moved forward on the display.
 ;       
 ; :Keywords:
-;     all: in, optional, type=boolean, default=0
-;         If this keyword is set, all the FSC_Window applications currently on the display
-;         are deleted.
 ;     object: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be an object reference.
 ;     title: in, optional, type=boolean
@@ -65,8 +62,12 @@
 ;         If this keyword is set, the selection is assumed to be a widget identifier.
 ;          
 ; :Examples:
-;    Used to delete an FSC_Window application::
-;       IDL> FSC_WDelete, 'Window 1', /TITLE
+;    Used with query routine::
+;       IDL> wids = cgQuery(TITLE=titles, COUNT=count)
+;       IDL> index = Where(StrUpCase(titles) EQ 'PLOT WINDOW', tcnt)
+;       IDL> IF tcnt GT 0 THEN cgSet, wids[index]
+;       IDL> cgWindow, 'Oplot', thisData, /AddCmd
+;       IDL> cgSet ; Bring current window forwad on display
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -79,12 +80,14 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 24 January 2011. DWF.
+;        Written, 23 January 2011. DWF.
+;        If selection match isn't provided, as like WShow to bring the current 
+;           window forward on display. 26 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_WDelete, selectMatch, ALL=all, OBJECT=object, WIDGETID=widgetID, TITLE=title
+PRO cgSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
 
    Compile_Opt idl2
     
@@ -96,14 +99,23 @@ PRO FSC_WDelete, selectMatch, ALL=all, OBJECT=object, WIDGETID=widgetID, TITLE=t
         RETURN
    ENDIF
    
+   ; If there is no selection match, then act like WSHOW an bring the window
+   ; forward on the display.
+   IF N_Elements(selection) EQ 0 THEN BEGIN
+      void = cgQuery(WIDGETID=tlb, /CURRENT)
+      Widget_Control, tlb, /Show
+      RETURN
+   ENDIF
+   
+   ; Try to do the right thing here.
+   IF Size(selection, /TNAME) EQ 'OBJREF' THEN object = 1
+   IF Size(selection, /TNAME) EQ 'STRING' THEN title = 1
+   
    ; Get the values you need.
-   wid = FSC_QueryWin(WIDGETID=tlb, OBJECT=objref, TITLE=titles, COUNT=count)
-   IF count EQ 0 THEN RETURN
-
-   ; Check the match criteria.
-   IF N_Elements(selectMatch) NE 0 THEN BEGIN
-       IF Size(selectMatch, /TNAME) EQ 'OBJREF' THEN object = 1
-       IF Size(selectMatch, /TNAME) EQ 'STRING' THEN title = 1
+   wid = cgQuery(WIDGETID=tlb, OBJECT=objref, TITLE=titles, COUNT=count)
+   IF count EQ 0 THEN BEGIN
+        Message, 'There are no cgWindow objects currently on the display.', /INFORMATIONAL
+        RETURN
    ENDIF
    
    ; Get the window list.
@@ -113,43 +125,34 @@ PRO FSC_WDelete, selectMatch, ALL=all, OBJECT=object, WIDGETID=widgetID, TITLE=t
    CASE 1 OF
    
         Keyword_Set(widgetID): BEGIN
-            IF N_Elements(selectMatch) EQ 0 THEN selectMatch = tlb[count-1]
-            index = Where(tlb EQ selectMatch, selectCount)
-            IF selectCount EQ 0 THEN Message, 'No FSC_Window matches the selection criteria.'
+            index = Where(tlb EQ selection, selectCount)
+            IF selectCount EQ 0 THEN Message, 'No cgWindow matches the selection criteria.'
             END
             
         Keyword_Set(object): BEGIN
-            IF N_Elements(selectMatch) EQ 0 THEN selectMatch = objref[count-1]
-            index = Where(objref EQ selectMatch, selectCount)
-            IF selectCount EQ 0 THEN Message, 'No FSC_Window matches the selection criteria.'
+            index = Where(objref EQ selection, selectCount)
+            IF selectCount EQ 0 THEN Message, 'No cgWindow matches the selection criteria.'
             END
             
         Keyword_Set(title): BEGIN
-            IF N_Elements(selectMatch) EQ 0 THEN selectMatch = title[count-1]
-            index = Where(StrUpCase(titles) EQ StrUpCase(selectMatch), selectCount)
-            IF selectCount EQ 0 THEN Message, 'No FSC_Window matches the selection criteria.'
+            index = Where(StrUpCase(titles) EQ StrUpCase(selection), selectCount)
+            IF selectCount EQ 0 THEN Message, 'No cgWindow matches the selection criteria.'
             END
 
         ELSE: BEGIN
-            IF N_Elements(selectMatch) EQ 0 THEN selectMatch = wid[count-1]
-            index = Where(wid EQ selectMatch, selectCount)
-            IF selectCount EQ 0 THEN Message, 'No FSC_Window matches the selection criteria.'
+            index = Where(wid EQ selection, selectCount)
+            IF selectCount EQ 0 THEN Message, 'No cgWindow matches the selection criteria.'
             END
    
    ENDCASE
    
    ; Make sure the index is a scalar.
    index = index[0]
-      
-   ; Delete the window.
-   IF Keyword_Set(all) THEN BEGIN
-      FOR j=0,count-1 DO Widget_Control, tlb[j], /Destroy  
-   ENDIF ELSE BEGIN
-      Widget_Control, tlb[index], /Destroy
-   ENDELSE
    
-   ; Find the next window in line and send it forward on the display.
-   wid = FSC_QueryWin(WIDGETID=tlb, OBJECT=objref, TITLE=titles, COUNT=count, /CURRENT)
-   IF count GT 0 THEN Widget_Control, tlb, /Show
-
+   ; Move the window forward on the display.
+   Widget_Control, tlb[index], /Show
+   
+   ; Move the matched node to the end of the list.
+   list -> Move_Node, index
+   
 END

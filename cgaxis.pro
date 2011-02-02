@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_Axis
+;   cgAxis
 ;
 ; PURPOSE:
 ;   Provides a device-independent and color-model-independent way to draw an axis into
@@ -52,11 +52,11 @@
 ;       The Z location of the axis. 
 ;       
 ; :Keywords:
-;     charsize: in, optional, type=float, default=FSC_DefCharSize()
-;         The character size for axes annotations. Uses FSC_DefCharSize to select default
+;     charsize: in, optional, type=float, default=cgDefCharSize()
+;         The character size for axes annotations. Uses cgDefCharSize to select default
 ;         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
 ;     color: in, optional, type=string/integer/long
-;         The color of the text. Color names are those used with FSC_Color. By default,
+;         The color of the text. Color names are those used with cgColor. By default,
 ;         "black", unless the upper-right hand pixel in the display is black, then "white".
 ;     data: in, optional, type=boolean
 ;         Set this keyword to indicate xloc and yloc are in data coordinates. Data coordinates
@@ -70,7 +70,7 @@
 ;     save: in, optional, type=boolean
 ;         Set this keyword to save the scaling parameters set by the axis for subsequent use.
 ;     window: in, optional, type=boolean
-;         Set this keyword to add the command to the in the current FSC_Window application.
+;         Set this keyword to add the command to the in the current cgWindow application.
 ;     xaxis: in, optional, type=integer, default=0
 ;         If set to 0, the axis is drawn under the plot with the tick marks pointing up; if set 
 ;         to 1, the axis is drawn on top of the plot with the tick marks pointing down.
@@ -93,8 +93,8 @@
 ;          
 ; :Examples:
 ;    Used like the IDL AXIS command::
-;       IDL> FSC_Plot, Loaddata(1), YStyle=8, Position=[0.1, 0.1, 0.85, 0.9], /Window
-;       IDL> FSC_Axis, /YAxis, Color='red', YRange=[-500, 500], /Save, /Window
+;       IDL> cgPlot, Loaddata(1), YStyle=8, Position=[0.1, 0.1, 0.85, 0.9], /Window
+;       IDL> cgAxis, /YAxis, Color='red', YRange=[-500, 500], /Save, /Window
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -112,7 +112,7 @@
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Axis, xloc, yloc, zloc, $
+PRO cgAxis, xloc, yloc, zloc, $
             CHARSIZE=charsize, $
             COLOR=scolor, $
             DATA=data, $
@@ -146,9 +146,9 @@ PRO FSC_Axis, xloc, yloc, zloc, $
     ; Should this be added to a resizeable graphics window?
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-        void = FSC_QueryWin(COUNT=wincnt)
-        IF wincnt EQ 0 THEN FSC_Window
-        FSC_Window, 'FSC_Axis', xloc, yloc, zloc, $
+        void = cgQuery(COUNT=wincnt)
+        IF wincnt EQ 0 THEN cgWindow
+        cgWindow, 'cgAxis', xloc, yloc, zloc, $
             CHARSIZE=charsize, $
             COLOR=scolor, $
             DATA=data, $
@@ -201,7 +201,7 @@ PRO FSC_Axis, xloc, yloc, zloc, $
     
     ; Check keywords.
     IF N_Elements(font) EQ 0 THEN font = !P.FONT
-    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
+    IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
 
     ; Draw the axis. Do this in Decomposed color, if possible.
     SetDecomposedState, 1, CURRENTSTATE=currentState
@@ -227,7 +227,7 @@ PRO FSC_Axis, xloc, yloc, zloc, $
     IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
      
     ; Draw the axis.
-    IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(color) ELSE thisColor = color
+    IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = cgColor(color) ELSE thisColor = color
     Axis, xloc, yloc, zloc, $
           CHARSIZE=charsize, $
           COLOR=thisColor, $
@@ -268,7 +268,7 @@ PRO FSC_Axis, xloc, yloc, zloc, $
 ;        ; Draw the text.
 ;        xpos = !X.Window[1] + xwidth
 ;        ypos = (!Y.Window[1] - !Y.Window[0]) / 2.0 + !Y.Window[0]
-;        FSC_Text, xpos, ypos, reverseTitle, /NORMAL, ALIGNMENT=0.5, $
+;        cgText, xpos, ypos, reverseTitle, /NORMAL, ALIGNMENT=0.5, $
 ;            COLOR=scolor, Charsize=charsize, ORIENTATION=-90.0
 ;        
 ;    ENDIF

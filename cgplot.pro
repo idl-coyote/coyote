@@ -1,10 +1,10 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_Plot
+;   cgPlot
 ;
 ; PURPOSE:
-;   The purpose of FSC_Plot is to create a wrapper for the traditional IDL graphics
+;   The purpose of cgPlot is to create a wrapper for the traditional IDL graphics
 ;   command, Plot. The primary purpose of this is to create plot commands that work
 ;   and look identically both on the display and in PostScript files.
 ;
@@ -38,7 +38,7 @@
 ;
 ;+
 ; :Description:
-;   The purpose of FSC_Plot is to create a wrapper for the traditional IDL graphics
+;   The purpose of cgPlot is to create a wrapper for the traditional IDL graphics
 ;   command, Plot. The primary purpose of this is to create plot commands that work
 ;   and look identically both on the display and in PostScript files.
 ;
@@ -55,7 +55,7 @@
 ;       
 ; :Keywords:
 ;     addcmd: in, optional, type=boolean, default=0
-;        Set this keyword to add the command to an FSC_Window. Setting this keyword
+;        Set this keyword to add the command to an cgWindow. Setting this keyword
 ;        automatically sets the WINDOW keyword, but the command does not erase the
 ;        graphics window as it would normally.
 ;     aspect: in, optional, type=float, default=none
@@ -71,12 +71,12 @@
 ;     background: in, optional, type=string/integer, default='white'
 ;        If this keyword is a string, the name of the background color. By default, 'white'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
-;     charsize: in, optional, type=float, default=FSC_DefCharSize()
-;         The character size for axes annotations. Uses FSC_DefCharSize to select default
+;     charsize: in, optional, type=float, default=cgDefCharSize()
+;         The character size for axes annotations. Uses cgDefCharSize to select default
 ;         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, 'black'.
-;        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
+;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table.
 ;     font: in, optional, type=integer, default=!P.Font
 ;        The type of font desired for axis annotation.
@@ -117,10 +117,10 @@
 ;
 ; :Examples:
 ;    Use as you would use the IDL PLOT command::
-;       FSC_Plot, Findgen(11)
-;       FSC_Plot, Findgen(11), Aspect=1.0
-;       FSC_Plot, Findgen(11), Color='olive', AxisColor='red', Thick=2
-;       FSC_Plot, Findgen(11), Color='blue', SymColor='red', PSym=-16
+;       cgPlot, Findgen(11)
+;       cgPlot, Findgen(11), Aspect=1.0
+;       cgPlot, Findgen(11), Color='olive', AxisColor='red', Thick=2
+;       cgPlot, Findgen(11), Color='blue', SymColor='red', PSym=-16
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -144,14 +144,14 @@
 ;        Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
 ;        Changes so that color inputs don't change type. 23 Nov 2010. DWF.
 ;        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
-;        Modifications to allow FSC_Plot to be drop-in replacement for old PLOT commands in 
+;        Modifications to allow cgPlot to be drop-in replacement for old PLOT commands in 
 ;            indexed color mode. 24 Dec 2010. DWF.
 ;        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
 ;        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
 ;        Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.
 ;        In some cases, I was turning BYTE values to strings without converting to 
 ;            INTEGERS first. 30 Dec 2010. DWF.  
-;         Selecting character size now with FSC_DefCharSize. 11 Jan 2011. DWF.   
+;         Selecting character size now with cgDefCharSize. 11 Jan 2011. DWF.   
 ;         Moved setting to decomposed color before color selection process to avoid PostScript
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF. 
 ;         Changed _EXTRA to _REF_EXTRA on procedure definition statement to be able to return
@@ -164,7 +164,7 @@
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Plot, x, y, $
+PRO cgPlot, x, y, $
     ADDCMD=addcmd, $
     ASPECT=aspect, $
     AXISCOLOR=saxiscolor, $
@@ -201,7 +201,7 @@ PRO FSC_Plot, x, y, $
     
     ; Check parameters.
     IF N_Params() EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_Plot, x, y'
+        Print, 'USE SYNTAX: cgPlot, x, y'
         RETURN
     ENDIF
     
@@ -218,7 +218,7 @@ PRO FSC_Plot, x, y, $
         
         ; Special treatment for overplotting or adding a command.
         IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
-        FSC_Window, 'FSC_Plot', x, y, $
+        cgWindow, 'cgPlot', x, y, $
             ASPECT=aspect, $
             AXISCOLOR=saxiscolor, $
             AXESCOLOR=saxescolor, $
@@ -242,9 +242,9 @@ PRO FSC_Plot, x, y, $
        ENDIF
         
         ; Open a new window or replace the current commands, as required.
-        currentWindow = FSC_QueryWin(/CURRENT, COUNT=wincnt)
+        currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
-        FSC_Window, 'FSC_Plot', x, y, $
+        cgWindow, 'cgPlot', x, y, $
             ASPECT=aspect, $
             AXISCOLOR=saxiscolor, $
             AXESCOLOR=saxescolor, $
@@ -311,7 +311,7 @@ PRO FSC_Plot, x, y, $
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF (!D.Window LT 0) &&  Keyword_Set(noerase) THEN BEGIN
                         Window
-                        IF ~Keyword_Set(traditional) THEN FSC_Erase, 'WHITE'
+                        IF ~Keyword_Set(traditional) THEN cgErase, 'WHITE'
                     ENDIF
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) THEN background = 'WHITE'
@@ -341,7 +341,7 @@ PRO FSC_Plot, x, y, $
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF !D.Window LT 0 THEN Window
-                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
+                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN saxisColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN saxisColor = 'WHITE'
@@ -366,7 +366,7 @@ PRO FSC_Plot, x, y, $
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF !D.Window LT 0 THEN Window
-                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
+                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN sColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN sColor = 'WHITE'
@@ -382,20 +382,20 @@ PRO FSC_Plot, x, y, $
     ; If color is the same as background, do something.
     IF ColorsAreIdentical(background, color) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-           IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
+           IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
         ENDIF
         color = 'OPPOSITE'
     ENDIF
     IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-           IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
+           IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
         ENDIF
         axiscolor = 'OPPOSITE'
     ENDIF
     
     ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font
-    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
+    IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     
     ; Other keywords.
     IF N_Elements(ssymcolor) EQ 0 THEN symcolor = color ELSE symcolor = ssymcolor
@@ -453,10 +453,10 @@ PRO FSC_Plot, x, y, $
  
     
      ; Load the drawing colors, if needed.
-    IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = FSC_Color(axiscolor)
-    IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)
-    IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
-    IF Size(symcolor, /TNAME) EQ 'STRING' THEN symcolor = FSC_Color(symcolor)
+    IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = cgColor(axiscolor)
+    IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
+    IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
+    IF Size(symcolor, /TNAME) EQ 'STRING' THEN symcolor = cgColor(symcolor)
     
     ; Draw the plot.
     IF Keyword_Set(overplot) THEN BEGIN

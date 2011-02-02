@@ -1,11 +1,11 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_WControl
+;   cgControl
 ;
 ; PURPOSE:
-;   Allows the user to set various properties of an FSC_Window object. This is essentially
-;   a wrapper to the FSC_Window SetProperty method.
+;   Allows the user to set various properties of an cgWindow object. This is essentially
+;   a wrapper to the cgWindow SetProperty method.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -37,17 +37,17 @@
 ;
 ;+
 ; :Description:
-;   Allows the user to set various properties of an FSC_Window object. This is essentially
-;   a wrapper to the FSC_Window SetProperty method.
+;   Allows the user to set various properties of an cgWindow object. This is essentially
+;   a wrapper to the cgWindow SetProperty method.
 ;
 ; :Categories:
 ;    Graphics
 ;    
 ; :Params:
 ;    selection: in, required, type=varies
-;       Normally, a window index number of an FSC_Window application. But, the selection
+;       Normally, a window index number of an cgWindow application. But, the selection
 ;       can be a widget identifier, an object reference, or a window title, depending on
-;       which keywords are set. The FSC_Window matching the selection has its properties set.
+;       which keywords are set. The cgWindow matching the selection has its properties set.
 ;       
 ; :Keywords:
 ;     all: in, optional, type=boolean
@@ -63,13 +63,13 @@
 ;     delay: in, optional, type=float
 ;         Set this keyword to the amount of "delay" you want between commands in the command list.
 ;     deletecmd: in, optional, type=boolean
-;          Set this keyword to delete a command in the FSC_Window. The keywords cmdIndex and All
+;          Set this keyword to delete a command in the cgWindow. The keywords cmdIndex and All
 ;          are used in deleting the specified command.
 ;     destroy: in, optional, type=boolean
-;          Set this keyword to destroy the FSC_Window program. This keyword should not be used
+;          Set this keyword to destroy the cgWindow program. This keyword should not be used
 ;          with other keywords.
 ;     eraseit: in, optional, type=boolean
-;         If this property is set, the FSC_Window erases with the background color before
+;         If this property is set, the cgWindow erases with the background color before
 ;         displaying the commands in the window's command list.
 ;     execute: in, optional, type=boolean
 ;         Set this keyword to exectute the commands in the window's command list. Use UPDATE if you
@@ -119,9 +119,9 @@
 ;         Sets the !Y.OMargin system variable when multiple plots are displayed in the window.
 ;          
 ; :Examples:
-;    Used to set FSC_Window properties::
-;       IDL> FSC_WControl, Background='gray', EraseIt=1
-;       IDL> FSC_WControl, Multi=[0,2,2]
+;    Used to set cgWindow properties::
+;       IDL> cgControl, Background='gray', EraseIt=1
+;       IDL> cgControl, Multi=[0,2,2]
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -139,7 +139,7 @@
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_WControl, selection, $
+PRO cgControl, selection, $
     ALL=all, $                                    ; Apply the command operation to all the commands (i.e., DeleteCMD)
     BACKGROUND=background, $                      ; Sets the background color of the window
     CMDINDEX=cmdIndex, $                          ; Apply the command operation to this command only.
@@ -189,10 +189,10 @@ PRO FSC_WControl, selection, $
    ; If there is no selection match, use the current window. If there
    ; is no current window, create one.
    IF N_Elements(selection) EQ 0 THEN BEGIN
-        selection = FSC_QueryWin(/CURRENT, COUNT=count)
+        selection = cgQuery(/CURRENT, COUNT=count)
         IF count EQ 0 THEN BEGIN
-            FSC_Window
-            selection = FSC_QueryWin(/CURRENT, COUNT=count)
+            cgWindow
+            selection = cgQuery(/CURRENT, COUNT=count)
         ENDIF
    ENDIF
    
@@ -201,8 +201,8 @@ PRO FSC_WControl, selection, $
    IF Size(selection, /TNAME) EQ 'STRING' THEN title = 1
    
    ; Get the values you need.
-   wid = FSC_QueryWin(WIDGETID=tlb, OBJECT=objref, TITLE=titles, COUNT=count)
-   IF count EQ 0 THEN Message, 'There are no FSC_Windows currently on the display.', /Infomational
+   wid = cgQuery(WIDGETID=tlb, OBJECT=objref, TITLE=titles, COUNT=count)
+   IF count EQ 0 THEN Message, 'There are no cgWindows currently on the display.', /Infomational
    
    ; Get the window list.
    list = !FSC_Window_List
@@ -213,25 +213,25 @@ PRO FSC_WControl, selection, $
         Keyword_Set(widgetID): BEGIN
             index = Where(tlb EQ selection, selectCount)
             IF selectCount EQ 0 THEN $
-                Message, 'No FSC_Window matches the selection criteria.', /Infomational
+                Message, 'No cgWindow matches the selection criteria.', /Infomational
             END
             
         Keyword_Set(object): BEGIN
             index = Where(objref EQ selection, selectCount)
             IF selectCount EQ 0 THEN $
-                Message, 'No FSC_Window matches the selection criteria.', /Infomational
+                Message, 'No cgWindow matches the selection criteria.', /Infomational
             END
             
         Keyword_Set(title): BEGIN
             index = Where(StrUpCase(titles) EQ StrUpCase(selection), selectCount)
             IF selectCount EQ 0 THEN $
-                Message, 'No FSC_Window matches the selection criteria.', /Infomational
+                Message, 'No cgWindow matches the selection criteria.', /Infomational
             END
 
         ELSE: BEGIN
             index = Where(wid EQ selection, selectCount)
             IF selectCount EQ 0 THEN $
-                Message, 'No FSC_Window matches the selection criteria.', /Infomational
+                Message, 'No cgWindow matches the selection criteria.', /Infomational
             END
    
    ENDCASE

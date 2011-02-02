@@ -274,7 +274,7 @@ PRO WindowImage_Display, info
 
     ; Load the color table.
     CTLoad, info.colortable, REVERSE=info.reverse, BREWER=info.brewer, NCOLORS=253
-    TVLCT, FSC_Color(info.neutralColor, /TRIPLE), 254
+    TVLCT, cgColor(info.neutralColor, /TRIPLE), 254
     
     ; Draw the image.
     WSet, info.imgWinID
@@ -283,8 +283,8 @@ PRO WindowImage_Display, info
 
     ; Draw the color bar.
     WSet, info.cbWinID
-    FSC_Erase
-    FSC_Colorbar, NCOLORS=253, CLAMP=info.iwindow, NEUTRALINDEX=254, $
+    cgErase
+    cgColorbar, NCOLORS=253, CLAMP=info.iwindow, NEUTRALINDEX=254, $
         POSITION=[0.05, 0.35, 0.95, 0.65], FONT=0, ANNOTATECOLOR='black', $
         RANGE=[info.minImage, info.maxImage], DIVISIONS=5, FORMAT='(F0.2)'
     
@@ -293,7 +293,7 @@ PRO WindowImage_Display, info
     txt = 'Window: [' + String(info.iwindow[0], FORMAT=format) + ', ' + $
                         String(info.iwindow[1], FORMAT=format) + ']  Level: ' + $
                         String(info.ilevel, FORMAT=format)
-    FSC_Text, 0.5, 0.75, /Normal, Alignment=0.5, Font=0, txt, Color='black'
+    cgText, 0.5, 0.75, /Normal, Alignment=0.5, Font=0, txt, Color='black'
   
     SetDecomposedState, currentState
 

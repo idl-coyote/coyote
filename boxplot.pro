@@ -38,6 +38,8 @@
 ;                there will be one box plot drawn for each valid pointer in the array.
 ;
 ; INPUT KEYWORDS:
+; 
+;      ADDCMD:      Set this keyword to add the command to the resizeable graphics window cgWindow.
 ;
 ;      AXES_COLOR:  A string color name, as appropriate for the FSC_COLOR program.
 ;                   By default, the same as the COLOR keyword. Used only if OVERPLOT 
@@ -47,6 +49,9 @@
 ;                   By default, 'white'. Used only if OVERPLOT keyword is not set.
 ;
 ;      BOXCOLOR:    If FILLBOXES is set, the IQR box is filled with this color. By default, "ROSE".
+;      
+;      CHARSIZE:    Set this to the character size to use on the plot. If undefined, uses
+;                   the value of cgDefCharsize().
 ;                   
 ;      COLOR:       A string color name, as appropriate for the FSC_COLOR program.
 ;                   By default, 'charcoal'. The boxplot will be drawn in this color.
@@ -66,6 +71,8 @@
 ;                   
 ;      ROTATE:      Set to a value between -90 and 90 degree. The labels will be rotated this
 ;                   amount. Positive values rotate in CCW fashion, negative values in CW fashion.
+;                   
+;      WINDOW:      Set this keyword to display the plot in a resizeable graphics window (cgWindow).
 ;                   
 ;      Any other keywords (e.g., POSITION, XTITLE, YTITLE, etc.) that are appropriate for 
 ;      the PLOT command can be used with this procedure.
@@ -103,7 +110,7 @@
 ;          
 ;       Here are the IDL commands to read the data and produce a box plot of it.
 ;       
-;           OpenR, 1, 'mm_data.dat'
+;           OpenR, 1, Find_Resource_File('mm_data.dat')
 ;           header = Strarr(2)
 ;           Readf, 1, header
 ;           data = Intarr(5, 20)
@@ -135,6 +142,7 @@
 ;       Minor adjustment of the X axis label position. 28 October 2010. DWF.
 ;       Add the ability to change the label character size and thickness via the normal
 ;          XCHARSIZE and XTHICK keywords you would use for a plot. 3 Dec 2010. DWF.
+;       Fixed a couple of typos, added ADDCMD, CHARSIZE, LAYOUT and WINDOW keywords. 2 Feb 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -163,7 +171,7 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-   FUNCTION BoxPlot_Prepare_Data, data, missing_data_value
+FUNCTION BoxPlot_Prepare_Data, data, missing_data_value
    
       ; If there is no missing_data_value, then just return the data.
       IF N_Elements(missing_data_value) NE 0 THEN BEGIN
@@ -344,18 +352,22 @@
    
 
    PRO BoxPlot, data, $
+        ADDCMD=addcmd, $
         AXES_COLOR=axes_color, $
         BACKGROUND_COLOR=background_color, $
         BOXCOLOR=boxcolor, $
+        CHARSIZE=charsize, $
         COLOR=color, $
         FILLBOXES=fillboxes, $
         LABELS=labels, $
+        LAYOUT=layout, $
         MISSING_DATA_VALUE=missing_data_value, $
         OVERPLOT=overplot, $
         ROTATE=rotate, $
         STATS=stats, $
         XCHARSIZE=xcharsize, $
         XTHICK=xthick, $
+        WINDOW=window, $
         _EXTRA=extra
         
       ; Error handling.
@@ -364,14 +376,87 @@
          Catch, /CANCEL
          void = Error_Message()
          IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState
+         IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
          RETURN
       ENDIF
       
+      ; Check parameters.
+      IF N_Params() EQ 0 THEN BEGIN
+          Print, 'USE SYNTAX: Boxplot, data'
+          RETURN
+      ENDIF
+      
+    ; Do they want this plot in a resizeable graphics window?
+    IF Keyword_Set(addcmd) THEN window = 1
+    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    
+        ; If you are using a layout, you can't ever erase.
+        IF N_Elements(layout) NE 0 THEN noerase = 1
+            
+        IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
+            cgWindow, 'Boxplot', data, $
+                AXES_COLOR=axes_color, $
+                BACKGROUND_COLOR=background_color, $
+                BOXCOLOR=boxcolor, $
+                CHARSIZE=charsize, $
+                COLOR=color, $
+                FILLBOXES=fillboxes, $
+                LABELS=labels, $
+                MISSING_DATA_VALUE=missing_data_value, $
+                OVERPLOT=overplot, $
+                ROTATE=rotate, $
+                STATS=stats, $
+                XCHARSIZE=xcharsize, $
+                XTHICK=xthick, $
+                ADDCMD=1, $
+                _Extra=extra
+             RETURN
+       ENDIF
+        
+        currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
+        IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
+        cgWindow, 'Boxplot', data, $
+                AXES_COLOR=axes_color, $
+                BACKGROUND_COLOR=background_color, $
+                BOXCOLOR=boxcolor, $
+                CHARSIZE=charsize, $
+                COLOR=color, $
+                FILLBOXES=fillboxes, $
+                LABELS=labels, $
+                MISSING_DATA_VALUE=missing_data_value, $
+                OVERPLOT=overplot, $
+                ROTATE=rotate, $
+                STATS=stats, $
+                XCHARSIZE=xcharsize, $
+                XTHICK=xthick, $
+                REPLACECMD=replaceCmd, $
+                _Extra=extra
+         RETURN
+    ENDIF
+    
+    ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
+    ; done BEFORE checking the LAYOUT properties.
+    IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
+    
+    ; Set up the layout, if necessary.
+    IF N_Elements(layout) NE 0 THEN BEGIN
+       thisMulti = !P.Multi
+       totalPlots = layout[0]*layout[1]
+       !P.Multi = [0,layout[0], layout[1], 0, 0]
+       IF layout[2] EQ 1 THEN BEGIN
+            noerase = 1
+            !P.Multi[0] = 0
+       ENDIF ELSE BEGIN
+            !P.Multi[0] = totalPlots - layout[2] + 1
+       ENDELSE
+    ENDIF
+
       ; Arguments and keywords.
-      IF N_Params() EQ 0 THEN Message, 'A data array must be passed into BoxPlot.'
       IF N_Elements(color) EQ 0 THEN color = 'Charcoal'
       IF N_Elements(axes_color) EQ 0 THEN axes_color = color
-      IF N_Elements(background_color) EQ 0 THEN backgroud_color = 'white'
+      IF N_Elements(background_color) EQ 0 THEN background_color = 'white'
+      IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharsize()
+      IF N_Elements(xcharsize) EQ 0 THEN xcharsize = charsize * 0.75
       IF N_Elements(boxcolor) EQ 0 THEN boxcolor = 'rose'
       fillboxes = Keyword_Set(fillboxes)
       IF N_Elements(rotate) EQ 0 THEN rotate = 0
@@ -427,7 +512,7 @@
          Plot, xrange, yrange, /NODATA, _STRICT_EXTRA=extra, $
             XMINOR=1, XTICKS=numbox+1, YSTYLE=1, BACKGROUND=FSC_Color(background_color), $
             COLOR=FSC_Color(axes_color), XTICK_GET=xloc, XTICKFORMAT='(A1)', $
-            XCHARSIZE=xcharsize, XTHICK=xthick
+            XCHARSIZE=xcharsize, XTHICK=xthick, CHARSIZE=charsize
             
          ; Put the labels on the plots.
          CASE 1 OF
@@ -440,9 +525,10 @@
          ENDCASE
          FOR j=1,numbox DO BEGIN
              xy = Convert_Coord(xloc[j], !Y.CRange[0], /DATA, /TO_NORMAL)
-             XYOUTS, xy[0], xy[1] - 0.0375, /NORMAL, plotlabels[j], $
+             chary = !D.Y_CH_SIZE / Float(!D.Y_Size) * charsize
+             XYOUTS, xy[0], xy[1] - (1.5 * chary), /NORMAL, plotlabels[j], $
                 ALIGNMENT=alignment, COLOR=FSC_Color(axes_color), $
-                ORIENTATION=rotate, CHARSIZE=xcharsize, THICK=xthick
+                ORIENTATION=rotate, CHARSIZE=charsize, CHARTHICK=xthick
          ENDFOR
          IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState
       ENDIF
@@ -465,4 +551,6 @@
           IF Arg_Present(stats) THEN stats[j-1] = s
       ENDFOR
       
+      ; Clean up.
+      IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
    END ;-----------------------------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_Arrow
+;   cgArrow
 ;
 ; PURPOSE:
 ;   Provides a device-independent and color-model-independent way of drawing an arrow
@@ -60,7 +60,7 @@
 ; :Keywords:
 ;     color: in, optional, type=string/integer/long, default='white'
 ;         An alternative way to specify the color to use in erasing the graphics window.
-;         Color names are those used with FSC_Color. This parameter is used in
+;         Color names are those used with cgColor. This parameter is used in
 ;         preference to the background_color parameter.
 ;     data: in, optional, type=boolean, default=0
 ;          Set this keyword of the arrow locations are in data coordinates.
@@ -80,11 +80,11 @@
 ;     thick: in, optional, type=float, default=1.0
 ;         The thickness of the line drawing the shaft of the arrow. 
 ;     window: in, optional, type=boolean, default=0
-;         Set this keyword to add the command to an FSC_Window application.
+;         Set this keyword to add the command to an cgWindow application.
 ;         
 ; :Examples:
 ;    Used to draw arrows::
-;       IDL> FSC_Arrow, 50, 50, 100, 100, /Solid
+;       IDL> cgArrow, 50, 50, 100, 100, /Solid
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -103,7 +103,7 @@
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Arrow, x0, y0, x1, y1, $
+PRO cgArrow, x0, y0, x1, y1, $
     COLOR = scolor, $
     DATA = data, $
     HSIZE = hsize, $
@@ -128,9 +128,9 @@ PRO FSC_Arrow, x0, y0, x1, y1, $
     ; Should this be added to a resizeable graphics window?
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-        void = FSC_QueryWin(COUNT=wincnt)
-        IF wincnt EQ 0 THEN FSC_Window
-        FSC_Window, 'FSC_Arrow', x0, y0, x1, y1, $
+        void = cgQuery(COUNT=wincnt)
+        IF wincnt EQ 0 THEN cgWindow
+        cgWindow, 'cgArrow', x0, y0, x1, y1, $
             COLOR = scolor, $
             DATA = data, $
             HSIZE = hsize, $
@@ -224,14 +224,14 @@ PRO FSC_Arrow, x0, y0, x1, y1, $
        SetDecomposedState, 1, CURRENT=currentState
        IF Keyword_Set(solid) THEN BEGIN   ;Use polyfill?
          b = a * mcost*.9d ; End of arrow shaft (Fudge to force join)
-         FSC_PlotS, [xp0, xp1+b*dx], [yp0, yp1+b*dy], /DEVICE, $
+         cgPlotS, [xp0, xp1+b*dx], [yp0, yp1+b*dy], /DEVICE, $
             COLOR=color, THICK=thick, LINESTYLE=linestyle, _Extra=extra
-         FSC_ColorFill, [xxp0, xxp1, xp1, xxp0], [yyp0, yyp1, yp1, yyp0], $
+         cgColorFill, [xxp0, xxp1, xp1, xxp0], [yyp0, yyp1, yp1, yyp0], $
             /DEVICE, COLOR = color
        ENDIF ELSE BEGIN
-         FSC_PlotS, [xp0, xp1], [yp0, yp1], /DEVICE, COLOR=color, THICK=thick, $
+         cgPlotS, [xp0, xp1], [yp0, yp1], /DEVICE, COLOR=color, THICK=thick, $
              LINESTYLE=linestyle, _Extra=extra
-         FSC_PlotS, [xxp0,xp1,xxp1],[yyp0,yp1,yyp1], /DEVICE, COLOR=color, $
+         cgPlotS, [xxp0,xp1,xxp1],[yyp0,yp1,yyp1], /DEVICE, COLOR=color, $
             THICK=hthick, LINESTYLE=linestyle, _Extra=extra
        ENDELSE
        SetDecomposedState, currentState

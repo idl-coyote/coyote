@@ -1,10 +1,10 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_DefCharSize
+;   cgDefCharSize
 ;
 ; PURPOSE:
-;   Defines a default character size for Coyote Graphics routines (FSC_Plot, FSC_Contour, etc.)
+;   Defines a default character size for Coyote Graphics routines (cgPlot, cgContour, etc.)
 ;   IF !P.Charsize is set, the function simply returns !P.Charsize.
 ;
 ;******************************************************************************************;
@@ -37,7 +37,7 @@
 ;
 ;+
 ; :Description:
-;   Defines a default character size for Coyote Graphics routines (FSC_Plot, FSC_Contour, etc.)
+;   Defines a default character size for Coyote Graphics routines (cgPlot, cgContour, etc.)
 ;   IF !P.Charsize is set, the function simply returns !P.Charsize.
 ;
 ; :Categories:
@@ -66,7 +66,7 @@
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-FUNCTION FSC_DefCharSize, FONT=font
+FUNCTION cgDefCharSize, FONT=font
 
     Compile_Opt idl2
     

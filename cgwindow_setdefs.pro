@@ -1,10 +1,10 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_Window_Set_Defauls
+;   cgWindow_SetDefs
 ;
 ; PURPOSE:
-;   Allows the user to set global defaults for resizeable FSC_Window programs.
+;   Allows the user to set global defaults for resizeable cgWindow programs.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -36,7 +36,7 @@
 ;
 ;+
 ; :Description:
-;   Allows the user to set global defaults for resizeable FSC_Window programs.
+;   Allows the user to set global defaults for resizeable cgWindow programs.
 ;
 ; :Categories:
 ;    Graphics
@@ -50,7 +50,7 @@
 ;     delay: in, optional, type=float, default=0
 ;         Set this keyword to the amount of delay desired between command execution. 0
 ;     eraseit: in, optional, type=boolean
-;         If this property is set, the FSC_Window erases with the background color before
+;         If this property is set, the cgWindow erases with the background color before
 ;         displaying the commands in the window's command list.
 ;     im_transparent: in, optional, type=boolean, default=0
 ;         Set this keyword to allow ImageMagick to create transparent backgrounds when it
@@ -106,9 +106,9 @@
 ;         Set this keyword to the starting Y size of the window.
 ;          
 ; :Examples:
-;    Used to set FSC_Window global properties::
+;    Used to set cgWindow global properties::
 ;       IDL> CTLoad, 5, RGB_TABLE=palette
-;       IDL> FSC_Window_Set_Defaults, PALETTE=palette, $
+;       IDL> cgWindow_SetDefs, PALETTE=palette, $
 ;               ERASEIT=1, XSIZE=800, YSIZE=400, XPOS=100, YPOS=200, $
 ;               PS_ENCAPSULATED=1, PS_METRIC=1
 ;       IDL> TVImage, LoadData(7), /WINDOW, MARGIN=0.1
@@ -129,18 +129,18 @@
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Window_Set_Defaults, $
+PRO cgWindow_SetDefs, $
    Reset=reset, $                                  ; Reset to original values.
    
-   ; FSC_Window properties.
+   ; cgWindow properties.
    Background = background, $                      ; The background color. 
    Delay = delay, $                                ; The delay between command execution.
    EraseIt = eraseit, $                            ; Set this keyword to erase the display before executing the commands.
    Multi = multi, $                                ; Set this in the same way !P.Multi is used.   
    XOMargin = xomargin, $                          ; Set the !X.OMargin. A two element array.
    YOMargin = yomargin, $                          ; Set the !Y.OMargin. A two element array
-   XSize = xsize, $                                ; The X size of the FSC_Window graphics window.
-   YSize = ysize, $                                ; The Y size of the FSC_Window graphics window.
+   XSize = xsize, $                                ; The X size of the cgWindow graphics window.
+   YSize = ysize, $                                ; The Y size of the cgWindow graphics window.
    Title = title, $                                ; The window title.
    XPos = xpos, $                                  ; The X offset of the window on the display.
    YPos = ypos, $                                  ; The Y offset of the window on the display. 
@@ -203,8 +203,8 @@ PRO FSC_Window_Set_Defaults, $
            Multi:multi, $                                ; Set this in the same way !P.Multi is used.   
            xomargin:xomargin, $                          ; Set the !X.OMargin. A two element array.
            yomargin:yomargin, $                          ; Set the !Y.OMargin. A two element array
-           XSize:xsize, $                                ; The X size of the FSC_Window graphics window.
-           YSize:ysize, $                                ; The Y size of the FSC_Window graphics window.
+           XSize:xsize, $                                ; The X size of the cgWindow graphics window.
+           YSize:ysize, $                                ; The Y size of the cgWindow graphics window.
            Title:title, $                                ; The window title.
            XPos:xpos, $                                  ; The X offset of the window on the display.
            YPos:ypos, $                                  ; The Y offset of the window on the display. 

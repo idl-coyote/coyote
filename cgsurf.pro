@@ -1,10 +1,10 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_Surf
+;   cgSurf
 ;
 ; PURPOSE:
-;   The purpose of FSC_Surf is to create a wrapper for the traditional IDL graphics
+;   The purpose of cgSurf is to create a wrapper for the traditional IDL graphics
 ;   commands, Surface and Shade_Surf. The primary purpose of this is to create surface 
 ;   commands that work and look identically both on the display and in PostScript files.
 ;
@@ -38,7 +38,7 @@
 ;
 ;+
 ; :Description:
-;   The purpose of FSC_Surf is to create a wrapper for the traditional IDL graphics
+;   The purpose of cgSurf is to create a wrapper for the traditional IDL graphics
 ;   commands, Surface and Shade_Surf. The primary purpose of this is to create surface 
 ;   commands that work and look identically both on the display and in PostScript files.
 ;
@@ -57,7 +57,7 @@
 ;       
 ; :Keywords:
 ;     addcmd: in, optional, type=boolean, default=0
-;        Set this keyword to add the command to an FSC_Window. Setting this keyword
+;        Set this keyword to add the command to an cgWindow. Setting this keyword
 ;        automatically sets the WINDOW keyword, but the command does not erase the
 ;        graphics window as it would normally.
 ;     axiscolor: in, optional, type=string/integer, default='black'
@@ -71,8 +71,8 @@
 ;     bottom: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the bottom color. By default, same as COLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
-;     charsize: in, optional, type=float, default=FSC_DefCharSize*1.25
-;        The character size for axes annotations. Uses FSC_DefCharSize()*1.25 to select default
+;     charsize: in, optional, type=float, default=cgDefCharSize*1.25
+;        The character size for axes annotations. Uses cgDefCharSize()*1.25 to select default
 ;        character size, unless !P.Charsize is set, in which case !P.Charsize*1.25 is always used.
 ;     color: in, optional, type=string/integer, default='blu6'
 ;        If this keyword is a string, the name of the data color. By default, "BLU6".
@@ -100,7 +100,7 @@
 ;         example, from CTLOAD with the RGB_TABLE keyword:
 ;               
 ;             CTLoad, 33, RGB_TABLE=palette
-;             FSC_Surf, Loaddata(2), PALETTE=palette, /Elevation
+;             cgSurf, Loaddata(2), PALETTE=palette, /Elevation
 ;                    
 ;     rotx: in, optional, type=float, default=30
 ;        The rotation about the X axis.
@@ -146,10 +146,10 @@
 ;    Use as you would use the IDL SURFACE of SHADE_SURF command::
 ;       data = Dist(200)
 ;       LoadCT, 33
-;       FSC_Surf, data
-;       FSC_Surf, data, Shades=BytScl(data)
-;       FSC_Surf, data, /Shaded
-;       FSC_Surf, data, /Shaded, Shades=BytScl(data) 
+;       cgSurf, data
+;       cgSurf, data, Shades=BytScl(data)
+;       cgSurf, data, /Shaded
+;       cgSurf, data, /Shaded, Shades=BytScl(data) 
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -174,7 +174,7 @@
 ;           ROTX and ROTZ keywords. 7 Dec 2010. DWF.
 ;        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
 ;        Changed the Title size to 1.1 times the character size of the plot. 14 Dec 2010. DWF.
-;        Modifications to allow FSC_Surf to be drop-in replacement for old Surface commands in 
+;        Modifications to allow cgSurf to be drop-in replacement for old Surface commands in 
 ;            indexed color mode. 24 Dec 2010. DWF.
 ;        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
 ;        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
@@ -191,7 +191,7 @@
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Surf, data, x, y, $
+PRO cgSurf, data, x, y, $
     ADDCMD=addcmd, $
     AXISCOLOR=saxiscolor, $
     AXESCOLOR=saxescolor, $
@@ -231,7 +231,7 @@ PRO FSC_Surf, data, x, y, $
     
     ; Did user pass parameters?
     IF N_Elements(data) EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_Surf, data, x, y, [SHADED=1]'
+        Print, 'USE SYNTAX: cgSurf, data, x, y, [SHADED=1]'
         RETURN
     ENDIF
     
@@ -245,12 +245,12 @@ PRO FSC_Surf, data, x, y, $
         ; If you are using a layout, you can't ever erase.
         IF N_Elements(layout) NE 0 THEN noerase = 1
         
-        currentWindow = FSC_QueryWin(/CURRENT, COUNT=wincnt)
+        currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
         
         ; If adding a command, have to do this differently.
         IF Keyword_Set(addcmd) THEN BEGIN
-            FSC_Window, 'FSC_Surf', data, x, y, $
+            cgWindow, 'cgSurf', data, x, y, $
                 AXISCOLOR=saxiscolor, $
                 AXESCOLOR=saxescolor, $
                 BACKGROUND=sbackground, $
@@ -281,7 +281,7 @@ PRO FSC_Surf, data, x, y, $
         ENDIF
         
         ; Otherwise, we are just replacing the commands in a new or existing window.
-        FSC_Window, 'FSC_Surf', data, x, y, $
+        cgWindow, 'cgSurf', data, x, y, $
             AXISCOLOR=saxiscolor, $
             AXESCOLOR=saxescolor, $
             BACKGROUND=sbackground, $
@@ -359,7 +359,7 @@ PRO FSC_Surf, data, x, y, $
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF (!D.Window LT 0) &&  Keyword_Set(noerase) THEN BEGIN
                         Window
-                        IF ~Keyword_Set(traditional) THEN FSC_Erase, 'WHITE'
+                        IF ~Keyword_Set(traditional) THEN cgErase, 'WHITE'
                     ENDIF
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) THEN background = 'WHITE'
@@ -389,7 +389,7 @@ PRO FSC_Surf, data, x, y, $
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF !D.Window LT 0 THEN Window
-                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
+                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN saxisColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN saxisColor = 'WHITE'
@@ -417,7 +417,7 @@ PRO FSC_Surf, data, x, y, $
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF !D.Window LT 0 THEN Window
-                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
+                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN BEGIN
                         IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE sColor = 'BLU6'
@@ -440,13 +440,13 @@ PRO FSC_Surf, data, x, y, $
     ; If color is the same as background, do something.
     IF ColorsAreIdentical(background, color) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
+            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
         ENDIF
         color = 'OPPOSITE'
     ENDIF
     IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
+            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
         ENDIF
         axiscolor = 'OPPOSITE'
     ENDIF
@@ -458,7 +458,7 @@ PRO FSC_Surf, data, x, y, $
     
     ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN IF (!D.Name EQ 'PS') THEN font = 1 ELSE font = !P.font
-    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font) * 1.25
+    IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font) * 1.25
     
     ; Other properties.
     IF N_Elements(rotx) EQ 0 THEN rotx = 30
@@ -468,24 +468,24 @@ PRO FSC_Surf, data, x, y, $
     IF N_Elements(zstyle) EQ 0 THEN zstyle = 0
             
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN BEGIN
-        axiscolor = FSC_Color(axiscolor)
+        axiscolor = cgColor(axiscolor)
     ENDIF ELSE BEGIN
          IF currentState EQ 0 THEN axiscolor = Color24(rr[axiscolor], gg[axiscolor], bb[axiscolor])
     ENDELSE
     IF Size(bottom, /TNAME) EQ 'STRING' THEN BEGIN
-        bottom = FSC_Color(bottom)
+        bottom = cgColor(bottom)
     ENDIF ELSE BEGIN
          IF currentState EQ 0 THEN bottom = Color24(rr[bottom], gg[bottom], bb[bottom])
     ENDELSE
     IF Size(color, /TNAME) EQ 'STRING' THEN BEGIN
-        color = FSC_Color(color)
+        color = cgColor(color)
     ENDIF ELSE BEGIN
          IF currentState EQ 0 THEN color = Color24(rr[color], gg[color], bb[color])
     ENDELSE
     IF Size(background, /TNAME) EQ 'STRING' THEN BEGIN
         originalbg = background
-        background = FSC_Color(background)
-        shadebackground = FSC_Color(originalbg, DECOMPOSED=0, 254)
+        background = cgColor(background)
+        shadebackground = cgColor(originalbg, DECOMPOSED=0, 254)
     ENDIF ELSE BEGIN
          ; Different values based on current state of the device. Indexed color mode here.
          IF currentState EQ 0 THEN BEGIN
@@ -496,7 +496,7 @@ PRO FSC_Surf, data, x, y, $
          ; do white. If it is not right, then use strings for color values!
          IF currentState EQ 1 THEN BEGIN
             orginalbg = 'white'
-            shadebackground = FSC_Color('white', DECOMPOSED=0, 254)
+            shadebackground = cgColor('white', DECOMPOSED=0, 254)
          ENDIF
     ENDELSE
     
@@ -625,7 +625,7 @@ PRO FSC_Surf, data, x, y, $
         ; Depending upon the original background color, load the color
         ; in color table index 254.
         IF Size(originalbg, /TNAME) EQ 'STRING' $
-            THEN orignalbg = FSC_Color(originalBg, 254) $
+            THEN orignalbg = cgColor(originalBg, 254) $
             ELSE TVLCT, Reform(origialbg), 254
             
         ; Restrict the current color table vectors to the range 0-253.

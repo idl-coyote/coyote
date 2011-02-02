@@ -113,9 +113,9 @@
 ;       type these commands.
 ;
 ;       PS_Start, FILENAME='lineplot.ps'
-;       Plot, Findgen(11), COLOR=FSC_Color('navy'), /NODATA, XTITLE='Time', YTITLE='Signal'
-;       OPlot, Findgen(11), COLOR=FSC_Color('indian red')
-;       OPlot, Findgen(11), COLOR=FSC_Color('olive'), PSYM=2
+;       Plot, Findgen(11), COLOR=cgColor('navy'), /NODATA, XTITLE='Time', YTITLE='Signal'
+;       OPlot, Findgen(11), COLOR=cgColor('indian red')
+;       OPlot, Findgen(11), COLOR=cgColor('olive'), PSYM=2
 ;       PS_End, /PNG
 ;
 ; NOTES:

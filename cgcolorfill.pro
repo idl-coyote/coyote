@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_ColorFill
+;   cgColorFill
 ;
 ; PURPOSE:
 ;   Provides a device-independent and color-model-independent way to fill a polygon
@@ -59,7 +59,7 @@
 ;
 ; :Keywords:
 ;     color: in, optional, type=string/integer/long, default='rose'
-;         The name of the fill color. Color names are those used with FSC_Color. 
+;         The name of the fill color. Color names are those used with cgColor. 
 ;         This value can also be a long integer or an index into the current color
 ;         table.
 ;     device: in, optional, type=boolean, default=0
@@ -67,14 +67,14 @@
 ;     normalized: in, optional, type=boolean, default=0
 ;         Set to indicate the polygon vertices are in normalized coordinates.
 ;     window: in, optional, type=boolean, default=0
-;         Set this keyword to add the command to the current FSC_Window application.
+;         Set this keyword to add the command to the current cgWindow application.
 ;     _extra: in, optional, type=appropriate
 ;         Any other keywords to the IDL POLYFILL command may be used.
 ;     
 ;          
 ; :Examples:
 ;    Used like the IDL Polyfill command::
-;       IDL> FSC_ColorFill, [0.25, 0.25, 0.75, 0.75, 0.25], [0.25, 0.75, 0.75, 0.25, 0.25], $
+;       IDL> cgColorFill, [0.25, 0.25, 0.75, 0.75, 0.25], [0.25, 0.75, 0.75, 0.25, 0.25], $
 ;                 /NORMAL, COLOR='blue'
 ;       
 ; :Author:
@@ -98,7 +98,7 @@
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_ColorFill, x, y, z, $
+PRO cgColorFill, x, y, z, $
     COLOR=color, $
     NORMAL=normal, $
     DEVICE=device, $
@@ -116,14 +116,14 @@ PRO FSC_ColorFill, x, y, z, $
 
     ; Did user pass parameters?
     IF N_Params() EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_ColorFill, x, y, [z]'
+        Print, 'USE SYNTAX: cgColorFill, x, y, [z]'
         RETURN
     ENDIF
     
     ; Should this be added to a resizeable graphics window?
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-        FSC_Window, 'FSC_ColorFill', x, y, z, $
+        cgWindow, 'cgColorFill', x, y, z, $
             COLOR=color, $
             NORMAL=normal, $
             DEVICE=device, $
@@ -148,7 +148,7 @@ PRO FSC_ColorFill, x, y, z, $
     TVLCT, rr, gg, bb, /Get
     
     ; Fill the polygon.
-    IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(thisColor)
+    IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = cgColor(thisColor)
     CASE N_Elements(z) OF
         0: PolyFill, x, y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _STRICT_EXTRA=extra
         ELSE: PolyFill, x, y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _STRICT_EXTRA=extra

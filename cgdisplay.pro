@@ -1,13 +1,13 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_Display
+;   cgDisplay
 ;
 ; PURPOSE:
-;   The purpose of FSC_Display is to open a graphics window on the display, or in the
+;   The purpose of cgDisplay is to open a graphics window on the display, or in the
 ;   PostScript device, or in the Z-graphics buffer, depending upon the current graphics
 ;   device. In PostScript a window of the proper aspect ratio is created with PSWindow.
-;   Using FSC_Display to open "windows" will allow you to more easily write device-independent
+;   Using cgDisplay to open "windows" will allow you to more easily write device-independent
 ;   IDL programs.
 ;
 ;******************************************************************************************;
@@ -40,10 +40,10 @@
 ;
 ;+
 ; :Description:
-;   The purpose of FSC_Display is to open a graphics window on the display, or in the
+;   The purpose of cgDisplay is to open a graphics window on the display, or in the
 ;   PostScript device, or in the Z-graphics buffer, depending upon the current graphics
 ;   device. In PostScript a window of the proper aspect ratio is created with PSWindow.
-;   Using FSC_Display to open "windows" will allow you to more easily write device-independent
+;   Using cgDisplay to open "windows" will allow you to more easily write device-independent
 ;   IDL programs.
 ;
 ; :Categories:
@@ -58,7 +58,7 @@
 ; :Keywords:
 ;    color: in, optional, type=string/integer, default='white'
 ;        If this keyword is a string, the name of the data color. By default, 'white'.
-;        Color names are those used with FSC_Color. Otherwise, the keyword is assumed 
+;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table. The color is not used if
 ;        the "window" is opened in PostScript on the Z-graphics buffer.
 ;    free: in, optional, type=boolean, default=0
@@ -77,8 +77,8 @@
 ;         
 ; :Examples:
 ;    Use like the IDL WINDOW command::
-;       IDL> FSC_Display, XSIZE=500 YSIZE=400
-;       IDL> FSC_Display, 500, 500, WID=1, COLOR='gray'
+;       IDL> cgDisplay, XSIZE=500 YSIZE=400
+;       IDL> cgDisplay, 500, 500, WID=1, COLOR='gray'
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -100,7 +100,7 @@
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Display, pxsize, pysize, $
+PRO cgDisplay, pxsize, pysize, $
     COLOR=scolor, $
     FREE=free, $
     WID=windowIndex, $
@@ -133,9 +133,9 @@ PRO FSC_Display, pxsize, pysize, $
     IF (!D.Flags AND 256) NE 0 THEN BEGIN
         Window, windowIndex, XSIZE=pxsize, YSIZE=pysize, FREE=free, _STRICT_EXTRA=extra
         
-        ; FSC_Erase will take care of sorting out what kind of "color" indicator
+        ; cgErase will take care of sorting out what kind of "color" indicator
         ; we are using. No need to do it here.
-        FSC_Erase, color   
+        cgErase, color   
     ENDIF ELSE BEGIN
         CASE !D.Name OF
             'PS': Device, _Extra=PSWindow(AspectRatio=Float(pysize)/pxsize)

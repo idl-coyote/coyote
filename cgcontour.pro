@@ -1,12 +1,12 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_Contour
+;   cgContour
 ;
 ; PURPOSE:
-;   The purpose of FSC_Contour is to create a wrapper for the traditional IDL graphics
+;   The purpose of cgContour is to create a wrapper for the traditional IDL graphics
 ;   command, Contour. The Contour command has a number of deficiencies that make it
-;   difficult to use in a modern computing environment. FSC_Contour corrects these
+;   difficult to use in a modern computing environment. cgContour corrects these
 ;   deficiencies and allows the user to produce traditional contour plots in a device
 ;   and machine independent manner.
 ;
@@ -40,9 +40,9 @@
 ;
 ;+
 ; :Description:
-;   The purpose of FSC_Contour is to create a wrapper for the traditional IDL graphics
+;   The purpose of cgContour is to create a wrapper for the traditional IDL graphics
 ;   command, Contour. The Contour command has a number of deficiencies that make it
-;   difficult to use in a modern computing environment. FSC_Contour corrects these
+;   difficult to use in a modern computing environment. cgContour corrects these
 ;   deficiencies and allows the user to produce traditional contour plots in a device
 ;   and machine independent manner.
 ;
@@ -62,7 +62,7 @@
 ;       
 ; :Keywords:
 ;     addcmd: in, optional, type=boolean, default=0
-;        Set this keyword to add the command to an FSC_Window. Setting this keyword
+;        Set this keyword to add the command to an cgWindow. Setting this keyword
 ;        automatically sets the WINDOW keyword, but the command does not erase the
 ;        graphics window as it would normally.
 ;     axiscolor: in, optional, type=string/integer, default='black'
@@ -83,8 +83,8 @@
 ;        Set to indicate filled contours should be created using the "cell fill" method.
 ;        This keyword should always be set if displaying filled contours on map projections
 ;        or if missing data is present in the data you are contouring.
-;     charsize: in, optional, type=float, default=FSC_DefCharSize()
-;         The character size for axes annotations. Uses FSC_DefCharSize to select default
+;     charsize: in, optional, type=float, default=cgDefCharSize()
+;         The character size for axes annotations. Uses cgDefCharSize to select default
 ;         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
@@ -147,12 +147,12 @@
 ; :Examples:
 ;    Use as you would use the IDL CONTOUR command::
 ;       data = dist(51)
-;       FSC_Contour, data
+;       cgContour, data
 ;       LoadCT, 33
-;       FSC_Contour, data, /FILL
-;       FSC_Contour, data, /OVERPLOT
+;       cgContour, data, /FILL
+;       cgContour, data, /OVERPLOT
 ;       
-;       See http://www.dfanning.com/graphics_tips/fsc_contour.html for additional examples.
+;       See http://www.dfanning.com/graphics_tips/cgcontour.html for additional examples.
 ;
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -176,7 +176,7 @@
 ;        Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
 ;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
 ;        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
-;        Modifications to allow FSC_Contour to be drop-in replacement for old Contour commands in 
+;        Modifications to allow cgContour to be drop-in replacement for old Contour commands in 
 ;            indexed color mode. 24 Dec 2010. DWF.
 ;        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
 ;        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
@@ -193,7 +193,7 @@
 ;        TVLCT commands protected from NULL device. 4 Jan 2011. DWF.
 ;        Fixed a no color problem when CELL_FILL was set. 11 Jan 2011. DWF.
 ;        Fixed a problem with overlaying filled contours with /OVERPLOT. 11 Jan 2011. DWF.
-;        Selecting character size now with FSC_DefCharSize. 11 Jan 2011. DWF.      
+;        Selecting character size now with cgDefCharSize. 11 Jan 2011. DWF.      
 ;        Moved setting to decomposed color before color selection process to avoid PostScript
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
 ;        Fixed a problem in which I assumed the background color was a string. 18 Jan 2011. DWF.  
@@ -203,7 +203,7 @@
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Contour, data, x, y, $
+PRO cgContour, data, x, y, $
     ADDCMD=addcmd, $
     AXISCOLOR=saxiscolor, $
     AXESCOLOR=saxescolor, $
@@ -248,7 +248,7 @@ PRO FSC_Contour, data, x, y, $
     
     ; Check parameters.
     IF N_Params() EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_Contour, data, x, y'
+        Print, 'USE SYNTAX: cgContour, data, x, y'
         RETURN
     ENDIF
 
@@ -260,7 +260,7 @@ PRO FSC_Contour, data, x, y, $
         IF N_Elements(layout) NE 0 THEN noerase = 1
             
         IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
-            FSC_Window, 'FSC_Contour', data, x, y, $
+            cgWindow, 'cgContour', data, x, y, $
                 AXISCOLOR=saxiscolor, $
                 AXESCOLOR=saxescolor, $
                 BACKGROUND=sbackground, $
@@ -290,9 +290,9 @@ PRO FSC_Contour, data, x, y, $
              RETURN
        ENDIF
         
-        currentWindow = FSC_QueryWin(/CURRENT, COUNT=wincnt)
+        currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
-        FSC_Window, 'FSC_Contour', data, x, y, $
+        cgWindow, 'cgContour', data, x, y, $
             AXISCOLOR=saxiscolor, $
             AXESCOLOR=saxescolor, $
             BACKGROUND=sbackground, $
@@ -325,7 +325,7 @@ PRO FSC_Contour, data, x, y, $
     
     ; Check parameters.
     IF N_Elements(data) EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_Contour, data, x, y, NLEVELS=10'
+        Print, 'USE SYNTAX: cgContour, data, x, y, NLEVELS=10'
         RETURN
     ENDIF
     
@@ -351,7 +351,7 @@ PRO FSC_Contour, data, x, y, $
 
     ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font
-    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
+    IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     
     ; Handle data properly.
     ndims = Size(data, /N_DIMENSIONS)
@@ -380,7 +380,7 @@ PRO FSC_Contour, data, x, y, $
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF (!D.Window LT 0) &&  Keyword_Set(noerase) THEN BEGIN
                         Window
-                        IF ~Keyword_Set(traditional) THEN FSC_Erase, 'WHITE'
+                        IF ~Keyword_Set(traditional) THEN cgErase, 'WHITE'
                     ENDIF
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) THEN background = 'WHITE'
@@ -410,7 +410,7 @@ PRO FSC_Contour, data, x, y, $
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF !D.Window LT 0 THEN Window
-                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
+                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN saxisColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN saxisColor = 'WHITE'
@@ -435,7 +435,7 @@ PRO FSC_Contour, data, x, y, $
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF !D.Window LT 0 THEN Window
-                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
+                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
                     pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN sColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN sColor = 'WHITE'
@@ -451,13 +451,13 @@ PRO FSC_Contour, data, x, y, $
     ; If color is the same as background, do something.
     IF ColorsAreIdentical(background, color) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
+            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
         ENDIF
         color = 'OPPOSITE'
     ENDIF
     IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN FSC_Erase, background
+            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
         ENDIF
         axiscolor = 'OPPOSITE'
     ENDIF
@@ -532,11 +532,11 @@ PRO FSC_Contour, data, x, y, $
     ENDIF
 
     ; Load the drawing colors, if needed.
-    IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = FSC_Color(axiscolor)
-    IF Size(color, /TNAME) EQ 'STRING' THEN color = FSC_Color(color)
-    IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
+    IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = cgColor(axiscolor)
+    IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
+    IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
     IF (Size(c_colors, /TYPE) LE 2) AND (Size(c_colors, /TYPE) NE 0) THEN c_colors = StrTrim(Fix(c_colors),2)
-    IF Size(c_colors, /TNAME) EQ 'STRING' THEN c_colors = FSC_Color(c_colors)
+    IF Size(c_colors, /TNAME) EQ 'STRING' THEN c_colors = cgColor(c_colors)
     
     ; Do you need a PostScript background color? Lot's of problems here!
     ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a
@@ -622,10 +622,10 @@ PRO FSC_Contour, data, x, y, $
         
     ; If we filled the contour plot, we need to repair the axes. 
     IF Keyword_Set(fill) OR Keyword_Set(cell_fill) THEN BEGIN  
-       FSC_PlotS, [!X.CRange[0], !X.CRange[0]], !Y.CRange, COLOR=axiscolor, THICK=ythick
-       FSC_PlotS, !X.CRange, [!Y.CRange[1], !Y.CRange[1]], COLOR=axiscolor, THICK=xthick
-       FSC_PlotS, [!X.CRange[1], !X.CRange[1]], !Y.CRange, COLOR=axiscolor, THICK=ythick
-       FSC_PlotS, !X.CRange, [!Y.CRange[0], !Y.CRange[0]], COLOR=axiscolor, THICK=xthick
+       cgPlotS, [!X.CRange[0], !X.CRange[0]], !Y.CRange, COLOR=axiscolor, THICK=ythick
+       cgPlotS, !X.CRange, [!Y.CRange[1], !Y.CRange[1]], COLOR=axiscolor, THICK=xthick
+       cgPlotS, [!X.CRange[1], !X.CRange[1]], !Y.CRange, COLOR=axiscolor, THICK=ythick
+       cgPlotS, !X.CRange, [!Y.CRange[0], !Y.CRange[0]], COLOR=axiscolor, THICK=xthick
     ENDIF
     
     ; Restore the decomposed color state if you can.

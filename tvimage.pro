@@ -44,10 +44,10 @@
 ;
 ;     ACOLOR:   This keyword has been depreciated in favor of the COLOR keyword.
 ;     
-;     ADDCMD:   Set this keyword to add the TVImage command to an FSC_Window
+;     ADDCMD:   Set this keyword to add the TVImage command to an cgWindow
 ;               command list. Setting this command will force ERASEIT to be set
 ;               to 0, so the TVImage command can exist peacefully with other commands
-;               in an FSC_Window command list. Setting this keyword automatically sets
+;               in an cgWindow command list. Setting this keyword automatically sets
 ;               the WINDOW keyword.
 ;               
 ;     ALPHABACKGROUNDIMAGE: Normally, when a image with an alpha channel is displayed,
@@ -99,9 +99,9 @@
 ;               see the background color in your image output. For example, you
 ;               should NOT use code like this while in indexed color mode:
 ;               
-;                  TVImage, image, Background=FSC_Color('gray')
+;                  TVImage, image, Background=cgColor('gray')
 ;                  
-;                Since FSC_Color will load a gray color in index 81, which is inside
+;                Since cgColor will load a gray color in index 81, which is inside
 ;                the indices assigned to the image. To do this correctly in indexed color
 ;                mode, do this:
 ;                
@@ -109,7 +109,7 @@
 ;                   
 ;                Or, this:
 ;                
-;                    TVImage, Bytscl(image, Top=253), Background=FSC_Color('gray',254)
+;                    TVImage, Bytscl(image, Top=253), Background=cgColor('gray',254)
 ;
 ;     BOTTOM:   IF SCALE=1, the image is scaled so that all displayed pixels have values
 ;               greater than or equal to BOTTOM and less than or equal to TOP.
@@ -120,7 +120,7 @@
 ;     COLOR:    Set this keyword to the axis color. If a byte or integer value,
 ;               it will assume you are using INDEXED color mode. If a long integer
 ;               is will assume you are using DECOMPOSED color mode. If a string,
-;               is will pass the string color name along to FSC_COLOR for processing.
+;               is will pass the string color name along to cgCOLOR for processing.
 ;     
 ;     CHARSIZE: Sets the character size. Used only if the AXES keyword is also set.
 ;
@@ -300,9 +300,9 @@
 ;               keyword to "white. Also sets the ACOLOR keyword to "black," unless
 ;               it is already set to something else.
 ;               
-;      WINDOW:  Set this keyword to add the command to an FSC_Window application.
+;      WINDOW:  Set this keyword to add the command to an cgWindow application.
 ;               Setting this keyword ALWAYS sets the ERASEIT keyword. If you want
-;               to add an image to an FSC_Window without the ERASEIT keyword set,
+;               to add an image to an cgWindow without the ERASEIT keyword set,
 ;               use the ADDCMD keyword.
 ;               
 ;      XRANGE:  If the AXES keyword is set, this keyword is a two-element vector
@@ -369,19 +369,19 @@
 ;     p = [0.02, 0.3, 0.98, 0.98]
 ;     LoadCT, 0
 ;     TVImage, image, Position=p
-;     FSC_Colorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
 ;     p = [0.02, 0.3, 0.98, 0.98]
 ;     LoadCT, 2
 ;     TVImage, image, Position=p
-;     FSC_Colorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
 ;     p = [0.02, 0.3, 0.98, 0.98]
 ;     LoadCT, 3
 ;     TVImage, image, Position=p
-;     FSC_Colorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
 ;     p = [0.02, 0.3, 0.98, 0.98]
 ;     LoadCT, 5
 ;     TVImage, image, Position=p
-;     FSC_Colorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
 ;     !P.Multi =0
 ;
 ; MODIFICATION HISTORY:
@@ -517,7 +517,7 @@
 ;        Added XTITLE and YTITLE keywords to add titles to image axes. 10 January 2011. DWF.
 ;        Added FONT, CHARSIZE, and TITLE keywords. 11 Jan 2011. DWF.
 ;        Depreciated ACOLOR keyword in favor of new COLOR keyword. 11 Jan 2011. DWF.
-;        Added ADDCMD and WINDOW keywords to allow TVIMAGE to work with FSC_Window. 26 Jan 2011. DWF.
+;        Added ADDCMD and WINDOW keywords to allow TVIMAGE to work with cgWindow. 26 Jan 2011. DWF.
 ;        Added LAYOUT and PALETTE keywords. 28 Jan 2011. DWF.
 ;-
 ;******************************************************************************************;
@@ -741,13 +741,13 @@ PRO TVIMAGE, image, x, y, $
                          _tvimage_position, _tvimage_winID, $
                          _tvimage_current
     
-    ; Add the command to FSC_Window?
+    ; Add the command to cgWindow?
     IF Keyword_Set(addcmd) THEN window = 1
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-        currentWindow = FSC_QueryWin(/CURRENT, COUNT=wincnt)
+        currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
-        weraseit = 1 ; Must always erase in FSC_Window, unless you are adding TVIMAGE to FSC_Window
+        weraseit = 1 ; Must always erase in cgWindow, unless you are adding TVIMAGE to cgWindow
         
         ; If you are using a layout, you can't ever erase.
         IF N_Elements(layout) NE 0 THEN eraseit = 0
@@ -755,7 +755,7 @@ PRO TVIMAGE, image, x, y, $
         ; If we are adding a command, we have to do something different.
         IF Keyword_Set(addcmd) THEN BEGIN
             eraseit = 0
-            FSC_Window, 'TVImage', image, x, y, $
+            cgWindow, 'TVImage', image, x, y, $
                ACOLOR=acolorname, $
                ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
                ALPHABGPOSITION=alphapos, $
@@ -798,7 +798,7 @@ PRO TVIMAGE, image, x, y, $
         ENDIF
         
         ; Otherwise, we are replacing the commands in a new or existing window.
-        FSC_Window, 'TVImage', image, x, y, $
+        cgWindow, 'TVImage', image, x, y, $
            ACOLOR=acolorname, $
            ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
            ALPHABGPOSITION=alphapos, $
@@ -867,7 +867,7 @@ PRO TVIMAGE, image, x, y, $
 
      ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font
-    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
+    IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     
     ; Doing multiple plots?
     IF Total(!P.Multi) GT 0 THEN multi = 1 ELSE multi = 0
@@ -956,10 +956,10 @@ PRO TVIMAGE, image, x, y, $
     ; Do you need to erase the window before image display?
     IF Keyword_Set(eraseit) && (!P.MULTI[0] EQ 0) && (N_Elements(layout) EQ 0) THEN BEGIN
          IF (!D.Flags AND 256) NE 0 THEN BEGIN
-            FSC_Erase, background
+            cgErase, background
          ENDIF ELSE BEGIN
             IF (!D.NAME EQ 'Z') THEN BEGIN
-                FSC_Erase, background
+                cgErase, background
             ENDIF
             
             ; Do you need a PostScript background color? Lot's of problems here!
@@ -1056,13 +1056,13 @@ PRO TVIMAGE, image, x, y, $
     
     ; If a window is not open, open one, otherwise in X devices you get incorrect
     ; window size information the first time you call TVIMAGE.
-    IF (!D.FLAGS AND 256) NE 0 THEN IF (!D.Window EQ -1) THEN FSC_Display
+    IF (!D.FLAGS AND 256) NE 0 THEN IF (!D.Window EQ -1) THEN cgDisplay
     
     ; Check for position and overplot keywords.
     IF N_Elements(position) EQ 0 THEN BEGIN
        IF Keyword_Set(multi) AND (Keyword_Set(overplot) NE 1) THEN BEGIN
           ; Draw the invisible plot to get plot position.
-          IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
+          IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
           Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
              XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]], $
              NOERASE=N_Elements(layout) EQ 0 ? tempNoErase : 1
@@ -1076,7 +1076,7 @@ PRO TVIMAGE, image, x, y, $
     ENDIF ELSE BEGIN
        IF Keyword_Set(multi) AND (Keyword_Set(overplot) NE 1)THEN BEGIN
           ; Draw the invisible plot to get plot position.
-          IF Size(background, /TNAME) EQ 'STRING' THEN background = FSC_Color(background)
+          IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
           Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
               XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]], $
              NOERASE=N_Elements(layout) EQ 0 ? tempNoErase : 1
@@ -1488,7 +1488,7 @@ PRO TVIMAGE, image, x, y, $
     ; If the user wanted axes, draw them now.
     IF axes THEN BEGIN
     
-        FSC_PLOT, [0], /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
+        cgPLOT, [0], /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
             XSTYLE=1, YSTYLE=1, POSITION=position, AXISCOLOR=acolor, $
             XTITLE=plotxtitle, YTITLE=plotytitle, TITLE=title, CHARSIZE=charsize, $
             FONT=font, _STRICT_EXTRA=axkeywords

@@ -37,21 +37,21 @@
 ;
 ; KEYWORD PARAMETERS:
 ;
-;       ADDCMD:       Set this keyword to add the FSC_Colorbar command to the current FSC_Window
+;       ADDCMD:       Set this keyword to add the FSC_Colorbar command to the current cgWindow
 ;                     command list. 
 ;               
 ;       ANNOTATECOLOR: The name of the "annotation color" to use. The names are those for
-;                     FSC_COLOR, and using the keyword implies that FSC_COLOR is also in
+;                     cgCOLOR, and using the keyword implies that cgCOLOR is also in
 ;                     your !PATH. If this keyword is used, the annotation color is loaded
 ;                     *after* the color bar is displayed. The color will be represented
-;                     as theColor = FSC_COLOR(ANNOTATECOLOR). This keyword is provide
+;                     as theColor = cgCOLOR(ANNOTATECOLOR). This keyword is provide
 ;                     to maintain backward compatibility, but also to solve the problem of
 ;                     an extra line in the color bar when this kind of syntax is used in
 ;                     conjunction with the indexed (DEVICE, DECOMPOSED=0) model is used:
 ;
 ;                          LoadCT, 33
 ;                          TVImage, image
-;                          FSC_Colorbar, Color=FSC_Color('firebrick')
+;                          FSC_Colorbar, Color=cgColor('firebrick')
 ;
 ;                     The proper syntax for device-independent color is like this:
 ;
@@ -105,15 +105,15 @@
 ;                     for high range values, in order to provide contrast with the
 ;                     clamped region. See the Example section for more information.
 ;
-;       NODISPLAY:    FSC_COLORBAR uses FSC_COLOR to specify some of it colors. Normally, 
-;                     FSC_COLOR loads "system" colors as part of its palette of colors.
+;       NODISPLAY:    FSC_COLORBAR uses cgCOLOR to specify some of it colors. Normally, 
+;                     cgCOLOR loads "system" colors as part of its palette of colors.
 ;                     In order to do so, it has to create an IDL widget, which in turn 
 ;                     has to make a connection to the windowing system. If your program 
 ;                     is being run without a window connection, then this program will 
 ;                     fail. If you can live without the system colors (and most people 
 ;                     don't even know they are there, to tell you the truth), then setting 
 ;                     this keyword will keep them from being loaded, and you can run
-;                     FSC_COLORBAR without a display. As of 19 Oct 2010, set to 1  by default.
+;                     cgCOLORBAR without a display. As of 19 Oct 2010, set to 1  by default.
 ;
 ;       POSITION:     A four-element array of normalized coordinates in the same
 ;                     form as the POSITION keyword on a plot. Default is
@@ -140,7 +140,7 @@
 ;                     is a horizontal color bar.
 ;                     
 ;       WINDOW:       Set this keyword if you want to add the FSC_Colorbar command to
-;                     the current FSC_Window application.
+;                     the current cgWindow application.
 ;
 ; COMMON BLOCKS:
 ;
@@ -155,9 +155,9 @@
 ;       The number of colors available on the graphics display device (not the
 ;       PostScript device) is used unless the NCOLORS keyword is used.
 ;
-;       Requires the FSC_COLOR program from the Coyote Library:
+;       Requires the cgCOLOR program from the Coyote Library:
 ;
-;          http://www.dfanning.com/programs/fsc_color.pro
+;          http://www.dfanning.com/programs/cgcolor.pro
 ;
 ; EXAMPLE:
 ;
@@ -171,7 +171,7 @@
 ;       Example using the CLAMP and NEUTRALINDEX keywords.
 ;       
 ;       LOADCT, 33, NCOLORS=254
-;       TVLCT, FSC_COLOR('gray', /TRIPLE), 255
+;       TVLCT, cgCOLOR('gray', /TRIPLE), 255
 ;       FSC_COLORBAR, NCOLORS=254, NEUTRALINDEX=255, RANGE=[0,1500], $
 ;           DIVISIONS=8, CLAMP=[400, 800]
 ;
@@ -236,9 +236,9 @@
 ;      19 Oct 2010. Made changes so that axes titles are not picked up in _EXTRA and displayed
 ;             on the color bar. Also changed all _EXTRA passes to _STRICT_EXTRA to report
 ;             mis-spelled and/or inappropriate keywords. DWF.
-;      19 Oct 2010. Changed the default value of NODISPLAY keyword to 1, since FSC_Color
+;      19 Oct 2010. Changed the default value of NODISPLAY keyword to 1, since cgColor
 ;             no longer looks for system colors anyway. NODISPLAY is a depreciated keyword
-;             and does nothing if using the latest version of FSC_Color. DWF.
+;             and does nothing if using the latest version of cgColor. DWF.
 ;      13 Nov 2010. Samples the upper-right hand pixel on the display if it can. It this pixel is 
 ;             "white" or the current device is PostScript, sets the ANNOTATECOLOR keyword
 ;             to "black" if it of the COLOR keyword is not currently set to some other color. 
@@ -325,9 +325,9 @@ PRO FSC_COLORBAR, $
     IF (Keyword_Set(window) OR Keyword_Set(addcmd)) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
         IF Keyword_Set(addcmd) THEN window = 0
-        void = FSC_QueryWin(COUNT=wincnt)
-        IF wincnt EQ 0 THEN FSC_Window
-        FSC_Window, 'FSC_Colorbar', $
+        void = cgQuery(COUNT=wincnt)
+        IF wincnt EQ 0 THEN cgWindow
+        cgWindow, 'FSC_Colorbar', $
             ANNOTATECOLOR=annotatecolor, $
             BOTTOM=bottom, $
             CHARSIZE=charsize, $
@@ -531,7 +531,7 @@ PRO FSC_COLORBAR, $
     ; If color is undefined, use the annotate color.
     IF N_Elements(color) EQ 0 THEN BEGIN
         IF Size(annotateColor, /TNAME) EQ 'STRING' THEN BEGIN
-            color = FSC_Color(annotateColor)
+            color = cgColor(annotateColor)
         ENDIF ELSE BEGIN
             color = annotateColor
         ENDELSE

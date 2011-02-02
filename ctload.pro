@@ -37,7 +37,7 @@
 ;
 ; KEYWORDS:
 ;
-;       ADDCMD:        Set this keyword to add the CTLOAD command to the current FSC_Window
+;       ADDCMD:        Set this keyword to add the CTLOAD command to the current cgWindow
 ;                      command list. 
 ;               
 ;       BOTTOM:        The first color table index. Set to 0 by default.
@@ -102,9 +102,9 @@
 ;       SILENT:       This keyword is provided ONLY for compatibility with LOADCT. *All*
 ;                     color table manipulations are handled silently.
 ;                     
-;       WINDOW:       Set this keyword to send the colors to an FSC_Window program.
+;       WINDOW:       Set this keyword to send the colors to an cgWindow program.
 ;       
-;       WINID:        The window index number of an FSC_Window to receive the color vectors.
+;       WINID:        The window index number of an cgWindow to receive the color vectors.
 ;
 ; EXAMPLES:
 ;
@@ -116,15 +116,15 @@
 ;           CTLoad, 0
 ;           CTLoad, 3, /REVERSE, CLIP=[32,240], BOTTOM=1, NCOLORS=10
 ;           CTLoad, 1, CLIP=[64, 245], BOTTOM=11, NCOLORS=10
-;           FSC_Colorbar, NCOLORS=20, BOTTOM=1, DIV=10, RANGE=[-10,10]
+;           cgColorbar, NCOLORS=20, BOTTOM=1, DIV=10, RANGE=[-10,10]
 ;
 ;       Here is an example that shows the difference between LOADCT and CTLOAD:
 ;
-;           ERASE, COLOR=FSC_COLOR('Charcoal)
+;           ERASE, COLOR=cgCOLOR('Charcoal)
 ;           LoadCT, 5, NCOLORS=8
-;           FSC_Colorbar, NCOLORS=8, DIVISIONS=8, POSITION=[0.1, 0.65, 0.9, 0.75], XMINOR=0, XTICKLEN=1
+;           cgColorbar, NCOLORS=8, DIVISIONS=8, POSITION=[0.1, 0.65, 0.9, 0.75], XMINOR=0, XTICKLEN=1
 ;           CTLoad, 5, NCOLORS=8, CLIP=[16, 240]
-;           FSC_Colorbar, NCOLORS=8, DIVISIONS=8, POSITION=[0.1, 0.35, 0.9, 0.45], XMINOR=0, XTICKLEN=1
+;           cgColorbar, NCOLORS=8, DIVISIONS=8, POSITION=[0.1, 0.35, 0.9, 0.45], XMINOR=0, XTICKLEN=1
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -133,7 +133,7 @@
 ;       Small change in the way the program looks for the Brewer file. 8 July 2008. DWF.
 ;       Changed the way the program looks for the Brewer color table file. Now use
 ;          the Coyote Library routine FIND_RESOURCE_FILE to look for the file. 29 June 2010. DWF. 
-;       Renamed Colorbar procedure to FSC_Colorbar to avoid conflict with IDL 8 Colorbar function.
+;       Renamed Colorbar procedure to cgColorbar to avoid conflict with IDL 8 Colorbar function.
 ;          26 September 2010. DWF.
 ;       Added ROW keyword to transpose color table vectors for new graphics functions 
 ;          in IDL 8. 23 Nov 2010. DWF.
@@ -200,19 +200,19 @@ PRO CTLOAD, table, $
       RETURN
    ENDIF
    
-    ; Are you adding this command to an FSC_Window command list?
+    ; Are you adding this command to an cgWindow command list?
     ; Should this be added to a resizeable graphics window?
     IF Keyword_Set(addcmd) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-        windowIDs = FSC_QueryWin(COUNT=wincnt)
+        windowIDs = cgQuery(COUNT=wincnt)
         IF N_Elements(winid) NE 0 THEN BEGIN
             IF (wincnt GT 0) THEN BEGIN
                 index = Where(windowIDs EQ winID)
-                IF index[0] NE -1 THEN FSC_WSet, winid
+                IF index[0] NE -1 THEN cgSet, winid
             ENDIF
         ENDIF
-        IF wincnt EQ 0 THEN FSC_Window
-        FSC_Window, 'CTLoad', table, $
+        IF wincnt EQ 0 THEN cgWindow
+        cgWindow, 'CTLoad', table, $
            BREWER=brewer, $
            BOTTOM=bottom, $
            CLIP = clip, $
@@ -320,7 +320,7 @@ PRO CTLOAD, table, $
      TVLCT, r, g, b, bottom
   ENDELSE
   
-  ; If the WINDOW keyword is set, send these colors to an FSC_Window object.
+  ; If the WINDOW keyword is set, send these colors to an cgWindow object.
   IF Keyword_Set(window) THEN BEGIN
   
       ; Does a window object exist somewhere?
@@ -335,7 +335,7 @@ PRO CTLOAD, table, $
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
                     IF count GT 0 THEN winID = index[0] ELSE BEGIN
-                        Message, 'Cannot find an FSC_Window with window index ' + StrTrim(winID, 2) + '.'
+                        Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
                 thisWindowStruct = structs[winID]

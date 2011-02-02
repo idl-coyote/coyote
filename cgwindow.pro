@@ -1,11 +1,11 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_Window
+;   cgWindow
 ;
 ; PURPOSE:
 ;   Creates a resizeable graphics window for IDL traditional commands (Plot, Contour, 
-;   Surface, etc. or for Coyote Graphics routines, FSC_Plot, FSC_Contour, FSC_Surf, etc.). 
+;   Surface, etc. or for Coyote Graphics routines, cgPlot, cgContour, cgSurf, etc.). 
 ;   In addition, the window contents can be saved as PostScript files or as raster image 
 ;   files. If ImageMagick is installed on your machine, the raster image files can be 
 ;   created in very high quality from PostScript files.
@@ -230,7 +230,7 @@ PRO FSC_CmdWindow::ExecuteCommands
     TVLCT, *self.r, *self.g, *self.b
     
     ; Erase the window.
-    IF self.eraseit THEN FSC_Erase, *self.background 
+    IF self.eraseit THEN cgErase, *self.background 
     
     ; Are we doing multiple commands?
     IF Total(self.pmulti) NE 0 THEN !P.Multi = self.pmulti
@@ -678,14 +678,14 @@ END ;---------------------------------------------------------------------------
 
 ;+
 ; :Description:
-;     This method initializes the object that is at the heart of FSC_Window.
-;     It takes most of the same arguments as FSC_Window.
+;     This method initializes the object that is at the heart of cgWindow.
+;     It takes most of the same arguments as cgWindow.
 ;-
 FUNCTION FSC_CmdWindow::Init, $
    command, $                       ; The graphics "command" to execute.
    p1, p2, p3, $                    ; The three allowed positional parameters.
    _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
-   Group_Leader = group_leader, $   ; The group leader of the FSC_Window program.
+   Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
    AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface.
    CmdDelay=cmdDelay, $             ; Set this keyword to a value to "wait" before executing the next command.
    Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
@@ -694,8 +694,8 @@ FUNCTION FSC_CmdWindow::Init, $
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
    WOXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
    WOYMargin = woymargin, $         ; Set the !Y.OMargin. A two element array
-   WXSize = wxsize, $               ; The X size of the FSC_Window graphics window in pixels. By default: 400.
-   WYSize = wysize, $               ; The Y size of the FSC_Window graphics window in pixels. By default: 400.
+   WXSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 400.
+   WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 400.
    WTitle = wtitle, $               ; The window title.
    WXPos = wxpos, $                 ; The X offset of the window on the display. The window is centered if not set.
    WYPos = wypos, $                 ; The Y offset of the window on the display. The window is centered if not set.
@@ -714,15 +714,15 @@ FUNCTION FSC_CmdWindow::Init, $
     method = Keyword_Set(method)
     
     ; Get the global defaults.
-    FSC_Window_Get_Defaults, $
+    cgWindow_GetDefs, $
        Background = d_background, $                      ; The background color. 
        Delay = d_delay, $                                ; The amount of delay between command execution.
        EraseIt = d_eraseit, $                            ; Set this keyword to erase the display before executing the commands.
        Multi = d_multi, $                                ; Set this in the same way !P.Multi is used.   
        XOMargin = d_xomargin, $                          ; Set the !X.OMargin. A two element array.
        YOMargin = d_yomargin, $                          ; Set the !Y.OMargin. A two element array
-       XSize = d_xsize, $                                ; The X size of the FSC_Window graphics window.
-       YSize = d_ysize, $                                ; The Y size of the FSC_Window graphics window.
+       XSize = d_xsize, $                                ; The X size of the cgWindow graphics window.
+       YSize = d_ysize, $                                ; The Y size of the cgWindow graphics window.
        Title = d_title, $                                ; The window title.
        XPos = d_xpos, $                                  ; The X offset of the window on the display.
        YPos = d_ypos, $                                  ; The Y offset of the window on the display. 
@@ -879,7 +879,7 @@ FUNCTION FSC_CmdWindow::Init, $
     
     ; Get it running.
     WIDGET_CONTROL, /MANAGED, self.tlb
-    XManager, 'fsc_window', self.tlb, /No_Block, $
+    XManager, 'cgwindow', self.tlb, /No_Block, $
         Event_Handler='FSC_CmdWindow_Dispatch_Events', $
         Cleanup = 'FSC_CmdWindow_Cleanup', $
         Group_Leader=group_leader
@@ -887,7 +887,7 @@ FUNCTION FSC_CmdWindow::Init, $
     ; Store the self reference in the UVALUE of the TLB.
     Widget_Control, self.tlb, SET_UValue=self
     
-    ; Each instance of FSC_Window will store evidence of its
+    ; Each instance of cgWindow will store evidence of its
     ; existance in a linked list.
     DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists
     IF ~exists THEN BEGIN
@@ -935,7 +935,7 @@ PRO FSC_CmdWindow::Cleanup
     FOR j=0,count-1 DO Obj_Destroy, self.cmds -> Get_Item(j, /DEREFERENCE)
     Obj_Destroy, self.cmds
     
-    ; You have to remove yourself from the list of valid FSC_Windows.
+    ; You have to remove yourself from the list of valid cgWindows.
     theList = !FSC_WINDOW_LIST
     IF Obj_Valid(theList) THEN BEGIN
         structs = theList -> Get_Item(/ALL, /DEREFERENCE)
@@ -943,7 +943,7 @@ PRO FSC_CmdWindow::Cleanup
         IF count GT 0 THEN theList -> Delete, index[0]
     ENDIF 
     
-    ; If the list doesn't have any more FSC_Windows objects in it,
+    ; If the list doesn't have any more cgWindows objects in it,
     ; delete the list so it doesn't waste memory.
     IF theList -> Get_Count() EQ 0 THEN Obj_Destroy, theList
     
@@ -961,7 +961,7 @@ PRO FSC_CmdWindow__Define, class
               wid: 0L, $                    ; The window index number of the graphics window.
               drawid: 0L, $                 ; The identifier of the draw widget.
               
-              ; FSC_Window parameters
+              ; cgWindow parameters
               background: Ptr_New(), $      ; The background color.
               delay: 0.0, $                 ; The command delay.
               eraseit: 0B, $                ; Do we need to erase the display.
@@ -1168,7 +1168,7 @@ END ;---------------------------------------------------------------------------
 ;+
 ; :Description:
 ;   Creates a resizeable graphics window for IDL traditional commands (Plot, Contour, 
-;   Surface, etc. or for Coyote Graphics routines, FSC_Plot, FSC_Contour, FSC_Surf, etc.). 
+;   Surface, etc. or for Coyote Graphics routines, cgPlot, cgContour, cgSurf, etc.). 
 ;   In addition, the window contents can be saved as PostScript files or as raster image 
 ;   files. If ImageMagick is installed on your machine, the raster image files can be 
 ;   created in very high quality from PostScript files.
@@ -1180,7 +1180,7 @@ END ;---------------------------------------------------------------------------
 ;    command: in, required, type=string
 ;       The graphics procedure command to be executed. This parameter
 ;       must be a string and the the command must be a procedure. Examples
-;       are 'Surface', 'Contour', 'Plot', 'FSC_Plot', FSC_Contour, etc.
+;       are 'Surface', 'Contour', 'Plot', 'cgPlot', cgContour, etc.
 ;    p1: in, optional, type=any
 ;       The first positional parameter appropriate for the graphics command.
 ;    p2: in, optional, type=any
@@ -1190,9 +1190,9 @@ END ;---------------------------------------------------------------------------
 ;       
 ; :Keywords:
 ;    addcmd: in, optional, type=boolean, default=0
-;       Set this keyword to add an additional graphics command to an FSC_Window.
-;       The command is added to the last created FSC_Window, unless the WinID
-;       keyword is used to select another FSC_Window. Adding a command causes
+;       Set this keyword to add an additional graphics command to an cgWindow.
+;       The command is added to the last created cgWindow, unless the WinID
+;       keyword is used to select another cgWindow. Adding a command causes
 ;       all the commands in the window to be immediately executed. If this is
 ;       not behavior you desire, use the LOADCMD keyword instead. If CMDINDEX
 ;       is used to select a command index, the new command is added before
@@ -1202,36 +1202,36 @@ END ;---------------------------------------------------------------------------
 ;       delay of this many seconds between command execution. This will permit
 ;       "movies" of command sequences to be displayed.
 ;    cmdindex: in, optional, type=integer
-;       This keyword is used to select which command in an FSC_Window to act on
+;       This keyword is used to select which command in an cgWindow to act on
 ;       when the AllCmd, DeleteCmd, LoadCmd and ReplaceCmd keywords are used. 
 ;       See the descriptions of these keywords for details on what happens when 
 ;       CmdIndex is missing.
 ;    deletecmd: in, optional, type=boolean, default=0
-;       Set this keyword to delete a graphics command from an FSC_Window.
+;       Set this keyword to delete a graphics command from an cgWindow.
 ;       If CmdIndex is undefined the last command entered into the window is
 ;       deleted. It is not possible to delete the last command in the window.
-;       Use WinID to identify the FSC_Window you are interested in. If WinID 
-;       is undefined, the last FSC_Window created is used.
+;       Use WinID to identify the cgWindow you are interested in. If WinID 
+;       is undefined, the last cgWindow created is used.
 ;    executecmd: in, optional, type=boolean, default=0
-;       Set this keyword to immediate execute all the commands in an FSC_Window.
+;       Set this keyword to immediate execute all the commands in an cgWindow.
 ;       Normally, this is used after commands have been loaded with LOADCMD.
 ;    listcmd: in, optional, type=boolean, default=0
-;       If this keyword is set, the commands currently in the FSC_Window are
-;       listed. Use WinID to identify the FSC_Window you are interested in.
-;       If WinID is undefined, the last FSC_Window created is used.
+;       If this keyword is set, the commands currently in the cgWindow are
+;       listed. Use WinID to identify the cgWindow you are interested in.
+;       If WinID is undefined, the last cgWindow created is used.
 ;    loadcmd: in, optional, type=boolean, default=0
-;       Set this keyword to add an additional graphics command to an FSC_Window.
-;       The command is added to the last created FSC_Window, unless the WinID
-;       keyword is used to select another FSC_Window. Loaded commands are not
+;       Set this keyword to add an additional graphics command to an cgWindow.
+;       The command is added to the last created cgWindow, unless the WinID
+;       keyword is used to select another cgWindow. Loaded commands are not
 ;       automatically executed. Set the EXECUTECMD keyword at the end of loading
 ;       to execute the loaded commands. If CMDINDEX is used to select a command 
 ;       index, the new command is loaded before the command currently occuping 
 ;       that index in the command list.
 ;    replacecmd: in, optional, type=boolean, default=0
-;       Set this keyword to replace a graphics command from an FSC_Window.
+;       Set this keyword to replace a graphics command from an cgWindow.
 ;       If CmdIndex is undefined, *all* commands in the window are replaced. Use 
-;       WinID to identify the FSC_Window you are interested in. If WinID is 
-;       undefined, the last FSC_Window created is used for the replacement.
+;       WinID to identify the cgWindow you are interested in. If WinID is 
+;       undefined, the last cgWindow created is used for the replacement.
 ;    group_leader: in, optional
 ;       The identifier of a widget to serve as a group leader for this program.
 ;       If the group leader is destroyed, this program is also destroyed. Used
@@ -1247,41 +1247,41 @@ END ;---------------------------------------------------------------------------
 ;       Set this keyword to cause the window to be erased before graphics commands 
 ;       are drawn. This may need to be set, for example, to display images.
 ;    winid: in, optional, type=integer
-;       Use this keyword to select the window FSC_Window identifier (the number between
-;       the parentheses in the title bar of FSC_Window). The AddCmd, ReplaceCmd, ListCmd,
-;       and DeleteCmd keywords will all apply to the commands in the last FSC_Window
-;       created unless this keyword is used to select another FSC_Window to apply the 
+;       Use this keyword to select the window cgWindow identifier (the number between
+;       the parentheses in the title bar of cgWindow). The AddCmd, ReplaceCmd, ListCmd,
+;       and DeleteCmd keywords will all apply to the commands in the last cgWindow
+;       created unless this keyword is used to select another cgWindow to apply the 
 ;       commands to.
 ;    wmulti: in, optional, type=intarr(5)
 ;        Set this keyword in exactly the same way you would set the !P.Multi keyword.
-;        It will allow you to display multi-plots in the FSC_Window graphics window.
+;        It will allow you to display multi-plots in the cgWindow graphics window.
 ;    wobject: out, optional, type=object
-;       FSC_Window creates a FSC_CmdWindow object. This object reference is returned
+;       cgWindow creates a FSC_CmdWindow object. This object reference is returned
 ;       if this keyword is present.
 ;    wxpos: in, optional, type=integer, default=5
-;       The x offset in device coordinates of the FSC_Window from the upper-left corner of the display.
+;       The x offset in device coordinates of the cgWindow from the upper-left corner of the display.
 ;    wypos: in, optional, type=integer, default=5
-;       The y offset in device coordinates of the FSC_Window from the upper-left corner of the display.
+;       The y offset in device coordinates of the cgWindow from the upper-left corner of the display.
 ;    wxsize: in, optional, type=integer, default=640
 ;       The x size in device coordinates of the graphics window.
 ;    wysize: in, optional, type=integer, default=5
 ;       The y size in device coordinates of the the graphics window.
 ;    wtitle: in, opetional, type=string, default='Resizeable Graphics Window'
 ;       The title of the graphics window. A window index number is appended to the
-;       title so multiple FSC_Window programs can be selected.
+;       title so multiple cgWindow programs can be selected.
 ;          
 ; :Examples:
 ;    Test code::
 ;       data = Loaddata(17)
-;       FSC_Window, 'FSC_Plot', data, COLOR='red'
-;       FSC_Window, 'FSC_Plot', data, PSYM=2, /Overplot, COLOR='dodger blue', /AddCmd
-;       FSC_WIndow, 'FSC_Plot', Loaddata(17), color='olive', linestyle = 2, /Overplot, /AddCmd
-;       FSC_Window, /ListCmd
-;       FSC_Window, 'FSC_Plot', data, COLOR='purple', /ReplaceCMD, CMDINDEX=0
+;       cgWindow, 'cgPlot', data, COLOR='red'
+;       cgWindow, 'cgPlot', data, PSYM=2, /Overplot, COLOR='dodger blue', /AddCmd
+;       cgWIndow, 'cgPlot', Loaddata(17), color='olive', linestyle = 2, /Overplot, /AddCmd
+;       cgWindow, /ListCmd
+;       cgWindow, 'cgPlot', data, COLOR='purple', /ReplaceCMD, CMDINDEX=0
 ;       
 ;       Additional examples can be found here:
 ;       
-;          http://www.idlcoyote.com/graphics_tips/fsc_window.html
+;          http://www.idlcoyote.com/graphics_tips/cgwindow.html
 ;           
 ; :Notes:
 ;    Notes on using the program::
@@ -1289,14 +1289,14 @@ END ;---------------------------------------------------------------------------
 ;       The program is designed to work with any IDL traditional graphics routine
 ;       that is a procedure and includes no more than three positional parameters.
 ;       Any number of keywords can be used to specify properties of the graphical
-;       output. Any number of graphics commands can be "added" the the FSC_Window.
+;       output. Any number of graphics commands can be "added" the the cgWindow.
 ;       Simply use the ADDCMD keyword to add commands.
 ;       
 ;       If your program does not load its own color tables, the color tables in
-;       effect when FSC_Window is first called are used to display the graphics
+;       effect when cgWindow is first called are used to display the graphics
 ;       commands.
 ;    
-;       To create PostScript output from within FSC_Window, your graphics program
+;       To create PostScript output from within cgWindow, your graphics program
 ;       has to be written in such a way that it can work properly in the PostScript
 ;       device. This means there are no Window commands, WSet commands, and the like
 ;       that are not allowed in the PostScript device. Such commands are allowed in 
@@ -1305,21 +1305,21 @@ END ;---------------------------------------------------------------------------
 ;       
 ;          IF (!D.Flags AND 256) NE 0 THEN Window, ...
 ;          
-;        FSC_Display is a good program for opening graphics "windows", because such
+;        cgDisplay is a good program for opening graphics "windows", because such
 ;        PostScript protection is built into the program. In a PostScript device,
-;        FSC_Display produces a "window" with the same aspect ratio as the current
+;        cgDisplay produces a "window" with the same aspect ratio as the current
 ;        dislay graphics window, which is an aid in producing PostScript output that
 ;        looks like the same output in the display window.
 ;        
-;        Much better looking raster files can be created from the FSC_Window contents,
+;        Much better looking raster files can be created from the cgWindow contents,
 ;        if the raster files are created by converting PostScript files to the raster 
 ;        file. If the ImageMagick "convert" command can be found on your machine, you
 ;        will have the option to create raster files using this method. I *highly*
 ;        recommend doing so, as fonts and other plot annotation will be of much higher
 ;        quality using this method.
 ;        
-;        FSC_Window has been designed to work with other Coyote Graphics routines: FSC_Plot,
-;        FSC_Contour, FSC_Surf, and so on, although I expect it to work with any IDL
+;        cgWindow has been designed to work with other Coyote Graphics routines: cgPlot,
+;        cgContour, cgSurf, and so on, although I expect it to work with any IDL
 ;        traditional graphics routine, if the routine is well written.
 ;        
 ; :Author:
@@ -1338,25 +1338,25 @@ END ;---------------------------------------------------------------------------
 ;           to force UNIX machines to empty the graphics buffer after CALL_PROCEDURE. 20 Jan 2011. DWF.
 ;        Improved documentation and error handling. 19 Jan 2011. DWF.
 ;        More improved error handling and messages. 26 Jan 2011. DWF.
-;        Made changes to accommodate the new FSC_WControl routine. 27 Jan 2011. DWF.
+;        Made changes to accommodate the new cgControl routine. 27 Jan 2011. DWF.
 ;        Added WXOMARGIN and WYOMARGIN keywords. 28 Jan 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Window, $
+PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.
    p1, p2, p3, $                    ; The three allowed positional parameters.
    _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
-   Group_Leader = group_leader, $   ; The group leader of the FSC_Window program.
+   Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
    Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
    WBackground = wbackground, $     ; The background color. Set to !P.Background by default.
    WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.   
    WOXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
    WOYMargin = woymargin, $         ; Set the !Y.OMargin. A two element array
-   WXSize = wxsize, $               ; The X size of the FSC_Window graphics window in pixels. By default: 640.
-   WYSize = wysize, $               ; The Y size of the FSC_Window graphics window in pixels. By default: 512.
+   WXSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 640.
+   WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 512.
    WTitle = wtitle, $               ; The window title.
    WXPos = wxpos, $                 ; The X offset of the window on the display. The window is tiled if not set.
    WYPos = wypos, $                 ; The Y offset of the window on the display. The window is tiled if not set.
@@ -1369,7 +1369,7 @@ PRO FSC_Window, $
    ListCmd=listCmd, $               ; Set this keyword to list the commands in the window.
    LoadCmd=loadCmd, $               ; Set this keyword to load commands in the window, but not execute them.
    ReplaceCmd=replacecmd, $         ; Set this keyword to replace a command in the window.
-   WinID=winid, $                   ; Set this keyword to select an FSC_Window.
+   WinID=winid, $                   ; Set this keyword to select an cgWindow.
    WObject=wobject                  ; The FSC_CMDWindow object. A return value.
 
     Compile_Opt idl2
@@ -1396,21 +1396,21 @@ PRO FSC_Window, $
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
                     IF count GT 0 THEN winID = index[0] ELSE BEGIN
-                        Message, 'Cannot find an FSC_Window with window index ' + StrTrim(winID, 2) + '.'
+                        Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
                 thisWindowStruct = structs[winID]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     thisWindowStruct.windowObj -> ExecuteCommands
                 ENDIF ELSE BEGIN
-                    Message, 'The FSC_Window referred to does not exist.'
+                    Message, 'The cgWindow referred to does not exist.'
                 ENDELSE
                 RETURN
-           ENDIF ELSE Message, 'A valid FSC_Window does not exist to execute commands in.'
-       ENDIF ELSE Message, 'An FSC_Window object not exist to execute commands in.'
+           ENDIF ELSE Message, 'A valid cgWindow does not exist to execute commands in.'
+       ENDIF ELSE Message, 'An cgWindow object not exist to execute commands in.'
     ENDIF
     
-    ; Did the user want to list the commands in a FSC_Window?
+    ; Did the user want to list the commands in a cgWindow?
     IF N_Elements(listCmd) NE 0 THEN BEGIN
    
       ; Does the self object exist somewhere?
@@ -1425,18 +1425,18 @@ PRO FSC_Window, $
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
                     IF count GT 0 THEN winID = index[0] ELSE BEGIN
-                        Message, 'Cannot find an FSC_Window with window index ' + StrTrim(winID, 2) + '.'
+                        Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
                 thisWindowStruct = structs[winID]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     thisWindowStruct.windowObj -> ListCommand
                 ENDIF ELSE BEGIN
-                    Message, 'The FSC_Window referred to does not exist.'
+                    Message, 'The cgWindow referred to does not exist.'
                 ENDELSE
                 RETURN
-           ENDIF ELSE Message, 'A valid FSC_Window does not exist to list commands from.'
-       ENDIF ELSE Message, 'An FSC_Window object not exist to list commands from.'
+           ENDIF ELSE Message, 'A valid cgWindow does not exist to list commands from.'
+       ENDIF ELSE Message, 'An cgWindow object not exist to list commands from.'
     ENDIF
     
     ; Did the user want to delete a command in the window?
@@ -1454,7 +1454,7 @@ PRO FSC_Window, $
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
                     IF count GT 0 THEN winID = index[0] ELSE BEGIN
-                        Message, 'Cannot find an FSC_Window with window index ' + StrTrim(winID, 2) + '.'
+                        Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
                 thisWindowStruct = structs[winID]
@@ -1462,11 +1462,11 @@ PRO FSC_Window, $
                     ; If the cmdIndex is undefined, the last entered command is deleted.
                     thisWindowStruct.windowObj -> DeleteCommand, cmdIndex
                 ENDIF ELSE BEGIN
-                    Message, 'The FSC_Window referred to does not exist.'
+                    Message, 'The cgWindow referred to does not exist.'
                 ENDELSE
                 RETURN
-           ENDIF ELSE Message, 'The FSC_Window object is not a valid window object.'
-       ENDIF ELSE Message, 'An FSC_Window object not exist to add a command to.'
+           ENDIF ELSE Message, 'The cgWindow object is not a valid window object.'
+       ENDIF ELSE Message, 'An cgWindow object not exist to add a command to.'
    ENDIF
 
    ; Did the user want to replace a command or commands in the window?
@@ -1487,7 +1487,7 @@ PRO FSC_Window, $
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
                     IF count GT 0 THEN winID = index[0] ELSE BEGIN
-                        Message, 'Cannot find an FSC_Window with window index ' + StrTrim(winID, 2) + '.'
+                        Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
                 thisWindowStruct = structs[winID]
@@ -1505,11 +1505,11 @@ PRO FSC_Window, $
                     thisWindowStruct.windowObj -> ReplaceCommand, newCommand, cmdIndex, MULTI=wmulti
                     thisWindowStruct.windowObj -> ExecuteCommands
                 ENDIF ELSE BEGIN
-                    Message, 'The FSC_Window referred to does not exist.'
+                    Message, 'The cgWindow referred to does not exist.'
                 ENDELSE
                 RETURN
-           ENDIF ELSE Message, 'A valid FSC_Window does not exist to replace commands with.'
-       ENDIF ELSE Message, 'An FSC_Window does not exist to replace commands with.'
+           ENDIF ELSE Message, 'A valid cgWindow does not exist to replace commands with.'
+       ENDIF ELSE Message, 'An cgWindow does not exist to replace commands with.'
     
     ENDIF 
    
@@ -1528,7 +1528,7 @@ PRO FSC_Window, $
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
                     IF count GT 0 THEN winID = index[0] ELSE BEGIN
-                        Message, 'Cannot find an FSC_Window with window index ' + StrTrim(winID, 2) + '.'
+                        Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
                 thisWindowStruct = structs[winID]
@@ -1537,11 +1537,11 @@ PRO FSC_Window, $
                         P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=Keyword_Set(method))
                     thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                 ENDIF ELSE BEGIN
-                    Message, 'The FSC_Window referred to does not exist.'
+                    Message, 'The cgWindow referred to does not exist.'
                 ENDELSE
                 RETURN
-           ENDIF ELSE Message, 'A valid FSC_Window does not exist to add a command to.'
-       ENDIF ELSE Message, 'An FSC_Window does not exist to add a command to.'
+           ENDIF ELSE Message, 'A valid cgWindow does not exist to add a command to.'
+       ENDIF ELSE Message, 'An cgWindow does not exist to add a command to.'
     
     ENDIF 
    
@@ -1560,7 +1560,7 @@ PRO FSC_Window, $
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
                     IF count GT 0 THEN winID = index[0] ELSE BEGIN
-                        Message, 'Cannot find an FSC_Window with window index ' + StrTrim(winID, 2) + '.'
+                        Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
                 thisWindowStruct = structs[winID]
@@ -1570,11 +1570,11 @@ PRO FSC_Window, $
                     thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                     thisWindowStruct.windowObj -> ExecuteCommands
                 ENDIF ELSE BEGIN
-                    Message, 'The FSC_Window referred to does not exist.'
+                    Message, 'The cgWindow referred to does not exist.'
                 ENDELSE
                 RETURN
-           ENDIF ELSE Message, 'A valid FSC_Window does not exist to add a command to.'
-       ENDIF ELSE Message, 'An FSC_Window does not exist to add a command to.'
+           ENDIF ELSE Message, 'A valid cgWindow does not exist to add a command to.'
+       ENDIF ELSE Message, 'An cgWindow does not exist to add a command to.'
     
     ENDIF 
    
@@ -1584,13 +1584,13 @@ PRO FSC_Window, $
        p1, p2, p3, $                    ; The three allowed positional parameters.
        _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
        CmdDelay = cmdDelay, $           ; The amount of time to "wait" between commands.
-       Group_Leader = group_leader, $   ; The group leader of the FSC_Window program.
+       Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
        Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
        WBackground = wbackground, $     ; The background color. Not used unless set.
        WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
        WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.
-       WXSize = wxsize, $               ; The X size of the FSC_Window graphics window in pixels. By default: 400.
-       WYSize = wysize, $               ; The Y size of the FSC_Window graphics window in pixels. By default: 400.
+       WXSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 400.
+       WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 400.
        WTitle = wtitle, $               ; The window title.
        WXPos = wxpos, $                 ; The X offset of the window on the display. The window is centered if not set.
        WYPos = wypos )                  ; The Y offset of the window on the display. The window is centered if not set.

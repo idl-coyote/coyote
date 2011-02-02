@@ -1,11 +1,11 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_QueryWin
+;   cgQuery
 ;
 ; PURPOSE:
-;   Provides information about any FSC_Window applications currently on the display. Returns
-;   the window index numbers of any FSC_Window applications current on the display.
+;   Provides information about any cgWindow applications currently on the display. Returns
+;   the window index numbers of any cgWindow applications current on the display.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -37,8 +37,8 @@
 ;
 ;+
 ; :Description:
-;   Provides information about any FSC_Window applications currently on the display. Returns
-;   the window index numbers of any FSC_Window applications current on the display.
+;   Provides information about any cgWindow applications currently on the display. Returns
+;   the window index numbers of any cgWindow applications current on the display.
 ;
 ; :Categories:
 ;    Graphics
@@ -48,29 +48,29 @@
 ;       
 ; :Keywords:
 ;     current: in, optional, type=boolean
-;         If set, the current FSC_Window application information is returned in the result
+;         If set, the current cgWindow application information is returned in the result
 ;         of the function and in the information keywords.
 ;     count: out, optional, type=long
-;         The number of FSC_Window applications currently on the display.
+;         The number of cgWindow applications currently on the display.
 ;     objectref: out, optional, type=object
-;         A vector of FSC_CMDWINDOW object references for each FSC_Window application currently 
+;         A vector of FSC_CMDWINDOW object references for each cgWindow application currently 
 ;         on the display.
 ;     title: out, optional, type=string
-;         A vector of window titles for each FSC_Window application currently on the display.
+;         A vector of window titles for each cgWindow application currently on the display.
 ;     widgetID: out, optional, type=long
-;         A vector of widget identifiers of the top-level base widget for each FSC_Window
+;         A vector of widget identifiers of the top-level base widget for each cgWindow
 ;         application currently on the display.
 ;          
 ; :Return Value:
 ;      windowIndexID: out, type=long
-;          An array of window index numbers for each FSC_Window application currently on the display.
+;          An array of window index numbers for each cgWindow application currently on the display.
 ;          
 ; :Examples:
 ;    Used as a query routine::
-;       IDL> wids = FSC_QueryWin(TITLE=titles, COUNT=count)
+;       IDL> wids = cgQuery(TITLE=titles, COUNT=count)
 ;       IDL> index = Where(StrUpCase(titles) EQ 'PLOT WINDOW', tcnt)
-;       IDL> IF tcnt GT 0 THEN FSC_WSet, wids[index]
-;       IDL> FSC_Window, 'Oplot', thisData, /AddCmd
+;       IDL> IF tcnt GT 0 THEN cgSet, wids[index]
+;       IDL> cgWindow, 'Oplot', thisData, /AddCmd
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -88,14 +88,14 @@
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-FUNCTION FSC_QueryWin, $
+FUNCTION cgQuery, $
     COUNT=count, $
     CURRENT=current, $
     OBJECTREF=objectRef, $
     TITLE=title, $
     WIDGETID=widgetID
 
-    ; Are there FSC_Window applications around?
+    ; Are there cgWindow applications around?
     DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists
     
     ; If it doesn't exist, or it is invalid, leave.

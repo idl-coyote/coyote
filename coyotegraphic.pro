@@ -76,24 +76,26 @@ FUNCTION CoyoteGraphic, routine
     list = [ $
       'CTLOAD', $
       'DCBAR', $
-      'FSC_ARROW', $
-      'FSC_AXIS', $
+      'CGARROW', $
+      'CGAXIS', $
+      'CGCOLOR', $
       'FSC_COLOR', $
+      'CGCOLORBAR', $
       'FSC_COLORBAR', $
-      'FSC_COLORFILL', $
-      'FSC_COLORSELECT', $
-      'FSC_CONTOUR', $
-      'FSC_DISPLAY', $
-      'FSC_ERASE', $
-      'FSC_PLOT', $
-      'FSC_PLOTS', $
-      'FSC_SURF', $
-      'FSC_SURFACE', $
-      'FSC_TEXT', $
-      'FSC_WCONTROL', $
-      'FSC_WDELETE', $
-      'FSC_WINDOW', $
-      'FSC_WSET', $  
+      'CGCOLORFILL', $
+      'CGCONTOUR', $
+      'CGDISPLAY', $
+      'CGERASE', $
+      'CGIMAGE', $
+      'CGPLOT', $
+      'CGPLOTS', $
+      'CGSURF', $
+      'CGSURFACE', $
+      'CGTEXT', $
+      'CGCONTROL', $
+      'CGDELETE', $
+      'CGWINDOW', $
+      'CGSET', $  
       'HISTOPLOT', $
       'TVIMAGE', $
       'TVSCALE', $

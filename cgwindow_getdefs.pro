@@ -1,10 +1,10 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_Window_Get_Defauls
+;   cgWindow_GetDefs
 ;
 ; PURPOSE:
-;   Allows the user to get the global defaults for resizeable FSC_Window programs.
+;   Allows the user to get the global defaults for resizeable cgWindow programs.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -36,7 +36,7 @@
 ;
 ;+
 ; :Description:
-;   Allows the user to get the global defaults for resizeable FSC_Window programs.
+;   Allows the user to get the global defaults for resizeable cgWindow programs.
 ;
 ; :Categories:
 ;    Graphics
@@ -86,8 +86,8 @@
 ;         The starting Y size of the window.
 ;          
 ; :Examples:
-;    Used to get FSC_Window global properties::
-;       IDL> FSC_Window_Get_Defaults, PALETTE=palette, PS_ENCAPSULATED=encap, PS_METRIC=metric
+;    Used to get cgWindow global properties::
+;       IDL> cgWindow_GetDefs, PALETTE=palette, PS_ENCAPSULATED=encap, PS_METRIC=metric
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -105,15 +105,15 @@
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Window_Get_Defaults, $
+PRO cgWindow_GetDefs, $
    Background = background, $                      ; The background color. 
    Delay = delay, $                                ; The amount of delay between command execution.
    EraseIt = eraseit, $                            ; Set this keyword to erase the display before executing the commands.
    Multi = multi, $                                ; Set this in the same way !P.Multi is used.   
    XOMargin = xomargin, $                          ; Set the !X.OMargin. A two element array.
    YOMargin = yomargin, $                          ; Set the !Y.OMargin. A two element array
-   XSize = xsize, $                                ; The X size of the FSC_Window graphics window.
-   YSize = ysize, $                                ; The Y size of the FSC_Window graphics window.
+   XSize = xsize, $                                ; The X size of the cgWindow graphics window.
+   YSize = ysize, $                                ; The Y size of the cgWindow graphics window.
    Title = title, $                                ; The window title.
    XPos = xpos, $                                  ; The X offset of the window on the display.
    YPos = ypos, $                                  ; The Y offset of the window on the display. 
@@ -141,7 +141,7 @@ PRO FSC_Window_Get_Defaults, $
    
    ; Does the defaults structure exist? If not, create the defaults.
    DefSysV, '!FSC_WINDOW_DEFAULTS', EXISTS=exists
-   IF ~exists THEN FSC_Window_Set_Defaults
+   IF ~exists THEN cgWindow_SetDefs
    
    ; If the user asked for the default, give it to them.
    IF Arg_Present(background) THEN background = !FSC_WINDOW_DEFAULTS.background

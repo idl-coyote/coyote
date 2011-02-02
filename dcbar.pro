@@ -29,7 +29,7 @@
 ; INPUTS:
 ;
 ;       colors:       A vector of "colors" to be represented in the color bar. The
-;                     vector can be a vector of color "names" that are known to FSC_COLOR.
+;                     vector can be a vector of color "names" that are known to cgCOLOR.
 ;                     Or, it can be a vector of 24-bit color values that can be decomposed
 ;                     into color triples. Or, it can be a vector of byte or integer values
 ;                     that can be used as indices into the current color table. If both colors
@@ -38,10 +38,10 @@
 ;
 ; KEYWORD PARAMETERS:
 ;
-;       ADDCMD:       Set this keyword to add the DCBar command to the current FSC_Window
+;       ADDCMD:       Set this keyword to add the DCBar command to the current cgWindow
 ;                     command list. 
 ;               
-;       BARCOLOR:     This is the name of a color known to FSC_COLOR that can be
+;       BARCOLOR:     This is the name of a color known to cgCOLOR that can be
 ;                     used to draw the color bar outlines. By default, the same as
 ;                     specified with the COLOR keyword.
 ;                     
@@ -51,14 +51,14 @@
 ;                     
 ;       CHARSIZE:     The size of the color bar annotations. By default, !P.Charsize.
 ;
-;       COLOR:        This is the name of a color known to FSC_COLOR that can be
+;       COLOR:        This is the name of a color known to cgCOLOR that can be
 ;                     used to draw the color bar annotations (labels and title).
 ;                     By default, "Black" for the PostScript device, and "White" 
 ;                     for all other devices. If unspecified, the "color" of the
 ;                     pixel in the upper-right corner of the display will be used
 ;                     to choose either "black" or "white".
 ;                     
-;       FILE:         The name of a color table file that can be read by FSC_COLOR.
+;       FILE:         The name of a color table file that can be read by cgCOLOR.
 ;                     This allows you to specify your own color names for your own colors.
 ;                     
 ;       FONT:         Set this keyword to the type of font desired for labels. Similar to !P.FONT.
@@ -70,7 +70,7 @@
 ;       NCOLORS:      An alternative way to specify the colors in the color bar is by
 ;                     using the NCOLORS and BOTTOM keywords to locate the colors in the
 ;                     current color table. The NCOLORS and BOTTOM keywords have the same
-;                     meaning as in the LOADCT, XLOADCT, XCOLORS, or FSC_COLORBAR programs.
+;                     meaning as in the LOADCT, XLOADCT, XCOLORS, or cgCOLORBAR programs.
 ;
 ;       POSITION:     A four-element array of normalized coordinates in the same
 ;                     form as the POSITION keyword on a plot. Default is
@@ -96,7 +96,7 @@
 ;       VERTICAL:     Setting this keyword give a vertical color bar. The default
 ;                     is a horizontal color bar.
 ;                     
-;       WINDOW:       Set this keyword to add the color bar to an FSC_Window display.
+;       WINDOW:       Set this keyword to add the color bar to an cgWindow display.
 ;
 ; COMMON BLOCKS:
 ;
@@ -117,7 +117,7 @@
 ;          http://www.dfanning.com/programs/color24.pro
 ;          http://www.dfanning.com/programs/ctload.pro
 ;          http://www.dfanning.com/programs/error_message.pro
-;          http://www.dfanning.com/programs/fsc_color.pro
+;          http://www.dfanning.com/programs/cgcolor.pro
 ;
 ; EXAMPLE:
 ;
@@ -206,9 +206,9 @@ PRO DCBar, colors, $
     IF (Keyword_Set(window) OR Keyword_Set(addcmd)) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
         IF Keyword_Set(addcmd) THEN window = 0
-        void = FSC_QueryWin(COUNT=wincnt)
-        IF wincnt EQ 0 THEN FSC_Window
-        FSC_Window, 'DCBar', colors, $
+        void = cgQuery(COUNT=wincnt)
+        IF wincnt EQ 0 THEN cgWindow
+        cgWindow, 'DCBar', colors, $
             BARCOLOR=barcolor, $
             BOTTOM=bottom, $
             CHARSIZE=charsize, $
@@ -313,7 +313,7 @@ PRO DCBar, colors, $
     IF supportsTrueColor THEN BEGIN
         CASE Size(cbar_colors, /TNAME) OF
             'STRING': BEGIN
-                cbar_colors = FSC_Color(cbar_colors, DECOMPOSED=1, FILE=file)
+                cbar_colors = cgColor(cbar_colors, DECOMPOSED=1, FILE=file)
                 END
             'INT': BEGIN
                  TVLCT, r, g, b, /GET
@@ -371,7 +371,7 @@ PRO DCBar, colors, $
     
         CASE Size(cbar_colors, /TNAME) OF
             'STRING': BEGIN
-                cbar_colors = FSC_Color(cbar_colors, DECOMPOSED=0, FILE=file)
+                cbar_colors = cgColor(cbar_colors, DECOMPOSED=0, FILE=file)
                 END
              'LONG': BEGIN
 
@@ -407,7 +407,7 @@ PRO DCBar, colors, $
             x = [x0, x1, x1, x0, x0]
             y = [y0, y0, y1, y1, y0]
             Polyfill, x, y, /NORMAL, Color=cbar_colors[j]
-            PlotS, x, y, /NORMAL, COLOR=FSC_Color(barcolor, FILE=file)
+            PlotS, x, y, /NORMAL, COLOR=cgColor(barcolor, FILE=file)
             x0 = x1
             x1 = x0 + step
         ENDFOR
@@ -426,12 +426,12 @@ PRO DCBar, colors, $
            ELSE: alignment = 0.5
         ENDCASE
         FOR j=0,N_Elements(labels)-1 DO BEGIN
-            XYOutS, x, y, /NORMAL, StrTrim(labels[j],2), COLOR=FSC_Color(color, FILE=file), $
+            XYOutS, x, y, /NORMAL, StrTrim(labels[j],2), COLOR=cgColor(color, FILE=file), $
                 ORIENTATION=rotate, ALIGNMENT=alignment, CHARSIZE=charsize, FONT=font
             x = x + step
         ENDFOR
         XYOutS, (position[2]-position[0])/2.0 + position[0], y1+chardist, title, $
-            COLOR=FSC_Color(color, FILE=file), /NORMAL, ALIGNMENT=0.5, CHARSIZE=tcharsize, FONT=font
+            COLOR=cgColor(color, FILE=file), /NORMAL, ALIGNMENT=0.5, CHARSIZE=tcharsize, FONT=font
             
     ENDIF ELSE BEGIN ; Draw the vertical color bar.
 
@@ -445,7 +445,7 @@ PRO DCBar, colors, $
             x = [x0, x1, x1, x0, x0]
             y = [y0, y0, y1, y1, y0]
             Polyfill, x, y, /NORMAL, Color=cbar_colors[j]
-            PlotS, x, y, /NORMAL, COLOR=FSC_Color(barcolor, FILE=file)
+            PlotS, x, y, /NORMAL, COLOR=cgColor(barcolor, FILE=file)
             y0 = y1
             y1 = y0 + step
         ENDFOR
@@ -470,12 +470,12 @@ PRO DCBar, colors, $
            ELSE: alignment = 0.0
         ENDCASE
         FOR j=0,N_Elements(labels)-1 DO BEGIN
-            XYOutS, x, y, /NORMAL, StrTrim(labels[j],2), COLOR=FSC_Color(color, FILE=file), $
+            XYOutS, x, y, /NORMAL, StrTrim(labels[j],2), COLOR=cgColor(color, FILE=file), $
                 ORIENTATION=rotate, ALIGNMENT=alignment, CHARSIZE=charsize, FONT=font
             y = y + step
         ENDFOR
         XYOutS, x0 - (chardist * ((x0 LT 0.5) ? 2 : 3)), (position[3]-position[1])/2.0 + position[1], $
-            title, COLOR=FSC_Color(color, FILE=file), /NORMAL, ALIGNMENT=0.5, $
+            title, COLOR=cgColor(color, FILE=file), /NORMAL, ALIGNMENT=0.5, $
             ORIENTATION=(x GE 0.5) ? -90 : 90,  CHARSIZE=tcharsize, FONT=font
     ENDELSE
     

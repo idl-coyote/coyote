@@ -1,10 +1,10 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_Surface
+;   cgSurface
 ;
 ; PURPOSE:
-;   The purpose of FSC_Surface is to create a window where a surface is displayed. Surfaces
+;   The purpose of cgSurface is to create a window where a surface is displayed. Surfaces
 ;   can be wire-framed, shaded surfaces, and surfaces with texture maps draped on top of
 ;   them, among other types of surfaces. LEFT mouse button rotates the surface, MIDDLE
 ;   mouse button zooms out from the surface, RIGHT mouse button zoom into the surface. 
@@ -224,13 +224,13 @@ END ;---------------------------------------------------------------------------
 
 
 
-PRO FSC_Surface_Light_Done, event
+PRO cgSurface_Light_Done, event
     Widget_Control, event.top, /Destroy
 END ;--------------------------------------------------------------------
 
 
 
-PRO FSC_Surface_Light_Controls_Event, event
+PRO cgSurface_Light_Controls_Event, event
     Widget_Control, event.top, Get_UValue=info
     info.theWindow->Draw, info.theView
 END
@@ -238,7 +238,7 @@ END
 
 
 
-PRO FSC_Surface_Light_Controls, event
+PRO cgSurface_Light_Controls, event
 
     ; Place the light control beside the current widget program.
     Widget_Control, event.top, Get_UValue=info, /No_Copy
@@ -251,32 +251,32 @@ PRO FSC_Surface_Light_Controls, event
     info.thisWindow->Draw, info.thisView
     
     ; Create widgets.
-    tlb = Widget_Base(Title='FSC_Surface Light Controls', Column=1, Group_Leader=event.top, $
+    tlb = Widget_Base(Title='cgSurface Light Controls', Column=1, Group_Leader=event.top, $
        UValue={theView:info.thisView, theWindow:info.thisWindow}, XOffset=xpos, YOffset=ypos)
     dummy = CW_Light_Control(tlb, Name='Non-Rotating Light', info.nonRotatingLight, LabelSize=130, $
-       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-18, Color=[255,255,255], $
+       Event_Pro='cgSurface_Light_Controls_Event', Index=!D.Table_Size-18, Color=[255,255,255], $
        SetColor_Name='Color for Non-Rotating Light')
     dummy = CW_Light_Control(tlb, Name='Rotating Light', info.rotatingLight, LabelSize=130, $
-       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-19, Color=[255,255,255], $
+       Event_Pro='cgSurface_Light_Controls_Event', Index=!D.Table_Size-19, Color=[255,255,255], $
        SetColor_Name='Color for Rotating Light')
     dummy = CW_Light_Control(tlb, Name='Fill Light', info.fillLight, LabelSize=130, $
-       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-20, Color=[255,255,255], $
+       Event_Pro='cgSurface_Light_Controls_Event', Index=!D.Table_Size-20, Color=[255,255,255], $
        SetColor_Name='Color for Fill Light')
     dummy = CW_Light_Control(tlb, Name='Ambient Light', info.ambientLight, LabelSize=130, $
-       Event_Pro='FSC_Surface_Light_Controls_Event', Index=!D.Table_Size-21, Color=[255,255,255], $
+       Event_Pro='cgSurface_Light_Controls_Event', Index=!D.Table_Size-21, Color=[255,255,255], $
        SetColor_Name='Color for Ambient Light')
-    quit = Widget_Button(tlb, Value='Done', Event_Pro='FSC_Surface_Light_Done')
+    quit = Widget_Button(tlb, Value='Done', Event_Pro='cgSurface_Light_Done')
     
     Widget_Control, tlb, /Realize
     
-    XManager, 'FSC_Surface_Light_Controls', tlb, /No_Block, Event_Handler='FSC_Surface_Light_Controls_Event'
+    XManager, 'cgSurface_Light_Controls', tlb, /No_Block, Event_Handler='cgSurface_Light_Controls_Event'
     Widget_Control, event.top, Set_UValue=info, /No_Copy
 
 END
 ;-------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Axes_OnOff, event
+PRO cgSurface_Axes_OnOff, event
 
     ; This event handler turns the surface axes on or off.
     
@@ -316,7 +316,7 @@ PRO FSC_Surface_Axes_OnOff, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Bottom_OnOff, event
+PRO cgSurface_Bottom_OnOff, event
 
     ; This event handler turns the bottom color on or off.
     
@@ -348,7 +348,7 @@ PRO FSC_Surface_Bottom_OnOff, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Change_Colors, event
+PRO cgSurface_Change_Colors, event
 
     ; This event handler changes color tables for elevation shading.
     
@@ -366,25 +366,25 @@ PRO FSC_Surface_Change_Colors, event
         'TITLE COLOR': BEGIN
             title = 'Set Title Color'
             color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
-            info.tcolor = FSC_Color(color, /Triple, /Row)
+            info.tcolor = cgColor(color, /Triple, /Row)
             info.plottitle -> SetProperty, COLOR=info.tcolor
             END
         'SURFACE COLOR': BEGIN
             title = 'Set Surface Color'
             color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
-            info.color = FSC_Color(color, /Triple, /Row)
+            info.color = cgColor(color, /Triple, /Row)
             info.thisSurface -> SetProperty, COLOR=info.color
             END
         'BACKGROUND COLOR': BEGIN
             title = 'Set Background Color'
             color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
-            info.background = FSC_Color(color, /Triple, /Row)
+            info.background = cgColor(color, /Triple, /Row)
             info.thisView -> SetProperty, COLOR=info.background
             END
         'AXIS COLOR': BEGIN
             title = 'Set Axis Color'
             color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
-            info.axiscolor = FSC_Color(color, /Triple, /Row)
+            info.axiscolor = cgColor(color, /Triple, /Row)
             info.xaxis -> SetProperty, COLOR=info.axiscolor
             info.yaxis -> SetProperty, COLOR=info.axiscolor
             info.zaxis -> SetProperty, COLOR=info.axiscolor
@@ -392,7 +392,7 @@ PRO FSC_Surface_Change_Colors, event
         'BOTTOM COLOR': BEGIN
             title = 'Set Bottom Color'
             color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
-            info.bottom = FSC_Color(color, /Triple, /Row)
+            info.bottom = cgColor(color, /Triple, /Row)
             info.thisSurface -> SetProperty, BOTTOM=info.bottom
             END
     ENDCASE
@@ -407,7 +407,7 @@ PRO FSC_Surface_Change_Colors, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Draw_Events, event
+PRO cgSurface_Draw_Events, event
 
     ; Draw widget events handled here: expose events and trackball
     ; events. The trackball uses RSI-supplied TRACKBALL_DEFINE.PRO.
@@ -441,7 +441,7 @@ PRO FSC_Surface_Draw_Events, event
            IF Obj_Valid(item[0]) THEN BEGIN
                IF Obj_Class(item[0]) EQ 'IDLGRTEXT' THEN BEGIN
                    Widget_Control, event.id, /CLEAR_EVENTS
-                   Widget_Control, event.id, EVENT_PRO='FSC_SURFACE_MOVE_TITLE'
+                   Widget_Control, event.id, EVENT_PRO='cgSURFACE_MOVE_TITLE'
                    info.xstart = event.x
                    info.ystart = event.y
                    info.selectedItem = item[0]
@@ -451,7 +451,7 @@ PRO FSC_Surface_Draw_Events, event
                ENDIF
                IF Obj_Class(item[0]) EQ 'IDLGRAXIS' THEN BEGIN
                    Widget_Control, event.id, /CLEAR_EVENTS
-                   Widget_Control, event.id, EVENT_PRO='FSC_SURFACE_MOVE_SURFACE'
+                   Widget_Control, event.id, EVENT_PRO='cgSURFACE_MOVE_SURFACE'
                    info.xstart = event.x
                    info.ystart = event.y
                    info.selectedItem = item[0]
@@ -527,7 +527,7 @@ PRO FSC_Surface_Draw_Events, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Elevation_Colors, event
+PRO cgSurface_Elevation_Colors, event
 
     ; This event handler changes color tables for elevation shading.
     
@@ -552,9 +552,8 @@ PRO FSC_Surface_Elevation_Colors, event
           ENDIF ELSE BEGIN
             CTLoad, info.colortable, BREWER=info.brewer, REVERSE=info.reverse
           ENDELSE
-          Print, 'Info.Reverse set to on button event:', info.reverse
           XColors, Group_Leader=event.top, NotifyID=[event.id, event.top], $
-             Title="FSC_Surface Elevation Shading Colors", BREWER=info.brewer, $
+             Title="cgSurface Elevation Shading Colors", BREWER=info.brewer, $
              INDEX=info.colortable, REVERSE=info.reverse
           ENDCASE
     
@@ -565,7 +564,6 @@ PRO FSC_Surface_Elevation_Colors, event
           info.colortable = event.index
           info.brewer = event.brewer
           info.reverse = event.reversed
-          Print, 'Info.Reverse set to on XColors event:', info.reverse
           IF Obj_Valid(info.colorPalette) THEN info.colorPalette->SetProperty, $
              Red=event.r, Green=event.g, Blue=event.b
           ENDCASE
@@ -579,7 +577,7 @@ PRO FSC_Surface_Elevation_Colors, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Elevation_Shading, event
+PRO cgSurface_Elevation_Shading, event
 
     ; This event handler sets up elevation shading for the surface.
     
@@ -622,7 +620,7 @@ PRO FSC_Surface_Elevation_Shading, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Exit, event
+PRO cgSurface_Exit, event
 
    ; Exit the program. This will cause the CLEANUP
    ; routine to be called automatically.
@@ -631,7 +629,7 @@ PRO FSC_Surface_Exit, event
 END ;-----------------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Move_Surface, event
+PRO cgSurface_Move_Surface, event
 
     ; This event handler moves the surface.
 
@@ -651,7 +649,7 @@ PRO FSC_Surface_Move_Surface, event
     
         'RELEASE': BEGIN
             Widget_Control, event.id, /CLEAR_EVENTS
-            Widget_Control, event.id, EVENT_PRO='FSC_SURFACE_DRAW_EVENTS'
+            Widget_Control, event.id, EVENT_PRO='cgSURFACE_DRAW_EVENTS'
             Widget_Control, event.id, DRAW_MOTION_EVENTS=0
             info.xstart = -1
             info.ystart = -1
@@ -673,7 +671,7 @@ PRO FSC_Surface_Move_Surface, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Move_Title, event
+PRO cgSurface_Move_Title, event
 
     ; This event handler moves the surface title.
 
@@ -693,7 +691,7 @@ PRO FSC_Surface_Move_Title, event
     
         'RELEASE': BEGIN
             Widget_Control, event.id, /CLEAR_EVENTS
-            Widget_Control, event.id, EVENT_PRO='FSC_SURFACE_DRAW_EVENTS'
+            Widget_Control, event.id, EVENT_PRO='cgSURFACE_DRAW_EVENTS'
             Widget_Control, event.id, DRAW_MOTION_EVENTS=0
             info.xstart = -1
             info.ystart = -1
@@ -715,7 +713,7 @@ PRO FSC_Surface_Move_Title, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Output, event
+PRO cgSurface_Output, event
 
    ; This event handler creates GIF and JPEG files.
 
@@ -735,20 +733,20 @@ PRO FSC_Surface_Output, event
              ; appropriate color tables for the GIF file.
     
           image2D = Color_Quan(snapshot, 1, r, g, b)
-          filename = Dialog_Pickfile(/Write, File='fsc_surface.gif')
+          filename = Dialog_Pickfile(/Write, File='cgsurface.gif')
           IF filename NE '' THEN Write_GIF, filename, image2d, r, g, b
           END
     
        'JPEG': BEGIN
     
-          filename = Dialog_Pickfile(/Write, File='fsc_surface.jpg')
+          filename = Dialog_Pickfile(/Write, File='cgsurface.jpg')
           IF filename NE '' THEN Write_JPEG, filename, snapshot, True=1, Quality=100
           END
     
     
        'TIFF': BEGIN
     
-          filename = Dialog_Pickfile(/Write, File='fsc_surface.tif')
+          filename = Dialog_Pickfile(/Write, File='cgsurface.tif')
           IF filename NE '' THEN BEGIN
     
              ; TIFF files should have their Y direction reversed for
@@ -759,17 +757,17 @@ PRO FSC_Surface_Output, event
           END
     
        'BMP': BEGIN
-          filename = Dialog_Pickfile(/Write, File='fsc_surface.bmp')
+          filename = Dialog_Pickfile(/Write, File='cgsurface.bmp')
           IF filename NE '' THEN Write_BMP, filename, snapshot
           END
     
        'PNG': BEGIN
-          filename = Dialog_Pickfile(/Write, File='fsc_surface.png')
+          filename = Dialog_Pickfile(/Write, File='cgsurface.png')
           IF filename NE '' THEN Write_PNG, filename, snapshot
           END
     
        'PS': BEGIN
-          filename = Dialog_Pickfile(/Write, File='fsc_surface.ps')
+          filename = Dialog_Pickfile(/Write, File='cgsurface.ps')
           IF filename NE '' THEN BEGIN
              resolution = [2.54, 2.54]/ 600; 600 pixels per inch
              viewDimensions = [info.xsize, info.ysize] / 100.0 ; 100 pixels in size = 1 inch
@@ -788,7 +786,7 @@ PRO FSC_Surface_Output, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Properties, event
+PRO cgSurface_Properties, event
 
     ; Event handler to set program properties.
 
@@ -839,7 +837,7 @@ PRO FSC_Surface_Properties, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Resize, event
+PRO cgSurface_Resize, event
 
     ; The only events generated by this simple program are resize
     ; events, which are handled here.
@@ -872,7 +870,7 @@ END
 
 
 
-PRO FSC_Surface_Skirt_OnOff, event
+PRO cgSurface_Skirt_OnOff, event
 
     ; This event handler turns the skirt on or off.
     
@@ -902,7 +900,7 @@ PRO FSC_Surface_Skirt_OnOff, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Style, event
+PRO cgSurface_Style, event
 
      ; Event handler to select surface style.
 
@@ -957,7 +955,7 @@ PRO FSC_Surface_Style, event
 END ;------------------------------------------------------------------------------
 
 
-PRO FSC_Surface_Cleanup, tlb
+PRO cgSurface_Cleanup, tlb
 
     ; Come here when program dies. Free all created objects.
     Widget_Control, tlb, Get_UValue=info
@@ -969,7 +967,7 @@ PRO FSC_Surface_Cleanup, tlb
 END ;------------------------------------------------------------------------------
 
 
-FUNCTION FSC_Surface_Aspect, aspectRatio, MARGIN=margin, WindowAspect=wAspectRatio
+FUNCTION cgSurface_Aspect, aspectRatio, MARGIN=margin, WindowAspect=wAspectRatio
 
     ; This function calculates the correct aspect ratio for display.
     
@@ -1018,7 +1016,7 @@ END ;---------------------------------------------------------------------------
 
 ;+
 ; :Description:
-;   The purpose of FSC_Surface is to create a window where a surface is displayed. Surfaces
+;   The purpose of cgSurface is to create a window where a surface is displayed. Surfaces
 ;   can be wire-framed, shaded surfaces, and surfaces with texture maps draped on top of
 ;   them, among other types of surfaces. LEFT mouse button rotates the surface, MIDDLE
 ;   mouse button zooms out from the surface, RIGHT mouse button zoom into the surface. 
@@ -1121,10 +1119,10 @@ END ;---------------------------------------------------------------------------
 ;    Use as you would use the IDL SURFACE of SHADE_SURF command::
 ;       data = Dist(200)
 ;       LoadCT, 33
-;       FSC_Surface, data
-;       FSC_Surface, data, /Elevation_Shading
-;       FSC_Surface, data, /Shaded
-;       FSC_Surface, data, /Shaded, Texture_Image=Loaddata(16) 
+;       cgSurface, data
+;       cgSurface, data, /Elevation_Shading
+;       cgSurface, data, /Shaded
+;       cgSurface, data, /Shaded, Texture_Image=Loaddata(16) 
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -1137,7 +1135,7 @@ END ;---------------------------------------------------------------------------
 ;
 ; :History:
 ;     Change History::
-;        Completely re-written, 26 November 2010 from old FSC_SURFACE program. DWF.
+;        Completely re-written, 26 November 2010 from old cgSURFACE program. DWF.
 ;        Added ability to translate the surface by clicking on an axis. 28 Nov 2010. DWF.
 ;        Fixed a problem with light controls in which the light controls didn't show the
 ;            current light color. 28 Nov 2010. DWF.
@@ -1147,7 +1145,7 @@ END ;---------------------------------------------------------------------------
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Surface, data, x, y, $
+PRO cgSurface, data, x, y, $
     Axiscolor=axiscolorName, $
     Background=backgroundName, $
     Block=block, $
@@ -1197,7 +1195,7 @@ PRO FSC_Surface, data, x, y, $
   
     ; Did the user pass parameters?
     IF N_Params() EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_Surface, data, x, y'
+        Print, 'USE SYNTAX: cgSurface, data, x, y'
         RETURN
     ENDIF
     
@@ -1210,7 +1208,7 @@ PRO FSC_Surface, data, x, y, $
       
     ; Check parameters.
     IF N_Elements(data) EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_Surface, data, x, y'
+        Print, 'USE SYNTAX: cgSurface, data, x, y'
         Print, 'Using example data.'
         data = LoadData(2)
     ENDIF
@@ -1273,7 +1271,7 @@ PRO FSC_Surface, data, x, y, $
     ; If the colors are strings, they need to be converted to row vectors.
     ; If they are LONGS, they need to be decomposed to a row vector.
     ; If they are NOT longs, they must be indices into the color table.
-    IF Size(axiscolorName, /TNAME) EQ 'STRING' THEN axiscolor = FSC_Color(axiscolorName, /Triple, /Row)
+    IF Size(axiscolorName, /TNAME) EQ 'STRING' THEN axiscolor = cgColor(axiscolorName, /Triple, /Row)
     IF N_Elements(axiscolor) NE 3 THEN BEGIN
         IF Size(axiscolor, /TNAME) EQ 'LONG' THEN BEGIN
             axiscolor = [Byte(axiscolor), Byte(axiscolor,1), Byte(axiscolor,2)]
@@ -1281,7 +1279,7 @@ PRO FSC_Surface, data, x, y, $
             axiscolor = [rr[0>axiscolor<255],gg[0>axiscolor<255],bb[0>axiscolor<255]]
         ENDELSE
     ENDIF
-    IF Size(backgroundName, /TNAME) EQ 'STRING' THEN background = FSC_Color(backgroundName, /Triple, /Row)
+    IF Size(backgroundName, /TNAME) EQ 'STRING' THEN background = cgColor(backgroundName, /Triple, /Row)
     IF N_Elements(background) NE 3 THEN BEGIN
         IF Size(background, /TNAME) EQ 'LONG' THEN BEGIN
             background = [Byte(background), Byte(background,1), Byte(background,2)]
@@ -1289,7 +1287,7 @@ PRO FSC_Surface, data, x, y, $
             background = [rr[0>background<255],gg[0>background<255],bb[0>background<255]]
         ENDELSE
     ENDIF
-    IF Size(bottomName, /TNAME) EQ 'STRING' THEN bottom = FSC_Color(bottomName, /Triple, /Row)
+    IF Size(bottomName, /TNAME) EQ 'STRING' THEN bottom = cgColor(bottomName, /Triple, /Row)
     IF N_Elements(bottom) NE 3 THEN BEGIN
         IF Size(bottom, /TNAME) EQ 'LONG' THEN BEGIN
             bottom = [Byte(bottom), Byte(bottom,1), Byte(bottom,2)]
@@ -1297,7 +1295,7 @@ PRO FSC_Surface, data, x, y, $
             bottom = [rr[0>bottom<255],gg[0>bottom<255],bb[0>bottom<255]]
         ENDELSE
     ENDIF
-    IF Size(colorName, /TNAME) EQ 'STRING' THEN color = FSC_Color(colorName, /Triple, /Row)
+    IF Size(colorName, /TNAME) EQ 'STRING' THEN color = cgColor(colorName, /Triple, /Row)
     IF N_Elements(color) NE 3 THEN BEGIN
         IF Size(color, /TNAME) EQ 'LONG' THEN BEGIN
             color = [Byte(color), Byte(color,1), Byte(color,2)]
@@ -1305,7 +1303,7 @@ PRO FSC_Surface, data, x, y, $
             color = [rr[0>color<255],gg[0>color<255],bb[0>color<255]]
         ENDELSE
     ENDIF
-    IF Size(tcolorName, /TNAME) EQ 'STRING' THEN tcolor = FSC_Color(tcolorName, /Triple, /Row)
+    IF Size(tcolorName, /TNAME) EQ 'STRING' THEN tcolor = cgColor(tcolorName, /Triple, /Row)
     IF N_Elements(tcolor) NE 3 THEN BEGIN
         IF Size(tcolor, /TNAME) EQ 'LONG' THEN BEGIN
             tcolor = [Byte(tcolor), Byte(tcolor,1), Byte(tcolor,2)]
@@ -1322,7 +1320,7 @@ PRO FSC_Surface, data, x, y, $
        s = Size(data, /DIMENSIONS)
        surfaceAspect = Float(s[1]) / s[0]
        windowAspect = Float(ysize) / xsize
-       pos = FSC_Surface_Aspect(surfaceAspect, WindowAspect=windowAspect, Margin=0)
+       pos = cgSurface_Aspect(surfaceAspect, WindowAspect=windowAspect, Margin=0)
        pos = [pos[0], pos[2], pos[1], pos[3], 0.0, 1.0] - 0.5
     
     ENDIF ELSE pos = [0, 1, 0, 1, 0, 1] - 0.5
@@ -1548,11 +1546,11 @@ PRO FSC_Surface, data, x, y, $
     ; has its own problems when working with blocking widgets, or do the rendering
     ; in software. The code exists here for you to choose your own poison. :-(
     ;drawID = Widget_Draw(tlb, XSize=400, YSize=400, Graphics_Level=2, $
-    ;   Event_Pro='FSC_Surface_Draw_Events', Button_Events=1, Retain=2)
+    ;   Event_Pro='cgSurface_Draw_Events', Button_Events=1, Retain=2)
     ;drawID = Widget_Draw(tlb, XSize=400, YSize=400, Graphics_Level=2, $
-    ;   Event_Pro='FSC_Surface_Draw_Events', Button_Events=1, Expose_Events=1)
+    ;   Event_Pro='cgSurface_Draw_Events', Button_Events=1, Expose_Events=1)
     drawID = Widget_Draw(tlb, XSize=xsize, YSize=ysize, Graphics_Level=2, $
-       Event_Pro='FSC_Surface_Draw_Events', Button_Events=1, Retain=1, Renderer=1)
+       Event_Pro='cgSurface_Draw_Events', Button_Events=1, Retain=1, Renderer=1)
     
     ; Create FILE menu buttons.
     filer = Widget_Button(menubase, Value='File', /Menu)
@@ -1561,79 +1559,79 @@ PRO FSC_Surface, data, x, y, $
     ; files if available.
     output = Widget_Button(filer, Value='Save As...', /Menu)
     button = Widget_Button(output, Value='PostScript File', $
-       UValue='PS', Event_Pro='FSC_Surface_Output')
+       UValue='PS', Event_Pro='cgSurface_Output')
     button = Widget_Button(output, Value='BMP File', $
-       UValue='BMP', Event_Pro='FSC_Surface_Output')
+       UValue='BMP', Event_Pro='cgSurface_Output')
     IF havegif THEN gif = Widget_Button(output, Value='GIF File', $
-       UValue='GIF', Event_Pro='FSC_Surface_Output')
+       UValue='GIF', Event_Pro='cgSurface_Output')
     button = Widget_Button(output, Value='JPEG File', $
-       UValue='JPEG', Event_Pro='FSC_Surface_Output')
+       UValue='JPEG', Event_Pro='cgSurface_Output')
     button = Widget_Button(output, Value='PNG File', $
-       UValue='PNG', Event_Pro='FSC_Surface_Output')
+       UValue='PNG', Event_Pro='cgSurface_Output')
     button = Widget_Button(output, Value='TIFF File', $
-       UValue='TIFF', Event_Pro='FSC_Surface_Output')
+       UValue='TIFF', Event_Pro='cgSurface_Output')
     
     quitter = Widget_Button(filer, /Separator, Value='Exit', $
-       Event_Pro='FSC_Surface_Exit')
+       Event_Pro='cgSurface_Exit')
     
     ; Create STYLE menu buttons for surface style.
     style = Widget_Button(menubase, Value='Style', /Menu)
     dummy = Widget_Button(style, Value='Dot Surface', $
-       Event_Pro='FSC_Surface_Style', UValue='DOTS')
+       Event_Pro='cgSurface_Style', UValue='DOTS')
     dummy = Widget_Button(style, Value='Wire Mesh', $
-       Event_Pro='FSC_Surface_Style', UValue='MESH')
+       Event_Pro='cgSurface_Style', UValue='MESH')
     dummy = Widget_Button(style, Value='Solid', $
-       Event_Pro='FSC_Surface_Style', UValue='SOLID')
+       Event_Pro='cgSurface_Style', UValue='SOLID')
     dummy = Widget_Button(style, Value='Parallel X Lines', $
-       Event_Pro='FSC_Surface_Style', UValue='XPARALLEL')
+       Event_Pro='cgSurface_Style', UValue='XPARALLEL')
     dummy = Widget_Button(style, Value='Parallel Y Lines', $
-       Event_Pro='FSC_Surface_Style', UValue='YPARALLEL')
+       Event_Pro='cgSurface_Style', UValue='YPARALLEL')
     dummy = Widget_Button(style, Value='Wire Mesh Lego', $
-       Event_Pro='FSC_Surface_Style', UValue='WIRELEGO')
+       Event_Pro='cgSurface_Style', UValue='WIRELEGO')
     dummy = Widget_Button(style, Value='Solid Lego', $
-       Event_Pro='FSC_Surface_Style', UValue='SOLIDLEGO')
+       Event_Pro='cgSurface_Style', UValue='SOLIDLEGO')
     IF hidden_lines THEN hlValue = 'Hidden Lines OFF' ELSE hlValue='Hidden Lines ON'
     dummy = Widget_Button(style, Value=hlvalue, $
-       Event_Pro='FSC_Surface_Style', UValue='HIDDEN', /Separator)
+       Event_Pro='cgSurface_Style', UValue='HIDDEN', /Separator)
     
     IF elevation_shading THEN BEGIN
        elevationID = Widget_Button(style, Value='Elevation Shading OFF', $
           /Separator, UValue='Elevation Shading ON', $
-          Event_Pro='FSC_Surface_Elevation_Shading')
+          Event_Pro='cgSurface_Elevation_Shading')
           thisSurface -> SetProperty, Bottom=bottomOffPtr
     ENDIF ELSE BEGIN
        elevationID = Widget_Button(style, Value='Elevation Shading ON', $
           /Separator, UValue='Elevation Shading OFF', $
-          Event_Pro='FSC_Surface_Elevation_Shading')
+          Event_Pro='cgSurface_Elevation_Shading')
     ENDELSE
    
     IF elevation_shading THEN BEGIN
        bottomID = Widget_Button(style, Value='Bottom Color ON', $
           /Separator, UValue='Bottom Color OFF', $
-          Event_Pro='FSC_Surface_Bottom_OnOff')
+          Event_Pro='cgSurface_Bottom_OnOff')
           thisSurface -> SetProperty, Bottom=bottomOffPtr
     ENDIF ELSE BEGIN
        bottomID = Widget_Button(style, Value='Bottom Color OFF', $
           /Separator, UValue='Bottom Color ON', $
-          Event_Pro='FSC_Surface_Bottom_OnOff')
+          Event_Pro='cgSurface_Bottom_OnOff')
     ENDELSE
     
     void = Widget_Button(style, Value='Turn Axes OFF', $
           /Separator, UValue='Turn Axes ON', $
-          Event_Pro='FSC_Surface_Axes_OnOff')
+          Event_Pro='cgSurface_Axes_OnOff')
     
     IF N_Elements(skirt) GT 0 THEN BEGIN
         skirtID = Widget_Button(style, Value='Turn Skirt OFF', $
           /Separator, UValue='Turn Skirt ON', $
-          Event_Pro='FSC_Surface_Skirt_OnOff')
+          Event_Pro='cgSurface_Skirt_OnOff')
     ENDIF
     ; Create PROPERTIES menu buttons for surface properties.
     properties = Widget_Button(menubase, Value='Properties', /Menu, $
-       Event_Pro='FSC_Surface_Properties')
+       Event_Pro='cgSurface_Properties')
     
     ; Background Color
     colorID = Widget_Button(properties, Value='Colors', /Menu, $
-        Event_Pro='FSC_Surface_Change_Colors')
+        Event_Pro='cgSurface_Change_Colors')
     dummy = Widget_Button(colorID, Value='Surface Color', UValue=colorName)
     dummy = Widget_Button(colorID, Value='Bottom Color', UValue=bottomName)
     dummy = Widget_Button(colorID, Value='Axis Color', UValue=axiscolorName)
@@ -1641,25 +1639,25 @@ PRO FSC_Surface, data, x, y, $
     dummy = Widget_Button(colorID, Value='Title Color', UValue=tColorName)
     
     colorsID = Widget_Button(colorID, Value='Elevation Color Table', $
-       Event_Pro='FSC_Surface_Elevation_Colors', /Separator)
+       Event_Pro='cgSurface_Elevation_Colors', /Separator)
      
     ; Original Axis rotation.
     dummy = Widget_Button(properties, Value='Original Rotation', /Separator, $
-       Event_Pro='FSC_Surface_Properties', UValue='ORIGINAL_T3D')
+       Event_Pro='cgSurface_Properties', UValue='ORIGINAL_T3D')
     
     ; Drag Quality.
     dragID = Widget_Button(properties, Value='Drag Quality', /Separator, /Menu)
        dragLowID = Widget_Button(dragID, Value='Low', $
-          Event_Pro='FSC_Surface_Properties', UValue='DRAG_LOW')
+          Event_Pro='cgSurface_Properties', UValue='DRAG_LOW')
        dragMedID = Widget_Button(dragID, Value='Medium', $
-          Event_Pro='FSC_Surface_Properties', UValue='DRAG_MEDIUM')
+          Event_Pro='cgSurface_Properties', UValue='DRAG_MEDIUM')
        dragHighID = Widget_Button(dragID, Value='High', $
-          Event_Pro='FSC_Surface_Properties', UValue='DRAG_HIGH')
+          Event_Pro='cgSurface_Properties', UValue='DRAG_HIGH')
     Widget_Control, dragHighID, Sensitive=0
     
     ; Light controller.
     lightID = Widget_Button(properties, Value='Light Controls...', $
-       /Separator, Event_Pro='FSC_Surface_Light_Controls')
+       /Separator, Event_Pro='cgSurface_Light_Controls')
     
     ; Draw the widgets.
     Widget_Control, tlb, /Realize
@@ -1750,9 +1748,9 @@ PRO FSC_Surface, data, x, y, $
     
     ; Call XManager. Set a cleanup routine so the objects
     ; can be freed upon exit from this program.
-    XManager, 'fsc_surface', tlb, Cleanup='FSC_Surface_Cleanup', $
+    XManager, 'cgsurface', tlb, Cleanup='cgSurface_Cleanup', $
        No_Block=(1 - Keyword_Set(block)), $
-       Event_Handler='FSC_Surface_Resize', Group_Leader=groupLeader
+       Event_Handler='cgSurface_Resize', Group_Leader=groupLeader
     
 END ;-----------------------------------------------------------------------------------------
    

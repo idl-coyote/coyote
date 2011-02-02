@@ -1,12 +1,12 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_WSet
+;   cgShow
 ;
 ; PURPOSE:
-;   Allows the user to select the FSC_Window application to be the "current" application.
+;   Allows the user to select the cgWindow application to be the brought forward on the display.
 ;   Selection can be made based on window index number, widget identifier, object reference,
-;   or window title.
+;   or window title. This is the equivalent of WShow for normal graphics windows.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -38,19 +38,19 @@
 ;
 ;+
 ; :Description:
-;   Allows the user to select the FSC_Window application to be the "current" application.
+;   Allows the user to select the cgWindow application to be the brought forward on the display.
 ;   Selection can be made based on window index number, widget identifier, object reference,
-;   or window title.
+;   or window title. This is the equivalent of WShow for normal graphics windows.
 ;
 ; :Categories:
 ;    Graphics
 ;    
 ; :Params:
 ;    selection: in, required, type=varies
-;       Normally, a window index number of an FSC_Window application. But, the selection
+;       Normally, a window index number of an cgWindow application. But, the selection
 ;       can be a widget identifier, an object reference, or a window title, depending on
-;       which keywords are set. The FSC_Window matching the selection is made the "current"
-;       FSC_Window and the application is moved forward on the display.
+;       which keywords are set. The cgWindow matching the selection is made the "current"
+;       cgWindow and the application is moved forward on the display.
 ;       
 ; :Keywords:
 ;     object: in, optional, type=boolean
@@ -63,11 +63,11 @@
 ;          
 ; :Examples:
 ;    Used with query routine::
-;       IDL> wids = FSC_QueryWin(TITLE=titles, COUNT=count)
+;       IDL> wids = cgQuery(TITLE=titles, COUNT=count)
 ;       IDL> index = Where(StrUpCase(titles) EQ 'PLOT WINDOW', tcnt)
-;       IDL> IF tcnt GT 0 THEN FSC_WSet, wids[index]
-;       IDL> FSC_Window, 'Oplot', thisData, /AddCmd
-;       IDL> FSC_WSet ; Bring current window forwad on display
+;       IDL> IF tcnt GT 0 THEN cgSet, wids[index]
+;       IDL> cgWindow, 'Oplot', thisData, /AddCmd
+;       IDL> cgShow ; Bring current window forwad on display
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -80,14 +80,12 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 23 January 2011. DWF.
-;        If selection match isn't provided, as like WShow to bring the current 
-;           window forward on display. 26 Jan 2011. DWF.
+;        Written, 1 February 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_WSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
+PRO cgShow, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
 
    Compile_Opt idl2
     
@@ -102,7 +100,7 @@ PRO FSC_WSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
    ; If there is no selection match, then act like WSHOW an bring the window
    ; forward on the display.
    IF N_Elements(selection) EQ 0 THEN BEGIN
-      void = FSC_QueryWin(WIDGETID=tlb, /CURRENT)
+      void = cgQuery(WIDGETID=tlb, /CURRENT)
       Widget_Control, tlb, /Show
       RETURN
    ENDIF
@@ -112,9 +110,9 @@ PRO FSC_WSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
    IF Size(selection, /TNAME) EQ 'STRING' THEN title = 1
    
    ; Get the values you need.
-   wid = FSC_QueryWin(WIDGETID=tlb, OBJECT=objref, TITLE=titles, COUNT=count)
+   wid = cgQuery(WIDGETID=tlb, OBJECT=objref, TITLE=titles, COUNT=count)
    IF count EQ 0 THEN BEGIN
-        Message, 'There are no FSC_Window objects currently on the display.', /INFORMATIONAL
+        Message, 'There are no cgWindow objects currently on the display.', /INFORMATIONAL
         RETURN
    ENDIF
    
@@ -126,22 +124,22 @@ PRO FSC_WSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
    
         Keyword_Set(widgetID): BEGIN
             index = Where(tlb EQ selection, selectCount)
-            IF selectCount EQ 0 THEN Message, 'No FSC_Window matches the selection criteria.'
+            IF selectCount EQ 0 THEN Message, 'No cgWindow matches the selection criteria.'
             END
             
         Keyword_Set(object): BEGIN
             index = Where(objref EQ selection, selectCount)
-            IF selectCount EQ 0 THEN Message, 'No FSC_Window matches the selection criteria.'
+            IF selectCount EQ 0 THEN Message, 'No cgWindow matches the selection criteria.'
             END
             
         Keyword_Set(title): BEGIN
             index = Where(StrUpCase(titles) EQ StrUpCase(selection), selectCount)
-            IF selectCount EQ 0 THEN Message, 'No FSC_Window matches the selection criteria.'
+            IF selectCount EQ 0 THEN Message, 'No cgWindow matches the selection criteria.'
             END
 
         ELSE: BEGIN
             index = Where(wid EQ selection, selectCount)
-            IF selectCount EQ 0 THEN Message, 'No FSC_Window matches the selection criteria.'
+            IF selectCount EQ 0 THEN Message, 'No cgWindow matches the selection criteria.'
             END
    
    ENDCASE
@@ -151,8 +149,5 @@ PRO FSC_WSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
    
    ; Move the window forward on the display.
    Widget_Control, tlb[index], /Show
-   
-   ; Move the matched node to the end of the list.
-   list -> Move_Node, index
-   
+      
 END

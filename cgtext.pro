@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   FSC_Text
+;   cgText
 ;
 ; PURPOSE:
 ;   Provides a device-independent and color-model-independent way to write text into
@@ -57,11 +57,11 @@
 ;         x and y location. 0 is left aligned, 0.5 is centered, and 1.0 is right aligned.
 ;         The alignment is set to 0.5 if PLACE is set and ALIGNMENT is unspecified. 
 ;         Otherwise, the default is 0.
-;     charsize: in, optional, type=float, default=FSC_DefCharSize()
-;         The character size for axes annotations. Uses FSC_DefCharSize to select default
+;     charsize: in, optional, type=float, default=cgDefCharSize()
+;         The character size for axes annotations. Uses cgDefCharSize to select default
 ;         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
 ;     color: in, optional, type=string/integer/long
-;         The color of the text. Color names are those used with FSC_Color. By default,
+;         The color of the text. Color names are those used with cgColor. By default,
 ;         "black", unless the upper-right hand pixel in the display is black, then "white".
 ;     data: in, optional, type=boolean
 ;         Set this keyword to indicate xloc and yloc are in data coordinates. Data coordinates
@@ -88,15 +88,15 @@
 ;         Set this keyword to a named variable in which to return the width of the text string, 
 ;         in normalized coordinate units.
 ;     window: in, optional, type=boolean
-;         Set this keyword to add the command to the in the current FSC_Window application.
+;         Set this keyword to add the command to the in the current cgWindow application.
 ;     _extra: in, optional
 ;          Any keywords appropriate for the XYOUTS command.
 ;     
 ;          
 ; :Examples:
 ;    Used like the IDL XYOUTS command::
-;       IDL> FSC_Text, 0.5, 0.5, 'This is sample text', ALIGNMENT=0.5, /NORMAL
-;       IDL> FSC_Text, /PLACE, 'Use the cursor to locate this text', COLOR='dodger blue'
+;       IDL> cgText, 0.5, 0.5, 'This is sample text', ALIGNMENT=0.5, /NORMAL
+;       IDL> cgText, /PLACE, 'Use the cursor to locate this text', COLOR='dodger blue'
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -123,7 +123,7 @@
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
-PRO FSC_Text, xloc, yloc, text, $
+PRO cgText, xloc, yloc, text, $
     ALIGNMENT=alignment, $
     CHARSIZE=charsize, $
     COLOR=scolor, $
@@ -150,16 +150,16 @@ PRO FSC_Text, xloc, yloc, text, $
     
     ; Did the user pass parameters?
     IF N_Params() EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: FSC_Text, xlocation, ylocation, text'
+        Print, 'USE SYNTAX: cgText, xlocation, ylocation, text'
         RETURN
     ENDIF
     
     ; Should this be added to a resizeable graphics window?
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-        void = FSC_QueryWin(COUNT=wincnt)
-        IF wincnt EQ 0 THEN FSC_Window
-        FSC_Window, 'FSC_Text', xloc, yloc, text, $
+        void = cgQuery(COUNT=wincnt)
+        IF wincnt EQ 0 THEN cgWindow
+        cgWindow, 'cgText', xloc, yloc, text, $
             ALIGNMENT=alignment, $
             CHARSIZE=charsize, $
             COLOR=scolor, $
@@ -204,7 +204,7 @@ PRO FSC_Text, xloc, yloc, text, $
     ENDIF ELSE BEGIN
     
         ; All three positional parameters are required.
-        IF N_Params() NE 3 THEN Message, 'FSC_Text must be called with three positional parameters.'
+        IF N_Params() NE 3 THEN Message, 'cgText must be called with three positional parameters.'
   
         ; If the text is specified as the first parameter, move things around.
         IF Size(xloc, /TNAME) EQ 'STRING' THEN BEGIN
@@ -223,7 +223,7 @@ PRO FSC_Text, xloc, yloc, text, $
     
     ; Check keywords.
     IF N_Elements(font) EQ 0 THEN font = !P.FONT
-    IF N_Elements(charsize) EQ 0 THEN charsize = FSC_DefCharSize(FONT=font)
+    IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     IF N_Elements(tt_font) NE 0 THEN BEGIN
         IF font EQ 1 THEN BEGIN
             Device, Set_Font=tt_font, /TT_FONT
@@ -254,7 +254,7 @@ PRO FSC_Text, xloc, yloc, text, $
     IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
      
     ; Draw the text.
-    IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = FSC_Color(color) ELSE thisColor = color
+    IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = cgColor(color) ELSE thisColor = color
     XYOutS, x, y, textStr, CHARSIZE=charsize, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
         DATA=data, DEVICE=device, NORMAL=normal, WIDTH=width, _STRICT_EXTRA=extra
    SetDecomposedState, currentState

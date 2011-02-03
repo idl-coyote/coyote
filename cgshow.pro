@@ -93,28 +93,23 @@ PRO cgShow, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
    Catch, theError
    IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        ok = Dialog_Message(!Error_State.MSG)
+        ;ok = Dialog_Message(!Error_State.MSG)
+        void = Error_Message()
         RETURN
-   ENDIF
-   
-   ; If there is no selection match, then act like WSHOW an bring the window
-   ; forward on the display.
-   IF N_Elements(selection) EQ 0 THEN BEGIN
-      void = cgQuery(WIDGETID=tlb, /CURRENT)
-      Widget_Control, tlb, /Show
-      RETURN
    ENDIF
    
    ; Try to do the right thing here.
+   IF N_Elements(selection) EQ 0 THEN BEGIN
+      selection = cgQuery(/CURRENT, COUNT=count)
+      IF count EQ 0 THEN RETURN
+   ENDIF
+   
    IF Size(selection, /TNAME) EQ 'OBJREF' THEN object = 1
    IF Size(selection, /TNAME) EQ 'STRING' THEN title = 1
    
-   ; Get the values you need.
+   ; Get the values you need. In there are no windows, nothing to do. Return.
    wid = cgQuery(WIDGETID=tlb, OBJECT=objref, TITLE=titles, COUNT=count)
-   IF count EQ 0 THEN BEGIN
-        Message, 'There are no cgWindow objects currently on the display.', /INFORMATIONAL
-        RETURN
-   ENDIF
+   IF count EQ 0 THEN RETURN
    
    ; Get the window list.
    list = !FSC_Window_List

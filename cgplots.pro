@@ -130,7 +130,7 @@ PRO cgPlotS, x, y, z, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
-        IF Keyword_Set(dataSwitch) THEN x = Temporar(y)
+        IF Keyword_Set(dataSwitch) THEN x = Temporary(y)
         RETURN
     ENDIF
     

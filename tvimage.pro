@@ -747,7 +747,7 @@ PRO TVIMAGE, image, x, y, $
     
         currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
-        weraseit = 1 ; Must always erase in cgWindow, unless you are adding TVIMAGE to cgWindow
+        IF replaceCMD EQ 0 THEN weraseit = 1 ; Must always erase in cgWindow, unless you are adding TVIMAGE to cgWindow
         
         ; If you are using a layout, you can't ever erase.
         IF N_Elements(layout) NE 0 THEN eraseit = 0
@@ -792,7 +792,6 @@ PRO TVIMAGE, image, x, y, $
                YRANGE=plotyrange, $
                YTITLE=plotytitle, $
                ADDCMD=1, $
-               WERASEIT=weraseit, $
                _EXTRA=extra
                  RETURN
         ENDIF
@@ -835,6 +834,7 @@ PRO TVIMAGE, image, x, y, $
            YRANGE=plotyrange, $
            YTITLE=plotytitle, $
            REPLACECMD=replacecmd, $
+           WERASEIT=weraseit, $
            _EXTRA=extra
              RETURN
     ENDIF

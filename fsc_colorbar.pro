@@ -501,10 +501,10 @@ PRO FSC_COLORBAR, $
        ; Display the color bar.
        TV, bar, xstart, ystart, /Normal
 
-   ENDELSE
+    ENDELSE
    
-   ; Restore the decomposed state if needed.
-   IF currentState THEN SetDecomposedState, 1
+    ; Restore the decomposed state if needed.
+    IF currentState THEN SetDecomposedState, 1
 
     ; Get the current colortable.
     TVLCT, rr, gg, bb, /GET

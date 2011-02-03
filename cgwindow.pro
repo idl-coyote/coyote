@@ -187,6 +187,9 @@ PRO FSC_CmdWindow_Dispatch_Events, event
     CASE eventType OF   
         'TLB_RESIZE': self -> Resize, event
         'POSTSCRIPT': self -> CreatePostscriptFile, event
+        'SAVECOMMANDS': self -> SaveCommands
+        'RESTORECOMMANDS': self -> RestoreCommands
+        'QUIT': Obj_Destroy, self
         ELSE: self -> SaveAsRaster, event
     ENDCASE
     
@@ -292,11 +295,11 @@ END ;---------------------------------------------------------------------------
 ;-
 PRO FSC_CmdWindow::GetProperty, $
     BACKGROUND=background, $
-    COLORPALETTE=colorPalette, $
     COMMANDS=commands, $
     DELAY=delay, $
     ERASEIT=eraseit, $
     MULTI=multi, $
+    PALETTE=palette, $
     TLB=tlb, $
     WID=wid, $
     XOMARGIN=xomargin, $
@@ -325,13 +328,12 @@ PRO FSC_CmdWindow::GetProperty, $
 
     ; Window properties.
     IF Arg_Present(background) THEN background = *self.background
-    IF Arg_Present(colorPalette) THEN BEGIN
+    IF Arg_Present(palette) THEN BEGIN
         len = N_Elements(*self.r)
         palette = BytArr(len,3)
         palette[*,0] = *self.r
         palette[*,1] = *self.g
         palette[*,2] = *self.b
-        colorPalette = palette
     ENDIF
     IF Arg_Present(commands) THEN commands = self.cmds
     IF Arg_Present(delay) THEN delay = self.delay
@@ -597,6 +599,138 @@ END ;---------------------------------------------------------------------------
 
 ;+
 ; :Description:
+;     This method restores the commands.
+;-
+PRO FSC_CmdWindow::RestoreCommands, filename
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    ; Need a file name?
+    IF N_Elements(filename) EQ 0 THEN BEGIN
+        filename = FSC_Pickfile(Title='Restore Coyote Graphics Commands...', $
+            FILTER='*.cgs')
+        IF filename EQ "" THEN RETURN
+    ENDIF
+    
+    ; Does the file exist?
+    fileTest = File_Test(filename, /READ)
+    IF ~fileTest THEN BEGIN
+        text = 'The file (' + filename + ') cannot be located. Returning.'
+        void = Dialog_Message(text)
+        RETURN
+    ENDIF
+    
+    ; Restore the file. The variables "cg_commands" and "cg_window" are restored.
+    Restore, FILE=filename, /Relaxed_Structure_Assignment
+    
+    ; Make this object the current object.
+    cgSet, self.wid
+    
+    ; Erase the current commands in the window. If this is not
+    ; done memory will leak.
+    cgErase, self.wid, /Window
+    
+    ; Copy the commands from the restored command list to this command list.
+    oldCommands = cg_commands -> Get_Item(/DEREFERENCE, /ALL)
+    cg_commands -> Delete, /ALL
+    FOR j=0,N_Elements(oldCommands)-1 DO BEGIN
+        self.cmds -> Add, oldCommands[j]
+    ENDFOR
+        
+    ; Copy properties from old window object to new.
+    cg_window -> GetProperty, $
+        BACKGROUND=background, $       ; The background color of the window.
+        DELAY=delay, $                 ; The delay between command execution.
+        ERASEIT=eraseit, $             ; Set the erase flag for the window
+        PALETTE=palette, $             ; Change window color table vectors.
+        MULTI=multi, $                 ; Change the !P.MULTI setting for the window.
+        XOMARGIN=xomargin, $           ; Change the !X.OMargin setting for the winow.
+        YOMARGIN=yomargin, $           ; Change the !Y.OMargin setting for the window.
+        IM_TRANSPARENT=im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+        IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+        IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+        IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+        PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
+        PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
+        PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
+        PS_FONT=ps_font, $                            ; Select the font for PostScript output.
+        PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
+        PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
+        PS_TT_FONT=ps_tt_font                         ; Select the true-type font to use for PostScript output.
+        
+    self -> SetProperty, $
+        BACKGROUND=background, $       ; The background color of the window.
+        DELAY=delay, $                 ; The delay between command execution.
+        ERASEIT=eraseit, $             ; Set the erase flag for the window
+        PALETTE=palette, $             ; Change window color table vectors.
+        MULTI=multi, $                 ; Change the !P.MULTI setting for the window.
+        XOMARGIN=xomargin, $           ; Change the !X.OMargin setting for the winow.
+        YOMARGIN=yomargin, $           ; Change the !Y.OMargin setting for the window.
+        IM_TRANSPARENT=im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+        IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+        IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+        IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+        PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
+        PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
+        PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
+        PS_FONT=ps_font, $                            ; Select the font for PostScript output.
+        PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
+        PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
+        PS_TT_FONT=ps_tt_font                         ; Select the true-type font to use for PostScript output.
+        
+     
+    ; Destroy the old window object.
+    Obj_Destroy, cg_window
+    
+    ; Execute the new commands.
+    self -> ExecuteCommands
+
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     This method saves the commands.
+;-
+PRO FSC_CmdWindow::SaveCommands, filename
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+    
+    ; Need a file name.
+    IF N_Elements(filename) EQ 0 THEN BEGIN
+       filename = FSC_Pickfile(FILE='commands.cgs', $
+            TITLE='Save Coyote Graphics Commands...', /Write)
+       IF filename EQ "" THEN RETURN
+    ENDIF
+    
+    ; Copy the commands.
+    cg_commands = self.cmds
+    cg_window = self
+    
+    ; Save them in the file.
+    Save, cg_commands, cg_window, FILE=filename
+   
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
 ;     This method sets properties of the window object.
 ;-
 PRO FSC_CmdWindow::SetProperty, $
@@ -795,7 +929,8 @@ FUNCTION FSC_CmdWindow::Init, $
     ; Create the widgets for the program.
     self.tlb = Widget_Base(/TLB_SIZE_EVENTS, MBar=menuID)
     
-    saveID = Widget_Button(menuID, Value='Save As...')
+    fileID = Widget_Button(menuID, Value='File')
+    saveID = Widget_Button(fileID, Value='Save Window As...', /MENU)
     button = Widget_Button(saveID, Value='PostScript File', UVALUE='POSTSCRIPT')
     raster = Widget_Button(saveID, Value='Raster Image File', /MENU)
     
@@ -815,6 +950,10 @@ FUNCTION FSC_CmdWindow::Init, $
         button = Widget_Button(imraster, Value='PNG', UVALUE='IMAGEMAGICK_PNG')
         button = Widget_Button(imraster, Value='TIFF', UVALUE='IMAGEMAGICK_TIFF')
     ENDIF
+    
+    button = Widget_Button(fileID, Value='Save Current Visualization', /Separator, UVALUE='SAVECOMMANDS')
+    button = Widget_Button(fileID, Value='Restore Visualization', UVALUE='RESTORECOMMANDS')
+    button = Widget_Button(fileID, Value='Quit', /Separator, UVALUE='QUIT')
     
     ; Create draw widget.
     retain = (StrUpCase(!Version.OS_Family) EQ 'UNIX') ? 2 : 1
@@ -931,9 +1070,11 @@ PRO FSC_CmdWindow::Cleanup
     Ptr_Free, self.b
     
     ; Destroy the command objects.
-    count = self.cmds -> Get_Count()
-    FOR j=0,count-1 DO Obj_Destroy, self.cmds -> Get_Item(j, /DEREFERENCE)
-    Obj_Destroy, self.cmds
+    IF Obj_Valid(self.cmds) THEN BEGIN
+        count = self.cmds -> Get_Count()
+        FOR j=0,count-1 DO Obj_Destroy, self.cmds -> Get_Item(j, /DEREFERENCE)
+        Obj_Destroy, self.cmds
+    ENDIF
     
     ; You have to remove yourself from the list of valid cgWindows.
     theList = !FSC_WINDOW_LIST
@@ -944,8 +1085,8 @@ PRO FSC_CmdWindow::Cleanup
     ENDIF 
     
     ; If the list doesn't have any more cgWindows objects in it,
-    ; delete the list so it doesn't waste memory.
-    IF theList -> Get_Count() EQ 0 THEN Obj_Destroy, theList
+    ; delete the list so it doesn't waste memory. 
+    IF (theList -> Get_Count() EQ 0) THEN Obj_Destroy, theList
     
     ; If your widget ID is valid, destroy the widget program.
     IF Widget_Info(self.tlb, /VALID_ID) THEN Widget_Control, self.tlb, /Destroy
@@ -988,6 +1129,13 @@ PRO FSC_CmdWindow__Define, class
               im_options: "" $              ; Sets extra ImageMagick options on the ImageMagick convert command.
             }
             
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+FUNCTION FSC_Window_Command::Copy
+
+    ; Make and return a copy of the object.
+
 END ;----------------------------------------------------------------------------------------------------------------
 
 

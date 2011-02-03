@@ -102,8 +102,7 @@ PRO cgSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
    ; If there is no selection match, then act like WSHOW an bring the window
    ; forward on the display.
    IF N_Elements(selection) EQ 0 THEN BEGIN
-      void = cgQuery(WIDGETID=tlb, /CURRENT)
-      Widget_Control, tlb, /Show
+      cgShow
       RETURN
    ENDIF
    

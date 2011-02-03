@@ -83,16 +83,16 @@ FUNCTION cgDefCharSize, FONT=font
             CASE StrUpCase(!Version.OS_Family) OF
             
                 'WINDOWS': BEGIN
-                    IF Total(!P.MULTI) EQ 0 THEN thisCharsize = 1.25 ELSE thisCharsize = 1.00
+                    IF Total(!P.MULTI) EQ 0 THEN thisCharsize = 1.25 ELSE thisCharsize = 1.5
                     IF (font EQ 1) THEN BEGIN
-                        IF Total(!P.MULTI) EQ 0 THEN thisCharsize = 1.50 ELSE thisCharsize = 1.25
+                        IF Total(!P.MULTI) EQ 0 THEN thisCharsize = 1.50 ELSE thisCharsize = 1.75
                     ENDIF
                     END
                     
                 ELSE: BEGIN
-                    IF Total(!P.MULTI) EQ 0 THEN thisCharsize = 1.50 ELSE thisCharsize = 1.25
+                    IF Total(!P.MULTI) EQ 0 THEN thisCharsize = 1.50 ELSE thisCharsize = 1.75
                     IF (font EQ 1) THEN BEGIN
-                        IF Total(!P.MULTI) EQ 0 THEN thisCharsize = 1.50 ELSE thisCharsize = 1.25
+                        IF Total(!P.MULTI) EQ 0 THEN thisCharsize = 1.50 ELSE thisCharsize = 1.75
                     ENDIF
                     END
             

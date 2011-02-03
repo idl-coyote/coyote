@@ -1,3 +1,4 @@
+
 ;+
 ; NAME:
 ;       HISTOPLOT
@@ -30,7 +31,7 @@
 ;
 ; INPUT KEYWORDS:
 ;
-;      ADDCMD:            Set this keyword to add the command to an FSC_Window
+;       ADDCMD:           Set this keyword to add the command to an FSC_Window
 ;                         command list. Setting this keyword automatically sets
 ;                         the WINDOW keyword.
 ;                         
@@ -48,6 +49,8 @@
 ;                         calcuated as:
 ;                         
 ;                             binsize = (Max(dataToHistogram) - Min(dataToHistogram)) / (NBINS -1)
+;                             
+;       CHARSIZE:         The character size. Default set by calling cgDefCharSize().
 ;
 ;       DATACOLORNAME:    The name of the data color for drawing the histogram outlines.
 ;                         Default: "Indian Red".
@@ -210,6 +213,7 @@
 ;       Added WINDOW keyword. 24 Jan 2011. DWF.
 ;       Added ADDCMD keyword. 26 Jan 2011. DWF.
 ;       Added LAYOUT keyword. 28 Jan 2011. DWF.
+;       Added CHARSIZE keyword. 2 Feb 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2011, by Fanning Software Consulting, Inc.                           ;
@@ -243,6 +247,7 @@ PRO HistoPlot, $                    ; The program name.
    ADDCMD=addcmd, $                 ; Add this command to an cgWindow.
    AXISCOLORNAME=axisColorName, $   ; The axis color.
    BACKCOLORNAME=backcolorName, $   ; The background color.
+   CHARSIZE=charsize, $
    DATACOLORNAME=datacolorName, $   ; The data color.
    _REF_EXTRA=extra, $              ; For passing extra keywords.
    FILE=file, $                     ; For specifying a color name file.
@@ -317,6 +322,7 @@ PRO HistoPlot, $                    ; The program name.
                dataToHistogram, $               ; The data to draw a histogram of.
                AXISCOLORNAME=axisColorName, $   ; The axis color.
                BACKCOLORNAME=backcolorName, $   ; The background color.
+               CHARSIZE=charsize, $
                DATACOLORNAME=datacolorName, $   ; The data color.
                _REF_EXTRA=extra, $              ; For passing extra keywords.
                FILE=file, $                     ; For specifying a color name file.
@@ -368,6 +374,7 @@ PRO HistoPlot, $                    ; The program name.
                dataToHistogram, $               ; The data to draw a histogram of.
                AXISCOLORNAME=axisColorName, $   ; The axis color.
                BACKCOLORNAME=backcolorName, $   ; The background color.
+               CHARSIZE=charsize, $
                DATACOLORNAME=datacolorName, $   ; The data color.
                _REF_EXTRA=extra, $              ; For passing extra keywords.
                FILE=file, $                     ; For specifying a color name file.
@@ -418,6 +425,7 @@ PRO HistoPlot, $                    ; The program name.
     
    ; Check for positional parameter.
    IF N_Elements(dataToHistogram) EQ 0 THEN Message, 'Must pass data to histogram.'
+   IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize()
    
    ; What kind of data are we doing a HISTOGRAM on?
    dataType = Size(dataToHistogram, /TYPE)
@@ -593,6 +601,7 @@ PRO HistoPlot, $                    ; The program name.
        Plot, xrange, yrange, $             
              Background=backColor, $
              Color=axisColor, $                       ; The color of the axes.
+             Charsize=charsize, $
              NoData=1, $                              ; Draw the axes only. No data.
              NOERASE=noerase, $
              XTHICK=thick, $                          ; Axes thicker, if needed.
@@ -671,6 +680,7 @@ PRO HistoPlot, $                    ; The program name.
        yrange = [ymin, ymax]
        Plot, xrange, yrange, $             
              Background=backColor, $
+             Charsize=charsize, $
              Color=axisColor, $                       ; The color of the axes.
              NoData=1, $                              ; Draw the axes only. No data.
              XThick=thick, $  
@@ -685,7 +695,7 @@ PRO HistoPlot, $                    ; The program name.
              _Strict_Extra=extra                      ; Pass any extra PLOT keywords.
              
         Axis, !X.CRange[0], !Y.CRange[1], XAXIS=1, XTickformat='(A1)', XMINOR=1, $
-            COLOR=axisColor, XSTYLE=1, XTHICK=thick
+            COLOR=axisColor, XSTYLE=1, XTHICK=thick, CHARSIZE=charsize
     ENDIF
     step = (xrange[1] - xrange[0]) / (binsize + 1)
     start = xrange[0] + binsize

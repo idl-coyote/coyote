@@ -208,6 +208,7 @@ PRO cgContour, data, x, y, $
     AXISCOLOR=saxiscolor, $
     AXESCOLOR=saxescolor, $
     BACKGROUND=sbackground, $
+    C_CHARSIZE=c_charsize, $
     C_COLORS=c_colors, $
     C_LABELS=c_labels, $
     CELL_FILL=cell_fill, $
@@ -264,6 +265,7 @@ PRO cgContour, data, x, y, $
                 AXISCOLOR=saxiscolor, $
                 AXESCOLOR=saxescolor, $
                 BACKGROUND=sbackground, $
+                C_CHARSIZE=c_charsize, $
                 C_COLORS=c_colors, $
                 C_LABELS=c_labels, $
                 CELL_FILL=cell_fill, $
@@ -296,6 +298,7 @@ PRO cgContour, data, x, y, $
             AXISCOLOR=saxiscolor, $
             AXESCOLOR=saxescolor, $
             BACKGROUND=sbackground, $
+            C_CHARSIZE=c_charsize, $
             C_COLORS=c_colors, $
             C_LABELS=c_labels, $
             CELL_FILL=cell_fill, $
@@ -352,6 +355,7 @@ PRO cgContour, data, x, y, $
     ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
+    IF N_Elements(c_charsize) EQ 0 THEN c_charsize = charsize * 0.75
     
     ; Handle data properly.
     ndims = Size(data, /N_DIMENSIONS)
@@ -565,7 +569,7 @@ PRO cgContour, data, x, y, $
                      Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
                         BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=xstyle, $
                         POSITION=position, _STRICT_EXTRA=extra, XTHICK=xthick, YTHICK=ythick, $
-                        FONT=font, /NODATA
+                        FONT=font, /NODATA, C_CHARSIZE=c_charsize
                     
                     ; Save the "after plot" system variables. Will use later. 
                     afterx = !X
@@ -602,7 +606,7 @@ PRO cgContour, data, x, y, $
         Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
             BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
             POSITION=position, _STRICT_EXTRA=extra, /NODATA, NOERASE=tempNoErase, $
-            XTHICK=xthick, YTHICK=ythick, FONT=font 
+            XTHICK=xthick, YTHICK=ythick, FONT=font, C_CHARSIZE=c_charsize
                     
     ENDIF
     
@@ -610,7 +614,7 @@ PRO cgContour, data, x, y, $
     Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
         LEVELS=levels, C_Labels=c_labels, C_COLORS=c_colors, XTHICK=xthick, YTHICK=ythick, $
         POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, CHARSIZE=charsize, $
-        FONT=font, /OVERPLOT
+        FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize
         
     ; If this is the first plot in PS, then we have to make it appear that we have
     ; drawn a plot, even though we haven't.

@@ -271,6 +271,9 @@ PRO FSC_CmdWindow::ExecuteCommands
         IF self.delay NE 0 THEN Wait, self.delay
     ENDFOR
     
+    ; If there are no commands, then just erase the window.
+    IF n_cmds EQ 0 THEN cgErase, *self.background 
+    
     ; Restore the colors in effect when we entered.
     TVLCT, rr, gg, bb
     
@@ -358,6 +361,17 @@ PRO FSC_CmdWindow::GetProperty, $
      im_density = self.im_density
      im_options = self.im_options
      im_resize = self.im_resize
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     This method invalidates a widget ID. It is used for restored
+;     visualizations, so that the current window doesn't get inadvertenly
+;     destroyed by a widget identifier from an old program.
+;-
+PRO FSC_CmdWindow::InvalidateWidgetID
+    self.tlb = -1
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -686,6 +700,8 @@ PRO FSC_CmdWindow::RestoreCommands, filename
         PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
         PS_TT_FONT=ps_tt_font                         ; Select the true-type font to use for PostScript output.
         
+    ; Invalidate the restore object's widget ID, so you don't inadvertently destroy this window!
+    cg_window -> InvalidateWidgetID
      
     ; Destroy the old window object.
     Obj_Destroy, cg_window

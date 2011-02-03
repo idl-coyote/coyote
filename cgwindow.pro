@@ -237,7 +237,7 @@ PRO FSC_CmdWindow::ExecuteCommands
     
     ; Are we doing multiple commands?
     IF Total(self.pmulti) NE 0 THEN !P.Multi = self.pmulti
-        
+
     ; How many commands are there?
     n_cmds = self.cmds -> Get_Count()
     
@@ -700,7 +700,7 @@ PRO FSC_CmdWindow::RestoreCommands, filename
         PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
         PS_TT_FONT=ps_tt_font                         ; Select the true-type font to use for PostScript output.
         
-    ; Invalidate the restore object's widget ID, so you don't inadvertently destroy this window!
+    ; Invalidate the restored object's widget ID, so you don't inadvertently destroy this window!
     cg_window -> InvalidateWidgetID
      
     ; Destroy the old window object.

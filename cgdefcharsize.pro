@@ -83,16 +83,48 @@ FUNCTION cgDefCharSize, FONT=font
             CASE StrUpCase(!Version.OS_Family) OF
             
                 'WINDOWS': BEGIN
-                    IF Total(!P.MULTI) EQ 0 THEN thisCharsize = 1.25 ELSE thisCharsize = 1.5
+                    IF Total(!P.MULTI) EQ 0 THEN BEGIN
+                        thisCharsize = 1.25 
+                    ENDIF ELSE BEGIN
+                        totalplots = !P.Multi[1]*!P.Multi[2]*(!P.Multi[3] > 1)
+                        CASE 1 OF
+                            totalplots LE 4: thisCharsize = 1.25
+                            totalplots GT 4: thisCharsize = 1.00
+                        ENDCASE
+                    ENDELSE
                     IF (font EQ 1) THEN BEGIN
-                        IF Total(!P.MULTI) EQ 0 THEN thisCharsize = 1.50 ELSE thisCharsize = 1.75
+                        IF Total(!P.MULTI) EQ 0 THEN BEGIN
+                            thisCharsize = 1.50 
+                        ENDIF ELSE BEGIN
+                            totalplots = !P.Multi[1]*!P.Multi[2]*(!P.Multi[3] > 1)
+                            CASE 1 OF
+                                totalplots LE 4: thisCharsize = 1.50
+                                totalplots GT 4: thisCharsize = 1.25
+                            ENDCASE
+                        ENDELSE
                     ENDIF
                     END
                     
                 ELSE: BEGIN
-                    IF Total(!P.MULTI) EQ 0 THEN thisCharsize = 1.50 ELSE thisCharsize = 1.75
+                    IF Total(!P.MULTI) EQ 0 THEN BEGIN
+                        thisCharsize = 1.75 
+                    ENDIF ELSE BEGIN
+                         totalplots = !P.Multi[1]*!P.Multi[2]*(!P.Multi[3] > 1)
+                        CASE 1 OF
+                            totalplots LE 4: thisCharsize = 1.75
+                            totalplots GT 4: thisCharsize = 1.50
+                        ENDCASE
+                    ENDELSE 
                     IF (font EQ 1) THEN BEGIN
-                        IF Total(!P.MULTI) EQ 0 THEN thisCharsize = 1.50 ELSE thisCharsize = 1.75
+                        IF Total(!P.MULTI) EQ 0 THEN BEGIN
+                            thisCharsize = 1.75 
+                        ENDIF ELSE BEGIN
+                            totalplots = !P.Multi[1]*!P.Multi[2]*(!P.Multi[3] > 1)
+                            CASE 1 OF
+                                totalplots LE 4: thisCharsize = 1.75
+                                totalplots GT 4: thisCharsize = 1.50
+                            ENDCASE
+                        ENDELSE
                     ENDIF
                     END
             

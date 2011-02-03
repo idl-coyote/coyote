@@ -252,9 +252,9 @@ PRO cgControl, selection, $
    ; Are you destroying the window?
    IF Keyword_Set(destroy) THEN BEGIN
        IF Keyword_Set(all) THEN BEGIN
-            FOR j=0,count-1 DO IF Widget_Info(wid[j], /Valid_ID) THEN Widget_Control, wid[j], /Destroy
+            FOR j=0,count-1 DO IF Widget_Info(tlb[j], /Valid_ID) THEN Widget_Control, tlb[j], /Destroy
        ENDIF ELSE BEGIN
-            IF Widget_Info(wid[index], /Valid_ID) THEN Widget_Control, wid[index], /Destroy
+            IF Widget_Info(tlb[index], /Valid_ID) THEN Widget_Control, tlb[index], /Destroy
        ENDELSE
        RETURN
    ENDIF

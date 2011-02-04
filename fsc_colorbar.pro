@@ -115,6 +115,9 @@
 ;                     this keyword will keep them from being loaded, and you can run
 ;                     cgCOLORBAR without a display. As of 19 Oct 2010, set to 1  by default.
 ;
+;       PALETTE:      A color palette containing the RGB color vectors to use for the color
+;                     bar. The program will sample NCOLORS from the color palette. 
+;                     
 ;       POSITION:     A four-element array of normalized coordinates in the same
 ;                     form as the POSITION keyword on a plot. Default is
 ;                     [0.88, 0.10, 0.95, 0.90] for a vertical bar and
@@ -252,6 +255,7 @@
 ;             COLOR is undefined. DWF.
 ;      24 Jan 2011. Added WINDOW keyword. DWF.
 ;      29 Jan 2011. Added ADDCMD keyword. DWF.
+;      4 Feb 2011. Added PALETTE keyword. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -297,6 +301,7 @@ PRO FSC_COLORBAR, $
     NCOLORS=ncolors, $
     NEUTRALINDEX=neutralIndex, $
     NODISPLAY=nodisplay, $
+    PALETTE=palette, $
     POSITION=position, $
     RANGE=range, $
     REVERSE=reverse, $
@@ -343,6 +348,7 @@ PRO FSC_COLORBAR, $
             NCOLORS=ncolors, $
             NEUTRALINDEX=neutralIndex, $
             NODISPLAY=nodisplay, $
+            PALETTE=palette, $
             POSITION=position, $
             RANGE=range, $
             REVERSE=reverse, $
@@ -361,6 +367,22 @@ PRO FSC_COLORBAR, $
             
          RETURN
     ENDIF
+    
+    ; Get the current color table vectors. 
+    TVLCT, r, g, b, /GET
+        
+    ; If you have a palette, load the colors now. Otherwise whatever colors
+    ; are in the current color table will be used.
+    IF N_Elements(palette) NE 0 THEN BEGIN
+        IF Size(palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
+        dims = Size(palette, /DIMENSIONS)
+        threeIndex = Where(dims EQ 3)
+        IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
+        IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
+        TVLCT, palette
+        TVLCT, rr, gg, bb, /Get
+    ENDIF
+    
 
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
@@ -381,6 +403,12 @@ PRO FSC_COLORBAR, $
     ; Check and define keywords.
     IF N_ELEMENTS(ncolors) EQ 0 THEN ncolors = 256
     IF N_ELEMENTS(bottom) EQ 0 THEN bottom = 0B
+    IF N_Elements(palette) NE 0 THEN BEGIN
+       rrr = Congrid(rr, ncolors)
+       ggg = Congrid(gg, ncolors)
+       bbb = Congrid(bb, ncolors)
+       TVLCT, rrr, ggg, bbb, bottom
+    ENDIF
     IF N_ELEMENTS(charsize) EQ 0 THEN charsize = !P.Charsize
     IF N_ELEMENTS(format) EQ 0 THEN format = '(I0)'
     IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
@@ -598,5 +626,5 @@ PRO FSC_COLORBAR, $
     !Map = bang_map
     
     ; Set the current colors back.
-    IF !D.Name NE 'Z' THEN TVLCT, rr, gg, bb
+    IF !D.Name NE 'Z' THEN TVLCT, r, g, b
 END

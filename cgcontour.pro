@@ -125,6 +125,11 @@
 ;     overplot: in, optional, type=boolean
 ;        Set this keyword to overplot the contours onto a previously established
 ;        data coordinate system.
+;     palette: in, optional, type=bytarr(256,3)
+;        A color palette containing the RGB color vectors to use for filled contours.
+;        If a color palette is used, do NOT use the C_COLORS keyword, as this value
+;        will be undefined by the program. Contour colors will be sampled from the
+;        color table palette into the number of contour levels required.
 ;     position: in, optional, type=float
 ;        Set this keyword to a four-element [x0,y0,x1,y1] array giving the contour plot
 ;        position in normalized coordinates. 
@@ -199,6 +204,7 @@
 ;        Fixed a problem in which I assumed the background color was a string. 18 Jan 2011. DWF.  
 ;        Added ADDCMD keyword. 26 Jan 2011. DWF.
 ;        Added LAYOUT keyword. 28 Jan 2011. DWF.
+;        Added PALETTE keyword. 4 Feb 2011. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -224,6 +230,7 @@ PRO cgContour, data, x, y, $
     NOERASE=noerase, $
     MISSINGVALUE=missingvalue, $
     OVERPLOT=overplot, $
+    PALETTE=palette, $
     POSITION=position, $
     RESOLUTION=resolution, $
     TRADITIONAL=traditional, $
@@ -241,6 +248,7 @@ PRO cgContour, data, x, y, $
         Catch, /CANCEL
         void = Error_Message()
         IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
+        IF (!D.Name NE "NULL") THEN TVLCT, rr, gg, bb
         RETURN
     ENDIF
     
@@ -280,6 +288,7 @@ PRO cgContour, data, x, y, $
                 NOERASE=noerase, $
                 MISSINGVALUE=missingvalue, $
                 OVERPLOT=overplot, $
+                PALETTE=palette, $
                 POSITION=position, $
                 RESOLUTION=resolution, $
                 TRADITIONAL=traditional, $
@@ -313,6 +322,7 @@ PRO cgContour, data, x, y, $
             NOERASE=noerase, $
             MISSINGVALUE=missingvalue, $
             OVERPLOT=overplot, $
+            PALETTE=palette, $
             POSITION=position, $
             RESOLUTION=resolution, $
             TRADITIONAL=traditional, $
@@ -372,8 +382,24 @@ PRO cgContour, data, x, y, $
         ELSE: Message, 'Contour data must be 1D or 2D.'
     ENDCASE
     
-    ; Get the current color table vectors.
-    IF (!D.Name NE 'NULL') THEN TVLCT, rr, gg, bb, /GET
+    ; Get the current color table vectors. The NULL business was put here at
+    ; the request of Wayne Landsman in support of NASA Astronomy Library. It
+    ; is important for programs NASA runs.
+    IF (!D.Name NE 'NULL') THEN BEGIN
+        TVLCT, rr, gg, bb, /GET
+        
+        ; If you have a palette, load the colors now. Otherwise whatever colors
+        ; are in the current color table will be used. If you are using a palette,
+        ; you should NOT use C_COLORS, so I undefine it.
+        IF N_Elements(palette) NE 0 THEN BEGIN
+            IF Size(palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
+            dims = Size(palette, /DIMENSIONS)
+            threeIndex = Where(dims EQ 3)
+            IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
+            IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
+            TVLCT, palette
+        ENDIF
+    ENDIF
     
     ; Check the keywords.
     IF N_Elements(sbackground) EQ 0 THEN BEGIN
@@ -511,8 +537,21 @@ PRO cgContour, data, x, y, $
     ; Need to make sure contour colors are integers if they are indices. 
     IF N_Elements(c_colors) NE 0 THEN BEGIN
         IF Size(c_colors, /TNAME) NE 'STRING' THEN BEGIN
-           IF (Size(c_colors, /TYPE) EQ 3) && (Max(c_colors) LE 255) THEN c_colors = Fix(c_colors)
-        ENDIF
+           IF (Size(c_colors, /TYPE) EQ 3) && (Max(c_colors) LE 255) THEN BEGIN
+                con_colors = Fix(c_colors)
+           ENDIF ELSE BEGIN
+                IF N_Elements(palette) NE 0 THEN BEGIN
+                    IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, /Get
+                    rrr = Congrid(rrr, nlevels)
+                    ggg = Congrid(ggg, nlevels)
+                    bbb = Congrid(bbb, nlevels)
+                    IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, 1
+                    con_colors = StrTrim(Indgen(nlevels)+1,2)
+                ENDIF ELSE BEGIN
+                    con_colors = c_colors
+                ENDELSE
+           ENDELSE
+        ENDIF ELSE con_colors = c_colors
     ENDIF ELSE BEGIN
         IF Keyword_Set(fill) OR Keyword_Set(cell_fill) THEN BEGIN
             IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, /Get
@@ -520,13 +559,14 @@ PRO cgContour, data, x, y, $
             ggg = Congrid(ggg, nlevels)
             bbb = Congrid(bbb, nlevels)
             IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, 1
-            c_colors = StrTrim(Indgen(nlevels)+1,2)
+            con_colors = StrTrim(Indgen(nlevels)+1,2)
         ENDIF ELSE BEGIN
-            c_colors = Replicate(color, nlevels)
+            con_colors = Replicate(color, nlevels)
         ENDELSE
-        IF Size(c_colors, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN c_colors = Byte(c_colors)
-        IF Size(c_colors, /TYPE) LE 2 THEN c_colors = StrTrim(Fix(c_colors),2)
+        IF Size(con_colors, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN con_colors = Byte(con_colors)
+        IF Size(con_colors, /TYPE) LE 2 THEN con_colors = StrTrim(Fix(c_colors),2)
     ENDELSE
+
     ; Set up the appropriate contour labeling. Only can do if C_LABELS not passed in.
     IF N_Elements(c_labels) EQ 0 THEN BEGIN
         indices = Indgen(N_Elements(levels))
@@ -539,8 +579,8 @@ PRO cgContour, data, x, y, $
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = cgColor(axiscolor)
     IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
     IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
-    IF (Size(c_colors, /TYPE) LE 2) AND (Size(c_colors, /TYPE) NE 0) THEN c_colors = StrTrim(Fix(c_colors),2)
-    IF Size(c_colors, /TNAME) EQ 'STRING' THEN c_colors = cgColor(c_colors)
+    IF (Size(c_colors, /TYPE) LE 2) AND (Size(c_colors, /TYPE) NE 0) THEN con_colors = StrTrim(Fix(c_colors),2)
+    IF Size(con_colors, /TNAME) EQ 'STRING' THEN con_colors = cgColor(con_colors)
     
     ; Do you need a PostScript background color? Lot's of problems here!
     ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a
@@ -612,7 +652,7 @@ PRO cgContour, data, x, y, $
     
     ; This is where we actually draw the data.
     Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
-        LEVELS=levels, C_Labels=c_labels, C_COLORS=c_colors, XTHICK=xthick, YTHICK=ythick, $
+        LEVELS=levels, C_Labels=c_labels, C_COLORS=con_colors, XTHICK=xthick, YTHICK=ythick, $
         POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, CHARSIZE=charsize, $
         FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize
         

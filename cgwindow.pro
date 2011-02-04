@@ -215,6 +215,9 @@ PRO FSC_CmdWindow::ExecuteCommands
         RETURN
     ENDIF
     
+    ; Make sure you are suppose to be executing these commands.
+    IF Keyword_Set(self.noExecuteCommands) THEN RETURN
+    
     ; Store the current !P.MULTI state.
     thisMulti = !P.Multi
     thisXOmargin = !X.OMargin
@@ -301,6 +304,7 @@ PRO FSC_CmdWindow::GetProperty, $
     COMMANDS=commands, $
     DELAY=delay, $
     ERASEIT=eraseit, $
+    NOEXECUTECOMMANDS=noExecuteCommands, $ ; Set if you want commands to execute commands.
     MULTI=multi, $
     PALETTE=palette, $
     TLB=tlb, $
@@ -317,7 +321,8 @@ PRO FSC_CmdWindow::GetProperty, $
     PS_FONT=ps_font, $                            ; Select the font for PostScript output.
     PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
     PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
-    PS_TT_FONT=ps_tt_font                         ; Select the true-type font to use for PostScript output.
+    PS_TT_FONT=ps_tt_font, $                       ; Select the true-type font to use for PostScript output.
+    _EXTRA=extra
     
     Compile_Opt idl2
     
@@ -361,6 +366,17 @@ PRO FSC_CmdWindow::GetProperty, $
      im_density = self.im_density
      im_options = self.im_options
      im_resize = self.im_resize
+     
+     noExecuteCommands = self.noExecuteCommands
+     
+    ; You may have gotten keywords you don't know what to deal with. Inform
+    ; the user there.
+    IF N_Elements(extra) NE 0 THEN BEGIN
+       tags = Tag_Names(extra)
+       FOR j=0,N_Elements(tags)-1 DO BEGIN
+          Message, 'The following property could NOT be obtained in the GetProperty method: ' + tags[j], /Informational
+       ENDFOR
+    ENDIF
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -569,6 +585,7 @@ PRO FSC_CmdWindow::SaveAsRaster, event
            ; Create a PostScript file first.
            thisname = outname + '.ps'
            PS_Start, $
+                FILENAME=thisname, $
                 EUROPEAN=self.ps_metric, $
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
@@ -754,6 +771,7 @@ PRO FSC_CmdWindow::SetProperty, $
     DELAY=delay, $                 ; The delay between command execution.
     ERASEIT=eraseit, $             ; Set the erase flag for the window
     PALETTE=palette, $             ; Change window color table vectors.
+    NOEXECUTECOMMANDS=noExecuteCommands, $ ; Set if you want commands to execute commands.
     MULTI=multi, $                 ; Change the !P.MULTI setting for the window.
     XOMARGIN=xomargin, $           ; Change the !X.OMargin setting for the winow.
     YOMARGIN=yomargin, $           ; Change the !Y.OMargin setting for the window.
@@ -768,7 +786,8 @@ PRO FSC_CmdWindow::SetProperty, $
     PS_FONT=ps_font, $                            ; Select the font for PostScript output.
     PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
     PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
-    PS_TT_FONT=ps_tt_font                         ; Select the true-type font to use for PostScript output.
+    PS_TT_FONT=ps_tt_font, $                      ; Select the true-type font to use for PostScript output.
+    _EXTRA=extra
     
     Compile_Opt idl2
     
@@ -797,6 +816,7 @@ PRO FSC_CmdWindow::SetProperty, $
     ENDIF   
     IF N_Elements(delay) NE 0 THEN self.delay = delay
     IF N_Elements(eraseit) NE 0 THEN self.eraseit = Keyword_Set(eraseit)
+    IF N_Elements(noExecuteCommands) NE 0 THEN self.noexecutecommands = Keyword_Set(noExecuteCommands)
     IF N_Elements(multi) NE 0 THEN BEGIN
         IF (N_Elements(multi) EQ 1) && (multi EQ 0) THEN multi = IntArr(5)
         FOR j=0,N_Elements(multi)-1 DO self.pmulti[j] = multi[j]
@@ -814,6 +834,15 @@ PRO FSC_CmdWindow::SetProperty, $
     IF N_Elements(ps_font) NE 0 THEN self.ps_font = ps_font
     IF N_Elements(ps_scale_factor) NE 0 THEN self.ps_scale_factor = ps_scale_factor
     IF N_Elements(ps_tt_font) NE 0 THEN self.ps_tt_font = ps_tt_font
+    
+    ; You may have gotten keywords you don't know what to deal with. Inform
+    ; the user there.
+    IF N_Elements(extra) NE 0 THEN BEGIN
+       tags = Tag_Names(extra)
+       FOR j=0,N_Elements(tags)-1 DO BEGIN
+          Message, 'The following property could NOT be set in the SetProperty method: ' + tags[j], /Informational
+       ENDFOR
+    ENDIF
     
     ; Update now?
     IF Keyword_Set(update) THEN self -> ExecuteCommands
@@ -1122,6 +1151,7 @@ PRO FSC_CmdWindow__Define, class
               background: Ptr_New(), $      ; The background color.
               delay: 0.0, $                 ; The command delay.
               eraseit: 0B, $                ; Do we need to erase the display.
+              noExecuteCommands: 0B, $      ; Set to stop command execution (e.g.,for loading commands)
               pmulti: LonArr(5), $          ; Identical to !P.Multi.
               xomargin: FltArr(2), $        ; Identical to !X.OMargin
               yomargin: FltArr(2), $        ; Identical to !Y.OMargin
@@ -1504,6 +1534,7 @@ END ;---------------------------------------------------------------------------
 ;        More improved error handling and messages. 26 Jan 2011. DWF.
 ;        Made changes to accommodate the new cgControl routine. 27 Jan 2011. DWF.
 ;        Added WXOMARGIN and WYOMARGIN keywords. 28 Jan 2011. DWF.
+;        Numerous changes leading up to official release. 4 Feb 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.

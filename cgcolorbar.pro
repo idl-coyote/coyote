@@ -23,6 +23,7 @@ PRO cgColorbar, $
     NCOLORS=ncolors, $
     NEUTRALINDEX=neutralIndex, $
     NODISPLAY=nodisplay, $
+    PALETTE=palette, $
     POSITION=position, $
     RANGE=range, $
     REVERSE=reverse, $
@@ -54,6 +55,7 @@ PRO cgColorbar, $
         NCOLORS=ncolors, $
         NEUTRALINDEX=neutralIndex, $
         NODISPLAY=nodisplay, $
+        PALETTE=palette, $
         POSITION=position, $
         RANGE=range, $
         REVERSE=reverse, $

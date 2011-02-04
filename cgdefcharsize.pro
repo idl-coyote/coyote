@@ -107,12 +107,12 @@ FUNCTION cgDefCharSize, FONT=font
                     
                 ELSE: BEGIN
                     IF Total(!P.MULTI) EQ 0 THEN BEGIN
-                        thisCharsize = 1.75 
+                        thisCharsize = 1.50 
                     ENDIF ELSE BEGIN
                          totalplots = !P.Multi[1]*!P.Multi[2]*(!P.Multi[3] > 1)
                         CASE 1 OF
-                            totalplots LE 4: thisCharsize = 1.75
-                            totalplots GT 4: thisCharsize = 1.50
+                            totalplots LE 4: thisCharsize = 1.50
+                            totalplots GT 4: thisCharsize = 1.25
                         ENDCASE
                     ENDELSE 
                     IF (font EQ 1) THEN BEGIN

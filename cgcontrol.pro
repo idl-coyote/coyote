@@ -72,10 +72,9 @@
 ;         If this property is set, the cgWindow erases with the background color before
 ;         displaying the commands in the window's command list.
 ;     execute: in, optional, type=boolean
-;         Set this keyword to exectute the commands in the window's command list. Use UPDATE if you
-;         want commands executed after changing their properties. This command should not be used
-;         with other keywwords. It's primary purpose is to execute commands after then have been
-;         silently loaded into the window.
+;         Set this keyword to 1 to exectute the commands in the window's command list. 
+;         Set this keyword to 0 to prevent command excution. This is useful, for example,
+;         if you want to load commands without having them be executed immediately.
 ;     im_transparent: in, optional, type=boolean, default=0
 ;         Set this keyword to allow ImageMagick to create transparent backgrounds when it
 ;         makes raster image files from PostScript output.
@@ -148,7 +147,7 @@ PRO cgControl, selection, $
     DELETECMD=deleteCmd, $                        ; Delete a command. If ALL is set, delete all commands.
     DESTROY=destroy, $                            ; Destroy the window. Should be called alone or with the ALL keyword.
     ERASEIT=eraseit, $                            ; Set the erase feature of the window.
-    EXECUTE=execute, $                            ; Execute the commands immediately. Should be called alone. Use UPDATE otherwise.
+    EXECUTE=execute, $                            ; Execute the commands immediately. 
     LISTCMD=listCmd, $                            ; List a command or ALL commands.
     MULTI=multi, $                                ; Set the multiple property of the window. Identical to !P.Multi.
     OBJECT=object, $                              ; If this keyword is set, the selection is an object reference.
@@ -181,11 +180,7 @@ PRO cgControl, selection, $
    
    ; Always update, unless told otherwise.
    IF N_Elements(update) EQ 0 THEN update = 1
-   
-   ; If you are updating, then turn execute off, otherwise you will
-   ; draw the graphics twice.
-   IF Keyword_Set(update) THEN execute=0
-   
+      
    ; If there is no selection match, use the current window. If there
    ; is no current window, create one.
    IF N_Elements(selection) EQ 0 THEN BEGIN
@@ -259,6 +254,16 @@ PRO cgControl, selection, $
        RETURN
    ENDIF
    
+   ; Are you executing commands? Has to be done before
+   ; setting properties.
+   IF N_Elements(execute) NE 0 THEN BEGIN
+       IF Keyword_Set(execute) THEN BEGIN
+            objref[index] -> SetProperty, NoExecuteCommands = 0
+       ENDIF ELSE BEGIN
+            objref[index] -> SetProperty, NoExecuteCommands = 1
+       ENDELSE
+   ENDIF
+   
    ; Set the properties of the window.
    IF Obj_Valid(objref[index]) THEN objref[index] -> SetProperty, $
         BACKGROUND=background, $
@@ -281,11 +286,11 @@ PRO cgControl, selection, $
         PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
         PS_TT_FONT=ps_tt_font                           ; Select the true-type font to use for PostScript output.
         
-   ; Are you executing commands immediately?
-   IF Keyword_Set(execute) THEN BEGIN
-        IF Obj_Valid(objref[index]) THEN objref[index] -> ExecuteCommands
+   ; Are you executing commands?
+   IF N_Elements(execute) NE 0 THEN BEGIN
+       IF Keyword_Set(execute) THEN BEGIN
+             IF ~update THEN IF Obj_Valid(objref[index]) THEN objref[index] -> ExecuteCommands
+       ENDIF 
    ENDIF
-   
-     
     
 END 

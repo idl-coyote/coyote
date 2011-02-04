@@ -1,0 +1,8 @@
+;;
+;; IDLWAVE catalog for library coyote
+;; Automatically Generated -- do not edit.
+;; Created by idlwave_catalog on Tue Jan 11 13:55:48 2011
+;;
+(setq idlwave-library-catalog-libname "coyote")
+(setq idlwave-library-catalog-routines
+ '(("COLORBAR" pro nil (lib "colorbar.pro" nil "coyote") "%s" (nil ("_EXTRA") ("ANNOTATECOLOR") ("BOTTOM") ("CHARSIZE") ("COLOR") ("DIVISIONS") ("FONT") ("FORMAT") ("INVERTCOLORS") ("MAXRANGE") ("MINOR") ("MINRANGE") ("NCOLORS") ("NODISPLAY") ("POSITION") ("RANGE") ("REVERSE") ("RIGHT") ("TICKLEN") ("TICKNAMES") ("TITLE") ("TOP") ("VERTICAL") ("XLOG") ("YLOG")))))

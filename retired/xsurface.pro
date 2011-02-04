@@ -49,7 +49,7 @@
 ;       all three axes are set to the same value. For example, to set the X axis to
 ;       exact scaling and the Y and Z axes to normal scaling, type:
 ;
-;           IDL> XSurface, Exact=[1,0,0]
+;           IDL> FSC_Surface, Exact=[1,0,0]
 ;
 ;       _EXTRA: This keyword collects otherwise undefined keywords that are
 ;        passed to the IDLgrSURFACE initialization routine.

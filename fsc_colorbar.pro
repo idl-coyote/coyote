@@ -7,6 +7,10 @@
 ;      same name. See the article "IDL 8 Name Conflicts" here:
 ;       
 ;           http://www.dfanning.com/ng_tips/idl8_name_conflicts.html
+;           
+; NOTE: Program development on FSC_COLORBAR has been stopped as of 4 Feb 2011.
+;       All future development of color bar technology will occur in cgColorbar,
+;       a program that is part of the Coyote Graphics System.
 ;
 ; PURPOSE:
 ;
@@ -256,6 +260,8 @@
 ;      24 Jan 2011. Added WINDOW keyword. DWF.
 ;      29 Jan 2011. Added ADDCMD keyword. DWF.
 ;      4 Feb 2011. Added PALETTE keyword. DWF.
+;      Program development ended 4 February 2011 with code transfer to cgColorbar in the 
+;            Coyote Graphics System. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;

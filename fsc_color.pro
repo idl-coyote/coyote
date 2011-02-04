@@ -19,6 +19,10 @@
 ;        correspond to the colors in the current color table in effect at
 ;        the time the FSC_Color program is called.
 ;
+; NOTE: Program development on FSC_COLOR has been stopped as of 4 Feb 2011.
+;       All future development this program will occur in cgColor,
+;       a program that is part of the Coyote Graphics System.
+;
 ; AUTHOR:
 ;
 ;       FANNING SOFTWARE CONSULTING:
@@ -379,6 +383,8 @@
 ;       Made sure the ColorIndex that is returned is always an INTEGER. 24 Dec 2010. DWF.
 ;       Changed the default "unknown" color from WHITE to OPPOSITE. 30 Dec 2010. DWF.
 ;       TVLCT commands protected from NULL device. 4 Jan 2011. DWF.
+;       Program development ended 4 February 2011 with code transfer to cgColor in the 
+;            Coyote Graphics System. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;

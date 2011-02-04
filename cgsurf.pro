@@ -187,6 +187,7 @@
 ;        Fixed a problem in which I assumed the background color was a string. 18 Jan 2011. DWF.  
 ;        Added ADDCMD keyword. 26 Jan 2011. DWF.
 ;        Added LAYOUT keyword. 28 Jan 2011. DWF.
+;        Added PALETTE keyword. 3 Feb 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.

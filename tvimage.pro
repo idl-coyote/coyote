@@ -8,6 +8,10 @@
 ;     programs, as well as at the IDL command line. It can be thought of as 
 ;     a "smart" TV command.
 ;
+; NOTE: Program development on TVIMAGE has been stopped as of 4 Feb 2011.
+;       All future development of color bar technology will occur in cgImage,
+;       a program that is part of the Coyote Graphics System.
+;
 ; AUTHOR:
 ;       FANNING SOFTWARE CONSULTING:
 ;       David Fanning, Ph.D.
@@ -519,6 +523,8 @@
 ;        Depreciated ACOLOR keyword in favor of new COLOR keyword. 11 Jan 2011. DWF.
 ;        Added ADDCMD and WINDOW keywords to allow TVIMAGE to work with cgWindow. 26 Jan 2011. DWF.
 ;        Added LAYOUT and PALETTE keywords. 28 Jan 2011. DWF.
+;        Program development on TVIMAGE has stopped as of 4 FEB 2011. All future development
+;            work will be carried on with cgImage. David Fanning.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2011, by Fanning Software Consulting, Inc.                           ;

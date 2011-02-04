@@ -12,6 +12,10 @@
 ;       all color table loading is handled silently. (To fix a major pet-peeve
 ;       of mine.)
 ;
+; NOTE: Program development on CTLOAD has been stopped as of 4 Feb 2011.
+;       All future development of this program will occur in cgLoadCT,
+;       a program that is part of the Coyote Graphics System.
+;
 ; AUTHOR:
 ;
 ;       FANNING SOFTWARE CONSULTING
@@ -139,6 +143,7 @@
 ;          in IDL 8. 23 Nov 2010. DWF.
 ;       Added WINDOW and WINID keywords. 26 January 2011. DWF.
 ;       Added ADDCMD keyword. 29 Jan 2011. DWF.
+;       Program delevopment ended and code transferred to cgLoadCT as of 4 Feb 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;

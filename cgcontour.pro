@@ -126,10 +126,9 @@
 ;        Set this keyword to overplot the contours onto a previously established
 ;        data coordinate system.
 ;     palette: in, optional, type=bytarr(256,3)
-;        A color palette containing the RGB color vectors to use for filled contours.
-;        If a color palette is used, do NOT use the C_COLORS keyword, as this value
-;        will be undefined by the program. Contour colors will be sampled from the
-;        color table palette into the number of contour levels required.
+;        A color palette containing the RGB color vectors to use for coloring contours.
+;        Contour colors will be sampled from the color table palette into the number 
+;        of contour levels required.
 ;     position: in, optional, type=float
 ;        Set this keyword to a four-element [x0,y0,x1,y1] array giving the contour plot
 ;        position in normalized coordinates. 

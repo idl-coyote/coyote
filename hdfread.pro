@@ -105,7 +105,7 @@ HDF_SD_ATTRINFO, newFileID, expAttID, DATA=thisExperiment
 PRINT, 'Drawing contour plot ...'
 WINDOW, XSIZE=400, YSIZE=400
 TVLCT, TRANSPOSE(CONGRID(thisPalette, 3, !D.Table_Size-1))
-TVIMAGE, BYTSCL(newGriddedData, TOP=!D.Table_Size-1), $
+cgImage, BYTSCL(newGriddedData, TOP=!D.Table_Size-1), $
    POSITION=[0.15, 0.15, 0.95, 0.87]
 CONTOUR, newGriddedData, lonscale, latscale, $
    XSTYLE=1, YSTYLE=1, NLEVELS=14, /NOERASE, $

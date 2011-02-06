@@ -91,7 +91,7 @@
 ;       COLOR:  Set this keyword to the color (index or 24-bit value) of
 ;               the color desired. For example:
 ;               
-;               Plot, Findgen(11), COLOR=FSC_COLOR('yellow'), PSYM=-SYMCAT(4, COLOR=FSC_COLOR('green'))
+;               Plot, Findgen(11), COLOR=cgColor('yellow'), PSYM=-SYMCAT(4, COLOR=cgColor('green'))
 ;
 ;       THICK:  Set this keyword to the thickness desired. Default is 1. 
 ;

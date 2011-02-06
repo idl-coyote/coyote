@@ -70,7 +70,7 @@
 ;     Requires the following programs from the Coyote Library:
 ;
 ;         http://www.dfanning.com/programs/error_message.pro
-;         http://www.dfanning.com/programs/fsc_color.pro
+;         http://www.dfanning.com/programs/cgColor.pro
 ;         http://www.dfanning.com/programs/undefine.pro
 ;
 ; EXAMPLE:
@@ -83,16 +83,16 @@
 ;         Map_Set, -25.0, 135.0, Position=pos, Scale=64e6, /Mercator, /NoBorder
 ;         Polyfill, [pos[0], pos[0], pos[2], pos[2], pos[0]], $
 ;                   [pos[1], pos[3], pos[3], pos[1], pos[1]], $
-;                   /Normal, Color=FSC_Color('Almond')
+;                   /Normal, Color=cgColor('Almond')
 ;         Map_GSHHS_Shoreline, datafile, /Fill, Level=3, /Outline
-;         XYOutS, 0.5, 0.85, 'Australia', Font=0, Color=FSC_Color('Almond'), $
+;         XYOutS, 0.5, 0.85, 'Australia', Font=0, Color=cgColor('Almond'), $
 ;               /Normal, Alignment=0.5
 ;
 ;     Example using MAP_PROJ_INIT to set up the map coordinate space.
 ;
 ;         datafile = 'gshhs_h.b'
 ;         Window, XSize=500, YSize=350
-;         Erase, Color=FSC_Color('IVORY')
+;         Erase, Color=cgColor('IVORY')
 ;
 ;        ; Lambert Azimuthal Projection
 ;        map = Map_Proj_Init(111, Limit=[40, -95, 50, -75], $
@@ -103,9 +103,9 @@
 ;          /NoData, XStyle=5, YStyle=5, /NoErase
 ;       Map_GSHHS_Shoreline, datafile, /Fill, Level=3, Map_Projection=map, $
 ;          Water='DODGER BLUE', NoClip=0
-;       Map_Grid, /Label, /Box, Color=FSC_Color('CHARCOAL'), Map_Structure=map
+;       Map_Grid, /Label, /Box, Color=cgColor('CHARCOAL'), Map_Structure=map
 ;       Map_Continents, /USA, Map_Structure=map
-;       XYOutS, 0.5, 0.85, 'Great Lakes Region', Font=0, Color=FSC_Color('CHARCOAL'), $
+;       XYOutS, 0.5, 0.85, 'Great Lakes Region', Font=0, Color=cgColor('CHARCOAL'), $
 ;         /Normal, Alignment=0.5
 ;
 ; MODIFICATION HISTORY:
@@ -296,18 +296,18 @@ PRO Map_GSHHS_Shoreline, filename, $ ; The name of the GSHHS data file to open
       IF Keyword_Set(fill) THEN BEGIN
 
          IF (polygonLevel EQ 1) OR (polygonLevel EQ 3) THEN $
-             POLYFILL, lon, lat, Color=FSC_Color(land_color), NoClip=0, _EXTRA=extra ELSE $
-             POLYFILL, lon, lat, Color=FSC_Color(water_color), NoClip=0, _EXTRA=extra
+             POLYFILL, lon, lat, Color=cgColor(land_color), NoClip=0, _EXTRA=extra ELSE $
+             POLYFILL, lon, lat, Color=cgColor(water_color), NoClip=0, _EXTRA=extra
 
       ENDIF ELSE BEGIN
 
-         PLOTS, lon, lat, Color=FSC_Color(color), _EXTRA=extra
+         PLOTS, lon, lat, Color=cgColor(color), _EXTRA=extra
 
       ENDELSE
 
       ; Need outlines with a fill?
       IF Keyword_Set(fill) AND Keyword_Set(outline) THEN $
-         PLOTS, lon, lat, Color=FSC_Color(color), _EXTRA=extra
+         PLOTS, lon, lat, Color=cgColor(color), _EXTRA=extra
 
    ENDWHILE
    Free_Lun, lun

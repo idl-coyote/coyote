@@ -70,7 +70,7 @@
 ;       indices = Where(image EQ 255)
 ;       Window, XSize=400, YSize=300
 ;       TV, image
-;       PLOTS, Fit_Ellipse(indices, XSize=400, YSize=300), /Device, Color=FSC_Color('red')
+;       PLOTS, Fit_Ellipse(indices, XSize=400, YSize=300), /Device, Color=cgColor('red')
 ;
 ; MODIFICATION HISTORY:
 ;

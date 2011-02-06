@@ -44,7 +44,7 @@
 ;
 ;  Written by David W. Fanning, 28 April 2006 from code and discussion supplied
 ;       by James Kuyper in the IDL newsgroup.
-;  Renamed Colorbar procedure to FSC_Colorbar to avoid conflict with IDL 8 Colorbar function.
+;  Renamed Colorbar procedure to cgColorbar to avoid conflict with IDL 8 Colorbar function.
 ;        26 September 2010. DWF.
 ;-
 ;
@@ -116,7 +116,7 @@ PRO PrecipMap, filename
    colors = ['dark green', 'lime green', 'light sea green', 'yellow', 'khaki', $
              'dark goldenrod', 'light salmon', 'orange', 'red', 'sienna', 'purple', $
              'orchid', 'thistle', 'sky blue', 'black']
-   TVLCT, FSC_COLOR(colors, /Triple), 1
+   TVLCT, cgColor(colors, /Triple), 1
 
    ; Process image data. Missing values = 9.999e20.
    s = Size(image, /Dimensions)
@@ -159,27 +159,27 @@ PRO PrecipMap, filename
    yrange = [uv[1,0] - (0.5 * yscale), uv[1,1] + (0.5 * yscale)]
 
    ; Erase the window, unless you are in PostScript.
-   IF (!D.Flags AND 256) NE 0 THEN Erase, COLOR=FSC_COLOR('ivory')
+   IF (!D.Flags AND 256) NE 0 THEN Erase, COLOR=cgColor('ivory')
 
    ; Decide on a position of the image in the window.
    pos = [0.05, 0.25, 0.95, 0.95]
 
    ; Display the image. The variable POS will change (probably) to keep the aspect.
-   TVIMAGE, scaledImage, POSITION=pos, /NOINTERP, /KEEP_ASPECT
+   cgImage, scaledImage, POSITION=pos, /NOINTERP, /KEEP_ASPECT
 
    ; Set up a map coordinate space on top of the image in UV coordinates.
    PLOT, xrange, yrange, XSTYLE=5, YSTYLE=21, /NODATA, /NOERASE, POSITION=pos
 ;
 ;   ; Add continent and state outlines, along with grid labels.
-   MAP_CONTINENTS, /HIRES, Color=FSC_Color('medium gray'), /USA, MAP_STRUCTURE=stereo
+   MAP_CONTINENTS, /HIRES, Color=cgColor('medium gray'), /USA, MAP_STRUCTURE=stereo
    MAP_GRID, LATS=Indgen(8)*5+Round(MIN(latitude)), /LABEL, $
              LONS = Indgen(8)*10+Round(Min(longitude)), $
-             COLOR=FSC_Color('light gray'), MAP_STRUCTURE=stereo
+             COLOR=cgColor('light gray'), MAP_STRUCTURE=stereo
 
    ; Add a colorbar. Non-linear scaling requires use of tick formatting function.
-   FSC_Colorbar, NColors=14, Bottom=1, Position=[pos[0], 0.1, pos[2], 0.15], $
+   cgColorbar, NColors=14, Bottom=1, Position=[pos[0], 0.1, pos[2], 0.15], $
       Divisions=14, Title='24 Hour Precipitation (mm)', $
-      Color=FSC_Color('black'), XTicklen=1, XMinor=1, XTickFormat='precipmap_annotate'   
+      Color=cgColor('black'), XTicklen=1, XMinor=1, XTickFormat='precipmap_annotate'   
       
         
 END ;----------------------------------------------------------------------

@@ -253,13 +253,13 @@
 ;
 ;             PRO REFRESH_IMAGE, Image=image, _Extra=extra, WID=wid
 ;             IF N_Elements(wid) NE 0 THEN WSet, wid
-;             TVIMAGE, image, _Extra=extra
+;             cgImage, image, _Extra=extra
 ;             END
 ;
 ;          This program can be invoked with this series of commands:
 ;
 ;             IDL> Window, /Free
-;             IDL> TVImage, image, Position=[0.2, 0.2, 0.8, 0.8]
+;             IDL> cgImage, image, Position=[0.2, 0.2, 0.8, 0.8]
 ;             IDL> XColors, NotifyPro='Refresh_Image', Image=image, WID=!D.Window
 ;
 ;          Note that "extra" keywords added to the XCOLORS call are passed along to
@@ -878,7 +878,7 @@ Widget_Control, event.top, Get_UValue=info, /No_Copy
 ; To get the initial colors correct. We have to load the colors as if they
 ; were not reversed.
 IF info.index GE 0 THEN BEGIN  
-CTLoad, info.index, BREWER=info.brewer, RGB_TABLE=c
+cgLoadCT, info.index, BREWER=info.brewer, RGB_TABLE=c
 info.r = c[*,0]
 info.g = c[*,1]
 info.b = c[*,2]

@@ -49,15 +49,9 @@
 ;
 ;   None.
 ;
-; RESTRICTIONS:
-;
-;   Requires FSC_COLOR from the Coyote Library.
-;
-;        http://www.dfanning.com/programs/fsc_color.pro
-;
 ; EXAMPLE:
 ;
-;        IDL> TVImage, Checkerboard()
+;        IDL> cgImage, Checkerboard()
 ;
 ; MODIFICATION HISTORY:
 ;

@@ -271,9 +271,9 @@ IF needresize THEN thisImage = Byte(Congrid(image, wxsize, wysize)) ELSE $
    ; Display the original image.
 
 IF Keyword_Set(display) THEN BEGIN $
-   TVIMAGE, thisImage, 0, 0, /TV
+   cgImage, thisImage, 0, 0, /TV
    XYOUTS, wxsize/2, 10,  /Device, 'Original Image', Font=0, $
-      Alignment=0.5, Color=FSC_Color('red6')
+      Alignment=0.5, Color=cgColor('red6')
 ENDIF
 
    ; Create the Laplacian filtered image.
@@ -284,9 +284,9 @@ filteredImage = Convol(Float(thisImage), k, Center=1, /Edge_Truncate, /NAN)
 
 IF Keyword_Set(display) THEN BEGIN
    fimage = Convol(thisImage, k, Center=1, /Edge_Truncate, /NAN)
-   TVImage, fimage, wxsize, wysize, /TV
+   cgImage, fimage, wxsize, wysize, /TV
    XYOUTS, (2*wxsize/4)*3, wysize + 10, /Device, 'Filtered Image', Font=0, $
-      Alignment=0.5, Color=FSC_Color('red6')
+      Alignment=0.5, Color=cgColor('red6')
 ENDIF
 
    ; Scale the Laplacian filtered image. Note conversion of
@@ -295,9 +295,9 @@ ENDIF
 filteredImage = filteredImage - (Min(filteredImage))
 filteredImage = filteredImage * (255./Max(filteredImage))
 IF Keyword_Set(display) THEN BEGIN
-   TVImage, filteredImage, 0, wysize, /TV
+   cgImage, filteredImage, 0, wysize, /TV
    XYOUTS, wxsize/2, wysize + 10, /Device, 'Scaled Filter', Font=0, $
-      Alignment=0.5, Color=FSC_Color('red6')
+      Alignment=0.5, Color=cgColor('red6')
 ENDIF
 
    ; Create the sharpened image by adding the Laplacian filtered image
@@ -314,9 +314,9 @@ adjusted = Sharpen_HistoMatch(sharpened, image)
    ; Display the adjusted image.
 
 IF Keyword_Set(display) THEN BEGIN
-   TVImage, BytScl(adjusted), wxsize, 0, /TV
+   cgImage, BytScl(adjusted), wxsize, 0, /TV
    XYOUTS, (2*wxsize/4)*3, 10, /Device, 'Sharpened Image', Font=0, $
-      Alignment=0.5, Color=FSC_Color('red6')
+      Alignment=0.5, Color=cgColor('red6')
 ENDIF
 
 RETURN, adjusted
@@ -329,8 +329,8 @@ image = LoadData(13)
 s = Size(image, /Dimensions)
 LoadCT, 0, /Silent
 Window, /Free, XSize=s[0]*2, YSize=s[1], Title='Image Sharpening'
-TVImage, image, 0, /TV
-XYOuts, 0.25, 0.1, /Normal, Alignment=0.5, 'Original Image', Font=0, Color=FSC_Color('red6')
-TVImage, Sharpen(image), 1, /TV
-XYOuts, 0.75, 0.1, /Normal, Alignment=0.5, 'Sharpened Image', Font=0, Color=FSC_Color('red6')
+cgImage, image, 0, /TV
+XYOuts, 0.25, 0.1, /Normal, Alignment=0.5, 'Original Image', Font=0, Color=cgColor('red6')
+cgImage, Sharpen(image), 1, /TV
+XYOuts, 0.75, 0.1, /Normal, Alignment=0.5, 'Sharpened Image', Font=0, Color=cgColor('red6')
 END

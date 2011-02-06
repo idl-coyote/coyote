@@ -31,7 +31,7 @@
 ;
 ; KEYWORD PARAMETERS:
 ;
-;       ADDCMD:       Set this keyword to add the FSC_Colorbar command to the current cgWindow
+;       ADDCMD:       Set this keyword to add the cgColorbar command to the current cgWindow
 ;                     command list. 
 ;               
 ;       ANNOTATECOLOR: The name of the "annotation color" to use. The names are those for
@@ -44,14 +44,14 @@
 ;                     conjunction with the indexed (DEVICE, DECOMPOSED=0) model is used:
 ;
 ;                          LoadCT, 33
-;                          TVImage, image
-;                          FSC_Colorbar, Color=cgColor('firebrick')
+;                          cgImage, image
+;                          cgColorbar, Color=cgColor('firebrick')
 ;
 ;                     The proper syntax for device-independent color is like this:
 ;
 ;                          LoadCT, 33
-;                          TVImage, image
-;                          FSC_Colorbar, AnnotateColor='firebrick', Color=255
+;                          cgImage, image
+;                          cgColorbar, AnnotateColor='firebrick', Color=255
 ;                          
 ;                    Set the Modification History note for 13 November 2010 for additional
 ;                    information about default values.
@@ -99,7 +99,7 @@
 ;                     for high range values, in order to provide contrast with the
 ;                     clamped region. See the Example section for more information.
 ;
-;       NODISPLAY:    FSC_COLORBAR uses cgCOLOR to specify some of it colors. Normally, 
+;       NODISPLAY:    cgColorBAR uses cgCOLOR to specify some of it colors. Normally, 
 ;                     cgCOLOR loads "system" colors as part of its palette of colors.
 ;                     In order to do so, it has to create an IDL widget, which in turn 
 ;                     has to make a connection to the windowing system. If your program 
@@ -136,7 +136,7 @@
 ;       VERTICAL:     Setting this keyword give a vertical color bar. The default
 ;                     is a horizontal color bar.
 ;                     
-;       WINDOW:       Set this keyword if you want to add the FSC_Colorbar command to
+;       WINDOW:       Set this keyword if you want to add the cgColorbar command to
 ;                     the current cgWindow application.
 ;
 ; COMMON BLOCKS:
@@ -174,8 +174,8 @@
 ;
 ; MODIFICATION HISTORY:
 ;
-;       Written by: David W. Fanning, 4 February 2011, as a direct descendant of FSC_Colorbar.
-;       Program developement stopped on FSC_Colorbar as of this date, and this program has
+;       Written by: David W. Fanning, 4 February 2011, as a direct descendant of cgColorbar.
+;       Program developement stopped on cgColorbar as of this date, and this program has
 ;       become a part of the Coyote Graphics System.
 ;
 ;-             

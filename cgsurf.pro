@@ -97,9 +97,9 @@
 ;     palette: in, optional, type=bytarr(3,N)
 ;         Set this keyword to a 3 x N or N x 3 byte array containing the RGB color vectors 
 ;         to be loaded before the surface is displayed. Such vectors can be obtained, for 
-;         example, from CTLOAD with the RGB_TABLE keyword:
+;         example, from cgLoadCT with the RGB_TABLE keyword:
 ;               
-;             CTLoad, 33, RGB_TABLE=palette
+;             cgLoadCT, 33, RGB_TABLE=palette
 ;             cgSurf, Loaddata(2), PALETTE=palette, /Elevation
 ;                    
 ;     rotx: in, optional, type=float, default=30

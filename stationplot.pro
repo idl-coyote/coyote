@@ -34,15 +34,15 @@
 ; KEYWORDS:
 ;
 ;      COLOR:         The name of the color to draw the station plot in. May be a vector
-;                     the same length as X. Colors are those available in FSC_COLOR.
+;                     the same length as X. Colors are those available in cgColor.
 ;
 ;      RADIUS:        The radius of the station plot circle in normalized coordinates.
 ;
 ; RESTRICTIONS:
 ;
-;       Requires FSC_COLOR from the Coyote Library:
+;       Requires cgColor from the Coyote Library:
 ;
-;           http://www.dfanning.com/programs/fsc_color.pro
+;           http://www.dfanning.com/programs/cgColor.pro
 ;
 ; EXAMPLE:
 ;
@@ -51,10 +51,10 @@
 ;   lat = Randomu(seed, 20) * 180 - 90
 ;   speed = Randomu(seed, 20) * 100
 ;   direction = Randomu(seed, 20) * 180 + 90
-;   Erase, Color=FSC_Color('Ivory', !P.Background)
-;   Map_Set, /Cylindrical,Position=[0.1, 0.1, 0.9, 0.9], Color=FSC_Color('Steel Blue'), /NoErase
-;   Map_Grid, Color=FSC_Color('Charcoal', !D.Table_Size-2)
-;   Map_Continents, Color=FSC_Color('Sea Green', !D.Table_Size-3)
+;   Erase, Color=cgColor('Ivory', !P.Background)
+;   Map_Set, /Cylindrical,Position=[0.1, 0.1, 0.9, 0.9], Color=cgColor('Steel Blue'), /NoErase
+;   Map_Grid, Color=cgColor('Charcoal', !D.Table_Size-2)
+;   Map_Continents, Color=cgColor('Sea Green', !D.Table_Size-3)
 ;   StationPlot, lon, lat, Color='Indian Red'
 ;
 ; MODIFICATION HISTORY:
@@ -184,7 +184,7 @@ xcenter = Round(coord[0,*])
 ycenter = Round(coord[1,*])
 
 FOR j=0L, N_Elements(xcenter)-1 DO BEGIN
-   Plots, x + xcenter[j], y + ycenter[j], Color=FSC_Color(color[j]), /Device, Thick=thick
+   Plots, x + xcenter[j], y + ycenter[j], Color=cgColor(color[j]), /Device, Thick=thick
 ENDFOR
 
 x = [xquad,  xquadrev]
@@ -192,8 +192,8 @@ y = [yquad, -yquadrev]
 u = [xquadrev,  -xquad[1:*]]
 v = [-yquadrev, -yquad[1:*]]
 FOR j=0L, N_Elements(xcenter)-1 DO BEGIN
-   Polyfill, x + xcenter[j], y + ycenter[j], Color=FSC_Color(color[j]), /Device
-   Polyfill, u + xcenter[j], v + ycenter[j], Color=FSC_Color(color[j]), /Device
+   Polyfill, x + xcenter[j], y + ycenter[j], Color=cgColor(color[j]), /Device
+   Polyfill, u + xcenter[j], v + ycenter[j], Color=cgColor(color[j]), /Device
 ENDFOR
 
 END

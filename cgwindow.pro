@@ -1000,9 +1000,16 @@ FUNCTION FSC_CmdWindow::Init, $
     button = Widget_Button(fileID, Value='Restore Visualization', UVALUE='RESTORECOMMANDS')
     button = Widget_Button(fileID, Value='Quit', /Separator, UVALUE='QUIT')
     
-    ; Create draw widget.
+    ; Create draw widget. UNIX versions of IDL have a bug in which creating
+    ; a draw widget as the very first window in an IDL session causes both
+    ; !P.Background and !P.Color to be set to white. I know, it's odd. But
+    ; doing this little trick fixes the problem.
+    tempBackground = !P.Background
+    tempColor = !P.Color
     retain = (StrUpCase(!Version.OS_Family) EQ 'UNIX') ? 2 : 1
     self.drawID = Widget_Draw(self.tlb, XSIZE=xsize, YSize=ysize, RETAIN=retain) 
+    !P.Background = Temporary(tempBackground)
+    !P.Color = Temporary(tempColor)
     
     ; Do we need to center the widget?
     IF (xpos EQ -1) AND (ypos EQ -1) THEN BEGIN
@@ -1535,6 +1542,7 @@ END ;---------------------------------------------------------------------------
 ;        Made changes to accommodate the new cgControl routine. 27 Jan 2011. DWF.
 ;        Added WXOMARGIN and WYOMARGIN keywords. 28 Jan 2011. DWF.
 ;        Numerous changes leading up to official release. 4 Feb 2011. DWF.
+;        Added workaround for UNIX bug for draw widget creation. 5 Feb 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.

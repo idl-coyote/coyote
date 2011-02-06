@@ -42,9 +42,9 @@
 ;
 ; KEYWORD PARAMETERS:
 ;
-;     ADDCMD:   Set this keyword to add the TVImage command to an cgWindow
+;     ADDCMD:   Set this keyword to add the cgImage command to an cgWindow
 ;               command list. Setting this command will force ERASEIT to be set
-;               to 0, so the TVImage command can exist peacefully with other commands
+;               to 0, so the cgImage command can exist peacefully with other commands
 ;               in an cgWindow command list. Setting this keyword automatically sets
 ;               the WINDOW keyword.
 ;               
@@ -54,7 +54,7 @@
 ;               problem on devices (e.g., WIN, X, Z) that allow this kind of operation,
 ;               but it is on devices (e.g., the PostScript device, PS) that do not.
 ;               To get around this problem, you can pass the background image to the
-;               TVImage program, along with the alpha channel image you wish to display
+;               cgImage program, along with the alpha channel image you wish to display
 ;               (via the image parameter) and the alpha channel image will be blended
 ;               with this image appropriately on all devices. If an alpha channel image
 ;               is displayed on a device in which there is no way to obtain the background
@@ -78,10 +78,10 @@
 ;               PLOT command that draws the axes for the image. Ignored unless the
 ;               AXES keyword is set. For example,
 ;
-;               TVImage, image, /AXES, AXKEYWORDS={TICKLEN:-0.025}
+;               cgImage, image, /AXES, AXKEYWORDS={TICKLEN:-0.025}
 ;               
 ;               The axis color, range, title, font and character size must be 
-;               set with TVIMAGE keywords ACOLOR, [XY]RANGE, [XY]TITLE, FONT, and
+;               set with cgImage keywords ACOLOR, [XY]RANGE, [XY]TITLE, FONT, and
 ;               CHARSIZE.
 ;
 ;     BACKGROUND:   This keyword specifies the name of the background color. The default is "white".
@@ -129,7 +129,7 @@
 ;               the image an equal margin around the edge of the window.
 ;               The margin must be a number in the range 0.0 to 0.333. This
 ;               keyword is ignored if the POSITION or OVERPLOT keywords are
-;               used. It is also ignored when TVImage is executed in a
+;               used. It is also ignored when cgImage is executed in a
 ;               multi-plot window, EXCEPT if it's value is zero. In this
 ;               special case, the image will be drawn into its position in
 ;               the multi-plot window with no margins whatsoever. (The
@@ -155,7 +155,7 @@
 ;               leave room at the top of an image for a color bar, you might
 ;               type this:
 ;               
-;                  TVImage, image, MultiMargin=[0, 0, 4, 0]
+;                  cgImage, image, MultiMargin=[0, 0, 4, 0]
 ;                  
 ;               This keyword applies *only* to images displayed with !P.Multi, and if
 ;               passed a scalar value, will use the same value for all four positions.
@@ -167,11 +167,11 @@
 ;
 ;     NCOLORS:  If this keyword is supplied, the TOP keyword is ignored and
 ;               the TOP keyword is set equal to  NCOLORS - 1. This
-;               keyword is provided to make TVIMAGE easier to use with the
+;               keyword is provided to make cgImage easier to use with the
 ;               color-loading programs such as LOADCT:
 ;
 ;                  LoadCT, 5, NColors=100, Bottom=100
-;                  TVImage, image, NColors=100, Bottom=100
+;                  cgImage, image, NColors=100, Bottom=100
 ;                  
 ;               Setting this keyword to a value implies SCALE=1.
 ;               
@@ -191,22 +191,22 @@
 ;
 ;     PALETTE:  Set this keyword to a 3 x N or N x 3 byte array containing
 ;               the RGB color vectors to be loaded before the image is displayed.
-;               Such vectors can be obtained, for example, from CTLOAD with the
+;               Such vectors can be obtained, for example, from cgLoadCT with the
 ;               RGB_TABLE keyword:
 ;               
-;                    CTLoad, 4, /BREWER, /REVERSE, RGB_TABLE=palette
-;                    TVImage, LoadData(7), PALETTE=palette
+;                    cgLoadCT, 4, /BREWER, /REVERSE, RGB_TABLE=palette
+;                    cgImage, LoadData(7), PALETTE=palette
 ;                    
 ;     POSITION: The location of the image in the output window. This is
 ;               a four-element floating array of normalized coordinates of
 ;               the type given by !P.POSITION or the POSITION keyword to
 ;               other IDL graphics commands. The form is [x0, y0, x1, y1].
 ;               The default is [0.0, 0.0, 1.0, 1.0]. Note that this keyword is ALSO
-;               an output keyword. That is to say, upon return from TVIMAGE
+;               an output keyword. That is to say, upon return from cgImage
 ;               this keyword (if passed by reference) contains the actual
 ;               position in the window where the image was displayed. This
 ;               may be different from the input values if the KEEP_ASPECT_RATIO
-;               keyword is set, or if you are using TVIMAGE with the POSITION
+;               keyword is set, or if you are using cgImage with the POSITION
 ;               keyword when !P.MULTI is set to something other than a single
 ;               plot. One use for the output values might be to position other
 ;               graphics (e.g., a colorbar) in relation to the image.
@@ -217,7 +217,7 @@
 ;               is responsible for calculating the position of graphics in the
 ;               display window. Normally, it would be a mistake to use a POSITION
 ;               graphics keyword on a graphics command that was being drawn with
-;               !P.MULTI. But in this special case, TVIMAGE will use the POSITION
+;               !P.MULTI. But in this special case, cgImage will use the POSITION
 ;               coordinates to calculate an image position in the actual position
 ;               calculated for the image by !P.MULTI. The main purpose of this
 ;               functionality is to allow the user to display images along with
@@ -225,8 +225,8 @@
 ;
 ;    QUIET:      There are situations when you would prefer that cgIMAGE does not
 ;                advertise itself by filling out the FSC_$TVIMAGE common block. For
-;                example, if you are using TVIMAGE to draw a color bar, it would
-;                not be necessary. Setting this keyword means that TVIMAGE just
+;                example, if you are using cgImage to draw a color bar, it would
+;                not be necessary. Setting this keyword means that cgImage just
 ;                goes quietly about it's business without bothering anyone else.
 ;             
 ;    SAVE:      Set this to cause a data coordinate system to be established
@@ -243,7 +243,7 @@
 ;               greater than or equal to BOTTOM and less than or equal to TOP.
 ;               The value of TOP is !D.Table_Size by default.
 ;
-;    TV:        Setting this keyword makes the TVIMAGE command work much
+;    TV:        Setting this keyword makes the cgImage command work much
 ;               like the TV command, although better. That is to say, it
 ;               will still set the correct DECOMPOSED state depending upon
 ;               the kind of image to be displayed (8-bit or 24-bit). It will
@@ -334,7 +334,7 @@
 ;     !P.Multi =0
 ;
 ; MODIFICATION HISTORY:
-;      Written by: David W. Fanning, from modifications to TVImage. 3 Feb 2011.
+;      Written by: David W. Fanning, from modifications to cgImage. 3 Feb 2011.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;

@@ -20,7 +20,7 @@
 ;
 ; CATEGORY:
 ;
-;       Graphics, Color Specification. See related program FSC_COLOR.
+;       Graphics, Color Specification. See related program cgColor.
 ;
 ; CALLING SEQUENCE:
 ;
@@ -40,7 +40,7 @@
 ;
 ;       IF the NAMES keyword is set, the return value of the function is
 ;       the "name" of the selected color. This would be appropriate for
-;       passing to the FSC_COLOR program, for example.
+;       passing to the cgColor program, for example.
 ;
 ; OPTIONAL INPUT POSITIONAL PARAMETERS:
 ;
@@ -113,19 +113,19 @@
 ;        To obtain the name of the selected color to pass to GetColor:
 ;
 ;          selectedColor = PickColor(/Name)
-;          axisColor = FSC_Color(selectedColor, !D.Table_Size-4)
+;          axisColor = cgColor(selectedColor, !D.Table_Size-4)
 ;
 ; MODIFICATION HISTORY:
 ;       Written by: David Fanning, 28 Oct 99.
 ;       Added NAME keyword. 18 March 2000, DWF.
 ;       Fixed a small bug when choosing a colorindex less than !D.Table_Size-17. 20 April 2000. DWF.
 ;       Added actual color names to label when NAMES keyword selected. 12 May 2000. DWF.
-;       Modified to use 88 colors and FSC_COLOR instead of 16 colors and GETCOLOR. 4 Dec 2000. DWF.
+;       Modified to use 88 colors and cgColor instead of 16 colors and GETCOLOR. 4 Dec 2000. DWF.
 ;       Now drawing small box around each color. 13 March 2003. DWF.
 ;       Added CURRENTCOLOR keyword. 3 July 2003. DWF.
 ;       Added BREWER keyword. 15 May 2008. DWF.
 ;       Fixed a couple of problems with outline color. 19 May 2008. DWF.
-;       Added all the colors available from FSC_COLOR. 28 Nov 2010. DWF.
+;       Added all the colors available from cgColor. 28 Nov 2010. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -187,7 +187,7 @@ IF info.needsliders EQ 0 THEN Widget_Control, info.labelID, Set_Value=thisColorN
    ; Get the color value and load it as the current color.
 
 WSet, info.currentWID
-thisColor = FSC_Color(thisColorName, /Triple, BREWER=info.brewer)
+thisColor = cgColor(thisColorName, /Triple, BREWER=info.brewer)
 info.currentName = thisColorName
 TVLCT, thisColor, info.currentColorIndex
 PolyFill, [0,0,1,1,0], [0,1,1,0,0], /Normal, Color=info.currentColorIndex

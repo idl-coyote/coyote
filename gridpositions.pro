@@ -104,12 +104,12 @@
 ;
 ;           positions = GridPositions(2, 2, YEXTENT=[0.15,0.85], XEXTENT=[0.2,0.8])
 ;           image = LoadData(11)
-;           Erase, COLOR=FSC_Color('rose')
-;           CTLoad, 25, /Brewer
-;           TVImage, image, POSITION=positions[*,0]
-;           TVImage, BytScl(Sobel(image)), POSITION=positions[*,1]
-;           TVImage, BytScl(Hist_Equal(image)), POSITION=positions[*,2]
-;           TVImage, BytScl(Median(image,7)), POSITION=positions[*,3]
+;           cgErase, 'rose'
+;           cgLoadCt, 25, /Brewer
+;           cgImage, image, POSITION=positions[*,0]
+;           cgImage, BytScl(Sobel(image)), POSITION=positions[*,1]
+;           cgImage, BytScl(Hist_Equal(image)), POSITION=positions[*,2]
+;           cgImage, BytScl(Median(image,7)), POSITION=positions[*,3]
 ;
 ;
 ; MODIFICATION HISTORY:

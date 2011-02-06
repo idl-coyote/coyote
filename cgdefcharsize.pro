@@ -84,7 +84,7 @@ FUNCTION cgDefCharSize, FONT=font
             
                 'WINDOWS': BEGIN
                     IF Total(!P.MULTI) EQ 0 THEN BEGIN
-                        thisCharsize = 1.25 
+                        thisCharsize = 1.25                         
                     ENDIF ELSE BEGIN
                         totalplots = !P.Multi[1]*!P.Multi[2]*(!P.Multi[3] > 1)
                         CASE 1 OF
@@ -131,6 +131,9 @@ FUNCTION cgDefCharSize, FONT=font
             ENDCASE
              
     ENDIF ELSE thisCharSize = !P.Charsize
+        
+    ; Adjust this size for the size of the window.
+    thisCharsize = Str_Size('This is the text size for a normal window', 0.475, INITSIZE=thisCharsize)
     
     RETURN, thisCharSize
     

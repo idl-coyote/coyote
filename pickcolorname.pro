@@ -6,8 +6,8 @@
 ;
 ;       The purpose of this program is to provide a blocking
 ;       or modal widget interface for selecting a color "name".
-;       The program uses colors familiar to the FSC_COLOR program,
-;       and is often used to select a color name for passing to FSC_COLOR.
+;       The program uses colors familiar to the cgColor program,
+;       and is often used to select a color name for passing to cgColor.
 ;
 ; AUTHOR:
 ;
@@ -153,7 +153,7 @@
 ;          jumps back to the center of the display when I select a color on UNIX
 ;          machines. Also had to remove TLB updating with UPDATE keyword to avoid 
 ;          tickling the same IDL bug. Sigh... 13 March (Friday) 2009.
-;       Removed system color names, since these are no longer available in FSC_Color. 
+;       Removed system color names, since these are no longer available in cgColor. 
 ;          27 Nov 2010. DWF
 ;-
 ;

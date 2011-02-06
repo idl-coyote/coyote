@@ -49,7 +49,7 @@
 ;       
 ; :Keywords:
 ;     color: in, optional, type=various
-;        If COLOR is a string, use FSC_Color to obtain a color triple. If
+;        If COLOR is a string, use cgColor to obtain a color triple. If
 ;        COLOR is a scalar, replicate the value to obtain a color triple.
 ;        Othersize, expect a color triple to indicate the "transparent"
 ;        color in the output image. The alpha channel in the output image
@@ -76,12 +76,12 @@
 ;    To create and display a transparent image::
 ;       Window, 0
 ;       LoadCT, 0
-;       TVImage, LoadData(5)
+;       cgImage, LoadData(5)
 ;       timage = Make_Transparent_Image(COLOR='black')
 ;       Window, 1
 ;       LoadCT, 22
-;       TVImage, LoadData(7)
-;       TVImage, timage, Position=[0.2, 0.2, 0.8, 0.8], /Keep_Aspect
+;       cgImage, LoadData(7)
+;       cgImage, timage, Position=[0.2, 0.2, 0.8, 0.8], /Keep_Aspect
 ;
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -169,7 +169,7 @@ FUNCTION Make_Transparent_Image, image, COLOR=color, $
         0: thisColor = [red[0,0], grn[0,0], blu[0,0]]
         1: BEGIN
            CASE Size(color, /TNAME) OF
-                'STRING': thisColor = FSC_Color(color, /TRIPLE)
+                'STRING': thisColor = cgColor(color, /TRIPLE)
                 ELSE: thisColor = Replicate(color, 3)
            ENDCASE
            END

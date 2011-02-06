@@ -36,7 +36,7 @@
 ;
 ;       COLOR:         The name of the color for the progress bar. By default: "red".
 ;
-;       Possible color names are those defined by FSC_COLOR:
+;       Possible color names are those defined by cgColor:
 ;
 ;                Almond   Antique White      Aquamarine           Beige          Bisque           Black
 ;                  Blue     Blue Violet           Brown       Burlywood        Charcoal      Chartreuse
@@ -57,7 +57,7 @@
 ;       FAST_LOOP:     Set this keyword if what you are doing in the loop doesn't involve
 ;                      any color operations and you want the progress bar to update as fast
 ;                      as possible. With this keyword set, the program will eliminate extra
-;                      calls to FSC_COLOR, which can be slow if you are calling it, say,
+;                      calls to cgColor, which can be slow if you are calling it, say,
 ;                      10,000 times!
 ;
 ;       GROUP_LEADER:  The group leader for the progress bar.
@@ -143,9 +143,9 @@
 ;
 ; DEPENDENCIES:
 ;
-;       This program requires FSC_COLOR from the Coyote Library:
+;       This program requires cgColor from the Coyote Library:
 ;
-;          http://www.dfanning.com/programs/fsc_color.pro
+;          http://www.dfanning.com/programs/cgColor.pro
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -575,7 +575,7 @@ END
 ;
 ;       COLOR:         The name of the color for the progress bar. By default: "red".
 ;
-;       Possible color names are those defined by FSC_COLOR:
+;       Possible color names are those defined by cgColor:
 ;
 ;                Almond   Antique White      Aquamarine           Beige          Bisque           Black
 ;                  Blue     Blue Violet           Brown       Burlywood        Charcoal      Chartreuse
@@ -625,13 +625,13 @@ PRO PROGRESSBAR::SetProperty, $
 
    IF N_Elements(background) NE 0 THEN BEGIN
       self.background = background
-      IF self.fast THEN TVLCT, FSC_Color(self.background, /Triple), self.colorindex-1
+      IF self.fast THEN TVLCT, cgColor(self.background, /Triple), self.colorindex-1
    ENDIF
    IF N_Elements(cancel) NE 0 THEN self.cancelFlag = Keyword_Set(cancel)
    IF N_Elements(fast_loop) NE 0 THEN self.fast = fast_loop
    IF N_Elements(color) NE 0 THEN BEGIN
       self.color = color
-      IF self.fast THEN TVLCT, FSC_Color(self.color, /Triple), self.colorindex
+      IF self.fast THEN TVLCT, cgColor(self.color, /Triple), self.colorindex
    ENDIF
    IF N_Elements(text) NE 0 THEN BEGIN
       self.text = text
@@ -693,8 +693,8 @@ PRO PROGRESSBAR::Start, initialPercent
 
    IF self.fast THEN BEGIN
       self.colorindex = (!D.Table_Size-1) < !P.Color
-      TVLCT, FSC_Color(self.color, /Triple), self.colorindex
-      TVLCT, FSC_Color(self.background, /Triple), !P.Background
+      TVLCT, cgColor(self.color, /Triple), self.colorindex
+      TVLCT, cgColor(self.background, /Triple), !P.Background
    ENDIF
 
       ; Find the window index number of any open display window.
@@ -709,7 +709,7 @@ PRO PROGRESSBAR::Start, initialPercent
 
    Widget_Control, self.drawID, Get_Value=wid
    self.wid = wid
-   Erase, Color=FSC_Color(self.background, !P.Background)
+   Erase, Color=cgColor(self.background, !P.Background)
 
       ; Back to the open display window.
 
@@ -785,8 +785,8 @@ PRO PROGRESSBAR::Update, percent, Text=theText, Title=theTitle
       Polyfill, [x1, x1, x2, x2, x1], [y1, y2, y2, y1, y1], /Device, Color=self.colorindex
       PlotS, [0, x2-1], [0, 0], /Device, Color=self.colorindex
    ENDIF ELSE BEGIN
-      Polyfill, [x1, x1, x2, x2, x1], [y1, y2, y2, y1, y1], /Device, Color=FSC_Color(self.color, !P.Color)
-      PlotS, [0, x2-1], [0, 0], /Device, Color=FSC_Color(self.color, !P.Color)
+      Polyfill, [x1, x1, x2, x2, x1], [y1, y2, y2, y1, y1], /Device, Color=cgColor(self.color, !P.Color)
+      PlotS, [0, x2-1], [0, 0], /Device, Color=cgColor(self.color, !P.Color)
    ENDELSE
    IF thisWindow GE 0 AND thisWindow NE self.wid THEN WSet, thisWindow
 
@@ -833,7 +833,7 @@ END
 ;
 ;       COLOR:         The name of the color for the progress bar. By default: "red".
 ;
-;       Possible color names are those defined by FSC_COLOR:
+;       Possible color names are those defined by cgColor:
 ;
 ;                Almond   Antique White      Aquamarine           Beige          Bisque           Black
 ;                  Blue     Blue Violet           Brown       Burlywood        Charcoal      Chartreuse
@@ -971,7 +971,7 @@ PRO PROGRESSBAR__DEFINE
               cancelID: 0L, $     ; The identifier of the CANCEL button.
               acceptID: 0L, $     ; The identifier of the ACCEPT button.
               color: "", $        ; The name of the color of the progress bar.
-              colorindex: 0L, $   ; The color index number (set by a call to FSC_COLOR).
+              colorindex: 0L, $   ; The color index number (set by a call to cgColor).
               drawID: 0L, $       ; The identifier of the draw widget.
               fast: 0L, $         ; A "fast loop" flag.
               labelID: 0L, $      ; The identifier of the label widget.

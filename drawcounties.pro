@@ -40,7 +40,7 @@
 ;
 ;     COLORS:          The name of a color to draw the state outline or polygon in. This
 ;                      may be a string array of the same size as STATENAMES. Color names
-;                      correspond to the colors available in FSC_COLOR. By default, "Sky Blue".
+;                      correspond to the colors available in cgColor. By default, "Sky Blue".
 ;
 ;     LINESTYLE:       The normal LINESTYLE keyword index to choose plotting linestyles.
 ;                      By default, set to 0 and solid lines. May be a vector of the same
@@ -65,7 +65,7 @@
 ;     Required Coyote Library programs:
 ;
 ;       Error_Message
-;       FSC_Color
+;       cgColor
 ;
 ; EXAMPLE:
 ;
@@ -74,8 +74,8 @@
 ;       Window, XSize=500, YSize=500, Title='County Boundaries'
 ;       Map_Set, 37.5, -120, /Albers, /IsoTropic, Limit=[30, -125, 45, -108], $
 ;         Position=[0.05, 0.05, 0.95, 0.95]
-;       Erase, COLOR=FSC_Color('ivory')
-;       Map_Grid, LatDel = 2.0, LonDel = 2.0, /Box_Axes, Color=FSC_Color('charcoal')
+;       Erase, COLOR=cgColor('ivory')
+;       Map_Grid, LatDel = 2.0, LonDel = 2.0, /Box_Axes, Color=cgColor('charcoal')
 ;       colors = [Replicate('dodger blue', 6), 'indian red']
 ;       DrawCounties, , 'co1990p020.shp', Statenames=['CA', 'OR', 'WA', 'AZ', 'UT', 'ID', 'NV'], $
 ;          Colors=colors
@@ -135,7 +135,7 @@ PRO DrawCounties_DrawEntity, entity, COLOR=color, LINESTYLE=linestyle, THICK=thi
             FOR j=0, entity.n_parts-1 DO BEGIN
                PlotS, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
                   (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
-                  COLOR=FSC_Color(color), LINESTYLE=linestyle, THICK=thick
+                  COLOR=cgColor(color), LINESTYLE=linestyle, THICK=thick
             ENDFOR
          ENDIF
       ENDCASE ; Polygon shapes.
@@ -150,7 +150,7 @@ PRO DrawCounties_DrawEntity, entity, COLOR=color, LINESTYLE=linestyle, THICK=thi
             FOR j=0, entity.n_parts-1 DO BEGIN
                PlotS, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
                   (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
-                  COLOR=FSC_Color(color), LINESTYLE=linestyle, THICK=thick
+                  COLOR=cgColor(color), LINESTYLE=linestyle, THICK=thick
             ENDFOR
          ENDIF
       ENDCASE ; Polyline shapes.

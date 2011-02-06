@@ -577,8 +577,8 @@ PRO ImageSelect_FilenameEvents, event
    Widget_Control, info.previewID, Draw_XSize=sizes[0], Draw_YSize=sizes[1]
    TVLCT, info.r, info.g, info.b
    IF (Min(image) LT 0) OR (Max(image) GT (!D.Table_Size-1)) THEN $
-      TVImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
-      TVImage, image, /Keep_Aspect, /NoInterpolation, /Erase
+      cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
+      cgImage, image, /Keep_Aspect, /NoInterpolation, /Erase
    IF imageDataType EQ 'NONE' THEN image = 0
 
    ; Store the image data for later retrieval.
@@ -621,8 +621,8 @@ PRO ImageSelect_FlipImage, event
    Widget_Control, info.previewID, Draw_XSize=sizes[0], Draw_YSize=sizes[1]
    TVLCT, info.r, info.g, info.b
    IF (Min(*(*(info.storagePtr)).image) LT 0) OR (Max(*(*(info.storagePtr)).image) GT (!D.Table_Size-1)) THEN $
-      TVImage, BytScl(*(*(info.storagePtr)).image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
-      TVImage, *(*(info.storagePtr)).image, /Keep_Aspect, /NoInterpolation, /Erase
+      cgImage, BytScl(*(*(info.storagePtr)).image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
+      cgImage, *(*(info.storagePtr)).image, /Keep_Aspect, /NoInterpolation, /Erase
 
    Widget_Control, event.top, Set_UValue=info, /No_Copy
 
@@ -759,8 +759,8 @@ PRO ImageSelect_ListEvents, event
          Widget_Control, info.previewID, Draw_XSize=sizes[0], Draw_YSize=sizes[1]
          TVLCT, info.r, info.g, info.b
          IF (Min(image) LT 0) OR (Max(image) GT (!D.Table_Size-1)) THEN $
-            TVImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
-            TVImage, image, /Keep_Aspect, /NoInterpolation, /Erase
+            cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
+            cgImage, image, /Keep_Aspect, /NoInterpolation, /Erase
          IF imageDataType EQ 'NONE' THEN image = 0
 
          ; Store the image data for later retrieval.
@@ -862,8 +862,8 @@ PRO ImageSelect_ListEvents, event
       Widget_Control, info.previewID, Draw_XSize=sizes[0], Draw_YSize=sizes[1]
       TVLCT, info.r, info.g, info.b
       IF (Min(image) LT 0) OR (Max(image) GT (!D.Table_Size-1)) THEN $
-         TVImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
-         TVImage, image, /Keep_Aspect, /NoInterpolation, /Erase
+         cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
+         cgImage, image, /Keep_Aspect, /NoInterpolation, /Erase
       IF imageDataType EQ 'NONE' THEN image = 0
 
       ; Store the image data for later retrieval.
@@ -1371,8 +1371,8 @@ PRO ImageSelect_SetFilter, event
    Widget_Control, info.previewID, Draw_XSize=sizes[0], Draw_YSize=sizes[1]
    TVLCT, info.r, info.g, info.b
    IF (Min(image) LT 0) OR (Max(image) GT (!D.Table_Size-1)) THEN $
-      TVImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
-      TVImage, image, /Keep_Aspect, /NoInterpolation, /Erase
+      cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
+      cgImage, image, /Keep_Aspect, /NoInterpolation, /Erase
    IF imageDataType EQ 'NONE' THEN image = 0
 
    ; Save the image data for later retrieval.
@@ -1779,8 +1779,8 @@ WSet, previewWID
 sizes = ImageSelect_WindowSize(image, XSIZE=previewSize, YSIZE=previewSize)
 Widget_Control, previewID, Draw_XSize=sizes[0], Draw_YSize=sizes[1]
 IF (Min(image) LT 0) OR (Max(image) GT (!D.Table_Size-1)) THEN $
-   TVImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation ELSE $
-   TVImage, image, /Keep_Aspect, /NoInterpolation
+   cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation ELSE $
+   cgImage, image, /Keep_Aspect, /NoInterpolation
 
 ; Set up information to run the program.
 storagePtr = Ptr_New({cancel:1, image:Ptr_New(image), fileInfo:Ptr_New(fileInfo), offsets:offsets, $

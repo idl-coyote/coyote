@@ -115,7 +115,7 @@
 ;       Known to be among these are the following.
 ;
 ;          http://www.dfanning.com/programs/color24.pro
-;          http://www.dfanning.com/programs/ctload.pro
+;          http://www.dfanning.com/programs/cgLoadCT.pro
 ;          http://www.dfanning.com/programs/error_message.pro
 ;          http://www.dfanning.com/programs/cgcolor.pro
 ;
@@ -245,7 +245,7 @@ PRO DCBar, colors, $
     IF N_Elements(charsize) EQ 0 THEN charsize = !P.Charsize
     IF N_Elements(colors) EQ 0 THEN BEGIN
         IF N_Elements(ncolors) EQ 0 THEN BEGIN
-            CTLoad, 25, /Brewer, NCOLORS=10, BOTTOM=245
+            cgLoadCT, 25, /Brewer, NCOLORS=10, BOTTOM=245
             ncolors = 10
             bottom = 245
         ENDIF

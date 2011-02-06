@@ -53,7 +53,7 @@
 ;      CHARSIZE:    Set this to the character size to use on the plot. If undefined, uses
 ;                   the value of cgDefCharsize().
 ;                   
-;      COLOR:       A string color name, as appropriate for the FSC_COLOR program.
+;      COLOR:       A string color name, as appropriate for the cgColor program.
 ;                   By default, 'charcoal'. The boxplot will be drawn in this color.
 ;
 ;      FILLBOXES:   Set this keyword to fill the IQR box with a color, specified by BOXCOLOR.
@@ -97,7 +97,7 @@
 ;       are required. Among them are these:
 ;       
 ;       ERROR_MESSAGE (http://www.dfanning.com/programs/error_message.pro)
-;       FSC_COLOR (http://www.dfanning.com/programs/fsc_color.pro)
+;       cgColor (http://www.dfanning.com/programs/cgColor.pro)
 ;       SYMCAT (http://www.dfanning.com/programs/symcat.pro)
 ;
 ; EXAMPLE:
@@ -265,7 +265,7 @@ FUNCTION BoxPlot_Prepare_Data, data, missing_data_value
         halfwidth = width / 2.0
         x1 = xlocation - halfwidth
         x2 = xlocation + halfwidth
-        PLOTS, [x1, x2], [stats.median, stats.median], COLOR=FSC_Color(color)
+        PLOTS, [x1, x2], [stats.median, stats.median], COLOR=cgColor(color)
         RETURN
       ENDIF
       
@@ -307,9 +307,9 @@ FUNCTION BoxPlot_Prepare_Data, data, missing_data_value
       x2 = xlocation + halfwidth
       y1 = quartile_25
       y2 = quartile_75
-      IF fillboxes THEN POLYFILL, [x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], COLOR=FSC_Color(boxcolor)
-      PLOTS, [x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], COLOR=FSC_Color(color)
-      PLOTS, [x1, x2], [medianData, medianData], COLOR=FSC_Color(color)
+      IF fillboxes THEN POLYFILL, [x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], COLOR=cgColor(boxcolor)
+      PLOTS, [x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], COLOR=cgColor(color)
+      PLOTS, [x1, x2], [medianData, medianData], COLOR=cgColor(color)
       
       ; Are there any data greater than 1.5*iqr
       imax = Where(data GT quartile_75 + (1.5 * iqr), maxcount)
@@ -330,21 +330,21 @@ FUNCTION BoxPlot_Prepare_Data, data, missing_data_value
       ENDELSE
       
       ; Draw the whiskers.
-      PLOTS, [xlocation, xlocation], [quartile_75, top], COLOR=FSC_Color(color)
-      PLOTS, [xlocation, xlocation], [quartile_25, bottom], COLOR=FSC_Color(color)
+      PLOTS, [xlocation, xlocation], [quartile_75, top], COLOR=cgColor(color)
+      PLOTS, [xlocation, xlocation], [quartile_25, bottom], COLOR=cgColor(color)
       PLOTS, [xlocation - (halfwidth*0.5), xlocation + (halfwidth*0.5)], $
-             [top, top], COLOR=FSC_Color(color)
+             [top, top], COLOR=cgColor(color)
       PLOTS, [xlocation - (halfwidth*0.5), xlocation + (halfwidth*0.5)], $
-             [bottom, bottom], COLOR=FSC_Color(color)
+             [bottom, bottom], COLOR=cgColor(color)
       
       ; Draw outliners if there are any.
       IF maxcount GT 0 THEN BEGIN
          FOR j=0,maxcount-1 DO PLOTS, xlocation, data[imax[j]], $
-            PSYM=SymCat(9), COLOR=FSC_Color(color), NOCLIP=0
+            PSYM=SymCat(9), COLOR=cgColor(color), NOCLIP=0
       ENDIF
       IF mincount GT 0 THEN BEGIN
          FOR j=0,mincount-1 DO PLOTS, xlocation, data[imin[j]], $
-            PSYM=SymCat(9), COLOR=FSC_Color(color), NOCLIP=0
+            PSYM=SymCat(9), COLOR=cgColor(color), NOCLIP=0
       ENDIF
       
       IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState
@@ -510,8 +510,8 @@ FUNCTION BoxPlot_Prepare_Data, data, missing_data_value
             IF theDepth GE 24 THEN Device, Decomposed=1, Get_Decomposed=theState
          ENDIF
          Plot, xrange, yrange, /NODATA, _STRICT_EXTRA=extra, $
-            XMINOR=1, XTICKS=numbox+1, YSTYLE=1, BACKGROUND=FSC_Color(background_color), $
-            COLOR=FSC_Color(axes_color), XTICK_GET=xloc, XTICKFORMAT='(A1)', $
+            XMINOR=1, XTICKS=numbox+1, YSTYLE=1, BACKGROUND=cgColor(background_color), $
+            COLOR=cgColor(axes_color), XTICK_GET=xloc, XTICKFORMAT='(A1)', $
             XCHARSIZE=xcharsize, XTHICK=xthick, CHARSIZE=charsize
             
          ; Put the labels on the plots.
@@ -527,7 +527,7 @@ FUNCTION BoxPlot_Prepare_Data, data, missing_data_value
              xy = Convert_Coord(xloc[j], !Y.CRange[0], /DATA, /TO_NORMAL)
              chary = !D.Y_CH_SIZE / Float(!D.Y_Size) * charsize
              XYOUTS, xy[0], xy[1] - (1.5 * chary), /NORMAL, plotlabels[j], $
-                ALIGNMENT=alignment, COLOR=FSC_Color(axes_color), $
+                ALIGNMENT=alignment, COLOR=cgColor(axes_color), $
                 ORIENTATION=rotate, CHARSIZE=charsize, CHARTHICK=xthick
          ENDFOR
          IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState

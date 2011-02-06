@@ -41,7 +41,7 @@
 ;
 ;     COLORS:          The name of a color to draw the state outline or polygon in. This
 ;                      may be a string array of the same size as STATENAMES. Color names
-;                      correspond to the colors available in FSC_COLOR. By default, "Sky Blue".
+;                      correspond to the colors available in cgColor. By default, "Sky Blue".
 ;
 ;     FILL:            Normally, the state outline is drawn. If this keyword is set,
 ;                      the polygon representing the state is filled with a solid color.
@@ -70,17 +70,17 @@
 ;     Required Coyote Library programs:
 ;
 ;       Error_Message
-;       FSC_Color
+;       cgColor
 ;
 ; EXAMPLE:
 ;
 ;       Window, XSize=700, YSize=800
 ;       Map_Set, 37.5, -117.5, /Albers, /IsoTropic, Limit=[30, -125, 45, -108], Position=[0.05, 0.05, 0.95, 0.95]
-;       Erase, Color=FSC_Color('ivory')
+;       Erase, Color=cgColor('ivory')
 ;       DrawStates, Statenames=['CA', 'OR', 'WA', 'AZ', 'UT', 'ID'], Thick=1, $
 ;           Colors=['firebrick', 'indian red', 'indian red', 'indian red', 'steel blue', 'indian red'], $
 ;           Fill = [1,0,0,0,1,0]
-;       Map_Grid, LatDel = 2.0, LonDel = 2.0, /Box_Axes, Color=FSC_Color('charcoal')
+;       Map_Grid, LatDel = 2.0, LonDel = 2.0, /Box_Axes, Color=cgColor('charcoal')
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -139,11 +139,11 @@ PRO DrawStates_DrawEntity, entity, COLOR=color, FILL=fill, LINESTYLE=linestyle, 
 
                   0: PlotS, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
                             (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
-                            COLOR=FSC_Color(color), LINESTYLE=linestyle, THICK=thick
+                            COLOR=cgColor(color), LINESTYLE=linestyle, THICK=thick
 
                   1: PolyFill, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
                                (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
-                               COLOR=FSC_Color(color)
+                               COLOR=cgColor(color)
 
                ENDCASE
             ENDFOR
@@ -162,11 +162,11 @@ PRO DrawStates_DrawEntity, entity, COLOR=color, FILL=fill, LINESTYLE=linestyle, 
 
                   0: PlotS, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
                             (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
-                            COLOR=FSC_Color(color), LINESTYLE=linestyle, THICK=thick
+                            COLOR=cgColor(color), LINESTYLE=linestyle, THICK=thick
 
                   1: PolyFill, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
                                (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
-                               COLOR=FSC_Color(color)
+                               COLOR=cgColor(color)
 
                ENDCASE
             ENDFOR

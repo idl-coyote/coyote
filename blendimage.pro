@@ -92,6 +92,6 @@ PRO BlendImage, foreGroundImage, backGroundImage, ALPHA=alpha, _EXTRA=extra
         THEN Message, 'Dimensions and/or size of input images do not match.'
         
     ; Output the blended image.
-    TVImage,  (foreGroundImage * alpha) + (1 - alpha) * backGroundImage, _EXTRA=extra
+    cgImage,  (foreGroundImage * alpha) + (1 - alpha) * backGroundImage, _EXTRA=extra
         
 END

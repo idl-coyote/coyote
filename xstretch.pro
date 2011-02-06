@@ -58,7 +58,7 @@
 ;
 ;                      http://www.dfanning.com/programs/fsc_brewer.tbl
 ;
-;       COLORS:        A five element string array, listing the FSC_COLORS colors for drawing the
+;       COLORS:        A five element string array, listing the cgColorS colors for drawing the
 ;                      histogram plot. The colors are used as follows:
 ;
 ;                      colors[0] : Background color. Default: "white".
@@ -243,7 +243,7 @@
 ;       October, 1998. Added NO_BLOCK keyword and modified to work with
 ;          24-bit color devices.
 ;       April, 1999. Made lines thicker. Offered default image. DWF.
-;       April, 1999. Replaced TV command with TVIMAGE. DWF.
+;       April, 1999. Replaced TV command with cgImage. DWF.
 ;       April, 1999. Made both windows resizeable. DWF.
 ;       April, 2000. Made several modifications to histogram plot and to
 ;          the way colors were handled. Added ability to pass pointer to
@@ -652,9 +652,9 @@ PRO XSTRETCH_DRAWLINES, minThresh, maxThresh, info
    !X = info.xbang
    !Y = info.ybang
    PlotS, [minThresh, minThresh], [!Y.CRange(0), !Y.CRange(1)], $
-      Color=FSC_Color(info.colors[2]), Thick=3
+      Color=cgColor(info.colors[2]), Thick=3
    PlotS, [maxThresh, maxThresh], [!Y.CRange(0), !Y.CRange(1)], $
-      Color=FSC_Color(info.colors[3]), Thick=3
+      Color=cgColor(info.colors[3]), Thick=3
 
    ; Label the lines.
    cmax = Convert_Coord(maxThresh, 0, /Data, /To_Normal)
@@ -666,9 +666,9 @@ PRO XSTRETCH_DRAWLINES, minThresh, maxThresh, info
       maxThresh = Float(maxThresh)
    ENDIF
    XYOuts, cmin[0], 0.90, /Normal, Number_Formatter(minThresh, Decimals=3), $
-      Color=FSC_Color(info.colors[2]), Alignment=1.0, Font=0
+      Color=cgColor(info.colors[2]), Alignment=1.0, Font=0
    XYOuts, cmax[0], 0.90, /Normal, Number_Formatter(maxThresh, Decimals=3), $
-      Color=FSC_Color(info.colors[3]), Alignment=0.0, Font=0
+      Color=cgColor(info.colors[3]), Alignment=0.0, Font=0
 
    CASE info.type OF
 
@@ -676,35 +676,35 @@ PRO XSTRETCH_DRAWLINES, minThresh, maxThresh, info
             line = BytScl(Findgen(101))
             line = Scale_Vector(line, 0.0, !Y.CRange[1])
             x = Scale_Vector(Findgen(101), minThresh, maxThresh)
-            OPlot, x, line, Color=FSC_Color(info.colors[4]), LineStyle=2, Thick=2
+            OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'LINEAR 2%': BEGIN
             line = BytScl(Findgen(101))
             line = Scale_Vector(line, 0.0, !Y.CRange[1])
             x = Scale_Vector(Findgen(101), minThresh, maxThresh)
-            OPlot, x, line, Color=FSC_Color(info.colors[4]), LineStyle=2, Thick=2
+            OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'ADAPTIVE EQUALIZATION': BEGIN
             line = BytScl(Findgen(101))
             line = Scale_Vector(line, 0.0, !Y.CRange[1])
             x = Scale_Vector(Findgen(101), minThresh, maxThresh)
-            OPlot, x, line, Color=FSC_Color(info.colors[4]), LineStyle=2, Thick=2
+            OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'EQUALIZATION': BEGIN
             line = BytScl(Findgen(101))
             line = Scale_Vector(line, 0.0, !Y.CRange[1])
             x = Scale_Vector(Findgen(101), minThresh, maxThresh)
-            OPlot, x, line, Color=FSC_Color(info.colors[4]), LineStyle=2, Thick=2
+            OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'LOG': BEGIN
             line = LogScl(Findgen(101), Mean=info.mean, Exponent=info.exponent)
             line = Scale_Vector(line, 0.0, !Y.CRange[1])
             x = Scale_Vector(Findgen(101), minThresh, maxThresh)
-            OPlot, x, line, Color=FSC_Color(info.colors[4]), LineStyle=2, Thick=2
+            OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'GAMMA': BEGIN
@@ -713,7 +713,7 @@ PRO XSTRETCH_DRAWLINES, minThresh, maxThresh, info
             line = Double(line)^info.gamma
             line = Scale_Vector(line, 0.0, !Y.CRange[1])
             x = Scale_Vector(Findgen(101), minThresh, maxThresh)
-            OPlot, x, line, Color=FSC_Color(info.colors[4]), LineStyle=2, Thick=2
+            OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'GAUSSIAN': BEGIN
@@ -722,14 +722,14 @@ PRO XSTRETCH_DRAWLINES, minThresh, maxThresh, info
             line = (1/(2*!PI*info.sigma^2))*EXP(-(line^2/(2*info.sigma^2)))
             line = Scale_Vector(line, 0, !Y.CRange[1])
             x = Scale_Vector(Findgen(101), minThresh, maxThresh)
-            OPlot, x, line, Color=FSC_Color(info.colors[4]), LineStyle=2, Thick=2
+            OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'SQUARE ROOT': BEGIN
             line = BytScl(Findgen(101))
             line = Scale_Vector(line, 0.0, !Y.CRange[1])
             x = Scale_Vector(Findgen(101), minThresh, maxThresh)
-            OPlot, x, line, Color=FSC_Color(info.colors[4]), LineStyle=2, Thick=2
+            OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'ASINH': BEGIN
@@ -737,7 +737,7 @@ PRO XSTRETCH_DRAWLINES, minThresh, maxThresh, info
             line = ASinhScl(Findgen(101), BETA=info.beta)
             line = Scale_Vector(line, 0.0, !Y.CRange[1])
              x = Scale_Vector(Findgen(101), minThresh, maxThresh)
-            OPlot, x, line, Color=FSC_Color(info.colors[4]), LineStyle=2, Thick=2
+            OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
    ENDCASE
@@ -909,8 +909,8 @@ PRO XSTRETCH_HISTOPLOT, info, $
    ; Plot the histogram of the display image.
    IF N_Elements(wid) NE 0 THEN WSet, wid
    Plot, [0,0], [1,1], $             
-          Background=FSC_Color(info.colors[0]), $
-          Color=FSC_Color(info.colors[1]), $       ; The color of the axes.
+          Background=cgColor(info.colors[0]), $
+          Color=cgColor(info.colors[1]), $       ; The color of the axes.
           NoData=1, $                              ; Draw the axes only. No data.
           XRange=[xmin, xmax], $                   ; The X data range.          
           XStyle=9, $                              ; Exact axis scaling. No autoscaled axes.
@@ -924,7 +924,7 @@ PRO XSTRETCH_HISTOPLOT, info, $
           Position=[0.15, 0.20, 0.85, 0.85], $
           _Extra=extra                      ; Pass any extra PLOT keywords.
              
-    Axis, !X.CRange[0], !Y.CRange[1], XAXIS=1, XTickformat='(A1)', XMINOR=1, COLOR=FSC_Color(info.colors[1])
+    Axis, !X.CRange[0], !Y.CRange[1], XAXIS=1, XTickformat='(A1)', XMINOR=1, COLOR=cgColor(info.colors[1])
        
     step = (!X.CRange[1] - !X.CRange[0]) / (binsize + 1)
     start = !X.CRange[0] + binsize
@@ -932,8 +932,8 @@ PRO XSTRETCH_HISTOPLOT, info, $
     FOR j=0,N_Elements(histdata)-1 DO BEGIN
         x = [start, start, endpt, endpt, start]
         y = [0, histdata[j], histdata[j], 0, 0]
-        PolyFill, x, y, COLOR=FSC_Color('rose'), NOCLIP=0
-        PlotS, x, y, COLOR=FSC_Color(info.colors[5]), NOCLIP=0
+        PolyFill, x, y, COLOR=cgColor('rose'), NOCLIP=0
+        PlotS, x, y, COLOR=cgColor(info.colors[5]), NOCLIP=0
         start = start + binsize
         endpt = start + binsize
     ENDFOR
@@ -1015,7 +1015,7 @@ PRO XSTRETCH_PARAMETERS, event
       WSet, info.windex
       WShow, info.windex
       TVLCT, info.r, info.g, info.b
-      TVImage, displayImage, /NoInterp
+      cgImage, displayImage, /NoInterp
    ENDIF
    XStretch_NotifyOthers, info
 
@@ -1059,7 +1059,7 @@ PRO XSTRETCH_FLIPIMAGE, event
       WSet, info.windex
       WShow, info.windex
       TVLCT, info.r, info.g, info.b
-      TVImage, displayImage, /NoInterp
+      cgImage, displayImage, /NoInterp
    ENDIF
    XStretch_NotifyOthers, info
 
@@ -1096,7 +1096,7 @@ PRO XSTRETCH_GAMMA, event
       WSet, info.windex
       WShow, info.windex
       TVLCT, info.r, info.g, info.b
-      TVImage, displayImage, /NoInterp
+      cgImage, displayImage, /NoInterp
    ENDIF
    XStretch_NotifyOthers, info
 
@@ -1141,7 +1141,7 @@ PRO XSTRETCH_NEGATIVE, event
       WSet, info.windex
       WShow, info.windex
       TVLCT, info.r, info.g, info.b
-      TVImage, displayImage, /NoInterp
+      cgImage, displayImage, /NoInterp
    ENDIF
    XStretch_NotifyOthers, info
 
@@ -1317,7 +1317,7 @@ PRO XSTRETCH_OPENIMAGE, event
      WSet, info.windex
      WShow, info.windex
      TVLCT, info.r, info.g, info.b
-     TVImage, displayImage, /NoInterp
+     cgImage, displayImage, /NoInterp
    ENDIF
    XStretch_NotifyOthers, info
 
@@ -1375,7 +1375,7 @@ PRO XSTRETCH_SAVEAS, event
                   Set_Plot, 'PS', /Copy
                   Device, _Extra=configureIt
                   displayImage = XStretch_ScaleImage(info)
-                  TVImage, displayImage, /NoInterp
+                  cgImage, displayImage, /NoInterp
                   Device, /Close_File
                   Set_Plot, thisDevice
             ENDIF
@@ -1493,7 +1493,7 @@ PRO XSTRETCH_SETTHRESHOLD, event
       WSet, info.windex
       WShow, info.windex
       TVLCT, info.r, info.g, info.b
-      TVImage, displayImage, /NoInterp
+      cgImage, displayImage, /NoInterp
    ENDIF
    XStretch_NotifyOthers, info
 
@@ -1541,7 +1541,7 @@ PRO XSTRETCH_PRINT, event
          WSet, info.histo_wid
 
          ; Have to set up drawing colors *before* we go into the PRINTER device.
-         FOR j=0,N_Elements(info.colors)-1 DO color = FSC_Color(info.colors[j])
+         FOR j=0,N_Elements(info.colors)-1 DO color = cgColor(info.colors[j])
       ENDELSE
       configurePrinter = PSWindow(/Printer)
 
@@ -1552,7 +1552,7 @@ PRO XSTRETCH_PRINT, event
       Widget_Control, Hourglass=1
       IF TARGET EQ 'IMAGE' THEN BEGIN
          displayImage = XStretch_ScaleImage(info)
-         TVImage, displayImage, /NoInterp
+         cgImage, displayImage, /NoInterp
       ENDIF ELSE BEGIN
             XStretch_Histoplot, info, MaxValue=info.maxValue, _Extra=*info.extra
             XStretch_DrawLines, info.minThresh, info.maxThresh, info
@@ -1784,7 +1784,7 @@ PRO XSTRETCH_MOVELINE, event
          WSet, info.windex
          WShow, info.windex
          TVLCT, info.r, info.g, info.b
-         TVImage, displayImage, /NoInterp
+         cgImage, displayImage, /NoInterp
       ENDIF ELSE BEGIN
 
          imageSize = Size(*info.image)
@@ -1813,7 +1813,7 @@ PRO XSTRETCH_MOVELINE, event
          Widget_Control, image_draw, Get_Value=windex
          info.image_draw = image_draw
          info.windex = windex
-         TVImage, displayImage, /NoInterp
+         cgImage, displayImage, /NoInterp
 
          XManager, 'xstretch_image', image_tlb, Event_Handler='XStretch_Image_Resize', /No_Block
          Widget_Control, info.saveas, Sensitive=1
@@ -1854,16 +1854,16 @@ PRO XSTRETCH_MOVELINE, event
       'MIN': BEGIN
          cmax = Convert_Coord(info.maxThresh, 0, /Data, /To_Normal)
          PlotS, [info.maxthresh, info.maxthresh],[info.ymin, info.ymax],  $
-            Color=FSC_Color(info.colors[3]), Thick=2
+            Color=cgColor(info.colors[3]), Thick=2
          XYOuts, cmax[0], 0.90, /Normal, Number_Formatter(XStretch_Validate_Threshold(info.maxThresh, info), Decimals=3), $
-            Color=FSC_Color(info.colors[3]), Alignment=0.0, Font=0
+            Color=cgColor(info.colors[3]), Alignment=0.0, Font=0
          END
       'MAX': BEGIN
          cmin = Convert_Coord(info.minThresh, 0, /Data, /To_Normal)
          PlotS, [info.minthresh, info.minthresh],[info.ymin, info.ymax],  $
-            Color=FSC_Color(info.colors[2]), Thick=2
+            Color=cgColor(info.colors[2]), Thick=2
          XYOuts, cmin[0], 0.90, /Normal, Number_Formatter(XStretch_Validate_Threshold(info.minThresh, info), Decimals=3), $
-            Color=FSC_Color(info.colors[2]), Alignment=1.0, Font=0
+            Color=cgColor(info.colors[2]), Alignment=1.0, Font=0
          END
    ENDCASE
 
@@ -1900,14 +1900,14 @@ PRO XSTRETCH_MOVELINE, event
    theCoord = XStretch_Validate_Threshold(coord[0], info)
    CASE info.lineby OF
       'MIN': BEGIN
-         PlotS, [coord[0], coord[0]],[info.ymin, info.ymax], Color=FSC_Color(info.colors[2]), Thick=2
+         PlotS, [coord[0], coord[0]],[info.ymin, info.ymax], Color=cgColor(info.colors[2]), Thick=2
          XYOuts, Float(event.x)/!D.X_Size, 0.90, /Normal, Number_Formatter(thecoord, Decimals=3), $
-            Color=FSC_Color(info.colors[2]), Alignment=1.0, Font=0
+            Color=cgColor(info.colors[2]), Alignment=1.0, Font=0
          END
       'MAX': BEGIN
-         PlotS, [coord[0], coord[0]],[info.ymin, info.ymax], Color=FSC_Color(info.colors[3]), Thick=2
+         PlotS, [coord[0], coord[0]],[info.ymin, info.ymax], Color=cgColor(info.colors[3]), Thick=2
          XYOuts, Float(event.x)/!D.X_Size, 0.90, /Normal,  Number_Formatter(thecoord, Decimals=3), $
-            Color=FSC_Color(info.colors[3]), Alignment=0.0, Font=0
+            Color=cgColor(info.colors[3]), Alignment=0.0, Font=0
          END
    ENDCASE
 
@@ -2019,7 +2019,7 @@ PRO XSTRETCH_RESTORE, event
       WSet, info.windex
       TVLCT, info.r, info.g, info.b
       WShow, info.windex
-      TVImage, displayImage, /NoInterp, _Extra=*info.extra
+      cgImage, displayImage, /NoInterp, _Extra=*info.extra
    ENDIF
    
    ; Notify others.
@@ -2173,7 +2173,7 @@ PRO XSTRETCH_STRETCHTYPE, event
       WSet, info.windex
       TVLCT, info.r, info.g, info.b
       WShow, info.windex
-      TVImage, displayImage, /NoInterp, _Extra=*info.extra
+      cgImage, displayImage, /NoInterp, _Extra=*info.extra
    ENDIF
 
    ; Notify others of image change.
@@ -2224,7 +2224,7 @@ PRO XSTRETCH_COLORS, event
                 TVLCT, info.r, info.g, info.b
                 WShow, info.windex
                 WSet, info.windex
-                TVImage, displayImage, /NoInterp
+                cgImage, displayImage, /NoInterp
              ENDIF
              XStretch_NotifyOthers, info
 
@@ -2322,7 +2322,7 @@ PRO XSTRETCH_IMAGE_RESIZE, event
    WSet, info.windex
    displayImage = XStretch_ScaleImage(info)
    TVLCT, info.r, info.g, info.b
-   TVImage, displayImage, /NoInterp
+   cgImage, displayImage, /NoInterp
    XStretch_NotifyOthers, info
 
    Widget_Control, histoTLB, Set_UValue=info, /No_Copy
@@ -2546,8 +2546,17 @@ PRO XSTRETCH, theImage, $
    histo_tlb = Widget_Base(Column=1, Title=title, XPad=0, YPad=0, $
       MBar=menubaseID, TLB_Size_Events=1, XOffset=xpos, YOffset=ypos, Base_Align_Center=1)
 
+   ; Create draw widget. UNIX versions of IDL have a bug in which creating
+   ; a draw widget as the very first window in an IDL session causes both
+   ; !P.Background and !P.Color to be set to white. I know, it's odd. But
+   ; doing this little trick fixes the problem.
+   tempBackground = !P.Background
+   tempColor = !P.Color
+   retain = (StrUpCase(!Version.OS_Family) EQ 'UNIX') ? 2 : 1
    histo_draw = Widget_Draw(histo_tlb, XSize=histXsize, YSize=histYsize, $
-      Button_Events=1, Event_Pro='XStretch_Process_Events')
+        Button_Events=1, Event_Pro='XStretch_Process_Events', RETAIN=retain)
+   !P.Background = Temporary(tempBackground)
+   !P.Color = Temporary(tempColor)
    controlID = Widget_Button(menubaseID, Value='Controls', Event_Pro='XStretch_MaxValue')
    openit = Widget_Button(controlID, Value='Open', /MENU)
    dummy = Widget_Button(openit, Value='Formatted Image File...', Event_Pro='XStretch_OpenImage')
@@ -2710,8 +2719,19 @@ PRO XSTRETCH, theImage, $
       ENDIF
       image_tlb = Widget_Base(Row=1, Group_Leader=histo_tlb, Title='XStretch Image', $
          XOffSet=xoff, YOffSet=yoff, TLB_Size_Events=1, XPad=0, YPad=0)
-      image_draw = Widget_Draw(image_tlb, XSize=xsize, YSize=ysize, $
+
+      ; Create draw widget. UNIX versions of IDL have a bug in which creating
+      ; a draw widget as the very first window in an IDL session causes both
+      ; !P.Background and !P.Color to be set to white. I know, it's odd. But
+      ; doing this little trick fixes the problem.
+      tempBackground = !P.Background
+      tempColor = !P.Color
+      retain = (StrUpCase(!Version.OS_Family) EQ 'UNIX') ? 2 : 1
+      image_draw = Widget_Draw(image_tlb, XSize=xsize, YSize=ysize, RETAIN=retain, $
          Kill_Notify='XStretch_ImageWindowKilled', UValue=[saveAs, printit, colorsID])
+      !P.Background = Temporary(tempBackground)
+      !P.Color = Temporary(tempColor)
+
       Widget_Control, image_tlb, /Realize
 
       ; Get window index numbers for the draw widgets.
@@ -2734,7 +2754,7 @@ PRO XSTRETCH, theImage, $
 
    ; Load the color table.
    IF N_Elements(palette) EQ 0 THEN $
-      CTLoad, 0 > ctable < 40, Brewer=brewer ELSE $
+      cgLoadCT, 0 > ctable < 40, Brewer=brewer ELSE $
       TVLCT, palette
    TVLCT, r, g, b, /Get
 
@@ -2885,9 +2905,9 @@ PRO XSTRETCH, theImage, $
    ; Display the image.
    IF NOT Keyword_Set(no_window) THEN BEGIN
       WSet, windex
-      CTLoad, ctable, Brewer=brewer
+      cgLoadCT, ctable, Brewer=brewer
       WShow, windex
-      TVImage, displayImage, /NoInterp, _Extra=*extra
+      cgImage, displayImage, /NoInterp, _Extra=*extra
    ENDIF
 
    ; Set proper threshold values.

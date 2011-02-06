@@ -550,7 +550,7 @@ PRO cgSurface_Elevation_Colors, event
           IF info.colortable EQ -1 THEN BEGIN
             TVLCT, info.r, info.g, info.b
           ENDIF ELSE BEGIN
-            CTLoad, info.colortable, BREWER=info.brewer, REVERSE=info.reverse
+            cgLoadCT, info.colortable, BREWER=info.brewer, REVERSE=info.reverse
           ENDELSE
           XColors, Group_Leader=event.top, NotifyID=[event.id, event.top], $
              Title="cgSurface Elevation Shading Colors", BREWER=info.brewer, $
@@ -1232,7 +1232,7 @@ PRO cgSurface, data, x, y, $
         colors = Transpose([[rr],[gg], [bb]])
         colortable = -1
     ENDIF ELSE BEGIN
-        CTLoad, colortable, Reverse=Keyword_Set(reverse), Brewer=Keyword_Set(brewer), $
+        cgLoadCT, colortable, Reverse=Keyword_Set(reverse), Brewer=Keyword_Set(brewer), $
             RGB_TABLE=colors, /ROW
     ENDELSE
     

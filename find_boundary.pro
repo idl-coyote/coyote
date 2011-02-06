@@ -77,7 +77,7 @@
 ;       Window, XSize=400, YSize=300
 ;       TV, image
 ;       PLOTS, Find_Boundary(indices, XSize=400, YSize=300, Perimeter=length), $
-;           /Device, Color=FSC_Color('red')
+;           /Device, Color=cgColor('red')
 ;       Print, length
 ;           230.0
 ;

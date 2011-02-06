@@ -99,7 +99,7 @@
 ;     thisDevice = !D.Name
 ;     Set_Plot, 'PS'
 ;     Device, _Extra=psKeywords
-;     TVImage, image
+;     cgImage, image
 ;     Device, /Close_File
 ;     Set_Plot, thisDevice
 ;     Obj_Destroy, psObject

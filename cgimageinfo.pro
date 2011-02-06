@@ -5,8 +5,8 @@
 ; PURPOSE:
 ;
 ;     The purpose of this program is allow interactive inquiry of image
-;     position and values for images displayed with either TVIMAGE or TVSCALE.
-;     After a call to cgImage or TVSCALE, cgImageInfo can be called and the user
+;     position and values for images displayed with cgImage.
+;     After a call to cgImage, cgImageInfo can be called and the user
 ;     can use the cursor to click in the image display window. If the user clicks
 ;     inside the image, the image location and value will be printed out in the
 ;     user's IDL console window.

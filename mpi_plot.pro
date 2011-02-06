@@ -136,7 +136,7 @@
 ;                     http://www.dfanning.com/programs/cw_drawcolor.pro
 ;                     http://www.dfanning.com/programs/cw_spacer.pro
 ;                     http://www.dfanning.com/programs/error_message.pro
-;                     http://www.dfanning.com/programs/fsc_color.pro
+;                     http://www.dfanning.com/programs/cgColor.pro
 ;                     http://www.dfanning.com/programs/fsc_droplist.pro
 ;                     http://www.dfanning.com/programs/fsc_field.pro
 ;                     http://www.dfanning.com/programs/fsc_fileselect.pro
@@ -304,7 +304,7 @@ IF Ptr_Valid((*infoptr).oplotinfo) THEN BEGIN
    FOR j=0,N_Elements(*(*infoptr).oplotinfo)-1 DO BEGIN
       struct = (*(*infoptr).oplotinfo)[j]
       OPlot, *struct.indep, *struct.dep, _Extra=*struct.extra, $
-         Color=FSC_Color(struct.color, !D.Table_Size-4+j), $
+         Color=cgColor(struct.color, !D.Table_Size-4+j), $
          PSym=(*infoptr).plotconfig->Symbol(struct.psym)
    ENDFOR
 ENDIF
@@ -371,7 +371,7 @@ IF Ptr_Valid((*infoptr).oplotinfo) THEN BEGIN
    FOR j=0,N_Elements(*(*infoptr).oplotinfo)-1 DO BEGIN
       struct = (*(*infoptr).oplotinfo)[j]
       OPlot, *struct.indep, *struct.dep, _Extra=*struct.extra, $
-         Color=FSC_Color(struct.color, !D.Table_Size-4+j), $
+         Color=cgColor(struct.color, !D.Table_Size-4+j), $
          PSym=(*infoptr).plotconfig->Symbol(struct.psym)
    ENDFOR
 ENDIF
@@ -413,13 +413,13 @@ WSet, (*infoptr).wid
    ; but there is no help for it. :-(
 
 plotkeywords = (*infoptr).plotconfig->GetKeywords()
-TVLCT, FSC_Color(plotkeywords.name_background, /Triple), !P.Background
-TVLCT, FSC_Color(plotkeywords.name_color, /Triple), !D.Table_Size-2
-TVLCT, FSC_Color(plotkeywords.name_datacolor, /Triple), !D.Table_Size-3
+TVLCT, cgColor(plotkeywords.name_background, /Triple), !P.Background
+TVLCT, cgColor(plotkeywords.name_color, /Triple), !D.Table_Size-2
+TVLCT, cgColor(plotkeywords.name_datacolor, /Triple), !D.Table_Size-3
 IF Ptr_Valid((*infoptr).oplotinfo) THEN BEGIN
    FOR j=0,N_Elements(*(*infoptr).oplotinfo)-1 DO BEGIN
       struct = (*(*infoptr).oplotinfo)[j]
-      TVLCT, FSC_Color(struct.color, /Triple),!D.Table_Size-4+j
+      TVLCT, cgColor(struct.color, /Triple),!D.Table_Size-4+j
    ENDFOR
 ENDIF
 

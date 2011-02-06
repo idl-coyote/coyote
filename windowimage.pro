@@ -273,12 +273,12 @@ PRO WindowImage_Display, info
     SetDecomposedState, 1, CURRENTSTATE=currentState
 
     ; Load the color table.
-    CTLoad, info.colortable, REVERSE=info.reverse, BREWER=info.brewer, NCOLORS=253
+    cgLoadCT, info.colortable, REVERSE=info.reverse, BREWER=info.brewer, NCOLORS=253
     TVLCT, cgColor(info.neutralColor, /TRIPLE), 254
     
     ; Draw the image.
     WSet, info.imgWinID
-    TVImage, info.image, SCALE=info.scale, NCOLORS=253, /Keep, $
+    cgImage, info.image, SCALE=info.scale, NCOLORS=253, /Keep, $
         MINVALUE=info.iwindow[0], MAXVALUE=info.iwindow[1]
 
     ; Draw the color bar.
@@ -318,7 +318,7 @@ END ;---------------------------------------------------------------------------
 ;     brewer: in, optional, type=boolean, default=0
 ;         Set this keyword to indicate a Brewer color table is desired.
 ;     colortable: in, optional, type=integer, default=0
-;          The index number of a color table to load with CTLOAD.
+;          The index number of a color table to load with cgLoadCT.
 ;     neutralcolor: in, optional, type=string
 ;         The name of the color to use for values outside the image "window" in
 ;         the color table. If a default grayscale color table is loaded, the default
@@ -375,17 +375,17 @@ PRO WindowImage, image, $
     IF N_Elements(colortable) EQ 0 THEN BEGIN
         IF N_Elements(neutralColor) EQ 0 THEN neutralColor = 'rose'
         IF brewer THEN BEGIN
-            CTLoad, 17, REVERSE=reverse, BREWER=1, NCOLORS=253
+            cgLoadCT, 17, REVERSE=reverse, BREWER=1, NCOLORS=253
             colortable = 17
         ENDIF ELSE BEGIN
-            CTLoad,  0, REVERSE=reverse, BREWER=0, NCOLORS=253
+            cgLoadCT,  0, REVERSE=reverse, BREWER=0, NCOLORS=253
             colortable = 0
         ENDELSE
     ENDIF ELSE BEGIN
         IF N_Elements(neutralColor) EQ 0 THEN neutralColor = 'gray'
-        CTLoad, colortable, REVERSE=reverse, BREWER=brewer, NCOLORS=253
+        cgLoadCT, colortable, REVERSE=reverse, BREWER=brewer, NCOLORS=253
     ENDELSE
-    TVLCT, FSC_Color(neutralColor, /TRIPLE), 254
+    TVLCT, cgColor(neutralColor, /TRIPLE), 254
         
     IF N_Elements(ilevel) EQ 0 THEN ilevel = (maxImage - minImage) / 2.0
     IF N_Elements(iwindow) EQ 0 THEN BEGIN

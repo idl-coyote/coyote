@@ -67,9 +67,9 @@
 ;
 ; RESTRICTIONS:
 ;
-;       Requires FSC_COLOR and STATIONPLOT from the Coyote Library:
+;       Requires cgColor and STATIONPLOT from the Coyote Library:
 ;
-;           http://www.dfanning.com/programs/fsc_color.pro
+;           http://www.dfanning.com/programs/cgColor.pro
 ;           http://www.dfanning.com/programs/stationplot.pro
 ;
 ; EXAMPLE:
@@ -80,11 +80,11 @@
 ;    lat = Randomu(seed, 9) * 180 - 90
 ;    speed = Randomu(seed, 9) * 100 + 5.0
 ;    direction = Indgen(9)*45
-;    Erase, Color=FSC_Color('Ivory', !P.Background)
-;    Polyfill,[0.1, 0.1, 0.9, 0.9, 0.1], [0.1, 0.9, 0.9, 0.1, 0.1], /Normal, Color=FSC_Color('light gray')
-;    Map_Set, /Cylindrical, Position=[0.1, 0.1, 0.9, 0.9], Color=FSC_Color('Steel Blue'), /NoErase
-;    Map_Grid, Color=FSC_Color('Charcoal', !D.Table_Size-2)
-;    Map_Continents, Color=FSC_Color('Sea Green', !D.Table_Size-3)
+;    Erase, Color=cgColor('Ivory', !P.Background)
+;    Polyfill,[0.1, 0.1, 0.9, 0.9, 0.1], [0.1, 0.9, 0.9, 0.1, 0.1], /Normal, Color=cgColor('light gray')
+;    Map_Set, /Cylindrical, Position=[0.1, 0.1, 0.9, 0.9], Color=cgColor('Steel Blue'), /NoErase
+;    Map_Grid, Color=cgColor('Charcoal', !D.Table_Size-2)
+;    Map_Continents, Color=cgColor('Sea Green', !D.Table_Size-3)
 ;    Windbarb, lon, lat, speed, direction, /Station, Color='Indian Red', /Southern_Hemisphere
 ;
 ;    To clip the windbards that fall outside the plot, substitute these two lines
@@ -248,7 +248,7 @@ PRO Windbarb, x, y, wspeed, wdirection, $
       x2 = clip[0] > (x1 + sindr * staff_len) < clip[2]
       y2 = clip[1] > (y1 + cosdr * staff_len * aspect) < clip[3]
       IF Keyword_Set(station) THEN StationPlot, x[j], y[j], Radius=sr, Color=color[j]
-      PLOTS, [x1, x2], [y1,y2], /Normal, Color=FSC_Color(color[j]), Clip=clip, Thick=thick
+      PLOTS, [x1, x2], [y1,y2], /Normal, Color=cgColor(color[j]), Clip=clip, Thick=thick
 
       ; Draw any half-barbs.
 
@@ -259,7 +259,7 @@ PRO Windbarb, x, y, wspeed, wdirection, $
          IF x2 LT clip[0] OR x2 GT clip[2] THEN CONTINUE
          IF y1 LT clip[1] OR y1 GT clip[3] THEN CONTINUE
          IF y2 LT clip[1] OR y2 GT clip[3] THEN CONTINUE
-         PLOTS, [x1, x2], [y1,y2], /Normal, Color=FSC_Color(color[j]), Clip=clip, Thick=thick
+         PLOTS, [x1, x2], [y1,y2], /Normal, Color=cgColor(color[j]), Clip=clip, Thick=thick
          IF (num50 EQ 0) AND (num10 EQ 0) THEN BEGIN
             x1 = x2 + sindr * half_len
             y1 = y2 + cosdr * half_len * aspect
@@ -267,7 +267,7 @@ PRO Windbarb, x, y, wspeed, wdirection, $
             IF x2 LT clip[0] OR x2 GT clip[2] THEN CONTINUE
             IF y1 LT clip[1] OR y1 GT clip[3] THEN CONTINUE
             IF y2 LT clip[1] OR y2 GT clip[3] THEN CONTINUE
-            PLOTS, [x1, x2], [y1,y2], /Normal, Color=FSC_Color(color[j]), Clip=clip, Thick=thick
+            PLOTS, [x1, x2], [y1,y2], /Normal, Color=cgColor(color[j]), Clip=clip, Thick=thick
          ENDIF
       ENDIF
 
@@ -287,7 +287,7 @@ PRO Windbarb, x, y, wspeed, wdirection, $
          IF y1 LT clip[1] OR y1 GT clip[3] THEN CONTINUE
          IF y2 LT clip[1] OR y2 GT clip[3] THEN CONTINUE
          IF y3 LT clip[1] OR y3 GT clip[3] THEN CONTINUE
-         PLOTS, [x1, x2, x3], [y1, y2, y3], /Normal, Color=FSC_Color(color[j]), Clip=clip, Thick=thick
+         PLOTS, [x1, x2, x3], [y1, y2, y3], /Normal, Color=cgColor(color[j]), Clip=clip, Thick=thick
          x1 = x2
          y1 = y2
       ENDFOR
@@ -316,8 +316,8 @@ PRO Windbarb, x, y, wspeed, wdirection, $
          IF x2 LT clip[0] OR x2 GT clip[2] THEN CONTINUE
          IF y0 LT clip[1] OR y0 GT clip[3] THEN CONTINUE
          IF y2 LT clip[1] OR y2 GT clip[3] THEN CONTINUE
-         PLOTS, [x2, x0], [y2, y0], /Normal, Color=FSC_Color(color[j]), Clip=clip, Thick=thick
-         POLYFILL, [x1, x2, x3], [y1, y2, y3], /Normal, Color=FSC_Color(color[j]), Clip=clip
+         PLOTS, [x2, x0], [y2, y0], /Normal, Color=cgColor(color[j]), Clip=clip, Thick=thick
+         POLYFILL, [x1, x2, x3], [y1, y2, y3], /Normal, Color=cgColor(color[j]), Clip=clip
 
          x1 = x2p
          y1 = y2p

@@ -286,8 +286,8 @@ PRO FSC_ColorSelect::Set_Color, color
    ; Must be a string.
    IF Size(color, /TNAME) NE 'STRING' THEN Message, 'Input color must be a string.'
    
-   ; Can you find this color in FSC_Color?
-   colors = FSC_Color(/NAMES)
+   ; Can you find this color in cgColor?
+   colors = cgColor(/NAMES)
    index = Where(colors EQ StrCompress(color, /REMOVE_ALL), count)
    IF count EQ 0 THEN Message, 'The color ' + StrUpCase(color) + ' is not a valid color name.'
 
@@ -320,7 +320,7 @@ PRO FSC_ColorSelect::Set_Color_Index, colorIndex, BREWER=brewer, TABLENAME=table
    thisDevice = !D.NAME
    Set_Plot, 'Z'
    TVLCT, r, g, b, /GET
-   CTLoad, colorIndex, GET_NAMES=ctNames, BREWER=brewer
+   cgLoadCT, colorIndex, GET_NAMES=ctNames, BREWER=brewer
    tableName = ctNames[colorIndex]
    TVLCT, r, g, b
    Set_Plot, thisDevice
@@ -372,7 +372,7 @@ FUNCTION FSC_ColorSelect::PickColorEvents, event
         thisDevice = !D.NAME
         Set_Plot, 'Z'
         TVLCT, r, g, b, /GET
-        CTLoad, cinfo.index, GET_NAMES=ctNames, BREWER=cinfo.brewer
+        cgLoadCT, cinfo.index, GET_NAMES=ctNames, BREWER=cinfo.brewer
         tableName = ctNames[cinfo.index]
         TVLCT, r, g, b
         Set_Plot, thisDevice
@@ -617,7 +617,7 @@ FUNCTION FSC_ColorSelect::INIT, $   ; The compound widget FSC_ColorSelect INIT m
         thisDevice = !D.NAME
         Set_Plot, 'Z'
         TVLCT, r, g, b, /GET
-        CTLoad, ct_index, GET_NAMES=ctNames, BREWER=brewer
+        cgLoadCT, ct_index, GET_NAMES=ctNames, BREWER=brewer
         thisColor = ctNames[ct_index]
         TVLCT, r, g, b
         Set_Plot, thisDevice

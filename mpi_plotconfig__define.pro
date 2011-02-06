@@ -171,7 +171,7 @@
 ;
 ; PROGRAM NOTES:
 ;
-;      Color Names: Color names are those used with FSC_Color and PickColorName. See the
+;      Color Names: Color names are those used with cgColor and PickColorName. See the
 ;         documentation for those programs for instuctions on loading your own colors.
 ;         To see the default colors and names, type this:
 ;
@@ -211,7 +211,7 @@
 ;                     http://www.dfanning.com/programs/cw_drawcolor.pro
 ;                     http://www.dfanning.com/programs/cw_spacer.pro
 ;                     http://www.dfanning.com/programs/error_message.pro
-;                     http://www.dfanning.com/programs/fsc_color.pro
+;                     http://www.dfanning.com/programs/cgColor.pro
 ;                     http://www.dfanning.com/programs/fsc_droplist.pro
 ;                     http://www.dfanning.com/programs/fsc_field.pro
 ;                     http://www.dfanning.com/programs/fsc_plotwindow.pro
@@ -495,10 +495,10 @@ ENDIF
 
 self->UpdateObject
 struct = Create_Struct( $
-   'background', FSC_Color(self.background, !P.Background), $
+   'background', cgColor(self.background, !P.Background), $
    'charthick', self.charthick, $
    'charsize', self.charsize, $
-   'color', FSC_Color(self.color, !D.Table_Size-2), $
+   'color', cgColor(self.color, !D.Table_Size-2), $
    'font', self.font, $
    'linestyle', self.linestyle, $
    'position', self.position, $
@@ -514,7 +514,7 @@ struct = Create_Struct( $
    ; Add axis color information, if required.
 
 IF self.usedatacolor THEN $
-   struct = Create_Struct(struct, 'datacolor', FSC_Color(self.dataColor, !D.Table_Size-3), $
+   struct = Create_Struct(struct, 'datacolor', cgColor(self.dataColor, !D.Table_Size-3), $
       'name_datacolor', self.datacolor)
 
    ; Done unless axis information is required.

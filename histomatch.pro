@@ -60,7 +60,7 @@
 ;
 ; EXAMPLE:
 ;
-;       There is an example program at the end of this file. It will require TVIMAGE
+;       There is an example program at the end of this file. It will require cgImage
 ;       from the Coyote Library to run. You can also find an explanation of this program
 ;       at http://www.dfanning.com/ip_tips/histomatch.html.
 ;
@@ -297,20 +297,20 @@ Free_Lun, lun
 
 Window, 0, XSize=500, YSize=250, Title='Match this Image Histogram', XPos=100, YPos=100
 !P.Multi=[0,2,1]
-TVImage, image_to_match
+cgImage, image_to_match
 Plot, Histogram(image_to_match), Max_Value=5000
 !P.Multi=0
 
 Window, 1, XSize=500, YSize=250, Title='Manipulate this Image', XPos=100, YPos=360
 !P.Multi=[0,2,1]
-TVImage, image
+cgImage, image
 Plot, Histogram(image), Max_Value=5000
 !P.Multi=0
 
 Window, 2, XSize=500, YSize=250, Title='Final Result', XPos=100, YPos=630
 !P.Multi=[0,2,1]
 match = HistoMatch(image, image_to_match)
-TVImage, match
+cgImage, match
 Plot, Histogram(match), Max_Value=5000
 !P.Multi=0
 END

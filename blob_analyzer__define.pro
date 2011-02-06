@@ -670,10 +670,10 @@ PRO Example
   s = Size(image, /DIMENSIONS)
   Window, XSIZE=2*s[0], YSIZE=2*s[1], Title='Blob Analyzer Example'
   LoadCT, 0
-  TVImage, image, 0, /TV
+  cgImage, image, 0, /TV
   
   ; Display the opened image beside it.
-  TVImage, openImage, 1, /TV
+  cgImage, openImage, 1, /TV
   
   ; Display the blobs we located with LABEL_REGION.
   count = blobs -> NumberOfBlobs()
@@ -682,22 +682,22 @@ PRO Example
     blobIndices = blobs -> GetIndices(j)
     blank[blobIndices] = image[blobIndices]
   ENDFOR
-  TVImage, blank, 2, /TV
+  cgImage, blank, 2, /TV
   
   ; Display the original image, with blob outlined and labelled.
-  TVImage, image, 3, /TV
+  cgImage, image, 3, /TV
   FOR j=0,count-1 DO BEGIN
     stats = blobs -> GetStats(j, /NoScale)
-    PLOTS, stats.perimeter_pts[0,*] + s[0], stats.perimeter_pts[1,*], /Device, COLOR=FSC_Color('dodger blue')
+    PLOTS, stats.perimeter_pts[0,*] + s[0], stats.perimeter_pts[1,*], /Device, COLOR=cgColor('dodger blue')
     XYOUTS, stats.center[0]+s[0], stats.center[1]-5, /Device, StrTrim(j,2), $
-        COLOR=FSC_Color('red'), ALIGNMENT=0.5, CHARSIZE=0.75
+        COLOR=cgColor('red'), ALIGNMENT=0.5, CHARSIZE=0.75
   ENDFOR
   
   ; Add labels for captions.
-  XYOUTS, 0.05, 0.95, 'A', FONT=0, ALIGNMENT=0.5, COLOR=FSC_Color('Yellow')
-  XYOUTS, 0.55, 0.95, 'B', FONT=0, ALIGNMENT=0.5, COLOR=FSC_Color('Yellow')
-  XYOUTS, 0.05, 0.45, 'C', FONT=0, ALIGNMENT=0.5, COLOR=FSC_Color('Yellow')
-  XYOUTS, 0.55, 0.45, 'D', FONT=0, ALIGNMENT=0.5, COLOR=FSC_Color('Yellow')
+  XYOUTS, 0.05, 0.95, 'A', FONT=0, ALIGNMENT=0.5, COLOR=cgColor('Yellow')
+  XYOUTS, 0.55, 0.95, 'B', FONT=0, ALIGNMENT=0.5, COLOR=cgColor('Yellow')
+  XYOUTS, 0.05, 0.45, 'C', FONT=0, ALIGNMENT=0.5, COLOR=cgColor('Yellow')
+  XYOUTS, 0.55, 0.45, 'D', FONT=0, ALIGNMENT=0.5, COLOR=cgColor('Yellow')
   
   ; Report stats.
   blobs -> ReportStats

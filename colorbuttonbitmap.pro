@@ -38,17 +38,17 @@
 ; OPTIONAL KEYWORDS:
 ;
 ;       BGCOLOR - The name of the background color. For example, 'Yellow', 'Tan', etc.
-;                 The name must be compatible with names appropriate for FSC_COLOR.
+;                 The name must be compatible with names appropriate for cgColor.
 ;
 ;       FGCOLOR - The name of the foreground color. For example, 'Navy', 'Black', etc.
-;                 The name must be compatible with names appropriate for FSC_COLOR.
+;                 The name must be compatible with names appropriate for cgColor.
 ;
 ;
 ; DEPENDENCIES:
 ;
-;       Reqires FSC_COLOR from the Coyote Library:
+;       Reqires cgColor from the Coyote Library:
 ;
-;                     http://www.dfanning.com/programs/fsc_color.pro
+;                     http://www.dfanning.com/programs/cgColor.pro
 ;
 ; EXAMPLE:
 ;
@@ -129,10 +129,10 @@ FUNCTION ColorButtonBitmap, theText, BGColor=bgcolor, FGColor=fgcolor
 
     ;;    Make window, draw text, read back
     Window, XSize=xSize, YSize=ySize, /Pixmap, /Free, Retain=2
-    Erase, Color=FSC_Color(bgcolor)
+    Erase, Color=cgColor(bgcolor)
     blankRGB = TVRD(True=3)
     XYOutS, x0, y0, theText, /Device, Font=0, $
-            Color=FSC_Color(fgcolor)
+            Color=cgColor(fgcolor)
     textRGB = TVRD(True=3)
     WDelete, !D.Window
     text2D = Total(textRGB NE blankRGB, 3)

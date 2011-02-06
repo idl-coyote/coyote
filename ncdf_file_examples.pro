@@ -210,9 +210,9 @@ PRO NCDF_File_Examples
     XInterAnimate, SET=[xsize, ysize, frames], /SHOWLOAD
     FOR j=0,frames-1 DO BEGIN
         data = sObj -> GetVarData('data', COUNT=[xsize, ysize, 1], OFFSET=[0,0,j])
-        TVImage, data, /KEEP, /NOINTERP
+        cgImage, data, /KEEP, /NOINTERP
         XYOUTS, 0.1, 0.05, /NORMAL, 'Frame Number: ' + StrTrim(j,2), $
-            COLOR=FSC_Color('black'), FONT=0
+            COLOR=cgColor('black'), FONT=0
         XInterAnimate, FRAME=j, WINDOW=!D.Window
     ENDFOR
     XInterAnimate, 25

@@ -52,7 +52,7 @@
 ;          
 ; :Examples:
 ;    Used to compare if two different colors are the same color::
-;       IDL> Print, ColorsAreIdentical('white', FSC_Color('white'))
+;       IDL> Print, ColorsAreIdentical('white', cgColor('white'))
 ;       IDL> Print, ColorsAreIdentical(252, !P.Color)
 ;       IDL> Print, ColorsAreIdentical('white', '255')
 ;       
@@ -117,26 +117,26 @@ FUNCTION ColorsAreIdentical, color_1, color_2
         
            ; First color a STRING, second color an INTEGER.
            (Size(c1, /TYPE) EQ 7) AND (Size(c2, /TYPE) LE 2): BEGIN
-                v1 = Transpose(FSC_Color(c1, /TRIPLE))
+                v1 = Transpose(cgColor(c1, /TRIPLE))
                 v2 = [r[c2], g[c2], b[c2]]
                 answer = Array_Equal(v1, v2)
                 END
  
            ; First color a STRING, second color a LONG.
            (Size(c1, /TYPE) EQ 7) AND (Size(c2, /TYPE) EQ 3): BEGIN
-                answer = Array_Equal(FSC_Color(c1, /DECOMPOSED), c2)
+                answer = Array_Equal(cgColor(c1, /DECOMPOSED), c2)
                 END
              
            ; First color an INTEGER, second color a STRING.    
            (Size(c1, /TYPE) LE 2) AND (Size(c2, /TYPE) EQ 7): BEGIN
-                v1 = Transpose(FSC_Color(c2, /TRIPLE))
+                v1 = Transpose(cgColor(c2, /TRIPLE))
                 v2 = [r[c1], g[c1], b[c1]]
                 answer = Array_Equal(v1, v2)
                 END
 
            ; First color a LONG, second color a STRING.
            (Size(c1, /TYPE) EQ 3) AND (Size(c2, /TYPE) EQ 7): BEGIN
-                answer = Array_Equal(FSC_Color(c2, /DECOMPOSED), c1)
+                answer = Array_Equal(cgColor(c2, /DECOMPOSED), c1)
                 END
 
             ; First color a LONG and second color an INTEGER.

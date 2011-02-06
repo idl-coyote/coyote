@@ -95,7 +95,7 @@
 ;         If this keyword is set, the selection is assumed to be an object reference.
 ;     palette: in, optional, type=BytArr(N,3)
 ;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
-;         R, G, and B vectors of a color table. It is probably easier to use CTLOAD or
+;         R, G, and B vectors of a color table. It is probably easier to use cgLoadCT or
 ;         XCOLORS to load color tables for the window, but this is provided as another option.
 ;     ps_delete: in, optional, type=boolean, default=1
 ;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates

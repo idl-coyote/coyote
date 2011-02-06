@@ -63,7 +63,7 @@ PRO FSC_ZImage_ZoomDied, zoomID
     
     ; Redisplay the image.
     WSet, info.drawIndex
-    TVImage, info.image, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
+    cgImage, info.image, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
              MAXValue=info.maxValue, SCALE=info.scale, NOINTERP=info.nointerp
     WSet, info.pixIndex
     Device, Copy=[0, 0, info.xsize, info.ysize, 0, 0, info.drawIndex]
@@ -97,7 +97,7 @@ PRO FSC_ZImage_BoxColor, event
     
     ; Redisplay the image.
     WSet, info.drawIndex
-    TVImage, info.image, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
+    cgImage, info.image, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
              MAXValue=info.maxValue, SCALE=info.scale, NOINTERP=info.nointerp
     WSet, info.pixIndex
     Device, Copy=[0, 0, info.xsize, info.ysize, 0, 0, info.drawIndex]
@@ -150,7 +150,7 @@ PRO FSC_ZImage_LoadColors, event
     
             ; Redisplay the image.
             WSet, info.drawIndex
-            TVImage, info.image, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
+            cgImage, info.image, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
                 MAXValue=info.maxValue, SCALE=info.scale, NOINTERP=info.nointerp
 
             WSet, info.pixIndex
@@ -160,7 +160,7 @@ PRO FSC_ZImage_LoadColors, event
             IF Widget_Info(info.zoomDrawID, /Valid_ID) THEN BEGIN
                WSet, info.zoomWindowID
                IF Ptr_Valid(info.zoomedImage) THEN BEGIN
-                  TVImage, *info.zoomedImage, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
+                  cgImage, *info.zoomedImage, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
                       MAXValue=info.maxValue, SCALE=info.scale, NOINTERP=1
                ENDIF
             ENDIF
@@ -391,7 +391,7 @@ PRO FSC_ZImage_DrawEvents, event
              info.zoomWindowID = windowID
              WSet, windowID
              IF Ptr_Valid(info.zoomedImage) THEN BEGIN
-                TVImage, *info.zoomedImage, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
+                cgImage, *info.zoomedImage, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
                     MAXValue=info.maxValue, SCALE=info.scale, NOINTERP=info.nointerp
              ENDIF
      
@@ -401,7 +401,7 @@ PRO FSC_ZImage_DrawEvents, event
          Widget_Control, info.zoomDrawID, XSize=zoomXSize, YSize=zoomYSize
          WSet, info.zoomWindowID
          IF Ptr_Valid(info.zoomedImage) THEN BEGIN
-            TVImage, *info.zoomedImage, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
+            cgImage, *info.zoomedImage, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
                 MAXValue=info.maxValue, SCALE=info.scale, NOINTERP=info.nointerp
          ENDIF
          
@@ -441,7 +441,7 @@ PRO FSC_ZImage_DrawEvents, event
          info.zoomWindowID = windowID
          WSet, windowID
          IF Ptr_Valid(info.zoomedImage) THEN BEGIN
-            TVImage, *info.zoomedImage, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
+            cgImage, *info.zoomedImage, BOTTOM=info.bottom, TOP=info.top, MINVALUE=info.minvalue, $
                 MAXValue=info.maxValue, SCALE=info.scale, NOINTERP=info.nointerp
          ENDIF
          
@@ -475,7 +475,7 @@ PRO FSC_ZImage_DrawEvents, event
     Device, Decomposed=1
     PlotS, [info.xs, info.xs, info.xd, info.xd, info.xs], $
        [info.ys, info.yd, info.yd, info.ys, info.ys], $
-       /Device, Color=FSC_Color(info.boxcolor)
+       /Device, Color=cgColor(info.boxcolor)
     Device, Decomposed=theState
        
     ENDCASE
@@ -501,30 +501,30 @@ END ; ----------------------------------------------------------------------
 ; :Params:
 ;    image: in, required, type=any
 ;        A 2D or true-color image of any normal data type. If not a BYTE array,
-;        TVImage keywords for proper image scaling must be used to provide image
+;        cgImage keywords for proper image scaling must be used to provide image
 ;        scaling parameters.
 ;        
 ;       
 ; :Keywords:
 ;     bottom: in, optional, type=byte, default=0
-;         As defined for the TVImage command.
+;         As defined for the cgImage command.
 ;     boxcolor: in, optional, type=string, default='red8'
 ;         The name of a color to use for the rubberband selection box.
-;         Color names are those used with FSC_Color. 
+;         Color names are those used with cgColor. 
 ;     group_leader: in, optional, type=long
 ;         The Group Leader widget identifier for this widget program.
 ;     maxvalue: in, optional, type=byte, default=0
-;         As defined for the TVImage command.
+;         As defined for the cgImage command.
 ;     minvalue: in, optional, type=byte, default=0
-;         As defined for the TVImage command.
+;         As defined for the cgImage command.
 ;     ncolors: in, optional, type=byte, default=0
-;         As defined for the TVImage command.
+;         As defined for the cgImage command.
 ;     nointerpolate: in, optional, type=byte, default=0
-;         As defined for the TVImage command.
+;         As defined for the cgImage command.
 ;     scale: in, optional, type=byte, default=0
-;         As defined for the TVImage command.
+;         As defined for the cgImage command.
 ;     top: in, optional, type=byte, default=0
-;         As defined for the TVImage command.
+;         As defined for the cgImage command.
 ;          
 ; :Examples:
 ;    Code examples::
@@ -645,7 +645,7 @@ PRO FSC_ZImage, image, $
     ; and display the image in it.
     Widget_Control, draw, Get_Value=drawIndex
     WSet, drawIndex
-    TVImage, image, BOTTOM=bottom, TOP=top, MINVALUE=minvalue, $
+    cgImage, image, BOTTOM=bottom, TOP=top, MINVALUE=minvalue, $
        MAXValue=maxValue, NCOLOR=ncolors, SCALE=scale, NOINTERP=nointerp
 
     ; Set the title of the window.
@@ -657,7 +657,7 @@ PRO FSC_ZImage, image, $
     ; image you just put in the draw widget in the pixmap window.
     Window, /Free, XSize=xsize, YSize=ysize, /Pixmap
     pixIndex = !D.Window
-    TVImage, image, BOTTOM=bottom, TOP=top, MINVALUE=minvalue, $
+    cgImage, image, BOTTOM=bottom, TOP=top, MINVALUE=minvalue, $
        MAXValue=maxValue, NCOLOR=ncolors, SCALE=scale, NOINTERP=nointerp
 
    ; Get color vectors for this application.

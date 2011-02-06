@@ -70,7 +70,7 @@
 ;         it's default value when the commands are finished executing.
 ;     palette: in, optional, type=BytArr(N,3)
 ;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
-;         R, G, and B vectors of a color table. It is probably easier to use CTLOAD or
+;         R, G, and B vectors of a color table. It is probably easier to use cgLoadCT or
 ;         XCOLORS to load color tables for the window, but this is provided as another option.
 ;     ps_charsize: in, optional, type=float, default=0.0
 ;         Set this value to the !P.Charsize value to use when creating PostScript output. This
@@ -107,11 +107,11 @@
 ;          
 ; :Examples:
 ;    Used to set cgWindow global properties::
-;       IDL> CTLoad, 5, RGB_TABLE=palette
+;       IDL> cgLoadCT, 5, RGB_TABLE=palette
 ;       IDL> cgWindow_SetDefs, PALETTE=palette, $
 ;               ERASEIT=1, XSIZE=800, YSIZE=400, XPOS=100, YPOS=200, $
 ;               PS_ENCAPSULATED=1, PS_METRIC=1
-;       IDL> TVImage, LoadData(7), /WINDOW, MARGIN=0.1
+;       IDL> cgImage, LoadData(7), /WINDOW, MARGIN=0.1
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::

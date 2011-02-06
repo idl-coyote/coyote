@@ -1,6 +1,6 @@
 ;+
 ; NAME:
-;   DCBAR
+;   cgDCBar
 ;
 ; PURPOSE:
 ;
@@ -24,7 +24,7 @@
 ;
 ; CALLING SEQUENCE:
 ;
-;       DCBAR
+;       cgDCBar
 ;
 ; INPUTS:
 ;
@@ -38,7 +38,7 @@
 ;
 ; KEYWORD PARAMETERS:
 ;
-;       ADDCMD:       Set this keyword to add the DCBar command to the current cgWindow
+;       ADDCMD:       Set this keyword to add the cgDCBar command to the current cgWindow
 ;                     command list. 
 ;               
 ;       BARCOLOR:     This is the name of a color known to cgCOLOR that can be
@@ -126,7 +126,7 @@
 ;       
 ;          IDL> Window
 ;          IDL> LoadCT, 5, NCOLORS=12, BOTTOM=1
-;          IDL> DCBar, NCOLORS=12, BOTTOM=1, LABELS=theMonths(/Abbreviation)
+;          IDL> cgDCBar, NCOLORS=12, BOTTOM=1, LABELS=theMonths(/Abbreviation)
 ;       
 ;       To load a 5 color vertical color bar, with the labels rotated 45 degrees.
 ;
@@ -134,7 +134,7 @@
 ;          IDL> labels = StrArr(5) 
 ;          IDL> FOR j=0,4 DO labels[j] = 'City ' + StrTrim(j+1,2)
 ;          IDL> colors = ['dodger blue', 'yellow', 'forest green', 'purple', 'tan']
-;          IDL> DCBar, colors, LABELS=labels, ROTATE=45, /VERTICAL
+;          IDL> cgDCBar, colors, LABELS=labels, ROTATE=45, /VERTICAL
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -176,7 +176,7 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-PRO DCBar, colors, $
+PRO cgDCBar, colors, $
     ADDCMD=addcmd, $
     BARCOLOR=barcolor, $
     BOTTOM=bottom, $
@@ -208,7 +208,7 @@ PRO DCBar, colors, $
         IF Keyword_Set(addcmd) THEN window = 0
         void = cgQuery(COUNT=wincnt)
         IF wincnt EQ 0 THEN cgWindow
-        cgWindow, 'DCBar', colors, $
+        cgWindow, 'cgDCBar', colors, $
             BARCOLOR=barcolor, $
             BOTTOM=bottom, $
             CHARSIZE=charsize, $

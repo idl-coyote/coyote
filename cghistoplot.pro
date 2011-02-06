@@ -1,7 +1,7 @@
 
 ;+
 ; NAME:
-;       HISTOPLOT
+;       cgHISTOPLOT
 ;
 ; PURPOSE:
 ;
@@ -23,7 +23,7 @@
 ;
 ; CALLING SEQUENCE:
 ;
-;      HistoPlot, dataToHistogram
+;      cgHistoplot, dataToHistogram
 ;
 ; ARGUMENTS:
 ;
@@ -139,9 +139,9 @@
 ;
 ; EXAMPLES:
 ;
-;      IDL> Histoplot, Dist(256)
-;      IDL> Histoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['charcoal', 'steel blue'], /FILLPOLYGON
-;      IDL> Histoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['navy', 'forest green'], /LINE_FILL, ORIENTATION=[45,-45]
+;      IDL> cgHistoplot, Dist(256)
+;      IDL> cgHistoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['charcoal', 'steel blue'], /FILLPOLYGON
+;      IDL> cgHistoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['navy', 'forest green'], /LINE_FILL, ORIENTATION=[45,-45]
 ;
 ; REQUIRES:
 ;
@@ -242,7 +242,7 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-PRO HistoPlot, $                    ; The program name.
+PRO cgHistoplot, $                    ; The program name.
    dataToHistogram, $               ; The data to draw a histogram of.
    ADDCMD=addcmd, $                 ; Add this command to an cgWindow.
    AXISCOLORNAME=axisColorName, $   ; The axis color.
@@ -293,7 +293,7 @@ PRO HistoPlot, $                    ; The program name.
    WINDOW=window                    ; Display this in an cgWindow.
 
 
-   ; Catch any error in the HistoPlot program.
+   ; Catch any error in the cgHistoplot program.
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
@@ -318,7 +318,7 @@ PRO HistoPlot, $                    ; The program name.
         
         ; Have to do something different if we are overplotting or adding a command.
         IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
-            cgWindow, 'Histoplot', $          ; The program name.
+            cgWindow, 'cgHistoplot', $          ; The program name.
                dataToHistogram, $               ; The data to draw a histogram of.
                AXISCOLORNAME=axisColorName, $   ; The axis color.
                BACKCOLORNAME=backcolorName, $   ; The background color.
@@ -370,7 +370,7 @@ PRO HistoPlot, $                    ; The program name.
         ; Otherwise, we are just replacing the commands in a new or existing window.
             void = cgQuery(COUNT=wincnt)
             IF wincnt EQ 0 THEN replaceCmd=0 ELSE replaceCmd=1
-            cgWindow, 'Histoplot', $          ; The program name.
+            cgWindow, 'cgHistoplot', $          ; The program name.
                dataToHistogram, $               ; The data to draw a histogram of.
                AXISCOLORNAME=axisColorName, $   ; The axis color.
                BACKCOLORNAME=backcolorName, $   ; The background color.

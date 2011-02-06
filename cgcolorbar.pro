@@ -236,38 +236,317 @@ PRO cgColorbar, $
     XLOG=xlog, $
     YLOG=ylog, $
     WINDOW=window, $
-    _REF_EXTRA=extra
+    _EXTRA=extra
+
+    Compile_Opt idl2
+
+    ; Catch the error.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    ; Should this be added to a resizeable graphics window?
+    IF (Keyword_Set(window) OR Keyword_Set(addcmd)) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-    FSC_COLORBAR, $
-        ADDCMD=addcmd, $
-        ANNOTATECOLOR=annotatecolor, $
-        BOTTOM=bottom, $
-        CHARSIZE=charsize, $
-        CLAMP=clamp, $
-        COLOR=color, $
-        DIVISIONS=divisions, $
-        FONT=font, $
-        FORMAT=format, $
-        INVERTCOLORS=invertcolors, $
-        MAXRANGE=maxrange, $
-        MINOR=minor, $
-        MINRANGE=minrange, $
-        NCOLORS=ncolors, $
-        NEUTRALINDEX=neutralIndex, $
-        NODISPLAY=nodisplay, $
-        PALETTE=palette, $
-        POSITION=position, $
-        RANGE=range, $
-        REVERSE=reverse, $
-        RIGHT=right, $
-        TICKLEN=ticklen, $
-        TICKNAMES=ticknames, $
-        TITLE=title, $
-        TOP=top, $
-        VERTICAL=vertical, $
-        XLOG=xlog, $
-        YLOG=ylog, $
-        WINDOW=window, $
-        _EXTRA=extra
+        IF Keyword_Set(addcmd) THEN window = 0
+        void = cgQuery(COUNT=wincnt)
+        IF wincnt EQ 0 THEN cgWindow
+        cgWindow, 'cgColorbar', $
+            ANNOTATECOLOR=annotatecolor, $
+            BOTTOM=bottom, $
+            CHARSIZE=charsize, $
+            CLAMP=clamp, $
+            COLOR=color, $
+            DIVISIONS=divisions, $
+            FONT=font, $
+            FORMAT=format, $
+            INVERTCOLORS=invertcolors, $
+            MAXRANGE=maxrange, $
+            MINOR=minor, $
+            MINRANGE=minrange, $
+            NCOLORS=ncolors, $
+            NEUTRALINDEX=neutralIndex, $
+            NODISPLAY=nodisplay, $
+            PALETTE=palette, $
+            POSITION=position, $
+            RANGE=range, $
+            REVERSE=reverse, $
+            RIGHT=right, $
+            TICKLEN=ticklen, $
+            TICKNAMES=ticknames, $
+            TITLE=title, $
+            TOP=top, $
+            VERTICAL=vertical, $
+            XLOG=xlog, $
+            YLOG=ylog, $
+            REPLACECMD=Keyword_Set(window), $
+            ADDCMD=Keyword_Set(addcmd), $
+             _EXTRA=extra
+
+            
+         RETURN
+    ENDIF
     
+    ; Get the current color table vectors. 
+    TVLCT, r, g, b, /GET
+        
+    ; If you have a palette, load the colors now. Otherwise whatever colors
+    ; are in the current color table will be used.
+    IF N_Elements(palette) NE 0 THEN BEGIN
+        IF Size(palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
+        dims = Size(palette, /DIMENSIONS)
+        threeIndex = Where(dims EQ 3)
+        IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
+        IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
+        TVLCT, palette
+        TVLCT, rr, gg, bb, /Get
+    ENDIF
+    
+
+    ; Set up PostScript device for working with colors.
+    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
+    ; Save the current plot state.
+    bang_p = !P
+    bang_x = !X
+    bang_Y = !Y
+    bang_Z = !Z
+    bang_Map = !Map
+
+    ; Are scalable pixels available on the device?
+    IF (!D.Flags AND 1) NE 0 THEN scalablePixels = 1 ELSE scalablePixels = 0
+
+    ; Which release of IDL is this?
+    thisRelease = Float(!Version.Release)
+
+    ; Check and define keywords.
+    IF N_ELEMENTS(ncolors) EQ 0 THEN ncolors = 256
+    IF N_ELEMENTS(bottom) EQ 0 THEN bottom = 0B
+    IF N_Elements(palette) NE 0 THEN BEGIN
+       rrr = Congrid(rr, ncolors)
+       ggg = Congrid(gg, ncolors)
+       bbb = Congrid(bb, ncolors)
+       TVLCT, rrr, ggg, bbb, bottom
+    ENDIF
+    IF N_ELEMENTS(charsize) EQ 0 THEN charsize = !P.Charsize
+    IF N_ELEMENTS(format) EQ 0 THEN format = '(I0)'
+    IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
+    minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange)
+    maxrange = (N_ELEMENTS(maxrange) EQ 0) ? Float(ncolors) : Float(maxrange)
+    IF N_ELEMENTS(ticklen) EQ 0 THEN ticklen = 0.2
+    IF N_ELEMENTS(minor) EQ 0 THEN minor = 2
+    IF N_ELEMENTS(range) NE 0 THEN BEGIN
+       minrange = Float(range[0])
+       maxrange = Float(range[1])
+    ENDIF
+    IF N_ELEMENTS(divisions) EQ 0 THEN divisions = 6
+    IF N_ELEMENTS(font) EQ 0 THEN font = !P.Font
+    IF N_ELEMENTS(title) EQ 0 THEN title = ''
+    xlog = Keyword_Set(xlog)
+    ylog = Keyword_Set(ylog)
+
+    ; You can't have a format set *and* use ticknames.
+    IF N_ELEMENTS(ticknames) NE 0 THEN format = ""
+
+    ; If the format is NOT null, then format the ticknames yourself.
+    ; Can't assume minrange is less than maxrange.
+    IF (xlog XOR ylog) EQ 0 THEN BEGIN
+        IF format NE "" THEN BEGIN
+           IF minrange LT maxrange THEN BEGIN
+               step = (maxrange - minrange) / divisions
+               levels = minrange > (Indgen(divisions+1) * step + minrange) < maxrange
+               IF StrPos(StrLowCase(format), 'i') NE -1 THEN levels = Round(levels)
+               ticknames = String(levels, Format=format)
+               format = "" ; No formats allowed in PLOT call now that we have ticknames.
+           ENDIF ELSE BEGIN
+               step = (minrange - maxrange) / divisions
+               levels = maxrange > (Indgen(divisions+1) * step + maxrange) < minrange
+               levels = Reverse(levels)
+               IF StrPos(StrLowCase(format), 'i') NE -1 THEN levels = Round(levels)
+               ticknames = String(levels, Format=format)
+               format = "" ; No formats allowed in PLOT call now that we have ticknames.
+           ENDELSE
+        ENDIF
+    ENDIF
+
+    IF KEYWORD_SET(vertical) THEN BEGIN
+       bar = REPLICATE(1B,20) # BINDGEN(ncolors)
+       IF Keyword_Set(invertcolors) THEN bar = Reverse(bar, 2)
+       IF N_ELEMENTS(position) EQ 0 THEN BEGIN
+          position = [0.88, 0.1, 0.95, 0.9]
+       ENDIF ELSE BEGIN
+          IF position[2]-position[0] GT position[3]-position[1] THEN BEGIN
+             position = [position[1], position[0], position[3], position[2]]
+          ENDIF
+          IF position[0] GE position[2] THEN Message, "Position coordinates can't be reconciled."
+          IF position[1] GE position[3] THEN Message, "Position coordinates can't be reconciled."
+       ENDELSE
+    ENDIF ELSE BEGIN
+       bar = BINDGEN(ncolors) # REPLICATE(1B, 20)
+       IF Keyword_Set(invertcolors) THEN bar = Reverse(bar, 1)
+       IF N_ELEMENTS(position) EQ 0 THEN BEGIN
+          position = [0.1, 0.88, 0.9, 0.95]
+       ENDIF ELSE BEGIN
+          IF position[3]-position[1] GT position[2]-position[0] THEN BEGIN
+             position = [position[1], position[0], position[3], position[2]]
+          ENDIF
+          IF position[0] GE position[2] THEN Message, "Position coordinates can't be reconciled."
+          IF position[1] GE position[3] THEN Message, "Position coordinates can't be reconciled."
+       ENDELSE
+     ENDELSE
+
+     ; Scale the color bar.
+     IF N_Elements(clamp) NE 0 THEN BEGIN
+        IF N_Elements(clamp) NE 2 THEN Message, 'The CLAMP keyword must be a two-element array.'
+        byterange = BytScl(clamp, minrange, maxrange)
+        tempbar = BYTSCL(bar, TOP=(ncolors-1) < (255-bottom)) + bottom   
+        bar = BYTSCL(bar, TOP=(ncolors-1) < (255-bottom), MIN=byterange[0], MAX=byterange[1]) + bottom 
+        IF N_Elements(neutralIndex) EQ 0 THEN BEGIN
+            neutralBottom = (ncolors-1) < (255-bottom)
+            neutralTop = bottom
+        ENDIF ELSE BEGIN
+            neutralBottom = neutralIndex
+            neutralTop = neutralIndex
+        ENDELSE
+        i = Where(tempbar LT byterange[0], count)
+        IF count GT 0 THEN bar[i] = neutralBottom
+        i = Where(tempbar GT byterange[1], count)
+        IF count GT 0 THEN bar[i] = neutralTop
+        
+         
+     ENDIF ELSE BEGIN
+        bar = BYTSCL(bar, TOP=(ncolors-1) < (255-bottom)) + bottom
+     ENDELSE
+
+     IF Keyword_Set(reverse) THEN BEGIN
+       IF Keyword_Set(vertical) THEN bar = Reverse(bar,2) ELSE bar = Reverse(bar,1)
+     ENDIF
+
+    ; Get starting locations in NORMAL coordinates.
+    xstart = position[0]
+    ystart = position[1]
+
+    ; Get the size of the bar in NORMAL coordinates.
+    xsize = (position[2] - position[0])
+    ysize = (position[3] - position[1])
+
+       
+    ; Decomposed color off if device supports it.
+    SetDecomposedState, 0, CURRENTSTATE=currentState
+       
+    ; Display the color bar in the window. Sizing is
+    ; different for PostScript and regular display.
+    IF scalablePixels THEN BEGIN
+
+       ; Display the color bar.
+       TV, bar, xstart, ystart, XSIZE=xsize, YSIZE=ysize, /Normal
+
+    ENDIF ELSE BEGIN
+
+       bar = CONGRID(bar, CEIL(xsize*!D.X_VSize), CEIL(ysize*!D.Y_VSize))
+
+       ; Display the color bar.
+       TV, bar, xstart, ystart, /Normal
+
+    ENDELSE
+   
+    ; Restore the decomposed state if needed.
+    IF currentState THEN SetDecomposedState, 1
+
+    ; Get the current colortable.
+    TVLCT, rr, gg, bb, /GET
+    
+    ; Annotate the color bar.
+    IF (!D.Name EQ 'PS') AND N_Elements(annotateColor) EQ 0 THEN BEGIN
+        annotateColor = 'black'
+    ENDIF ELSE BEGIN
+        IF N_Elements(annotateColor) EQ 0 THEN BEGIN
+            IF (!D.Window GE 0) AND ~scalablePixels THEN BEGIN
+                pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                IF N_ELEMENTS(color) EQ 0 THEN BEGIN
+                    IF Total(pixel) EQ 765 THEN annotateColor = 'black'
+                    IF Total(pixel) EQ 0 THEN annotateColor = 'white'
+                    IF N_Elements(annotateColor) EQ 0 THEN annotateColor = 'opposite'
+                ENDIF ELSE BEGIN
+                     IF Size(color, /TNAME) EQ 'STRING' THEN annotateColor = color
+                ENDELSE
+            ENDIF ELSE annotateColor = 'opposite'
+        ENDIF 
+    ENDELSE
+    IF N_Elements(annotateColor) EQ 0 THEN annotateColor = 'opposite'
+    
+    ; If color is undefined, use the annotate color.
+    IF N_Elements(color) EQ 0 THEN BEGIN
+        IF Size(annotateColor, /TNAME) EQ 'STRING' THEN BEGIN
+            color = cgColor(annotateColor)
+        ENDIF ELSE BEGIN
+            color = annotateColor
+        ENDELSE
+    ENDIF 
+    
+    IF KEYWORD_SET(vertical) THEN BEGIN
+
+       IF KEYWORD_SET(right) THEN BEGIN
+
+          PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1, $
+             YTICKS=divisions, XSTYLE=1, YSTYLE=9, XTITLE="", YTITLE="", $
+             POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
+             XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', YMINOR=minor, _STRICT_EXTRA=extra, $
+             YTICKNAME=ticknames, FONT=font, YLOG=ylog
+
+          AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
+             YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
+             FONT=font, YTITLE=title, _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, YLOG=ylog
+
+       ENDIF ELSE BEGIN
+
+          PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1,  $
+             YTICKS=divisions, YSTYLE=1, XSTYLE=1, YTITLE=title, $
+             POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
+             XTICKFORMAT='(A1)', YTICKFORMAT=format, YMinor=minor, _STRICT_EXTRA=extra, $
+             YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font, XTITLE=""
+
+       ENDELSE
+
+    ENDIF ELSE BEGIN
+
+       IF KEYWORD_SET(top) THEN BEGIN
+
+          PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=divisions, $
+             YTICKS=1, XSTYLE=9, YSTYLE=1, $
+             POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
+             YTICKFORMAT='(A1)', XTICKFORMAT='(A1)', XTICKLEN=ticklen, $
+             XRANGE=[minrange, maxrange], FONT=font, XMINOR=minor, _STRICT_EXTRA=extra, $
+             XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE=""
+
+          AXIS, XTICKS=divisions, XSTYLE=1, COLOR=color, CHARSIZE=charsize, $
+             XTICKFORMAT=format, XTICKLEN=ticklen, XRANGE=[minrange, maxrange], XAXIS=1, $
+             FONT=font, XTITLE=title, _STRICT_EXTRA=extra, XCHARSIZE=charsize, XMINOR=minor, $
+             XTICKNAME=ticknames, XLOG=xlog, YTITLE=""
+
+       ENDIF ELSE BEGIN
+
+          PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=divisions, $
+             YTICKS=1, XSTYLE=1, YSTYLE=1, TITLE=title, $
+             POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
+             YTICKFORMAT='(A1)', XTICKFORMAT=format, XTICKLEN=ticklen, $
+             XRANGE=[minrange, maxrange], FONT=font, XMinor=minor, _STRICT_EXTRA=extra, $
+             XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE=""
+
+        ENDELSE
+
+    ENDELSE
+
+    ; Restore the previous plot and map system variables.
+    !P = bang_p
+    !X = bang_x
+    !Y = bang_y
+    !Z = bang_z
+    !Map = bang_map
+    
+    ; Set the current colors back.
+    IF !D.Name NE 'Z' THEN TVLCT, r, g, b
 END

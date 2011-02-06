@@ -1,6 +1,6 @@
 ;+
 ; NAME:
-;       LOADDATA
+;       cgDemoData
 ;
 ; PURPOSE:
 ;
@@ -32,15 +32,15 @@
 ;
 ;       If calling from the IDL command line:
 ;
-;          data = LoadData()
+;          data = cgDemoData()
 ;
 ;       If calling from within a widget program:
 ;
-;          data = LoadData(Cancel=cancelled, Group_Leader=event.top)
+;          data = cgDemoData(Cancel=cancelled, Group_Leader=event.top)
 ;
 ;       If you know which data set you want, you can load it directly:
 ;
-;          data = LoadData(7)
+;          data = cgDemoData(7)
 ;
 ; OPTIONAL INPUTS:
 ;
@@ -52,11 +52,11 @@
 ;       CANCEL : An output keyword that is 1 of the use clicked the CANCEL
 ;           button and 0 otherwise.
 ;
-;              data = Loaddata(Cancel=cancelled)
+;              data = cgDemoData(Cancel=cancelled)
 ;              IF cancelled THEN RETURN
 ;
 ;        GROUP_LEADER: The group leader of the widget. This keyword
-;           is required if you wish LOADDATA to be a modal widget program.
+;           is required if you wish cgDemoData to be a modal widget program.
 ;           (Which you *always* do when calling it from a widget program.)
 ;
 ;        IMAGES: Set this keyword if you only want to select 2D image
@@ -77,7 +77,7 @@
 ;
 ;       To load the world elevation data set:
 ;
-;       image = LoadData(7)
+;       image = cgDemoData(7)
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -355,14 +355,14 @@
     end
 
 
-FUNCTION LoadData_ReadData, number
+FUNCTION cgDemoData_ReadData, number
 
-COMMON LOADDATA_SEED, seed
+COMMON cgDemoData_SEED, seed
 
 ; Read a data set in the $IDL_DIR/examples/data subdirectory.
 
 IF N_Elements(number) EQ 0 THEN BEGIN
-   ok = Dialog_Message("Data set index number is required in LOADDATA.")
+   ok = Dialog_Message("Data set index number is required in cgDemoData.")
    RETURN, -1
 ENDIF
 
@@ -570,7 +570,7 @@ END
 
 
 
-PRO LoadData_CenterTLB, tlb
+PRO cgDemoData_CenterTLB, tlb
 
 Device, Get_Screen_Size=screenSize
 IF screenSize[0] GT 2000 THEN screenSize[0] = screenSize[0]/2 ; Dual monitors.
@@ -586,31 +586,31 @@ Widget_Control, tlb, XOffset = xCenter-xHalfSize, $
 
 END ;; CenterTLB
 
-PRO LOADDATA_CANCEL, event
+PRO cgDemoData_CANCEL, event
 WIDGET_CONTROL, event.top, /Destroy
 END
 ;------------------------------------------------------------------
 
 
 
-PRO LOADDATA_EVENT, event
+PRO cgDemoData_EVENT, event
 WIDGET_CONTROL, event.top, GET_UVALUE=ptr
 WIDGET_CONTROL, event.id, GET_UVALUE=indexValue
-*ptr = LoadData_ReadData(indexValue(event.index))
+*ptr = cgDemoData_ReadData(indexValue(event.index))
 WIDGET_CONTROL, event.top, /DESTROY
 END
 ;------------------------------------------------------------------
 
 
 
-FUNCTION LOADDATA, CANCEL=cancel, number, Group_Leader=groupleader, $
+FUNCTION cgDemoData, CANCEL=cancel, number, Group_Leader=groupleader, $
    Images=images
 
 On_Error, 1
 
 ; Function to read and return training data sets.
 
-COMMON LOADDATA_SEED, seed
+COMMON cgDemoData_SEED, seed
 
    ; If a parameter is passed in, read that data set and return.
 
@@ -621,7 +621,7 @@ IF N_Params() EQ 1 THEN BEGIN
    IF type GT 5 THEN Message, 'Supplied argument must be a number.'
    number = number - 1
    number = 0 > number < 24
-   data = LoadData_ReadData(number)
+   data = cgDemoData_ReadData(number)
    RETURN, data
 ENDIF
 
@@ -689,8 +689,8 @@ ENDIF ELSE BEGIN
 ENDELSE
 
 list = WIDGET_LIST(tlb, VALUE=value, SCR_XSIZE=400, YSIZE=listsize, UValue=indexValue)
-button = WIDGET_BUTTON(tlb, VALUE='Cancel', EVENT_PRO='LOADDATA_CANCEL')
-LoadData_CenterTLB, tlb
+button = WIDGET_BUTTON(tlb, VALUE='Cancel', EVENT_PRO='cgDemoData_CANCEL')
+cgDemoData_CenterTLB, tlb
 WIDGET_CONTROL, tlb, /REALIZE
 
    ; Create a pointer to store the data.
@@ -699,7 +699,7 @@ ptr = Ptr_New(-1)
 WIDGET_CONTROL, tlb, SET_UVALUE=ptr
 
 
-XMANAGER, 'loaddata', tlb
+XMANAGER, 'cgDemoData', tlb
 
    ; Get the data if it is there. If it is not there,
    ; user canceled or error occured.

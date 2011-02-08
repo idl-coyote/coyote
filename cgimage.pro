@@ -102,20 +102,12 @@
 ;     INTERPOLATE: Normally, nearest neightbor sampling is done when the image size changes.
 ;               Setting this keyword will cause linear interpolation to be used instead.
 ;
-;     KEEP_ASPECT: Normally, the image will be resized to fit the
-;               specified position in the window. If you prefer, you can
-;               force the image to maintain its aspect ratio in the window
-;               (although not its natural size) by setting this keyword.
-;               The image width is fitted first. If, after setting the
-;               image width, the image height is too big for the window,
-;               then the image height is fitted into the window. The
-;               appropriate values of the POSITION keyword are honored
-;               during this fitting process. Once a fit is made, the
-;               POSITION coordiates are re-calculated to center the image
-;               in the window. You can recover these new position coordinates
-;               as the output from the POSITION keyword.
+;     KEEP_ASPECT: An image uses the POSITION keyword to located itself in a graphics
+;               window. If this keyword is set, then the image arranges itself in the
+;               window in a manner that maintains its orginal aspect ratio (ratio of
+;               height to width). 
 ;
-;    LAYOUT:    This keyword specifies a grid with a graphics window and determines 
+;     LAYOUT:   This keyword specifies a grid with a graphics window and determines 
 ;               where the graphic should appear. The syntax of LAYOUT is a 3-element 
 ;               array: [ncolumns, nrows, location]. The grid is determined by the 
 ;               number of columns (ncolumns) by the number of rows (nrows). The location 
@@ -134,7 +126,7 @@
 ;               special case, the image will be drawn into its position in
 ;               the multi-plot window with no margins whatsoever. (The
 ;               default is to have a slight margin about the image to separate
-;               it from other images or graphics.
+;               it from other images or graphics. The default margin is 0.05.
 ;
 ;      MAXVALUE: If defined, the data is linearly scaled between MINVALUE
 ;               and MAXVALUE. MAXVALUE is set to MAX(image) by default.
@@ -181,6 +173,15 @@
 ;     NORMAL:   Setting this keyword means image position coordinates x and y
 ;               are interpreted as being in normalized coordinates. This keyword
 ;               is only valid if the TV keyword is set.
+;               
+;     OPOSITION: If the KEEP_ASPECT keyword is set, there is a good chance the
+;               image's actual position in the window will differ from its input
+;               position. This keyword will report the image's actual output
+;               position, after it has been displayed and its position adjusted
+;               to account for aspect ratio. Note that the POSITION keyword is 
+;               both an input and output keyword if the input position is passed
+;               as a variable. The OPOSITION keyword allows you to obtain the
+;               output position even if you pass the position in as a value.
 ;
 ;     OVERPLOT: Setting this keyword causes the POSITION keyword to be ignored
 ;               and the image is positioned in the location established by the
@@ -224,7 +225,7 @@
 ;               colorbars when using !P.MULTI. See the example below.
 ;
 ;    QUIET:      There are situations when you would prefer that cgIMAGE does not
-;                advertise itself by filling out the FSC_$TVIMAGE common block. For
+;                advertise itself by filling out the FSC_$CGIMAGE common block. For
 ;                example, if you are using cgImage to draw a color bar, it would
 ;                not be necessary. Setting this keyword means that cgImage just
 ;                goes quietly about it's business without bothering anyone else.
@@ -334,7 +335,8 @@
 ;     !P.Multi =0
 ;
 ; MODIFICATION HISTORY:
-;      Written by: David W. Fanning, from modifications to cgImage. 3 Feb 2011.
+;      Written by: David W. Fanning, from modifications to TVIMAGE. 3 Feb 2011.
+;      8 Feb 2011. Added OPOSITION keyword. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
@@ -507,7 +509,7 @@ PRO cgImage, image, x, y, $
    BOTTOM=bottom, $
    COLOR=color, $
    INTERPOLATE=interp, $
-   KEEP_ASPECT_RATIO=keep, $
+   KEEP_ASPECT_RATIO=keep_aspect, $
    LAYOUT=layout, $
    MARGIN=margin, $
    MAXVALUE=max, $
@@ -517,9 +519,10 @@ PRO cgImage, image, x, y, $
    NCOLORS=ncolors, $
    NOERASE=noerase, $
    NORMAL=normal, $
+   OPOSITION=oposition, $
+   OVERPLOT=overplot, $
    PALETTE=palette, $
    POSITION=position, $
-   OVERPLOT=overplot, $
    QUIET=quiet, $
    SAVE=save, $
    SCALE=scale, $
@@ -530,7 +533,7 @@ PRO cgImage, image, x, y, $
    XTITLE=plotxtitle, $
    YRANGE=plotyrange, $
    YTITLE=plotytitle, $
-   _EXTRA=extra
+   _REF_EXTRA=extra
 
     ; Error handling.
     Catch, theError
@@ -548,10 +551,10 @@ PRO cgImage, image, x, y, $
     ENDIF
     
     ; Set up a common block as input to TVINFO.
-    COMMON FSC_$TVIMAGE, _tvimage_xsize, _tvimage_ysize, $
-                         _tvimage_winxsize, _tvimage_winysize, $
-                         _tvimage_position, _tvimage_winID, $
-                         _tvimage_current
+    COMMON FSC_$CGIMAGE, _cgimage_xsize, _cgimage_ysize, $
+                         _cgimage_winxsize, _cgimage_winysize, $
+                         _cgimage_position, _cgimage_winID, $
+                         _cgimage_current
     
     ; Add the command to cgWindow?
     IF Keyword_Set(addcmd) THEN window = 1
@@ -575,7 +578,7 @@ PRO cgImage, image, x, y, $
                BOTTOM=bottom, $
                COLOR=color, $
                INTERPOLATE=interp, $
-               KEEP_ASPECT_RATIO=keep, $
+               KEEP_ASPECT_RATIO=keep_aspect, $
                LAYOUT=layout, $
                MARGIN=margin, $
                MAXVALUE=max, $
@@ -585,9 +588,10 @@ PRO cgImage, image, x, y, $
                NCOLORS=ncolors, $
                NOERASE=noerase, $
                NORMAL=normal, $
+               OPOSITION=oposition, $
+               OVERPLOT=overplot, $
                PALETTE=palette, $
                POSITION=position, $
-               OVERPLOT=overplot, $
                QUIET=quiet, $
                SAVE=save, $
                SCALE=scale, $
@@ -613,7 +617,7 @@ PRO cgImage, image, x, y, $
                BOTTOM=bottom, $
                COLOR=color, $
                INTERPOLATE=interp, $
-               KEEP_ASPECT_RATIO=keep, $
+               KEEP_ASPECT_RATIO=keep_aspect, $
                LAYOUT=layout, $
                MARGIN=margin, $
                MAXVALUE=max, $
@@ -623,9 +627,10 @@ PRO cgImage, image, x, y, $
                NCOLORS=ncolors, $
                NOERASE=noerase, $
                NORMAL=normal, $
+               OPOSITION=oposition, $
+               OVERPLOT=overplot, $
                PALETTE=palette, $
                POSITION=position, $
-               OVERPLOT=overplot, $
                QUIET=quiet, $
                SAVE=save, $
                SCALE=scale, $
@@ -649,6 +654,7 @@ PRO cgImage, image, x, y, $
     ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
     ; done BEFORE checking the LAYOUT properties.
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
+    keep_aspect = Keyword_Set(keep_aspect)
     
     ; Set up the layout, if necessary.
     IF N_Elements(layout) NE 0 THEN BEGIN
@@ -1074,7 +1080,7 @@ PRO cgImage, image, x, y, $
     ENDIF
     
     ; Maintain aspect ratio (ratio of height to width)?
-    IF KEYWORD_SET(keep) THEN BEGIN
+    IF KEYWORD_SET(keep_aspect) THEN BEGIN
     
        ; Find aspect ratio of image.
        ratio = FLOAT(imgYsize) / imgXSize
@@ -1100,6 +1106,9 @@ PRO cgImage, image, x, y, $
        position[3] = position[1] + (trialY/FLOAT(!D.Y_VSize))
     
     ENDIF
+    
+    ; Set the output position.
+    oposition = position
     
     ; Calculate the image size and start locations.
     xsize = Ceil((position[2] - position[0]) * !D.X_VSIZE)
@@ -1261,13 +1270,13 @@ PRO cgImage, image, x, y, $
     ; And only if the QUIET flag is not turned on.
     IF ~Keyword_Set(quiet) THEN BEGIN
         IF (!D.FLAGS AND 256) NE 0 THEN BEGIN
-            _tvimage_xsize = imgXsize
-            _tvimage_ysize = imgYsize
-            _tvimage_winID = !D.Window
-            _tvimage_winxsize = !D.X_Size
-            _tvimage_winysize = !D.Y_Size
-            _tvimage_position = position
-            _tvimage_current = 1
+            _cgimage_xsize = imgXsize
+            _cgimage_ysize = imgYsize
+            _cgimage_winID = !D.Window
+            _cgimage_winxsize = !D.X_Size
+            _cgimage_winysize = !D.Y_Size
+            _cgimage_position = position
+            _cgimage_current = 1
         ENDIF 
     ENDIF
     

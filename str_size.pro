@@ -165,7 +165,7 @@ XYOUTS, xpos, ypos, ALIGN=0.5, theString, WIDTH=thisWidth, $
    ; Size is perfect.
 IF thisWidth EQ targetWidth THEN BEGIN
    !P.Font = thisFont
-   theSize = strTrialSize; * Float(!D.Y_Size)/!D.X_Size
+   theSize = strTrialSize * Float(!D.Y_Size)/!D.X_Size
    IF currentWindow NE -1 THEN WSet, currentWindow
    IF N_Elements(pixID) NE 0 THEN WDelete, pixID
    RETURN, theSize

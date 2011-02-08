@@ -136,10 +136,10 @@ PRO cgImageInfo, image, position
      ENDIF
 
     ; Set up a common block to access cgImage informaton.
-    COMMON FSC_$TVIMAGE, _tvimage_xsize, _tvimage_ysize, $
-                         _tvimage_winxsize, _tvimage_winysize, $
-                         _tvimage_position, _tvimage_winID, $
-                         _tvimage_current
+    COMMON FSC_$CGIMAGE, _cgimage_xsize, _cgimage_ysize, $
+                         _cgimage_winxsize, _cgimage_winysize, $
+                         _cgimage_position, _cgimage_winID, $
+                         _cgimage_current
 
     ; Check to see if we can proceed. First see if we have an image.
     IF N_Elements(image) EQ 0 THEN Message, 'Must supply image for reporting values.'
@@ -153,33 +153,33 @@ PRO cgImageInfo, image, position
     IF (!D.FLAGS AND 256) EQ 0 THEN Message, 'cgImageInfo only works on devices that support windows.'
 
     ; Has a call to cgImage preceeded this call?
-    IF _tvimage_current EQ 0 THEN Message, 'Must call cgImage prior to calling cgImageInfo.'
+    IF _cgimage_current EQ 0 THEN Message, 'Must call cgImage prior to calling cgImageInfo.'
 
     ; Is the image window still open?
     Device, WINDOW_STATE=theWindows
-    IF theWindows[_tvimage_winID] EQ 0 THEN Message, 'The image window has been closed.'
+    IF theWindows[_cgimage_winID] EQ 0 THEN Message, 'The image window has been closed.'
 
     ; Is the image that you got here the same size as the cgImage image?
     void = Image_Dimensions(image, XSIZE=imgxsize, YSIZE=imgysize)
-    IF imgxsize NE _tvimage_xsize OR imgysize NE _tvimage_ysize THEN $
+    IF imgxsize NE _cgimage_xsize OR imgysize NE _cgimage_ysize THEN $
         Message, 'Image dimensions to not match those of last displayed image.'
 
     ; Make the image window the current graphics window.
     thisWindow = !D.Window
-    WSet, _tvimage_winID
+    WSet, _cgimage_winID
 
     ; Are the window sizes still right?
-    IF !D.X_Size NE _tvimage_winxsize OR !D.Y_Size NE _tvimage_winysize THEN BEGIN
+    IF !D.X_Size NE _cgimage_winxsize OR !D.Y_Size NE _cgimage_winysize THEN BEGIN
         WSet, thisWindow
         Message, 'The image window size has changed size from when image was last displayed.'
     ENDIF
 
     ; If a position was supplied, use that rather than the stored position.
-    IF N_Elements(position) NE 0 THEN thePos = position ELSE thePos = _tvimage_position
+    IF N_Elements(position) NE 0 THEN thePos = position ELSE thePos = _cgimage_position
 
     ; Print instructions to the user.
     Print, ''
-    Print, 'Click cursor in image window (window ' + StrTrim(_tvimage_winID,2) + ') to get image values.'
+    Print, 'Click cursor in image window (window ' + StrTrim(_cgimage_winID,2) + ') to get image values.'
     Print, 'Use LEFT mouse buton to inquire.'
     Print, 'Use RIGHT mouse button to exit program.'
     Print, ''
@@ -209,8 +209,8 @@ PRO cgImageInfo, image, position
        IF inside THEN BEGIN
 
           ; Create vectors for locating image dimensions with VALUE_LOCATE
-          xvec = Scale_Vector(Findgen(_tvimage_xsize+1), thePos[0], thePos[2])
-          yvec = Scale_Vector(Findgen(_tvimage_ysize+1), thePos[1], thePos[3])
+          xvec = Scale_Vector(Findgen(_cgimage_xsize+1), thePos[0], thePos[2])
+          yvec = Scale_Vector(Findgen(_cgimage_ysize+1), thePos[1], thePos[3])
           xpixel = Value_Locate(xvec, x)
           ypixel = Value_Locate(yvec, y)
 

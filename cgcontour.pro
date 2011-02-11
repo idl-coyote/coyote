@@ -528,8 +528,8 @@ PRO cgContour, data, x, y, $
   
     ; Do you need to calculate levels.
     IF N_Elements(levels) EQ 0 THEN BEGIN
-        minData = Min(contourData, /NAN)
-        maxData = Max(contourData, /NAN)
+        minData = Min(contourData, /NAN, MAX=maxData)
+        IF Size(minData ,/TYPE) EQ 3 THEN minData = Float(minData)     ;Avoid 16 bit integer overflow
         levels = ((maxData - minData) / Float(nlevels)) * Indgen(nlevels) + minData
     ENDIF
     
@@ -578,7 +578,7 @@ PRO cgContour, data, x, y, $
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = cgColor(axiscolor)
     IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
     IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
-    IF (Size(c_colors, /TYPE) LE 2) AND (Size(c_colors, /TYPE) NE 0) THEN con_colors = StrTrim(Fix(c_colors),2)
+    IF (Size(con_colors, /TYPE) LE 2) && (Size(con_colors, /TYPE) NE 0) THEN con_colors = StrTrim(Fix(con_colors),2)
     IF Size(con_colors, /TNAME) EQ 'STRING' THEN con_colors = cgColor(con_colors)
     
     ; Do you need a PostScript background color? Lot's of problems here!

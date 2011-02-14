@@ -557,7 +557,10 @@ PRO cgImage, image, x, y, $
                          _cgimage_current
     
     ; Add the command to cgWindow?
-    IF Keyword_Set(addcmd) THEN window = 1
+    IF Keyword_Set(addcmd) THEN BEGIN
+        noerase = 1
+        window = 1
+    ENDIF
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
         currentWindow = cgQuery(/CURRENT, COUNT=wincnt)

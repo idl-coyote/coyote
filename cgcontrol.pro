@@ -78,6 +78,18 @@
 ;         Set this keyword to 1 to exectute the commands in the window's command list. 
 ;         Set this keyword to 0 to prevent command excution. This is useful, for example,
 ;         if you want to load commands without having them be executed immediately.
+;     get_keycmdindex: in, optional, type=integer
+;         Set this value to the number of the command (zero-based) for which you want to
+;         obtain the keyword value. If not provided, the first command (command 0) is searched.
+;     get_keyword: in, optional, type=string
+;         The name of the keyword whose value you want to return in get_keyvalue. The name must
+;         be spelled EXACTLY as you used the keyword, expect that case does not matter. The string
+;         is converted to UPPERCASE to locate the proper keyword. Although it was my intention to use
+;         this to retrieve output keyword values, this is not possible using cgWindow do to the way
+;         Call_Procedure and keyword inheritance work.
+;     get_keyvalue: out, optional, type=any
+;         The value of the keyword specified in get_keyword. If the keyword cannot be found, this
+;         value will be undefined. You MUST check for this before using the return variable in your program.
 ;     im_transparent: in, optional, type=boolean, default=0
 ;         Set this keyword to allow ImageMagick to create transparent backgrounds when it
 ;         makes raster image files from PostScript output.
@@ -107,6 +119,8 @@
 ;          Set this keyword to configure PSCONFIG to produce encapsulated PostScript output by default.
 ;     ps_metric: in, optional, type=boolean, default=0
 ;          Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
+;     ps_quiet: in, optional, type=boolean, default=0
+;          Set this keyword to set the QUIET keyword on PS_Start.
 ;     title: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be a window title. All
 ;         matching is done in uppercase characters.
@@ -141,6 +155,7 @@
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;     Added CREATE_PS keyword. 16 Feb 2011. DWF.
+;     Added PS_QUIET, GET_KEYCMDINDEX, GET_KEYWORD, and GET_KEYVALUE keywords. 17 Feb 2011. DWF.
 ;-
 PRO cgControl, selection, $
     ALL=all, $                                    ; Apply the command operation to all the commands (i.e., DeleteCMD)
@@ -153,6 +168,9 @@ PRO cgControl, selection, $
     DESTROY=destroy, $                            ; Destroy the window. Should be called alone or with the ALL keyword.
     ERASEIT=eraseit, $                            ; Set the erase feature of the window.
     EXECUTE=execute, $                            ; Execute the commands immediately. 
+    GET_KEYCMDINDEX = get_keycmdindex, $          ; Gets the keyword value out of this command. Counting starts at 0.
+    GET_KEYWORD=get_keyword, $                    ; Get this keyword value.
+    GET_KEYVALUE=get_keyvalue, $                  ; Returns the keyword value. Will be undefined if the keyword is not found.
     LISTCMD=listCmd, $                            ; List a command or ALL commands.
     MULTI=multi, $                                ; Set the multiple property of the window. Identical to !P.Multi.
     OBJECT=object, $                              ; If this keyword is set, the selection is an object reference.
@@ -170,6 +188,7 @@ PRO cgControl, selection, $
     PS_ENCAPSULATED=ps_encapsulated, $            ; Create Encapsulated PostScript output.
     PS_FONT=ps_font, $                            ; Select the font for PostScript output.
     PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
+    PS_QUIET=ps_quiet, $                          ; Select the QUIET keyword on PS_Start.
     PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
     PS_TT_FONT=ps_tt_font                         ; Select the true-type font to use for PostScript output.
     
@@ -288,6 +307,7 @@ PRO cgControl, selection, $
         PS_ENCAPSULATED = ps_encapsulated, $            ; Create encapsulated PostScript output.
         PS_FONT=ps_font, $                              ; Select the font for PostScript output.
         PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.
+        PS_QUIET=ps_quiet, $                            ; Setlect the QUIET keywords for PS_Start.
         PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
         PS_TT_FONT=ps_tt_font                           ; Select the true-type font to use for PostScript output.
         
@@ -315,4 +335,15 @@ PRO cgControl, selection, $
        IF Obj_Valid(objref[index]) THEN objref[index] -> AutoPostScriptFile, filename 
    ENDIF
     
+   ; Need a keyword?
+   IF N_Elements(get_keyword) NE 0 THEN BEGIN
+      IF Size(get_keyword, /TNAME) NE 'STRING' THEN Message, 'Keyword name must be a string variable.'
+      IF Obj_Valid(objref[index]) THEN BEGIN
+      
+            ; Look for the keyword in the first command, unless told otherwise.
+            IF N_Elements(get_keycmdindex) EQ 0 THEN get_keycmdindex = 0
+            keywordValue = objref[index] -> GetCommandKeyword(get_keyword, get_keycmdindex, SUCCESS=success)
+            IF success THEN get_keyvalue = keywordValue
+      ENDIF
+   ENDIF
 END 

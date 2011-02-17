@@ -84,6 +84,8 @@
 ;          Set this to the !P.Font value to use for creating PostScript files.
 ;     ps_metric: in, optional, type=boolean, default=0
 ;          Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
+;     ps_quiet: in, optional, type=boolean, default=0
+;          Set this keyword to suppress output messages from PS_Start and PS_End.
 ;     ps_scale_factor: in, optional, type=float, default=1.0
 ;          Set this keyword to the PostScript scale factor you want to use for PostScript output.
 ;     ps_tt_font: in, optional, type=string, default="Helvetica"
@@ -128,6 +130,7 @@
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Small bug fixes, and addition of PS_QUIET keyword. 17 Feb 2011. DWF.
 ;-
 PRO cgWindow_SetDefs, $
    Reset=reset, $                                  ; Reset to original values.
@@ -158,6 +161,7 @@ PRO cgWindow_SetDefs, $
    PS_Encapsulated = ps_encapsulated, $            ; Create Encapsulated PostScript output.
    PS_FONT=ps_font, $                              ; Select the font for PostScript output.
    PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.
+   PS_QUIET=ps_quiet, $                            ; Select the QUIET keyword for PS_START.
    PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
    PS_TT_FONT=ps_tt_font                           ; Select the true-type font to use for PostScript output.
    
@@ -192,6 +196,7 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(ps_encapsulated) EQ 0 THEN ps_encapsulated = 0
         IF N_Elements(ps_charsize) EQ 0 THEN ps_charsize = 0.0
         IF N_Elements(ps_font) EQ 0 THEN ps_font = 0
+        IF N_Elements(ps_quiet) EQ 0 THEN ps_quiet = 0
         IF N_Elements(ps_scale_factor) EQ 0 THEN ps_scale_factor = 1.0
         IF N_Elements(ps_tt_font) EQ 0 THEN ps_tt_font = 'Helvetica'
 
@@ -218,6 +223,7 @@ PRO cgWindow_SetDefs, $
            PS_Encapsulated:ps_encapsulated, $            ; Create Encapsulated PostScript output.
            PS_Charsize:ps_charsize, $                    ; PostScript character size.
            PS_Font:ps_font, $                            ; PostScript font to use.
+           PS_Quiet:ps_quiet, $                          ; PostScript QUIET keyword on PS_Start.
            PS_Scale_Factor:ps_scale_factor, $            ; PostScript scale_factor
            PS_TT_Font:ps_tt_font }                       ; PostScript true-type font.
            
@@ -233,7 +239,7 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(eraseit) NE 0 THEN !FSC_WINDOW_DEFAULTS.eraseit = eraseit
         IF N_Elements(multi) NE 0 THEN !FSC_WINDOW_DEFAULTS.multi = multi
         IF N_Elements(xomargin) NE 0 THEN !FSC_WINDOW_DEFAULTS.xomargin = xomargin
-        IF N_Elements(yomargin) NE 0 THEN !FSC_WINDOW_DEFAULTS.yomargin = oymartin
+        IF N_Elements(yomargin) NE 0 THEN !FSC_WINDOW_DEFAULTS.yomargin = oymargin
         IF N_Elements(xsize) NE 0 THEN !FSC_WINDOW_DEFAULTS.xsize = xsize
         IF N_Elements(ysize) NE 0 THEN !FSC_WINDOW_DEFAULTS.ysize = ysize
         IF N_Elements(title) NE 0 THEN !FSC_WINDOW_DEFAULTS.title = title
@@ -241,14 +247,15 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(ypos) NE 0 THEN !FSC_WINDOW_DEFAULTS.ypos = ypos
         IF N_Elements(palette) NE 0 THEN !FSC_WINDOW_DEFAULTS.palette = palette
         IF N_Elements(im_transparent) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_transparent = Keyword_Set(im_transparent)
-        IF N_Elements(im_density) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_density = density
-        IF N_Elements(im_resize) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_resize = resize
+        IF N_Elements(im_density) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_density = im_density
+        IF N_Elements(im_resize) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_resize = im_resize
         IF N_Elements(im_options) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_options = im_options
         IF N_Elements(ps_delete) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_delete = Keyword_Set(ps_delete)
         IF N_Elements(ps_metric) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_metric = Keyword_Set(ps_metric)
         IF N_Elements(ps_encapsulated) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_encapsulated = Keyword_Set(ps_encapsulated)
         IF N_Elements(ps_charsize) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_charsize = ps_charsize
         IF N_Elements(ps_font) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_font = ps_font
+        IF N_Elements(ps_quiet) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_quiet = ps_quiet
         IF N_Elements(ps_scale_factor) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_scale_factor = ps_scale_factor
         IF N_Elements(ps_tt_font) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_tt_font = ps_tt_font
         

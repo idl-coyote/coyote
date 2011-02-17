@@ -296,7 +296,7 @@ PRO cgContour, data, x, y, $
                 YSTYLE=ystyle, $
                 YTHICK=ythick, $
                 ADDCMD=1, $
-                _Extra=extra
+                _Ref_Extra=extra
              RETURN
        ENDIF
         
@@ -330,7 +330,7 @@ PRO cgContour, data, x, y, $
             YSTYLE=ystyle, $
             YTHICK=ythick, $
             REPLACECMD=replaceCmd, $
-            _Extra=extra
+            _Ref_Extra=extra
             
          RETURN
     ENDIF

@@ -84,6 +84,10 @@ PRO FSC_CmdWindow::AutoPostScriptFile, filename
         RETURN
     ENDIF
     
+    ; Make this window the current graphics windows.
+    currentWindow = !D.Window
+    WSet, self.wid
+
     IF N_Elements(filename) EQ 0 THEN filename='cgwindow.ps'
 
     ; Allow the user to configure the PostScript file.
@@ -94,6 +98,7 @@ PRO FSC_CmdWindow::AutoPostScriptFile, filename
         SCALE_FACTOR=self.ps_scale_factor, $
         CHARSIZE=self.ps_charsize, $
         FONT=self.ps_font, $
+        QUIET=self.ps_quiet, $
         TT_FONT=self.ps_tt_font
     
     ; Execute the graphics commands.
@@ -101,6 +106,9 @@ PRO FSC_CmdWindow::AutoPostScriptFile, filename
     
     ; Clean up.
     PS_End
+
+    ; Set the window index number back.
+    IF WindowAvailable(curentWindow) THEN WSet, currentWindow ELSE WSet, -1
 
 END ;----------------------------------------------------------------------------------------------------------------
 ;+
@@ -122,6 +130,10 @@ PRO FSC_CmdWindow::CreatePostScriptFile, event
         void = Error_Message()
         RETURN
     ENDIF
+    
+    ; Make this window the current graphics windows.
+    currentWindow = !D.Window
+    WSet, self.wid
 
     ; Allow the user to configure the PostScript file.
     PS_Start, /GUI, $
@@ -131,6 +143,7 @@ PRO FSC_CmdWindow::CreatePostScriptFile, event
         SCALE_FACTOR=self.ps_scale_factor, $
         CHARSIZE=self.ps_charsize, $
         FONT=self.ps_font, $
+        QUIET=self.ps_quiet, $
         TT_FONT=self.ps_tt_font
     IF cancelled THEN RETURN
     
@@ -139,6 +152,9 @@ PRO FSC_CmdWindow::CreatePostScriptFile, event
     
     ; Clean up.
     PS_End
+    
+    ; Set the window index number back.
+    IF WindowAvailable(curentWindow) THEN WSet, currentWindow ELSE WSet, -1
 
 END ;----------------------------------------------------------------------------------------------------------------
 
@@ -245,7 +261,6 @@ PRO FSC_CmdWindow::ExecuteCommands, KEYWORDS=keywords
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
-        ;void = Dialog_Message(!Error_State.MSG)
         !P.Multi = thisMulti
         !X.OMargin = thisXOmargin
         !Y.OMargin = thisYOmargin
@@ -339,6 +354,53 @@ PRO FSC_CmdWindow::ExecuteCommands, KEYWORDS=keywords
 END ;----------------------------------------------------------------------------------------------------------------
 
 
+;+
+; :Description:
+;     This method retrieves properties from the object.
+;-
+FUNCTION FSC_CmdWindow::GetCommandKeyword, keyword, cmdIndex, SUCCESS=success
+
+    Compile_Opt idl2
+
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        void = Error_Message()
+        success = 0
+        RETURN, success
+    ENDIF
+    
+    ; Assume failure.
+    success = 0
+
+    IF N_Params() NE 2 THEN BEGIN
+        Print, 'Useage: keywordValue = obj -> GetCommandKeyword(keywordName, commandIndex)'
+        RETURN, ""
+    ENDIF
+    IF Size(keyword, /TNAME) NE 'STRING' THEN Message, 'Keyword name must be a string variable.'
+    
+    ; Make sure command index is in the range.
+    cmdIndex = 0 > cmdIndex < ((self.cmds -> Get_Count()) - 1)
+    
+    ; Get the keywords for the proper command.
+    cmdObject = self.cmds -> Get_Item(cmdIndex, /DEREFERENCE)
+    keywordStruct = cmdObject -> Get_Keywords(HAS_KEYWORDS=has_keywords)
+    
+    ; Does this command have keywords?
+    retValue = ""
+    IF has_keywords THEN BEGIN
+        tagNames = Tag_Names(keywordStruct)
+        keyIndex = Where(tagNames EQ StrUpCase(keyword), nameCount)
+        IF nameCount GT 0 THEN BEGIN
+            retvalue = keywordStruct.(nameCount)
+            success = 1
+        ENDIF ELSE Message, 'This command has no keyword named: ' + keyword
+    ENDIF ELSE Message, 'This command has no keywords.'
+
+    RETURN, retValue
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;
 ;+
 ; :Description:
 ;     This method retrieves properties from the object.
@@ -642,6 +704,7 @@ PRO FSC_CmdWindow::SaveAsRaster, event
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
                 FONT=self.ps_font, $
+                QUIET=self.ps_quiet, $
                 TT_FONT=self.ps_tt_font
            
            ; Draw the graphics.
@@ -837,6 +900,7 @@ PRO FSC_CmdWindow::SetProperty, $
     PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
     PS_FONT=ps_font, $                            ; Select the font for PostScript output.
     PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
+    PS_QUIET=ps_quiet, $                          ; Select the QUIET keyword for PS_Start.
     PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
     PS_TT_FONT=ps_tt_font, $                      ; Select the true-type font to use for PostScript output.
     _EXTRA=extra
@@ -884,6 +948,7 @@ PRO FSC_CmdWindow::SetProperty, $
     IF N_Elements(ps_encapsulated) NE 0 THEN self.ps_encapsulated = ps_encapsulated
     IF N_Elements(ps_charsize) NE 0 THEN self.ps_charsize = ps_charsize
     IF N_Elements(ps_font) NE 0 THEN self.ps_font = ps_font
+    IF N_Elements(ps_quiet) NE 0 THEN self.ps_quiet = ps_quiet
     IF N_Elements(ps_scale_factor) NE 0 THEN self.ps_scale_factor = ps_scale_factor
     IF N_Elements(ps_tt_font) NE 0 THEN self.ps_tt_font = ps_tt_font
     
@@ -971,6 +1036,7 @@ FUNCTION FSC_CmdWindow::Init, $
        PS_Encapsulated = d_ps_encapsulated, $            ; Create Encapsulated PostScript output.    
        PS_FONT = d_ps_font, $                            ; Select the font for PostScript output.
        PS_CHARSIZE = d_ps_charsize, $                    ; Select the character size for PostScript output.
+       PS_QUIET = d_ps_quiet, $                          ; Select the QUIET keyword for PS_Start.
        PS_SCALE_FACTOR = d_ps_scale_factor, $            ; Select the scale factor for PostScript output.
        PS_TT_FONT = d_ps_tt_font                         ; Select the true-type font to use for PostScript output.
         
@@ -1114,6 +1180,7 @@ FUNCTION FSC_CmdWindow::Init, $
     self.ps_metric = d_ps_metric
     self.ps_charsize = d_ps_charsize
     self.ps_font = d_ps_font
+    self.ps_quiet = d_ps_quiet
     self.ps_scale_factor = d_ps_scale_factor
     self.ps_tt_font = d_ps_tt_font
 
@@ -1224,6 +1291,7 @@ PRO FSC_CmdWindow__Define, class
               ps_metric: 0L, $              ; Metric measurements in PostScript.
               ps_charsize: 0.0, $           ; The character size to use for PostScript output.
               ps_font: 0, $                 ; The PostScript font to use.
+              ps_quiet: 0, $                ; Select the QUIET keyword for PS_Start.
               ps_scale_factor: 0, $         ; The PostScript scale factor.
               ps_tt_font: "", $             ; The name of a true-type font to use for PostScript output.
 
@@ -1276,6 +1344,17 @@ PRO FSC_Window_Command::CreateCommandStruct, structName, Quiet=quiet
     IF NOT Keyword_Set(quiet) THEN $
         PRINT, 'Created command struct variable ', structName, ' in IDL $MAIN level.'
 
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+FUNCTION FSC_Window_Command::Get_Keywords, HAS_KEYWORDS=has_keywords
+    IF Ptr_Valid(self.keywords) THEN BEGIN
+        has_keywords = 1
+        RETURN, *self.keywords 
+    ENDIF ELSE BEGIN
+        has_keywords = 0
+        RETURN, Ptr_New()
+    ENDELSE
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -1647,6 +1726,8 @@ END ;---------------------------------------------------------------------------
 ;        Added WXOMARGIN and WYOMARGIN keywords. 28 Jan 2011. DWF.
 ;        Numerous changes leading up to official release. 4 Feb 2011. DWF.
 ;        Added workaround for UNIX bug for draw widget creation. 5 Feb 2011. DWF.
+;        Corrected a window aspect ratio problem with PostScript output by making the
+;           window the current window before calling PS_Start. 17 Feb 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.

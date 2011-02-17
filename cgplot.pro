@@ -237,7 +237,7 @@ PRO cgPlot, x, y, $
             SYMSIZE=symsize, $
             TRADITIONAL=traditional, $
             ADDCMD=1, $
-           _Extra=extra
+           _Ref_Extra=extra
              RETURN
        ENDIF
         
@@ -263,7 +263,7 @@ PRO cgPlot, x, y, $
             SYMSIZE=symsize, $
             TRADITIONAL=traditional, $
             REPLACECMD=replaceCmd, $
-           _Extra=extra
+           _Ref_Extra=extra
             
          RETURN
     ENDIF

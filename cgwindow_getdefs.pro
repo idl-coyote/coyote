@@ -101,6 +101,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 29 January 2011. DWF.
+;        Added PS_QUIET keyword. 17 Feb 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -131,6 +132,7 @@ PRO cgWindow_GetDefs, $
    PS_Encapsulated = ps_encapsulated, $            ; Create Encapsulated PostScript output.
    PS_FONT=ps_font, $                              ; Select the font for PostScript output.
    PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.
+   PS_QUIET=ps_quiet, $                            ; The QUIET keyword to PS_Start.
    PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
    PS_TT_FONT=ps_tt_font                           ; Select the true-type font to use for PostScript output.
    
@@ -165,6 +167,7 @@ PRO cgWindow_GetDefs, $
    IF Arg_Present(ps_encapsulated) THEN ps_encapsulated =!FSC_WINDOW_DEFAULTS.ps_encapsulated
    IF Arg_Present(ps_charsize) THEN ps_charsize =!FSC_WINDOW_DEFAULTS.ps_charsize
    IF Arg_Present(ps_font) THEN ps_font =!FSC_WINDOW_DEFAULTS.ps_font
+   IF Arg_Present(ps_quiet) THEN ps_quiet =!FSC_WINDOW_DEFAULTS.ps_quiet
    IF Arg_Present(ps_scale_factor) THEN ps_scale_factor =!FSC_WINDOW_DEFAULTS.ps_scale_factor
    IF Arg_Present(ps_tt_font) THEN ps_tt_font =!FSC_WINDOW_DEFAULTS.ps_tt_font
    

@@ -218,7 +218,7 @@ PRO cgSurf, data, x, y, $
     XSTYLE=xstyle, $
     YSTYLE=ystyle, $
     ZSTYLE=zstyle, $
-    _Extra=extra
+    _Ref_Extra=extra
     
     Compile_Opt idl2
 
@@ -276,7 +276,7 @@ PRO cgSurf, data, x, y, $
                 YSTYLE=ystyle, $
                 ZSTYLE=zstyle, $
                 ADDCMD=1, $
-                _Extra=extra
+                _Ref_Extra=extra
                 
             RETURN
         ENDIF
@@ -307,7 +307,7 @@ PRO cgSurf, data, x, y, $
             YSTYLE=ystyle, $
             ZSTYLE=zstyle, $
             REPLACECMD=replaceCmd, $
-            _Extra=extra
+            _Ref_Extra=extra
             
          RETURN
     ENDIF

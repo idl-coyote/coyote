@@ -605,7 +605,7 @@ PRO cgImage, image, x, y, $
                YRANGE=plotyrange, $
                YTITLE=plotytitle, $
                ADDCMD=1, $
-               _EXTRA=extra
+               _REF_EXTRA=extra
                  RETURN
         ENDIF
         
@@ -644,7 +644,7 @@ PRO cgImage, image, x, y, $
                YRANGE=plotyrange, $
                YTITLE=plotytitle, $
                REPLACECMD=replacecmd, $
-               _EXTRA=extra
+               _REF_EXTRA=extra
              RETURN
     ENDIF
     

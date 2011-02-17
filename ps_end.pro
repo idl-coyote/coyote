@@ -152,6 +152,7 @@
 ;       Added better handing of errors coming from FIXPS after update to FIXPS. 15 November 2010. DWF.
 ;       Added DELETE_PS keyword. 16 Jan 2011. DWF.
 ;       Better protection of code from not finding ImageMagick. 17 Jan 2011. DWF.
+;       Collecting result of SPAWN command. Only printing if QUIET=0. 16 Feb 2011. DWF.
 ;- 
 ;
 ;******************************************************************************************;
@@ -272,8 +273,15 @@ PRO PS_END, $
                     THEN cmd = cmd + ' "' + 'PNG24:' +outfilename + '"' $
                     ELSE cmd = cmd + ' "' + outfilename + '"'
                 IF ~ps_struct.quiet THEN Print, 'ImageMagick CONVERT command: ',  cmd
-                SPAWN, cmd
-                
+                SPAWN, cmd, result, err_result
+                IF ~ps_struct.quiet THEN BEGIN
+                    IF N_Elements(result) NE 0 THEN BEGIN
+                        FOR k=0,N_Elements(result)-1 DO Print, result[k]
+                    ENDIF
+                    IF N_Elements(err_result) NE 0 THEN BEGIN
+                        FOR k=0,N_Elements(err_result)-1 DO Print, err_result[k]
+                    ENDIF
+                ENDIF
                 ; Have you been asked to delete the PostScript file?
                 IF Keyword_Set(delete_ps) THEN BEGIN
                     IF outfilename NE ps_filename THEN File_Delete, ps_filename

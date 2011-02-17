@@ -60,6 +60,9 @@
 ;         This keyword applies only to keywords that manipulate commands in the command
 ;         list (e.g., DeleteCmd). It specifies the command index number of the command 
 ;         for which the action is desired.
+;     create_ps: in, optional, type='string', default='cgwindow.ps'
+;          Set this keyword to the name of a PostScript file to create automatically from the window.
+;          Using this keyword is a way to create a PostScript file programmatically from a cgWindow application.
 ;     delay: in, optional, type=float
 ;         Set this keyword to the amount of "delay" you want between commands in the command list.
 ;     deletecmd: in, optional, type=boolean
@@ -137,11 +140,13 @@
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Added CREATE_PS keyword. 16 Feb 2011. DWF.
 ;-
 PRO cgControl, selection, $
     ALL=all, $                                    ; Apply the command operation to all the commands (i.e., DeleteCMD)
     BACKGROUND=background, $                      ; Sets the background color of the window
     CMDINDEX=cmdIndex, $                          ; Apply the command operation to this command only.
+    CREATE_PS=create_ps, $                        ; Set this to the name of a PostScript file that is produced from the commands in the window.
     PALETTE=palette, $                            ; The color palette (color vectors) associated with this window.
     DELAY=delay, $                                ; Set the delay between command execution.
     DELETECMD=deleteCmd, $                        ; Delete a command. If ALL is set, delete all commands.
@@ -291,6 +296,23 @@ PRO cgControl, selection, $
        IF Keyword_Set(execute) THEN BEGIN
              IF ~update THEN IF Obj_Valid(objref[index]) THEN objref[index] -> ExecuteCommands
        ENDIF 
+   ENDIF
+   
+   ; Are you creating a PostScript file?
+   IF N_Elements(create_ps) NE 0 THEN BEGIN
+   
+       typeName = Size(create_ps, /TNAME)
+       CASE 1 OF
+          typeName EQ 'STRING': BEGIN
+            filename = create_ps
+            END
+          (typeName EQ 'INT') && (create_ps[0] EQ 1): BEGIN
+               filename = 'cgwindow.ps'
+            END
+          ELSE: Message, 'Incorrect input to SEND_POSTSCRIPT keyword.'
+       ENDCASE
+       
+       IF Obj_Valid(objref[index]) THEN objref[index] -> AutoPostScriptFile, filename 
    ENDIF
     
 END 

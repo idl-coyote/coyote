@@ -66,6 +66,45 @@ END ;---------------------------------------------------------------------------
 
 ;+
 ; :Description:
+;     Provides a programmatic way to create a PostScript file from the window.
+;     Call by setting the Send_PostScript keyword with cgControl.
+;
+; :Params:
+;     filename:  The name of the PostScript file.
+;-
+PRO FSC_CmdWindow::AutoPostScriptFile, filename
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+    
+    IF N_Elements(filename) EQ 0 THEN filename='cgwindow.ps'
+
+    ; Allow the user to configure the PostScript file.
+    PS_Start, GUI=0, $
+        FILENAME=filename, $
+        EUROPEAN=self.ps_metric, $
+        ENCAPSULATED=self.ps_encapsulated, $
+        SCALE_FACTOR=self.ps_scale_factor, $
+        CHARSIZE=self.ps_charsize, $
+        FONT=self.ps_font, $
+        TT_FONT=self.ps_tt_font
+    
+    ; Execute the graphics commands.
+    self -> ExecuteCommands
+    
+    ; Clean up.
+    PS_End
+
+END ;----------------------------------------------------------------------------------------------------------------
+;+
+; :Description:
 ;     Sends the window commands to a PostScript file.
 ;
 ; :Params:
@@ -200,7 +239,7 @@ END ;---------------------------------------------------------------------------
 ; :Description:
 ;     This method executes the commands on the command list.
 ;-
-PRO FSC_CmdWindow::ExecuteCommands
+PRO FSC_CmdWindow::ExecuteCommands, KEYWORDS=keywords
 
     Catch, theError
     IF theError NE 0 THEN BEGIN
@@ -250,7 +289,12 @@ PRO FSC_CmdWindow::ExecuteCommands
     ; Execute the commands.
     FOR j=0,n_cmds-1 DO BEGIN
         thisCmdObj = self.cmds -> Get_Item(j, /DEREFERENCE)
-        thisCmdObj -> Draw, SUCCESS=success
+        
+        ; Execute the command. This will update output keywords, possibly.
+        thisCmdObj -> Draw, SUCCESS=success, KEYWORDS=keywords
+        
+        ; Update the keyword structure.
+        IF success && (N_Elements(keywords) NE 0) THEN thisCmdObj -> UpdateKeywordStruct, keywords
 
         ; Did you successfully draw this command?
         IF ~success THEN BEGIN
@@ -396,12 +440,10 @@ END ;---------------------------------------------------------------------------
 ;     This method lists the command indicated by the command index. In the
 ;     absence of the command index, all commands are listed.
 ;-
-PRO FSC_CmdWindow::ListCommand, cmdIndex
-
-    ; List the commands in the command window.
+PRO FSC_CmdWindow::ListCommand, cmdIndex, CREATECOMMANDSTRUCT=createCommandStruct
 
     Compile_Opt idl2
-    
+
     ; Error handling.
     Catch, theError
     IF theError NE 0 THEN BEGIN
@@ -410,26 +452,36 @@ PRO FSC_CmdWindow::ListCommand, cmdIndex
         RETURN
     ENDIF
 
+    ; Need a command structure?
+    createCommandStruct = Keyword_Set(createCommandStruct)
+
     ; How many commands are there?
     count = self.cmds -> Get_Count()
-    
+
     IF N_Elements(cmdIndex) EQ 0 THEN BEGIN
         FOR j = 0, count-1 DO BEGIN
             thisCmdObj = self.cmds -> Get_Item(j, /DEREFERENCE)
-        
+
             ; Preface the commands with their index number.
             thisCmdObj -> List, StrTrim(j,2) + '.'
+
+            ; Create the command struct
+            IF createCommandStruct THEN thisCmdObj -> CreateCommandStruct, 'cmd' + StrTrim(j,2)
         ENDFOR
     ENDIF ELSE BEGIN
         IF cmdIndex LT (count-1) THEN BEGIN
             thisCmdObj = self.cmds -> Get_Item(cmdIndex, /DEREFERENCE)
-        
+
             ; Preface the commands with their index number.
             thisCmdObj -> List, StrTrim(cmdIndex,2) + '.'
+
+            ; Create the command struct
+            IF createCommandStruct THEN thisCmdObj -> CreateCommandStruct, 'cmd' + StrTrim(cmdIndex,2)
         ENDIF ELSE Message, 'The command index is out of range of the number of commands.'
     ENDELSE
 
 END ;----------------------------------------------------------------------------------------------------------------
+
 
 ;+
 ; :Description:
@@ -561,11 +613,11 @@ PRO FSC_CmdWindow::SaveAsRaster, event
 
     ; Get a filename from the user.
     CASE filetype OF
-       'BMP':  filename = FSC_Pickfile(FILE='fsc_window.bmp', /WRITE, TITLE='Select an Output File...')
-       'GIF':  filename = FSC_Pickfile(FILE='fsc_window.gif', /WRITE, TITLE='Select an Output File...')
-       'JPEG': filename = FSC_Pickfile(FILE='fsc_window.jpg', /WRITE, TITLE='Select an Output File...')
-       'PNG':  filename = FSC_Pickfile(FILE='fsc_window.png', /WRITE, TITLE='Select an Output File...')
-       'TIFF': filename = FSC_Pickfile(FILE='fsc_window.tif', /WRITE, TITLE='Select an Output File...')
+       'BMP':  filename = FSC_Pickfile(FILE='cgwindow.bmp', /WRITE, TITLE='Select an Output File...')
+       'GIF':  filename = FSC_Pickfile(FILE='cgwindow.gif', /WRITE, TITLE='Select an Output File...')
+       'JPEG': filename = FSC_Pickfile(FILE='cgwindow.jpg', /WRITE, TITLE='Select an Output File...')
+       'PNG':  filename = FSC_Pickfile(FILE='cgwindow.png', /WRITE, TITLE='Select an Output File...')
+       'TIFF': filename = FSC_Pickfile(FILE='cgwindow.tif', /WRITE, TITLE='Select an Output File...')
     ENDCASE
     IF filename EQ "" THEN RETURN
     root_name = FSC_Base_Filename(filename, DIRECTORY=dirName)
@@ -1192,7 +1244,42 @@ FUNCTION FSC_Window_Command::Copy
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-PRO FSC_Window_Command::Draw, SUCCESS=success
+PRO FSC_Window_Command::CreateCommandStruct, structName, Quiet=quiet
+
+    Compile_Opt idl2
+
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    ; Struct variable name
+    IF N_Elements(structName) EQ 0 THEN structName='cmd'
+
+    cmdString = self.command
+    cmdStruct = Create_Struct('Command', cmdString, 'nparams', self.nparams, 'type', self.type)
+    CASE self.nparams OF
+        0:
+        1: cmdStruct = Create_Struct(cmdStruct, 'p1', *self.p1)
+        2: cmdStruct = Create_Struct(cmdStruct, 'p1', *self.p1, 'p2', *self.p2)
+        3: cmdStruct = Create_Struct(cmdStruct, 'p1', *self.p1, 'p2', *self.p2, 'p3', *self.p3)
+    ENDCASE
+    IF Ptr_Valid(self.keywords) THEN BEGIN
+        cmdStruct = Create_Struct(cmdStruct, 'keywords', *self.keywords)
+    ENDIF
+
+    ; Copy the variable to the MAIN level
+    (Scope_VarFetch(structName, /Enter, Level=1)) = Temporary(cmdStruct)
+    IF NOT Keyword_Set(quiet) THEN $
+        PRINT, 'Created command struct variable ', structName, ' in IDL $MAIN level.'
+
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
 
     Compile_Opt idl2
     
@@ -1226,6 +1313,7 @@ PRO FSC_Window_Command::Draw, SUCCESS=success
                      2: Call_Procedure, self.command, *self.p1, *self.p2, _Extra=*self.keywords
                      3: Call_Procedure, self.command, *self.p1, *self.p2, *self.p3, _Extra=*self.keywords
                  ENDCASE
+                 keywords = *self.keywords
              ENDIF ELSE BEGIN
                  CASE self.nparams OF
                      0: Call_Procedure, self.command
@@ -1247,6 +1335,7 @@ PRO FSC_Window_Command::Draw, SUCCESS=success
                      2: Call_Method, self.command, *self.p1, *self.p2, _Extra=*self.keywords
                      3: Call_Method, self.command, *self.p1, *self.p2, *self.p3, _Extra=*self.keywords
                  ENDCASE
+                 keywords = *self.keywords
              ENDIF ELSE BEGIN
                  CASE self.nparams OF
                      0: Call_Method, self.command
@@ -1301,6 +1390,21 @@ PRO FSC_Window_Command::List, prefix
     IF N_Elements(prefix) NE 0 THEN prefix = '   ' + prefix + ' ' ELSE prefix = '   '
     
     Print, prefix + cmdString
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+PRO FSC_Window_Command::UpdateKeywordStruct, keywords
+    
+    Compile_Opt idl2
+
+    On_Error, 2
+    
+    ; If the keyword pointer is invalid, out of here.
+    IF ~Ptr_Valid(self.keywords) THEN RETURN
+    
+    ; Update the structure.
+    IF N_Elements(keywords) NE 0 THEN *self.keywords = keywords
+    
 END ;----------------------------------------------------------------------------------------------------------------
 
 

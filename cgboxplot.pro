@@ -368,7 +368,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
         XCHARSIZE=xcharsize, $
         XTHICK=xthick, $
         WINDOW=window, $
-        _EXTRA=extra
+        _REF_EXTRA=extra
         
       ; Error handling.
       Catch, theError
@@ -409,7 +409,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
                 XCHARSIZE=xcharsize, $
                 XTHICK=xthick, $
                 ADDCMD=1, $
-                _Extra=extra
+                _EXTRA=extra
              RETURN
        ENDIF
         

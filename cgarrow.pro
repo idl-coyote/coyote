@@ -113,7 +113,7 @@ PRO cgArrow, x0, y0, x1, y1, $
     SOLID = solid, $
     THICK = thick, $
     WINDOW=window, $
-    _EXTRA=extra
+    _REF_EXTRA=extra
 
     Compile_Opt idl2
     
@@ -139,7 +139,7 @@ PRO cgArrow, x0, y0, x1, y1, $
             NORMAL = normal, $
             SOLID = solid, $
             THICK = thick, $
-            _REF_EXTRA=extra
+            _EXTRA=extra
             
          RETURN
     ENDIF

@@ -103,7 +103,7 @@ PRO cgColorFill, x, y, z, $
     NORMAL=normal, $
     DEVICE=device, $
     WINDOW=window, $
-     _EXTRA=extra
+     _REF_EXTRA=extra
 
     Compile_Opt idl2
 

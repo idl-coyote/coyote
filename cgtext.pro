@@ -172,7 +172,7 @@ PRO cgText, xloc, yloc, text, $
             TT_FONT=tt_font, $
             WIDTH=width, $
             ADDCMD=1, $
-            _REF_EXTRA=extra
+            _EXTRA=extra
             
          RETURN
     ENDIF

@@ -67,7 +67,7 @@ END ;---------------------------------------------------------------------------
 ;+
 ; :Description:
 ;     Provides a programmatic way to create a PostScript file from the window.
-;     Call by setting the Send_PostScript keyword with cgControl.
+;     Call by setting the CREATE_PS keyword with cgControl.
 ;
 ; :Params:
 ;     filename:  The name of the PostScript file.
@@ -111,6 +111,97 @@ PRO FSC_CmdWindow::AutoPostScriptFile, filename
     IF WindowAvailable(curentWindow) THEN WSet, currentWindow ELSE WSet, -1
 
 END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
+;     Provides a programmatic way to create a raster file from the window.
+;     Call by setting the create_png, etc. keyword with cgControl.
+;
+; :Params:
+;     filetype:  The type of raster file (e.g., PNG, JPEG, etc.)
+;     filename:  The name of the output file.
+;-
+PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+    
+    ; Make this window the current graphics windows.
+    currentWindow = !D.Window
+    WSet, self.wid
+
+    IF N_Elements(filetype) EQ 0 then filetype = 'PNG'
+    IF N_Elements(filename) EQ 0 THEN filename = 'cgwindow.' + StrLowCase(filetype)
+
+    ; Strip the extension off the filename.
+    outname = FSC_Base_Filename(filename, DIRECTORY=dirName)
+    
+    ; Put it back together without an extension.
+    outputFilename = Filepath(ROOT_DIR=dirName, outname)
+    
+    ; What kind of raster file. The type will be set with cgControl, IM_RASTER=type.
+    CASE self.im_raster OF
+      ; Normal raster.
+      0: BEGIN
+         void = TVRead(TYPE=filetype, FILENAME=outputFilename, /NODIALOG)
+         END
+
+      ; Raster via ImageMagick
+      1: BEGIN
+
+           ; Create a PostScript file first.
+           PS_Start, $
+                FILENAME=outputFilename + '.ps', $
+                EUROPEAN=self.ps_metric, $
+                SCALE_FACTOR=self.ps_scale_factor, $
+                CHARSIZE=self.ps_charsize, $
+                FONT=self.ps_font, $
+                QUIET=self.ps_quiet, $
+                TT_FONT=self.ps_tt_font
+           
+           ; Draw the graphics.
+           self -> ExecuteCommands
+           
+           ; Close the file and convert to proper file type.
+           CASE filetype OF
+                'BMP':  PS_END, /BMP, DELETE_PS=self.ps_delete, $
+                            ALLOW_TRANSPARENT=self.im_transparent, $
+                            DENSITY=self.im_density, RESIZE=self.im_resize, $
+                            IM_OPTIONS=self.im_options
+                'GIF':  PS_END, /GIF, DELETE_PS=self.ps_delete, $
+                            ALLOW_TRANSPARENT=self.im_transparent, $
+                            DENSITY=self.im_density, RESIZE=self.im_resize, $
+                            IM_OPTIONS=self.im_options
+                'JPEG': PS_END, /JPEG, DELETE_PS=self.ps_delete, $
+                            ALLOW_TRANSPARENT=self.im_transparent, $
+                            DENSITY=self.im_density, RESIZE=self.im_resize, $
+                            IM_OPTIONS=self.im_options
+                'PNG':  PS_END, /PNG,  DELETE_PS=self.ps_delete, $
+                            ALLOW_TRANSPARENT=self.im_transparent, $
+                            DENSITY=self.im_density, RESIZE=self.im_resize, $
+                            IM_OPTIONS=self.im_options
+                'TIFF': PS_END, /TIFF, DELETE_PS=self.ps_delete, $
+                            ALLOW_TRANSPARENT=self.im_transparent, $
+                            DENSITY=self.im_density, RESIZE=self.im_resize, $
+                            IM_OPTIONS=self.im_options
+           ENDCASE
+         END
+
+    ENDCASE
+
+    ; Set the window index number back.
+    IF WindowAvailable(curentWindow) THEN WSet, currentWindow ELSE WSet, -1
+END ;----------------------------------------------------------------------------------------------------------------
+
+
 ;+
 ; :Description:
 ;     Sends the window commands to a PostScript file.
@@ -157,7 +248,6 @@ PRO FSC_CmdWindow::CreatePostScriptFile, event
     IF WindowAvailable(curentWindow) THEN WSet, currentWindow ELSE WSet, -1
 
 END ;----------------------------------------------------------------------------------------------------------------
-
 
 ;+
 ; :Description:
@@ -421,6 +511,7 @@ PRO FSC_CmdWindow::GetProperty, $
     IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+    RASTER_IM=raster_im, $                        ; Sets whether to generate raster files via ImageMagick
     PS_DELETE=ps_delete, $
     PS_ENCAPSULATED=ps_encapsulated, $
     PS_METRIC=ps_metric, $
@@ -472,6 +563,7 @@ PRO FSC_CmdWindow::GetProperty, $
      im_density = self.im_density
      im_options = self.im_options
      im_resize = self.im_resize
+     raster_im = self.raster_im
      
      noExecuteCommands = self.noExecuteCommands
      
@@ -804,6 +896,7 @@ PRO FSC_CmdWindow::RestoreCommands, filename
         IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
         IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
         IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+        RASTER_IM=raster_im, $                        ; Sets whether to use ImageMagick to create raster files.
         PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
         PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
         PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
@@ -824,6 +917,7 @@ PRO FSC_CmdWindow::RestoreCommands, filename
         IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
         IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
         IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+        RASTER_IM=raster_im, $                        ; Sets whether to use ImageMagick to create raster files.
         PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
         PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
         PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
@@ -895,6 +989,7 @@ PRO FSC_CmdWindow::SetProperty, $
     IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+    RASTER_IM=raster_im, $                        ; Sets the raster via ImageMagick setting.
     PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
     PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
     PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
@@ -943,6 +1038,7 @@ PRO FSC_CmdWindow::SetProperty, $
     IF N_Elements(im_density) NE 0 THEN self.im_density = im_density
     IF N_Elements(im_resize) NE 0 THEN self.im_resize = im_resize
     IF N_Elements(im_options) NE 0 THEN self.im_options = im_options
+    IF N_Elements(raster_im) NE 0 then self.raster_im = raster_im
     IF N_Elements(ps_delete) NE 0 THEN self.ps_delete = ps_delete
     IF N_Elements(ps_metric) NE 0 THEN self.ps_metric = ps_metric
     IF N_Elements(ps_encapsulated) NE 0 THEN self.ps_encapsulated = ps_encapsulated
@@ -1027,6 +1123,7 @@ FUNCTION FSC_CmdWindow::Init, $
        ; ImageMagick Properties.
        IM_Transparent = d_im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
        IM_Density = d_im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+       IM_Raster = d_im_raster, $                        ; Create raster files via ImageMagick.
        IM_Resize = d_im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
        IM_Options = d_im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
        
@@ -1174,6 +1271,7 @@ FUNCTION FSC_CmdWindow::Init, $
     self.im_transparent = d_im_transparent
     self.im_density = d_im_density
     self.im_options = d_im_options
+    self.im_raster = d_im_raster
     self.im_resize = d_im_resize
     self.ps_delete = d_ps_delete
     self.ps_encapsulated = d_ps_encapsulated
@@ -1299,7 +1397,8 @@ PRO FSC_CmdWindow__Define, class
               im_transparent: 0B, $         ; Sets the "alpha" keyword on ImageMagick convert command.
               im_density: 0L, $             ; Sets the density parameter on ImageMagick convert command.
               im_resize: 0L, $              ; Sets the resize parameter on ImageMagick convert command.
-              im_options: "" $              ; Sets extra ImageMagick options on the ImageMagick convert command.
+              im_options: "", $             ; Sets extra ImageMagick options on the ImageMagick convert command.
+              im_raster: 0L $               ; Create raster files via ImageMagick
             }
             
 END ;----------------------------------------------------------------------------------------------------------------
@@ -1728,6 +1827,7 @@ END ;---------------------------------------------------------------------------
 ;        Added workaround for UNIX bug for draw widget creation. 5 Feb 2011. DWF.
 ;        Corrected a window aspect ratio problem with PostScript output by making the
 ;           window the current window before calling PS_Start. 17 Feb 2011. DWF.
+;        Added machinery for programmatically generating raster files. 18 Feb 2011. Jeremy Bailin.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.

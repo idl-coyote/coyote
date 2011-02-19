@@ -56,6 +56,8 @@
 ;         file from PostScript outout.
 ;     im_options: out, optional, type=string
 ;         Current ImageMagick convert options.
+;     im_raster: out, optional, type=boolean
+;         The raster via ImageMagick setting.
 ;     im_resize: out, optional, type=integer
 ;         The amount PostScript output is resized.
 ;     im_transparent: out, optional, type=boolean
@@ -102,6 +104,7 @@
 ;     Change History::
 ;        Written, 29 January 2011. DWF.
 ;        Added PS_QUIET keyword. 17 Feb 2011. DWF.
+;        Added Raster_IM.  18 Feb 2011. Jeremy Bailin
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -123,6 +126,7 @@ PRO cgWindow_GetDefs, $
    ; ImageMagick Properties.
    IM_Transparent = im_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
    IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+   IM_Raster = im_raster, $                        ; Sets the raster via ImageMagick setting.
    IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
    
@@ -160,6 +164,7 @@ PRO cgWindow_GetDefs, $
    IF Arg_Present(palette) THEN palette = !FSC_WINDOW_DEFAULTS.palette
    IF Arg_Present(im_transparent) THEN im_transparent = !FSC_WINDOW_DEFAULTS.im_transparent
    IF Arg_Present(im_density) THEN im_density = !FSC_WINDOW_DEFAULTS.im_density
+   IF Arg_Present(im_raster) THEN im_raster = !FSC_WINDOW_DEFAULTS.im_raster
    IF Arg_Present(im_resize) THEN im_resize = !FSC_WINDOW_DEFAULTS.im_resize
    IF Arg_Present(im_options) THEN im_options = !FSC_WINDOW_DEFAULTS.im_options
    IF Arg_Present(ps_delete) THEN ps_delete = !FSC_WINDOW_DEFAULTS.ps_delete

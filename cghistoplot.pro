@@ -324,7 +324,7 @@ PRO cgHistoplot, $                    ; The program name.
                BACKCOLORNAME=backcolorName, $   ; The background color.
                CHARSIZE=charsize, $
                DATACOLORNAME=datacolorName, $   ; The data color.
-               _REF_EXTRA=extra, $              ; For passing extra keywords.
+               _EXTRA=extra, $                  ; For passing extra keywords.
                FILE=file, $                     ; For specifying a color name file.
                FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
                LAYOUT=layout, $
@@ -376,7 +376,7 @@ PRO cgHistoplot, $                    ; The program name.
                BACKCOLORNAME=backcolorName, $   ; The background color.
                CHARSIZE=charsize, $
                DATACOLORNAME=datacolorName, $   ; The data color.
-               _REF_EXTRA=extra, $              ; For passing extra keywords.
+               _EXTRA=extra, $                  ; For passing extra keywords.
                FILE=file, $                     ; For specifying a color name file.
                FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
                LAYOUT=layout, $

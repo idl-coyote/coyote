@@ -236,7 +236,7 @@ PRO cgColorbar, $
     XLOG=xlog, $
     YLOG=ylog, $
     WINDOW=window, $
-    _EXTRA=extra
+    _REF_EXTRA=extra
 
     Compile_Opt idl2
 

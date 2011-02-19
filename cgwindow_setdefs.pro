@@ -61,6 +61,11 @@
 ;     im_options: in, optional, type=string, default=""
 ;         Set this keyword to any ImageMagick options you would like to pass along to the
 ;         ImageMagick convert command when creating raster image files from PostScript output.
+;     im_raster: in, optional, type=boolean, default=1 (if ImageMagick is found)
+;         When raster files are created programmatically, this keyword determines if the
+;         raster file is created directly in IDL (value =0) or is created from a PostScript
+;         intermediate file via ImageMagick (value =1). The default is via ImageMagick if the
+;         convert program can be found on the machine running the program.
 ;     im_resize: in, optional, type=integer, default=25
 ;         Set this keyword to percentage that the raster image file created my ImageMagick
 ;         from PostScript output should be resized.
@@ -127,6 +132,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 29 January 2011. DWF.
+;        Added Raster_IM, 18 February 2011. Jeremy Bailin.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -154,6 +160,7 @@ PRO cgWindow_SetDefs, $
    IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
    IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+   IM_Raster = im_raster, $                        ; Sets thee raster via ImageMagick setting.
    
    ; PostScript properties.
    PS_Delete = ps_delete, $                        ; Delete the PostScript file when making IM files.
@@ -187,10 +194,13 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(xpos) EQ 0 THEN xpos = -1
         IF N_Elements(ypos) EQ 0 THEN ypos = -1
         IF N_Elements(palette) EQ 0 THEN palette = BytArr(256,3)
-        IF N_Elements(im_transparent) EQ 0 THEN im_transparent = 0
         IF N_Elements(im_density) EQ 0 THEN im_density = 300
         IF N_Elements(im_resize) EQ 0 THEN im_resize = 25
         IF N_Elements(im_options) EQ 0 THEN im_options = ""
+        IF N_Elements(im_raster) EQ 0 THEN BEGIN
+            IF HasImageMagick() THEN im_raster = 1 ELSE im_raster = 0
+        ENDIF
+        IF N_Elements(im_transparent) EQ 0 THEN im_transparent = 0
         IF N_Elements(ps_delete) EQ 0 THEN ps_delete = 1
         IF N_Elements(ps_metric) EQ 0 THEN ps_metric = 0
         IF N_Elements(ps_encapsulated) EQ 0 THEN ps_encapsulated = 0
@@ -214,10 +224,11 @@ PRO cgWindow_SetDefs, $
            XPos:xpos, $                                  ; The X offset of the window on the display.
            YPos:ypos, $                                  ; The Y offset of the window on the display. 
            Palette:palette, $                            ; The color table palette to use for the window.
-           IM_Transparent:im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
            IM_Density:im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+           IM_Raster:im_raster, $                        ; Sets the raster via ImageMagick setting.
            IM_Resize:im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
            IM_Options:im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+           IM_Transparent:im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
            PS_Delete:ps_delete, $                        ; Delete the PostScript file when making IM files.
            PS_Metric:ps_metric, $                        ; Select metric measurements in PostScript output.
            PS_Encapsulated:ps_encapsulated, $            ; Create Encapsulated PostScript output.
@@ -248,8 +259,10 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(palette) NE 0 THEN !FSC_WINDOW_DEFAULTS.palette = palette
         IF N_Elements(im_transparent) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_transparent = Keyword_Set(im_transparent)
         IF N_Elements(im_density) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_density = im_density
+        IF N_Elements(im_raster) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_raster = im_raster
         IF N_Elements(im_resize) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_resize = im_resize
         IF N_Elements(im_options) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_options = im_options
+        IF N_Elements(raster_im) NE 0 then !FSC_WINDOW_DEFAULTS.raster_im = raster_im
         IF N_Elements(ps_delete) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_delete = Keyword_Set(ps_delete)
         IF N_Elements(ps_metric) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_metric = Keyword_Set(ps_metric)
         IF N_Elements(ps_encapsulated) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_encapsulated = Keyword_Set(ps_encapsulated)

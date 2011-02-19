@@ -60,9 +60,29 @@
 ;         This keyword applies only to keywords that manipulate commands in the command
 ;         list (e.g., DeleteCmd). It specifies the command index number of the command 
 ;         for which the action is desired.
+;     create_bmp: in, optional, type='string', default='cgwindow.bmp'
+;          Set this keyword to the name of a bitmap file to create automatically from the window.
+;          Using this keyword is a way to create a bitmap file programmatically from a cgWindow application.
+;          The raster file will be created via ImageMagick if raster_im has been set (default).
+;     create_gif: in, optional, type='string', default='cgwindow.gif'
+;          Set this keyword to the name of a GIF file to create automatically from the window.
+;          Using this keyword is a way to create a GIF file programmatically from a cgWindow application.
+;          The raster file will be created via ImageMagick if raster_im has been set (default).
+;     create_jpeg: in, optional, type='string', default='cgwindow.jpeg'
+;          Set this keyword to the name of a JPEG file to create automatically from the window.
+;          Using this keyword is a way to create a JPEG file programmatically from a cgWindow application.
+;          The raster file will be created via ImageMagick if raster_im has been set (default).
+;     create_png: in, optional, type='string', default='cgwindow.png'
+;          Set this keyword to the name of a PNG file to create automatically from the window.
+;          Using this keyword is a way to create a PNG file programmatically from a cgWindow application.
+;          The raster file will be created via ImageMagick if raster_im has been set (default).
 ;     create_ps: in, optional, type='string', default='cgwindow.ps'
 ;          Set this keyword to the name of a PostScript file to create automatically from the window.
 ;          Using this keyword is a way to create a PostScript file programmatically from a cgWindow application.
+;     create_tiff: in, optional, type='string', default='cgwindow.tiff'
+;          Set this keyword to the name of a TIFF file to create automatically from the window.
+;          Using this keyword is a way to create a TIFF file programmatically from a cgWindow application.
+;          The raster file will be created via ImageMagick if raster_im has been set (default).
 ;     delay: in, optional, type=float
 ;         Set this keyword to the amount of "delay" you want between commands in the command list.
 ;     deletecmd: in, optional, type=boolean
@@ -102,6 +122,9 @@
 ;     im_resize: in, optional, type=integer, default=25
 ;         Set this keyword to percentage that the raster image file created my ImageMagick
 ;         from PostScript output should be resized.
+;     raster_im: in, optional, type=boolean, default=1
+;         Set this keyword to zero to create raster files using the create_png etc. keywords
+;         directly, instead of via ImageMagick.
 ;     multi: in, optional, type=Intarr(5)
 ;         Set this keyword to the !P.MULTI setting you want to use for the window.
 ;         !P.MULTI is set to this setting before command execution, and set back to
@@ -151,6 +174,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 28 January 2011. DWF.
+;        Added raster_im and the create_... raster options. 18 Feb 2011. Jeremy Bailin
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -161,7 +185,12 @@ PRO cgControl, selection, $
     ALL=all, $                                    ; Apply the command operation to all the commands (i.e., DeleteCMD)
     BACKGROUND=background, $                      ; Sets the background color of the window
     CMDINDEX=cmdIndex, $                          ; Apply the command operation to this command only.
+    CREATE_BMP=create_bmp, $                      ; Set this to the name of a bitmap file that is produced from the commands in the window.
+    CREATE_GIF=create_gif, $                      ; Set this to the name of a GIF file that is produced from the commands in the window.
+    CREATE_JPEG=create_jpeg, $                    ; Set this to the name of a JPEG file that is produced from the commands in the window.
+    CREATE_PNG=create_png, $                      ; Set this to the name of a PNG file that is produced from the commands in the window.
     CREATE_PS=create_ps, $                        ; Set this to the name of a PostScript file that is produced from the commands in the window.
+    CREATE_TIFF=create_tiff, $                    ; Set this to the name of a TIFF file that is produced from the commands in the window.
     PALETTE=palette, $                            ; The color palette (color vectors) associated with this window.
     DELAY=delay, $                                ; Set the delay between command execution.
     DELETECMD=deleteCmd, $                        ; Delete a command. If ALL is set, delete all commands.
@@ -183,6 +212,7 @@ PRO cgControl, selection, $
     IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+    RASTER_IM=raster_im, $                        ; Sets whether to generate raster files via ImageMagick.
     PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM files.
     PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
     PS_ENCAPSULATED=ps_encapsulated, $            ; Create Encapsulated PostScript output.
@@ -302,6 +332,7 @@ PRO cgControl, selection, $
         IM_DENSITY = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
         IM_RESIZE = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
         IM_OPTIONS = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+        RASTER_IM = raster_im, $                        ; Sets whether to create raster files via ImageMagick.
         PS_DELETE = ps_delete, $                        ; Delete the PostScript file when making IM files.
         PS_METRIC = ps_metric, $                        ; Select metric measurements in PostScript output.
         PS_ENCAPSULATED = ps_encapsulated, $            ; Create encapsulated PostScript output.
@@ -329,10 +360,95 @@ PRO cgControl, selection, $
           (typeName EQ 'INT') && (create_ps[0] EQ 1): BEGIN
                filename = 'cgwindow.ps'
             END
-          ELSE: Message, 'Incorrect input to SEND_POSTSCRIPT keyword.'
+          ELSE: Message, 'Incorrect input to CREATE_PS keyword.'
        ENDCASE
        
        IF Obj_Valid(objref[index]) THEN objref[index] -> AutoPostScriptFile, filename 
+   ENDIF
+    
+   ; Are you creating a bitmap file?
+   IF N_Elements(create_bmp) NE 0 THEN BEGIN
+   
+       typeName = Size(create_bmp, /TNAME)
+       CASE 1 OF
+          typeName EQ 'STRING': BEGIN
+            filename = create_bmp
+            END
+          (typeName EQ 'INT') && (create_bmp[0] EQ 1): BEGIN
+               filename = 'cgwindow.bmp'
+            END
+          ELSE: Message, 'Incorrect input to CREATE_BMP keyword.'
+       ENDCASE
+       
+       IF Obj_Valid(objref[index]) THEN objref[index] -> AutoRasterFile, 'BMP', filename 
+   ENDIF
+    
+   ; Are you creating a GIF file?
+   IF N_Elements(create_gif) NE 0 THEN BEGIN
+   
+       typeName = Size(create_gif, /TNAME)
+       CASE 1 OF
+          typeName EQ 'STRING': BEGIN
+            filename = create_gif
+            END
+          (typeName EQ 'INT') && (create_gif[0] EQ 1): BEGIN
+               filename = 'cgwindow.gif'
+            END
+          ELSE: Message, 'Incorrect input to CREATE_GIF keyword.'
+       ENDCASE
+       
+       IF Obj_Valid(objref[index]) THEN objref[index] -> AutoRasterFile, 'GIF', filename 
+   ENDIF
+    
+   ; Are you creating a JPEG file?
+   IF N_Elements(create_jpeg) NE 0 THEN BEGIN
+   
+       typeName = Size(create_jpeg, /TNAME)
+       CASE 1 OF
+          typeName EQ 'STRING': BEGIN
+            filename = create_jpeg
+            END
+          (typeName EQ 'INT') && (create_jpeg[0] EQ 1): BEGIN
+               filename = 'cgwindow.jpeg'
+            END
+          ELSE: Message, 'Incorrect input to CREATE_JPEG keyword.'
+       ENDCASE
+       
+       IF Obj_Valid(objref[index]) THEN objref[index] -> AutoRasterFile, 'JPEG', filename 
+   ENDIF
+    
+   ; Are you creating a PNG file?
+   IF N_Elements(create_png) NE 0 THEN BEGIN
+   
+       typeName = Size(create_png, /TNAME)
+       CASE 1 OF
+          typeName EQ 'STRING': BEGIN
+            filename = create_png
+            END
+          (typeName EQ 'INT') && (create_png[0] EQ 1): BEGIN
+               filename = 'cgwindow.png'
+            END
+          ELSE: Message, 'Incorrect input to CREATE_PNG keyword.'
+       ENDCASE
+       
+       IF Obj_Valid(objref[index]) THEN objref[index] -> AutoRasterFile, 'PNG', filename 
+   ENDIF
+    
+   ; Are you creating a TIFF file?
+   IF N_Elements(create_tiff) NE 0 THEN BEGIN
+   
+       typeName = Size(create_tiff, /TNAME)
+       CASE 1 OF
+          typeName EQ 'STRING': BEGIN
+            filename = create_tiff
+            END
+          (typeName EQ 'INT') && (create_tiff[0] EQ 1): BEGIN
+               filename = 'cgwindow.tiff'
+            END
+          ELSE: Message, 'Incorrect input to CREATE_TIFF keyword.'
+       ENDCASE
+       
+       IF Obj_Valid(objref[index]) THEN objref[index] -> AutoRasterFile, 'TIFF', filename 
    ENDIF
     
    ; Need a keyword?

@@ -160,6 +160,7 @@
 ;   Fixed a problem with 24-bit color support that allowed only IDL 7 versions to work correctly. 20 Sept 2009. DWF.
 ;   Added a LANGUAGE_LEVEL keyword. 13 Dec 2010. DWF.
 ;   Added the FONTYPE value to the keyword return structure. 14 Dec 2010. DWF.
+;   Modified the return structure to turn landscape mode off and set offsets to zero if in encapsulated mode. 19 Feb 2011. DWF.
 ;-
 
 ;******************************************************************************************;
@@ -649,7 +650,7 @@ PRO FSC_PSCONFIG::Encapsulate, event
 
 ; This method responds to a change in the Encapsulation droplist widget.
 
-IF event.index THEN self.previewID->Sensitive, 1 ELSE self.previewID->Sensitive, 0
+IF event.index THEN self.previewID->Sensitive, 1  ELSE self.previewID->Sensitive, 0
 END ;--------------------------------------------------------------------------------
 
 
@@ -854,6 +855,17 @@ IF self.fontStyleSet[4] THEN struct = Create_Struct(struct, 'light', 1) ELSE str
 IF self.fontStyleSet[5] THEN struct = Create_Struct(struct, 'medium', 1) ELSE struct = Create_Struct(struct, 'medium', 0)
 IF self.fontStyleSet[6] THEN struct = Create_Struct(struct, 'narrow', 1) ELSE struct = Create_Struct(struct, 'narrow', 0)
 IF self.fontStyleSet[7] THEN struct = Create_Struct(struct, 'oblique', 1) ELSE struct = Create_Struct(struct, 'oblique', 0)
+
+; If the user is doing encapsulated PostScript, then landscape mode must be off and
+; offsets must be set to zero.
+IF struct.encapsulated THEN BEGIN
+
+    struct.portrait = 1
+    struct.landscape = 0
+    struct.xoffset = 0
+    struct.yoffset = 0
+
+ENDIF
 
    ; Return the keyword stucture.
 

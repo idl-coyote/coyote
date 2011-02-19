@@ -257,6 +257,14 @@ PRO PS_START, $
         PS_END, /NoFix
         RETURN
    ENDIF
+   
+   ; If encapsulated then turn off landscape mode.
+   IF keywords.encapsulated THEN BEGIN
+       keywords.portrait = 1
+       keywords.landscape = 0
+       keywords.xoffset = 0
+       keywords.yoffset = 0
+   ENDIF
 
    ; Let them know where the output will be.
    IF ~quiet THEN Print, 'PostScript output will be created here: ', keywords.filename

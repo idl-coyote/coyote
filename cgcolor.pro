@@ -433,7 +433,7 @@ FUNCTION cgColor, theColour, colorIndex, $
     ; Get the pixel value of the "opposite" color. This is the pixel color
     ; opposite the pixel color in the upper right corner of the display.
     IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
-       opixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+       opixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
        IF N_Elements(opixel) NE 3 THEN BEGIN
             IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, /Get
             opixel = [rrr[opixel], ggg[opixel], bbb[opixel]]

@@ -151,7 +151,7 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
     CASE self.im_raster OF
       ; Normal raster.
       0: BEGIN
-         void = TVRead(TYPE=filetype, FILENAME=outputFilename, /NODIALOG)
+         void = cgSnapshot(TYPE=filetype, FILENAME=outputFilename, /NODIALOG)
          END
 
       ; Raster via ImageMagick
@@ -782,7 +782,7 @@ PRO FSC_CmdWindow::SaveAsRaster, event
     
         ; Normal raster.
         0: BEGIN
-           void = TVRead(TYPE=fileType, FILENAME=outname, /NODIALOG)
+           void = cgSnapshot(TYPE=fileType, FILENAME=outname, /NODIALOG)
            END
            
         ; Raster via ImageMagick.

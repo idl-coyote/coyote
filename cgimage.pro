@@ -417,7 +417,7 @@ FUNCTION cgImage_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
     ; are on a device where we could get such an image.
     IF N_Elements(alphaBackgroundImage) EQ 0 THEN BEGIN
         IF (!D.Flags AND 256) NE 0 THEN BEGIN
-           alphaBackgroundImage = TVRead()
+           alphaBackgroundImage = cgSnapshot()
         ENDIF ELSE BEGIN
             ss = Size(foregndImage, /DIMENSIONS)
             alphaBackgroundImage = BytArr(ss[0], ss[1], 3) + 255B
@@ -733,7 +733,7 @@ PRO cgImage, image, x, y, $
                 acolorname = 'OPPOSITE' 
            ENDIF ELSE BEGIN
                 IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
-                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) THEN acolorname = 'BLACK'
                     IF (Total(pixel) EQ 0) THEN acolorname = 'WHITE'
                     IF N_Elements(acolorname) EQ 0 THEN acolorname = 'OPPOSITE'

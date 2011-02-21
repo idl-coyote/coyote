@@ -148,7 +148,7 @@
 ;                     http://www.dfanning.com/programs/pickcolorname.pro
 ;                     http://www.dfanning.com/programs/psconfig.pro
 ;                     http://www.dfanning.com/programs/pswindow.pro
-;                     http://www.dfanning.com/programs/tvread.pro
+;                     http://www.dfanning.com/programs/cgsnapshot.pro
 ;
 ;         All these programs can be obtained at once by downloading the MPI_PLOT zip file:
 ;
@@ -470,12 +470,12 @@ basename = 'mpi_plot'
 
 WSet, (*infoptr).wid
 CASE file_extension OF
-   'BMP'  : image = TVREAD(Filename = basename, /BMP)
-   'GIF'  : image = TVREAD(Filename = basename, /GIF)
-   'PICT' : image = TVREAD(Filename = basename, /PICT)
-   'JPG'  : image = TVREAD(Filename = basename, /JPEG)
-   'TIF'  : image = TVREAD(Filename = basename, /TIFF)
-   'PNG'  : image = TVREAD(Filename = basename, /PNG)
+   'BMP'  : image = cgSnapshot(Filename = basename, /BMP)
+   'GIF'  : image = cgSnapshot(Filename = basename, /GIF)
+   'PICT' : image = cgSnapshot(Filename = basename, /PICT)
+   'JPG'  : image = cgSnapshot(Filename = basename, /JPEG)
+   'TIF'  : image = cgSnapshot(Filename = basename, /TIFF)
+   'PNG'  : image = cgSnapshot(Filename = basename, /PNG)
 ENDCASE
 
 END ;----------------------------------------------------------------------------------------

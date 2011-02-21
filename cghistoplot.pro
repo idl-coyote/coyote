@@ -516,7 +516,7 @@ PRO cgHistoplot, $                    ; The program name.
                 axisColorName = 'BLACK' 
            ENDIF ELSE BEGIN
                 IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
-                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF Total(pixel) EQ 765 THEN axisColorName = 'BLACK'
                     IF Total(pixel) EQ 0 THEN axisColorName = 'WHITE'
                     IF N_Elements(axisColorName) EQ 0 THEN axisColorName = 'OPPOSITE'

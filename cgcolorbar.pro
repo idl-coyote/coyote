@@ -465,7 +465,7 @@ PRO cgColorbar, $
     ENDIF ELSE BEGIN
         IF N_Elements(annotateColor) EQ 0 THEN BEGIN
             IF (!D.Window GE 0) AND ~scalablePixels THEN BEGIN
-                pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                 IF N_ELEMENTS(color) EQ 0 THEN BEGIN
                     IF Total(pixel) EQ 765 THEN annotateColor = 'black'
                     IF Total(pixel) EQ 0 THEN annotateColor = 'white'

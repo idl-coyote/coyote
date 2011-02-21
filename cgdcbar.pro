@@ -233,7 +233,7 @@ PRO cgDCBar, colors, $
         color = 'black'
     ENDIF ELSE BEGIN
         IF (!D.Window GE 0) AND ((!D.Flags AND 1) EQ 0) THEN BEGIN
-            pixel = TVRead(!D.X_Size-1, !D.Y_Size-1, 1, 1)
+            pixel = cgSnapshot(!D.X_Size-1, !D.Y_Size-1, 1, 1)
             IF N_ELEMENTS(color) EQ 0 THEN BEGIN
                 color = 'white'
                 IF Total(pixel) EQ 765 THEN color = 'black'

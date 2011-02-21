@@ -1358,12 +1358,12 @@ PRO XSTRETCH_SAVEAS, event
    filename = 'xstretch'
    CASE saveAsType OF
 
-      'JPEG': dummy = TVRead(Filename=filename, /JPEG)
-      'PNG': dummy = TVRead(Filename=filename, /PNG)
-      'TIFF': dummy = TVRead(Filename=filename, /TIFF)
-      'GIF': dummy = TVRead(Filename=filename, /GIF)
-      'PICT': dummy = TVRead(Filename=filename, /PICT)
-      'BMP': dummy = TVRead(Filename=filename, /BMP)
+      'JPEG': dummy = cgSnapshot(Filename=filename, /JPEG)
+      'PNG': dummy = cgSnapshot(Filename=filename, /PNG)
+      'TIFF': dummy = cgSnapshot(Filename=filename, /TIFF)
+      'GIF': dummy = cgSnapshot(Filename=filename, /GIF)
+      'PICT': dummy = cgSnapshot(Filename=filename, /PICT)
+      'BMP': dummy = cgSnapshot(Filename=filename, /BMP)
       'PS': BEGIN
 
             WSet, info.windex
@@ -1422,12 +1422,12 @@ PRO XSTRETCH_SAVEHISTOAS, event
    filename = 'xstretch_histogram'
    CASE saveAsType OF
 
-      'JPEG': dummy = TVRead(Filename=filename, /JPEG)
-      'PNG': dummy = TVRead(Filename=filename, /PNG)
-      'TIFF': dummy = TVRead(Filename=filename, /TIFF)
-      'GIF': dummy = TVRead(Filename=filename, /GIF)
-      'PICT': dummy = TVRead(Filename=filename, /PICT)
-      'BMP': dummy = TVRead(Filename=filename, /BMP)
+      'JPEG': dummy = cgSnapshot(Filename=filename, /JPEG)
+      'PNG': dummy = cgSnapshot(Filename=filename, /PNG)
+      'TIFF': dummy = cgSnapshot(Filename=filename, /TIFF)
+      'GIF': dummy = cgSnapshot(Filename=filename, /GIF)
+      'PICT': dummy = cgSnapshot(Filename=filename, /PICT)
+      'BMP': dummy = cgSnapshot(Filename=filename, /BMP)
       'PS': BEGIN
 
             keys = PSWindow()

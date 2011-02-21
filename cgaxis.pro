@@ -215,7 +215,7 @@ PRO cgAxis, xloc, yloc, zloc, $
                 sColor = 'OPPOSITE' 
            ENDIF ELSE BEGIN
                 IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
-                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) THEN sColor = 'BLACK'
                     IF (Total(pixel) EQ 0) THEN sColor = 'WHITE'
                     IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'

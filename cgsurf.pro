@@ -362,7 +362,7 @@ PRO cgSurf, data, x, y, $
                         Window
                         IF ~Keyword_Set(traditional) THEN cgErase, 'WHITE'
                     ENDIF
-                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) THEN background = 'WHITE'
                     IF (Total(pixel) EQ 0) THEN background = 'BLACK'
                     IF N_Elements(background) EQ 0 THEN background = 'OPPOSITE'
@@ -391,7 +391,7 @@ PRO cgSurf, data, x, y, $
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF !D.Window LT 0 THEN Window
                     IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
-                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN saxisColor = 'BLACK'
                     IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN saxisColor = 'WHITE'
                     IF N_Elements(saxisColor) EQ 0 THEN saxisColor = 'OPPOSITE'
@@ -419,7 +419,7 @@ PRO cgSurf, data, x, y, $
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
                     IF !D.Window LT 0 THEN Window
                     IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
-                    pixel = TVRead(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN BEGIN
                         IF Keyword_Set(traditional) THEN sColor = 'BLACK' ELSE sColor = 'BLU6'
                     ENDIF

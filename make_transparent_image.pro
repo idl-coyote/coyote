@@ -116,7 +116,7 @@ FUNCTION Make_Transparent_Image, image, COLOR=color, $
             thisWindow = !D.Window
             WSet, wset
         ENDIF
-        image = TVRead(TRUE=3)
+        image = cgSnapshot(TRUE=3)
         IF N_Elements(thisWindow) NE 0 THEN WSet, thisWindow
     ENDIF
     

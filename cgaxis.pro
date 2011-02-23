@@ -173,7 +173,6 @@ PRO cgAxis, xloc, yloc, zloc, $
          RETURN
     ENDIF
     
-    yreverse = 1
     ; AXIS command is a little brain dead. Have to define values for the parameters.
     IF N_Elements(xloc) EQ 0 THEN BEGIN
         xloc = Keyword_Set(xaxis) ? !X.CRange[0] : !X.CRange[1]
@@ -248,31 +247,6 @@ PRO cgAxis, xloc, yloc, zloc, $
           ZTITLE=ztitle, $
           _STRICT_EXTRA=extra
           
-;    IF Keyword_Set(yreverse) THEN BEGIN
-;    
-;        ; What is the width of a character in normalized units?
-;        ncharsize = Float(!D.Y_Ch_Size)/!D.X_Size
-;        
-;        ; What is the width of the Y labels in normalized units.
-;        IF N_Elements(yrange) EQ 0 THEN yrange = !Y.CRange
-;        IF N_Elements(ytickformat) EQ 0 THEN BEGIN
-;           largest_y =String( Max( Ceil( Abs(yrange) ) ), FORMAT='(I0)')
-;           slength = StrLen(largest_y) + 1.5
-;           slength = (Min(yrange) LT 0) ? slength - 0.5 : slength 
-;           print, 'SLength: ', slength
-;        ENDIF ELSE BEGIN
-;           IF
-;        ENDELSE
-;        xwidth = slength * ncharsize * charsize
-;        
-;        ; Draw the text.
-;        xpos = !X.Window[1] + xwidth
-;        ypos = (!Y.Window[1] - !Y.Window[0]) / 2.0 + !Y.Window[0]
-;        cgText, xpos, ypos, reverseTitle, /NORMAL, ALIGNMENT=0.5, $
-;            COLOR=scolor, Charsize=charsize, ORIENTATION=-90.0
-;        
-;    ENDIF
-    
     SetDecomposedState, currentState
    
    ; Restore the color tables.

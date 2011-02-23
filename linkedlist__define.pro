@@ -2,6 +2,9 @@
 ; NAME:
 ;   LINKEDLIST
 ;
+; FILENAME:
+;   linkedlist__define.pro
+;
 ; PURPOSE:
 ; 
 ;   The purpose of this program is to implement a list that
@@ -48,7 +51,13 @@
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; PRO LINKEDLIST::ADD, item, index, AFTER=after, BEFORE=before
+; PRO LINKEDLIST::ADD, item, index, $
+;     AFTER=after, $
+;     BEFORE=before, $
+;     ERROR=error, $
+;     NO_COPY=no_copy, $
+;     REPLACE=replace
+;     
 ;
 ;   The ADD method adds a data item to the list.
 ;
@@ -69,11 +78,20 @@
 ;
 ;   BEFORE: If this keyword is set, the item is added before the
 ;     item at the current index.
+;     
+;   ERROR: On return, if this is not a null string, an error occurred
+;      and this value is set equal to the error message.
+;      
+;   NO_COPY: If set, the item is transferred to the internal pointer using
+;      a no copy method. This will cause the item variable to become undefined.
+;      
+;   REPLACE: If this keyword is set, the item will replace the current item at
+;      the index location.
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; PRO LINKEDLIST::DELETE, index, ALL=all, DESTROY=destroy
-;
+; PRO LINKEDLIST::DELETE, index, ALL=all, DESTROY=destroy, ERROR=error   
+;      
 ;   The DELETE method deletes an item from the list.
 ;
 ;   Parameters:
@@ -87,9 +105,12 @@
 ;   ALL: If this keyword is set, all items in the list are deleted.
 ;
 ;   DESTROY: If the item at the node is an object or pointer, the
-;     item will be destroyed before the node it deleted.
+;     item will be destroyed before the node is deleted. This keyword
+;     is turned on (set to 1) by default. Set to 0 to prevent destruction.
 ;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;    ERROR: On return, if this is not a null string, an error occurred
+;      and this value is set equal to the error message.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; FUNCTION LINKEDLIST::GET_COUNT
 ;
@@ -100,10 +121,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ;
-; FUNCTION LINKEDLIST::GET_ITEM, index
-;
-;   The GET_ITEM_PTR method returns a pointer to the specified data
-;   item from the list.
+; FUNCTION LINKEDLIST::GET_ITEM, index, $
+;    ALL=all, $                 ; This ASSUMES all items stored are the same type!!!
+;    Dereference=dereference, $ ; Obsolete. Ignored. Always returns item.
+;    ItemPtr=itemPtr, $         ; The pointer to the item, if needed. Output.
+;    NO_COPY=no_copy, $         ; Copy from location with NO_COPY.
+;    ERROR=errorMsg             ; The error message. Null string if no error.
+
 ;
 ;   Parameters:
 ;
@@ -113,23 +137,28 @@
 ;
 ;   Keywords:
 ;
-;   DEREFERENCE: Set this keyword to return the thing the pointer
-;      points to (i.e., the item itself.)
+;   DEREFERENCE: This keyword obsolete and only provided for backward compatibility.
 ;
 ;   ALL: Set this keyword to return an n-element array containing all the list
-;      elements.  This requires that all list elements be of the same type, and
-;      if they are arrays, they have 7 dimensions or fewer.
-;      If index is passed, it is ignored.
-;      Added by HBT 14-Jul-2004.
+;      items.  This requires that all list items be of the same type, and
+;      if they are arrays, they have 7 dimensions or fewer. If index is passed, 
+;      it is ignored.
+;     
+;   ITEMPTR: The pointer to the data item.
+;   
+;   NO_COPY: If this keyword is set, the item is transferred from the data
+;      pointer using a NO_COPY method. This will undefine the item at that
+;      indexed locaton.
+;      
+;    ERROR: On return, if this is not a null string, an error occurred
+;      and this value is set equal to the error message.
 ;
-;   Return Value: A pointer to the specified data item stored
-;     in the list. IF DEREFERENCE is set, the data item itself
-;     is returned.  If ALL is set, then an array containing
-;     all the elements is returned.
+;   Return Value: The data item at this index on the list.
+;     If ALL is set, then an array containing all the data items is returned.
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; FUNCTION LINKEDLIST::GET_NODE, index
+; FUNCTION LINKEDLIST::GET_NODE, index, ERROR=error
 ;
 ;   The GET_NODE method returns a pointer to the specified node
 ;   from the list.
@@ -146,6 +175,9 @@
 ;     list. The item field is a pointer to the item stored in the
 ;     node. Optional.
 ;
+;   ERROR: On return, if this is not a null string, an error occurred
+;      and this value is set equal to the error message.
+;      
 ;   Return Value: A pointer to the specified node structure in
 ;     the linked list.
 ;
@@ -163,7 +195,7 @@
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; PRO LINKEDLIST::MOVE_NODE, nodeIndex, location, BEFORE=before
+; PRO LINKEDLIST::MOVE_NODE, nodeIndex, location, BEFORE=before, ERROR=error
 ;
 ;   The MOVE_NODE method moves a list node from one location to another.
 ;
@@ -182,18 +214,36 @@
 ;      list before the location node. Otherwise, it is added after
 ;      the location node.
 ;
+;    ERROR: On return, if this is not a null string, an error occurred
+;      and this value is set equal to the error message.
+;      
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; PRO LINKEDLIST::REPLACE_ITEM, Index, NewItem
+; PRO LINKEDLIST::REPLACE_ITEM, newItem, index, ERROR=error
 ;
 ;  Use this method to replace any item in the list with any other value.
 ;  This allows the caller to change an item without stepping through the
 ;  process of deleting an item then adding a new one.
 ;
 ;  Parameters:
-;     Index:  The location of the node you are replacing
+;     index:  The location of the node you are replacing
 ;
-;     NewItem:  Any value of any data type.
+;     newItem:  Any value of any data type.
 ;
+;    ERROR: On return, if this is not a null string, an error occurred
+;      and this value is set equal to the error message.
+;      
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; FUNCTION LINKEDLIST::HAVE_ITEM, index, ERROR=error
+;
+;  Use this method to check to see if an item exits at a particular location
+;  on the list. Returns a 1 if the item is there, otherwise a 0.
+;
+;  Parameters:
+;     index:  The location of the node you are replacing
+;      
+;    ERROR: On return, if this is not a null string, an error occurred
+;      and this value is set equal to the error message.
+;      
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ;
@@ -203,10 +253,10 @@
 ;   mylist->Add, 10
 ;   mylist->Add, 7, 1, /Before
 ;   mylist->Add, 12
-;   print, mylist->Get_Item(/All, /Deref)
-;   mylist->Replace_Item, 1, 'Bob'
+;   print, mylist->Get_Item(/All)
+;   mylist->Add, 'Bob', 2, /Replace
 ;   mylist->Help
-;   mylist->Delete
+;   mylist->Delete, 0
 ;   mylist->Help, /Print
 ;
 ; MODIFICATION HISTORY:
@@ -224,6 +274,10 @@
 ;   30 Jun 2004.  Added /ALL to GET_ITEM function.  Henry Throop, SWRI.
 ;   23 Nov 2004.  Fixed GET_ITEM, /ALL to accomodate structures and empty
 ;      lists.  Henry Throop.
+;   21 February 2011. A complete refurbishing to incorporate changes and to fix bugs
+;      I found in the SolarSoft version of this code. I've tried to make this compatible
+;      with the version distributed with SolarSoft to reduce problems caused by two versions
+;      of the software with the same name.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -252,401 +306,476 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-PRO LINKEDLIST::ADD, item, index, Before=before, After=after
+PRO LINKEDLIST::ADD, item, index, $
+    After=after, $
+    Before=before, $
+    Error=errorMsg, $
+    No_Copy=no_copy, $
+    Replace=replace
 
 
-; This method is the public interface to the private ADD_+ methods.
-; If INDEX is not specified, the item is always added to the end
-; of the list. If INDEX is specified, but neither the BEFORE or
-; AFTER keywords are used, the item is added AFTER the INDEX specified.
+    ; This method is the public interface to the private ADD_+ methods.
+    ; If INDEX is not specified, the item is always added to the end
+    ; of the list. If INDEX is specified, but neither the BEFORE or
+    ; AFTER keywords are used, the item is added AFTER the INDEX specified.
+    
+    Catch, error
+    IF error NE 0 THEN BEGIN
+       Catch, /Cancel
+       errorMsg = !Error_State.MSG
+       Message, errorMsg, /Continue
+       RETURN
+    ENDIF
 
-
-   ; Must supply an item to add to the list.
-IF N_Elements(item) EQ 0 THEN BEGIN
-   ok = Dialog_Message('Must supply an item to add to the list.')
-   RETURN
+    ; Assume no error.
+    errorMsg = ""
+    
+    ; Must supply an item to add to the list.
+    IF N_Elements(item) EQ 0 THEN BEGIN
+       errorMsg = 'Must supply an item to add to the list.'
+       Message, errorMsg, /Continue
+       RETURN
+    END
+    
+    ; Check for index. If there is none, add to end of list.
+    IF N_Elements(index) EQ 0 THEN BEGIN
+       self->Add_To_End, item, NO_COPY=no_copy, ERROR=errorMsg
+       RETURN
+    ENDIF
+    
+    ; If this is the last index, add it to the end of list.
+    IF index GT (self.count-1) THEN BEGIN
+       self->Add_To_End, item, NO_COPY=no_copy, ERROR=errorMsg
+       RETURN
+    ENDIF
+    
+    ; Are we replacing an item?
+    IF Keyword_Set(replace) THEN BEGIN
+        self -> Replace_Item, item, index, NO_COPY=no_copy, ERROR=errorMsg
+        RETURN
+    ENDIF
+    
+    ; BEFORE keyword set.
+    IF Keyword_Set(before) THEN BEGIN
+       self->Add_Before, item, index, NO_COPY=no_copy, ERROR=errorMsg
+       RETURN
+    ENDIF
+    
+    ; AFTER keyword set.
+    IF Keyword_Set(after) THEN BEGIN
+       self->Add_After, item, index, NO_COPY=no_copy, ERROR=errorMsg
+       RETURN
+    ENDIF
+    
+    ; No BEFORE or AFTER keywords. Add to location AFTER index.
+    self->Add_After, item, index, NO_COPY=no_copy, ERROR=errorMsg
+    
 END
+;------------------------------------------------------------------------
 
 
-   ; Check for index. If there is none, add to end of list.
-IF N_Elements(index) EQ 0 THEN BEGIN
-   self->Add_To_End, item
-   RETURN
-ENDIF
 
+PRO LINKEDLIST::ADD_AFTER, item, index, NO_COPY=no_copy, ERROR=errorMsg
 
-IF index GT (self.count-1) THEN BEGIN
-   self->Add_To_End, item
-   RETURN
-ENDIF
+    ; This method adds an item node AFTER the item specified by
+    ; the index number. This is a private method. Use the public
+    ; ADD method to add an item to the list.
 
+    Catch, error
+    IF error NE 0 THEN BEGIN
+       Catch, /Cancel
+       errorMsg = !Error_State.MSG
+       Message, errorMsg, /Continue
+       RETURN
+    ENDIF
 
-   ; Are keywords set?
-before = Keyword_Set(before)
-after = Keyword_Set(after)
+    ; Assume no error.
+    errorMsg = ""
+    
+    ; Must supply an item to add to the list.
+    IF N_Elements(item) EQ 0 THEN BEGIN
+       errorMsg = 'Must supply an item to add to the list.'
+       Message, errorMsg, /Continue
+       RETURN
+    END
+    
+    ; Check for index. If there is none, add to end of list.
+    IF N_Elements(index) EQ 0 THEN BEGIN
+       self->Add_To_End, item, NO_COPY=no_copy, ERROR=errorMsg
+       RETURN
+    ENDIF
+    
+    ; If this is the last index, add it to the end of list.
+    IF index GE (self.count-1) THEN BEGIN
+       self->Add_To_End, item, NO_COPY=no_copy, ERROR=errorMsg
+       RETURN
+    ENDIF
 
-
-   ; No BEFORE or AFTER keywords. Add to location AFTER index.
-IF (before + after) EQ 0 THEN BEGIN
-   self->Add_After, item, index
-   RETURN
-ENDIF
-
-
-   ; BEFORE keyword set.
-IF before THEN BEGIN
-   self->Add_Before, item, index
-   RETURN
-ENDIF
-
-
-   ; AFTER keyword set.
-IF after THEN BEGIN
-   self->Add_After, item, index
-   RETURN
-ENDIF
-
+    ; Create a new node and store the item in it.
+    currentNode = Ptr_New( {LINKEDLIST_NODE} )
+    (*currentNode).item = Ptr_New(item, NO_COPY=no_copy)
+    self.count = self.count + 1
+    
+    ; Get the node currently located at the index.
+    indexNode = self->Get_Node(index)
+    
+    ; Get the node that follows the indexNode.
+    nextNode = (*indexNode).next
+    
+    ; Update pointers.
+    (*indexNode).next = currentNode
+    (*currentNode).previous = indexNode
+    (*nextNode).previous = currentNode
+    (*currentNode).next = nextNode
 
 END
 ;------------------------------------------------------------------------
 
 
 
-PRO LINKEDLIST::ADD_AFTER, item, index
+PRO LINKEDLIST::ADD_BEFORE, item, index, NO_COPY=no_copy, ERROR=errorMsg
 
+    ; This method adds an item node BEFORE the item specified by
+    ; the index number. This is a private method. Use the public
+    ; ADD method to add an item to the list.
 
-; This method adds an item node AFTER the item specified by
-; the index number.
+    Catch, error
+    IF error NE 0 THEN BEGIN
+       Catch, /Cancel
+       errorMsg = !Error_State.MSG
+       Message, errorMsg, /Continue
+       RETURN
+    ENDIF
 
+    ; Assume no error.
+    errorMsg = ""
+    
+    ; Must supply an item to add to the list.
+    IF N_Elements(item) EQ 0 THEN BEGIN
+       errorMsg = 'Must supply an item to add to the list.'
+       Message, errorMsg, /Continue
+       RETURN
+    END
+    
+    ; Check for index. If there is none, add to head of list.
+    IF N_Elements(index) EQ 0 THEN index = 0
 
-   ; Be sure there is an item to add.
-IF N_Elements(item) EQ 0 THEN BEGIN
-   ok = Dialog_Message('Must pass an ITEM to add to the list.')
-   RETURN
-ENDIF
-
-
-   ; If no index is specified, add the item to the end of the list.
-IF N_Elements(index) EQ 0 THEN BEGIN
-   self->Add_To_End, item
-   RETURN
-ENDIF
-
-
-
-   ; If index is equal to the number of nodes, add the item to
-   ; the end of the list.
-IF index EQ (self.count-1) THEN BEGIN
-   self->Add_To_End, item
-   RETURN
-ENDIF
-
-
-   ; Create a new node and store the item in it.
-currentNode = Ptr_New( {LINKEDLIST_NODE} )
-(*currentNode).item = Ptr_New(item)
-self.count = self.count + 1
-
-
-   ; Get the node currently located at the index.
-indexNode = self->Get_Node(index)
-
-
-   ; Get the node that follows the indexNode.
-nextNode = (*indexNode).next
-
-
-   ; Update pointers.
-(*indexNode).next = currentNode
-(*currentNode).previous = indexNode
-(*nextNode).previous = currentNode
-(*currentNode).next = nextNode
-
+    ; Create a new node and store the item in it.
+    currentNode = Ptr_New( {LINKEDLIST_NODE} )
+    (*currentNode).item = Ptr_New(item, NO_COPY=no_copy)
+    self.count = self.count + 1
+    
+    ; Get the node currently located at the index.
+    indexNode = self->Get_Node(index)
+    
+    ; Get the node that is before the indexNode.
+    previousNode = (*indexNode).previous
+    
+    ; Update pointers.
+    (*indexNode).previous = currentNode
+    (*currentNode).previous = previousNode
+    (*currentNode).next = indexNode
+    IF Ptr_Valid(previousNode) THEN $
+       (*previousNode).next = currentNode ELSE $
+       self.head = currentNode
 
 END
 ;------------------------------------------------------------------------
 
 
 
-PRO LINKEDLIST::ADD_BEFORE, item, index
+PRO LINKEDLIST::ADD_TO_END, item, NO_COPY=no_copy, ERROR=errorMsg
 
+    ; This method adds an item to the tail of the list. This is 
+    ; a private method. Use the public ADD method to add an 
+    ; item to the list.
 
-; This method adds an item node BEFORE the item specified by
-; the index number.
+    Catch, error
+    IF error NE 0 THEN BEGIN
+       Catch, /Cancel
+       errorMsg = !Error_State.MSG
+       Message, errorMsg, /Continue
+       RETURN
+    ENDIF
 
-
-   ; Be sure there is an item to add.
-IF N_Elements(item) EQ 0 THEN BEGIN
-   ok = Dialog_Message('Must pass an ITEM to add to the list.')
-   RETURN
-ENDIF
-
-
-   ; If no index is specified or the index is 0,
-   ; add the item to the head of the list.
-IF N_Elements(index) EQ 0 THEN index = 0
-
-
-   ; Create a new node and store the item in it.
-currentNode = Ptr_New( {LINKEDLIST_NODE} )
-(*currentNode).item = Ptr_New(item)
-self.count = self.count + 1
-
-
-   ; Get the node currently located at the index.
-indexNode = self->Get_Node(index)
-
-
-   ; Get the node that is before the indexNode.
-previousNode = (*indexNode).previous
-
-
-   ; Update pointers.
-(*indexNode).previous = currentNode
-(*currentNode).previous = previousNode
-(*currentNode).next = indexNode
-IF Ptr_Valid(previousNode) THEN $
-   (*previousNode).next = currentNode ELSE $
-   self.head = currentNode
-
-
-END
-;------------------------------------------------------------------------
-
-
-
-PRO LINKEDLIST::ADD_TO_END, item
-
-
-; This method adds an item to the tail of the list.
-
-
-   ; Be sure you have an item to add.
-IF N_Elements(item) EQ 0 THEN BEGIN
-   ok = Dialog_Message('Must pass an ITEM to add to the list.')
-   RETURN
-ENDIF
-
-
-IF self.count EQ 0 THEN BEGIN
-
-
+    ; Assume no error.
+    errorMsg = ""
+    
+    ; Must supply an item to add to the list.
+    IF N_Elements(item) EQ 0 THEN BEGIN
+       errorMsg = 'Must supply an item to add to the list.'
+       Message, errorMsg, /Continue
+       RETURN
+    END
+    
+    ; Is this the first item we are adding to the list?
+    IF self.count EQ 0 THEN BEGIN
+    
         ; Create a new node.
-    currentNode = Ptr_New({ LINKEDLIST_NODE })
-
-
+        currentNode = Ptr_New({ LINKEDLIST_NODE })
+    
         ; Add the item to the node.
-    (*currentNode).item = Ptr_New(item)
-
-
-        ; The head and tail point to current node.
-    self.head = currentNode
-    self.tail = currentNode
-
-
+        (*currentNode).item = Ptr_New(item, NO_COPY=no_copy)
+    
+         ; The head and tail point to current node.
+        self.head = currentNode
+        self.tail = currentNode
+     
         ; Update the node count.
-    self.count = self.count + 1
-
-
-ENDIF ELSE BEGIN
-
-
+        self.count = self.count + 1
+     
+    ENDIF ELSE BEGIN ; Not first, but must add a node.
+     
         ; Create a new node.
-    currentNode = Ptr_New({ LINKEDLIST_NODE })
-
-
+        currentNode = Ptr_New({ LINKEDLIST_NODE })
+    
         ; Set the next field of the previous node.
-    (*self.tail).next = currentNode
-
-
+        (*self.tail).next = currentNode
+     
         ; Add the item to the current node.
-    (*currentNode).item = Ptr_New(item)
-
-
+        (*currentNode).item = Ptr_New(item, NO_COPY=no_copy)
+    
         ; Set the previous field to point to previous node.
-    (*currentNode).previous = self.tail
-
-
+        (*currentNode).previous = self.tail
+    
         ; Update the tail field to point to current node.
-    self.tail = currentNode
-
-
+        self.tail = currentNode
+    
         ; Update the node count.
-    self.count = self.count + 1
-ENDELSE
-
-
+        self.count = self.count + 1
+        
+    ENDELSE
+    
 END
 ;------------------------------------------------------------------------
 
 
 
-PRO LINKEDLIST::DELETE, index, All=all, DESTROY=destroy
+PRO LINKEDLIST::DELETE, index, All=all, DESTROY=destroy, ERROR=errorMsg
 
+    ; This method is the public interface to the private DELETE_+ methods.
+    ; If INDEX is not specified, the last item on the list is always deleted.
+    ; The ALL keyword will delete all the items on the list.
+    ; The DESTROY keyword will destroy any object or pointer item stored in
+    ; the node before the node is deleted.
 
-; This method is the public interface to the private DELETE_+ methods.
-; If INDEX is not specified, the last item on the list is always deleted.
-; The ALL keyword will delete all the items on the list.
-; The DESTROY keyword will destroy any object or pointer item stored in
-; the node before the node is deleted.
+    Catch, error
+    IF error NE 0 THEN BEGIN
+       Catch, /Cancel
+       errorMsg = !Error_State.MSG
+       Message, errorMsg, /Continue
+       RETURN
+    ENDIF
 
+    ; Assume no error.
+    errorMsg = ""
+    
+    ; Assume you want to destroy the items in the node.
+    IF (N_Elements(destroy) EQ 0) $
+        THEN destroy = 1 $
+        ELSE destroy = Keyword_Set(destroy)
+    
+    ; Delete all the nodes?
+    IF Keyword_Set(all) THEN BEGIN
+       self->Delete_Nodes, DESTROY=destroy, ERROR=errorMsg
+       RETURN
+    ENDIF
 
-   ; Delete all the nodes?
-IF Keyword_Set(all) THEN BEGIN
-   self->Delete_Nodes, DESTROY=destroy
-   RETURN
-ENDIF
-
-
-   ; Check for index. If there is none, delete last node on list.
-IF N_Elements(index) EQ 0 THEN BEGIN
-   self->Delete_Last_Node, DESTROY=destroy
-   RETURN
-ENDIF
-
-
-   ; Delete specified node.
-IF index EQ (self.count - 1) THEN $
-   self->Delete_Last_Node, DESTROY=destroy ELSE $
-   self->Delete_Node, index, DESTROY=destroy
-
-
+    ; Check for index. If there is none, delete last node on list.
+    IF N_Elements(index) EQ 0 THEN BEGIN
+       self->Delete_Last_Node, DESTROY=destroy, ERROR=errorMsg
+       RETURN
+    ENDIF
+    
+    ; Delete specified node.
+    IF index EQ (self.count - 1) THEN $
+       self->Delete_Last_Node, DESTROY=destroy, ERROR=errorMsg ELSE $
+       self->Delete_Node, index, DESTROY=destroy, ERROR=errorMsg
+       
 END
 ;------------------------------------------------------------------------
 
 
 
-PRO LINKEDLIST::DELETE_LAST_NODE, DESTROY=destroy
+PRO LINKEDLIST::DELETE_LAST_NODE, DESTROY=destroy, ERROR=errorMsg
 
+    ; This method deletes the last node in the list. This is a 
+    ; private method. Use the public DELETE method to delete an 
+    ; item from the list.
 
-; This method deletes the last node in the list.
+    Catch, error
+    IF error NE 0 THEN BEGIN
+       Catch, /Cancel
+       errorMsg = !Error_State.MSG
+       Message, errorMsg, /Continue
+       RETURN
+    ENDIF
 
-
-IF self.count EQ 0 THEN RETURN
-
-
-currentNode = self.tail
-IF Keyword_Set(destroy) THEN $
-BEGIN
-  theItem = *((*currentNode).item)
-  CASE Size(theItem, /TNAME) OF
-     'OBJREF': Obj_Destroy, theItem
-     'POINTER': Ptr_Free, theItem
-     ELSE:
-  ENDCASE
-ENDIF
-Ptr_Free, (*currentNode).item
-
-
+    ; Assume no error.
+    errorMsg = ""
+    
+    ; Assume you want to destroy the items in the node.
+    IF (N_Elements(destroy) EQ 0) $
+        THEN destroy = 1 $
+        ELSE destroy = Keyword_Set(destroy)
+    
+    ; If there is nothing here, return.
+    IF self.count EQ 0 THEN RETURN
+    
+    ; This should be the last node.
+    currentNode = self.tail
+    
+    ; Free the item pointer and everything it points to.
+    IF Keyword_Set(destroy) THEN BEGIN
+        IF Ptr_Valid((*currentNode).item) THEN Heap_Free, (*currentNode).item
+    ENDIF    
+    
     ; Is this the last node in the list?
-IF NOT Ptr_Valid((*currentNode).previous) THEN BEGIN
-    self.head = Ptr_New()
-    self.tail = Ptr_New()
-    self.count = 0
-    Ptr_Free, (*currentNode).next
-ENDIF ELSE BEGIN
-    previousNode = (*currentNode).previous
-    self.tail = previousNode
-    Ptr_Free, (*self.tail).next
-    (*self.tail).next = Ptr_New()
-    self.count = self.count - 1
-ENDELSE
-
-
-   ; Release the currentNode pointer.
-Ptr_Free, currentNode
-END
-;------------------------------------------------------------------------
-
-
-
-PRO LINKEDLIST::DELETE_NODE, index, DESTROY=destroy
-
-
-; This method deletes the indicated node from the list.
-
-
-IF self.count EQ 0 THEN BEGIN
-   ok = Dialog_Message('No nodes to delete.')
-   RETURN
-ENDIF
-
-
-IF index GT (self.count - 1) THEN BEGIN
-   ok = Dialog_Message('No node with the requested index number.')
-   RETURN
-ENDIF
-
-
-   ; Get the current node and free the item pointer.
-currentNode = self->Get_Node(index)
-IF Keyword_Set(destroy) THEN $
-BEGIN
-  theItem = *(*currentNode).item
-  CASE Size(theItem, /TNAME) OF
-     'OBJREF': Obj_Destroy, theItem
-     'POINTER': Ptr_Free, theItem
-     ELSE:
-  ENDCASE
-ENDIF
-Ptr_Free, (*currentNode).item
-
-   ; Is this the last node?
-IF index EQ (self.count - 1) THEN self->Delete_Last_Node, DESTROY=destroy
-
-    ; Is this the first node in the list?
-IF NOT Ptr_Valid((*currentNode).previous) THEN BEGIN
-        nextNode = (*currentNode).next
-        Ptr_Free, (*nextNode).previous
-        (*nextNode).previous = Ptr_New()
-        self.head = nextNode
-ENDIF ELSE BEGIN
+    IF NOT Ptr_Valid((*currentNode).previous) THEN BEGIN
+        self.head = Ptr_New()
+        self.tail = Ptr_New()
+        self.count = 0
+        Ptr_Free, (*currentNode).next
+    ENDIF ELSE BEGIN
         previousNode = (*currentNode).previous
-        nextNode = (*currentNode).next
-        (*nextNode).previous = previousNode
-        (*previousNode).next = nextNode
-ENDELSE
-
-   ; Release the currentNode pointer.
-Ptr_Free, currentNode
-self.count = self.count - 1
+        self.tail = previousNode
+        Ptr_Free, (*self.tail).next
+        (*self.tail).next = Ptr_New()
+        self.count = self.count - 1
+    ENDELSE
+    
+    ; Release the currentNode pointer.
+    Ptr_Free, currentNode
 END
 ;------------------------------------------------------------------------
 
 
 
+PRO LINKEDLIST::DELETE_NODE, index, DESTROY=destroy, ERROR=errorMsg
 
-PRO LINKEDLIST::DELETE_NODES, DESTROY=destroy
+    ; This method deletes the indicated node from the list. This is a 
+    ; private method. Use the public DELETE method to delete an 
+    ; item from the list.
+    
+    Catch, error
+    IF error NE 0 THEN BEGIN
+       Catch, /Cancel
+       errorMsg = !Error_State.MSG
+       Message, errorMsg, /Continue
+       RETURN
+    ENDIF
 
-
-; This method deletes all of the nodes.
-
-
-WHILE Ptr_Valid(self.head) DO BEGIN
-    currentNode = *self.head
+    ; Assume no error.
+    errorMsg = ""
+    
+    ; Assume you want to destroy the items in the node.
+    IF (N_Elements(destroy) EQ 0) $
+        THEN destroy = 1 $
+        ELSE destroy = Keyword_Set(destroy)
+    
+    IF self.count EQ 0 THEN BEGIN
+       errorMsg = 'No nodes to delete.'
+       Message, errorMsg, /Continue
+       RETURN
+    ENDIF
+    
+    IF index GT (self.count - 1) THEN BEGIN
+       errorMsg = 'No node with the requested index number.'
+       Message, errorMsg, /Continue
+       RETURN
+    ENDIF
+      
+    ; Get the current node and free the item pointer.
+    currentNode = self->Get_Node(index)
+    IF ~Ptr_Valid(currentNode) THEN BEGIN
+        errorMsg = 'The current node is not a valid pointer.'
+        Message, errorMsg, /Continue
+        RETURN
+    ENDIF
+    
+    ; Free the item pointer and everything it points to.
     IF Keyword_Set(destroy) THEN $
     BEGIN
-      theItem = *(currentNode.item)
+      theItem = *(*currentNode).item
       CASE Size(theItem, /TNAME) OF
          'OBJREF': Obj_Destroy, theItem
          'POINTER': Ptr_Free, theItem
          ELSE:
       ENDCASE
     ENDIF
-    Ptr_Free, currentNode.previous
-    Ptr_Free, currentNode.item
-    self.head = currentNode.next
-ENDWHILE
+    Ptr_Free, (*currentNode).item
+    
+    ; Is this the last node?
+    IF index EQ (self.count - 1) THEN BEGIN
+        self->Delete_Last_Node, DESTROY=destroy, ERROR=errorMsg
+        RETURN
+    ENDIF
+    
+    ; Is this the first node in the list?
+    IF NOT Ptr_Valid((*currentNode).previous) THEN BEGIN
+            nextNode = (*currentNode).next
+            Ptr_Free, (*nextNode).previous
+            (*nextNode).previous = Ptr_New()
+            self.head = nextNode
+    ENDIF ELSE BEGIN
+            previousNode = (*currentNode).previous
+            nextNode = (*currentNode).next
+            (*nextNode).previous = previousNode
+            (*previousNode).next = nextNode
+    ENDELSE
 
+    ; Release the currentNode pointer. 
+    Ptr_Free, currentNode
+    self.count = self.count - 1
+END
+;------------------------------------------------------------------------
+
+
+
+
+PRO LINKEDLIST::DELETE_NODES, DESTROY=destroy, ERROR=errorMsg
+
+    ; This method deletes all of the nodes. This is a private method. 
+    ; Use the public DELETE method to delete all items from the list.
+
+    Catch, error
+    IF error NE 0 THEN BEGIN
+       Catch, /Cancel
+       errorMsg = !Error_State.MSG
+       Message, errorMsg, /Continue
+       RETURN
+    ENDIF
+
+    ; Assume no error.
+    errorMsg = ""
+    
+    ; Assume you want to destroy the items in the node.
+    IF (N_Elements(destroy) EQ 0) $
+        THEN destroy = 1 $
+        ELSE destroy = Keyword_Set(destroy)
+    
+    ; Cycle through the list, deleting as you go.
+    WHILE Ptr_Valid(self.head) DO BEGIN
+        currentNode = *self.head
+        IF Keyword_Set(destroy) THEN $
+        BEGIN
+          theItem = *(currentNode.item)
+          CASE Size(theItem, /TNAME) OF
+             'OBJREF': Obj_Destroy, theItem
+             'POINTER': Ptr_Free, theItem
+             ELSE:
+          ENDCASE
+        ENDIF
+        Ptr_Free, currentNode.previous
+        Ptr_Free, currentNode.item
+        self.head = currentNode.next
+    ENDWHILE
 
     ; Free up that last pointer.
-Ptr_Free, self.tail
-
-
+    Ptr_Free, self.tail
 
     ; Update the count.
-self.count = 0
-
+    self.count = 0
 
 END
 ;------------------------------------------------------------------------
@@ -655,209 +784,308 @@ END
 
 FUNCTION LINKEDLIST::GET_COUNT
 
-
-; This method returns the number of items in the list.
-
-
-RETURN, self.count
+    ; This method returns the number of items in the list.
+    RETURN, self.count
 END
 ;------------------------------------------------------------------------
 
 
 
-FUNCTION LINKEDLIST::GET_ITEM, index, Dereference=dereference, ALL=all
+FUNCTION LINKEDLIST::GET_ITEM, index, $
+    ALL=all, $         ; This ASSUMES all items stored are the same type!!!
+    Dereference=dereference, $ ; Obsolete. Ignored. Always returns item.
+    ItemPtr=itemPtr, $ ; The pointer to the item, if needed. Output.
+    NO_COPY=no_copy, $
+    ERROR=errorMsg
 
-
-; This method returns a pointer to the information
-; stored in the list. Ask for the item by number or
-; order in the list (list numbers start at 0).
-
-
-; Gets last item by default.
-
-
-; Make sure there are items in the list.
-
-
-IF self.count EQ 0 THEN BEGIN
-   ok = Dialog_Message('Nothing is currently stored in the list.')
-   RETURN, Ptr_New()
-ENDIF
-
-
-IF Keyword_Set(ALL) THEN BEGIN          ; Returns array with all of the elements in it.
-                                        ; /ALL returns array of pointers; /ALL, /DEREF returns array of elements.
-
-
-  item  = self->Get_Item(deref=Keyword_Set(DEREFERENCE))
-  num   = self.count
-
-
-; If items in list are x * y arrays, then for n items, we return a n * x * y ... array
-; Since IDL's maximum arrays are 8D, this means that this particular routine works only up to 7D arrays.
-;
-; There is an unadvertised limitation in IDL's MAKE_ARRAY() function, in that it does not allow
-; the automatic creation of structures by passing TYPE=8.  Instead, we use the VALUE= keyword
-; keyword to MAKE_ARRAY.  This takes a scalar and not a vector.
-
-
-  dim_item      = (Size(item))[0]               ; number of dimensions
-  IF (dim_item gt 0) THEN BEGIN
-    size_item   = (Size(item))[1:dim_item]
-    type_item   = (Size(item))[dim_item+1]
-    arr         = Make_Array(dimension=[num,size_item], val=item[0])
-
-
-  ENDIF ELSE BEGIN
-    type_item   = (Size(item))[1]
-    arr         = Make_Array(dimension=[num], val=item[0])
-  ENDELSE
-
-
-  dim_item_save = dim_item
-  type_item_save= type_item
-
-
-; Rather than call Get_Item for each element, it is much faster to march through the list
-; sequentially and extract every item as we get to it.
-; After we extract each item, we check to make sure that its type and size are the same as for the
-; first item; if they're not, we generate an error and return.  This is a bit conservative -- we
-; could promote ints to floats, for instance -- but it's safe.
-
-
-  currentNode = self.head
-  FOR i = 0L, num-1 DO BEGIN
-
-    item        = Keyword_Set(DEREFERENCE) ? *((*currentNode).item) : (*currentNode).item
-
-    dim_item    = (Size(item))[0]               ; number of dimensions
-
-    IF (dim_item GT 0) THEN type_item   = (Size(item))[dim_item+1] $
-      ELSE type_item    = (Size(item))[1]
-    IF ((type_item NE type_item_save) OR (dim_item NE dim_item_save)) THEN BEGIN
-      ok = Dialog_Message('Inconsistent type or size for Get_Item(/ALL).  Use Get_Item(index) instead.')
-      RETURN, Ptr_New()
+    ; This method returns the item stored at the index location.
+    ; The DEREFERENCE keyword is obsolete and is provide only
+    ; to allow backward compatibility. It is always set to 1.
+    ; If you wish to obtain the pointer to the item, use the
+    ; ItemPtr keyword. If an INDEX is not provided, the
+    ; last item is returned.
+    
+    Catch, error
+    IF error NE 0 THEN BEGIN
+       Catch, /Cancel
+       errorMsg = !Error_State.MSG
+       Message, errorMsg, /Continue
+       RETURN, Ptr_New()
     ENDIF
 
-
-    CASE dim_item OF
-      0 : arr[i]               = item
-      1 : arr[i,*]             = item
-      2 : arr[i,*,*]           = item
-      3 : arr[i,*,*,*]         = item
-      4 : arr[i,*,*,*,*]       = item
-      5 : arr[i,*,*,*,*,*]     = item
-      6 : arr[i,*,*,*,*,*,*]   = item
-      7 : arr[i,*,*,*,*,*,*,*] = item
-      ELSE : BEGIN
-        ok = Dialog_Message('Maximum array size for Get_Item(/ALL) exceeded.  Use Get_Item(index) instead.')
-        RETURN, Ptr_New()
-      END
-    ENDCASE
-    currentNode = (*currentNode).next
-  ENDFOR
-
-
-  RETURN, arr
-
-
-ENDIF ; if keyword ALL is set.
-
-
-IF N_Params() EQ 0 THEN index = self.count - 1
-
-
-IF index GT (self.count - 1) OR index LT 0 THEN BEGIN
-   ok = Dialog_Message('Sorry. Requested node is not in list.')
-   RETURN, Ptr_New()
-ENDIF
-
-
-    ; Start at the head of the list.
-currentNode = self.head
-
-
-    ; Find the item asked for by traversing the list.
-FOR j=0L, index-1 DO currentNode = (*currentNode).next
-
-
-    ; Return the pointer to the item.
-IF Keyword_Set(dereference) THEN RETURN, *((*currentNode).item) ELSE RETURN, (*currentNode).item
-
-
-END
-;------------------------------------------------------------------------
-
-
-
-FUNCTION LINKEDLIST::GET_NODE, index
-
-
-; This method returns a pointer to the asked-for node.
-; Ask for the node by number or order in the list
-; (node numbers start at 0).
-
-
-   ; Gets last node by default.
-IF N_Params() EQ 0 THEN index = self.count - 1
-
-
+    ; Assume no error.
+    errorMsg = ""
+    dereference = 1
+    
+    ; Last item, if index is unspecified.
+    IF N_Elements(index) EQ 0 THEN index = self.count - 1
+    
     ; Make sure there are items in the list.
-IF self.count EQ 0 THEN BEGIN
-   ok = Dialog_Message('Nothing is currently stored in the list.')
-   RETURN, Ptr_New()
-ENDIF
-
-
-IF index GT (self.count - 1) OR index LT 0 THEN BEGIN
-   ok = Dialog_Message('Sorry. Requested node is not in list.')
-   RETURN, Ptr_New()
-ENDIF
-
-
+    IF self.count EQ 0 THEN BEGIN
+       errorMsg = 'Nothing is currently stored in the list.'
+       Message, errorMsg, /CONTINUE
+       RETURN, Ptr_New()
+    ENDIF
+    
+    ; The index has to be in range.
+    IF index GT (self.count-1) OR index LT 0 THEN BEGIN
+       errorMsg = 'Requested node index is out of range.'
+       Message, errorMsg, /CONTINUE
+       RETURN, Ptr_New()
+    ENDIF
+    
     ; Start at the head of the list.
-currentNode = self.head
-
+    currentNode = self.head
+    
+    ; Is this a valid pointer?
+    IF ~Ptr_Valid(currentNode) THEN BEGIN
+        errorMsg = 'The current node pointer is invalid.'
+        Message, errorMsg, /CONTINUE
+        RETURN, Ptr_New()
+    ENDIF
+    
+    ; Is the ALL keyword set. ; We are going *assume* the items are all the same type.
+    IF Keyword_Set(ALL) THEN BEGIN 
+    
+        item  = self->Get_Item()
+        num   = self.count
+        
+        ; If items in list are x * y arrays, then for n items, we return a n * x * y ... array
+        ; Since IDL's maximum arrays are 8D, this means that this particular routine works only up to 7D arrays.
+        ;
+        ; There is an unadvertised limitation in IDL's MAKE_ARRAY() function, in that it does not allow
+        ; the automatic creation of structures by passing TYPE=8.  Instead, we use the VALUE= keyword
+        ; keyword to MAKE_ARRAY.  This takes a scalar and not a vector.
+          dim_item      = Size(item, /DIMENSIONS) 
+          IF (dim_item gt 0) THEN BEGIN
+            size_item   = (Size(item))[1:dim_item]
+            type_item   = (Size(item))[dim_item+1]
+            arr         =  Make_Array(dimension=[num,size_item], val=item[0])
+        
+          ENDIF ELSE BEGIN
+            type_item   = (Size(item))[1]
+            arr         = Make_Array(dimension=[num], val=item[0])
+          ENDELSE
+        
+          dim_item_save = dim_item
+          type_item_save= type_item
+        
+          ; Rather than call Get_Item for each element, it is much faster to march through the list
+          ; sequentially and extract every item as we get to it.
+          ; After we extract each item, we check to make sure that its type and size are the same as for the
+          ; first item; if they're not, we generate an error and return.  This is a bit conservative -- we
+          ; could promote ints to floats, for instance -- but it's safe.
+          currentNode = self.head
+          FOR i = 0L, num-1 DO BEGIN
+        
+                item        =  *((*currentNode).item)
+                dim_item    = (Size(item))[0]               ; number of dimensions
+                IF (dim_item GT 0) THEN type_item   = (Size(item))[dim_item+1] $
+                  ELSE type_item    = (Size(item))[1]
+                IF ((type_item NE type_item_save) OR (dim_item NE dim_item_save)) THEN BEGIN
+                    errorMsg = 'Inconsistent type or size for Get_Item(/ALL).  Use Get_Item(index) instead.'
+                    Message, errorMsg, /CONTINUE
+                    RETURN, Ptr_New()
+                ENDIF
+            
+                ; How many dimensions are there?
+                CASE dim_item OF
+                  0 : arr[i]               = item
+                  1 : arr[i,*]             = item
+                  2 : arr[i,*,*]           = item
+                  3 : arr[i,*,*,*]         = item
+                  4 : arr[i,*,*,*,*]       = item
+                  5 : arr[i,*,*,*,*,*]     = item
+                  6 : arr[i,*,*,*,*,*,*]   = item
+                  7 : arr[i,*,*,*,*,*,*,*] = item
+                  ELSE : BEGIN
+                    errorMsg = 'Maximum array size for Get_Item(/ALL) exceeded.  Use Get_Item(index) instead.'
+                    Message, errorMgs, /CONTINUE
+                    RETURN, Ptr_New()
+                  END
+                ENDCASE
+                currentNode = (*currentNode).next
+          ENDFOR
+        
+          RETURN, arr
+    
+    ENDIF ; if keyword ALL is set.
 
     ; Find the item asked for by traversing the list.
-FOR j=0L, index-1 DO currentNode = (*currentNode).next
-
-
-    ; Return the pointer to the node.
-RETURN, currentNode
+    FOR j=0L, index-1 DO currentNode = (*currentNode).next
+    
+    ; Get the item pointer.
+    itemPtr = (*currentNode).item
+    
+    ; Return the item.
+    IF Ptr_Valid(itemPtr) THEN BEGIN
+        RETURN, *itemPtr 
+    ENDIF ELSE BEGIN
+        errorMsg = 'The item pointer is invalid.'
+        Message, errorMsg, /CONTINUE
+        RETURN, Ptr_New()
+   ENDELSE
+    
 END
 ;------------------------------------------------------------------------
 
+
+
+FUNCTION LINKEDLIST::GET_NODE, index, ERROR=errorMsg
+
+    ; This method returns a pointer to the asked-for node.
+    ; Ask for the node by number or order in the list
+    ; (node numbers start at 0).
+    
+    Catch, error
+    IF error NE 0 THEN BEGIN
+       Catch, /Cancel
+       errorMsg = !Error_State.MSG
+       Message, errorMsg, /Continue
+       RETURN, Ptr_New()
+    ENDIF
+
+    ; Assume no error.
+    errorMsg = ""
+    
+    ; Gets last node by default.
+    IF N_Elements(index) EQ 0 THEN index = self.count - 1
+    
+    ; Make sure there are items in the list.
+    IF self.count EQ 0 THEN BEGIN
+       errorMsg = 'Nothing is currently stored in the list.'
+       Message, errorMsg, /Continue
+       RETURN, Ptr_New()
+    ENDIF
+    
+    IF index GT (self.count - 1) OR index LT 0 THEN BEGIN
+       errorMsg = 'Sorry. Requested node is not in list.'
+       Message, errorMsg, /Continue
+       RETURN, Ptr_New()
+    ENDIF  
+    
+    ; Start at the head of the list.
+    currentNode = self.head
+   
+    ; Find the item asked for by traversing the list.
+    FOR j=0L, index-1 DO currentNode = (*currentNode).next
+    
+    ; Return the pointer to the node.
+    RETURN, currentNode
+    
+END
+;------------------------------------------------------------------------
+
+
+
+FUNCTION LINKEDLIST::GET_VALUE, index, NO_COPY=no_copy, ERROR=errorMsg
+
+    ; This method returns the item stored at index in the list.
+    ; It is a synonym for Get_Item. Added here to be compatible with
+    ; SolarSoft changes to LinkImage.
+    
+    RETURN, self -> Get_Item(index, NO_COPY=no_copy, ERROR=errorMsg)
+
+END
+;------------------------------------------------------------------------
+
+
+FUNCTION LINKEDLIST::HAVE_ITEM, index, ERROR=errorMsg
+
+    ; This method returns a 1 if there is a valid item stored at the
+    ; index location. Otherwise, it returns a 0.
+    
+    ; Try to get the item. See if you were successful.
+    item = self -> Get_Item(ERROR=errorMsg, ITEMPTR=itemPtr)
+    IF errorMsg NE "" THEN RETURN, 0
+    IF ~Ptr_Valid(itemPtr) THEN RETURN, 0
+    
+    RETURN, 1
+    
+END
+;------------------------------------------------------------------------
 
 
 PRO LINKEDLIST::HELP, Print=print
 
-
-; This method performs a HELP command on the items
-; in the linked list. If the PRINT keyword is set, the
-; data items are printed instead.
-
-
-   ; Are there nodes to work with?
-IF NOT Ptr_Valid(self.head) THEN BEGIN
-    ok = Widget_Message('No nodes in Linked List.')
-    RETURN
-ENDIF
-
-
+    ; This method performs a HELP command on the items
+    ; in the linked list. If the PRINT keyword is set, the
+    ; data items are printed instead.
+    
+    ; Are there nodes to work with?
+    IF NOT Ptr_Valid(self.head) THEN BEGIN
+        ok = Widget_Message('No nodes in Linked List.')
+        RETURN
+    ENDIF
+    
     ; First node.
-currentNode = *self.head
-IF Keyword_Set(print) THEN Print, *currentNode.item ELSE $
-    Help, *currentNode.item
-
-
+    currentNode = *self.head
+    IF Keyword_Set(print) THEN Print, *currentNode.item ELSE $
+        Help, *currentNode.item
+    
     ; The rest of the nodes. End of list indicated by null pointer.
-WHILE currentNode.next NE Ptr_New() DO BEGIN
-    nextNode = *currentNode.next
-    IF Keyword_Set(print) THEN Print, *nextNode.item ELSE $
-        Help, *nextNode.item
-    currentNode = nextNode
-ENDWHILE
+    WHILE currentNode.next NE Ptr_New() DO BEGIN
+        nextNode = *currentNode.next
+        IF Keyword_Set(print) THEN Print, *nextNode.item ELSE $
+            Help, *nextNode.item
+        currentNode = nextNode
+    ENDWHILE
+
+END
+;------------------------------------------------------------------------
+
+
+
+PRO LINKEDLIST::MOVE_NODE, nodeIndex, location, Before=before, Error=errormsg
+
+    ; This method moves the requested node to a new location.
+    ; The node is added AFTER the target location, unless the BEFORE
+    ; keyword is used.
+
+    Catch, error
+    IF error NE 0 THEN BEGIN
+       Catch, /Cancel
+       errorMsg = !Error_State.MSG
+       Message, !Error_State.MSG, /Continue
+       RETURN
+    ENDIF
+
+    ; Assume no error.
+    errorMsg = ""
+    
+    ; A node index is required.
+    IF N_Elements(nodeIndex) EQ 0 THEN BEGIN
+       errorMsg = 'A node index is required in MOVE_NODE method.'
+       Message, errorMsg, /Continue
+       RETURN
+    ENDIF
+
+    ; If location is not specified the node is moved to the
+    ; end of the list.
+    IF N_Elements(location) EQ 0 THEN BEGIN
+       location = (self->Get_Count()) - 1
+    ENDIF
+
+    ; Add the node to the list.
+    currentNode = self->Get_Node(nodeIndex)
+    
+    ; If the current node is not a valid pointer, there is problem.
+    IF ~Ptr_Valid(currentNode) THEN BEGIN
+        errorMsg = 'The requested node is not a valid pointer.'
+        Message, errorMsg, /Continue
+        RETURN
+    ENDIF
+
+    IF Keyword_Set(before) THEN BEGIN
+       self->Add, *(*currentNode).item, location, /Before
+    ENDIF ELSE BEGIN
+       self->Add, *(*currentNode).item, location, /After
+    ENDELSE
+
+    ; Delete the node from its current location.
+    IF location LT nodeIndex THEN $
+       self->Delete, nodeIndex + 1 ELSE $
+       self->Delete, nodeIndex
 
 
 END
@@ -865,101 +1093,80 @@ END
 
 
 
-PRO LINKEDLIST::MOVE_NODE, nodeIndex, location, Before=before
+PRO LINKEDLIST::REPLACE_ITEM, item, index, NO_COPY=no_copy, ERROR=errorMsg
 
+    ; This method replace an item with another item at a particular
+    ; index. If index is not supplied, the the last index is used.
+    
+    Catch, error
+    IF error NE 0 THEN BEGIN
+       Catch, /Cancel
+       errorMsg = !Error_State.MSG
+       Message, !Error_State.MSG, /Continue
+       RETURN
+    ENDIF
 
-; This method moves the requested node to a new location.
-; The node is added AFTER the target location, unless the BEFORE
-; keyword is used.
-
-
-Catch, error
-IF error NE 0 THEN BEGIN
-   Catch, /Cancel
-   ok = Dialog_Message(!Error_State.Msg)
-   RETURN
-ENDIF
-
-
-   ; A node index is required.
-IF N_Elements(nodeIndex) EQ 0 THEN BEGIN
-   ok = Dialog_Message('A node index is required in MOVE_NODE method.')
-   RETURN
-ENDIF
-
-
-   ; If location is not specified the node is moved to the
-   ; end of the list.
-IF N_Elements(location) EQ 0 THEN BEGIN
-   location = (self->Get_Count()) - 1
-ENDIF
-
-
-   ; Add the node to the list.
-currentNode = self->Get_Node(nodeIndex)
-
-
-
-IF Keyword_Set(before) THEN BEGIN
-   self->Add, *(*currentNode).item, location, /Before
-ENDIF ELSE BEGIN
-   self->Add, *(*currentNode).item, location, /After
-ENDELSE
-
-
-
-   ; Delete the node from its current location.
-IF location LT nodeIndex THEN $
-   self->Delete, nodeIndex + 1 ELSE $
-   self->Delete, nodeIndex
-
-
-END
-;------------------------------------------------------------------------
-
-
-
-PRO LINKEDLIST::REPLACE_ITEM, Index, NewItem
-
-
-If n_params() NE 2 Then Begin
-   ok = Dialog_Message('Two arguments required (index and item)')
-   Return
-EndIf
-
-
-IF index GT (self.count - 1) OR index LT 0 THEN BEGIN
-   ok = Dialog_Message('Sorry. Requested node is not in list.')
-   RETURN
-ENDIF
-
-
-currentNode = self.head
-
-
+    ; Assume no error.
+    errorMsg = ""
+    
+    ; Must supply an item to add to the list.
+    IF N_Elements(item) EQ 0 THEN BEGIN
+       errorMsg = 'Must supply an item to add to the list.'
+       Message, errorMsg, /Continue
+       RETURN
+    END
+    
+    ; Check for index. If there is none, add to end of list.
+    IF N_Elements(index) EQ 0 THEN index = self.count - 1
+    
+    ; Start at the head of the list.
+    currentNode = self.head
+    
+    ; Is this a valid pointer?
+    IF ~Ptr_Valid(currentNode) THEN BEGIN
+        errorMsg = 'The current node pointer is invalid.'
+        Message, errorMsg, /CONTINUE
+        RETURN
+    ENDIF
+    
     ; Find the item asked for by traversing the list.
-FOR j=0L, index[0]-1 DO currentNode = (*currentNode).next
+    FOR j=0L, index-1 DO currentNode = (*currentNode).next
+    
+    ; Get the item pointer.
+    itemPtr = (*currentNode).item
+    
+    ; Replace the item, if you can.
+    IF Ptr_Valid(itemPtr) THEN BEGIN
+    
+        ; Stuff the new item into the place of the old item.
+        IF Keyword_Set(no_copy) THEN BEGIN
+            *(*currentNode).item = Temporary(item)
+        ENDIF ELSE BEGIN
+             *(*currentNode).item = item  
+        ENDELSE
+        
+    ENDIF ELSE BEGIN
+    
+        errorMsg = 'The item pointer is invalid.'
+        Message, errorMsg, /CONTINUE
+        RETURN
+        
+   ENDELSE
 
-
-   ; Stuff the new item into the place of the olditem
-*(*currentNode).item = NewItem
-
-
-END   ;Replace_Item
+END 
 ;------------------------------------------------------------------------
 
 
 
 PRO LINKEDLIST::CLEANUP
 
-
-; This method deletes all of the nodes and cleans up
-; the objects pointers.
-
-
-self->Delete_Nodes
-Ptr_Free, self.head
-Ptr_Free, self.tail
+    ; This method deletes all of the nodes and cleans up
+    ; the objects pointers.
+    
+    self->Delete_Nodes
+    Ptr_Free, self.head
+    Ptr_Free, self.tail
+    
 END
 ;------------------------------------------------------------------------
 
@@ -967,13 +1174,12 @@ END
 
 FUNCTION LINKEDLIST::INIT, item
 
-
-; Initialize the linked list. Add an item if required.
-
-
-IF N_Params() EQ 0 THEN RETURN, 1
-self->Add, item
-RETURN, 1
+    ; Initialize the linked list. Add an item if required.
+    
+    IF N_Params() EQ 0 THEN RETURN, 1
+    self->Add, item
+    RETURN, 1
+    
 END
 ;------------------------------------------------------------------------
 
@@ -981,16 +1187,7 @@ END
 
 PRO LINKEDLIST__DEFINE
 
-
-; The implementation of a LINKEDLIST object.
-
-
-   struct = { LINKEDLIST, $         ; The LINKEDLIST object.
-              head:Ptr_New(), $     ; A pointer to the first node.
-              tail:Ptr_New(), $     ; A pointer to the last node.
-              count:0L $            ; The number of nodes in the list.
-              }
-
+   ; The implementation of a LINKEDLIST object.
 
    struct = { LINKEDLIST_NODE, $    ; The LINKEDLIST NODE structure.
               previous:Ptr_New(), $ ; A pointer to the previous node.
@@ -998,6 +1195,11 @@ PRO LINKEDLIST__DEFINE
               next:Ptr_New()  $     ; A pointer to the next node.
               }
 
+   struct = { LINKEDLIST, $         ; The LINKEDLIST object.
+              head:Ptr_New(), $     ; A pointer to the first node.
+              tail:Ptr_New(), $     ; A pointer to the last node.
+              count:0L $            ; The number of nodes in the list.
+              }
 
 END
 ;------------------------------------------------------------------------

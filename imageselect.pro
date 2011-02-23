@@ -195,6 +195,7 @@
 ;   Provided check for PNG images with more than 8 bits per channel. 5 August 2009. DWF.
 ;   Fixed a problem in which the starting directory was changed on exit. 20 Nov 2010. DWF.
 ;   Change EXAMPLES to more easily remembered DEMO keyword. 29 Nov 2010. DWF.
+;   Removed NOINTERPOLATION keywords in going from TVIMAGE to cgImage. 22 Feb 2011. DWF.
 ;   
 ;-
 ;
@@ -577,8 +578,8 @@ PRO ImageSelect_FilenameEvents, event
    Widget_Control, info.previewID, Draw_XSize=sizes[0], Draw_YSize=sizes[1]
    TVLCT, info.r, info.g, info.b
    IF (Min(image) LT 0) OR (Max(image) GT (!D.Table_Size-1)) THEN $
-      cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
-      cgImage, image, /Keep_Aspect, /NoInterpolation, /Erase
+      cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect ELSE $
+      cgImage, image, /Keep_Aspect
    IF imageDataType EQ 'NONE' THEN image = 0
 
    ; Store the image data for later retrieval.
@@ -621,8 +622,8 @@ PRO ImageSelect_FlipImage, event
    Widget_Control, info.previewID, Draw_XSize=sizes[0], Draw_YSize=sizes[1]
    TVLCT, info.r, info.g, info.b
    IF (Min(*(*(info.storagePtr)).image) LT 0) OR (Max(*(*(info.storagePtr)).image) GT (!D.Table_Size-1)) THEN $
-      cgImage, BytScl(*(*(info.storagePtr)).image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
-      cgImage, *(*(info.storagePtr)).image, /Keep_Aspect, /NoInterpolation, /Erase
+      cgImage, BytScl(*(*(info.storagePtr)).image, Top=!D.Table_Size-1), /Keep_Aspect ELSE $
+      cgImage, *(*(info.storagePtr)).image, /Keep_Aspect
 
    Widget_Control, event.top, Set_UValue=info, /No_Copy
 
@@ -759,8 +760,8 @@ PRO ImageSelect_ListEvents, event
          Widget_Control, info.previewID, Draw_XSize=sizes[0], Draw_YSize=sizes[1]
          TVLCT, info.r, info.g, info.b
          IF (Min(image) LT 0) OR (Max(image) GT (!D.Table_Size-1)) THEN $
-            cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
-            cgImage, image, /Keep_Aspect, /NoInterpolation, /Erase
+            cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect ELSE $
+            cgImage, image, /Keep_Aspect
          IF imageDataType EQ 'NONE' THEN image = 0
 
          ; Store the image data for later retrieval.
@@ -862,8 +863,8 @@ PRO ImageSelect_ListEvents, event
       Widget_Control, info.previewID, Draw_XSize=sizes[0], Draw_YSize=sizes[1]
       TVLCT, info.r, info.g, info.b
       IF (Min(image) LT 0) OR (Max(image) GT (!D.Table_Size-1)) THEN $
-         cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
-         cgImage, image, /Keep_Aspect, /NoInterpolation, /Erase
+         cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect ELSE $
+         cgImage, image, /Keep_Aspect
       IF imageDataType EQ 'NONE' THEN image = 0
 
       ; Store the image data for later retrieval.
@@ -1371,8 +1372,8 @@ PRO ImageSelect_SetFilter, event
    Widget_Control, info.previewID, Draw_XSize=sizes[0], Draw_YSize=sizes[1]
    TVLCT, info.r, info.g, info.b
    IF (Min(image) LT 0) OR (Max(image) GT (!D.Table_Size-1)) THEN $
-      cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation, /Erase ELSE $
-      cgImage, image, /Keep_Aspect, /NoInterpolation, /Erase
+      cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect ELSE $
+      cgImage, image, /Keep_Aspect
    IF imageDataType EQ 'NONE' THEN image = 0
 
    ; Save the image data for later retrieval.
@@ -1779,8 +1780,8 @@ WSet, previewWID
 sizes = ImageSelect_WindowSize(image, XSIZE=previewSize, YSIZE=previewSize)
 Widget_Control, previewID, Draw_XSize=sizes[0], Draw_YSize=sizes[1]
 IF (Min(image) LT 0) OR (Max(image) GT (!D.Table_Size-1)) THEN $
-   cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect, /NoInterpolation ELSE $
-   cgImage, image, /Keep_Aspect, /NoInterpolation
+   cgImage, BytScl(image, Top=!D.Table_Size-1), /Keep_Aspect ELSE $
+   cgImage, image, /Keep_Aspect
 
 ; Set up information to run the program.
 storagePtr = Ptr_New({cancel:1, image:Ptr_New(image), fileInfo:Ptr_New(fileInfo), offsets:offsets, $

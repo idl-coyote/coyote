@@ -218,7 +218,7 @@
 ;                     http://www.dfanning.com/programs/mpi_axis__define.pro
 ;                     http://www.dfanning.com/programs/pickcolorname.pro
 ;                     http://www.dfanning.com/programs/pswindow.pro
-;                     http://www.dfanning.com/programs/tvread.pro
+;                     http://www.dfanning.com/programs/cgsnapshot.pro
 ;
 ; EXAMPLE:
 ;

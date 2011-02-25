@@ -52,6 +52,8 @@
 ;         of the function and in the information keywords.
 ;     count: out, optional, type=long
 ;         The number of cgWindow applications currently on the display.
+;     dimensions: out, optional, type=intarr(2,count)
+;         The dimensions of the current ctWindow application, [xdim, ydim].
 ;     objectref: out, optional, type=object
 ;         A vector of FSC_CMDWINDOW object references for each cgWindow application currently 
 ;         on the display.
@@ -84,6 +86,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 23 January 2011. DWF.
+;        Added DIMENSIONS keyword to return current dimensions of cgWindows. 24 Feb 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -91,6 +94,7 @@
 FUNCTION cgQuery, $
     COUNT=count, $
     CURRENT=current, $
+    DIMENSIONS=dimensions, $
     OBJECTREF=objectRef, $
     TITLE=title, $
     WIDGETID=widgetID
@@ -118,15 +122,20 @@ FUNCTION cgQuery, $
     objectRef = ObjArr(count)
     title = StrArr(count)
     windowIndex = IntArr(count)
+    dimensions = IntArr(2, count)
     
     ; Fill them up.
+    thisWindow = !D.Window
     FOR j=0,count-1 DO BEGIN
         thisItem = list -> Get_Item(j, /DEREFERENCE)
         widgetID[j] = thisItem.tlb
         objectRef[j] = thisItem.windowobj
         title[j] = thisItem.title
         windowIndex[j] = thisItem.wid
+        WSet, windowIndex[j]
+        dimensions[*,j] = [!D.X_Size, !D.Y_Size]
     ENDFOR
+    IF (thisWindow GE 0) && WindowAvailable(thisWindow) THEN WSet, thisWindow ELSE WSet, -1
     
     ; Return just the current values if the CURRENT keyword is set.
     IF Keyword_Set(current) THEN BEGIN
@@ -135,11 +144,13 @@ FUNCTION cgQuery, $
             widgetID = widgetID[count-1]
             objectRef = objectRef[count-1]
             title = title[count-1] 
+            dimensions = dimensions[*,count-1]
         ENDIF ELSE BEGIN
             windowIndex = -1
             widgetID = -1
             objectRef = Obj_New()
             title = ""
+            dimensions = [0,0]
         ENDELSE
     ENDIF
 
@@ -150,6 +161,7 @@ FUNCTION cgQuery, $
         title = title[0]
         windowIndex = windowIndex[0]
     ENDIF
+    
     
     RETURN, windowIndex
     

@@ -160,6 +160,7 @@
 ;         Fixed a problem in which I assumed the background color was a string. 18 Jan 2011. DWF.  
 ;         Added ADDCMD keyword. 26 Jan 2011. DWF.
 ;         Added LAYOUT keyword. 28 Jan 2011. DWF.
+;         Made a modification that allows THICK and COLOR keywords apply to symbols, too. 24 Feb 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -470,7 +471,7 @@ PRO cgPlot, x, y, $
     ENDELSE
     IF Abs(psym) GT 0 THEN BEGIN
         IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=symcolor, $
-            PSYM=SymCat(Abs(psym)), SYMSIZE=symsize, _EXTRA=extra
+            PSYM=SymCat(Abs(psym), COLOR=symcolor, _Extra=extra), SYMSIZE=symsize, _EXTRA=extra
     ENDIF 
          
     ; If this is the first plot in PS, then we have to make it appear that we have

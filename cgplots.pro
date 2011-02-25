@@ -110,6 +110,7 @@
 ;        Moved setting to decomposed color before color selection process to avoid PostScript
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.  
 ;        Added WINDOW keyword. 24 Jan 2011. DWF. 
+;        Made a modification that allows THICK and COLOR keywords apply to symbols, too. 24 Feb 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -263,17 +264,17 @@ PRO cgPlotS, x, y, z, $
           CASE n_params OF
               
                 1: BEGIN
-                   PlotS, x[*,j], COLOR=thisColor, PSYM=SymCat(Abs(psym)), $
+                   PlotS, x[*,j], COLOR=thisColor, PSYM=SymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
                       SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    END
                    
                 2: BEGIN
-                  PlotS, x[j], y[j], COLOR=thisColor, PSYM=SymCat(Abs(psym)), $
+                  PlotS, x[j], y[j], COLOR=thisColor, PSYM=SymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
                        SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    END
                    
                 3: BEGIN
-                   PlotS, x[j], y[j], z[j], COLOR=thisColor, PSYM=SymCat(Abs(psym)), $
+                   PlotS, x[j], y[j], z[j], COLOR=thisColor, PSYM=SymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
                        SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    END
                        

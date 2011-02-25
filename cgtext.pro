@@ -52,6 +52,10 @@
 ;        The text to output. By default, the calling sequence of the program.
 ;       
 ; :Keywords:
+;     addcmd: in, optional, type=boolean, default=0
+;        Set this keyword to add the command to an cgWindow. Setting this keyword
+;        automatically sets the WINDOW keyword, but the command does not erase the
+;        graphics window as it would normally.
 ;     alignment: in, optional, type=integer, default=0
 ;         Set this keyword to indicate the alignment of the text with respect to the
 ;         x and y location. 0 is left aligned, 0.5 is centered, and 1.0 is right aligned.
@@ -119,11 +123,14 @@
 ;        Moved setting to decomposed color before color selection process to avoid PostScript
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
 ;        Added Window keyword. 24 Jan 2011. DWF.
+;        Added ability to return WIDTH from resizeable graphics windows and added ADDCMD 
+;              keyword. 24 Feb 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO cgText, xloc, yloc, text, $
+    ADDCMD=addcmd, $
     ALIGNMENT=alignment, $
     CHARSIZE=charsize, $
     COLOR=scolor, $
@@ -155,10 +162,10 @@ PRO cgText, xloc, yloc, text, $
     ENDIF
     
     ; Should this be added to a resizeable graphics window?
-    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    IF (Keyword_Set(window) || Keyword_Set(addcmd)) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
         void = cgQuery(COUNT=wincnt)
-        IF wincnt EQ 0 THEN cgWindow
+        IF (wincnt EQ 0) && Keyword_Set(window) THEN cgWindow
         cgWindow, 'cgText', xloc, yloc, text, $
             ALIGNMENT=alignment, $
             CHARSIZE=charsize, $
@@ -173,6 +180,16 @@ PRO cgText, xloc, yloc, text, $
             WIDTH=width, $
             ADDCMD=1, $
             _EXTRA=extra
+            
+         ; You might want to get the width of the window back.
+         IF Arg_Present(width) THEN BEGIN
+            void = cgQuery(DIMENSIONS=dims, /CURRENT)
+            Window, /PIXMAP, XSIZE=dims[0], YSIZE=dims[1]
+            IF N_Elements(font) EQ 0 THEN font = !P.FONT
+            IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
+            XYOUTS, 0.5, 0.5, text, /NORMAL, WIDTH=width, CHARSIZE=charsize
+            WDelete, !D.Window
+         ENDIF
             
          RETURN
     ENDIF

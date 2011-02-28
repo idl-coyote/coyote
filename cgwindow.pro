@@ -398,7 +398,11 @@ PRO FSC_CmdWindow::ExecuteCommands, KEYWORDS=keywords
         ; Execute the command. This will update output keywords, possibly.
         thisCmdObj -> Draw, SUCCESS=success, KEYWORDS=keywords
         
-        ; Update the keyword structure.
+        ; Update the keyword structure. I had hoped that by doing this would have
+        ; updated output keyword values, but this doesn't work because Call_Procedure
+        ; does not pass keywords by reference (using keyword inheritance) but, by value).
+        ; Thus, it is currently NOT possible to obtain output keyword values from commands
+        ; entered into cgWindow.
         IF success && (N_Elements(keywords) NE 0) THEN thisCmdObj -> UpdateKeywordStruct, keywords
 
         ; Did you successfully draw this command?

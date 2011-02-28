@@ -87,6 +87,7 @@
 ;  Added a pixmap to get proper scaling in skinny windows. 16 May 2000. DWF.
 ;  Forgot I can't do pixmaps in all devices. :-( Fixed. 7 Aug 2000. DWF.
 ;  Added support of PostScript at behest of Benjamin Hornberger. 11 November 2004. DWF.
+;  Cleaned up the code a bit. 28 Feb 2011. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -122,88 +123,80 @@ FUNCTION STR_SIZE, theString, targetWidth, $
    XPOS=xpos, $
    YPOS=ypos
 
-ON_ERROR, 2
+    ON_ERROR, 2
+    
+    ; No hardware fonts.
+    thisFont = !P.Font
+    IF (thisFont EQ 0) AND (!D.NAME NE 'PS') THEN !P.Font = -1
+    
+    ; Check positional parameters.
+    np = N_PARAMS()
+    CASE np OF
+       0: MESSAGE, 'One string parameter is required.'
+       1: targetWidth = 0.25
+       ELSE:
+    ENDCASE
+    
+    ; Check keywords. Assign default values.
+    IF N_ELEMENTS(initsize) EQ 0 THEN initsize = 1.0
+    IF N_ELEMENTS(step) EQ 0 THEN step = 0.05
+    IF N_ELEMENTS(xpos) EQ 0 THEN IF !D.NAME NE 'PS' THEN xpos = 0.5 ELSE xpos = 2.0
+    IF N_ELEMENTS(ypos) EQ 0 THEN IF !D.NAME NE 'PS' THEN ypos = 0.5 ELSE ypos = 2.0
+    
+    ; Save the current window index number.
+    currentWindow = !D.Window
+    
+    ; This is the algorithm that makes this work. Reverse size of
+    ; window if is window is taller than wider.
+    IF((!D.Flags AND 256) NE 0) THEN BEGIN
+        IF !D.X_Size GE !D.Y_Size THEN BEGIN
+           Window, /Pixmap, /Free, XSize=!D.X_Size, YSize=!D.Y_Size
+        ENDIF ELSE BEGIN
+           Window, /Pixmap, /Free, XSize=!D.Y_Size, YSize=!D.X_Size
+        ENDELSE
+        pixID = !D.Window
+    ENDIF
 
-; No hardware fonts.
-thisFont = !P.Font
-IF (thisFont EQ 0) AND (!D.NAME NE 'PS') THEN !P.Font = -1
+    ; Calculate a trial width.
+    strTrialSize = initsize
+    XYOUTS, xpos, ypos, ALIGN=0.5, theString, WIDTH=thisWidth, $
+          CHARSIZE=-strTrialSize, /NORMAL
 
-; Check positional parameters.
-np = N_PARAMS()
-CASE np OF
-   0: MESSAGE, 'One string parameter is required.'
-   1: targetWidth = 0.25
-   ELSE:
-ENDCASE
-
-; Check keywords. Assign default values.
-IF N_ELEMENTS(initsize) EQ 0 THEN initsize = 1.0
-IF N_ELEMENTS(step) EQ 0 THEN step = 0.05
-IF N_ELEMENTS(orientation) EQ 0 THEN orientation = 0.0 ELSE orientation = Float(orientation)
-IF N_ELEMENTS(xpos) EQ 0 THEN IF !D.NAME NE 'PS' THEN xpos = 0.5 ELSE xpos = 2.0
-IF N_ELEMENTS(ypos) EQ 0 THEN IF !D.NAME NE 'PS' THEN ypos = 0.5 ELSE ypos = 2.0
-
-   ; Create a pixmap window for drawing the string.
-
-currentWindow = !D.Window
-
-IF !D.X_Size GE !D.Y_Size AND ((!D.Flags AND 256) NE 0) THEN BEGIN
-   Window, /Pixmap, /Free, XSize=!D.X_Size, YSize=!D.Y_Size
-   pixID = !D.Window
-ENDIF ELSE BEGIN
-   IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-      Window, /Pixmap, /Free, XSize=!D.Y_Size, YSize=!D.X_Size
-      pixID = !D.Window
-   ENDIF
-ENDELSE
-
-; Calculate a trial width.
-strTrialSize = initsize
-XYOUTS, xpos, ypos, ALIGN=0.5, theString, WIDTH=thisWidth, $
-      CHARSIZE=-strTrialSize, /NORMAL
-
-   ; Size is perfect.
-IF thisWidth EQ targetWidth THEN BEGIN
-   !P.Font = thisFont
-   theSize = strTrialSize * Float(!D.Y_Size)/!D.X_Size
-   IF currentWindow NE -1 THEN WSet, currentWindow
-   IF N_Elements(pixID) NE 0 THEN WDelete, pixID
-   RETURN, theSize
-ENDIF
-
-   ; Initial size is too big.
-
-IF thisWidth GT targetWidth THEN BEGIN
-   REPEAT BEGIN
-     XYOUTS, xpos, ypos, ALIGN=0.5, theString, WIDTH=thisWidth, $
-        CHARSIZE=-strTrialSize, /NORMAL
-     strTrialSize = strTrialSize - step
-   ENDREP UNTIL thisWidth LE targetWidth
-   !P.Font = thisFont
-   theSize = strTrialSize
-   IF currentWindow NE -1 THEN WSet, currentWindow
-   IF N_Elements(pixID) NE 0 THEN WDelete, pixID
-   RETURN, theSize
-ENDIF
-
-   ; Initial size is too small.
-
-IF thisWidth LT targetWidth THEN BEGIN
-   REPEAT BEGIN
-     XYOUTS, xpos, ypos, ALIGN=0.5, theString, WIDTH=thisWidth, $
-        CHARSIZE=-strTrialSize, /NORMAL
-     strTrialSize = strTrialSize + step
-   ENDREP UNTIL thisWidth GT targetWidth
-   strTrialSize = strTrialSize - step ; Need a value slightly smaller than target.
-   !P.Font = thisFont
-   theSize = strTrialSize
-   IF currentWindow NE -1 THEN WSet, currentWindow
-   IF N_Elements(pixID) NE 0 THEN WDelete, pixID
-   RETURN, theSize
-ENDIF
-
-   ; Cleanup.
-
-!P.Font = thisFont
-
+    ; Three possibilities for comparison.
+    CASE 1 OF
+    
+        ; Initial size is perfect.
+        (thisWidth EQ targetWidth): BEGIN
+           theSize = strTrialSize 
+           END
+    
+       ; Initial size is too big.
+       (thisWidth GT targetWidth): BEGIN
+          REPEAT BEGIN
+             XYOUTS, xpos, ypos, ALIGN=0.5, theString, WIDTH=thisWidth, $
+                CHARSIZE=-strTrialSize, /NORMAL
+             strTrialSize = strTrialSize - step
+           ENDREP UNTIL thisWidth LE targetWidth
+           theSize = strTrialSize
+           END
+        
+       ; Initial size is too small.
+       (thisWidth LT targetWidth): BEGIN
+           REPEAT BEGIN
+             XYOUTS, xpos, ypos, ALIGN=0.5, theString, WIDTH=thisWidth, $
+                CHARSIZE=-strTrialSize, /NORMAL
+             strTrialSize = strTrialSize + step
+           ENDREP UNTIL thisWidth GT targetWidth
+           strTrialSize = strTrialSize - (step/2.0) ; Need a value slightly smaller than target.
+           theSize = strTrialSize
+           END
+    
+    ENDCASE
+    
+    ; Cleanup.
+    !P.Font = thisFont
+    IF currentWindow NE -1 THEN WSet, currentWindow
+    IF N_Elements(pixID) NE 0 THEN WDelete, pixID
+    
+    RETURN, theSize
 END

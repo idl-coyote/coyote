@@ -279,7 +279,7 @@ PRO WindowImage_Display, info
     ; Draw the image.
     WSet, info.imgWinID
     cgImage, info.image, SCALE=info.scale, NCOLORS=253, /Keep, $
-        MINVALUE=info.iwindow[0], MAXVALUE=info.iwindow[1]
+        MINVALUE=info.iwindow[0], MAXVALUE=info.iwindow[1], NOERASE=1
 
     ; Draw the color bar.
     WSet, info.cbWinID
@@ -343,6 +343,7 @@ END ;---------------------------------------------------------------------------
 ;     Change History::
 ;        Written, 29 November 2010. DWF. 
 ;        Added color protection to the program. 30 Nov 2010. DWF.
+;        Modification of cgImage command to prevent flashing. 27 Feb 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.

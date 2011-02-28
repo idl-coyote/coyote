@@ -53,7 +53,7 @@
 ;     count: out, optional, type=long
 ;         The number of cgWindow applications currently on the display.
 ;     dimensions: out, optional, type=intarr(2,count)
-;         The dimensions of the current ctWindow application, [xdim, ydim].
+;         The dimensions of the ctWindow application, [xdim, ydim, n].
 ;     objectref: out, optional, type=object
 ;         A vector of FSC_CMDWINDOW object references for each cgWindow application currently 
 ;         on the display.
@@ -160,6 +160,7 @@ FUNCTION cgQuery, $
         objectRef = objectRef[0]
         title = title[0]
         windowIndex = windowIndex[0]
+        dimensions = dimensions[*,0]
     ENDIF
     
     

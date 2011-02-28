@@ -59,7 +59,7 @@
 ;       BOTTOM:       The lowest color index of the colors to be loaded in
 ;                     the bar.
 ;
-;       CHARSIZE:     The character size of the color bar annotations. Default is !P.Charsize.
+;       CHARSIZE:     The character size of the color bar annotations. Default is cgDefCharsize*0.85.
 ;       
 ;       CLAMP:        A two-element array in data units. The color bar is clamped to these
 ;                     two values. This is mostly of interest if you are "window-leveling"
@@ -76,6 +76,12 @@
 ;
 ;       DIVISIONS:    The number of divisions to divide the bar into. There will
 ;                     be (divisions + 1) annotations. The default is 6.
+;                     
+;       FIT:          If this keyword is set, the colorbar "fits" itself to the normalized
+;                     coordinates of the last plot command executed. In other words, for
+;                     a horizontal color bar, postition[[0,2]] = !X.Window, and for a vertical
+;                     color bar, position[[1,3]] = !Y.Window. Other positions are adjusted
+;                     to put the colorbar "reasonably" close to the plot.
 ;
 ;       FONT:         Sets the font of the annotation. Hershey: -1, Hardware:0, True-Type: 1.
 ;
@@ -177,6 +183,9 @@
 ;       Written by: David W. Fanning, 4 February 2011, as a direct descendant of cgColorbar.
 ;       Program developement stopped on cgColorbar as of this date, and this program has
 ;       become a part of the Coyote Graphics System.
+;       
+;       Added FIT keyword. 28 Feb 2011. DWF
+;       Made default character size cgDefCharsize*0.85. 28 Feb 2011. DWF.
 ;
 ;-             
 ;******************************************************************************************;
@@ -214,6 +223,7 @@ PRO cgColorbar, $
     CLAMP=clamp, $
     COLOR=color, $
     DIVISIONS=divisions, $
+    FIT=fit, $
     FONT=font, $
     FORMAT=format, $
     INVERTCOLORS=invertcolors, $
@@ -261,6 +271,7 @@ PRO cgColorbar, $
             CLAMP=clamp, $
             COLOR=color, $
             DIVISIONS=divisions, $
+            FIT=fit, $
             FONT=font, $
             FORMAT=format, $
             INVERTCOLORS=invertcolors, $
@@ -305,7 +316,6 @@ PRO cgColorbar, $
         TVLCT, rr, gg, bb, /Get
     ENDIF
     
-
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
@@ -331,7 +341,7 @@ PRO cgColorbar, $
        bbb = Congrid(bb, ncolors)
        TVLCT, rrr, ggg, bbb, bottom
     ENDIF
-    IF N_ELEMENTS(charsize) EQ 0 THEN charsize = !P.Charsize
+    IF N_ELEMENTS(charsize) EQ 0 THEN charsize = cgDefCharsize() * 0.85
     IF N_ELEMENTS(format) EQ 0 THEN format = '(I0)'
     IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
     minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange)
@@ -384,6 +394,16 @@ PRO cgColorbar, $
           IF position[0] GE position[2] THEN Message, "Position coordinates can't be reconciled."
           IF position[1] GE position[3] THEN Message, "Position coordinates can't be reconciled."
        ENDELSE
+      IF Keyword_Set(fit) THEN BEGIN
+            position[[1,3]] = !Y.Window
+            distance = position[2] - position[0]
+            IF Keyword_Set(right) THEN BEGIN
+                position[0] = !X.Window[1] + ((4*!D.X_CH_SIZE*charsize) / !D.X_Size)
+            ENDIF ELSE BEGIN
+                position[0] = !X.Window[1] + ((10*!D.X_CH_SIZE*charsize) / !D.X_Size)
+            ENDELSE
+            position[2] = position[0] + distance
+       ENDIF
     ENDIF ELSE BEGIN
        bar = BINDGEN(ncolors) # REPLICATE(1B, 20)
        IF Keyword_Set(invertcolors) THEN bar = Reverse(bar, 1)
@@ -396,6 +416,12 @@ PRO cgColorbar, $
           IF position[0] GE position[2] THEN Message, "Position coordinates can't be reconciled."
           IF position[1] GE position[3] THEN Message, "Position coordinates can't be reconciled."
        ENDELSE
+       IF Keyword_Set(fit) THEN BEGIN
+            position[[0,2]] = !X.Window
+            distance = position[3] - position[1]
+            position[1] = !Y.Window[1] + ((4*!D.Y_CH_SIZE*charsize) / !D.Y_Size)
+            position[3] = position[1] + distance
+       ENDIF
      ENDELSE
 
      ; Scale the color bar.

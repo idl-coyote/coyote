@@ -103,9 +103,9 @@
 ;         obtain the keyword value. If not provided, the first command (command 0) is searched.
 ;     get_keyword: in, optional, type=string
 ;         The name of the keyword whose value you want to return in get_keyvalue. The name must
-;         be spelled EXACTLY as you used the keyword, expect that case does not matter. The string
+;         be spelled EXACTLY as you used the keyword, except that case does not matter. The string
 ;         is converted to UPPERCASE to locate the proper keyword. Although it was my intention to use
-;         this to retrieve output keyword values, this is not possible using cgWindow do to the way
+;         this to retrieve output keyword values, this is not possible using cgWindow due to the way
 ;         Call_Procedure and keyword inheritance work.
 ;     get_keyvalue: out, optional, type=any
 ;         The value of the keyword specified in get_keyword. If the keyword cannot be found, this

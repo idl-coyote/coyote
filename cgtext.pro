@@ -184,7 +184,7 @@ PRO cgText, xloc, yloc, text, $
          ; You might want to get the width of the window back.
          IF Arg_Present(width) THEN BEGIN
             void = cgQuery(DIMENSIONS=dims, /CURRENT)
-            Window, /PIXMAP, XSIZE=dims[0], YSIZE=dims[1]
+            Window, /PIXMAP, XSIZE=dims[0], YSIZE=dims[1], /FREE
             IF N_Elements(font) EQ 0 THEN font = !P.FONT
             IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
             XYOUTS, 0.5, 0.5, text, /NORMAL, WIDTH=width, CHARSIZE=charsize

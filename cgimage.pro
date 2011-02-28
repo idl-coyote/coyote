@@ -337,6 +337,7 @@
 ; MODIFICATION HISTORY:
 ;      Written by: David W. Fanning, from modifications to TVIMAGE. 3 Feb 2011.
 ;      8 Feb 2011. Added OPOSITION keyword. DWF.
+;      27 Feb 2011. Added keywords to make cgImage more compatible with TVImage calls. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
@@ -508,6 +509,7 @@ PRO cgImage, image, x, y, $
    BACKGROUND=background, $
    BOTTOM=bottom, $
    COLOR=color, $
+   ERASE=obsolte_erase, $ ; Added for compatibility with TVIMAGE.
    INTERPOLATE=interp, $
    KEEP_ASPECT_RATIO=keep_aspect, $
    LAYOUT=layout, $
@@ -518,6 +520,7 @@ PRO cgImage, image, x, y, $
    MULTIMARGIN=multimargin, $
    NCOLORS=ncolors, $
    NOERASE=noerase, $
+   NOINTERPOLATION=obsolete_nointerpolation, $ ; Added for compatibility with TVIMAGE.
    NORMAL=normal, $
    OPOSITION=oposition, $
    OVERPLOT=overplot, $
@@ -549,6 +552,10 @@ PRO cgImage, image, x, y, $
         Print, 'USE SYNTAX: cgImage, image'
         RETURN
     ENDIF
+    
+    ; Handle obsolete keywords.
+    IF N_Elements(obsolete_erase) NE 0 THEN noerase = 1 - obsolete_erase
+    IF N_Elements(obsolete_nointerpolation) NE 0 THEN interp = 1 - obsolete_nointerpolation
     
     ; Set up a common block as input to TVINFO.
     COMMON FSC_$CGIMAGE, _cgimage_xsize, _cgimage_ysize, $
@@ -813,7 +820,7 @@ PRO cgImage, image, x, y, $
        ENDIF ELSE BEGIN
           IF N_Elements(multimargin) EQ 0 THEN multimargin=[1., 1., 1., 1.]
        ENDELSE
-       IF margin[0] EQ 1 THEN margin = 0.075
+       IF margin[0] EQ 1 THEN margin = 0.075  ; Comes from /MARGIN
     ENDIF 
     
     ; Make sure the multimargin has four elements.

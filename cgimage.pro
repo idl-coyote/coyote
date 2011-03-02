@@ -93,6 +93,7 @@
 ;     COLOR:    Set this keyword to the name of an axis color. Default = "black".
 ;     
 ;     CHARSIZE: Sets the character size. Used only if the AXES keyword is also set.
+;               By default, the value from cgDefCharsize().
 ;
 ;     FONT:     Set this to the type of font wanted on axis annotation. By default
 ;               FONT = !P.Font. Used only if the AXES keyword is also set.

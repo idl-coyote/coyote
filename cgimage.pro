@@ -339,6 +339,7 @@
 ;      Written by: David W. Fanning, from modifications to TVIMAGE. 3 Feb 2011.
 ;      8 Feb 2011. Added OPOSITION keyword. DWF.
 ;      27 Feb 2011. Added keywords to make cgImage more compatible with TVImage calls. DWF.
+;      Color table vectors must be obtained AFTER loading the color palette. 6 March 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
@@ -752,9 +753,7 @@ PRO cgImage, image, x, y, $
     IF Size(acolor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN acolor = Byte(color)
     IF Size(acolor, /TYPE) LE 2 THEN acolor = StrTrim(Fix(acolor),2)
  
-    ; Before you do anything, get the current color table vectors
-    ; so they can be restored later.
-    TVLCT, rr, gg, bb, /Get
+    ; Load the color palette if you are using one.
     IF N_Elements(palette) NE 0 THEN BEGIN
         IF Size(palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
         dims = Size(palette, /DIMENSIONS)
@@ -763,6 +762,10 @@ PRO cgImage, image, x, y, $
         IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
         TVLCT, palette
     ENDIF
+    
+    ; Before you do anything, get the current color table vectors
+    ; so they can be restored later. Must do AFTER loading a palette!
+    TVLCT, rr, gg, bb, /Get
     
     ; Do you need to erase the window before image display?
     IF ~Keyword_Set(noerase) && (!P.MULTI[0] EQ 0) && (N_Elements(layout) EQ 0) THEN BEGIN

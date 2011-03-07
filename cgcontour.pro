@@ -204,6 +204,7 @@
 ;        Added ADDCMD keyword. 26 Jan 2011. DWF.
 ;        Added LAYOUT keyword. 28 Jan 2011. DWF.
 ;        Added PALETTE keyword. 4 Feb 2011. DWF.
+;        Color table vectors must be obtained AFTER loading the color palette. 6 March 2011. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -385,8 +386,7 @@ PRO cgContour, data, x, y, $
     ; the request of Wayne Landsman in support of NASA Astronomy Library. It
     ; is important for programs NASA runs.
     IF (!D.Name NE 'NULL') THEN BEGIN
-        TVLCT, rr, gg, bb, /GET
-        
+         
         ; If you have a palette, load the colors now. Otherwise whatever colors
         ; are in the current color table will be used. If you are using a palette,
         ; you should NOT use C_COLORS, so I undefine it.
@@ -398,6 +398,10 @@ PRO cgContour, data, x, y, $
             IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
             TVLCT, palette
         ENDIF
+
+       ; Get the color table vectors. Must do AFTER loading the palette, or
+       ; PostScript can't be produced properly.
+       TVLCT, rr, gg, bb, /GET
     ENDIF
     
     ; Check the keywords.

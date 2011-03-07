@@ -188,6 +188,7 @@
 ;        Added ADDCMD keyword. 26 Jan 2011. DWF.
 ;        Added LAYOUT keyword. 28 Jan 2011. DWF.
 ;        Added PALETTE keyword. 3 Feb 2011. DWF.
+;        Color table vectors must be obtained AFTER loading the color palette. 6 March 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -340,8 +341,7 @@ PRO cgSurf, data, x, y, $
     IF N_Elements(y) EQ 0 THEN y = Findgen(s[1])
     noerase = Keyword_Set(noerase)
     
-    ; Get the current color table vectors.
-    TVLCT, rr, gg, bb, /GET
+    ; Load a color palette, if you have one.
     IF N_Elements(palette) NE 0 THEN BEGIN
         IF Size(palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
         dims = Size(palette, /DIMENSIONS)
@@ -350,6 +350,9 @@ PRO cgSurf, data, x, y, $
         IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
         TVLCT, palette
     ENDIF
+    
+    ; Get the current color table vectors.
+    TVLCT, rr, gg, bb, /GET
     
     ; Check the keywords.
     IF N_Elements(sbackground) EQ 0 THEN BEGIN

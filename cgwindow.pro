@@ -515,7 +515,7 @@ PRO FSC_CmdWindow::GetProperty, $
     IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
-    RASTER_IM=raster_im, $                        ; Sets whether to generate raster files via ImageMagick
+    IM_RASTER=im_raster, $                        ; Sets whether to generate raster files via ImageMagick
     PS_DELETE=ps_delete, $
     PS_ENCAPSULATED=ps_encapsulated, $
     PS_METRIC=ps_metric, $
@@ -567,7 +567,7 @@ PRO FSC_CmdWindow::GetProperty, $
      im_density = self.im_density
      im_options = self.im_options
      im_resize = self.im_resize
-     raster_im = self.raster_im
+     im_raster = self.im_raster
      
      noExecuteCommands = self.noExecuteCommands
      
@@ -882,9 +882,10 @@ PRO FSC_CmdWindow::RestoreCommands, filename
     
     ; Copy the commands from the restored command list to this command list.
     oldCommands = cg_commands -> Get_Item(/DEREFERENCE, /ALL)
-    cg_commands -> Delete, /ALL
+    self.cmds -> Delete, /ALL
     FOR j=0,N_Elements(oldCommands)-1 DO BEGIN
-        self.cmds -> Add, oldCommands[j]
+        thisCmd = oldCommands[j] -> Copy()
+        self.cmds -> Add, thisCmd
     ENDFOR
         
     ; Copy properties from old window object to new.
@@ -900,7 +901,7 @@ PRO FSC_CmdWindow::RestoreCommands, filename
         IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
         IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
         IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
-        RASTER_IM=raster_im, $                        ; Sets whether to use ImageMagick to create raster files.
+        IM_RASTER=im_raster, $                        ; Sets whether to use ImageMagick to create raster files.
         PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
         PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
         PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
@@ -921,7 +922,7 @@ PRO FSC_CmdWindow::RestoreCommands, filename
         IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
         IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
         IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
-        RASTER_IM=raster_im, $                        ; Sets whether to use ImageMagick to create raster files.
+        IM_RASTER=im_raster, $                        ; Sets whether to use ImageMagick to create raster files.
         PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
         PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
         PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
@@ -930,10 +931,7 @@ PRO FSC_CmdWindow::RestoreCommands, filename
         PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
         PS_TT_FONT=ps_tt_font                         ; Select the true-type font to use for PostScript output.
         
-    ; Invalidate the restored object's widget ID, so you don't inadvertently destroy this window!
-    cg_window -> InvalidateWidgetID
-     
-    ; Destroy the old window object.
+        
     Obj_Destroy, cg_window
     
     ; Execute the new commands.
@@ -993,7 +991,7 @@ PRO FSC_CmdWindow::SetProperty, $
     IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
-    RASTER_IM=raster_im, $                        ; Sets the raster via ImageMagick setting.
+    IM_RASTER=im_raster, $                        ; Sets whether to use ImageMagick to create raster files.
     PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
     PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
     PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
@@ -1042,7 +1040,7 @@ PRO FSC_CmdWindow::SetProperty, $
     IF N_Elements(im_density) NE 0 THEN self.im_density = im_density
     IF N_Elements(im_resize) NE 0 THEN self.im_resize = im_resize
     IF N_Elements(im_options) NE 0 THEN self.im_options = im_options
-    IF N_Elements(raster_im) NE 0 then self.raster_im = raster_im
+    IF N_Elements(im_raster) NE 0 then self.im_raster = im_raster
     IF N_Elements(ps_delete) NE 0 THEN self.ps_delete = ps_delete
     IF N_Elements(ps_metric) NE 0 THEN self.ps_metric = ps_metric
     IF N_Elements(ps_encapsulated) NE 0 THEN self.ps_encapsulated = ps_encapsulated
@@ -1408,13 +1406,6 @@ PRO FSC_CmdWindow__Define, class
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-FUNCTION FSC_Window_Command::Copy
-
-    ; Make and return a copy of the object.
-
-END ;----------------------------------------------------------------------------------------------------------------
-
-
 PRO FSC_Window_Command::CreateCommandStruct, structName, Quiet=quiet
 
     Compile_Opt idl2
@@ -1447,6 +1438,33 @@ PRO FSC_Window_Command::CreateCommandStruct, structName, Quiet=quiet
     IF NOT Keyword_Set(quiet) THEN $
         PRINT, 'Created command struct variable ', structName, ' in IDL $MAIN level.'
 
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+FUNCTION FSC_Window_Command::Copy
+
+    IF Ptr_Valid(self.keywords) THEN BEGIN
+    
+        CASE self.nparams OF
+           0: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, KEYWORDS=*self.keywords, TYPE=self.type)
+           1: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, KEYWORDS=*self.keywords, TYPE=self.type)
+           2: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, KEYWORDS=*self.keywords, TYPE=self.type)
+           3: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, P3=*self.p3, KEYWORDS=*self.keywords, TYPE=self.type)
+        ENDCASE
+        
+    ENDIF ELSE BEGIN
+    
+        CASE self.nparams OF
+           0: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, TYPE=self.type)
+           1: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1*self.p1, TYPE=self.type)
+           2: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, TYPE=self.type)
+           3: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, p2=*self.p2, P3=*self.p3, TYPE=self.type)
+        ENDCASE
+    
+    ENDELSE
+    
+    RETURN, copyObj
+    
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -1832,6 +1850,7 @@ END ;---------------------------------------------------------------------------
 ;        Corrected a window aspect ratio problem with PostScript output by making the
 ;           window the current window before calling PS_Start. 17 Feb 2011. DWF.
 ;        Added machinery for programmatically generating raster files. 18 Feb 2011. Jeremy Bailin.
+;        Problem with restoring visualizations fixed. 6 March 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.

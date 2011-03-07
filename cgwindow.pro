@@ -1456,7 +1456,7 @@ FUNCTION FSC_Window_Command::Copy
     
         CASE self.nparams OF
            0: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, TYPE=self.type)
-           1: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1*self.p1, TYPE=self.type)
+           1: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, TYPE=self.type)
            2: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, TYPE=self.type)
            3: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, p2=*self.p2, P3=*self.p3, TYPE=self.type)
         ENDCASE

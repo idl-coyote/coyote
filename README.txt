@@ -9,7 +9,33 @@ programs that are easy to maintain and extend. You can learn
 more about these programs and about IDL programming in general
 at David's web page, Coyote's Guide to IDL Programming.
 
-   http://www.dfanning.com
+   http://www.idlcoyote.com
+
+PROGRAMS RENAMED:
+
+Note that in February 2011 a great many Coyote Library programs
+were renamed to start with the letter "cg" for Coyote Graphics.
+The old programs didn't go away, they simply moved to the "retired"
+sub-directory in the Coyote Library. If you want to use them, all
+you need to is add the Coyote Library and all its sub-directories to
+your IDL path. (Normally this is done by putting a check mark in 
+front of the directory if you set your path with the IDL workbench,
+or by adding a + sign to the name of the directory in an IDL start-up
+file.)
+
+Further development, however, had stopped for "retired" programs
+and will only go forward on the renamed Coyote Library programs.
+This means you will *probably* want to start using the new names
+in your programs. Most of the names are self-explanatory. A few
+are not. Here are some common programs with their name changes on
+the right:
+
+   CTLoad -> cgLoadCT
+   FSC_Color -> cgColor
+   LoadData -> cgDemoData
+   TVInfo -> cgImageInfo
+   TVImage -> cgImage
+   TVRead -> cgSnapshot
 
 AUTHOR:
 

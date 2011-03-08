@@ -305,6 +305,7 @@
 ;        Fixed a problem with the display image when starting with a Square Root stretch. 23 April 2010. DWF.
 ;        Added ADAPTIVE EQUALIZATION stretch and changed default colors. 24 Nov 2010. DWF.
 ;        Changed SELECTIMAGE references to Coyote Library routine IMAGESELECT. 6 Jan 2011. DWF.
+;        Fixed misplaced parenthesis with SQRT function and NAN keyword. 7 March 2011. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -863,7 +864,7 @@ PRO XSTRETCH_HISTOPLOT, info, $
       'SQUARE ROOT': BEGIN
          goodIndices = Where(Finite(*info.image), NCOMPLEMENT=nanCount, count)
          IF nanCount GT 0 THEN BEGIN
-             binsize = (3.5 * StdDev(SQRT(*info.image, /NAN)))/N_Elements((*info.image)[goodIndices])^(1./3)
+             binsize = (3.5 * StdDev(SQRT(*info.image), /NAN))/N_Elements((*info.image)[goodIndices])^(1./3)
              IF (dataType LE 3) OR (dataType GE 12) THEN binsize = Round(binsize) > 1
              binsize = Convert_To_Type(binsize, dataType)
              histdata = Histogram(/NAN, SQRT((*info.image)[goodIndices]), Binsize=binsize, $

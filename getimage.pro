@@ -125,6 +125,7 @@
 ;          Now dependent on FSC_FIELD, ERROR_MESSAGE, and CENTER_TLB from Coyote Library.
 ;       Added ability to parse fully qualified file names passed from Dialog_Pickfile. 30 Oct 2010. DWF.
 ;       IF a file name is not passed into the program, it asks the user to select one now. 10 Jan 2011. DWF.
+;       Problem with SWAP_ENDIAN keywords fixed. 7 March 2011. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -552,13 +553,13 @@ FUNCTION GETIMAGE, filename, Directory=directory, DataType=datatype, Dimensions=
    ; Read the data file.
    IF formdata.header GT 0 THEN headdata = BytArr(formdata.header)
    Get_Lun, lun
-   OpenR, lun, formdata.filename, XDR=formdata.xdr
-   IF formdata.header GT 0 THEN ReadU, lun, headdata
    CASE formdata.endian OF
-      0: ReadU, lun, image
-      1: ReadU, lun, image, /Swap_If_Little_Endian
-      2: ReadU, lun, image, /Swap_If_Big_Endian
+      0: OpenR, lun, formdata.filename, XDR=formdata.xdr
+      1: OpenR, lun, formdata.filename, XDR=formdata.xdr, /Swap_If_Little_Endian
+      2: OpenR, lun, formdata.filename, XDR=formdata.xdr, /Swap_If_Big_Endian
    ENDCASE
+   IF formdata.header GT 0 THEN ReadU, lun, headdata
+   ReadU, lun, image
    Free_Lun, lun
 
    ; Free the pointer.

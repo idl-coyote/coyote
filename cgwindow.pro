@@ -1530,7 +1530,7 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
 
              IF Ptr_Valid(self.keywords) THEN BEGIN
                  CASE self.nparams OF
-                     0: Call_Method, self.command, _Extra=*self.keywords
+                     0: Message, 'Call_Method requires at least one positional parameter.'
                      1: Call_Method, self.command, *self.p1, _Extra=*self.keywords
                      2: Call_Method, self.command, *self.p1, *self.p2, _Extra=*self.keywords
                      3: Call_Method, self.command, *self.p1, *self.p2, *self.p3, _Extra=*self.keywords
@@ -1538,7 +1538,7 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
                  keywords = *self.keywords
              ENDIF ELSE BEGIN
                  CASE self.nparams OF
-                     0: Call_Method, self.command
+                     0: Message, 'Call_Method requires at least one positional parameter.'
                      1: Call_Method, self.command, *self.p1
                      2: Call_Method, self.command, *self.p1, *self.p2
                      3: Call_Method, self.command, *self.p1, *self.p2, *self.p3
@@ -1851,6 +1851,7 @@ END ;---------------------------------------------------------------------------
 ;           window the current window before calling PS_Start. 17 Feb 2011. DWF.
 ;        Added machinery for programmatically generating raster files. 18 Feb 2011. Jeremy Bailin.
 ;        Problem with restoring visualizations fixed. 6 March 2011. DWF.
+;        Fixed a problem with CALL_METHOD, which requires one positional parameter. 8 March 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.

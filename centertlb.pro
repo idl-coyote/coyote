@@ -24,7 +24,7 @@
 ;
 ; CALLING SEQUENCE:
 ;
-;       CenterTLB, tlb, [x, y, /NOCENTER, /DEVICE]
+;       CenterTLB, tlb, [x, y, /NOCENTER, /DEVICE, CENTERONTLB=wOtherTLBID]
 ;
 ; REQUIRED INPUTS:
 ;
@@ -53,6 +53,9 @@
 ;      location specified by the x and y parameters.  If NOCENTER is set
 ;      to a non-zero value, then the upper left corner of the widget
 ;      is postioned at the specifed location.
+;      
+;      CENTERONTLB:  If provided, the center of the widget is positioned at 
+;      the center of the widget whose ID is provided here.
 ;
 ; PROCEDURE:
 ;
@@ -76,6 +79,7 @@
 ;            center the widget on a single monitor when using dual
 ;            monitor settings with some graphics cards. 3 Feb 2003. DWF.
 ;       Added DEVICE keyword. 4 January 2006. DWF.
+;       Added CenterOnTLB keyword. 7 March 2011. DJ.
 ;
 ;-
 ;******************************************************************************************;
@@ -105,40 +109,47 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-PRO CenterTLB, tlb, x, y, NoCenter=nocenter, Device=device
+PRO CenterTLB, tlb, x, y, NoCenter=nocenter, Device=device, $
+   CenterOnTLB=wCenterOnTLB
 
-On_Error, 2
-
-IF Widget_Info(tlb, /Valid_ID) EQ 0 THEN Message, 'First parameter must be a valid widget ID.'
-
-IF N_Elements(x) EQ 0 THEN xc = 0.5 ELSE xc = Float(x[0])
-IF N_Elements(y) EQ 0 THEN yc = 0.5 ELSE yc = Float(y[0])
-center = 1 - Keyword_Set(nocenter)
-
-screenSize = Get_Screen_Size()
-IF screenSize[0] GT 2000 THEN screenSize[0] = screenSize[0]/2 ; Dual monitors.
-IF ~Keyword_Set(device) THEN BEGIN ; Normalized coordinates
-   xCenter = screenSize[0] * xc
-   yCenter = screenSize[1] * yc
-ENDIF ELSE BEGIN ; Device coordinates
-   xCenter = xc
-   yCenter = yc
-ENDELSE
-
-; Get the screen sizes of the TLB. Divide by 2.
-geom = Widget_Info(tlb, /Geometry)
-xHalfSize = geom.Scr_XSize / 2
-yHalfSize = geom.Scr_YSize / 2
-
-; Are you centering, or placing upper-left corner?
-IF center THEN BEGIN
-   XOffset = 0 > (xCenter - xHalfSize) < (screenSize[0] - geom.Scr_Xsize)
-   YOffset = 0 > (yCenter - yHalfSize) < (screenSize[1] - geom.Scr_Ysize)
-ENDIF ELSE BEGIN
-   XOffset = xcenter
-   YOffset = ycenter
-ENDELSE
-
-; Set the offsets.
-Widget_Control, tlb, XOffset=XOffset, YOffset=YOffset
+    On_Error, 2
+    
+    IF Widget_Info(tlb, /Valid_ID) EQ 0 THEN Message, 'First parameter must be a valid widget ID.'
+    
+    IF N_Elements(x) EQ 0 THEN xc = 0.5 ELSE xc = Float(x[0])
+    IF N_Elements(y) EQ 0 THEN yc = 0.5 ELSE yc = Float(y[0])
+    center = 1 - Keyword_Set(nocenter)
+    
+    ; Get the screen size of the primary monitor.
+    screenSize = GetPrimaryScreenSize(/Exclude_Taskbar)
+    IF N_Elements(wCenterOnTLB) EQ 1 && $
+       Widget_Info(wCenterOnTLB, /Valid_ID) THEN BEGIN
+       wCenterOnTLBGeom = Widget_Info(wCenterOnTLB, /Geometry)
+       xCenter = wCenterOnTLBGeom.xOffset + wCenterOnTLBGeom.scr_xSize / 2
+       yCenter = wCenterOnTLBGeom.yOffset + wCenterOnTLBGeom.scr_ySize / 2
+    ENDIF ELSE IF ~Keyword_Set(device) THEN BEGIN ; Normalized coordinates
+       xCenter = screenSize[0] * xc
+       yCenter = screenSize[1] * yc
+    ENDIF ELSE BEGIN ; Device coordinates
+       xCenter = xc
+       yCenter = yc
+    ENDELSE
+    
+    ; Get the screen sizes of the TLB. Divide by 2.
+    geom = Widget_Info(tlb, /Geometry)
+    xHalfSize = geom.Scr_XSize / 2
+    yHalfSize = geom.Scr_YSize / 2
+    
+    ; Are you centering, or placing upper-left corner?
+    IF center THEN BEGIN
+       xOffset = 0 > (xCenter - xHalfSize) < (screenSize[0] - geom.Scr_Xsize)
+       yOffset = 0 > (yCenter - yHalfSize) < (screenSize[1] - geom.Scr_Ysize)
+    ENDIF ELSE BEGIN
+       xOffset = xcenter
+       yOffset = ycenter
+    ENDELSE
+    
+    ; Set the offsets.
+    Widget_Control, tlb, XOffset=xOffset, YOffset=yOffset
+    
 END

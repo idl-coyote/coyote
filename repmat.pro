@@ -59,6 +59,7 @@
 ;
 ;       Written by David W. Fanning, 8 May 2009.
 ;       Algorithm significantly improved by Ronn Kling, 4 August 2009.
+;       Added line to handle an input matrix with a trailing 1 dimension correctly. DJ 8 March 2011.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -99,6 +100,7 @@ FUNCTION RepMat, matrix, ncol, nrow
     IF N_Elements(nrow) EQ 0 THEN nrow = 1
     
     s = Size(matrix, /DIMENSIONS)
+    IF N_Elements(s) EQ 1 THEN s = [s,1] ; Handle the case of a vector being passed in
     
     ; Create array.
     array = Make_Array(s[0]*ncol, s[1]*nrow, TYPE=Size(matrix,/TYPE))

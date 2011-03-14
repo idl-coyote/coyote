@@ -156,7 +156,7 @@
 ;     MINUS_ONE: The value of this keyword is passed along to the FSC_RESIZE_IMAGE
 ;               command. It prevents FSC_RESIZE_IMAGE from adding an extra row and
 ;               column to the resulting array, which can be a problem with
-;               small image arrays. This keyword is set to 1 by default.
+;               small image arrays. This keyword is set to 0 by default.
 ;
 ;     NCOLORS:  If this keyword is supplied, the TOP keyword is ignored and
 ;               the TOP keyword is set equal to  NCOLORS - 1. This
@@ -340,6 +340,10 @@
 ;      8 Feb 2011. Added OPOSITION keyword. DWF.
 ;      27 Feb 2011. Added keywords to make cgImage more compatible with TVImage calls. DWF.
 ;      Color table vectors must be obtained AFTER loading the color palette. 6 March 2011. DWF.
+;     I have been convinced (conversations with Wayne Landsman) that if the 
+;         CENTER keyword is set, the MINUS_ONE keyword is not needed, since 
+;         it was created to solve the same problem. So, I have changed the 
+;         default setting of MINUS_ONE to 0. 14 March 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
@@ -725,7 +729,7 @@ PRO cgImage, image, x, y, $
     
     ; Check other keywords.
     interp = Keyword_Set(interp)
-    IF N_Elements(minusOne) EQ 0 THEN minusOne = 1
+    IF N_Elements(minusOne) EQ 0 THEN minusOne = 0
     minusOne = Keyword_Set(minusOne)
         
     IF N_Elements(background) EQ 0 THEN background = 'white'

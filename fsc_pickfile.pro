@@ -64,6 +64,7 @@
 ;
 ;       Written by David W. Fanning, 22 February 2010.
 ;       Name changed from Pickfile to FSC_Pickfile on 14 October 2010. DWF.
+;       Modifications to make it work with multiple file selection. 9 March 2011. DWF.
 ;
 ;
 ;******************************************************************************************;
@@ -172,8 +173,9 @@ FUNCTION FSC_Pickfile, $
     file = Dialog_Pickfile(PATH=fileDir, GET_PATH=selectedDir, $
         FILE=lastFile, _STRICT_EXTRA=extra)
     
-    ; Save the last directory and filename.
-    IF file NE "" THEN BEGIN
+    ; Save the last directory and filename. Make sure you are working
+    ; with a scalar.
+    IF file[0] NE "" THEN BEGIN
         DEFSYSV, '!Coyote_LastDir', EXISTS=exists
         IF (exists AND (N_Elements(selectedDir) NE 0)) THEN BEGIN
             !Coyote_LastDir = selectedDir 
@@ -182,9 +184,9 @@ FUNCTION FSC_Pickfile, $
         ENDELSE
         DEFSYSV, '!Coyote_LastFile', EXISTS=exists
         IF exists THEN BEGIN
-            !Coyote_LastFile = File_BaseName(file)
+            !Coyote_LastFile = File_BaseName(file[0])
         ENDIF ELSE BEGIN
-            DEFSYSV, '!Coyote_LastFile', File_BaseName(file)
+            DEFSYSV, '!Coyote_LastFile', File_BaseName(file[0])
         ENDELSE
     ENDIF 
     

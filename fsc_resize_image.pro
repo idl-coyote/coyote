@@ -84,13 +84,13 @@
 ; :History:
 ;     Change History::
 ;        Written, 20 November 2010. DWF.
-;
-; :Copyright:
-;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;     I have been convinced (conversations with Wayne Landsman) that if the 
 ;         CENTER keyword is set, the MINUS_ONE keyword is not needed, since 
 ;         it was created to solve the same problem. So, I have changed the 
 ;         default setting of MINUS_ONE to 0. 11 Jan 2011. DWF.
+;         
+; :Copyright:
+;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 FUNCTION FSC_Resize_Image, image, cols, rows, $
     INTERPOLATE=interp, $
@@ -113,11 +113,11 @@ FUNCTION FSC_Resize_Image, image, cols, rows, $
     IF ((ndim LT 2) OR (ndim GT 3)) THEN $
       Message, 'Input image must have two or three dimensions.'
     
-    ; Check for keywords. Default for minus_one is 1.
+    ; Check for keywords. Default for minus_one is 0.
     interp = Keyword_Set(interp)
     IF N_Elements(minus_one) EQ 0 THEN minus_one = 0
     m1 = Keyword_Set(minus_one)
-    
+
     ; 2D images are immediately passed to IDL's Congrid command, with 
     ; the CENTER keyword set.
     IF ndim EQ 2 THEN BEGIN

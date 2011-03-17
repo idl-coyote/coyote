@@ -94,6 +94,7 @@
 ;        Moved setting to decomposed color before color selection process to avoid PostScript
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
 ;        Added WINDOW keyword. 24 Jan 2011. DWF.
+;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -111,6 +112,7 @@ PRO cgColorFill, x, y, z, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         RETURN
     ENDIF
 

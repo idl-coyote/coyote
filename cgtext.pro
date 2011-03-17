@@ -125,6 +125,7 @@
 ;        Added Window keyword. 24 Jan 2011. DWF.
 ;        Added ability to return WIDTH from resizeable graphics windows and added ADDCMD 
 ;              keyword. 24 Feb 2011. DWF.
+;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -152,6 +153,7 @@ PRO cgText, xloc, yloc, text, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         RETURN
     ENDIF
     

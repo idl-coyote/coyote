@@ -111,6 +111,7 @@
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.  
 ;        Added WINDOW keyword. 24 Jan 2011. DWF. 
 ;        Made a modification that allows THICK and COLOR keywords apply to symbols, too. 24 Feb 2011. DWF.
+;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -132,6 +133,7 @@ PRO cgPlotS, x, y, z, $
         Catch, /CANCEL
         void = Error_Message()
         IF Keyword_Set(dataSwitch) THEN x = Temporary(y)
+        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         RETURN
     ENDIF
     

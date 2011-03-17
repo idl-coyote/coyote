@@ -108,6 +108,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 25 Janauray 2011. DWF.
+;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -140,6 +141,7 @@ PRO cgAxis, xloc, yloc, zloc, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         RETURN
     ENDIF
         

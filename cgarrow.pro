@@ -99,6 +99,7 @@
 ;     Change History::
 ;        Written, 23 November 2010. DWF. Based on old Arrow routine in IDL.
 ;        Added Window keyword 24 January 2011. DWF.
+;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -122,6 +123,7 @@ PRO cgArrow, x0, y0, x1, y1, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         RETURN
     ENDIF
     

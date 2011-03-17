@@ -95,13 +95,21 @@
 ;        Modified to erase in decomposed color, if possible.
 ;        In some cases, I was turning BYTE values to strings without converting to 
 ;            INTEGERS first. 30 Dec 2010. DWF.   
-;         Added WINDOW keyword. 26 Jan 2011. DWF. 
-;         Added LAYOUT keyword. 1 Feb 2011. DWF.    
+;        Added WINDOW keyword. 26 Jan 2011. DWF. 
+;        Added LAYOUT keyword. 1 Feb 2011. DWF.    
+;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO cgErase, background_color, COLOR=color, LAYOUT=layout, WINDOW=window
+
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+       Catch, /Cancel
+       IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+       RETURN
+    ENDIF
 
     ; Are we erasing an cgWindow application?
     IF Keyword_Set(window) THEN BEGIN

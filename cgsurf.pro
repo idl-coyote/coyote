@@ -189,6 +189,7 @@
 ;        Added LAYOUT keyword. 28 Jan 2011. DWF.
 ;        Added PALETTE keyword. 3 Feb 2011. DWF.
 ;        Color table vectors must be obtained AFTER loading the color palette. 6 March 2011. DWF.
+;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -228,6 +229,7 @@ PRO cgSurf, data, x, y, $
         Catch, /CANCEL
         void = Error_Message()
         IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
+        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         RETURN
     ENDIF
     

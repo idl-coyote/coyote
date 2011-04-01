@@ -340,10 +340,11 @@
 ;      8 Feb 2011. Added OPOSITION keyword. DWF.
 ;      27 Feb 2011. Added keywords to make cgImage more compatible with TVImage calls. DWF.
 ;      Color table vectors must be obtained AFTER loading the color palette. 6 March 2011. DWF.
-;     I have been convinced (conversations with Wayne Landsman) that if the 
+;      I have been convinced (conversations with Wayne Landsman) that if the 
 ;         CENTER keyword is set, the MINUS_ONE keyword is not needed, since 
 ;         it was created to solve the same problem. So, I have changed the 
 ;         default setting of MINUS_ONE to 0. 14 March 2011. DWF.
+;       Corrected a problem with restoring color tables if a PALETTE is used. 31 March 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
@@ -764,6 +765,7 @@ PRO cgImage, image, x, y, $
         threeIndex = Where(dims EQ 3)
         IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
         IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
+        TVLCT, p_red, p_grn, p_blu, /Get ; Save the color vectors before loading the palette.
         TVLCT, palette
     ENDIF
     
@@ -1326,7 +1328,11 @@ PRO cgImage, image, x, y, $
     ENDELSE
 
     ; Clean up after yourself.
-    IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb
+    IF (!D.Name NE 'Z') THEN BEGIN
+        TVLCT, rr, gg, bb
+        ; If you loaded a color palette, restore the before color vectors.
+        IF N_Elements(p_red) NE 0 THEN TVLCT, p_red, p_grn, p_blu
+    ENDIF
     IF ~Keyword_Set(save) THEN BEGIN
         !P = bangp
         !X = bangx

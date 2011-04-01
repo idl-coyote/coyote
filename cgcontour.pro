@@ -128,7 +128,8 @@
 ;     palette: in, optional, type=bytarr(256,3)
 ;        A color palette containing the RGB color vectors to use for coloring contours.
 ;        Contour colors will be sampled from the color table palette into the number 
-;        of contour levels required.
+;        of contour levels required. If the palette is NOT 256 elements in length, then
+;        it is assumed that the length corresponds to the number of levels to be contoured.
 ;     position: in, optional, type=float
 ;        Set this keyword to a four-element [x0,y0,x1,y1] array giving the contour plot
 ;        position in normalized coordinates. 
@@ -206,7 +207,7 @@
 ;        Added PALETTE keyword. 4 Feb 2011. DWF.
 ;        Color table vectors must be obtained AFTER loading the color palette. 6 March 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
-;         
+;        Modifications to allow palettes of less than 256 elememts in length to be used. 1 April 2011. DWF.
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -398,7 +399,19 @@ PRO cgContour, data, x, y, $
             threeIndex = Where(dims EQ 3)
             IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
             IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
+            TVLCT, p_red, p_grn, p_blu, /Get ; Save the color vectors before loading the palette.
             TVLCT, palette
+            
+            ; Set up contour colors for the palette. If you passed contour colors,
+            ; then I assume these are indices into the color palette.
+            IF N_Elements(c_colors) NE 0 THEN con_colors = Color24(palette[c_colors,*])
+            
+            ; If the palette contains fewer colors than the color table, then I assume
+            ; the palette is just for contour colors.
+            IF (N_Elements(c_colors) EQ 0) && ((N_Elements(palette)/3) LT 256) THEN BEGIN
+                con_colors = Color24(palette)
+            ENDIF
+            
         ENDIF
 
        ; Get the color table vectors. Must do AFTER loading the palette, or
@@ -546,12 +559,13 @@ PRO cgContour, data, x, y, $
                 con_colors = Fix(c_colors)
            ENDIF ELSE BEGIN
                 IF N_Elements(palette) NE 0 THEN BEGIN
+                    TVLCT, palette
                     IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, /Get
                     rrr = Congrid(rrr, nlevels)
                     ggg = Congrid(ggg, nlevels)
                     bbb = Congrid(bbb, nlevels)
                     IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, 1
-                    con_colors = StrTrim(Indgen(nlevels)+1,2)
+                    IF N_Elements(con_colors) EQ 0 THEN con_colors = StrTrim(Indgen(nlevels)+1,2)
                 ENDIF ELSE BEGIN
                     con_colors = c_colors
                 ENDELSE
@@ -559,12 +573,13 @@ PRO cgContour, data, x, y, $
         ENDIF ELSE con_colors = c_colors
     ENDIF ELSE BEGIN
         IF Keyword_Set(fill) OR Keyword_Set(cell_fill) THEN BEGIN
+            IF N_Elements(palette) NE 0 THEN IF (!D.Name NE 'NULL') THEN TVLCT, palette
             IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, /Get
             rrr = Congrid(rrr, nlevels)
             ggg = Congrid(ggg, nlevels)
             bbb = Congrid(bbb, nlevels)
             IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, 1
-            con_colors = StrTrim(Indgen(nlevels)+1,2)
+            IF N_Elements(con_colors) EQ 0 THEN con_colors = StrTrim(Indgen(nlevels)+1,2)
         ENDIF ELSE BEGIN
             con_colors = Replicate(color, nlevels)
         ENDELSE
@@ -682,7 +697,11 @@ PRO cgContour, data, x, y, $
     
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.
-    IF (!D.Name NE 'Z') AND (!D.Name NE 'NULL') THEN TVLCT, rr, gg, bb
+    IF (!D.Name NE 'Z') AND (!D.Name NE 'NULL') THEN BEGIN
+        TVLCT, rr, gg, bb
+        ; If you loaded a color palette, restore the before color vectors.
+        IF N_Elements(p_red) NE 0 THEN TVLCT, p_red, p_grn, p_blu
+    ENDIF
      
     ; Clean up if you are using a layout.
     IF N_Elements(layout) NE 0 THEN !P.Multi = thisMulti

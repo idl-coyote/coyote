@@ -66,6 +66,7 @@
 ;
 ;       Written by David W. Fanning, January 2003.
 ;       Updated slightly to use Coyote Library routines. 3 Dec. 2010. DWF.
+;       Modified the example to work with cgImage. 29 March 2011. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -331,6 +332,6 @@ LoadCT, 0, /Silent
 Window, /Free, XSize=s[0]*2, YSize=s[1], Title='Image Sharpening'
 cgImage, image, 0, /TV
 XYOuts, 0.25, 0.1, /Normal, Alignment=0.5, 'Original Image', Font=0, Color=cgColor('red6')
-cgImage, Sharpen(image), 1, /TV
+cgImage, Sharpen(image), 1, /NoErase, /TV
 XYOuts, 0.75, 0.1, /Normal, Alignment=0.5, 'Sharpened Image', Font=0, Color=cgColor('red6')
 END

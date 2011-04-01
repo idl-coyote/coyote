@@ -58,8 +58,14 @@
 ;
 ;       BOTTOM:       The lowest color index of the colors to be loaded in
 ;                     the bar.
+;                     
+;       CHARPERCENT:   A value from 0.0 go 1.0 that is multiplied by the CHARSIZE to produce
+;                     the character size for the color bar. The default is 0.85. This value
+;                     is only used if CHARSIZE is undefined. This keyword is primarily useful
+;                     for using color bars in resizeable graphics windows (cgWindow).
 ;
-;       CHARSIZE:     The character size of the color bar annotations. Default is cgDefCharsize*0.85.
+;       CHARSIZE:     The character size of the color bar annotations. Default is 
+;                     cgDefCharsize()*charPercent.
 ;       
 ;       CLAMP:        A two-element array in data units. The color bar is clamped to these
 ;                     two values. This is mostly of interest if you are "window-leveling"
@@ -187,7 +193,7 @@
 ;       Added FIT keyword. 28 Feb 2011. DWF
 ;       Made default character size cgDefCharsize*0.85. 28 Feb 2011. DWF.
 ;       Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
-;
+;       Added CHARPERCENT keyword 18 March 2011. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -220,6 +226,7 @@ PRO cgColorbar, $
     ADDCMD=addcmd, $
     ANNOTATECOLOR=annotatecolor, $
     BOTTOM=bottom, $
+    CHARPERCENT=charpercent, $
     CHARSIZE=charsize, $
     CLAMP=clamp, $
     COLOR=color, $
@@ -269,6 +276,7 @@ PRO cgColorbar, $
         cgWindow, 'cgColorbar', $
             ANNOTATECOLOR=annotatecolor, $
             BOTTOM=bottom, $
+            CHARPERCENT=charpercent, $
             CHARSIZE=charsize, $
             CLAMP=clamp, $
             COLOR=color, $
@@ -305,6 +313,11 @@ PRO cgColorbar, $
     
     ; Get the current color table vectors. 
     TVLCT, r, g, b, /GET
+    
+    ; Default values.
+    IF (N_Elements(charPercent) EQ 0) $
+        THEN charPercent = 0.85 $
+        ELSE charPercent = 0.0 > charPercent < 1.0
         
     ; If you have a palette, load the colors now. Otherwise whatever colors
     ; are in the current color table will be used.
@@ -343,7 +356,7 @@ PRO cgColorbar, $
        bbb = Congrid(bb, ncolors)
        TVLCT, rrr, ggg, bbb, bottom
     ENDIF
-    IF N_ELEMENTS(charsize) EQ 0 THEN charsize = cgDefCharsize() * 0.85
+    IF N_ELEMENTS(charsize) EQ 0 THEN charsize = cgDefCharsize() * charPercent
     IF N_ELEMENTS(format) EQ 0 THEN format = '(I0)'
     IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
     minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange)

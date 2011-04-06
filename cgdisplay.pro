@@ -138,7 +138,17 @@ PRO cgDisplay, pxsize, pysize, $
         cgErase, color   
     ENDIF ELSE BEGIN
         CASE !D.Name OF
-            'PS': Device, _Extra=PSWindow(AspectRatio=Float(pysize)/pxsize)
+        
+            ; There can be some strange interactions with PS_START is PS_START
+            ; is called with no current windows open, and cgDisplay is called with
+            ; an aspect ratio that results in a PORTRAIT mode display. This checks
+            ; for that problem.
+            'PS': BEGIN
+                COMMON _$FSC_PS_START_, ps_struct
+                keywords = PSWindow(AspectRatio=Float(pysize)/pxsize)
+                Device, _Extra=keywords
+                IF N_Elements(ps_struct) NE 0 THEN ps_struct.landscape = keywords.landscape
+                END
             'Z': Device, Set_Resolution=[pxsize,pysize]
             ELSE:
         ENDCASE

@@ -212,7 +212,7 @@ PRO cgControl, selection, $
     IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
-    RASTER_IM=raster_im, $                        ; Sets whether to generate raster files via ImageMagick.
+    IM_RASTER=im_raster, $                        ; Sets whether to generate raster files via ImageMagick.
     PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM files.
     PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
     PS_ENCAPSULATED=ps_encapsulated, $            ; Create Encapsulated PostScript output.
@@ -332,7 +332,7 @@ PRO cgControl, selection, $
         IM_DENSITY = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
         IM_RESIZE = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
         IM_OPTIONS = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
-        RASTER_IM = raster_im, $                        ; Sets whether to create raster files via ImageMagick.
+        IM_RASTER = im_raster, $                        ; Sets whether to create raster files via ImageMagick.
         PS_DELETE = ps_delete, $                        ; Delete the PostScript file when making IM files.
         PS_METRIC = ps_metric, $                        ; Select metric measurements in PostScript output.
         PS_ENCAPSULATED = ps_encapsulated, $            ; Create encapsulated PostScript output.

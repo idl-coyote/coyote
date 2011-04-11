@@ -932,6 +932,9 @@ PRO FSC_CmdWindow::RestoreCommands, filename
         PS_TT_FONT=ps_tt_font                         ; Select the true-type font to use for PostScript output.
         
         
+    ; The widget ID of the restored object must be invalidated,
+    ; or the current object (with that widget ID) will be destroyed.
+    cg_window -> InvalidateWidgetID
     Obj_Destroy, cg_window
     
     ; Execute the new commands.
@@ -1357,7 +1360,7 @@ PRO FSC_CmdWindow::Cleanup
     
     ; If the list doesn't have any more cgWindows objects in it,
     ; delete the list so it doesn't waste memory. 
-    IF (theList -> Get_Count() EQ 0) THEN Obj_Destroy, theList
+    IF ((theList -> Get_Count()) EQ 0) THEN Obj_Destroy, theList
     
     ; If your widget ID is valid, destroy the widget program.
     IF Widget_Info(self.tlb, /VALID_ID) THEN Widget_Control, self.tlb, /Destroy

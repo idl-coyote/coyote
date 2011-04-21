@@ -130,13 +130,14 @@ FUNCTION cgDefCharSize, FONT=font
             
             ENDCASE
              
+        ; Adjust this size for the size of the window. Can't do this in PostScript
+        ; for some reason, as it creates an extra page of output.
+        IF !D.Name NE 'PS' THEN BEGIN
+           ;thisCharsize = Str_Size('This is the text size for a normal window', 0.65, INITSIZE=thisCharsize)
+        ENDIF
+
     ENDIF ELSE thisCharSize = !P.Charsize
         
-    ; Adjust this size for the size of the window. Can't do this in PostScript
-    ; for some reason, as it creates an extra page of output.
-    IF !D.Name NE 'PS' THEN BEGIN
-       thisCharsize = Str_Size('This is the text size for a normal window', 0.65, INITSIZE=thisCharsize)
-    ENDIF
     
     RETURN, thisCharSize
     

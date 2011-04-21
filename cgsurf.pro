@@ -100,7 +100,7 @@
 ;         example, from cgLoadCT with the RGB_TABLE keyword:
 ;               
 ;             cgLoadCT, 33, RGB_TABLE=palette
-;             cgSurf, Loaddata(2), PALETTE=palette, /Elevation
+;             cgSurf, cgDemoData(2), PALETTE=palette, /Elevation
 ;                    
 ;     rotx: in, optional, type=float, default=30
 ;        The rotation about the X axis.

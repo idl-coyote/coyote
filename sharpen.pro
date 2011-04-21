@@ -326,7 +326,7 @@ END
 
 PRO Example
 
-image = LoadData(13)
+image = cgDemoData(13)
 s = Size(image, /Dimensions)
 LoadCT, 0, /Silent
 Window, /Free, XSize=s[0]*2, YSize=s[1], Title='Image Sharpening'

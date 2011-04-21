@@ -70,11 +70,11 @@
 ;       IDL> cgErase, 'gray'
 ;       IDL> cgErase, COLOR='charcoal'
 ;       
-;       IDL> cgPlot, Loaddata(1), /Window
+;       IDL> cgPlot, cgDemoData(1), /Window
 ;       IDL> cgErase, /Window
 ;       
-;       IDL> cgPlot, Loaddata(17), Layout=[2,2,1]
-;       IDL> cgPlot, Loaddata(17), Layout=[2,2,4]
+;       IDL> cgPlot, cgDemoData(17), Layout=[2,2,1]
+;       IDL> cgPlot, cgDemoData(17), Layout=[2,2,4]
 ;       IDL> cgErase, Layout=[2,2,1]
 ;       
 ; :Author:

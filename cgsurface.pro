@@ -1122,7 +1122,7 @@ END ;---------------------------------------------------------------------------
 ;       cgSurface, data
 ;       cgSurface, data, /Elevation_Shading
 ;       cgSurface, data, /Shaded
-;       cgSurface, data, /Shaded, Texture_Image=Loaddata(16) 
+;       cgSurface, data, /Shaded, Texture_Image=cgDemoData(16) 
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -1210,7 +1210,7 @@ PRO cgSurface, data, x, y, $
     IF N_Elements(data) EQ 0 THEN BEGIN
         Print, 'USE SYNTAX: cgSurface, data, x, y'
         Print, 'Using example data.'
-        data = LoadData(2)
+        data = cgDemoData(2)
     ENDIF
     
     ; Get the current color table vectors. May need them later.

@@ -65,12 +65,12 @@
 ;
 ; EXAMPLES:
 ;
-;       LoadCT, 0                                    ; Gray-scale colors.
-;       image = LoadData(22)                         ; Load image.
-;       TV, image                                    ; No contrast.
-;       TV, LogScl(image)                            ; Improved contrast.
-;       TV, LogScl(image, Exponent=10, Mean=0.65)    ; Even more contrast.
-;       TV, LogScl(image, /Negative, Exponent=5)     ; A negative image.
+;       cgLoadCT, 0                                       ; Gray-scale colors.
+;       image = cgDemoData(22)                            ; Load image.
+;       cgImage, image                                    ; No contrast.
+;       cgImage, LogScl(image)                            ; Improved contrast.
+;       cgImage, LogScl(image, Exponent=10, Mean=0.65)    ; Even more contrast.
+;       cgImage, LogScl(image, /Negative, Exponent=5)     ; A negative image.
 ;
 ; RESTRICTIONS:
 ;

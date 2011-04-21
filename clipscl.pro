@@ -66,7 +66,7 @@
 ; EXAMPLES:
 ;
 ;       LoadCT, 0                                            ; Gray-scale colors.
-;       image = LoadData(22)                                 ; Load image.
+;       image = cgDemoData(22)                                 ; Load image.
 ;       TV, ClipScl(image, 4)
 ;
 ; RESTRICTIONS:

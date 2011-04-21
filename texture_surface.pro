@@ -88,15 +88,15 @@
 ;
 ;       To use this program with your surface data and 2D image, type:
 ;
-;        IDL> data = Loaddata(2)
-;        IDL> image = Loaddata(7)
+;        IDL> data = cgDemoData(2)
+;        IDL> image = cgDemoData(7)
 ;        IDL> Texture_Surface, data, Image=image, Colortable=33
 ;
 ; RESTRICTIONS:
 ;
 ;        Requires the ASPECT program from the Coyote Library:
 ;
-;           http://www.dfanning.com/programs/aspect.pro
+;           http://www.idlcoyote.com/programs/aspect.pro
 ;
 ; MODIFICATION HISTORY
 ;

@@ -103,7 +103,7 @@
 ;       for a color bar:
 ;
 ;           positions = GridPositions(2, 2, YEXTENT=[0.15,0.85], XEXTENT=[0.2,0.8])
-;           image = LoadData(11)
+;           image = cgDemoData(11)
 ;           cgErase, 'rose'
 ;           cgLoadCt, 25, /Brewer
 ;           cgImage, image, POSITION=positions[*,0]

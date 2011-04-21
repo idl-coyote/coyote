@@ -59,7 +59,7 @@
 ; EXAMPLES:
 ;
 ;       LoadCT, 0                                            ; Gray-scale colors.
-;       image = LoadData(11)                                 ; Load image.
+;       image = cgDemoData(11)                                 ; Load image.
 ;       TV, GaussScl(image)
 ;
 ; RESTRICTIONS:

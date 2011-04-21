@@ -93,7 +93,7 @@
 ;          
 ; :Examples:
 ;    Used like the IDL AXIS command::
-;       IDL> cgPlot, Loaddata(1), YStyle=8, Position=[0.1, 0.1, 0.85, 0.9], /Window
+;       IDL> cgPlot, cgDemoData(1), YStyle=8, Position=[0.1, 0.1, 0.85, 0.9], /Window
 ;       IDL> cgAxis, /YAxis, Color='red', YRange=[-500, 500], /Save, /Window
 ;       
 ; :Author:

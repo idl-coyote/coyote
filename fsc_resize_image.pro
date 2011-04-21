@@ -69,8 +69,8 @@
 ;          
 ; :Examples:
 ;    Used in a similar fashion to the Congrid command, but for images::
-;       IDL> bigEarth = FSC_Resize_Image(LoadData(7), 720, 720)
-;       IDL> bigRose  = FSC_Resize_Image(LoadData(16), 681, 447)
+;       IDL> bigEarth = FSC_Resize_Image(cgDemoData(7), 720, 720)
+;       IDL> bigRose  = FSC_Resize_Image(cgDemoData(16), 681, 447)
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::

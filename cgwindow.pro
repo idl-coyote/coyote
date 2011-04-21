@@ -1780,10 +1780,10 @@ END ;---------------------------------------------------------------------------
 ;          
 ; :Examples:
 ;    Test code::
-;       data = Loaddata(17)
+;       data = cgDemoData(17)
 ;       cgWindow, 'cgPlot', data, COLOR='red'
 ;       cgWindow, 'cgPlot', data, PSYM=2, /Overplot, COLOR='dodger blue', /AddCmd
-;       cgWIndow, 'cgPlot', Loaddata(17), color='olive', linestyle = 2, /Overplot, /AddCmd
+;       cgWIndow, 'cgPlot', cgDemoData(17), color='olive', linestyle = 2, /Overplot, /AddCmd
 ;       cgWindow, /ListCmd
 ;       cgWindow, 'cgPlot', data, COLOR='purple', /ReplaceCMD, CMDINDEX=0
 ;       

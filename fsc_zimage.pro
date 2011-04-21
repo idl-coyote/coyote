@@ -528,9 +528,9 @@ END ; ----------------------------------------------------------------------
 ;          
 ; :Examples:
 ;    Code examples::
-;       IDL> image = LoadData(7)
+;       IDL> image = cgDemoData(7)
 ;       IDL> FSC_ZImage, image ; 2D image
-;       IDL> image = LoadData(16)
+;       IDL> image = cgDemoData(16)
 ;       IDL> FSC_ZImage, image ; True-Color image
 ;       
 ; :Author:

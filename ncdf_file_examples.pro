@@ -94,7 +94,7 @@ PRO NCDF_File_Examples
         Message, 'Invalid file object returned from NCDF_FILE INIT.'
     
     ; Create some data to put into the file.
-    data = LoadData(18)
+    data = cgDemoData(18)
     dims = Size(data, /DIMENSIONS)
     colortable = 34
     
@@ -123,7 +123,7 @@ PRO NCDF_File_Examples
     
     ; Write the data to the file. Here we are going to write 10 frames of data.
     FOR j=0,9 DO BEGIN
-        fileObj -> WriteVarData, 'data', LoadData(18), OFFSET=[0,0,j]
+        fileObj -> WriteVarData, 'data', cgDemoData(18), OFFSET=[0,0,j]
     ENDFOR
     
     ; Sync the file by writing memory to disk.

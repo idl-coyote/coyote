@@ -74,14 +74,14 @@
 ;
 ; :Examples:
 ;    To create and display a transparent image::
-;       Window, 0
-;       LoadCT, 0
-;       cgImage, LoadData(5)
+;       cgDisplay, WID=0
+;       cgLoadCT, 0
+;       cgImage, cgDemoData(5)
 ;       timage = Make_Transparent_Image(COLOR='black')
-;       Window, 1
-;       LoadCT, 22
-;       cgImage, LoadData(7)
-;       cgImage, timage, Position=[0.2, 0.2, 0.8, 0.8], /Keep_Aspect
+;       cgDisplay, WID=1
+;       cgLoadCT, 22
+;       cgImage, cgDemoData(7)
+;       cgImage, timage, Position=[0.2, 0.2, 0.8, 0.8]
 ;
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::

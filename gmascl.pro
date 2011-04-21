@@ -66,7 +66,7 @@
 ; EXAMPLES:
 ;
 ;       LoadCT, 0                                            ; Gray-scale colors.
-;       image = LoadData(11)                                 ; Load image.
+;       image = cgDemoData(11)                                 ; Load image.
 ;       TV, GmaScl(image, Min=30, Max=100)                   ; Similar to BytScl.
 ;       TV, GmaScl(image, /Negative)                         ; Produce negative image.
 ;       power = Shift(ALog(Abs(FFT(image,-1))), 124, 124)    ; Create power spectrum.

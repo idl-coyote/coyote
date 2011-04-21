@@ -197,7 +197,7 @@
 ;               RGB_TABLE keyword:
 ;               
 ;                    cgLoadCT, 4, /BREWER, /REVERSE, RGB_TABLE=palette
-;                    cgImage, LoadData(7), PALETTE=palette
+;                    cgImage, cgDemoData(7), PALETTE=palette
 ;                    
 ;     POSITION: The location of the image in the output window. This is
 ;               a four-element floating array of normalized coordinates of

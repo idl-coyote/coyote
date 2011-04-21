@@ -64,7 +64,7 @@
 ;          
 ; :Examples:
 ;    Used with the HISTOGRAM command::
-;       IDL> image = LoadData(7)
+;       IDL> image = cgDemoData(7)
 ;       IDL> h = Histogram(image, REVERSE_INDICES=ri)
 ;       IDL> indices = ReverseIndices(ri, 4, COUNT=cnt)
 ;       IDL> Help, indices, cnt, h[4]

@@ -118,7 +118,7 @@
 ;       IDL> cgWindow_SetDefs, PALETTE=palette, $
 ;               ERASEIT=1, XSIZE=800, YSIZE=400, XPOS=100, YPOS=200, $
 ;               PS_ENCAPSULATED=1, PS_METRIC=1
-;       IDL> cgImage, LoadData(7), /WINDOW, MARGIN=0.1
+;       IDL> cgImage, cgDemoData(7), /WINDOW, MARGIN=0.1
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::

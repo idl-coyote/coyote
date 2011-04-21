@@ -361,7 +361,7 @@ END ; -----------------------------------------------------------------------
 ;          
 ; :Examples:
 ;    Code examples::
-;       IDL> Zplot, LoadData(1)
+;       IDL> Zplot, cgDemoData(1)
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::

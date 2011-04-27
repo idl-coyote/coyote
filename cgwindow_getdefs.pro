@@ -45,6 +45,8 @@
 ;    None
 ;       
 ; :Keywords:
+;     adjustsize: out, optional, type=boolean
+;         If set, adjust the default text size to match the display window size.
 ;     background: out, optional, type=string
 ;         The background color of the window.
 ;     delay: out, optional, type=float
@@ -105,11 +107,14 @@
 ;        Written, 29 January 2011. DWF.
 ;        Added PS_QUIET keyword. 17 Feb 2011. DWF.
 ;        Added Raster_IM.  18 Feb 2011. Jeremy Bailin
+;        Added the ability to set and unset adjustable text size in 
+;          cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
 PRO cgWindow_GetDefs, $
+   AdjustSize = adjustsize, $                      ; Adjusts text size to fit display window size.
    Background = background, $                      ; The background color. 
    Delay = delay, $                                ; The amount of delay between command execution.
    EraseIt = eraseit, $                            ; Set this keyword to erase the display before executing the commands.
@@ -150,6 +155,7 @@ PRO cgWindow_GetDefs, $
    IF ~exists THEN cgWindow_SetDefs
    
    ; If the user asked for the default, give it to them.
+   IF Arg_Present(adjustsize) THEN adjustsize = !FSC_WINDOW_DEFAULTS.adjustsize
    IF Arg_Present(background) THEN background = !FSC_WINDOW_DEFAULTS.background
    IF Arg_Present(delay) THEN delay = !FSC_WINDOW_DEFAULTS.delay
    IF Arg_Present(eraseit) THEN eraseit = !FSC_WINDOW_DEFAULTS.eraseit

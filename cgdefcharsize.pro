@@ -47,6 +47,10 @@
 ;    None.
 ;       
 ; :Keywords:
+;     adjustsize: in, optional, type=boolean, default=0
+;        If this keyword is set, the output character size is adjusted to
+;        fit the size of the output graphics window. No adjustment is ever
+;        done in PostScript. Applies only when !P.Charsize=0.
 ;     font: in, optional, type=integer, default=!P.Font
 ;        The font type: -1 = Hershey, 0 = hardware, 1 = true-type. 
 ;          
@@ -61,12 +65,14 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 11 January 2011. DWF.        
+;        Written, 11 January 2011. DWF.      
+;        Added an ADJUSTSIZE keyword to allow adjustable sizing of characters
+;           in resizeable graphics windows. 24 April 2011. DWF.  
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-FUNCTION cgDefCharSize, FONT=font
+FUNCTION cgDefCharSize, ADJUSTSIZE=adjustsize, FONT=font
 
     Compile_Opt idl2
     
@@ -75,6 +81,28 @@ FUNCTION cgDefCharSize, FONT=font
     
     ; Check parameters
     IF N_Elements(font) EQ 0 THEN font = !P.Font
+    
+    ; If the current window is a cgWindow, then the ADJUSTSIZE property of the
+    ; window is used to set the AdjustSize keyword.
+    IF (!D.Name EQ 'PS') THEN adjustsize = 0
+    IF (N_Elements(adjustsize) EQ 0) THEN BEGIN
+    
+        ; Each instance of cgWindow will store evidence of its
+        ; existance in a linked list.
+        DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists
+        IF ~exists THEN BEGIN
+            adjustsize = 0 
+        ENDIF ELSE BEGIN
+            IF Obj_Valid(!FSC_WINDOW_LIST) THEN BEGIN
+                wid = cgQuery(/Current)
+                IF wid EQ !D.Window THEN BEGIN
+                    void = cgQuery(ObjectRef=windowObj, /Current)
+                    windowObj -> GetProperty, AdjustSize=adjustsize
+                ENDIF ELSE adjustsize = 0
+            ENDIF ELSE adjustsize = 0
+        ENDELSE
+            
+    ENDIF
 
     ; Calculate a default character size. We absolutely do not want to
     ; do this if !P.Charsize is not set to its default value of 0.
@@ -133,7 +161,12 @@ FUNCTION cgDefCharSize, FONT=font
         ; Adjust this size for the size of the window. Can't do this in PostScript
         ; for some reason, as it creates an extra page of output.
         IF !D.Name NE 'PS' THEN BEGIN
-           ;thisCharsize = Str_Size('This is the text size for a normal window', 0.65, INITSIZE=thisCharsize)
+        
+          ; The adjustment attempts to compensate for multiple plots in the window.
+          IF Keyword_Set(adjustsize) THEN BEGIN
+                thisCharsize = Str_Size('This is the text size for a normal window', $
+                    0.65 * ((10-!P.multi[1])/10. > 0.5), INITSIZE=thisCharsize)
+           ENDIF
         ENDIF
 
     ENDIF ELSE thisCharSize = !P.Charsize

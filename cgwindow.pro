@@ -500,6 +500,7 @@ END ;---------------------------------------------------------------------------
 ;     This method retrieves properties from the object.
 ;-
 PRO FSC_CmdWindow::GetProperty, $
+    ADJUSTSIZE=adjustsize, $
     BACKGROUND=background, $
     COMMANDS=commands, $
     DELAY=delay, $
@@ -536,6 +537,7 @@ PRO FSC_CmdWindow::GetProperty, $
     ENDIF
 
     ; Window properties.
+    IF Arg_Present(adjustsize) THEN adjustsize = self.adjustsize
     IF Arg_Present(background) THEN background = *self.background
     IF Arg_Present(palette) THEN BEGIN
         len = N_Elements(*self.r)
@@ -981,6 +983,7 @@ END ;---------------------------------------------------------------------------
 ;     This method sets properties of the window object.
 ;-
 PRO FSC_CmdWindow::SetProperty, $
+    ADJUSTSIZE=adjustsize, $       ; Adjust the default charsize to match display size.
     BACKGROUND=background, $       ; The background color of the window.
     DELAY=delay, $                 ; The delay between command execution.
     ERASEIT=eraseit, $             ; Set the erase flag for the window
@@ -1014,6 +1017,8 @@ PRO FSC_CmdWindow::SetProperty, $
         void = Error_Message()
         RETURN
     ENDIF
+    
+    IF N_Elements(adjustsize) NE 0 THEN self.adjustsize = Keyword_Set(adjustsize)
 
     IF N_Elements(background) NE 0 THEN BEGIN
         IF Ptr_Valid(self.background) $
@@ -1112,6 +1117,7 @@ FUNCTION FSC_CmdWindow::Init, $
     
     ; Get the global defaults.
     cgWindow_GetDefs, $
+       AdjustSize = d_adjustsize, $                     ; Adjust charsize to window size.
        Background = d_background, $                      ; The background color. 
        Delay = d_delay, $                                ; The amount of delay between command execution.
        EraseIt = d_eraseit, $                            ; Set this keyword to erase the display before executing the commands.
@@ -1273,6 +1279,7 @@ FUNCTION FSC_CmdWindow::Init, $
     ENDIF ELSE self.pmulti = d_multi
     IF N_Elements(wxomargin) NE 0 THEN self.xomargin = wxomargin ELSE self.xomargin = d_xomargin
     IF N_Elements(wyomargin) NE 0 THEN self.yomargin = wyomargin ELSE self.yomargin = d_yomargin
+    self.adjustsize = d_adjustsize
     self.im_transparent = d_im_transparent
     self.im_density = d_im_density
     self.im_options = d_im_options
@@ -1377,6 +1384,7 @@ PRO FSC_CmdWindow__Define, class
               drawid: 0L, $                 ; The identifier of the draw widget.
               
               ; cgWindow parameters
+              adjustsize: 0B, $             ; Adjust character size to display window.
               background: Ptr_New(), $      ; The background color.
               delay: 0.0, $                 ; The command delay.
               eraseit: 0B, $                ; Do we need to erase the display.
@@ -1855,7 +1863,8 @@ END ;---------------------------------------------------------------------------
 ;        Added machinery for programmatically generating raster files. 18 Feb 2011. Jeremy Bailin.
 ;        Problem with restoring visualizations fixed. 6 March 2011. DWF.
 ;        Fixed a problem with CALL_METHOD, which requires one positional parameter. 8 March 2011. DWF.
-;
+;        Added the ability to set and unset adjustable text size in the window. 24 April 2011. DWF.
+;   
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-

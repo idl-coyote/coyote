@@ -54,6 +54,8 @@
 ;         This keyword applies only to keywords that manipulate commands in the command
 ;         list (e.g., DeleteCmd). It will select all the commands in the command list to
 ;         apply the action to.
+;     adjustsize: in, optional, type=boolean
+;         Set this keyword to adjust default character size to the display window size.
 ;     background: in, optional, type=string
 ;         The background color of the window. Only use if the ERASEIT property is also set.
 ;     cmdindex: in, optional, type=integer
@@ -175,6 +177,8 @@
 ;     Change History::
 ;        Written, 28 January 2011. DWF.
 ;        Added raster_im and the create_... raster options. 18 Feb 2011. Jeremy Bailin
+;        Added the ability to set and unset adjustable text size in 
+;          cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -182,6 +186,7 @@
 ;     Added PS_QUIET, GET_KEYCMDINDEX, GET_KEYWORD, and GET_KEYVALUE keywords. 17 Feb 2011. DWF.
 ;-
 PRO cgControl, selection, $
+    ADJUSTSIZE=adjustsize, $                      ; Adjusts text size to fit display window size.
     ALL=all, $                                    ; Apply the command operation to all the commands (i.e., DeleteCMD)
     BACKGROUND=background, $                      ; Sets the background color of the window
     CMDINDEX=cmdIndex, $                          ; Apply the command operation to this command only.
@@ -231,6 +236,10 @@ PRO cgControl, selection, $
         void = Error_Message()
         RETURN
    ENDIF
+   
+   ; Make sure there is something here to control.
+   void = cgQuery(COUNT=count)
+   IF count EQ 0 THEN RETURN
    
    ; Always update, unless told otherwise.
    IF N_Elements(update) EQ 0 THEN update = 1
@@ -320,6 +329,7 @@ PRO cgControl, selection, $
    
    ; Set the properties of the window.
    IF Obj_Valid(objref[index]) THEN objref[index] -> SetProperty, $
+        ADJUSTSIZE=adjustsize, $
         BACKGROUND=background, $
         DELAY=delay, $
         ERASEIT=eraseit, $

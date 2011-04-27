@@ -45,6 +45,9 @@
 ;    None
 ;       
 ; :Keywords:
+;     adjustsize: in, optional, type=boolean, default=0
+;         Set this keyword to have the default text size adjusted to fit the size of the 
+;         display window.
 ;     background: in, optional, type=string
 ;         The background color of the window. Only use if the ERASEIT property is also set.
 ;     delay: in, optional, type=float, default=0
@@ -133,6 +136,8 @@
 ;     Change History::
 ;        Written, 29 January 2011. DWF.
 ;        Added Raster_IM, 18 February 2011. Jeremy Bailin.
+;        Added the ability to set and unset adjustable text size in 
+;          cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -142,6 +147,7 @@ PRO cgWindow_SetDefs, $
    Reset=reset, $                                  ; Reset to original values.
    
    ; cgWindow properties.
+   AdjustSize = adjustsize, $                      ; Adjusts text size to fit display window size.
    Background = background, $                      ; The background color. 
    Delay = delay, $                                ; The delay between command execution.
    EraseIt = eraseit, $                            ; Set this keyword to erase the display before executing the commands.
@@ -182,6 +188,7 @@ PRO cgWindow_SetDefs, $
    IF ~exists || Keyword_Set(reset) THEN BEGIN
    
         ; Check the various keywords. Create defaults.
+        IF N_Elements(adjustsize) EQ 0 THEN adjustsize = 0
         IF N_Elements(background) EQ 0 THEN background = 'white'
         IF N_Elements(delay) EQ 0 THEN delay = 0
         IF N_Elements(eraseit) EQ 0 THEN eraseit = 0
@@ -212,6 +219,7 @@ PRO cgWindow_SetDefs, $
 
         ; Define the default structure.
         fsc_window_defaults = { _$_FSC_WINDOW_DEFAULTS, $
+           Adjustsize:adjustsize, $                      ; Adjust text size.
            Background:background, $                      ; The background color. 
            Delay: delay, $                               ; Set this keyword to the delay between command execution.
            EraseIt:eraseit, $                            ; Set this keyword to erase the display before executing the commands.
@@ -245,6 +253,7 @@ PRO cgWindow_SetDefs, $
         ENDELSE
    ENDIF ELSE BEGIN
     
+        IF N_Elements(adjustsize) NE 0 THEN !FSC_WINDOW_DEFAULTS.adjustsize = adjustsize
         IF N_Elements(background) NE 0 THEN !FSC_WINDOW_DEFAULTS.background = background
         IF N_Elements(delay) NE 0 THEN !FSC_WINDOW_DEFAULTS.delay = delay
         IF N_Elements(eraseit) NE 0 THEN !FSC_WINDOW_DEFAULTS.eraseit = eraseit

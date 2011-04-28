@@ -140,6 +140,9 @@
 ;       Added WINDOW and WINID keywords. 26 January 2011. DWF.
 ;       Added ADDCMD keyword. 29 Jan 2011. DWF.
 ;       Program delevopment ended and code transferred to cgLoadCT as of 4 Feb 2011. DWF.
+;       Added missing ADDCMD keyword. 28 April 2011. DWF.
+;       Fixed a problem that occurred when the BOTTOM keyword was used in conjuntion with
+;          the WINDOW keyword, resulting in incorrect colors in cgWindow programs. 28 April 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -169,6 +172,7 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 PRO cgLoadCT, table, $
+   ADDCMD=addcmd, $
    BREWER=brewer, $
    BOTTOM=bottom, $
    CLIP = clip, $
@@ -321,7 +325,7 @@ PRO cgLoadCT, table, $
      TVLCT, r, g, b, bottom
   ENDELSE
   
-  ; If the WINDOW keyword is set, send these colors to an cgWindow object.
+  ; If the WINDOW keyword is set, send these colors to a cgWindow object.
   IF Keyword_Set(window) THEN BEGIN
   
       ; Does a window object exist somewhere?
@@ -341,7 +345,14 @@ PRO cgLoadCT, table, $
                 ENDELSE
                 thisWindowStruct = structs[winID]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
-                    thisWindowStruct.windowObj -> LoadColors, r, g, b
+                
+                    ; Get the RGB vectors from the current color table to load.
+                    ; This is necessary because the cgWindow object does not use
+                    ; the concept of loading its colors at the BOTTOM. So, if the
+                    ; BOTTOM keyword is used here, the cgWindow colors would be
+                    ; incorrect if we used the r,g,b vectors directly.
+                    TVLCT, rr, gg, bb, /GET
+                    thisWindowStruct.windowObj -> LoadColors, rr, gg, bb
                 ENDIF 
                 RETURN
            ENDIF 

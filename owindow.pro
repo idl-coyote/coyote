@@ -71,6 +71,7 @@
 ;       Written by David Fanning, 19 June 97.
 ;       Set RETAIN=1 on draw widget. 6 Oct 97. DWF.
 ;       Changed discredited IDLgrContainer to IDL_Container. 29 JUN 98. DWF.
+;       Modified draw widget to use RETAIN=2 and do away with expose events. 6 May 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -104,9 +105,8 @@
 PRO OWindow_Cleanup, tlb
 
     ; This is the clean up routine called when the TLB dies.
-
-Widget_Control, tlb, Get_UValue=info, /No_Copy
-IF N_Elements(info) GT 0 THEN Obj_Destroy, info.thisContainer
+    Widget_Control, tlb, Get_UValue=info, /No_Copy
+    IF N_Elements(info) GT 0 THEN Obj_Destroy, info.thisContainer
 END
 ;------------------------------------------------------------------------
 
@@ -115,20 +115,7 @@ END
 PRO OWindow_Quit, event
 
     ; Quit the program via the QUIT button.
-
-Widget_Control, event.top, /Destroy
-END
-;------------------------------------------------------------------------
-
-
-
-PRO OWindow_Expose_Events, event
-
-    ; Handle window expose events here.
-
-Widget_Control, event.top, Get_UValue=info, /No_Copy
-info.thisWindow->Draw, info.thisView
-Widget_Control, event.top, Set_UValue=info, /No_Copy
+    Widget_Control, event.top, /Destroy
 END
 ;------------------------------------------------------------------------
 
@@ -137,11 +124,10 @@ END
 PRO OWindow_Event, event
 
     ; Handle window resize events here.
-
-Widget_Control, event.top, Get_UValue=info, /No_Copy
-info.thisWindow->SetProperty, Dimension=[event.x, event.y]
-info.thisWindow->Draw, info.thisView
-Widget_Control, event.top, Set_UValue=info, /No_Copy
+    Widget_Control, event.top, Get_UValue=info, /No_Copy
+    info.thisWindow->SetProperty, Dimension=[event.x, event.y]
+    info.thisWindow->Draw, info.thisView
+    Widget_Control, event.top, Set_UValue=info, /No_Copy
 END
 ;-------------------------------------------------------------------------
 
@@ -151,47 +137,43 @@ FUNCTION OWindow, thisView, XSize=xsize, YSize=ysize, Title=title, $
     Group_Leader=group
 
     ; Check defaults. Define values if necessary.
-
-IF N_Params() EQ 0 THEN thisView = Obj_New('IDLgrView', Color=[80,80,80], $
-   Viewplane_Rect=[0,0,1,1])
-IF N_Elements(xsize) EQ 0 THEN xsize = 400
-IF N_Elements(ysize) EQ 0 THEN ysize = 400
-IF N_Elements(title) EQ 0 THEN title = ''
+    IF N_Params() EQ 0 THEN thisView = Obj_New('IDLgrView', Color=[80,80,80], $
+       Viewplane_Rect=[0,0,1,1])
+    IF N_Elements(xsize) EQ 0 THEN xsize = 400
+    IF N_Elements(ysize) EQ 0 THEN ysize = 400
+    IF N_Elements(title) EQ 0 THEN title = ''
 
     ; Creat the widgets for this program.
-
-tlb = Widget_Base(Column=1, Title=title, TLB_Size_Events=1, $
-    MBar=menubase)
-drawID = Widget_Draw(tlb, XSize=xsize, YSize=ysize, Graphics_Level=2, $
-   Expose_Events=1, Event_Pro='OWindow_Expose_Events', Retain=0)
-
-filer = Widget_Button(menubase, Value='File')
-quitter = Widget_Button(filer, Value='Quit', Event_Pro='OWindow_Quit')
+    tlb = Widget_Base(Column=1, Title=title, TLB_Size_Events=1, $
+        MBar=menubase)
+    drawID = Widget_Draw(tlb, XSize=xsize, YSize=ysize, Graphics_Level=2, Retain=2)
+    
+    filer = Widget_Button(menubase, Value='File')
+    quitter = Widget_Button(filer, Value='Quit', Event_Pro='OWindow_Quit')
 
     ; Realize the widgets. Get the object window.
-
-Widget_Control, tlb, /Realize
-Widget_Control, drawID, Get_Value=thisWindow
+    Widget_Control, tlb, /Realize
+    Widget_Control, drawID, Get_Value=thisWindow
 
     ; Store objects in a container for easy clean up.
-
-thisContainer = Obj_New('IDL_Container')
-thisContainer->Add, thisWindow
-thisContainer->Add, thisView
+    thisContainer = Obj_New('IDL_Container')
+    thisContainer->Add, thisWindow
+    thisContainer->Add, thisView
 
     ; Create info structure for program information.
+    info = { thisWindow:thisWindow, $
+             thisContainer:thisContainer, $
+             thisView:thisView }
 
-info = { thisWindow:thisWindow, $
-         thisContainer:thisContainer, $
-         thisView:thisView }
+    Widget_Control, tlb, Set_UValue=info, /No_Copy
 
-Widget_Control, tlb, Set_UValue=info, /No_Copy
+    XManager, 'owindow', tlb, /No_Block, Cleanup='OWindow_Cleanup', $
+        Group_Leader=group
 
-XManager, 'owindow', tlb, /No_Block, Cleanup='OWindow_Cleanup', $
-    Group_Leader=group
+    ; Draw the view.
+    thisWindow -> Draw, thisView
 
     ; Return the window object so you can put something else
     ; in this window if you like.
-
-RETURN, thisWindow
+    RETURN, thisWindow
 END

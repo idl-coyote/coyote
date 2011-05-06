@@ -708,7 +708,7 @@ PRO FSC_CmdWindow::ReplaceCommand, command, cmdIndex, MULTI=multi
     
         ; Get the old command first, so you can destroy it properly.
         oldcmd = self.cmds -> Get_Item(cmdIndex, /DEREFERENCE)
-        self.cmds -> Replace_Item, cmdIndex, command
+        self.cmds -> Replace_Item, command, cmdIndex
         Obj_Destroy, oldcmd
     ENDELSE
     
@@ -1864,6 +1864,7 @@ END ;---------------------------------------------------------------------------
 ;        Problem with restoring visualizations fixed. 6 March 2011. DWF.
 ;        Fixed a problem with CALL_METHOD, which requires one positional parameter. 8 March 2011. DWF.
 ;        Added the ability to set and unset adjustable text size in the window. 24 April 2011. DWF.
+;        Fixed a problem in the ReplaceCommand method that had input parameters reversed. 6 May 2011. DWF.
 ;   
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.

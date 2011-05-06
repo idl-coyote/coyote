@@ -147,6 +147,7 @@
 ;          are now available. 26 June 2002. DWF.
 ;       Fixed a problem with POSITION keyword in SetProperty method. 23 May 2003. DWF.
 ;       Removed NORMALIZE from source code. 29 Nov 2005. DWF.
+;       Font sizes have changed. Now using a 12 point font. 6 May 2011. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -214,7 +215,7 @@ IF (self->IDLgrModel::Init(_EXTRA=extra) NE 1) THEN RETURN, 0
 IF N_Elements(name) EQ 0 THEN name=''
 IF N_Elements(color) EQ 0 THEN self.color = [255,255,255] $
    ELSE self.color = color
-thisFont = Obj_New('IDLgrFont', 'Helvetica', Size=8.0)
+thisFont = Obj_New('IDLgrFont', 'Helvetica', Size=12.0)
 self.thisFont = thisFont
 IF N_Elements(title) EQ 0 THEN title=''
 

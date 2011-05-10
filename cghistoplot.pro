@@ -214,6 +214,7 @@
 ;       Added ADDCMD keyword. 26 Jan 2011. DWF.
 ;       Added LAYOUT keyword. 28 Jan 2011. DWF.
 ;       Added CHARSIZE keyword. 2 Feb 2011. DWF.
+;       Added YTITLE keyword. 9 May 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2011, by Fanning Software Consulting, Inc.                           ;
@@ -262,6 +263,7 @@ PRO cgHistoplot, $                    ; The program name.
    OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
    PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
    THICK=thick, $                   ; Set to draw thicker lines and axes.
+   YTITLE=ytitle, $                 ; The Y title.
    ;
    ; POLYFILL KEYWORDS
    ;
@@ -336,6 +338,7 @@ PRO cgHistoplot, $                    ; The program name.
                OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
                PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
                THICK=thick, $                   ; Set to draw thicker lines and axes.
+               YTITLE=ytitle, $                 ; The Y title.
                ;
                ; POLYFILL KEYWORDS
                ;
@@ -389,6 +392,7 @@ PRO cgHistoplot, $                    ; The program name.
                OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
                PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
                THICK=thick, $                   ; Set to draw thicker lines and axes.
+               YTITLE=ytitle, $                 ; The Y title.
                ;
                ; POLYFILL KEYWORDS
                ;
@@ -550,10 +554,10 @@ PRO cgHistoplot, $                    ; The program name.
 
    ; Set up some labels.
    IF frequency THEN BEGIN
-      ytitle = 'Relative Frequency'
+      IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Relative Frequency'
       ytickformat = '(F6.4)'
    ENDIF ELSE BEGIN
-      ytitle = 'Histogram Density'
+      IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Histogram Density'
       ytickformat = '(I)'
    ENDELSE
 

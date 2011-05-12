@@ -275,13 +275,13 @@ PRO cgPlot, x, y, $
     CASE N_Params() OF
       
        1: BEGIN
-       dep = x
-       indep = Findgen(N_Elements(dep))
+       indep = x
+       dep = Findgen(N_Elements(indep))
        ENDCASE
     
        2: BEGIN
-       dep = y
-       indep = x
+       indep = y
+       dep = x
        ENDCASE
     
     ENDCASE
@@ -430,7 +430,7 @@ PRO cgPlot, x, y, $
                     bangp = !P
                     
                     ; Draw the plot that doesn't draw anything.
-                    Plot, indep, dep, POSITION=position, CHARSIZE=charsize, /NODATA, $
+                    Plot, dep, indep, POSITION=position, CHARSIZE=charsize, /NODATA, $
                         FONT=font, _STRICT_EXTRA=extra  
                     
                     ; Save the "after plot" system variables. Will use later. 
@@ -465,14 +465,14 @@ PRO cgPlot, x, y, $
     IF Keyword_Set(overplot) THEN BEGIN
        IF psym LE 0 THEN OPlot, indep, dep, COLOR=color, _STRICT_EXTRA=extra
     ENDIF ELSE BEGIN
-      Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
+      Plot, dep, indep, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
             POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, _STRICT_EXTRA=extra
         IF psym LE 0 THEN BEGIN
-           IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=color, _EXTRA=extra  
+           IF ~Keyword_Set(nodata) THEN OPlot, dep, indep, COLOR=color, _EXTRA=extra  
         ENDIF  
     ENDELSE
     IF Abs(psym) GT 0 THEN BEGIN
-        IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=symcolor, $
+        IF ~Keyword_Set(nodata) THEN OPlot, dep, indep, COLOR=symcolor, $
             PSYM=SymCat(Abs(psym), COLOR=symcolor, _Extra=extra), SYMSIZE=symsize, _EXTRA=extra
     ENDIF 
          

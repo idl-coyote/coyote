@@ -77,7 +77,7 @@ END ;---------------------------------------------------------------------------
 ; :Params:
 ;     filename:  The name of the PostScript file.
 ;-
-PRO FSC_CmdWindow::AutoPostScriptFile, filename
+PRO CGS_CmdWindow::AutoPostScriptFile, filename
 
     Compile_Opt idl2
     
@@ -127,7 +127,7 @@ END ;---------------------------------------------------------------------------
 ;     filetype:  The type of raster file (e.g., PNG, JPEG, etc.)
 ;     filename:  The name of the output file.
 ;-
-PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
+PRO CGS_CmdWindow::AutoRasterFile, filetype, filename
 
     Compile_Opt idl2
     
@@ -215,7 +215,7 @@ END ;---------------------------------------------------------------------------
 ;     event: in, required, type=structure
 ;         An event structure.
 ;-
-PRO FSC_CmdWindow::CreatePostScriptFile, event
+PRO CGS_CmdWindow::CreatePostScriptFile, event
 
     Compile_Opt idl2
     
@@ -267,7 +267,7 @@ END ;---------------------------------------------------------------------------
 ;     all: in, optional, type=boolean
 ;         If set, all the commands in the command list are deleted.
 ;-
-PRO FSC_CmdWindow::DeleteCommand, cmdIndex, ALL=all
+PRO CGS_CmdWindow::DeleteCommand, cmdIndex, ALL=all
 
     Compile_Opt idl2
     
@@ -313,7 +313,7 @@ END ;---------------------------------------------------------------------------
 ;     event: in, required, type=structure
 ;         An event structure.
 ;-
-PRO FSC_CmdWindow_Dispatch_Events, event
+PRO CGS_CmdWindow_Dispatch_Events, event
 
     Compile_Opt idl2
     
@@ -350,7 +350,7 @@ END ;---------------------------------------------------------------------------
 ; :Description:
 ;     This method executes the commands on the command list.
 ;-
-PRO FSC_CmdWindow::ExecuteCommands, KEYWORDS=keywords
+PRO CGS_CmdWindow::ExecuteCommands, KEYWORDS=keywords
 
     Catch, theError
     IF theError NE 0 THEN BEGIN
@@ -449,7 +449,7 @@ END ;---------------------------------------------------------------------------
 ; :Description:
 ;     This method retrieves properties from the object.
 ;-
-PRO FSC_CmdWindow::GetProperty, $
+PRO CGS_CmdWindow::GetProperty, $
     ADJUSTSIZE=adjustsize, $
     BACKGROUND=background, $
     COMMANDS=commands, $
@@ -540,7 +540,7 @@ END ;---------------------------------------------------------------------------
 ;     visualizations, so that the current window doesn't get inadvertenly
 ;     destroyed by a widget identifier from an old program.
 ;-
-PRO FSC_CmdWindow::InvalidateWidgetID
+PRO CGS_CmdWindow::InvalidateWidgetID
     self.tlb = -1
 END ;----------------------------------------------------------------------------------------------------------------
 
@@ -550,7 +550,7 @@ END ;---------------------------------------------------------------------------
 ;     This method lists the command indicated by the command index. In the
 ;     absence of the command index, all commands are listed.
 ;-
-PRO FSC_CmdWindow::ListCommand, cmdIndex, CREATECOMMANDSTRUCT=createCommandStruct
+PRO CGS_CmdWindow::ListCommand, cmdIndex, CREATECOMMANDSTRUCT=createCommandStruct
 
     Compile_Opt idl2
 
@@ -599,7 +599,7 @@ END ;---------------------------------------------------------------------------
 ;     The XCOLORS_DATA keyword is required to get color vector
 ;     information from XCOLORS.
 ;-
-PRO FSC_CmdWindow::LoadColors, r, g, b, XCOLORS_DATA=colorData
+PRO CGS_CmdWindow::LoadColors, r, g, b, XCOLORS_DATA=colorData
 
     Compile_Opt idl2
     
@@ -633,7 +633,7 @@ END ;---------------------------------------------------------------------------
 ;     This method replaces a command in the command list. If cmdImdex is missing,
 ;     replace all the commands in the command list.
 ;-
-PRO FSC_CmdWindow::ReplaceCommand, command, cmdIndex, MULTI=multi
+PRO CGS_CmdWindow::ReplaceCommand, command, cmdIndex, MULTI=multi
 
     Compile_Opt idl2
     
@@ -669,7 +669,7 @@ END ;---------------------------------------------------------------------------
 ; :Description:
 ;     This method resizes the graphics window and executes the commands again.
 ;-
-PRO FSC_CmdWindow::Resize, event
+PRO CGS_CmdWindow::Resize, event
 
     Compile_Opt idl2
     
@@ -691,7 +691,7 @@ END ;---------------------------------------------------------------------------
 ; :Description:
 ;     This method saves the graphics window as a raster image file.
 ;-
-PRO FSC_CmdWindow::SaveAsRaster, event
+PRO CGS_CmdWindow::SaveAsRaster, event
 
     Compile_Opt idl2
     
@@ -795,7 +795,7 @@ END ;---------------------------------------------------------------------------
 ; :Description:
 ;     This method restores the commands.
 ;-
-PRO FSC_CmdWindow::RestoreCommands, filename
+PRO CGS_CmdWindow::RestoreCommands, filename
 
     Compile_Opt idl2
     
@@ -899,7 +899,7 @@ END ;---------------------------------------------------------------------------
 ; :Description:
 ;     This method saves the commands.
 ;-
-PRO FSC_CmdWindow::SaveCommands, filename
+PRO CGS_CmdWindow::SaveCommands, filename
 
     Compile_Opt idl2
     
@@ -932,7 +932,7 @@ END ;---------------------------------------------------------------------------
 ; :Description:
 ;     This method sets properties of the window object.
 ;-
-PRO FSC_CmdWindow::SetProperty, $
+PRO CGS_CmdWindow::SetProperty, $
     ADJUSTSIZE=adjustsize, $       ; Adjust the default charsize to match display size.
     BACKGROUND=background, $       ; The background color of the window.
     DELAY=delay, $                 ; The delay between command execution.
@@ -1022,13 +1022,13 @@ PRO FSC_CmdWindow::SetProperty, $
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-PRO FSC_CmdWindow::SetWindow
+PRO CGS_CmdWindow::SetWindow
     WSet, self.wid
 END ;----------------------------------------------------------------------------------------------------------------
 
 
 
-PRO FSC_CmdWindow_Cleanup, tlb
+PRO CGS_CmdWindow_Cleanup, tlb
     Widget_Control, tlb, Get_UValue=self
     Obj_Destroy, self
 END ;----------------------------------------------------------------------------------------------------------------
@@ -1039,7 +1039,7 @@ END ;---------------------------------------------------------------------------
 ;     This method initializes the object that is at the heart of cgWindow.
 ;     It takes most of the same arguments as cgWindow.
 ;-
-FUNCTION FSC_CmdWindow::Init, $
+FUNCTION CGS_CmdWindow::Init, $
        command, $                      ; The graphics "command" object to execute.
        Group_Leader = group_leader, $  ; The group leader of the cgWindow program.
        Background = wbackground, $     ; The background color. Not used unless set.
@@ -1229,8 +1229,8 @@ FUNCTION FSC_CmdWindow::Init, $
     ; Get it running.
     WIDGET_CONTROL, /MANAGED, self.tlb
     XManager, 'cgwindow', self.tlb, /No_Block, $
-        Event_Handler='FSC_CmdWindow_Dispatch_Events', $
-        Cleanup = 'FSC_CmdWindow_Cleanup', $
+        Event_Handler='CGS_CmdWindow_Dispatch_Events', $
+        Cleanup = 'CGS_CmdWindow_Cleanup', $
         Group_Leader=group_leader
     
     ; Store the self reference in the UVALUE of the TLB.
@@ -1272,7 +1272,7 @@ PRO CGS_Window_ID__Define
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-PRO FSC_CmdWindow::Cleanup
+PRO CGS_CmdWindow::Cleanup
 
     Compile_Opt idl2
     
@@ -1315,9 +1315,9 @@ PRO FSC_CmdWindow::Cleanup
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-PRO FSC_CmdWindow__Define, class
+PRO CGS_CmdWindow__Define, class
 
-    class = { FSC_CMDWINDOW, $
+    class = { CGS_CMDWINDOW, $
               tlb: 0L, $                    ; The identifier of the top-level base widget.
               cmds: Obj_New(), $            ; A linkedlist object containing the graphics commands.
               wid: 0L, $                    ; The window index number of the graphics window.
@@ -1448,7 +1448,7 @@ END ;---------------------------------------------------------------------------
 ;        Set this keyword in exactly the same way you would set the !P.Multi keyword.
 ;        It will allow you to display multi-plots in the cgWindow graphics window.
 ;    wobject: out, optional, type=object
-;       cgWindow creates a FSC_CmdWindow object. This object reference is returned
+;       cgWindow creates a CGS_CmdWindow object. This object reference is returned
 ;       if this keyword is present.
 ;    wxpos: in, optional, type=integer, default=5
 ;       The x offset in device coordinates of the cgWindow from the upper-left corner of the display.
@@ -1568,7 +1568,7 @@ FUNCTION cgsWindow, $
         RETURN, 0
     ENDIF
     
-   windowObject = Obj_New('FSC_CmdWindow', $
+   windowObject = Obj_New('CGS_CmdWindow', $
        command, $                       ; The graphics "command" to execute.
        Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
        Background = wbackground, $     ; The background color. Not used unless set.

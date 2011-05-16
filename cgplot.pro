@@ -162,7 +162,7 @@
 ;         Added LAYOUT keyword. 28 Jan 2011. DWF.
 ;         Made a modification that allows THICK and COLOR keywords apply to symbols, too. 24 Feb 2011. DWF.
 ;         Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
-;         
+;         Somehow I had gotten independent and dependent data reversed in the code. Put right. 16 May 2011. DWF.
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -463,7 +463,7 @@ PRO cgPlot, x, y, $
     
     ; Draw the plot.
     IF Keyword_Set(overplot) THEN BEGIN
-       IF psym LE 0 THEN OPlot, indep, dep, COLOR=color, _STRICT_EXTRA=extra
+       IF psym LE 0 THEN OPlot, dep, indep, COLOR=color, _STRICT_EXTRA=extra
     ENDIF ELSE BEGIN
       Plot, dep, indep, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
             POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, _STRICT_EXTRA=extra

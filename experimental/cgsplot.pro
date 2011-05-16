@@ -1,3 +1,46 @@
+PRO cgsPlot::SetData, x, y, NODRAW=nodraw
+
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /Cancel
+        void = Error_Message()
+        RETURN
+    ENDIF
+    
+    CASE N_Params() OF
+    
+       0: Message, 'Must pass at least one positional parameter.'
+      
+       1: BEGIN
+       indep = x
+       dep = Findgen(N_Elements(x))
+       ENDCASE
+    
+       2: BEGIN
+       indep = y
+       dep = x
+       ENDCASE
+    
+    ENDCASE
+    
+    ; Load the values.
+    IF Ptr_Valid(self.dep) THEN *self.dep = dep ELSE self.dep = Ptr_New(dep)
+    IF Ptr_Valid(self.indep) THEN *self.indep = indep ELSE self.indep = Ptr_New(indep)
+
+    ; Update the display, if you can. If you belong to a window, ask the window
+    ; to draw itself.
+    IF ~Keyword_Set(nodraw) THEN BEGIN
+        IF Obj_Valid(self.winObject) THEN BEGIN
+            self.winObject -> ExecuteCommands
+        ENDIF ELSE BEGIN
+            self -> Draw
+        ENDELSE
+     ENDIF
+
+END ; ----------------------------------------------------------------------  
+
+
 PRO cgsPlot::Save, filename, RESOLUTION=resolution
 
     ; Error handling.
@@ -31,9 +74,27 @@ PRO cgsPlot::Save, filename, RESOLUTION=resolution
         ENDELSE
     ENDIF
     
+    ; Get the global CGS defaults.
+    cgWindow_GetDefs, $
+       ; ImageMagick Properties.
+       IM_Transparent = d_im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+       IM_Density = d_im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+       IM_Raster = d_im_raster, $                        ; Create raster files via ImageMagick.
+       IM_Resize = d_im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+       IM_Options = d_im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+       
+       ; PostScript properties.
+       PS_Delete = d_ps_delete, $                        ; Delete PS file when making IM raster.
+       PS_Metric = d_ps_metric, $                        ; Select metric measurements in PostScript output.
+       PS_Encapsulated = d_ps_encapsulated, $            ; Create Encapsulated PostScript output.    
+       PS_FONT = d_ps_font, $                            ; Select the font for PostScript output.
+       PS_CHARSIZE = d_ps_charsize, $                    ; Select the character size for PostScript output.
+       PS_QUIET = d_ps_quiet, $                          ; Select the QUIET keyword for PS_Start.
+       PS_SCALE_FACTOR = d_ps_scale_factor, $            ; Select the scale factor for PostScript output.
+       PS_TT_FONT = d_ps_tt_font                         ; Select the true-type font to use for PostScript output.
     
     ; What kind of raster file.
-    rasterType = HasImageMagick()
+    rasterType = d_im_raster
     CASE rasterType OF
     
         ; Normal raster.
@@ -55,7 +116,13 @@ PRO cgsPlot::Save, filename, RESOLUTION=resolution
         
            ; Create a PostScript file first.
            thisname = Filepath(ROOT_Dir=dirName, rootName + '.ps')
-           PS_Start, FILENAME=thisname
+           PS_Start, FILENAME=thisname, $
+                METRIC=d_ps_metric, $
+                SCALE_FACTOR=d_ps_scale_factor, $
+                CHARSIZE=d_ps_charsize, $
+                FONT=d_ps_font, $
+                QUIET=d_ps_quiet, $
+                TT_FONT=d_ps_tt_font
            cgDisplay, resolution[0], resolution[1]
            
            ; Draw the graphics.
@@ -63,11 +130,26 @@ PRO cgsPlot::Save, filename, RESOLUTION=resolution
            
            ; Close the file and convert to proper file type.
            CASE type OF
-                'BMP':  PS_END, /BMP, DELETE_PS=1
-                'GIF':  PS_END, /GIF, DELETE_PS=1
-                'JPEG': PS_END, /JPEG, DELETE_PS=1
-                'PNG':  PS_END, /PNG,  DELETE_PS=1
-                'TIFF': PS_END, /TIFF, DELETE_PS=1
+                'BMP':  PS_END, /BMP, DELETE_PS=d_ps_delete, $
+                            ALLOW_TRANSPARENT=D_IM_TRANSPARENT, $
+                            DENSITY=d__density, RESIZE=d_im_resize, $
+                            IM_OPTIONS=d_im_options
+                'GIF':  PS_END, /GIF, DELETE_PS=d_ps_delete, $
+                            ALLOW_TRANSPARENT=d_im_transparent, $
+                            DENSITY=d__density, RESIZE=d_im_resize, $
+                            IM_OPTIONS=d_im_options
+                'JPEG': PS_END, /JPEG, DELETE_PS=d_ps_delete, $
+                            ALLOW_TRANSPARENT=d_im_transparent, $
+                            DENSITY=d__density, RESIZE=d_im_resize, $
+                            IM_OPTIONS=d_im_options
+                'PNG':  PS_END, /PNG,  DELETE_PS=d_ps_delete, $
+                            ALLOW_TRANSPARENT=d_im_transparent, $
+                            DENSITY=d__density, RESIZE=d_im_resize, $
+                            IM_OPTIONS=d_im_options
+                'TIFF': PS_END, /TIFF, DELETE_PS=d_ps_delete, $
+                            ALLOW_TRANSPARENT=d_im_transparent, $
+                            DENSITY=d__density, RESIZE=d_im_resize, $
+                            IM_OPTIONS=d_im_options
            ENDCASE
         
            END
@@ -90,8 +172,26 @@ PRO cgsPlot::PS, filename, GUI=gui
     ; Need a filename?
     IF N_Elements(filename) EQ 0 THEN filename = 'cgsplot.ps'
     
+    ; Get the global CGS PostScript defaults.
+    cgWindow_GetDefs, $
+       ; PostScript properties.
+       PS_Delete = d_ps_delete, $                        ; Delete PS file when making IM raster.
+       PS_Metric = d_ps_metric, $                        ; Select metric measurements in PostScript output.
+       PS_Encapsulated = d_ps_encapsulated, $            ; Create Encapsulated PostScript output.    
+       PS_FONT = d_ps_font, $                            ; Select the font for PostScript output.
+       PS_CHARSIZE = d_ps_charsize, $                    ; Select the character size for PostScript output.
+       PS_QUIET = d_ps_quiet, $                          ; Select the QUIET keyword for PS_Start.
+       PS_SCALE_FACTOR = d_ps_scale_factor, $            ; Select the scale factor for PostScript output.
+       PS_TT_FONT = d_ps_tt_font                         ; Select the true-type font to use for PostScript output.
+
     ; Allow the user to configure the PostScript file.
-    PS_Start, GUI=Keyword_Set(gui), CANCEL=cancelled, FILENAME=filename
+    PS_Start, GUI=Keyword_Set(gui), CANCEL=cancelled, FILENAME=filename, $
+                METRIC=d_ps_metric, $
+                SCALE_FACTOR=d_ps_scale_factor, $
+                CHARSIZE=d_ps_charsize, $
+                FONT=d_ps_font, $
+                QUIET=d_ps_quiet, $
+                TT_FONT=d_ps_tt_font
     IF cancelled THEN RETURN
     
     ; Execute the graphics commands.

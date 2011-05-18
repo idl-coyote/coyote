@@ -31,7 +31,10 @@
 ;
 ; INPUTS:
 ;
-;     image:    A 2D or 3D image array. Values will be returned from this image. (Required)
+;     image:    A 2D or 3D image array. Values will be returned from this (Required).
+;               In versions of IDL < 8.0, it is possible to use a HASH object of
+;               keys/images where this program will describe the value for each of
+;               the images in the HASH object.
 ;
 ;     position: A four-element array giving image position in the window in normalized
 ;               coordinates. If not provided, uses the stored position from cgImage.
@@ -87,6 +90,7 @@
 ;      Changed cursor operation to conform with expected differences
 ;         between Windows and UNIX. 20 March 2008, DWF.
 ;      Slightly modified screen directions. 16 November 2010. DWF.
+;      Modified so that multiple images/grids can be described 18 May 2011. MHS
 ;-
 ;
 ;******************************************************************************************;
@@ -140,6 +144,32 @@ PRO cgImageInfo, image, position
                          _cgimage_winxsize, _cgimage_winysize, $
                          _cgimage_position, _cgimage_winID, $
                          _cgimage_current
+
+
+
+    ;;  First check to see if we're using a HASH as input for the variable image.
+    hsh = ''
+    IF total( obj_valid( image ) EQ 1 ) &&  obj_isa( image, 'HASH' ) THEN BEGIN 
+       ;; If so, we need to pull out the first image from the hash so that all of the
+       ;; information can be set up properly before the user selects data from the
+       ;; displayed image
+       hsh = image
+
+       IF n_elements( hsh ) EQ 0 THEN Message, 'Must supply a hash of names/images to examine.'
+       ;; 
+       keys = hsh -> keys( ) 
+       image = hsh[ keys[ 0 ] ]
+
+       ;; check that each image in the hash has same dimensions.
+       void =  Image_Dimensions( image, xsize = first_xsize, ysize = first_ysize )
+       FOR k = 1, n_elements( keys ) - 1 DO BEGIN
+          img =  hsh[ keys[ k ] ]
+          void =  Image_Dimensions( img,  xsize = xsize,  ysize = ysize )
+          IF xsize NE first_xsize OR ysize NE first_ysize THEN $
+             Message, 'Each Image must have same X & Y dimensions'
+       ENDFOR 
+       
+    ENDIF 
 
     ; Check to see if we can proceed. First see if we have an image.
     IF N_Elements(image) EQ 0 THEN Message, 'Must supply image for reporting values.'
@@ -214,33 +244,9 @@ PRO cgImageInfo, image, position
           xpixel = Value_Locate(xvec, x)
           ypixel = Value_Locate(yvec, y)
 
-          ; Output depends in whether this is 2D or 3D image.
-          dims = Size(image, /Dimensions)
-          trueIndex = Where(dims EQ 3)
-
-          ; I guess a legit dimension could be three, too, but I
-          ; don't know what to do in that case.
-          IF N_Elements(trueIndex) GT 1 THEN $
-             Message, 'Dude. This is one strange image! Returning.'
-
-          IF trueIndex[0] EQ -1 THEN BEGIN
-
-             value = image[xpixel, ypixel]
-             IF Size(value, /TNAME) EQ 'BYTE' THEN value = Fix(value)
-             Print, 'Value at (' + StrTrim(xpixel,2) + ',' + StrTrim(ypixel,2) + ') is ', StrTrim(value,2)
-
-          ENDIF ELSE BEGIN
-
-            ; 3D image processing here.
-            CASE trueindex[0] OF
-                0: rgb = image[*, xpixel, ypixel]
-                1: rgb = image[xpixel, *, ypixel]
-                2: rgb = image[xpixel, ypixel, *]
-            ENDCASE
-            IF Size(rgb, /TNAME) EQ 'BYTE' THEN rgb = Fix(rgb)
-            value = '[' + StrTrim(rgb[0],2) + ', ' + StrTrim(rgb[1],2) + ', ' + StrTrim(rgb[2],2) + ']'
-            Print, 'Value at (' + StrTrim(xpixel,2) + ',' + StrTrim(ypixel,2) + ') is ' + value
-          ENDELSE
+          ;; If a hash wasn't input, use the old output convention.
+          cgImageInfoDescribeValues, image,  xpixel,  ypixel, hsh
+          
        ENDIF ELSE Print, 'Outside image'
 
     ENDWHILE

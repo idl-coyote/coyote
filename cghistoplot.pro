@@ -215,6 +215,8 @@
 ;       Added LAYOUT keyword. 28 Jan 2011. DWF.
 ;       Added CHARSIZE keyword. 2 Feb 2011. DWF.
 ;       Added YTITLE keyword. 9 May 2011. DWF.
+;       Worked around a PLOT problem when setting the X axis range that caused the Y axis
+;          range to be corrupted. 19 May 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2011, by Fanning Software Consulting, Inc.                           ;
@@ -601,8 +603,10 @@ PRO cgHistoplot, $                    ; The program name.
    ; by polygon filling.
    xrange = [xmin, xmax]
    yrange = [ymin, ymax]
+   print, 'xrange: ', xrange
+   print, 'yrange: ', yrange
    IF ~Keyword_Set(overplot) THEN BEGIN
-       Plot, xrange, yrange, $             
+       Plot, [0,0], xrange=xrange, yrange=yrange, $             
              Background=backColor, $
              Color=axisColor, $                       ; The color of the axes.
              Charsize=charsize, $
@@ -682,7 +686,7 @@ PRO cgHistoplot, $                    ; The program name.
    IF ~Keyword_Set(overplot) THEN BEGIN
        xrange = [xmin, xmax]
        yrange = [ymin, ymax]
-       Plot, xrange, yrange, $             
+       Plot, [0,0], xrange=xrange, yrange=yrange, $             
              Background=backColor, $
              Charsize=charsize, $
              Color=axisColor, $                       ; The color of the axes.

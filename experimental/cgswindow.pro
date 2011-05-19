@@ -46,7 +46,7 @@
 ;     command: in, required, type=object
 ;         A command object of class IDL_WINDOW_COMMAND.
 ;-
-PRO FSC_CmdWindow::AddCmd, command,  INDEX=index
+PRO CGS_CmdWindow::AddCmd, command,  INDEX=index
 
     Compile_Opt idl2
     

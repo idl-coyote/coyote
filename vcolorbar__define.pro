@@ -260,33 +260,33 @@ self.thisPolygon = thisPolygon
 
     ; Scale the polygon into the correct position.
 
-xs = FSC_Normalize([0,1], Position=[self.position(0), self.position(2)])
-ys = FSC_Normalize([0,1], Position=[self.position(1), self.position(3)])
+xs = FSC_Normalize([0,1], Position=[self.position[0], self.position[2]])
+ys = FSC_Normalize([0,1], Position=[self.position[1], self.position[3]])
 thispolygon->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
     ; Create scale factors to position the axes.
 
-longScale = FSC_Normalize(self.range, Position=[self.position(1), self.position(3)])
-shortScale = FSC_Normalize([0,1], Position=[self.position(0), self.position(2)])
+longScale = FSC_Normalize(self.range, Position=[self.position[1], self.position[3]])
+shortScale = FSC_Normalize([0,1], Position=[self.position[0], self.position[2]])
 
     ; Create the colorbar axes. 1000 indicates this location ignored.
 
 shortAxis1 = Obj_New("IDLgrAxis", 0, Color=self.color, Ticklen=0.025, $
     Major=1, Range=[0,1], /NoText, /Exact, XCoord_Conv=shortScale,  $
-    Location=[1000, self.position(1), 0.001])
+    Location=[1000, self.position[1], 0.001])
 shortAxis2 = Obj_New("IDLgrAxis", 0, Color=self.color, Ticklen=0.025, $0.001
     Major=1, Range=[0,1], /NoText, /Exact, XCoord_Conv=shortScale,  $
-    Location=[1000, self.position(3), 0.001], TickDir=1)
+    Location=[1000, self.position[3], 0.001], TickDir=1)
 
 textAxis = Obj_New("IDLgrAxis", 1, Color=self.color, Ticklen=0.025, $
     Major=self.major, Minor=self.minor, Title=thisTitle, Range=self.range, /Exact, $
-    YCoord_Conv=longScale, Location=[self.position(0), 1000, 0.001], _Extra=extra)
+    YCoord_Conv=longScale, Location=[self.position[0], 1000, 0.001], _Extra=extra)
 textAxis->GetProperty, TickText=thisText
 thisText->SetProperty, Font=self.thisFont, Recompute_Dimensions=2
 
 longAxis2 = Obj_New("IDLgrAxis", 1, Color=self.color, /NoText, Ticklen=0.025, $
     Major=self.major, Minor=self.minor, Range=self.range, TickDir=1, $
-    YCoord_Conv=longScale, Location=[self.position(2), 1000, 0.001], /Exact)
+    YCoord_Conv=longScale, Location=[self.position[2], 1000, 0.001], /Exact)
 
     ; Add the parts to the colorbar model.
 
@@ -377,27 +377,27 @@ IF N_Elements(position) NE 0 THEN BEGIN
 
         ; Move the image polygon into its new positon.
 
-    xs = FSC_Normalize([0,1], Position=[position(0), position(2)])
-    ys = FSC_Normalize([0,1], Position=[position(1), position(3)])
+    xs = FSC_Normalize([0,1], Position=[position[0], position[2]])
+    ys = FSC_Normalize([0,1], Position=[position[1], position[3]])
     self.thisPolygon->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
         ; Create new scale factors to position the axes.
 
     longScale = FSC_Normalize(self.range, $
-       Position=[self.position(1), self.position(3)])
+       Position=[self.position[1], self.position[3]])
     shortScale = FSC_Normalize([0,1], $
-       Position=[self.position(0), self.position(2)])
+       Position=[self.position[0], self.position[2]])
 
         ; Position the axes. 1000 indicates this position ignored.
 
     self.textaxis->SetProperty, YCoord_Conv=longScale, $
-       Location=[self.position(0), 1000, 0]
+       Location=[self.position[0], 1000, 0]
     self.longaxis2->SetProperty, YCoord_Conv=longScale, $
-       Location=[self.position(2), 1000, 0]
+       Location=[self.position[2], 1000, 0]
     self.shortAxis1->SetProperty, XCoord_Conv=shortScale, $
-       Location=[1000, self.position(1), 0]
+       Location=[1000, self.position[1], 0]
     self.shortAxis2->SetProperty, XCoord_Conv=shortScale, $
-       Location=[1000, self.position(3), 0]
+       Location=[1000, self.position[3], 0]
 
 ENDIF
 IF N_Elements(title) NE 0 THEN self.thisTitle->SetProperty, Strings=title
@@ -419,7 +419,7 @@ END
 IF N_Elements(range) NE 0 THEN BEGIN
     self.range = range
     longScale = FSC_Normalize(range, $
-       Position=[self.position(1), self.position(3)])
+       Position=[self.position[1], self.position[3]])
     self.textAxis->SetProperty, Range=range, YCoord_Conv=longScale
     self.longAxis2->SetProperty, Range=range, YCoord_Conv=longScale
 ENDIF

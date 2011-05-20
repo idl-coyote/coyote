@@ -463,8 +463,8 @@ ystart = self.position(1)
 
    ; Get the size of the bar.
 
-xsize = (self.position(2) - self.position(0))
-ysize = (self.position(3) - self.position(1))
+xsize = (self.position[2] - self.position[0])
+ysize = (self.position[3] - self.position[1])
 
    ; Need to erase the display first?
 

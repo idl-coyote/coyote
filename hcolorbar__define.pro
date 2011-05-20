@@ -255,33 +255,33 @@ self.thisPolygon = thisPolygon
 
    ; Scale the Polygon into the correct position.
 
-xs = FSC_Normalize([0,1], Position=[self.position(0), self.position(2)])
-ys = FSC_Normalize([0,1], Position=[self.position(1), self.position(3)])
+xs = FSC_Normalize([0,1], Position=[self.position[0], self.position[2]])
+ys = FSC_Normalize([0,1], Position=[self.position[1], self.position[3]])
 thispolygon->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
     ; Create scale factors to position the axes.
 
-longScale = FSC_Normalize(self.range, Position=[self.position(0), self.position(2)])
-shortScale = FSC_Normalize([0,1], Position=[self.position(1), self.position(3)])
+longScale = FSC_Normalize(self.range, Position=[self.position[0], self.position[2]])
+shortScale = FSC_Normalize([0,1], Position=[self.position[1], self.position[3]])
 
     ; Create the colorbar axes.
 
 shortAxis1 = Obj_New("IDLgrAxis", 1, Color=self.color, Ticklen=0.025, $
     Major=1, Range=[0,1], /NoText, /Exact, YCoord_Conv=shortScale,  $
-    Location=[self.position(0), 1000, 0.001])
+    Location=[self.position[0], 1000, 0.001])
 shortAxis2 = Obj_New("IDLgrAxis", 1, Color=self.color, Ticklen=0.025, $
     Major=1, Range=[0,1], /NoText, /Exact, YCoord_Conv=shortScale,  $
-    Location=[self.position(2), 1000, 0.001], TickDir=1)
+    Location=[self.position[2], 1000, 0.001], TickDir=1)
 
 textAxis = Obj_New("IDLgrAxis", 0, Color=self.color, Ticklen=0.025, $
     Major=self.major, Minor=self.minor, Title=thisTitle, Range=self.range, /Exact, $
-    XCoord_Conv=longScale, Location=[1000, self.position(1), 0.001], _Extra=extra)
+    XCoord_Conv=longScale, Location=[1000, self.position[1], 0.001], _Extra=extra)
 textAxis->GetProperty, TickText=thisText
 thisText->SetProperty, Font=thisFont, Recompute_Dimensions=2
 
 longAxis2 = Obj_New("IDLgrAxis", 0, Color=self.color, /NoText, Ticklen=0.025, $
     Major=self.major, Minor=self.minor, Range=self.range, TickDir=1, $
-    XCoord_Conv=longScale, Location=[1000, self.position(3), 0.001], /Exact)
+    XCoord_Conv=longScale, Location=[1000, self.position[3], 0.001], /Exact)
 
     ; Add the parts to the colorbar model.
 
@@ -372,27 +372,27 @@ IF N_Elements(position) NE 0 THEN BEGIN
 
         ; Move the image polygon into its new positon.
 
-    xs = FSC_Normalize([0,1], Position=[position(0), position(2)])
-    ys = FSC_Normalize([0,1], Position=[position(1), position(3)])
+    xs = FSC_Normalize([0,1], Position=[position[0], position[2]])
+    ys = FSC_Normalize([0,1], Position=[position[1], position[3]])
     self.thisPolygon->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
         ; Create new scale factors to position the axes.
 
     longScale = FSC_Normalize(self.range, $
-       Position=[self.position(1), self.position(3)])
+       Position=[self.position[1], self.position[3]])
     shortScale = FSC_Normalize([0,1], $
-       Position=[self.position(0), self.position(2)])
+       Position=[self.position[0], self.position[2]])
 
         ; Position the axes. 1000 indicates this location is ignored.
 
     self.textaxis->SetProperty, YCoord_Conv=longScale, $
-       Location=[self.position(0), 1000, 0]
+       Location=[self.position[0], 1000, 0]
     self.longaxis2->SetProperty, YCoord_Conv=longScale, $
-       Location=[self.position(2), 1000, 0]
+       Location=[self.position[2], 1000, 0]
     self.shortAxis1->SetProperty, XCoord_Conv=shortScale, $
-       Location=[1000, self.position(1), 0]
+       Location=[1000, self.position[1], 0]
     self.shortAxis2->SetProperty, XCoord_Conv=shortScale, $
-       Location=[1000, self.position(3), 0]
+       Location=[1000, self.position[3], 0]
 
 ENDIF
 IF N_Elements(text) EQ self.Major THEN self.thisText->SetProperty, Strings=text
@@ -415,7 +415,7 @@ END
 IF N_Elements(range) NE 0 THEN BEGIN
     self.range = range
     longScale = FSC_Normalize(range, $
-       Position=[self.position(0), self.position(2)])
+       Position=[self.position[0], self.position[2]])
     self.textAxis->SetProperty, Range=range, XCoord_Conv=longScale
     self.longAxis2->SetProperty, Range=range, XCoord_Conv=longScale
 ENDIF

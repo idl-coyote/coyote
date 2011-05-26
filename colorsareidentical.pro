@@ -69,6 +69,7 @@
 ;     Change History::
 ;        Written, 24 December 2010. DWF.
 ;        Fixed a typo when first color is INTEGER and second color is STRING. 3 Jan 2011. DWF.
+;        Added error handling for out of bounds color values. 25 May 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -91,7 +92,15 @@ FUNCTION ColorsAreIdentical, color_1, color_2
         IF (lessthan + greaterthan) EQ 0 THEN c1 = Fix(color_1)
     ENDIF
     IF N_Elements(c1) EQ 0 THEN c1 = color_1
-
+    
+    ; Colors have to be between 0 and 255.
+    IF Size(c1, /TYPE) LE 2 THEN BEGIN
+        IF (c1 LT 0) || (c1 GT 255) THEN BEGIN
+            msg = 'Color value of ' + StrTrim(c1,2) + ' is outside expected color range of 0 to 255.'
+            Message, msg
+        ENDIF
+    ENDIF
+    
     IF Size(color_2, /TNAME) EQ 'STRING' THEN BEGIN
         bytecheck = Byte(StrUpCase(color_2))
         i = Where(bytecheck LT 48, lessthan)
@@ -99,6 +108,14 @@ FUNCTION ColorsAreIdentical, color_1, color_2
         IF (lessthan + greaterthan) EQ 0 THEN c2 = Fix(color_2)
     ENDIF
     IF N_Elements(c2) EQ 0 THEN c2 = color_2
+    
+    ; Colors have to be between 0 and 255.
+    IF Size(c2, /TYPE) LE 2 THEN BEGIN
+        IF (c2 LT 0) || (c2 GT 255) THEN BEGIN
+            msg = 'Color value of ' + StrTrim(c2,2) + ' is outside expected color range of 0 to 255.'
+            Message, msg
+        ENDIF
+    ENDIF
     
     ; If the colors are the same type, compare them directly
     IF Size(c1, /TYPE) EQ Size(c2, /TYPE) THEN BEGIN

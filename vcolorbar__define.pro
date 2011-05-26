@@ -271,7 +271,7 @@ shortScale = FSC_Normalize([0,1], Position=[self.position[0], self.position[2]])
 
     ; Create the colorbar axes. 1000 indicates this location ignored.
 
-shortAxis1 = Obj_New("IDLgrAxis", 0, Color=self.color, Ticklen=0.025, $
+shortAxis1 = Obj_New("IDLgrAxis", 0, Color=self.color, Ticklen=0.00, $
     Major=1, Range=[0,1], /NoText, /Exact, XCoord_Conv=shortScale,  $
     Location=[1000, self.position[1], 0.001])
 shortAxis2 = Obj_New("IDLgrAxis", 0, Color=self.color, Ticklen=0.025, $0.001

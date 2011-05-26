@@ -65,26 +65,26 @@
 ;     create_bmp: in, optional, type='string', default='cgwindow.bmp'
 ;          Set this keyword to the name of a bitmap file to create automatically from the window.
 ;          Using this keyword is a way to create a bitmap file programmatically from a cgWindow application.
-;          The raster file will be created via ImageMagick if raster_im has been set (default).
+;          The raster file will be created via ImageMagick if im_raster has been set (default).
 ;     create_gif: in, optional, type='string', default='cgwindow.gif'
 ;          Set this keyword to the name of a GIF file to create automatically from the window.
 ;          Using this keyword is a way to create a GIF file programmatically from a cgWindow application.
-;          The raster file will be created via ImageMagick if raster_im has been set (default).
+;          The raster file will be created via ImageMagick if im_raster has been set (default).
 ;     create_jpeg: in, optional, type='string', default='cgwindow.jpeg'
 ;          Set this keyword to the name of a JPEG file to create automatically from the window.
 ;          Using this keyword is a way to create a JPEG file programmatically from a cgWindow application.
-;          The raster file will be created via ImageMagick if raster_im has been set (default).
+;          The raster file will be created via ImageMagick if im_raster has been set (default).
 ;     create_png: in, optional, type='string', default='cgwindow.png'
 ;          Set this keyword to the name of a PNG file to create automatically from the window.
 ;          Using this keyword is a way to create a PNG file programmatically from a cgWindow application.
-;          The raster file will be created via ImageMagick if raster_im has been set (default).
+;          The raster file will be created via ImageMagick if im_raster has been set (default).
 ;     create_ps: in, optional, type='string', default='cgwindow.ps'
 ;          Set this keyword to the name of a PostScript file to create automatically from the window.
 ;          Using this keyword is a way to create a PostScript file programmatically from a cgWindow application.
 ;     create_tiff: in, optional, type='string', default='cgwindow.tiff'
 ;          Set this keyword to the name of a TIFF file to create automatically from the window.
 ;          Using this keyword is a way to create a TIFF file programmatically from a cgWindow application.
-;          The raster file will be created via ImageMagick if raster_im has been set (default).
+;          The raster file will be created via ImageMagick if im_raster has been set (default).
 ;     delay: in, optional, type=float
 ;         Set this keyword to the amount of "delay" you want between commands in the command list.
 ;     deletecmd: in, optional, type=boolean
@@ -124,7 +124,7 @@
 ;     im_resize: in, optional, type=integer, default=25
 ;         Set this keyword to percentage that the raster image file created my ImageMagick
 ;         from PostScript output should be resized.
-;     raster_im: in, optional, type=boolean, default=1
+;     im_raster: in, optional, type=boolean, default=1
 ;         Set this keyword to zero to create raster files using the create_png etc. keywords
 ;         directly, instead of via ImageMagick.
 ;     multi: in, optional, type=Intarr(5)
@@ -176,7 +176,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 28 January 2011. DWF.
-;        Added raster_im and the create_... raster options. 18 Feb 2011. Jeremy Bailin
+;        Added im_raster and the create_... raster options. 18 Feb 2011. Jeremy Bailin
 ;        Added the ability to set and unset adjustable text size in 
 ;          cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
 ;

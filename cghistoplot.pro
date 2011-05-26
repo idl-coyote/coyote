@@ -142,14 +142,6 @@
 ;      IDL> cgHistoplot, Dist(256)
 ;      IDL> cgHistoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['charcoal', 'steel blue'], /FILLPOLYGON
 ;      IDL> cgHistoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['navy', 'forest green'], /LINE_FILL, ORIENTATION=[45,-45]
-;
-; REQUIRES:
-;
-;     Requires at least these programs from the Coyote Library:
-;
-;        http://www.dfanning.com/programs/convert_to_type.pro
-;        http://www.dfanning.com/programs/error_message.pro
-;        http://www.dfanning.com/programs/cgcolor.pro
 ;        
 ; NOTE:
 ; 

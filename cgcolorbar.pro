@@ -194,6 +194,8 @@
 ;       Made default character size cgDefCharsize*0.85. 28 Feb 2011. DWF.
 ;       Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;       Added CHARPERCENT keyword 18 March 2011. DWF.
+;       Added XTITLE and YTITLE keywords, which do nothing except prevent these keywords
+;          from being used inadvertently. 27 May 2011. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -252,7 +254,9 @@ PRO cgColorbar, $
     TOP=top, $
     VERTICAL=vertical, $
     XLOG=xlog, $
+    XTITLE=xtitle, $ ; Ignored.
     YLOG=ylog, $
+    YTITLE=ytitle, $ ; Ignored
     WINDOW=window, $
     _REF_EXTRA=extra
 
@@ -302,7 +306,9 @@ PRO cgColorbar, $
             TOP=top, $
             VERTICAL=vertical, $
             XLOG=xlog, $
+            XTITLE=xtitle, $
             YLOG=ylog, $
+            YTITLE=ytitle, $
             REPLACECMD=Keyword_Set(window), $
             ADDCMD=Keyword_Set(addcmd), $
              _EXTRA=extra

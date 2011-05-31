@@ -208,6 +208,7 @@
 ;        Color table vectors must be obtained AFTER loading the color palette. 6 March 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;        Modifications to allow palettes of less than 256 elememts in length to be used. 1 April 2011. DWF.
+;        Modifications to repair axes and tickmarks when creating filled contour plots. 28 May 2011. DWF.
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -239,8 +240,10 @@ PRO cgContour, data, x, y, $
     WINDOW=window, $
     XSTYLE=xstyle, $
     XTHICK=xthick, $
+    XTICKLEN=xticklen, $
     YSTYLE=ystyle, $
     YTHICK=ythick, $
+    YTICKLEN=yticklen, $
     _REF_EXTRA=extra
     
     Compile_Opt idl2
@@ -297,8 +300,10 @@ PRO cgContour, data, x, y, $
                 TRADITIONAL=traditional, $
                 XSTYLE=xstyle, $
                 XTHICK=xthick, $
+                XTICKLEN=xticklen, $
                 YSTYLE=ystyle, $
                 YTHICK=ythick, $
+                YTICKLEN=yticklen, $
                 ADDCMD=1, $
                 _Extra=extra
              RETURN
@@ -331,8 +336,10 @@ PRO cgContour, data, x, y, $
             TRADITIONAL=traditional, $
             XSTYLE=xstyle, $
             XTHICK=xthick, $
+            XTICKLEN=xticklen, $
             YSTYLE=ystyle, $
             YTHICK=ythick, $
+            YTICKLEN=yticklen, $
             REPLACECMD=replaceCmd, $
             _Extra=extra
             
@@ -666,15 +673,16 @@ PRO cgContour, data, x, y, $
         Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
             BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
             POSITION=position, _STRICT_EXTRA=extra, /NODATA, NOERASE=tempNoErase, $
-            XTHICK=xthick, YTHICK=ythick, FONT=font, C_CHARSIZE=c_charsize
+            XTHICK=xthick, YTHICK=ythick, FONT=font, C_CHARSIZE=c_charsize, $
+            XTICKLEN=xticklen, YTICKLEN=yticklen
                     
     ENDIF
     
-    ; This is where we actually draw the data.
+    ; This is where we actually draw the data. 
     Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
-        LEVELS=levels, C_Labels=c_labels, C_COLORS=con_colors, XTHICK=xthick, YTHICK=ythick, $
-        POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, CHARSIZE=charsize, $
-        FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize
+       LEVELS=levels, C_Labels=c_labels, C_COLORS=con_colors, XTHICK=xthick, YTHICK=ythick, $
+       POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, CHARSIZE=charsize, $
+       FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize, XTICKLEN=xticklen, YTICKLEN=yticklen
         
     ; If this is the first plot in PS, then we have to make it appear that we have
     ; drawn a plot, even though we haven't.
@@ -686,10 +694,10 @@ PRO cgContour, data, x, y, $
         
     ; If we filled the contour plot, we need to repair the axes. 
     IF Keyword_Set(fill) OR Keyword_Set(cell_fill) THEN BEGIN  
-       cgPlotS, [!X.CRange[0], !X.CRange[0]], !Y.CRange, COLOR=axiscolor, THICK=ythick
-       cgPlotS, !X.CRange, [!Y.CRange[1], !Y.CRange[1]], COLOR=axiscolor, THICK=xthick
-       cgPlotS, [!X.CRange[1], !X.CRange[1]], !Y.CRange, COLOR=axiscolor, THICK=ythick
-       cgPlotS, !X.CRange, [!Y.CRange[0], !Y.CRange[0]], COLOR=axiscolor, THICK=xthick
+       cgAxis, XAXIS=0, COLOR=axiscolor, XTHICK=xthick
+       cgAxis, XAXIS=1, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)'
+       cgAxis, YAXIS=0, COLOR=axiscolor, YTHICK=ythick
+       cgAxis, YAXIS=1, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)'
     ENDIF
     
     ; Restore the decomposed color state if you can.

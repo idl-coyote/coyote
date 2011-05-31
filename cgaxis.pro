@@ -109,6 +109,7 @@
 ;     Change History::
 ;        Written, 25 Janauray 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
+;        Modifed the way I am handling brain dead AXIS command. 30 May 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -174,18 +175,7 @@ PRO cgAxis, xloc, yloc, zloc, $
             
          RETURN
     ENDIF
-    
-    ; AXIS command is a little brain dead. Have to define values for the parameters.
-    IF N_Elements(xloc) EQ 0 THEN BEGIN
-        xloc = Keyword_Set(xaxis) ? !X.CRange[0] : !X.CRange[1]
-    ENDIF
-    IF N_Elements(yloc) EQ 0 THEN BEGIN
-        yloc = Keyword_Set(yaxis) ? !Y.CRange[0] : !Y.CRange[1]
-    ENDIF
-    IF N_Elements(zloc) EQ 0 THEN BEGIN
-        zloc = Keyword_Set(zaxis) ? !Z.CRange[0] : !Z.CRange[1]
-    ENDIF
-    
+        
     ; Did the user specify a title with the TITLE keyword?
     IF (N_Elements(xtitle) EQ 0) && (N_Elements(title) NE 0) THEN xtitle = title
     IF (N_Elements(ytitle) EQ 0) && (N_Elements(title) NE 0) THEN ytitle = title
@@ -229,26 +219,87 @@ PRO cgAxis, xloc, yloc, zloc, $
      
     ; Draw the axis.
     IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = cgColor(color) ELSE thisColor = color
-    Axis, xloc, yloc, zloc, $
-          CHARSIZE=charsize, $
-          COLOR=thisColor, $
-          DATA=data, $
-          DEVICE=device, $
-          FONT=font, $
-          NORMAL=normal, $
-          SAVE=save, $
-          XAXIS=xaxis, $
-          XLOG=xlog, $
-          XTITLE=xtitle, $
-          YAXIS=yaxis, $
-          YLOG=ylog, $
-          YTITLE=ytitle, $
-          YNOZERO=ynozero, $
-          ZAXIS=zaxis, $
-          ZLOG=zlog, $
-          ZTITLE=ztitle, $
-          _STRICT_EXTRA=extra
-          
+    
+    ; Axis command appears to be brain dead. Doesn't act like any other command
+    ; in IDL. Have to do this according to number of positional parameters. Sigh...
+    CASE N_Params() OF
+      0: Axis, $
+            CHARSIZE=charsize, $
+            COLOR=thisColor, $
+            DATA=data, $
+            DEVICE=device, $
+            FONT=font, $
+            NORMAL=normal, $
+            SAVE=save, $
+            XAXIS=xaxis, $
+            XLOG=xlog, $
+            XTITLE=xtitle, $
+            YAXIS=yaxis, $
+            YLOG=ylog, $
+            YTITLE=ytitle, $
+            YNOZERO=ynozero, $
+            ZAXIS=zaxis, $
+            ZLOG=zlog, $
+            ZTITLE=ztitle, $
+            _STRICT_EXTRA=extra
+      1: Axis, xloc, $
+            CHARSIZE=charsize, $
+            COLOR=thisColor, $
+            DATA=data, $
+            DEVICE=device, $
+            FONT=font, $
+            NORMAL=normal, $
+            SAVE=save, $
+            XAXIS=xaxis, $
+            XLOG=xlog, $
+            XTITLE=xtitle, $
+            YAXIS=yaxis, $
+            YLOG=ylog, $
+            YTITLE=ytitle, $
+            YNOZERO=ynozero, $
+            ZAXIS=zaxis, $
+            ZLOG=zlog, $
+            ZTITLE=ztitle, $
+            _STRICT_EXTRA=extra
+      2: Axis, xloc, yloc, $
+            CHARSIZE=charsize, $
+            COLOR=thisColor, $
+            DATA=data, $
+            DEVICE=device, $
+            FONT=font, $
+            NORMAL=normal, $
+            SAVE=save, $
+            XAXIS=xaxis, $
+            XLOG=xlog, $
+            XTITLE=xtitle, $
+            YAXIS=yaxis, $
+            YLOG=ylog, $
+            YTITLE=ytitle, $
+            YNOZERO=ynozero, $
+            ZAXIS=zaxis, $
+            ZLOG=zlog, $
+            ZTITLE=ztitle, $
+            _STRICT_EXTRA=extra
+      3: Axis, xloc, yloc, zloc, $
+            CHARSIZE=charsize, $
+            COLOR=thisColor, $
+            DATA=data, $
+            DEVICE=device, $
+            FONT=font, $
+            NORMAL=normal, $
+            SAVE=save, $
+            XAXIS=xaxis, $
+            XLOG=xlog, $
+            XTITLE=xtitle, $
+            YAXIS=yaxis, $
+            YLOG=ylog, $
+            YTITLE=ytitle, $
+            YNOZERO=ynozero, $
+            ZAXIS=zaxis, $
+            ZLOG=zlog, $
+            ZTITLE=ztitle, $
+            _STRICT_EXTRA=extra
+    ENDCASE
     SetDecomposedState, currentState
    
    ; Restore the color tables.

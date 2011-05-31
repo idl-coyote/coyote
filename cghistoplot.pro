@@ -440,8 +440,15 @@ PRO cgHistoplot, $                    ; The program name.
    ENDIF 
    
    ; The only sensible way to proceed is to make a copy of the data. Otherwise, I'll have
-   ; a devil of a time putting it back together again at the end.
-   IF N_Elements(_dataToHistogram) EQ 0 THEN _dataToHistogram = dataToHistogram
+   ; a devil of a time putting it back together again at the end. There is a bug in
+   ; HISTOGRAM when using BYTE data, so convert that here
+   IF N_Elements(_dataToHistogram) EQ 0 THEN BEGIN
+      IF Size(dataToHistogram, /TNAME) EQ 'BYTE' THEN BEGIN
+          _dataToHistogram = Fix(dataToHistogram) 
+       ENDIF ELSE BEGIN
+          _dataToHistogram = dataToHistogram
+       ENDELSE
+   ENDIF
    
    ; If you have any "missing" data, then the data needs to be converted to float
    ; and the missing data set to F_NAN.
@@ -464,9 +471,6 @@ PRO cgHistoplot, $                    ; The program name.
       ENDELSE
    ENDIF
    
-   ; Did someone pass the number of bins?
-   IF N_Elements(nbins) NE 0 THEN theseBins = DOUBLE(nbins)
-
    ; Check for histogram keywords.
    IF N_Elements(binsize) EQ 0 THEN BEGIN
       range = Max(_dataToHistogram, /NAN) - Min(_dataToHistogram, /NAN)
@@ -475,14 +479,14 @@ PRO cgHistoplot, $                    ; The program name.
          IF (dataType LE 3) OR (dataType GE 12) THEN binsize = Round(binsize) > 1
          binsize = Convert_To_Type(binsize, dataType)
       ENDIF ELSE BEGIN
-        binsize = range / (nbins -1)
+         binsize = range / (nbins -1)
          IF dataType LE 3 THEN binsize = Round(binsize) > 1
-        binsize = Convert_To_Type(binsize, dataType)
+         binsize = Convert_To_Type(binsize, dataType)
       ENDELSE
    ENDIF ELSE BEGIN
        IF Size(binsize, /TYPE) NE dataType THEN BEGIN
-         IF dataType LE 3 THEN binsize = Round(binsize) > 1
-         binsize = Convert_To_Type(binsize, dataType)
+          IF dataType LE 3 THEN binsize = Round(binsize) > 1
+          binsize = Convert_To_Type(binsize, dataType)
        ENDIF
    ENDELSE
 
@@ -595,8 +599,6 @@ PRO cgHistoplot, $                    ; The program name.
    ; by polygon filling.
    xrange = [xmin, xmax]
    yrange = [ymin, ymax]
-   print, 'xrange: ', xrange
-   print, 'yrange: ', yrange
    IF ~Keyword_Set(overplot) THEN BEGIN
        Plot, [0,0], xrange=xrange, yrange=yrange, $             
              Background=backColor, $

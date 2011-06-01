@@ -273,7 +273,7 @@ IF (!D.Flags AND 256) NE 0 THEN BEGIN
       Device, Decomposed=1
       IF theDepth EQ 24 THEN truecolor = true ELSE truecolor = 0
    ENDIF ELSE truecolor = 0
-   IF thisWindow LT 0 THEN $
+   IF wid LT 0 THEN $
       Message, 'No currently open windows. Returning.', /NoName
 ENDIF ELSE BEGIN
    truecolor = 0

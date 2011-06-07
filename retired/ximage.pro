@@ -693,8 +693,8 @@ thisImage->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
     ; Set up font objects for the axes titles.
 
-helvetica10pt = Obj_New('IDLgrFont', 'Helvetica', Size=10)
-helvetica8pt = Obj_New('IDLgrFont', 'Helvetica', Size=8)
+helvetica10pt = Obj_New('IDLgrFont', 'Helvetica', Size=12)
+helvetica8pt = Obj_New('IDLgrFont', 'Helvetica', Size=10)
 
     ; Create title objects for the axes. Color them yellow.
 

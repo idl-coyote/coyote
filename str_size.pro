@@ -88,6 +88,7 @@
 ;  Forgot I can't do pixmaps in all devices. :-( Fixed. 7 Aug 2000. DWF.
 ;  Added support of PostScript at behest of Benjamin Hornberger. 11 November 2004. DWF.
 ;  Cleaned up the code a bit. 28 Feb 2011. DWF.
+;  Fixed non-square window algorithm to reflect my original intentions. 10 June 2011.
 ;-
 ;
 ;******************************************************************************************;
@@ -149,7 +150,7 @@ FUNCTION STR_SIZE, theString, targetWidth, $
     ; This is the algorithm that makes this work. Reverse size of
     ; window if is window is taller than wider.
     IF((!D.Flags AND 256) NE 0) THEN BEGIN
-        IF !D.X_Size GE !D.Y_Size THEN BEGIN
+        IF !D.X_Size LE !D.Y_Size THEN BEGIN
            Window, /Pixmap, /Free, XSize=!D.X_Size, YSize=!D.Y_Size
         ENDIF ELSE BEGIN
            Window, /Pixmap, /Free, XSize=!D.Y_Size, YSize=!D.X_Size

@@ -93,6 +93,9 @@
 ;     destroy: in, optional, type=boolean
 ;          Set this keyword to destroy the cgWindow program. This keyword should not be used
 ;          with other keywords.
+;     dimensions: in, optional, type=intarr(2)
+;          Set this keyword to a two-element array giving the xsize and ysize
+;          of the draw widget.
 ;     eraseit: in, optional, type=boolean
 ;         If this property is set, the cgWindow erases with the background color before
 ;         displaying the commands in the window's command list.
@@ -179,6 +182,7 @@
 ;        Added im_raster and the create_... raster options. 18 Feb 2011. Jeremy Bailin
 ;        Added the ability to set and unset adjustable text size in 
 ;          cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
+;        Added the ability to set the dimensions of the draw widget programmatically. 14 June 2011.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -200,6 +204,7 @@ PRO cgControl, selection, $
     DELAY=delay, $                                ; Set the delay between command execution.
     DELETECMD=deleteCmd, $                        ; Delete a command. If ALL is set, delete all commands.
     DESTROY=destroy, $                            ; Destroy the window. Should be called alone or with the ALL keyword.
+    DIMENSIONS=dimensions, $                      ; The dimensions of the draw widget.
     ERASEIT=eraseit, $                            ; Set the erase feature of the window.
     EXECUTE=execute, $                            ; Execute the commands immediately. 
     GET_KEYCMDINDEX = get_keycmdindex, $          ; Gets the keyword value out of this command. Counting starts at 0.
@@ -332,6 +337,7 @@ PRO cgControl, selection, $
         ADJUSTSIZE=adjustsize, $
         BACKGROUND=background, $
         DELAY=delay, $
+        DIMENSIONS=dimensions, $
         ERASEIT=eraseit, $
         PALETTE=palette, $
         MULTI=multi, $

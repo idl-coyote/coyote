@@ -985,6 +985,7 @@ END ;---------------------------------------------------------------------------
 PRO FSC_CmdWindow::SetProperty, $
     ADJUSTSIZE=adjustsize, $       ; Adjust the default charsize to match display size.
     BACKGROUND=background, $       ; The background color of the window.
+    DIMENSIONS=dimensions, $       ; Set the dimensions of the draw widget.
     DELAY=delay, $                 ; The delay between command execution.
     ERASEIT=eraseit, $             ; Set the erase flag for the window
     PALETTE=palette, $             ; Change window color table vectors.
@@ -1035,6 +1036,10 @@ PRO FSC_CmdWindow::SetProperty, $
         *self.g = palette[*,1]
         *self.b = palette[*,2]
     ENDIF   
+    IF N_Elements(dimensions) NE 0 THEN BEGIN
+       IF N_Elements(dimensions) EQ 1 THEN dimensions = [dimensions, dimensions]
+       Widget_Control, self.drawID, DRAW_XSIZE=dimensions[0], DRAW_YSIZE=dimensions[1]
+    ENDIF
     IF N_Elements(delay) NE 0 THEN self.delay = delay
     IF N_Elements(eraseit) NE 0 THEN self.eraseit = Keyword_Set(eraseit)
     IF N_Elements(noExecuteCommands) NE 0 THEN self.noexecutecommands = Keyword_Set(noExecuteCommands)
@@ -1865,6 +1870,7 @@ END ;---------------------------------------------------------------------------
 ;        Fixed a problem with CALL_METHOD, which requires one positional parameter. 8 March 2011. DWF.
 ;        Added the ability to set and unset adjustable text size in the window. 24 April 2011. DWF.
 ;        Fixed a problem in the ReplaceCommand method that had input parameters reversed. 6 May 2011. DWF.
+;        Added the ability to set the dimensions of the draw widget programmatically. 14 June 2011.
 ;   
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.

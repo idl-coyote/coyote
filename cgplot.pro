@@ -163,6 +163,7 @@
 ;         Made a modification that allows THICK and COLOR keywords apply to symbols, too. 24 Feb 2011. DWF.
 ;         Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;         Somehow I had gotten independent and dependent data reversed in the code. Put right. 16 May 2011. DWF.
+;         Allowed ASPECT (and /ISOTROPIC) to take into account input POSITION. 15 June 2011. Jeremy Bailin.
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -408,7 +409,32 @@ PRO cgPlot, x, y, $
     IF Keyword_Set(isotropic) THEN aspect = 1.0
     IF N_Elements(psym) EQ 0 THEN psym = 0
     IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
-        position = Aspect(aspect)
+    
+        ; If position is set, then fit the plot into those bounds.
+        IF (N_Elements(position) GT 0) THEN BEGIN
+          trial_position = Aspect(aspect, margin=0.)
+          trial_width = trial_position[2]-trial_position[0]
+          trial_height = trial_position[3]-trial_position[1]
+          pos_width = position[2]-position[0]
+          pos_height = position[3]-position[1]
+
+          ; Same logic as cgImage: try to fit image width, then if you can't get the right aspect
+          ; ratio, fit the image height instead.
+          fit_ratio = pos_width / trial_width
+          IF trial_height * fit_ratio GT pos_height THEN $
+             fit_ratio = pos_height / trial_height
+
+          ; new width and height
+          trial_width *= fit_ratio
+          trial_height *= fit_ratio
+
+          ; calculate position vector based on trial_width and trial_height
+          position[0] += 0.5*(pos_width - trial_width)
+          position[2] -= 0.5*(pos_width - trial_width)
+          position[1] += 0.5*(pos_height - trial_height)
+          position[3] -= 0.5*(pos_height - trial_height)
+        ENDIF ELSE position=Aspect(aspect)   ; if position isn't set, just use output of Aspect
+        
     ENDIF
            
     ; Do you need a PostScript background color? Lot's of problems here!

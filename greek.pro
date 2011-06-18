@@ -250,7 +250,7 @@ FUNCTION Greek, letter, CAPITAL=capital, EXAMPLE=example, UNICODE=unicode
             'sigma':   greekLetter = (capital) ? '!9' + String("123B) + '!X' : '!9' + String("163B) + '!X'
             'tau':     greekLetter = (capital) ? '!9' + String("124B) + '!X' : '!9' + String("164B) + '!X'
             'upsilon': greekLetter = (capital) ? '!9' + String("125B) + '!X' : '!9' + String("165B) + '!X'
-            'phi':     greekLetter = (capital) ? '!9' + String("112B) + '!X' : '!9' + String("152B) + '!X'
+            'phi':     greekLetter = (capital) ? '!9' + String("106B) + '!X' : '!9' + String("152B) + '!X'
             'chi':     greekLetter = (capital) ? '!9' + String("103B) + '!X' : '!9' + String("143B) + '!X'
             'psi':     greekLetter = (capital) ? '!9' + String("131B) + '!X' : '!9' + String("171B) + '!X'
             'omega':   greekLetter = (capital) ? '!9' + String("127B) + '!X' : '!9' + String("167B) + '!X'

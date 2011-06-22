@@ -209,6 +209,7 @@
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;        Modifications to allow palettes of less than 256 elememts in length to be used. 1 April 2011. DWF.
 ;        Modifications to repair axes and tickmarks when creating filled contour plots. 28 May 2011. DWF.
+;        Whoops! Last fix shouldn't apply to OVERPLOTTING. Fixed. 22 June 2011. DWF.
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -693,7 +694,7 @@ PRO cgContour, data, x, y, $
     ENDIF
         
     ; If we filled the contour plot, we need to repair the axes. 
-    IF Keyword_Set(fill) OR Keyword_Set(cell_fill) THEN BEGIN  
+    IF ~Keyword_Set(overplot) AND Keyword_Set(fill) OR Keyword_Set(cell_fill) THEN BEGIN  
        cgAxis, XAXIS=0, COLOR=axiscolor, XTHICK=xthick
        cgAxis, XAXIS=1, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)'
        cgAxis, YAXIS=0, COLOR=axiscolor, YTHICK=ythick

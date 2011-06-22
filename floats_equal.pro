@@ -65,6 +65,8 @@
 ; MODIFICATION HISTORY:
 ;
 ;       Written by:  David W. Fanning, 29 August 2007.
+;       Fixed a problem when using large numbers with the TOTAL command
+;          by setting the INTEGER keyword. 22 June 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -109,6 +111,6 @@ FUNCTION FLOATS_EQUAL, array_1, array_2, ULP=ulp
        epsilon = (MACHAR(DOUBLE=double)).eps
        NUMBER = (Abs(array_1) > Abs(array_2)) * epsilon * ulp
        ; Compare the arrays.
-       IF Total(Abs(array_1 - array_2) LE NUMBER) EQ N_Elements(array_1) THEN $
+       IF Total(Abs(array_1 - array_2, /INTEGER) LE NUMBER) EQ N_Elements(array_1) THEN $
            RETURN, 1 ELSE RETURN, 0
    END

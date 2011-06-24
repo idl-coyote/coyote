@@ -694,11 +694,11 @@ PRO cgContour, data, x, y, $
     ENDIF
         
     ; If we filled the contour plot, we need to repair the axes. 
-    IF ~Keyword_Set(overplot) AND Keyword_Set(fill) OR Keyword_Set(cell_fill) THEN BEGIN  
-       cgAxis, XAXIS=0, COLOR=axiscolor, XTHICK=xthick
-       cgAxis, XAXIS=1, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)'
-       cgAxis, YAXIS=0, COLOR=axiscolor, YTHICK=ythick
-       cgAxis, YAXIS=1, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)'
+    IF ~Keyword_Set(overplot) AND (Keyword_Set(fill) OR Keyword_Set(cell_fill)) THEN BEGIN  
+       cgAxis, XAXIS=0, COLOR=axiscolor, XTHICK=xthick, XSTYLE=xstyle
+       cgAxis, XAXIS=1, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle
+       cgAxis, YAXIS=0, COLOR=axiscolor, YTHICK=ythick, YSTYLE=ystyle
+       cgAxis, YAXIS=1, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)', YSTYLE=ystyle
     ENDIF
     
     ; Restore the decomposed color state if you can.

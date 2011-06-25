@@ -115,6 +115,7 @@
 ; MODIFICATION HISTORY:
 ;
 ;       Written by David W. Fanning, 17 March 2009.
+;       Fixed problems in calculating default window sizes in the Z and PS devices. 25 June 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -163,8 +164,31 @@ Function GridPositions, columns, rows, $
     inches = Keyword_Set(inches)
     landscape = Keyword_Set(landscape)
     order = Keyword_Set(order)
-    IF N_Elements(xsize) EQ 0 THEN xsize = !D.X_Size
-    IF N_Elements(ysize) EQ 0 THEN ysize = !D.Y_Size
+    IF N_Elements(xsize) EQ 0 THEN BEGIN
+        CASE !D.NAME OF
+            'PS': BEGIN
+                CASE inches OF
+                    0: xsize = !D.X_Size / Float(!D.X_PX_CM)
+                    1: xsize = !D.X_Size / Float(!D.X_PX_CM) / 2.54
+                ENDCASE
+                END
+            'Z': xsize = 640
+            ELSE: xsize = !D.X_Size
+        ENDCASE
+    ENDIF
+    IF N_Elements(ysize) EQ 0 THEN BEGIN
+        CASE !D.NAME OF
+            'PS': BEGIN
+                CASE inches OF
+                    0: ysize = !D.Y_Size / Float(!D.Y_PX_CM)
+                    1: ysize = !D.Y_Size / Float(!D.Y_PX_CM) / 2.54
+                ENDCASE
+                END
+            'Z': ysize = 512
+            ELSE: ysize = !D.Y_Size
+        ENDCASE
+    ENDIF
+       
     IF N_Elements(xextent) EQ 0 THEN xextent = [0.0, 1.0]
     IF N_Elements(xextent) EQ 1 THEN xextent = [0, xextent]
     xextent = 0.0 > xextent < 1.0
@@ -188,6 +212,7 @@ Function GridPositions, columns, rows, $
     ; Set up appropriately for the right device.
     CASE !D.NAME OF
         'PS': BEGIN
+             Print, 'Resolution: ', [xs,ys]
               Device, XSIZE=xs, YSIZE=ys, INCHES=inches, PORTRAIT=1-landscape, LANDSCAPE=landscape
               END
               
@@ -206,7 +231,7 @@ Function GridPositions, columns, rows, $
     !P.MULTI = [0, columns, rows, 0, order]
     FOR j=0,numpos-1 DO BEGIN
         Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, XMargin=xmargin, YMargin=ymargin
-              thePositions[*,j] = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]] 
+        thePositions[*,j] = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]] 
     ENDFOR
     !P.MULTI =0
     thePositions[[0,2], *] = thePositions[[0,2], *] *  (xextent[1] - xextent[0]) + xextent[0]

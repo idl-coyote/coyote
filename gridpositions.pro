@@ -107,15 +107,16 @@
 ;           cgErase, 'rose'
 ;           cgLoadCt, 25, /Brewer
 ;           cgImage, image, POSITION=positions[*,0]
-;           cgImage, BytScl(Sobel(image)), POSITION=positions[*,1]
-;           cgImage, BytScl(Hist_Equal(image)), POSITION=positions[*,2]
-;           cgImage, BytScl(Median(image,7)), POSITION=positions[*,3]
+;           cgImage, BytScl(Sobel(image)), POSITION=positions[*,1], /NoErase
+;           cgImage, BytScl(Hist_Equal(image)), POSITION=positions[*,2], /NoErase
+;           cgImage, BytScl(Median(image,7)), POSITION=positions[*,3], /NoErase
 ;
 ;
 ; MODIFICATION HISTORY:
 ;
 ;       Written by David W. Fanning, 17 March 2009.
 ;       Fixed problems in calculating default window sizes in the Z and PS devices. 25 June 2011. DWF.
+;       Fixed the example code to work with Coyote Graphics routines. 27 June 2011.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;

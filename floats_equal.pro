@@ -111,6 +111,6 @@ FUNCTION FLOATS_EQUAL, array_1, array_2, ULP=ulp
        epsilon = (MACHAR(DOUBLE=double)).eps
        NUMBER = (Abs(array_1) > Abs(array_2)) * epsilon * ulp
        ; Compare the arrays.
-       IF Total(Abs(array_1 - array_2, /INTEGER) LE NUMBER) EQ N_Elements(array_1) THEN $
+       IF Total(Abs(array_1 - array_2) LE NUMBER, /INTEGER) EQ N_Elements(array_1) THEN $
            RETURN, 1 ELSE RETURN, 0
    END

@@ -76,6 +76,11 @@
 ;                     form as the POSITION keyword on a plot. Default is
 ;                     [0.85, 0.1, 0.90, 0.9] for a vertical color bar and
 ;                     [0.1, 0.88, 0.9, 0.93] for a horizontal color bar.
+;                  
+;       RIGHT:        Set this keyword to put the title to the right of a vertical
+;                     color bar. The default is to put the title to the left of a
+;                     vertical color bar. The keyword has no effect for a horizontal
+;                     color bar.
 ;
 ;       ROTATE:       Set this keyword to a value that will rotate the label text.
 ;                     Positive values between 0 and 180 degrees rotate in a counter-clockwise
@@ -148,6 +153,8 @@
 ;       Modified the spacing of the labels on the color bar, specifically for the 
 ;           PostScript device. 3 November 2010. DWF.
 ;       Added Window and AddCmd keywords. 28 Jan 2011. DWF.
+;       Added a Right keyword and changed the title spacing a little bit for
+;           aesthetic reasons. 2 July 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009-2010, by Fanning Software Consulting, Inc.                           ;
@@ -187,6 +194,7 @@ PRO cgDCBar, colors, $
     LABELS=labels, $
     NCOLORS=ncolors, $
     POSITION=position, $
+    RIGHT=right, $
     ROTATE=rotate, $
     SPACING=spacing, $
     TITLE=title, $
@@ -218,6 +226,7 @@ PRO cgDCBar, colors, $
             LABELS=labels, $
             NCOLORS=ncolors, $
             POSITION=position, $
+            RIGHT=right, $
             ROTATE=rotate, $
             SPACING=spacing, $
             TITLE=title, $
@@ -474,9 +483,20 @@ PRO cgDCBar, colors, $
                 ORIENTATION=rotate, ALIGNMENT=alignment, CHARSIZE=charsize, FONT=font
             y = y + step
         ENDFOR
-        XYOutS, x0 - (chardist * ((x0 LT 0.5) ? 2 : 3)), (position[3]-position[1])/2.0 + position[1], $
-            title, COLOR=cgColor(color, FILE=file), /NORMAL, ALIGNMENT=0.5, $
-            ORIENTATION=(x GE 0.5) ? -90 : 90,  CHARSIZE=tcharsize, FONT=font
+        IF Keyword_Set(right) THEN BEGIN
+        
+           spacing = (rotate NE 0) ? !D.X_CH_SIZE*3.5/Float(!D.X_Size) : !D.X_CH_SIZE*2/Float(!D.X_Size)
+           rotateFactor = Cos(Abs(rotate)*!DtoR) > 0.75
+           xstart = x1 + (spacing + ( Max(StrLen(labels)) * (rotateFactor * !D.X_CH_SIZE ))/Float(!D.X_Size))
+           XYOutS, xstart, (position[3]-position[1])/2.0 + position[1], $
+               title, COLOR=cgColor(color, FILE=file), /NORMAL, ALIGNMENT=0.5, $
+               ORIENTATION=(x GE 0.5) ? -90 : 90, CHARSIZE=tcharsize, FONT=font
+        ENDIF ELSE BEGIN
+           xstart = x0 - (chardist * ((x0 LT 0.5) ? 1.5 : 2))
+           XYOutS, xstart, (position[3]-position[1])/2.0 + position[1], $
+               title, COLOR=cgColor(color, FILE=file), /NORMAL, ALIGNMENT=0.5, $
+               ORIENTATION=(x GE 0.5) ? -90 : 90, CHARSIZE=tcharsize, FONT=font        
+        ENDELSE
     ENDELSE
     
     ; Restore the orginal color table.

@@ -125,6 +125,8 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+Forward_Function Greek
+
 PRO Greek_Example, UNICODE=unicode
 
     Compile_Opt hidden

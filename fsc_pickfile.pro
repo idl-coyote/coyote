@@ -49,6 +49,9 @@
 ;       JPEG:         If set, starts in the "jpeg" directory at ".../IDL/data/jpeg".
 ;
 ;       HDF:          If set, starts in the "hdf" directory at ".../IDL/data/hdf".
+;       
+;       LAST_FILE:    If set, the name of the last file opened is placed in the
+;                     filename widget.
 ;
 ;       LIDAR:        If set, starts in the "lidar" directory at ".../IDL/data/lidar".
 ;
@@ -65,6 +68,7 @@
 ;       Written by David W. Fanning, 22 February 2010.
 ;       Name changed from Pickfile to FSC_Pickfile on 14 October 2010. DWF.
 ;       Modifications to make it work with multiple file selection. 9 March 2011. DWF.
+;       Added LAST_FILE keyword. 23 April 2011. DWF.
 ;
 ;
 ;******************************************************************************************;

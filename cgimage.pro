@@ -345,6 +345,7 @@
 ;         it was created to solve the same problem. So, I have changed the 
 ;         default setting of MINUS_ONE to 0. 14 March 2011. DWF.
 ;       Corrected a problem with restoring color tables if a PALETTE is used. 31 March 2011. DWF.
+;       Whoops! Documented a CHARSIZE keyword, but forgot to define it. 7 July 2011.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
@@ -515,6 +516,7 @@ PRO cgImage, image, x, y, $
    AXKEYWORDS=axkeywords, $
    BACKGROUND=background, $
    BOTTOM=bottom, $
+   CHARSIZE=charsize, $
    COLOR=color, $
    ERASE=obsolte_erase, $ ; Added for compatibility with TVIMAGE.
    INTERPOLATE=interp, $
@@ -593,6 +595,7 @@ PRO cgImage, image, x, y, $
                AXKEYWORDS=axkeywords, $
                BACKGROUND=background, $
                BOTTOM=bottom, $
+               CHARSIZE=charsize, $
                COLOR=color, $
                INTERPOLATE=interp, $
                KEEP_ASPECT_RATIO=keep_aspect, $
@@ -632,6 +635,7 @@ PRO cgImage, image, x, y, $
                AXKEYWORDS=axkeywords, $
                BACKGROUND=background, $
                BOTTOM=bottom, $
+               CHARSIZE=charsize, $
                COLOR=color, $
                INTERPOLATE=interp, $
                KEEP_ASPECT_RATIO=keep_aspect, $

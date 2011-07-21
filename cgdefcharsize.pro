@@ -68,6 +68,8 @@
 ;        Written, 11 January 2011. DWF.      
 ;        Added an ADJUSTSIZE keyword to allow adjustable sizing of characters
 ;           in resizeable graphics windows. 24 April 2011. DWF.  
+;        Made sure this program only adjusts text size on devices that support 
+;           windows. 20 July 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -83,8 +85,9 @@ FUNCTION cgDefCharSize, ADJUSTSIZE=adjustsize, FONT=font
     IF N_Elements(font) EQ 0 THEN font = !P.Font
     
     ; If the current window is a cgWindow, then the ADJUSTSIZE property of the
-    ; window is used to set the AdjustSize keyword.
-    IF (!D.Name EQ 'PS') THEN adjustsize = 0
+    ; window is used to set the AdjustSize keyword. This can only be done on
+    ; devices that support windows.
+    IF ~((!D.Flags AND 256) NE 0) THEN adjustsize = 0
     IF (N_Elements(adjustsize) EQ 0) THEN BEGIN
     
         ; Each instance of cgWindow will store evidence of its
@@ -94,10 +97,12 @@ FUNCTION cgDefCharSize, ADJUSTSIZE=adjustsize, FONT=font
             adjustsize = 0 
         ENDIF ELSE BEGIN
             IF Obj_Valid(!FSC_WINDOW_LIST) THEN BEGIN
-                wid = cgQuery(/Current)
-                IF wid EQ !D.Window THEN BEGIN
-                    void = cgQuery(ObjectRef=windowObj, /Current)
-                    windowObj -> GetProperty, AdjustSize=adjustsize
+                wid = cgQuery(/Current, COUNT=count)
+                IF count GT 0 THEN BEGIN
+                   IF wid EQ !D.Window THEN BEGIN
+                       void = cgQuery(ObjectRef=windowObj, /Current)
+                       IF Obj_Valid(windowObj) THEN windowObj -> GetProperty, AdjustSize=adjustsize
+                   ENDIF ELSE adjustsize = 0
                 ENDIF ELSE adjustsize = 0
             ENDIF ELSE adjustsize = 0
         ENDELSE

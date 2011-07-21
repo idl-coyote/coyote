@@ -87,7 +87,8 @@
 ;     Change History::
 ;        Written, 23 January 2011. DWF.
 ;        Added DIMENSIONS keyword to return current dimensions of cgWindows. 24 Feb 2011. DWF.
-;
+;        Made sure this program only returns information on devices that support windows. 20 July 2011. DWF.
+;        
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
@@ -98,6 +99,12 @@ FUNCTION cgQuery, $
     OBJECTREF=objectRef, $
     TITLE=title, $
     WIDGETID=widgetID
+    
+    ; This can only be done in devices that support windows.
+    IF ~((!D.Flags AND 256) NE 0) THEN BEGIN
+        count = 0
+        RETURN, -1
+    ENDIF
 
     ; Are there cgWindow applications around?
     DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists

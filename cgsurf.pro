@@ -190,7 +190,8 @@
 ;        Added PALETTE keyword. 3 Feb 2011. DWF.
 ;        Color table vectors must be obtained AFTER loading the color palette. 6 March 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
-;        
+;        Modified the color decomposition state to properly handle shaded surfaces in PostScript. 20 July 2011. DWF.
+;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -316,7 +317,11 @@ PRO cgSurf, data, x, y, $
     ENDIF
     
     ; Going to draw in decomposed color, if possible to avoid dirtying the color table.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    IF Keyword_Set(shaded) && (!D.Name EQ 'PS') THEN BEGIN
+       SetDecomposedState, 0, CURRENTSTATE=currentState
+    ENDIF ELSE BEGIN
+       SetDecomposedState, 1, CURRENTSTATE=currentState
+    ENDELSE
 
     ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
     ; done BEFORE checking the LAYOUT properties.

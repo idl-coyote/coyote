@@ -157,6 +157,12 @@
 ;       cgContour, data, /FILL
 ;       cgContour, data, /OVERPLOT
 ;       
+;    If you wish to overplot on top of an image, use the ONIMAGE keyword, rather
+;    than the OVERPLOT keyword:
+;       cgImage, data, /SCALE, XRANGE=[-10, 10], YRANGE=[-5,5], /AXES
+;       cgContour, data, /ONIMAGE
+;          
+;       
 ;       See http://www.dfanning.com/graphics_tips/cgcontour.html for additional examples.
 ;
 ; :Author:
@@ -211,6 +217,9 @@
 ;        Modifications to repair axes and tickmarks when creating filled contour plots. 28 May 2011. DWF.
 ;        Whoops! Last fix shouldn't apply to OVERPLOTTING. Fixed. 22 June 2011. DWF.
 ;        Still more work to get axes overplotting to work correct. 5 July 2011. DWF.
+;        Added an ONIMAGE keyword that allows the contours to be overplotted on top of an image that
+;           has been displayed with cgImage. This requires that the SAVE keyword is set in the 
+;           cgImage call.
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -234,6 +243,7 @@ PRO cgContour, data, x, y, $
     NLEVELS=nlevels, $
     NOERASE=noerase, $
     MISSINGVALUE=missingvalue, $
+    ONIMAGE=onImage, $
     OVERPLOT=overplot, $
     PALETTE=palette, $
     POSITION=position, $
@@ -295,6 +305,7 @@ PRO cgContour, data, x, y, $
                 NLEVELS=nlevels, $
                 NOERASE=noerase, $
                 MISSINGVALUE=missingvalue, $
+                ONIMAGE=onimage, $
                 OVERPLOT=overplot, $
                 PALETTE=palette, $
                 POSITION=position, $
@@ -331,6 +342,7 @@ PRO cgContour, data, x, y, $
             NLEVELS=nlevels, $
             NOERASE=noerase, $
             MISSINGVALUE=missingvalue, $
+            ONIMAGE=onimage, $
             OVERPLOT=overplot, $
             PALETTE=palette, $
             POSITION=position, $
@@ -353,6 +365,9 @@ PRO cgContour, data, x, y, $
         Print, 'USE SYNTAX: cgContour, data, x, y, NLEVELS=10'
         RETURN
     ENDIF
+    
+    ; If you want to overplot on an image, set the OVERPLOT keyword.
+    IF Keyword_Set(onImage) THEN overplot = 1
     
     ; Going to have to do all of this in decomposed color, if possible.
     SetDecomposedState, 1, CURRENTSTATE=currentState
@@ -384,12 +399,52 @@ PRO cgContour, data, x, y, $
     s = Size(data, /DIMENSIONS)
     CASE ndims OF
         1: BEGIN
-           IF N_Elements(x) EQ 0 THEN xgrid = Indgen(s[0]) ELSE xgrid = x
-           IF N_Elements(y) EQ 0 THEN ygrid = Indgen(s[0]) ELSE ygrid = y
+           IF N_Elements(x) EQ 0 THEN BEGIN
+               IF Keyword_Set(onImage) THEN BEGIN
+                   CASE !X.TYPE OF
+                      0: xgrid = Scale_Vector(Indgen(s[0]), !X.CRange[0], !X.CRange[1])
+                      1: xgrid = Scale_Vector(Indgen(s[0]), 10^!X.CRange[0], 10^!X.CRange[1])
+                      3: Message, 'Must supply LONGITUDE vector when overplotting on map projections'
+                   ENDCASE
+               ENDIF ELSE BEGIN
+                  xgrid = Indgen(s[0])
+               ENDELSE
+           ENDIF ELSE xgrid = x
+           IF N_Elements(y) EQ 0 THEN BEGIN
+               IF Keyword_Set(onImage) THEN BEGIN
+                   CASE !Y.TYPE OF
+                      0: ygrid = Scale_Vector(Indgen(s[1]), !Y.CRange[0], !Y.CRange[1])
+                      1: ygrid = Scale_Vector(Indgen(s[1]), 10^!Y.CRange[0], 10^!Y.CRange[1])
+                      3: Message, 'Must supply LATITUDE vector when overplotting on map projections'
+                   ENDCASE
+               ENDIF ELSE BEGIN
+                  ygrid = Indgen(s[1])
+               ENDELSE
+           ENDIF ELSE ygrid = y
            END
         2: BEGIN
-           IF N_Elements(x) EQ 0 THEN xgrid = Indgen(s[0]) ELSE xgrid = x
-           IF N_Elements(y) EQ 0 THEN ygrid = Indgen(s[1]) ELSE ygrid = y
+           IF N_Elements(x) EQ 0 THEN BEGIN
+               IF Keyword_Set(onImage) THEN BEGIN
+                   CASE !X.TYPE OF
+                      0: xgrid = Scale_Vector(Indgen(s[0]), !X.CRange[0], !X.CRange[1])
+                      1: xgrid = Scale_Vector(Indgen(s[0]), 10^!X.CRange[0], 10^!X.CRange[1])
+                      3: Message, 'Must supply LONGITUDE vector when overplotting on map projections'
+                   ENDCASE
+               ENDIF ELSE BEGIN
+                  xgrid = Indgen(s[0])
+               ENDELSE
+           ENDIF ELSE xgrid = x
+           IF N_Elements(y) EQ 0 THEN BEGIN
+               IF Keyword_Set(onImage) THEN BEGIN
+                   CASE !Y.TYPE OF
+                      0: ygrid = Scale_Vector(Indgen(s[1]), !Y.CRange[0], !Y.CRange[1])
+                      1: ygrid = Scale_Vector(Indgen(s[1]), 10^!Y.CRange[0], 10^!Y.CRange[1])
+                      3: Message, 'Must supply LATITUDE vector when overplotting on map projections'
+                   ENDCASE
+               ENDIF ELSE BEGIN
+                  ygrid = Indgen(s[1])
+               ENDELSE
+           ENDIF ELSE ygrid = y
            END
         ELSE: Message, 'Contour data must be 1D or 2D.'
     ENDCASE

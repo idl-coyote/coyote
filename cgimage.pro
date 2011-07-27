@@ -346,6 +346,7 @@
 ;         default setting of MINUS_ONE to 0. 14 March 2011. DWF.
 ;       Corrected a problem with restoring color tables if a PALETTE is used. 31 March 2011. DWF.
 ;       Whoops! Documented a CHARSIZE keyword, but forgot to define it. 7 July 2011.
+;       Damnation! I did the same thing with the FONT keyword! 25 July 2011.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
@@ -519,6 +520,7 @@ PRO cgImage, image, x, y, $
    CHARSIZE=charsize, $
    COLOR=color, $
    ERASE=obsolte_erase, $ ; Added for compatibility with TVIMAGE.
+   FONT=font, $
    INTERPOLATE=interp, $
    KEEP_ASPECT_RATIO=keep_aspect, $
    LAYOUT=layout, $
@@ -597,6 +599,7 @@ PRO cgImage, image, x, y, $
                BOTTOM=bottom, $
                CHARSIZE=charsize, $
                COLOR=color, $
+               FONT=font, $
                INTERPOLATE=interp, $
                KEEP_ASPECT_RATIO=keep_aspect, $
                LAYOUT=layout, $
@@ -637,6 +640,7 @@ PRO cgImage, image, x, y, $
                BOTTOM=bottom, $
                CHARSIZE=charsize, $
                COLOR=color, $
+               FONT=font, $
                INTERPOLATE=interp, $
                KEEP_ASPECT_RATIO=keep_aspect, $
                LAYOUT=layout, $
@@ -1316,10 +1320,10 @@ PRO cgImage, image, x, y, $
     ; If the user wanted axes, draw them now.
     IF axes THEN BEGIN
     
-        cgPLOT, [0], /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
+        cgPLOT, [0], FONT=font, /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
             XSTYLE=1, YSTYLE=1, POSITION=position, AXISCOLOR=acolor, $
             XTITLE=plotxtitle, YTITLE=plotytitle, TITLE=title, CHARSIZE=charsize, $
-            FONT=font, _STRICT_EXTRA=axkeywords
+            _STRICT_EXTRA=axkeywords
             
     ENDIF ELSE BEGIN
     

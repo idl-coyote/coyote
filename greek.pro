@@ -96,7 +96,9 @@
 ;  Had the wrong value for the PostScript version of Phi. 26 January 2010. DWF
 ;  Added UNICODE keyword and values for Greek characters. 11 June 2010. DWF.
 ;  Changed the branching from !D.NAME EQ 'PS' to !P.FONT NE -1. (This is actually
-;      what the documentation says, and what I intended. 13 Dec 2010. DWF.
+;      what the documentation says, and what I intended.) 13 Dec 2010. DWF.
+;  I don't think the last change did quite want I wanted. More tweaking to make
+;      this more responsive to being in a PostScript file. 31 July 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc.                                ;
@@ -226,7 +228,7 @@ FUNCTION Greek, letter, CAPITAL=capital, EXAMPLE=example, UNICODE=unicode
        
     ENDIF
     
-    IF !P.FONT NE -1  THEN BEGIN
+    IF (!D.Name EQ 'PS') && (!P.FONT NE -1)  THEN BEGIN
     
         ; Make sure ISOLATIN1 encoding is turned on.
         IF (!D.Name EQ 'PS') THEN DEVICE, /ISOLATIN1

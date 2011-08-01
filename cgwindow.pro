@@ -2120,6 +2120,7 @@ PRO cgWindow, $
        WBackground = wbackground, $     ; The background color. Not used unless set.
        WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
        WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.
+       WEXPR=wexpr, $
        WXSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 400.
        WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 400.
        WTitle = wtitle, $               ; The window title.

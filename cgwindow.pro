@@ -343,9 +343,76 @@ END ;---------------------------------------------------------------------------
 
 ;+
 ; :Description:
+;     This method evaluates a keyword structure and creates a new keyword list
+;     with the evaluated values.
+;-
+FUNCTION FSC_CmdWindow::EvaluateKeywords, keywords, SUCCESS=success
+
+  ; Error handling.
+  Catch, theError
+  IF theError NE 0 THEN BEGIN
+     Catch, /CANCEL
+     success = 0
+     void = Error_Message()
+     IF N_Elements(keywords) NE 0 THEN RETURN, keywords ELSE RETURN, 0
+  ENDIF
+  
+  ; Assume success.
+  success = 1
+  
+  ; Need to have keywords.
+  IF N_Elements(keywords) EQ 0 THEN $
+      Message, 'A keyword structure must be passed to the method.'
+
+  ; Get the keyword names.
+  tags = Tag_Names(keywords)
+  
+  ; Find the keywords to be evaluated in this keyword structure.
+  keysToEvaluate = StrUpCase(*self.kwexpr)
+  theseTags = Ptr_New()
+  FOR j=0,N_Elements(keysToEvaluate)-1 DO BEGIN
+     index = Where(tags EQ keysToEvaluate[j], count)
+     IF (count EQ 1) THEN BEGIN
+        IF Ptr_Valid(theseTags) THEN *theseTags = [*theseTags, index] ELSE theseTags = Ptr_New(index) 
+     ENDIF ELSE IF count GT 1 THEN Message, 'Ambiguous keywords to evaluate.'
+  ENDFOR
+  
+  ; Evaluate the keywords and, if necessary, replace the keyword value
+  ; with the evaluated value. The evaluated keyword value must initially be a 
+  ; STRING that can be evaluated with the EXECUTE command.
+  FOR j=0,N_Elements(tags)-1 DO BEGIN
+    index = Where(*theseTags EQ j, count)
+    IF count EQ 0 THEN BEGIN
+      IF N_Elements(mkeys) EQ 0 THEN BEGIN
+        mkeys = Create_Struct(tags[j], keywords.(j)) 
+      ENDIF ELSE BEGIN
+        mkeys = Create_Struct(mkeys, tags[j], keywords.(j))
+      ENDELSE
+    ENDIF ELSE BEGIN
+        IF Size(keywords.(j), /TNAME) NE 'STRING' THEN $
+          Message, 'Keyword value must be a string expression to be evaluated.'
+        cmd = 'tagValue = ' + keywords.(j)
+        ok = Execute(cmd)
+        IF ~ok THEN Message, 'Cannot execute the expression: ' + tags[j] + '=' + keywords.(j)
+      IF N_Elements(mkeys) EQ 0 THEN BEGIN
+        mkeys = Create_Struct(tags[j], tagValue)
+      ENDIF ELSE BEGIN
+        mkeys = Create_Struct(mkeys, tags[j], tagValue)
+      ENDELSE
+    ENDELSE
+    
+  ENDFOR
+ 
+  Ptr_Free, theseTags
+  RETURN, mkeys
+END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; :Description:
 ;     This method executes the commands on the command list.
 ;-
-PRO FSC_CmdWindow::ExecuteCommands, KEYWORDS=keywords
+PRO FSC_CmdWindow::ExecuteCommands
 
     Catch, theError
     IF theError NE 0 THEN BEGIN
@@ -387,24 +454,21 @@ PRO FSC_CmdWindow::ExecuteCommands, KEYWORDS=keywords
 
     ; How many commands are there?
     n_cmds = self.cmds -> Get_Count()
-    
-    ; Issue an informative message if there are no commands to execute.
-    ;IF n_cmds EQ 0 THEN Message, 'There are currently no graphics commands to execute.', /INFORMATIONAL
-    
+        
     ; Execute the commands.
     FOR j=0,n_cmds-1 DO BEGIN
         thisCmdObj = self.cmds -> Get_Item(j, /DEREFERENCE)
         
-        ; Execute the command. This will update output keywords, possibly.
-        thisCmdObj -> Draw, SUCCESS=success, KEYWORDS=keywords
+        ; Execute the command. If you have keywords that are expressions,
+        ; you must evaluate those first, and then pass the modified keywords
+        ;  to the DRAW method.
+        IF Ptr_Valid(self.kwexpr) THEN BEGIN
+          modifiedKeywords = self -> EvaluateKeywords(thisCmdObj->Get_Keywords(), SUCCESS=success)
+          IF success THEN thisCmdObj -> Draw, SUCCESS=success, KEYWORDS=modifiedKeywords
+        ENDIF ELSE BEGIN
+          thisCmdObj -> Draw, SUCCESS=success
+        ENDELSE
         
-        ; Update the keyword structure. I had hoped that by doing this would have
-        ; updated output keyword values, but this doesn't work because Call_Procedure
-        ; does not pass keywords by reference (using keyword inheritance) but, by value).
-        ; Thus, it is currently NOT possible to obtain output keyword values from commands
-        ; entered into cgWindow.
-        IF success && (N_Elements(keywords) NE 0) THEN thisCmdObj -> UpdateKeywordStruct, keywords
-
         ; Did you successfully draw this command?
         IF ~success THEN BEGIN
         
@@ -1098,6 +1162,7 @@ FUNCTION FSC_CmdWindow::Init, $
    Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
    ReplaceCmd=replacecmd, $         ; Replace the current command and execute in the current window.
    WEraseIt = Weraseit, $           ; Set this keyword to erase the display before executing the command.
+   WKWEXPR=wkwexpr, $               ; A list of keywords that should be evaluated as expressions.
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
    WOXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
    WOYMargin = woymargin, $         ; Set the !Y.OMargin. A two element array
@@ -1160,6 +1225,9 @@ FUNCTION FSC_CmdWindow::Init, $
             Message, 'The first positional parameter must be present to make a method call.'
         IF ~Obj_Valid(p1) THEN $
             Message, 'The first positional parameter must be a valid object reference when making method calls.'
+    ENDIF
+    IF N_Elements(wkwexpr) NE 0 THEN BEGIN
+      IF N_Elements(wkwexpr) EQ 1 THEN self.kwexpr = Ptr_New([wkwexpr]) ELSE self.kwexpr = Ptr_New(wkwexpr)
     ENDIF
     IF N_Elements(wxsize) EQ 0 THEN xsize = d_xsize ELSE xsize = wxsize
     IF N_Elements(wysize) EQ 0 THEN ysize = d_ysize ELSE ysize = wysize
@@ -1354,6 +1422,7 @@ PRO FSC_CmdWindow::Cleanup
     Ptr_Free, self.r
     Ptr_Free, self.g
     Ptr_Free, self.b
+    Ptr_Free, self.kwexpr
     
     ; Destroy the command objects.
     IF Obj_Valid(self.cmds) THEN BEGIN
@@ -1400,6 +1469,7 @@ PRO FSC_CmdWindow__Define, class
               r: Ptr_New(), $               ; The red color table vector.
               g: Ptr_New(), $               ; The green color table vector.
               b: Ptr_New(), $               ; The blue color table vector.
+              kwexpr: Ptr_New(), $          ; A list of keywords that should be evaluated as expressions.
               
               ; PostScript options.
               ps_delete: 0L, $              ; Delete the PS file when making IM image file.
@@ -1418,7 +1488,6 @@ PRO FSC_CmdWindow__Define, class
               im_options: "", $             ; Sets extra ImageMagick options on the ImageMagick convert command.
               im_raster: 0L $               ; Create raster files via ImageMagick
             }
-            
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -1515,6 +1584,10 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
     ; executed the command and change the success flag.
     success = 0
     Message, /RESET
+    
+    IF N_Elements(keywords) EQ 0 THEN BEGIN
+      IF Ptr_Valid(self.keywords) THEN keywords = *self.keywords
+    ENDIF
 
     ; What kind of command is this?
     CASE self.type OF 
@@ -1524,10 +1597,10 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
         
              IF Ptr_Valid(self.keywords) THEN BEGIN
                  CASE self.nparams OF
-                     0: Call_Procedure, self.command, _Extra=*self.keywords
-                     1: Call_Procedure, self.command, *self.p1, _Extra=*self.keywords
-                     2: Call_Procedure, self.command, *self.p1, *self.p2, _Extra=*self.keywords
-                     3: Call_Procedure, self.command, *self.p1, *self.p2, *self.p3, _Extra=*self.keywords
+                     0: Call_Procedure, self.command, _Extra=keywords
+                     1: Call_Procedure, self.command, *self.p1, _Extra=keywords
+                     2: Call_Procedure, self.command, *self.p1, *self.p2, _Extra=keywords
+                     3: Call_Procedure, self.command, *self.p1, *self.p2, *self.p3, _Extra=keywords
                  ENDCASE
                  keywords = *self.keywords
              ENDIF ELSE BEGIN
@@ -1547,9 +1620,9 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
              IF Ptr_Valid(self.keywords) THEN BEGIN
                  CASE self.nparams OF
                      0: Message, 'Call_Method requires at least one positional parameter.'
-                     1: Call_Method, self.command, *self.p1, _Extra=*self.keywords
-                     2: Call_Method, self.command, *self.p1, *self.p2, _Extra=*self.keywords
-                     3: Call_Method, self.command, *self.p1, *self.p2, *self.p3, _Extra=*self.keywords
+                     1: Call_Method, self.command, *self.p1, _Extra=keywords
+                     2: Call_Method, self.command, *self.p1, *self.p2, _Extra=keywords
+                     3: Call_Method, self.command, *self.p1, *self.p2, *self.p3, _Extra=keywords
                  ENDCASE
                  keywords = *self.keywords
              ENDIF ELSE BEGIN
@@ -1767,6 +1840,11 @@ END ;---------------------------------------------------------------------------
 ;    werase: in, optional, type=boolean, default=0
 ;       Set this keyword to cause the window to be erased before graphics commands 
 ;       are drawn. This may need to be set, for example, to display images.
+;    wkwexpr: in, optional, type=string
+;       Set this keyword to a list of keywords that should be evaluated as expressions.
+;       The keywords listed here must be set to strings that can be evaluated in an IDL
+;       EXECUTE command. If you use wkwexpr, you can NOT use cgWindow in a Virtual Machine
+;       program, as the use of EXECUTE is prohibited. Please be aware of this restriction.
 ;    winid: in, optional, type=integer
 ;       Use this keyword to select the window cgWindow identifier (the number between
 ;       the parentheses in the title bar of cgWindow). The AddCmd, ReplaceCmd, ListCmd,
@@ -1796,10 +1874,16 @@ END ;---------------------------------------------------------------------------
 ;       data = cgDemoData(17)
 ;       cgWindow, 'cgPlot', data, COLOR='red'
 ;       cgWindow, 'cgPlot', data, PSYM=2, /Overplot, COLOR='dodger blue', /AddCmd
-;       cgWIndow, 'cgPlot', cgDemoData(17), color='olive', linestyle = 2, /Overplot, /AddCmd
+;       cgWindow, 'cgPlot', cgDemoData(17), color='olive', linestyle = 2, /Overplot, /AddCmd
 ;       cgWindow, /ListCmd
 ;       cgWindow, 'cgPlot', data, COLOR='purple', /ReplaceCMD, CMDINDEX=0
 ;       
+;       To pass keywords that can be evaluated at run-time:
+;       
+;       cgPlot, cgDemodata(1), WKWEXPR=['TITLE', 'THICK'], $
+;          TITLE='"Greek Symbol Psi (" + Greek("psi") + ")"', $
+;          THICK=(!P.Name EQ 'PS') ? 3 : 1, /WINDOW
+;             
 ;       Additional examples can be found here:
 ;       
 ;          http://www.idlcoyote.com/graphics_tips/cgwindow.html
@@ -1870,7 +1954,8 @@ END ;---------------------------------------------------------------------------
 ;        Fixed a problem with CALL_METHOD, which requires one positional parameter. 8 March 2011. DWF.
 ;        Added the ability to set and unset adjustable text size in the window. 24 April 2011. DWF.
 ;        Fixed a problem in the ReplaceCommand method that had input parameters reversed. 6 May 2011. DWF.
-;        Added the ability to set the dimensions of the draw widget programmatically. 14 June 2011.
+;        Added the ability to set the dimensions of the draw widget programmatically. 14 June 2011. DWF.
+;        Added the WKWEXPR keyword to evaluate keyword expressions at run-time. 2 Aug 2011. DWF.
 ;   
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -1883,6 +1968,7 @@ PRO cgWindow, $
    Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
    WBackground = wbackground, $     ; The background color. Set to !P.Background by default.
    WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.
+   WKWEXPR = wkwexpr, $             ; A list of keywords that should be evaluated as expressions.
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.   
    WOXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
    WOYMargin = woymargin, $         ; Set the !Y.OMargin. A two element array
@@ -2120,7 +2206,7 @@ PRO cgWindow, $
        WBackground = wbackground, $     ; The background color. Not used unless set.
        WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
        WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.
-       WEXPR=wexpr, $
+       WKWEXPR = wkwexpr, $             ; A list of keywords that should be evaluated as expressions.
        WXSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 400.
        WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 400.
        WTitle = wtitle, $               ; The window title.

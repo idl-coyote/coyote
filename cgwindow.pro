@@ -1084,6 +1084,10 @@ END ;---------------------------------------------------------------------------
 FUNCTION FSC_CmdWindow::Init, $
    command, $                       ; The graphics "command" to execute.
    p1, p2, p3, $                    ; The three allowed positional parameters.
+   EvalKeywords=evalKeywords, $     ; A vector of command keyword names that should be "evaluated" at run-time.
+   EvalParams=evalParams, $         ; A three-element vector, whose value should be 1 if the command parameter in this 
+                                    ; position should be "evaluated" at run-time (e.g., EvalParams=[0,1,0] will evaluate
+                                    ; parameter p2 at runtime.
    _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
    Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
    AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface.
@@ -1496,7 +1500,7 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        ;void = Error_Message()
+        void = Error_Message()
         success = 0
         RETURN
     ENDIF
@@ -2036,7 +2040,7 @@ PRO cgWindow, $
         void = Error_Message(Traceback=0)
         RETURN
     ENDIF
-    
+
     ; Did the user want to execute the commands in the window?
     IF N_Elements(executeCmd) NE 0 THEN BEGIN
    
@@ -2243,6 +2247,10 @@ PRO cgWindow, $
        p1, p2, p3, $                    ; The three allowed positional parameters.
        _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
        CmdDelay = cmdDelay, $           ; The amount of time to "wait" between commands.
+       EvalKeywords=evalKeywords, $     ; A vector of command keyword names that should be "evaluated" at run-time.
+       EvalParams=evalParams, $         ; A three-element vector, whose value should be 1 if the command parameter in this 
+                                        ; position should be "evaluated" at run-time (e.g., EvalParams=[0,1,0] will evaluate
+                                        ; parameter p2 at runtime.
        Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
        Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
        WBackground = wbackground, $     ; The background color. Not used unless set.

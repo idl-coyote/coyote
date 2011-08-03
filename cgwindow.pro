@@ -1517,7 +1517,7 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
     IF Ptr_Valid(self.evalKeywords) THEN BEGIN
        keywords = self -> EvaluateKeywords(*self.keywords, SUCCESS=success)
        IF success EQ 0 THEN Ptr_Free, self.keywords
-    ENDIF ELSE keywords = *self.keywords
+    ENDIF ELSE IF Ptr_Valid(self.keywords) THEN keywords = *self.keywords
     
     ; Do we have parameters to evaluate?
     SWITCH self.nparams OF
@@ -1996,6 +1996,7 @@ END ;---------------------------------------------------------------------------
 ;        Added the keywords EvalKeywords and EvalParams to allow evaluation of command parameters and
 ;            keywords at run-time. See http://www.idlcoyote.com/cg_tips/kwexpressions.php for
 ;            additional details and explanations of how these keywords should be used. 2 Aug 2011.
+;        Problem dereferencing a null pointer in DRAW method fixed. 3 Aug 2011. DWF.
 ;   
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.

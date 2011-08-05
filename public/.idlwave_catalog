@@ -1,0 +1,8 @@
+;;
+;; IDLWAVE catalog for library coyote
+;; Automatically Generated -- do not edit.
+;; Created by idlwave_catalog on Fri Aug  5 08:15:59 2011
+;;
+(setq idlwave-library-catalog-libname "coyote")
+(setq idlwave-library-catalog-routines
+ '(("pg_plotimage" pro nil (lib "pg_plotimage.pro" nil "coyote") "%s, im, x, y" (nil ("_extra") ("addcmd") ("axiscolor") ("background") ("fulledges") ("isotropic") ("layout") ("no_rescale") ("noerase") ("position") ("psresolution") ("smooth") ("title") ("window") ("xcharsize") ("xgridstyle") ("xlog") ("xminor") ("xrange") ("xstyle") ("xthick") ("xtick_get") ("xtickformat") ("xtickinterval") ("xticklayout") ("xticklen") ("xtickname") ("xticks") ("xtickunits") ("xtickv") ("xtitle") ("ycharsize") ("ygridstyle") ("ylog") ("yminor") ("yrange") ("ystyle") ("ythick") ("ytick_get") ("ytickformat") ("ytickinterval") ("yticklayout") ("yticklen") ("ytickname") ("yticks") ("ytickunits") ("ytickv") ("ytitle")))))

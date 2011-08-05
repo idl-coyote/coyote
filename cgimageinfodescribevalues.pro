@@ -1,4 +1,4 @@
-;+========================================================================
+;========================================================================
 ; :Author: Matt Savoie  <savoie@nsidc.org>  
 ;
 ; Created 05/18/2011 
@@ -30,9 +30,9 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-;-========================================================================*/
+;========================================================================*/
 
-;+
+;
 ;  Display information about an image at a given location
 ;
 ; :Params:
@@ -46,7 +46,7 @@
 ;     ypixel: in, required, type=int
 ;       the y location on the image to fetch information from
 ;
-;-
+;
 pro cgDescribeThisImgValues,  image,  id, xpixel,  ypixel
    COMPILE_OPT idl2, logical_predicate
 

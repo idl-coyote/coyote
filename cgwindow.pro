@@ -37,7 +37,10 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-;+
+;
+; :Name
+;     FSC_CmdWindow::AddCommand
+;     
 ; :Description:
 ;     Adds a command object of class IDL_WINDOW_COMMAND to the command list 
 ;     maintained by the window.
@@ -45,7 +48,7 @@
 ; :Params:
 ;     command: in, required, type=object
 ;         A command object of class IDL_WINDOW_COMMAND.
-;-
+;
 PRO FSC_CmdWindow::AddCommand, command,  INDEX=index
 
     Compile_Opt idl2
@@ -64,14 +67,17 @@ PRO FSC_CmdWindow::AddCommand, command,  INDEX=index
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::AutoPostScriptFile
+;     
 ; :Description:
 ;     Provides a programmatic way to create a PostScript file from the window.
 ;     Call by setting the CREATE_PS keyword with cgControl.
 ;
 ; :Params:
 ;     filename:  The name of the PostScript file.
-;-
+;
 PRO FSC_CmdWindow::AutoPostScriptFile, filename
 
     Compile_Opt idl2
@@ -113,7 +119,10 @@ PRO FSC_CmdWindow::AutoPostScriptFile, filename
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::AutoRasterFile
+;     
 ; :Description:
 ;     Provides a programmatic way to create a raster file from the window.
 ;     Call by setting the create_png, etc. keyword with cgControl.
@@ -202,14 +211,17 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::CreatePostScriptFile
+;     
 ; :Description:
 ;     Sends the window commands to a PostScript file.
 ;
 ; :Params:
 ;     event: in, required, type=structure
 ;         An event structure.
-;-
+;
 PRO FSC_CmdWindow::CreatePostScriptFile, event
 
     Compile_Opt idl2
@@ -249,7 +261,10 @@ PRO FSC_CmdWindow::CreatePostScriptFile, event
 
 END ;----------------------------------------------------------------------------------------------------------------
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::DeleteCommand
+;     
 ; :Description:
 ;     Deletes a command object from the command list maintained by the window.
 ;
@@ -261,7 +276,7 @@ END ;---------------------------------------------------------------------------
 ; :Keywords:
 ;     all: in, optional, type=boolean
 ;         If set, all the commands in the command list are deleted.
-;-
+;
 PRO FSC_CmdWindow::DeleteCommand, cmdIndex, ALL=all
 
     Compile_Opt idl2
@@ -300,14 +315,17 @@ PRO FSC_CmdWindow::DeleteCommand, cmdIndex, ALL=all
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow_Dispatch_Events
+;     
 ; :Description:
 ;     All widget events come here and are dispatched to the proper object method.
 ;
 ; :Params:
 ;     event: in, required, type=structure
 ;         An event structure.
-;-
+;
 PRO FSC_CmdWindow_Dispatch_Events, event
 
     Compile_Opt idl2
@@ -341,10 +359,13 @@ PRO FSC_CmdWindow_Dispatch_Events, event
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::ExecuteCommands
+;     
 ; :Description:
 ;     This method executes the commands on the command list.
-;-
+;
 PRO FSC_CmdWindow::ExecuteCommands, KEYWORDS=keywords
 
     Catch, theError
@@ -441,10 +462,13 @@ PRO FSC_CmdWindow::ExecuteCommands, KEYWORDS=keywords
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::GetCommandKeyword
+;     
 ; :Description:
 ;     This method retrieves properties from the object.
-;-
+;
 FUNCTION FSC_CmdWindow::GetCommandKeyword, keyword, cmdIndex, SUCCESS=success
 
     Compile_Opt idl2
@@ -488,10 +512,13 @@ END ;---------------------------------------------------------------------------
 
 
 ;
-;+
+;
+; :Name
+;     FSC_CmdWindow::GetProperty
+;     
 ; :Description:
 ;     This method retrieves properties from the object.
-;-
+;
 PRO FSC_CmdWindow::GetProperty, $
     ADJUSTSIZE=adjustsize, $
     BACKGROUND=background, $
@@ -577,22 +604,28 @@ PRO FSC_CmdWindow::GetProperty, $
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::InvalidateWidgetID
+;     
 ; :Description:
 ;     This method invalidates a widget ID. It is used for restored
 ;     visualizations, so that the current window doesn't get inadvertenly
 ;     destroyed by a widget identifier from an old program.
-;-
+;
 PRO FSC_CmdWindow::InvalidateWidgetID
     self.tlb = -1
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::ListCommand
+;     
 ; :Description:
 ;     This method lists the command indicated by the command index. In the
 ;     absence of the command index, all commands are listed.
-;-
+;
 PRO FSC_CmdWindow::ListCommand, cmdIndex, CREATECOMMANDSTRUCT=createCommandStruct
 
     Compile_Opt idl2
@@ -636,12 +669,15 @@ PRO FSC_CmdWindow::ListCommand, cmdIndex, CREATECOMMANDSTRUCT=createCommandStruc
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::LoadColors
+;     
 ; :Description:
 ;     This method loads color table vectors into the program.
 ;     The XCOLORS_DATA keyword is required to get color vector
 ;     information from XCOLORS.
-;-
+;
 PRO FSC_CmdWindow::LoadColors, r, g, b, XCOLORS_DATA=colorData
 
     Compile_Opt idl2
@@ -671,11 +707,14 @@ PRO FSC_CmdWindow::LoadColors, r, g, b, XCOLORS_DATA=colorData
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::ReplaceCommand
+;     
 ; :Description:
 ;     This method replaces a command in the command list. If cmdImdex is missing,
 ;     replace all the commands in the command list.
-;-
+;
 PRO FSC_CmdWindow::ReplaceCommand, command, cmdIndex, MULTI=multi
 
     Compile_Opt idl2
@@ -708,10 +747,13 @@ PRO FSC_CmdWindow::ReplaceCommand, command, cmdIndex, MULTI=multi
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::Resize
+;     
 ; :Description:
 ;     This method resizes the graphics window and executes the commands again.
-;-
+;
 PRO FSC_CmdWindow::Resize, event
 
     Compile_Opt idl2
@@ -730,10 +772,13 @@ PRO FSC_CmdWindow::Resize, event
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::SaveAsRaster
+;     
 ; :Description:
 ;     This method saves the graphics window as a raster image file.
-;-
+;
 PRO FSC_CmdWindow::SaveAsRaster, event
 
     Compile_Opt idl2
@@ -834,10 +879,13 @@ PRO FSC_CmdWindow::SaveAsRaster, event
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::RestoreCommands
+;     
 ; :Description:
 ;     This method restores the commands.
-;-
+;
 PRO FSC_CmdWindow::RestoreCommands, filename
 
     Compile_Opt idl2
@@ -938,10 +986,13 @@ PRO FSC_CmdWindow::RestoreCommands, filename
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::SaveCommands
+;     
 ; :Description:
 ;     This method saves the commands.
-;-
+;
 PRO FSC_CmdWindow::SaveCommands, filename
 
     Compile_Opt idl2
@@ -971,10 +1022,13 @@ PRO FSC_CmdWindow::SaveCommands, filename
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::SetProperty
+;     
 ; :Description:
 ;     This method sets properties of the window object.
-;-
+;
 PRO FSC_CmdWindow::SetProperty, $
     ADJUSTSIZE=adjustsize, $       ; Adjust the default charsize to match display size.
     BACKGROUND=background, $       ; The background color of the window.
@@ -1076,11 +1130,14 @@ PRO FSC_CmdWindow_Cleanup, tlb
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
+; :Name
+;     FSC_CmdWindow::Init
+;     
 ; :Description:
 ;     This method initializes the object that is at the heart of cgWindow.
 ;     It takes most of the same arguments as cgWindow.
-;-
+;
 FUNCTION FSC_CmdWindow::Init, $
    command, $                       ; The graphics "command" to execute.
    p1, p2, p3, $                    ; The three allowed positional parameters.
@@ -1586,11 +1643,11 @@ END ;---------------------------------------------------------------------------
 
 
 
-;+
+;
 ; :Description:
 ;     This method evaluates a keyword structure and creates a new keyword list
 ;     with the evaluated values.
-;-
+;
 FUNCTION FSC_Window_Command::EvaluateKeywords, keywords, SUCCESS=success
 
   ; Error handling.
@@ -1653,10 +1710,10 @@ FUNCTION FSC_Window_Command::EvaluateKeywords, keywords, SUCCESS=success
 END ;----------------------------------------------------------------------------------------------------------------
 
 
-;+
+;
 ; :Description:
 ;     This method evaluates a parameter and returns the evaluated parameter.
-;-
+;
 FUNCTION FSC_Window_Command::EvaluateParam, parameter, SUCCESS=success
   
   ; Error handling.
@@ -1784,6 +1841,9 @@ END ;---------------------------------------------------------------------------
 
 
 ;+
+; :Name
+;     cgWindow
+;     
 ; :Description:
 ;   Creates a resizeable graphics window for IDL traditional commands (Plot, Contour, 
 ;   Surface, etc. or for Coyote Graphics routines, cgPlot, cgContour, cgSurf, etc.). 

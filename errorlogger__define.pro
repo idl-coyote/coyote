@@ -138,7 +138,7 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::AddError
 ;
@@ -162,7 +162,7 @@
 ; KEYWORDS:
 ;
 ;       None.
-;-
+;
 ;******************************************************************************************;
 PRO ErrorLogger::AddError, theText
 
@@ -280,7 +280,7 @@ END
 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::AddText
 ;
@@ -301,7 +301,7 @@ END
 ;
 ;       PRINT:        If this keyword is set, the added text is also sent to standard
 ;                     output.
-;-
+;
 ;******************************************************************************************;
 PRO ErrorLogger::AddText, theText, PRINT=print
     
@@ -350,7 +350,7 @@ END
 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::ClearLog
 ;
@@ -369,7 +369,7 @@ END
 ; KEYWORDS:
 ;
 ;       None.
-;-
+;
 ;******************************************************************************************;
 PRO ErrorLogger::ClearLog
 
@@ -386,7 +386,7 @@ PRO ErrorLogger::ClearLog
 END 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::Flush
 ;
@@ -405,14 +405,14 @@ END
 ; KEYWORDS:
 ;
 ;       None.
-;-
+;
 ;******************************************************************************************;
 PRO ErrorLogger::Flush
    IF self.lun GE 100 THEN Flush,  self.lun
 END 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::CloseFile
 ;
@@ -431,7 +431,7 @@ END
 ; KEYWORDS:
 ;
 ;       None.
-;-
+;
 ;******************************************************************************************;
 PRO ErrorLogger::CloseFile
     IF self.lun GE 100 THEN Free_Lun, self.lun ELSE IF self.lun GT 0 THEN Close, self.lun
@@ -439,7 +439,7 @@ END
 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::GetFileName
 ;
@@ -462,7 +462,7 @@ END
 ; KEYWORDS:
 ;
 ;       None.
-;-
+;
 ;******************************************************************************************;
 FUNCTION ErrorLogger::GetFileName
     RETURN, self.filename
@@ -471,7 +471,7 @@ END
 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::Status
 ;
@@ -497,7 +497,7 @@ END
 ; KEYWORDS:
 ;
 ;       None.
-;-
+;
 ;******************************************************************************************;
 FUNCTION ErrorLogger::Status
     RETURN, self.status
@@ -505,7 +505,7 @@ END
 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::SetStatus
 ;
@@ -527,7 +527,7 @@ END
 ; KEYWORDS:
 ;
 ;       None.
-;-
+;
 ;******************************************************************************************;
 PRO ErrorLogger::SetStatus, status
     IF N_Elements(status) NE 0 THEN BEGIN
@@ -542,7 +542,7 @@ END
 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::OpenFile
 ;
@@ -562,7 +562,7 @@ END
 ;
 ;       DELETE_CURRENT_FILE:  If this keyword is set, the current error log file is closed
 ;                      and deleted before the new file is opened for writing.
-;-
+;
 ;******************************************************************************************;
 FUNCTION ErrorLogger::OpenFile, newLogFilename, DELETE_CURRENT_FILE=delete_current_file
     
@@ -607,7 +607,7 @@ END
 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::LastMessage
 ;
@@ -630,7 +630,7 @@ END
 ; KEYWORDS:
 ;
 ;       None.
-;-
+;
 ;******************************************************************************************;
 FUNCTION ErrorLogger::LastMessage
     
@@ -641,7 +641,7 @@ END
 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::PrintLastMessage
 ;
@@ -660,7 +660,7 @@ END
 ; KEYWORDS:
 ;
 ;       None.
-;-
+;
 ;******************************************************************************************;
 PRO ErrorLogger::PrintLastMessage
     
@@ -673,7 +673,7 @@ END
 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::GetProperty
 ;
@@ -705,7 +705,7 @@ END
 ;
 ;       NOTRACEBACK:    The notraceback flag in the object. (Output)
 ;
-;-
+;
 ;******************************************************************************************;
 PRO ErrorLogger::GetProperty, $
     ALERT=alert, $
@@ -731,7 +731,7 @@ END
 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::SetProperty
 ;
@@ -758,7 +758,7 @@ END
 ;       NOTRACEBACK:    The notraceback flag in the object. (Input)
 ;
 ;       STATUS:         The current error log status. (Input)
-;-
+;
 ;******************************************************************************************;
 PRO ErrorLogger::SetProperty, $
     ALERT=alert, $
@@ -785,7 +785,7 @@ END
 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::CLEANUP
 ;
@@ -804,7 +804,7 @@ END
 ; KEYWORDS:
 ;
 ;       None.
-;-
+;
 ;******************************************************************************************;
 PRO ErrorLogger::CLEANUP
 
@@ -824,7 +824,7 @@ END
 
 
 ;******************************************************************************************;
-;+
+;
 ; NAME:
 ;       ErrorLogger::INIT
 ;
@@ -869,7 +869,7 @@ END
 ;       TIMESTAMP:   Set this keyword if you wish a time stamp to be appended to the provided
 ;                    filename. Otherwise, the filename is used as defined. Default filenames
 ;                    always have a timestamp appended to the file name. (Input)                  
-;-
+;
 ;******************************************************************************************;
 FUNCTION ErrorLogger::INIT, filename, $
     ALERT=alert, $

@@ -205,7 +205,7 @@ PRO NCDF_DATA::Browse, $
     TITLE=title, $
     XOFFSET=xoffset, $
     YOFFSET=yoffset
-;+
+;
 ; NAME:
 ;       NCDF_DATA::Browse
 ;
@@ -237,7 +237,7 @@ PRO NCDF_DATA::Browse, $
 ;                  device coordinates. The X offset of the Browser Window.
 ;
 ;       YOFFSET:    The Y offset of the Browser Window.
-;-
+;
 
    ; Error handling
    CATCH, theError
@@ -755,7 +755,7 @@ END ;---------------------------------------------------------------------------
 
 
 PRO NCDF_DATA::OpenFile, filename
-;+
+;
 ; NAME:
 ;       NCDF_DATA::OpenFile
 ;
@@ -774,7 +774,7 @@ PRO NCDF_DATA::OpenFile, filename
 ; KEYWORD PARAMETERS:
 ;       
 ;       None.
-;-
+;
 
    ; Error handling
    CATCH, theError
@@ -1509,7 +1509,7 @@ END ;---------------------------------------------------------------------------
 
 
 FUNCTION NCDF_DATA::ReadAttribute, theAttribute, SUCCESS=success
-;+
+;
 ; NAME:
 ;       NCDF_DATA::ReadAttribute
 ;
@@ -1533,7 +1533,7 @@ FUNCTION NCDF_DATA::ReadAttribute, theAttribute, SUCCESS=success
 ;       
 ;       SUCCESS:    An output parameter, set to 1 if the file was read successfully,
 ;                   and to 0 otherwise.
-;-
+;
 
    ; Error handling
    CATCH, theError
@@ -1729,7 +1729,7 @@ END ;---------------------------------------------------------------------------
 
 
 FUNCTION NCDF_DATA::ReadDimension, dimensionName, SUCCESS=success
-;+
+;
 ; NAME:
 ;       NCDF_DATA::ReadDimension
 ;
@@ -1753,7 +1753,7 @@ FUNCTION NCDF_DATA::ReadDimension, dimensionName, SUCCESS=success
 ;       
 ;       SUCCESS:    An output parameter, set to 1 if the file was read successfully,
 ;                   and to 0 otherwise.
-;-
+;
    ; Error handling
    CATCH, theError
    IF theError NE 0 THEN BEGIN
@@ -1797,7 +1797,7 @@ END ;---------------------------------------------------------------------------
 
 
 FUNCTION NCDF_DATA::ReadFile, theFile, SUCCESS=success
-;+
+;
 ; NAME:
 ;       NCDF_DATA::ReadFile
 ;
@@ -1823,7 +1823,7 @@ FUNCTION NCDF_DATA::ReadFile, theFile, SUCCESS=success
 ;       
 ;       SUCCESS:    An output parameter, set to 1 if the file was read successfully,
 ;                   and to 0 otherwise.
-;-
+;
 
    ; Error handling
    CATCH, theError
@@ -1974,7 +1974,7 @@ END ;---------------------------------------------------------------------------
 
 
 FUNCTION NCDF_DATA::ReadGlobalAttr, SUCCESS=success
-;+
+;
 ; NAME:
 ;       NCDF_DATA::ReadGlobalAttr
 ;
@@ -1999,7 +1999,7 @@ FUNCTION NCDF_DATA::ReadGlobalAttr, SUCCESS=success
 ;       
 ;       SUCCESS:    An output parameter, set to 1 if the file was read successfully,
 ;                   and to 0 otherwise.
-;-
+;
 
    ; Error handling
    CATCH, theError
@@ -2079,7 +2079,7 @@ FUNCTION NCDF_DATA::ReadVariable, theVariable, $
     OFFSET=offset, $
     START=start, $
     STRIDE=stride
-;+
+;
 ; NAME:
 ;       NCDF_DATA::ReadVariable
 ;
@@ -2126,7 +2126,7 @@ FUNCTION NCDF_DATA::ReadVariable, theVariable, $
 ;       SUCCESS:    An output parameter, set to 1 if the file was read successfully,
 ;                   and to 0 otherwise.
 ;
-;-
+;
 
    ; Error handling
    CATCH, theError
@@ -2467,7 +2467,7 @@ END ;---------------------------------------------------------------------------
 
 
 FUNCTION NCDF_DATA::ReadVariableWithAttr, theVariable, SUCCESS=success
-;+
+;
 ; NAME:
 ;       NCDF_DATA::ReadVariableWithAttr
 ;
@@ -2495,7 +2495,7 @@ FUNCTION NCDF_DATA::ReadVariableWithAttr, theVariable, SUCCESS=success
 ;       
 ;       SUCCESS:    An output parameter, set to 1 if the file was read successfully,
 ;                   and to 0 otherwise.
-;-
+;
 
    ; Error handling
    CATCH, theError

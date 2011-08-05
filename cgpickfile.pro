@@ -40,7 +40,9 @@
 ;                     just above it. If it can't find a "data" directory in either 
 ;                     of these two locations, the current directory is used as 
 ;                     the "data" directory. The data directory is ONLY used if
-;                     there is no "current" last directory.
+;                     there is no "current" last directory. In other words, it is
+;                     only used if cgPickfile has not been called in the current
+;                     IDL session.
 ;       
 ;       DEMO:         If set, starts in the !DIR/examples/data directory.
 ;       
@@ -70,7 +72,7 @@
 ; MODIFICATION HISTORY:
 ;
 ;       Adapted from FSC_PICKFILE to be a Coyote Graphics routine by David W. Fanning, 4 Aug 2011.
-;
+;-
 ;
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;

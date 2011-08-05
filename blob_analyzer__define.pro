@@ -156,7 +156,7 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 
-;+
+;
 ; NAME:
 ;  Blob_Analyzer::FitEllipse
 ;
@@ -203,7 +203,7 @@
 ;                   respectively. Lenghts are scaled unless the NOSCALE keyword is set. (Half the length
 ;                   of AXES.
 ;
-;-
+;
 FUNCTION Blob_Analyzer::FitEllipse, indexNumber, $
     AXES=axes, $
     CENTER=center, $
@@ -239,7 +239,7 @@ FUNCTION Blob_Analyzer::FitEllipse, indexNumber, $
 END ; ------------------------------------------------------------------------------
 
   
-;+
+;
 ; NAME:
 ;  Blob_Analyzer::GetIndices
 ;
@@ -271,7 +271,7 @@ END ; --------------------------------------------------------------------------
 ;                   
 ;    YSIZE:         The Y size of the image from which the blob is taken.
 ;
-;-
+;
 FUNCTION Blob_Analyzer::GetIndices, indexNumber, COUNT=count, XSIZE=xsize, YSIZE=ysize
 
     Compile_Opt idl2
@@ -303,7 +303,7 @@ FUNCTION Blob_Analyzer::GetIndices, indexNumber, COUNT=count, XSIZE=xsize, YSIZE
 END ; ------------------------------------------------------------------------------
 
 
-;+
+;
 ; NAME:
 ;  Blob_Analyzer::GetStats
 ;
@@ -356,7 +356,7 @@ END ; --------------------------------------------------------------------------
 ;     and takes the total), or it uses the perimeter to calculate an area using the method described in
 ;     Russ, The Image Processing Handbook, 2nd Edition, pp490+. The perimeter area is almost always less 
 ;     than the pixel area.
-;-
+;
 FUNCTION Blob_Analyzer::GetStats, indexNumber, INDICES=indices, NOSCALE=noscale, XYINDICES=xyindices
 
     Compile_Opt idl2
@@ -410,7 +410,7 @@ FUNCTION Blob_Analyzer::GetStats, indexNumber, INDICES=indices, NOSCALE=noscale,
 END ; ------------------------------------------------------------------------------
 
 
-;+
+;
 ; NAME:
 ;  Blob_Analyzer::NumberOfBlobs
 ;
@@ -433,13 +433,13 @@ END ; --------------------------------------------------------------------------
 ; KEYWORDS:  
 ; 
 ;    None.
-;-
+;
 FUNCTION Blob_Analyzer::NumberOfBlobs
     RETURN, self.count
 END ; ------------------------------------------------------------------------------
 
   
-;+
+;
 ; NAME:
 ;  Blob_Analyzer::ReportStats
 ;
@@ -479,7 +479,7 @@ END ; --------------------------------------------------------------------------
 ;     1        580        151.97      10.22       145.00         134.25            49.21          17.49        11.77       -0.99
 ;     2        812        266.29      15.36       203.00         190.75            52.56          17.88        14.65     -107.48
 ;     3       1438        204.53      43.29       359.50         344.13            70.23          21.68        21.12      -76.47
-;-
+;
 PRO Blob_Analyzer::ReportStats, NOSCALE=noscale, TOFILE=tofile, FILENAME=filename
 
     Compile_Opt idl2
@@ -541,7 +541,7 @@ PRO Blob_Analyzer::CLEANUP
 END ; ------------------------------------------------------------------------------
 
 
-;+
+;
 ; NAME:
 ;  Blob_Analyzer::INIT
 ;
@@ -577,7 +577,7 @@ END ; --------------------------------------------------------------------------
 ;                     If passed a scalar, the scale parameter is applied to both the X and Y directions of
 ;                     each pixel. Statistical output is reported with scaling unless the NOSCALE keyword
 ;                     is set. Scaling also effects the data that is output from the various methods.
-;-
+;
 FUNCTION Blob_Analyzer::INIT, inputImage, $
     ALL_NEIGHBORS=all_neighbors, $
     MASK=mask, $

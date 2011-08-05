@@ -82,7 +82,7 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-;+-----------------------------------------------------------------------------------------;
+;------------------------------------------------------------------------------------------;
 ; NAME:                                                                                
 ;    RandomNumberGenerator::GetRandomDigits                                                                   
 ;                                                                                      
@@ -146,7 +146,7 @@ FUNCTION RandomNumberGenerator::GetRandomDigits, digits, BYTES=bytes
 END
     
     
-;+-----------------------------------------------------------------------------------------;
+;------------------------------------------------------------------------------------------;
 ; NAME:                                                                                
 ;    RandomNumberGenerator::GetRandomNumbers                                                                  
 ;                                                                                      

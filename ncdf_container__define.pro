@@ -74,7 +74,7 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 ;*****************************************************************************************************
-;+
+;
 ; NAME:
 ;       NCDF_Container::FindByID
 ;
@@ -96,7 +96,7 @@
 ;
 ;       COUNT:          Set this keyword to a named variable that upon exit will contain the number
 ;                       of objects returned that meet the searchName description. (Output)
-;-
+;
 ;*****************************************************************************************************
 FUNCTION NCDF_Container::FindByID, thisID, COUNT=count
 
@@ -139,7 +139,7 @@ END
 
 
 ;*****************************************************************************************************
-;+
+;
 ; NAME:
 ;       NCDF_Container::FindByName
 ;
@@ -169,7 +169,7 @@ END
 ;
 ;       _EXTRA:         Any keywords supported by STREGEX can also be used. Requires REGEXP to be set.
 ;
-;-
+;
 ;*****************************************************************************************************
 FUNCTION NCDF_Container::FindByName, searchName, $
    Case_Sensitive=case_sensitive, $

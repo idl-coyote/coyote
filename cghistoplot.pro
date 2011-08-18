@@ -813,10 +813,17 @@ PRO cgHistoplot, $                    ; The program name.
    
    ; Need to overplot probability function?
    IF Keyword_Set(oprob) THEN BEGIN
-        proby = Scale_Vector(cumTotal, !Y.CRange[0], !Y.CRange[1])
-        IF Keyword_Set(oplot) THEN bsize = 0 ELSE bsize = binsize
-        probx = Scale_Vector(Findgen(N_Elements(proby)), !X.CRange[0] + bsize, !X.CRange[1] - bsize)
-        Oplot, probx, proby, COLOR=probcolor
+        IF Keyword_Set(rotate) THEN BEGIN
+            probx = Scale_Vector(cumTotal, !X.CRange[0], !X.CRange[1])
+            IF Keyword_Set(oplot) THEN bsize = 0 ELSE bsize = binsize
+            proby = Scale_Vector(Findgen(N_Elements(probx)), !Y.CRange[0] + bsize, !Y.CRange[1] - bsize)
+            Oplot, probx, proby, COLOR=probcolor
+        ENDIF ELSE BEGIN
+            proby = Scale_Vector(cumTotal, !Y.CRange[0], !Y.CRange[1])
+            IF Keyword_Set(oplot) THEN bsize = 0 ELSE bsize = binsize
+            probx = Scale_Vector(Findgen(N_Elements(proby)), !X.CRange[0] + bsize, !X.CRange[1] - bsize)
+            Oplot, probx, proby, COLOR=probcolor
+        ENDELSE
    ENDIF
 
    ; Advance the plot for !P.Multi purposes.

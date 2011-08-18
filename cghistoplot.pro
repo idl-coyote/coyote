@@ -116,6 +116,9 @@
 ;                         
 ;       PROBCOLORNAME:    The name of the probability color for overplotting the cumulative probability
 ;                         on the plot.  Default: "Blue".
+;                         
+;       ROTATE:           Set this keyword to cause the histogram bins to be drawn from left
+;                         to right, rather than from bottom to top.
 ;       
 ;       THICK:            Set this keyword to a value greater than 1 to draw thicker axes and lines.
 ;       
@@ -209,6 +212,7 @@
 ;       Added YTITLE keyword. 9 May 2011. DWF.
 ;       Worked around a PLOT problem when setting the X axis range that caused the Y axis
 ;          range to be corrupted. 19 May 2011. DWF.
+;       Added the ROTATE keyword. 18 Aug 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2011, by Fanning Software Consulting, Inc.                           ;
@@ -256,7 +260,9 @@ PRO cgHistoplot, $                    ; The program name.
    OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
    OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
    PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
+   ROTATE=rotate, $                 ; Rotate plot so histogram bars are drawn left to right.
    THICK=thick, $                   ; Set to draw thicker lines and axes.
+   XTITLE=xtitle, $
    YTITLE=ytitle, $                 ; The Y title.
    ;
    ; POLYFILL KEYWORDS
@@ -331,7 +337,9 @@ PRO cgHistoplot, $                    ; The program name.
                OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
                OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
                PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
+               ROTATE=rotate, $
                THICK=thick, $                   ; Set to draw thicker lines and axes.
+               XTITLE=xtitle, $
                YTITLE=ytitle, $                 ; The Y title.
                ;
                ; POLYFILL KEYWORDS
@@ -385,7 +393,9 @@ PRO cgHistoplot, $                    ; The program name.
                OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
                OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
                PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
+               ROTATE=rotate, $
                THICK=thick, $                   ; Set to draw thicker lines and axes.
+               XTITLE=xtitle, $
                YTITLE=ytitle, $                 ; The Y title.
                ;
                ; POLYFILL KEYWORDS
@@ -552,13 +562,23 @@ PRO cgHistoplot, $                    ; The program name.
 
    ; Set up some labels.
    IF frequency THEN BEGIN
-      IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Relative Frequency'
-      ytickformat = '(F6.4)'
+      IF Keyword_Set(rotate) THEN BEGIN
+          IF N_Elements(xtitle) EQ 0 THEN xtitle = 'Relative Frequency'
+          xtickformat = '(F6.4)'
+      ENDIF ELSE BEGIN
+          IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Relative Frequency'
+          ytickformat = '(F6.4)'
+      ENDELSE
    ENDIF ELSE BEGIN
-      IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Histogram Density'
-      ytickformat = '(I)'
+      IF Keyword_Set(rotate) THEN BEGIN
+          IF N_Elements(xtitle) EQ 0 THEN xtitle = 'Histogram Density'
+          xtickformat = '(I)'
+      ENDIF ELSE BEGIN
+          IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Histogram Density'
+          ytickformat = '(I)'
+      ENDELSE
    ENDELSE
-
+   
   ; Calculate the histogram.
    histdata = Histogram(_dataToHistogram, $
       BINSIZE=binsize, $
@@ -581,11 +601,18 @@ PRO cgHistoplot, $                    ; The program name.
    ; Calculate the range of the plot output.
    IF N_Elements(min_value) EQ 0 THEN min_value = 0
    IF N_Elements(max_value) EQ 0 THEN max_value = Max(histData) * 1.05
-   ymin = min_value
-   ymax = max_value
-   xmin = Double(omin) - binsize
-   xmax = Double(omax) + (binsize * 2)
-
+   IF Keyword_Set(rotate) THEN BEGIN
+       xmin = min_value
+       xmax = max_value
+       ymin = Double(omin) - binsize
+       ymax = Double(omax) + (binsize * 2)
+   ENDIF ELSE BEGIN
+       ymin = min_value
+       ymax = max_value
+       xmin = Double(omin) - binsize
+       xmax = Double(omax) + (binsize * 2)
+   ENDELSE
+   
    ; Save the current system variables, if doing multiple plots.
    IF Total(!P.MULTI) NE 0 THEN BEGIN
       bangp = !P
@@ -637,12 +664,22 @@ PRO cgHistoplot, $                    ; The program name.
          norient = N_Elements(orientation)
          nspace = N_Elements(spacing)
          step = (xrange[1] - xrange[0]) / (binsize + 1)
-         start = xrange[0] + binsize
+         IF Keyword_Set(rotate) THEN BEGIN
+            start = yrange[0] + binsize
+         ENDIF ELSE BEGIN
+            start = xrange[0] + binsize
+         ENDELSE
+
          endpt = start + binsize
 
          FOR j=0,N_Elements(histdata)-1 DO BEGIN
-            x = [start, start, endpt, endpt, start]
-            y = [0, histdata[j], histdata[j], 0, 0]
+            IF Keyword_Set(rotate) THEN BEGIN
+               y = [start, start, endpt, endpt, start]
+               x = [0, histdata[j], histdata[j], 0, 0]
+            ENDIF ELSE BEGIN
+               x = [start, start, endpt, endpt, start]
+               y = [0, histdata[j], histdata[j], 0, 0]
+            ENDELSE
             fillcolor = polycolor[j MOD ncolors]
             orient = orientation[j MOD norient]
             space = spacing[j MOD nspace]
@@ -655,11 +692,20 @@ PRO cgHistoplot, $                    ; The program name.
       ENDIF ELSE BEGIN ; Normal polygon color fill.
 
          step = (xrange[1] - xrange[0]) / (binsize + 1)
-         start = xrange[0] + binsize
+         IF Keyword_Set(rotate) THEN BEGIN
+            start = yrange[0] + binsize
+         ENDIF ELSE BEGIN
+            start = xrange[0] + binsize
+         ENDELSE
          endpt = start + binsize
          FOR j=0,N_Elements(histdata)-1 DO BEGIN
-            x = [start, start, endpt, endpt, start]
-            y = [0, histdata[j], histdata[j], 0, 0]
+            IF Keyword_Set(rotate) THEN BEGIN
+               y = [start, start, endpt, endpt, start]
+               x = [0, histdata[j], histdata[j], 0, 0]
+            ENDIF ELSE BEGIN
+               x = [start, start, endpt, endpt, start]
+               y = [0, histdata[j], histdata[j], 0, 0]
+            ENDELSE
             fillcolor = polycolor[j MOD ncolors]
             PolyFill, x, y, COLOR=fillColor, NOCLIP=0
             start = start + binsize
@@ -680,6 +726,25 @@ PRO cgHistoplot, $                    ; The program name.
    IF ~Keyword_Set(overplot) THEN BEGIN
        xrange = [xmin, xmax]
        yrange = [ymin, ymax]
+       IF Keyword_Set(rotate) THEN BEGIN
+       Plot, [0,0], xrange=xrange, yrange=yrange, $             
+             Background=backColor, $
+             Charsize=charsize, $
+             Color=axisColor, $                       ; The color of the axes.
+             NoData=1, $                              ; Draw the axes only. No data.
+             XThick=thick, $  
+             YThick=thick, $
+             YStyle=9, $                              ; Exact axis scaling. No autoscaled axes.
+             XMinor=1, $                              ; No minor tick mark on X axis.
+             XStyle=1, $                              ; Exact axis scaling. No autoscaled axes.
+             XTickformat=xtickformat, $               ; Y Tickformat
+             YTickformat=ytickformat, $
+             XTitle=xtitle, $                         ; Y Title
+             YTitle=ytitle, $
+             NoErase=1, $
+             YTicklen=-0.025, $
+             _Strict_Extra=extra                      ; Pass any extra PLOT keywords.
+       ENDIF ELSE BEGIN
        Plot, [0,0], xrange=xrange, yrange=yrange, $             
              Background=backColor, $
              Charsize=charsize, $
@@ -690,33 +755,57 @@ PRO cgHistoplot, $                    ; The program name.
              XStyle=9, $                              ; Exact axis scaling. No autoscaled axes.
              YMinor=1, $                              ; No minor tick mark on X axis.
              YStyle=1, $                              ; Exact axis scaling. No autoscaled axes.
-             YTickformat=ytickformat, $               ; Y Tickformat
-             YTitle=ytitle, $                         ; Y Title
+             XTickformat=xtickformat, $               ; Y Tickformat
+             YTickformat=ytickformat, $
+             XTitle=xtitle, $                         ; Y Title
+             YTitle=ytitle, $
              NoErase=1, $
              XTicklen=-0.025, $
              _Strict_Extra=extra                      ; Pass any extra PLOT keywords.
+        ENDELSE
              
-        Axis, !X.CRange[0], !Y.CRange[1], XAXIS=1, XTickformat='(A1)', XMINOR=1, $
-            COLOR=axisColor, XSTYLE=1, XTHICK=thick, CHARSIZE=charsize
+        IF Keyword_Set(rotate) THEN BEGIN
+            Axis, !X.CRange[1], !Y.CRange[0], YAXIS=1, YTickformat='(A1)', YMINOR=1, $
+                COLOR=axisColor, YSTYLE=1, YTHICK=thick, CHARSIZE=charsize
+        ENDIF ELSE BEGIN
+            Axis, !X.CRange[0], !Y.CRange[1], XAXIS=1, XTickformat='(A1)', XMINOR=1, $
+                COLOR=axisColor, XSTYLE=1, XTHICK=thick, CHARSIZE=charsize
+        ENDELSE
     ENDIF
+    
     step = (xrange[1] - xrange[0]) / (binsize + 1)
-    start = xrange[0] + binsize
+    IF Keyword_Set(rotate) THEN BEGIN
+        start = yrange[0] + binsize
+    ENDIF ELSE BEGIN
+        start = xrange[0] + binsize
+    ENDELSE
     endpt = start + binsize
     ystart = 0
     jend = N_Elements(histdata)-1
     FOR j=0,jend DO BEGIN
         IF Keyword_Set(outline) THEN BEGIN
-           PLOTS, [start, start], [ystart, histdata[j]], COLOR=dataColor, THICK=thick, NOCLIP=0
-           PLOTS, [start, endpt], [histdata[j], histdata[j]], COLOR=dataColor, THICK=thick, NOCLIP=0
-           IF j EQ jend THEN $
-              Plots, [endpt, endpt], [histdata[j], 0], COLOR=dataColor, THICK=thick, NOCLIP=0
+           IF Keyword_Set(rotate) THEN BEGIN
+               PLOTS, [ystart, histdata[j]], [start, start], COLOR=dataColor, THICK=thick, NOCLIP=0
+               PLOTS, [histdata[j], histdata[j]], [start, endpt], COLOR=dataColor, THICK=thick, NOCLIP=0
+               IF j EQ jend THEN $
+                  Plots, [histdata[j], 0], [endpt, endpt], COLOR=dataColor, THICK=thick, NOCLIP=0
+           ENDIF ELSE BEGIN
+               PLOTS, [start, start], [ystart, histdata[j]], COLOR=dataColor, THICK=thick, NOCLIP=0
+               PLOTS, [start, endpt], [histdata[j], histdata[j]], COLOR=dataColor, THICK=thick, NOCLIP=0
+               IF j EQ jend THEN $
+                  Plots, [endpt, endpt], [histdata[j], 0], COLOR=dataColor, THICK=thick, NOCLIP=0
+           ENDELSE
            start = start + binsize
            endpt = start + binsize
            ystart = histdata[j]
         ENDIF ELSE BEGIN
            x = [start, start, endpt, endpt, start]
            y = [0, histdata[j], histdata[j], 0, 0]
-           PLOTS, x, y, COLOR=dataColor, NOCLIP=0, THICK=thick
+           IF Keyword_Set(rotate) THEN BEGIN
+              PLOTS, y, x, COLOR=dataColor, NOCLIP=0, THICK=thick
+           ENDIF ELSE BEGIN
+              PLOTS, x, y, COLOR=dataColor, NOCLIP=0, THICK=thick
+           ENDELSE
            start = start + binsize
            endpt = start + binsize
         ENDELSE

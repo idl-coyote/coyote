@@ -515,12 +515,12 @@ PRO cgSurface_Draw_Events, event
     ; Draw the view. If this program STILL throws floating point exceptions,
     ; comment this line out and uncomment the code below it. Dishonest as
     ; all get out, but it works fine. :-)
-    info.thisWindow->Draw, info.thisView
-    ;currentExcept = !Except
-    ;!Except = 0
-    ;info.thisWindow -> Draw, info.thisView
-    ;dummy = Check_Math()
-    ;!Except = currentExcept
+    ;info.thisWindow->Draw, info.thisView
+    currentExcept = !Except
+    !Except = 0
+    info.thisWindow -> Draw, info.thisView
+    dummy = Check_Math()
+    !Except = currentExcept
     
     ; Put the info structure back.
     Widget_Control, event.top, Set_UValue=info, /No_Copy
@@ -1141,6 +1141,8 @@ END ;---------------------------------------------------------------------------
 ;            current light color. 28 Nov 2010. DWF.
 ;        I was ANDing [XYZ]Style keywords with 8 instead of 4 for hidded axes. Fixed. 4 Jan 2011. DWF.
 ;        Added Axes ON/OFF button. 4 Jan 2011. DWF.
+;        Rotation is throwing underflow warnings, so switched to code that surpress 
+;            these warnings. 26 Aug 2011. DWF
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.

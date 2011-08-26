@@ -220,6 +220,8 @@
 ;        Added an ONIMAGE keyword that allows the contours to be overplotted on top of an image that
 ;           has been displayed with cgImage. This requires that the SAVE keyword is set in the 
 ;           cgImage call.
+;        Improved error handling. 26 Aug 2011. DWF.
+;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -265,7 +267,7 @@ PRO cgContour, data, x, y, $
         Catch, /CANCEL
         void = Error_Message()
         IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
-        IF (!D.Name NE "NULL") THEN TVLCT, rr, gg, bb
+        IF (!D.Name NE "NULL") && (N_Elements(rr) NE 0) THEN TVLCT, rr, gg, bb
         IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         RETURN
     ENDIF

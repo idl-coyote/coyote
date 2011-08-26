@@ -87,6 +87,14 @@ PRO FSC_CmdWindow::AutoPostScriptFile, filename
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        
+        ; Set the window index number back.
+        IF N_Elements(currentWindow) NE 0 THEN BEGIN
+            IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
+        ENDIF
+        
+        ; Close the PostScript file.
+        PS_END, /NoFix     
         RETURN
     ENDIF
     
@@ -114,7 +122,7 @@ PRO FSC_CmdWindow::AutoPostScriptFile, filename
     PS_End
 
     ; Set the window index number back.
-    IF WindowAvailable(curentWindow) THEN WSet, currentWindow ELSE WSet, -1
+    IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
 
 END ;----------------------------------------------------------------------------------------------------------------
 
@@ -140,6 +148,14 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        
+        ; Set the window index number back.
+        IF N_Elements(currentWindow) NE 0 THEN BEGIN
+            IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
+        ENDIF
+        
+        ; Close the PostScript file.
+        PS_END, /NoFix     
         RETURN
     ENDIF
     
@@ -168,14 +184,23 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
 
            ; Create a PostScript file first.
            PS_Start, $
-                FILENAME=outputFilename + '.ps', $
+                FILENAME=thisname, $
                 EUROPEAN=self.ps_metric, $
+                KEYWORDS=keywords, $ ; Returned PSConfig keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
                 FONT=self.ps_font, $
                 QUIET=self.ps_quiet, $
                 TT_FONT=self.ps_tt_font
-           
+                
+           ; Cannot successfully convert encapsulated landscape file to raster.
+           ; Limitation of ImageMagick, and specifically, GhostScript, which does
+           ; the conversion.
+           IF keywords.encapsulated && keywords.landscape THEN BEGIN
+                Message, 'ImageMagick cannot successfully convert an encapsulated ' + $
+                         'PostScript file in landscape mode to a raster file. Returning...'
+           ENDIF
+
            ; Draw the graphics.
            self -> ExecuteCommands
            
@@ -207,7 +232,7 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
     ENDCASE
 
     ; Set the window index number back.
-    IF WindowAvailable(curentWindow) THEN WSet, currentWindow ELSE WSet, -1
+    IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -231,6 +256,14 @@ PRO FSC_CmdWindow::CreatePostScriptFile, event
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        
+        ; Set the window index number back.
+        IF N_Elements(currentWindow) NE 0 THEN BEGIN
+            IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
+        ENDIF
+        
+        ; Close the PostScript file.
+        PS_END, /NoFix     
         RETURN
     ENDIF
     
@@ -257,7 +290,7 @@ PRO FSC_CmdWindow::CreatePostScriptFile, event
     PS_End
     
     ; Set the window index number back.
-    IF WindowAvailable(curentWindow) THEN WSet, currentWindow ELSE WSet, -1
+    IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
 
 END ;----------------------------------------------------------------------------------------------------------------
 
@@ -788,10 +821,18 @@ PRO FSC_CmdWindow::SaveAsRaster, event
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
+        
+        ; Set the window index number back.
+        IF N_Elements(currentWindow) NE 0 THEN BEGIN
+            IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
+        ENDIF
+        
+        ; Close the PostScript file.
+        PS_END, /NoFix     
         RETURN
     ENDIF
 
-    ; On going in here for down event.
+    ; Only going in here for down event.
     IF event.select NE 1 THEN RETURN
     
     Widget_Control, event.ID, Get_UValue=buttonValue
@@ -837,11 +878,20 @@ PRO FSC_CmdWindow::SaveAsRaster, event
            PS_Start, $
                 FILENAME=thisname, $
                 EUROPEAN=self.ps_metric, $
+                KEYWORDS=keywords, $ ; Returned PSConfig keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
                 FONT=self.ps_font, $
                 QUIET=self.ps_quiet, $
                 TT_FONT=self.ps_tt_font
+                
+           ; Cannot successfully convert encapsulated landscape file to raster.
+           ; Limitation of ImageMagick, and specifically, GhostScript, which does
+           ; the conversion.
+           IF keywords.encapsulated && keywords.landscape THEN BEGIN
+                Message, 'ImageMagick cannot successfully convert an encapsulated ' + $
+                         'PostScript file in landscape mode to a raster file. Returning...'
+           ENDIF
            
            ; Draw the graphics.
            self -> ExecuteCommands
@@ -875,7 +925,7 @@ PRO FSC_CmdWindow::SaveAsRaster, event
     ENDCASE
     
     ; Set the window index number back.
-    IF WindowAvailable(curentWindow) THEN WSet, currentWindow ELSE WSet, -1
+    IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -2057,6 +2107,8 @@ END ;---------------------------------------------------------------------------
 ;            keywords at run-time. See http://www.idlcoyote.com/cg_tips/kwexpressions.php for
 ;            additional details and explanations of how these keywords should be used. 2 Aug 2011.
 ;        Problem dereferencing a null pointer in DRAW method fixed. 3 Aug 2011. DWF.
+;        Changes to handle inability to create raster files from PS encapsulated files in 
+;           landscape mode. 26 Aug 2011. DWF.
 ;   
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.

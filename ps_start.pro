@@ -152,6 +152,8 @@
 ;       Added Charsize keyword to PS_START. 14 Nov 2010. DWF.
 ;       Changed the way default character sizes are set. 19 Nov 2010. DWF.
 ;       Added CANCEL and KEYWORDS output keywords. 16 Jan 2011. DWF.
+;       Changes to handle inability to create raster files from PS encapsulated files in 
+;           landscape mode. 26 Aug 2011. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -209,7 +211,7 @@ PRO PS_START, $
    
    ; If the setup flag is on, then we have to close the previous
    ; start command before we can continue.
-   IF ps_struct.setup EQ 1 THEN PS_END, /NoFix
+   IF ps_struct.setup EQ 1 THEN PS_END, /NoFix, /NoMessage
    
    ; Save current setup information in the PS_STRUCT structure.
    ps_struct.setup = 1
@@ -254,18 +256,10 @@ PRO PS_START, $
       keywords = PSConfig(_Extra=extra, Cancel=cancelled, NOGUI=(~gui))
    ENDELSE
    IF cancelled THEN BEGIN
-        PS_END, /NoFix
+        PS_END, /NoFix, /NoMessage
         RETURN
    ENDIF
    
-   ; If encapsulated then turn off landscape mode.
-   IF keywords.encapsulated THEN BEGIN
-       keywords.portrait = 1
-       keywords.landscape = 0
-       keywords.xoffset = 0
-       keywords.yoffset = 0
-   ENDIF
-
    ; Let them know where the output will be.
    IF ~quiet THEN Print, 'PostScript output will be created here: ', keywords.filename
    
@@ -277,8 +271,9 @@ PRO PS_START, $
         DEVICE, SCALE_FACTOR=scale_factor ELSE $
         DEVICE, SCALE_FACTOR=1
    
-   ; Store filename.
+   ; Store filename and other pertinent information.
    ps_struct.filename = keywords.filename
+   ps_struct.encapsulated = keywords.encapsulated
    ps_struct.landscape = Fix(keywords.landscape)
    ps_struct.pagetype = keywords.pagetype
    ps_struct.quiet = Fix(quiet)

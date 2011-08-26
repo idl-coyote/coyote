@@ -58,6 +58,10 @@
 ;       
 ;       NOFIX:        If this keyword is set, then the FixPS program to fix IDL landscape
 ;                     PostScript files is not called.
+;                     
+;       NOMESSAGE:    If this keyword is set, then no error messages are issued. The
+;                     keyword is used primarily to allow PS_END to reset the internal
+;                     structure without a lot of ruckus.
 ;
 ;       PNG:          Set this keyword to convert the PostScript output file to a PNG image.
 ;
@@ -153,6 +157,8 @@
 ;       Added DELETE_PS keyword. 16 Jan 2011. DWF.
 ;       Better protection of code from not finding ImageMagick. 17 Jan 2011. DWF.
 ;       Collecting result of SPAWN command. Only printing if QUIET=0. 16 Feb 2011. DWF.
+;       Changes to handle inability to create raster files from PS encapsulated files in 
+;           landscape mode. Added NOMESSAGE keyword. 26 Aug 2011. DWF.
 ;- 
 ;
 ;******************************************************************************************;
@@ -191,6 +197,7 @@ PRO PS_END, $
     GIF=gif, $
     JPEG=jpeg, $
     NOFIX=nofix, $
+    NOMESSAGE=nomessage, $
     PNG=png, $
     RESIZE=resize, $
     TIFF=tiff
@@ -198,7 +205,28 @@ PRO PS_END, $
 
    COMMON _$FSC_PS_START_, ps_struct
    
-   ON_ERROR, 2 ; Return to caller.
+   Catch, theError
+   IF theError NE 0 THEN BEGIN
+   
+       Catch, /CANCEL
+   
+       ; Issue an error message, unless messages are turned off.
+       IF ~Keyword_Set(nomessage) THEN void = Error_Message()
+   
+       ; Clean up.
+       IF ps_struct.currentDevice NE "" THEN Set_Plot, ps_struct.currentDevice
+       !P = ps_struct.p
+       !X = ps_struct.x
+       !Y = ps_struct.y
+       !Z = ps_struct.z
+       ps_struct.setup = 0
+       ps_struct.currentDevice = ""
+       ps_struct.filename = ""
+       ps_struct.convert = ""
+       
+       RETURN
+       
+   ENDIF
    
    ; Close the PostScript file, if this is PostScript device.
    IF !D.Name EQ 'PS' THEN Device, /CLOSE_FILE
@@ -237,6 +265,15 @@ PRO PS_END, $
             ; ImageMagick is required for this section of the code.
             available = HasImageMagick(Version=version)
             IF available THEN BEGIN
+            
+                ; Cannot successfully convert encapsulated landscape file to raster.
+                ; Limitation of ImageMagick, and specifically, GhostScript, which does
+                ; the conversion. 
+                IF  ps_struct.encapsulated &&  ps_struct.landscape THEN BEGIN
+                    Message, 'ImageMagick cannot convert an encapsulated ' + $
+                             'PostScript file in landscape mode to a raster file. '
+                ENDIF
+                
                 vp = StrSplit(version, '.', /EXTRACT)
                 vp[2] = StrMid(vp[2],0,1)
                 version_number = Fix(vp[0]) * 100 + Fix(vp[1])*10 + vp[2]
@@ -286,13 +323,15 @@ PRO PS_END, $
                 IF Keyword_Set(delete_ps) THEN BEGIN
                     IF outfilename NE ps_filename THEN File_Delete, ps_filename
                 ENDIF
-            ENDIF ELSE Message, 'ImageMagick could not be found. No conversion to raster was possible.', /Informational
+            ENDIF ELSE BEGIN
+                Message, 'ImageMagick could not be found. No conversion to raster was possible.'
+            ENDELSE
         ENDIF
         
    ENDIF
    
    ; Clean up.
-   Set_Plot, ps_struct.currentDevice
+   IF ps_struct.currentDevice NE "" THEN Set_Plot, ps_struct.currentDevice
    !P = ps_struct.p
    !X = ps_struct.x
    !Y = ps_struct.y

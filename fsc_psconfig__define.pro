@@ -160,7 +160,10 @@
 ;   Fixed a problem with 24-bit color support that allowed only IDL 7 versions to work correctly. 20 Sept 2009. DWF.
 ;   Added a LANGUAGE_LEVEL keyword. 13 Dec 2010. DWF.
 ;   Added the FONTYPE value to the keyword return structure. 14 Dec 2010. DWF.
-;   Modified the return structure to turn landscape mode off and set offsets to zero if in encapsulated mode. 19 Feb 2011. DWF.
+;   Modified the return structure to turn landscape mode off and set offsets to zero if in 
+;        encapsulated mode. 19 Feb 2011. DWF.
+;   Changes to handle inability to create raster files from PS encapsulated files in 
+;        landscape mode. Also removed changes of 19 Feb 2011 as no longer needed. 26 Aug 2011. DWF.
 ;-
 
 ;******************************************************************************************;
@@ -858,14 +861,14 @@ IF self.fontStyleSet[7] THEN struct = Create_Struct(struct, 'oblique', 1) ELSE s
 
 ; If the user is doing encapsulated PostScript, then landscape mode must be off and
 ; offsets must be set to zero.
-IF struct.encapsulated THEN BEGIN
-
-    struct.portrait = 1
-    struct.landscape = 0
-    struct.xoffset = 0
-    struct.yoffset = 0
-
-ENDIF
+;IF struct.encapsulated THEN BEGIN
+;
+;    struct.portrait = 1
+;    struct.landscape = 0
+;    struct.xoffset = 0
+;    struct.yoffset = 0
+;
+;ENDIF
 
    ; Return the keyword stucture.
 

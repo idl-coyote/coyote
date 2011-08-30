@@ -347,6 +347,7 @@
 ;       Corrected a problem with restoring color tables if a PALETTE is used. 31 March 2011. DWF.
 ;       Whoops! Documented a CHARSIZE keyword, but forgot to define it. 7 July 2011.
 ;       Damnation! I did the same thing with the FONT keyword! 25 July 2011.
+;       And now a TITLE keyword! What the devil is going on!? 29 Aug 2011.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
@@ -540,6 +541,7 @@ PRO cgImage, image, x, y, $
    QUIET=quiet, $
    SAVE=save, $
    SCALE=scale, $
+   TITLE=title, $
    TOP=top, $
    TV=tv, $
    WINDOW=window, $
@@ -618,6 +620,7 @@ PRO cgImage, image, x, y, $
                QUIET=quiet, $
                SAVE=save, $
                SCALE=scale, $
+               TITLE=title, $
                TOP=top, $
                TV=tv, $
                XRANGE=plotxrange, $
@@ -659,6 +662,7 @@ PRO cgImage, image, x, y, $
                QUIET=quiet, $
                SAVE=save, $
                SCALE=scale, $
+               TITLE=title, $
                TOP=top, $
                TV=tv, $
                XRANGE=plotxrange, $

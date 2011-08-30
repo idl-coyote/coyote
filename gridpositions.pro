@@ -117,6 +117,12 @@
 ;       Written by David W. Fanning, 17 March 2009.
 ;       Fixed problems in calculating default window sizes in the Z and PS devices. 25 June 2011. DWF.
 ;       Fixed the example code to work with Coyote Graphics routines. 27 June 2011.
+;       Although GridPositions was not intended to be used to configure the PostScript
+;          device, I find that people are using it to do just that. To that end, I am now
+;          allowing PostScript device keywords to be collected and passed along to the
+;          PostScript device through the GridPositions interface. This is strictly a 
+;          convenience, and not the way I would recommend using the program, to be truthful. 
+;          29 Aug 2011. DWF
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -154,7 +160,8 @@ Function GridPositions, columns, rows, $
     XSIZE=xsize, $
     YEXTENT=yextent, $
     YMARGIN=ymargin, $
-    YSIZE=ysize
+    YSIZE=ysize, $
+    _EXTRA=extra
     
     Compile_Opt idl2
     
@@ -214,7 +221,8 @@ Function GridPositions, columns, rows, $
     CASE !D.NAME OF
         'PS': BEGIN
              Print, 'Resolution: ', [xs,ys]
-              Device, XSIZE=xs, YSIZE=ys, INCHES=inches, PORTRAIT=1-landscape, LANDSCAPE=landscape
+              Device, XSIZE=xs, YSIZE=ys, INCHES=inches, PORTRAIT=1-landscape, $
+                 LANDSCAPE=landscape, _STRICT_EXTRA=extra
               END
               
         'Z':  BEGIN
@@ -240,7 +248,8 @@ Function GridPositions, columns, rows, $
     
     ; Clean up
     CASE !D.NAME OF
-        'PS': Device, XSIZE=xsize, YSIZE=ysize, INCHES=inches, PORTRAIT=1-landscape, LANDSCAPE=landscape          
+        'PS': Device, XSIZE=xsize, YSIZE=ysize, INCHES=inches, PORTRAIT=1-landscape, $
+                 LANDSCAPE=landscape, _STRICT_EXTRA=extra
         'Z':       
         ELSE: BEGIN
               WDelete, !D.Window

@@ -196,6 +196,8 @@
 ;       Added CHARPERCENT keyword 18 March 2011. DWF.
 ;       Added XTITLE and YTITLE keywords, which do nothing except prevent these keywords
 ;          from being used inadvertently. 27 May 2011. DWF.
+;       Fixed a problem with assigning the color with the ANNOTATECOLOR keyword in the
+;          Z-graphics buffer. 30 Aug 2011. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -520,7 +522,7 @@ PRO cgColorbar, $
                 ENDIF ELSE BEGIN
                      IF Size(color, /TNAME) EQ 'STRING' THEN annotateColor = color
                 ENDELSE
-            ENDIF ELSE annotateColor = 'opposite'
+            ENDIF ELSE IF N_ELEMENTS(annotateColor) EQ 0 THEN annotateColor = 'opposite'
         ENDIF 
     ENDELSE
     IF N_Elements(annotateColor) EQ 0 THEN annotateColor = 'opposite'

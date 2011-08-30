@@ -155,6 +155,8 @@
 ;       Added Window and AddCmd keywords. 28 Jan 2011. DWF.
 ;       Added a Right keyword and changed the title spacing a little bit for
 ;           aesthetic reasons. 2 July 2011. DWF.
+;       Fixed a problem with assigning the color with the COLOR keyword in the Z-buffer. 
+;           30 Aug 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009-2010, by Fanning Software Consulting, Inc.                           ;
@@ -241,16 +243,18 @@ PRO cgDCBar, colors, $
     IF (!D.Name EQ 'PS') AND N_Elements(color) EQ 0 THEN BEGIN
         color = 'black'
     ENDIF ELSE BEGIN
-        IF (!D.Window GE 0) AND ((!D.Flags AND 1) EQ 0) THEN BEGIN
-            pixel = cgSnapshot(!D.X_Size-1, !D.Y_Size-1, 1, 1)
-            IF N_ELEMENTS(color) EQ 0 THEN BEGIN
-                color = 'white'
-                IF Total(pixel) EQ 765 THEN color = 'black'
-                IF Total(pixel) EQ 0 THEN color = 'opposite'
-            ENDIF 
-        ENDIF ELSE color = 'opposite'
+        IF N_Elements(color) EQ 0 THEN BEGIN
+            IF (!D.Window GE 0) AND ((!D.Flags AND 1) EQ 0) THEN BEGIN
+                pixel = cgSnapshot(!D.X_Size-1, !D.Y_Size-1, 1, 1)
+                IF N_ELEMENTS(color) EQ 0 THEN BEGIN
+                    color = 'white'
+                    IF Total(pixel) EQ 765 THEN color = 'black'
+                    IF Total(pixel) EQ 0 THEN color = 'opposite'
+                ENDIF 
+            ENDIF ELSE color = 'opposite'
+        ENDIF
     ENDELSE
-    IF N_Elements(barcolor) EQ 0 THEN   barcolor = color
+    IF N_Elements(barcolor) EQ 0 THEN barcolor = color
     IF N_Elements(charsize) EQ 0 THEN charsize = !P.Charsize
     IF N_Elements(colors) EQ 0 THEN BEGIN
         IF N_Elements(ncolors) EQ 0 THEN BEGIN

@@ -107,6 +107,7 @@ PRO FSC_CmdWindow::AutoPostScriptFile, filename
     ; Allow the user to configure the PostScript file.
     PS_Start, GUI=0, $
         FILENAME=filename, $
+        DECOMPOSED=self.ps_decomposed, $
         EUROPEAN=self.ps_metric, $
         ENCAPSULATED=self.ps_encapsulated, $
         SCALE_FACTOR=self.ps_scale_factor, $
@@ -274,6 +275,7 @@ PRO FSC_CmdWindow::CreatePostScriptFile, event
     ; Allow the user to configure the PostScript file.
     PS_Start, /GUI, $
         CANCEL=cancelled, $
+        DECOMPOSED=self.ps_decomposed, $
         EUROPEAN=self.ps_metric, $
         ENCAPSULATED=self.ps_encapsulated, $
         SCALE_FACTOR=self.ps_scale_factor, $
@@ -570,6 +572,7 @@ PRO FSC_CmdWindow::GetProperty, $
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
     IM_RASTER=im_raster, $                        ; Sets whether to generate raster files via ImageMagick
+    PS_DECOMPOSED=ps_decomposed, $
     PS_DELETE=ps_delete, $
     PS_ENCAPSULATED=ps_encapsulated, $
     PS_METRIC=ps_metric, $
@@ -610,6 +613,7 @@ PRO FSC_CmdWindow::GetProperty, $
     
      ; PostScript properties.
      ps_charsize = self.ps_charsize
+     ps_decomposed = self.ps_decomposed
      ps_delete = self.ps_delete
      ps_encapsulated = self.ps_encapsulated
      ps_metric = self.ps_metric
@@ -1096,6 +1100,7 @@ PRO FSC_CmdWindow::SetProperty, $
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
     IM_RASTER=im_raster, $                        ; Sets whether to use ImageMagick to create raster files.
+    PS_DECOMPOSED=ps_decomposed, $                ; Sets the PostScript color mode.
     PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
     PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
     PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
@@ -1151,6 +1156,7 @@ PRO FSC_CmdWindow::SetProperty, $
     IF N_Elements(im_resize) NE 0 THEN self.im_resize = im_resize
     IF N_Elements(im_options) NE 0 THEN self.im_options = im_options
     IF N_Elements(im_raster) NE 0 then self.im_raster = im_raster
+    IF N_Elements(ps_decomposed) NE 0 THEN self.ps_decomposed = ps_decomposed
     IF N_Elements(ps_delete) NE 0 THEN self.ps_delete = ps_delete
     IF N_Elements(ps_metric) NE 0 THEN self.ps_metric = ps_metric
     IF N_Elements(ps_encapsulated) NE 0 THEN self.ps_encapsulated = ps_encapsulated
@@ -1248,6 +1254,7 @@ FUNCTION FSC_CmdWindow::Init, $
        IM_Options = d_im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
        
        ; PostScript properties.
+       PS_Decomposed = d_ps_decomposed, $                ; Sets the PostScript color mode.
        PS_Delete = d_ps_delete, $                        ; Delete PS file when making IM raster.
        PS_Metric = d_ps_metric, $                        ; Select metric measurements in PostScript output.
        PS_Encapsulated = d_ps_encapsulated, $            ; Create Encapsulated PostScript output.    
@@ -1394,6 +1401,7 @@ FUNCTION FSC_CmdWindow::Init, $
     self.im_options = d_im_options
     self.im_raster = d_im_raster
     self.im_resize = d_im_resize
+    self.ps_decomposed = d_ps_decomposed
     self.ps_delete = d_ps_delete
     self.ps_encapsulated = d_ps_encapsulated
     self.ps_metric = d_ps_metric
@@ -1506,6 +1514,7 @@ PRO FSC_CmdWindow__Define, class
               b: Ptr_New(), $               ; The blue color table vector.
               
               ; PostScript options.
+              ps_decomposed: 0L, $          ; Sets the PostScript color mode.
               ps_delete: 0L, $              ; Delete the PS file when making IM image file.
               ps_encapsulated: 0L, $        ; Encapsulated PostScript
               ps_metric: 0L, $              ; Metric measurements in PostScript.

@@ -140,6 +140,9 @@
 ;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
 ;         R, G, and B vectors of a color table. It is probably easier to use cgLoadCT or
 ;         XCOLORS to load color tables for the window, but this is provided as another option.
+;     ps_decomposed: in, optional, type=boolean, default=0
+;         Set this keyword to zero to set the PostScript color mode to indexed color and to
+;         one to set the PostScript color mode to decomposed color.
 ;     ps_delete: in, optional, type=boolean, default=1
 ;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
 ;         when making raster file output.
@@ -183,6 +186,7 @@
 ;        Added the ability to set and unset adjustable text size in 
 ;          cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
 ;        Added the ability to set the dimensions of the draw widget programmatically. 14 June 2011.
+;        Added PS_DECOMPOSED keyword to set the PostScript color mode. 30 Aug 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -223,6 +227,7 @@ PRO cgControl, selection, $
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
     IM_RASTER=im_raster, $                        ; Sets whether to generate raster files via ImageMagick.
+    PS_DECOMPOSED=ps_decomposed, $                ; Sets the PostScript color mode.
     PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM files.
     PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
     PS_ENCAPSULATED=ps_encapsulated, $            ; Create Encapsulated PostScript output.
@@ -349,6 +354,7 @@ PRO cgControl, selection, $
         IM_RESIZE = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
         IM_OPTIONS = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
         IM_RASTER = im_raster, $                        ; Sets whether to create raster files via ImageMagick.
+        PS_DECOMPOSED = ps_decomposed, $                ; Sets the PostScript color mode.
         PS_DELETE = ps_delete, $                        ; Delete the PostScript file when making IM files.
         PS_METRIC = ps_metric, $                        ; Select metric measurements in PostScript output.
         PS_ENCAPSULATED = ps_encapsulated, $            ; Create encapsulated PostScript output.

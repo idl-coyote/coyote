@@ -83,6 +83,8 @@
 ;     ps_charsize: in, optional, type=float, default=0.0
 ;         Set this value to the !P.Charsize value to use when creating PostScript output. This
 ;         value is not used if !P.Charsize is set to anything other than 0.0.
+;     ps_decomposed: in, optional, type=boolean
+;         If set, use decomposed color in the PostScript device.
 ;     ps_delete: in, optional, type=boolean, default=1
 ;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
 ;         when making raster file output.
@@ -142,6 +144,7 @@
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;     Small bug fixes, and addition of PS_QUIET keyword. 17 Feb 2011. DWF.
+;     Added PS_DECOMPOSED keyword to set the PostScript color mode. 30 Aug 2011. DWF.
 ;-
 PRO cgWindow_SetDefs, $
    Reset=reset, $                                  ; Reset to original values.
@@ -169,6 +172,7 @@ PRO cgWindow_SetDefs, $
    IM_Raster = im_raster, $                        ; Sets thee raster via ImageMagick setting.
    
    ; PostScript properties.
+   PS_Decomposed = ps_decomposed, $                ; If set, use decomposed color in PostScript.
    PS_Delete = ps_delete, $                        ; Delete the PostScript file when making IM files.
    PS_Metric = ps_metric, $                        ; Select metric measurements in PostScript output.
    PS_Encapsulated = ps_encapsulated, $            ; Create Encapsulated PostScript output.
@@ -208,6 +212,7 @@ PRO cgWindow_SetDefs, $
             IF HasImageMagick() THEN im_raster = 1 ELSE im_raster = 0
         ENDIF
         IF N_Elements(im_transparent) EQ 0 THEN im_transparent = 0
+        IF N_Elements(ps_decomposed) EQ 0 THEN ps_decomposed = 0 ; Index mode by default.
         IF N_Elements(ps_delete) EQ 0 THEN ps_delete = 1
         IF N_Elements(ps_metric) EQ 0 THEN ps_metric = 0
         IF N_Elements(ps_encapsulated) EQ 0 THEN ps_encapsulated = 0
@@ -237,6 +242,7 @@ PRO cgWindow_SetDefs, $
            IM_Resize:im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
            IM_Options:im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
            IM_Transparent:im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+           PS_Decomposed:ps_decomposed, $                ; Sets the PostScript color mode.
            PS_Delete:ps_delete, $                        ; Delete the PostScript file when making IM files.
            PS_Metric:ps_metric, $                        ; Select metric measurements in PostScript output.
            PS_Encapsulated:ps_encapsulated, $            ; Create Encapsulated PostScript output.
@@ -272,6 +278,7 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(im_resize) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_resize = im_resize
         IF N_Elements(im_options) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_options = im_options
         IF N_Elements(raster_im) NE 0 then !FSC_WINDOW_DEFAULTS.raster_im = raster_im
+        IF N_Elements(ps_decomposed) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_decomposed = Keyword_Set(ps_decomposed)
         IF N_Elements(ps_delete) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_delete = Keyword_Set(ps_delete)
         IF N_Elements(ps_metric) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_metric = Keyword_Set(ps_metric)
         IF N_Elements(ps_encapsulated) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_encapsulated = Keyword_Set(ps_encapsulated)

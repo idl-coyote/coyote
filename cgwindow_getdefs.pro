@@ -68,6 +68,8 @@
 ;         The !P.MULTI setting for the window.
 ;     palette: out, optional, type=BytArr(N,3)
 ;         The window color palette.
+;     ps_decomposed: out, optional, type=boolean
+;         The PostScript decomposed status of the window.
 ;     ps_delete: out, optional, type=boolean
 ;         The delete PostScript file status of the window.
 ;     ps_encapsulated: out, optional, type=boolean
@@ -109,6 +111,8 @@
 ;        Added Raster_IM.  18 Feb 2011. Jeremy Bailin
 ;        Added the ability to set and unset adjustable text size in 
 ;          cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
+;        Added PS_DECOMPOSED keyword to allow getting/setting of PostScript decomposed 
+;          value. 30 Aug 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -136,6 +140,7 @@ PRO cgWindow_GetDefs, $
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
    
    ; PostScript properties.
+   PS_Decomposed = ps_decomposed, $                ; If set, use decomposed color in PostScript.
    PS_Delete = ps_delete, $                        ; Delete the PostScript file when making IM files.
    PS_Metric = ps_metric, $                        ; Select metric measurements in PostScript output.
    PS_Encapsulated = ps_encapsulated, $            ; Create Encapsulated PostScript output.
@@ -173,6 +178,7 @@ PRO cgWindow_GetDefs, $
    IF Arg_Present(im_raster) THEN im_raster = !FSC_WINDOW_DEFAULTS.im_raster
    IF Arg_Present(im_resize) THEN im_resize = !FSC_WINDOW_DEFAULTS.im_resize
    IF Arg_Present(im_options) THEN im_options = !FSC_WINDOW_DEFAULTS.im_options
+   IF Arg_Present(ps_decomposed) THEN ps_decomposed = !FSC_WINDOW_DEFAULTS.ps_decomposed
    IF Arg_Present(ps_delete) THEN ps_delete = !FSC_WINDOW_DEFAULTS.ps_delete
    IF Arg_Present(ps_metric) THEN ps_metric = !FSC_WINDOW_DEFAULTS.ps_metric
    IF Arg_Present(ps_encapsulated) THEN ps_encapsulated =!FSC_WINDOW_DEFAULTS.ps_encapsulated

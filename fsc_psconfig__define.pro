@@ -41,6 +41,7 @@
 ;
 ;   Bits_per_Pixel - The number of image bits saved for each image pixel: 2, 4, or 8. The default is 8.
 ;   Color - Set this keyword to select Color PostScript output. Turned on by default.
+;   Decomposed - Set this keyword to 0 to select indexed color and to 1 to select decomposed color.
 ;   DefaultSetup - Set this keyword to the "name" of a default style. Current styles (you can easily
 ;     create and add your own to the source code) are the following:
 ;

@@ -99,6 +99,9 @@
 ;      what the documentation says, and what I intended.) 13 Dec 2010. DWF.
 ;  I don't think the last change did quite want I wanted. More tweaking to make
 ;      this more responsive to being in a PostScript file. 31 July 2011. DWF.
+;  Added PS keyword so the return value is the PostScript file. This is for
+;      convenience only, as the return value will be the PostScript value if
+;      the current graphics device is PS and FONT is not equal to -1. 30 Aug 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc.                                ;
@@ -168,7 +171,7 @@ PRO Greek_Example, UNICODE=unicode
 END ; --------------------------------------------------------------------------------------
 
 
-FUNCTION Greek, letter, CAPITAL=capital, EXAMPLE=example, UNICODE=unicode
+FUNCTION Greek, letter, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unicode
 
     Compile_Opt idl2
     
@@ -228,7 +231,7 @@ FUNCTION Greek, letter, CAPITAL=capital, EXAMPLE=example, UNICODE=unicode
        
     ENDIF
     
-    IF (!D.Name EQ 'PS') && (!P.FONT NE -1)  THEN BEGIN
+    IF ((!D.Name EQ 'PS') && (!P.FONT NE -1)) || Keyword_Set(PS)  THEN BEGIN
     
         ; Make sure ISOLATIN1 encoding is turned on.
         IF (!D.Name EQ 'PS') THEN DEVICE, /ISOLATIN1

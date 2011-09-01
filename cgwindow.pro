@@ -1197,10 +1197,9 @@ END ;---------------------------------------------------------------------------
 FUNCTION FSC_CmdWindow::Init, $
    command, $                       ; The graphics "command" to execute.
    p1, p2, p3, $                    ; The three allowed positional parameters.
-   EvalKeywords=evalKeywords, $     ; A vector of command keyword names that should be "evaluated" at run-time.
-   EvalParams=evalParams, $         ; A three-element vector, whose value should be 1 if the command parameter in this 
-                                    ; position should be "evaluated" at run-time (e.g., EvalParams=[0,1,0] will evaluate
-                                    ; parameter p2 at runtime.
+   AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
+   AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. Fields 
+                                    ; should be "P1", "P2" or "P3".
    _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
    Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
    AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface.
@@ -1292,7 +1291,7 @@ FUNCTION FSC_CmdWindow::Init, $
     ; Add a command, if you have one. Otherwise, just make the window.
     IF (N_Elements(command) NE 0) THEN BEGIN
         thisCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
-                P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=method, EVALKEYWORDS=evalKeywords, EVALPARAMS=evalParams)
+                P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=method, ALTPS_KEYWORDS=altps_Keywords, ALTPS_PARAMS=altps_Params)
         IF Obj_Valid(thisCommand) THEN self.cmds -> Add, thisCommand ELSE Message, 'Failed to make command object.'
     ENDIF 
     
@@ -1629,20 +1628,38 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
     success = 0
     Message, /RESET
     
-    ; Do we have keywords to evaluate?
-    IF Ptr_Valid(self.evalKeywords) THEN BEGIN
+    ; Do we have alternative keywords?
+    IF Ptr_Valid(self.altps_Keywords) THEN BEGIN
        keywords = self -> EvaluateKeywords(*self.keywords, SUCCESS=success)
        IF success EQ 0 THEN Ptr_Free, self.keywords
     ENDIF ELSE IF Ptr_Valid(self.keywords) THEN keywords = *self.keywords
     
-    ; Do we have parameters to evaluate?
-    SWITCH self.nparams OF
-       0: BREAK
-       3: IF self.evalparams[2] THEN p3 = self -> EvaluateParam(*self.p3) ELSE p3 = *self.p3
-       2: IF self.evalparams[1] THEN p2 = self -> EvaluateParam(*self.p2) ELSE p2 = *self.p2
-       1: IF self.evalparams[0] THEN p1 = self -> EvaluateParam(*self.p1) ELSE p1 = *self.p1
-    ENDSWITCH
-     
+    ; Do we have alternative parameters?
+    IF Ptr_Valid(self.altps_params) THEN BEGIN
+    
+        altTags = Tag_Names(*self.altps_params)
+        IF (Where(altTags EQ 'P1') NE -1) THEN BEGIN
+            IF (!D.Name EQ 'PS') $
+                THEN p1 = (*self.altps_params).p1 $
+                ELSE IF Ptr_Valid(self.p1) THEN p1 = *self.p1
+        ENDIF ELSE IF Ptr_Valid(self.p1) THEN p1 = *self.p1
+        IF (Where(altTags EQ 'P2') NE -1) THEN BEGIN
+            IF (!D.Name EQ 'PS') $
+                THEN p2 = (*self.altps_params).p2 $
+                ELSE IF Ptr_Valid(self.p2) THEN p2 = *self.p2
+        ENDIF ELSE IF Ptr_Valid(self.p2) THEN p2 = *self.p2
+        IF (Where(altTags EQ 'P3') NE -1) THEN BEGIN
+            IF (!D.Name EQ 'PS') $
+                THEN p3 = (*self.altps_params).p3 $
+                ELSE IF Ptr_Valid(self.p3) THEN p3 = *self.p3
+        ENDIF ELSE IF Ptr_Valid(self.p3) THEN p3 = *self.p3
+    
+    ENDIF ELSE BEGIN
+        IF Ptr_Valid(self.p1) THEN p1 = *self.p1
+        IF Ptr_Valid(self.p2) THEN p2 = *self.p2
+        IF Ptr_Valid(self.p3) THEN p3 = *self.p3
+    ENDELSE
+
     ; What kind of command is this?
     CASE self.type OF 
     
@@ -1718,6 +1735,8 @@ FUNCTION FSC_Window_Command::EvaluateKeywords, keywords, SUCCESS=success
      IF N_Elements(keywords) NE 0 THEN RETURN, keywords ELSE RETURN, 0
   ENDIF
   
+  Compile_Opt idl2
+  
   ; Assume success.
   success = 1
   
@@ -1729,10 +1748,10 @@ FUNCTION FSC_Window_Command::EvaluateKeywords, keywords, SUCCESS=success
   tags = Tag_Names(keywords)
   
   ; Find the keywords to be evaluated in this keyword structure.
-  keysToEvaluate = StrUpCase(*self.evalKeywords)
+  evalTags = Tag_Names(*self.altps_keywords)
   theseTags = Ptr_New(/Allocate_Heap)
-  FOR j=0,N_Elements(keysToEvaluate)-1 DO BEGIN
-     index = Where(tags EQ keysToEvaluate[j], count)
+  FOR j=0,N_Elements(evalTags)-1 DO BEGIN
+     index = Where(tags EQ evalTags[j], count)
      IF (count EQ 1) THEN BEGIN
         IF N_Elements(*theseTags) NE 0 THEN *theseTags = [*theseTags, index] ELSE *theseTags = [index] 
      ENDIF ELSE IF count GT 1 THEN Message, 'Ambiguous keywords to evaluate.'
@@ -1750,11 +1769,9 @@ FUNCTION FSC_Window_Command::EvaluateKeywords, keywords, SUCCESS=success
         mkeys = Create_Struct(mkeys, tags[j], keywords.(j))
       ENDELSE
     ENDIF ELSE BEGIN
-        IF Size(keywords.(j), /TNAME) NE 'STRING' THEN $
-          Message, 'Keyword value must be a string expression to be evaluated.'
-        cmd = 'tagValue = ' + keywords.(j)
-        ok = Execute(cmd)
-        IF ~ok THEN Message, 'Cannot execute the expression: ' + tags[j] + '=' + keywords.(j)
+    
+      ; If this is PostScript, use the alternative keyword value.
+      tagValue = (!D.Name EQ 'PS') ? (*self.altps_keywords).(index) : keywords.(j)
       IF N_Elements(mkeys) EQ 0 THEN BEGIN
         mkeys = Create_Struct(tags[j], tagValue)
       ENDIF ELSE BEGIN
@@ -1766,35 +1783,6 @@ FUNCTION FSC_Window_Command::EvaluateKeywords, keywords, SUCCESS=success
  
   Ptr_Free, theseTags
   RETURN, mkeys
-END ;----------------------------------------------------------------------------------------------------------------
-
-
-;
-; :Description:
-;     This method evaluates a parameter and returns the evaluated parameter.
-;
-FUNCTION FSC_Window_Command::EvaluateParam, parameter, SUCCESS=success
-  
-  ; Error handling.
-  Catch, theError
-  IF theError NE 0 THEN BEGIN
-     Catch, /CANCEL
-     success = 0
-     void = Error_Message()
-     IF N_Elements(parameter) NE 0 THEN RETURN, parameter ELSE RETURN, 0
-  ENDIF
-  
-  ; Assume success.
-  success = 1
-
-  IF Size(parameter, /TNAME) NE 'STRING' THEN $
-     Message, 'Parameter value must be a string expression to be evaluated.'
-  cmd = 'modifiedParam = ' + parameter
-  ok = Execute(cmd)
-  IF ~ok THEN Message, 'Cannot evaluate the parameter command: ' + cmd
-  
-  RETURN, modifiedParam
-  
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -1835,7 +1823,8 @@ PRO FSC_Window_Command::Cleanup
     Ptr_Free, self.p2
     Ptr_Free, self.p3
     Ptr_Free, self.keywords
-    Ptr_Free, self.evalkeywords
+    Ptr_Free, self.altps_keywords
+    Ptr_Free, self.altps_params
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -1843,8 +1832,8 @@ FUNCTION FSC_Window_Command::INIT, $
     COMMAND=command, $
     P1=p1, P2=p2, P3=p3, $
     KEYWORDS=keywords, $
-    EvalKeywords=evalKeywords, $
-    EvalParams=evalParams, $
+    AltPS_Keywords=altps_keywords, $
+    AltPS_Params=altps_params, $
     TYPE=type
     
     Compile_Opt idl2
@@ -1862,8 +1851,8 @@ FUNCTION FSC_Window_Command::INIT, $
     IF N_Elements(p2) NE 0 THEN self.p2 = Ptr_New(p2)
     IF N_Elements(p3) NE 0 THEN self.p3 = Ptr_New(p3)
     IF N_Elements(keywords) NE 0 THEN self.keywords = Ptr_New(keywords)
-    IF N_Elements(evalkeywords) NE 0 THEN self.evalkeywords = Ptr_New(evalkeywords)
-    IF N_Elements(evalparams) NE 0 THEN self.evalparams = evalParams ELSE self.evalparams = Replicate(0,3)
+    IF N_Elements(altps_keywords) NE 0 THEN self.altps_keywords = Ptr_New(altps_keywords)
+    IF N_Elements(altps_params) NE 0 THEN self.altps_params = Ptr_New(altps_params)
     self.type = type
     self.nparams = (N_Elements(p1) NE 0) + (N_Elements(p2) NE 0) + (N_Elements(p3) NE 0)
     RETURN, 1
@@ -1881,8 +1870,8 @@ PRO FSC_Window_Command__Define
               p3: Ptr_New(), $           ; The third parameter.
               nparams: 0, $              ; The number of parameters.
               keywords: Ptr_New(), $     ; The command keywords.
-              evalkeywords: Ptr_New(), $ ; List of keywords to evaluate at run-time.
-              evalparams: IntArr(3), $   ; List of parameters to evaluate at run-time.
+              altps_keywords: Ptr_New(), $ ; Structure of keywords to evaluate at run-time.
+              altps_params: Ptr_New(), $  ; Structure of parameters to evaluate at run-time.
               type: 0 $                  ; =0 call_procedure =1 call_method
             }
 END ;----------------------------------------------------------------------------------------------------------------
@@ -1934,6 +1923,17 @@ END ;---------------------------------------------------------------------------
 ;       not behavior you desire, use the LOADCMD keyword instead. If CMDINDEX
 ;       is used to select a command index, the new command is added before
 ;       the command currently occuping that index in the command list.
+;    altps_Keywords: in, optional, type=string
+;       A structure containing alternative keyword names (as tags) and values for
+;       those keywords to be used when the current device is the PostScript device.
+;       See http://www.idlcoyote.com/cg_tips/kwexpressions.php and the examples
+;       below for details on how to use this keyword.
+;    altps_Params: in, optional, type=IntArr(3)
+;       A structure containing alternative parameter values to be used when 
+;       the current device is the PostScript device. Structure names are restricted
+;       to the names "P1", "P2" and "P3" to correspond to the equivalent positional
+;       parameter. See http://www.idlcoyote.com/cg_tips/kwexpressions.php and the 
+;       examples below for details on how to use this keyword.
 ;    cmddelay: in, optional, type=float
 ;       If this keyword is set to a value other than zero, there will be a 
 ;       delay of this many seconds between command execution. This will permit
@@ -1949,23 +1949,6 @@ END ;---------------------------------------------------------------------------
 ;       deleted. It is not possible to delete the last command in the window.
 ;       Use WinID to identify the cgWindow you are interested in. If WinID 
 ;       is undefined, the last cgWindow created is used.
-;    evalKeywords: in, optional, type=string
-;       A scalar or vector of keyword names. Keywords listed here will be evaluated
-;       every time the command associated with the keyword is executed. For example,
-;       this allows different values to be used for the keyword in different devices.
-;       The actual value of the keyword should be a string that can be evaluated by
-;       the IDL Execute function and assigned to a value. This value will be used as
-;       the keyword value when the command is executed. See the example below or the article
-;       http://www.idlcoyote.com/cg_tips/kwexpressions.php for additional information.
-;       Use of this keyword precludes using cgWindow in a Virtual Machine application.
-;    evalParams: in, optional, type=IntArr(3)
-;       A three-element vector. Set the value of the vector to 1 to have the positional
-;       parameter in that position of the command evaluated at run-time. The actual parameter 
-;       should be a string that can be evaluated by the IDL Execute function and assigned to  
-;       a value. This value will be used as the parameter value when the command is executed.  
-;       See the example below or the article http://www.idlcoyote.com/cg_tips/kwexpressions.php 
-;       for additional information. Use of this keyword precludes using cgWindow in a 
-;       Virtual Machine application.
 ;    executecmd: in, optional, type=boolean, default=0
 ;       Set this keyword to immediate execute all the commands in an cgWindow.
 ;       Normally, this is used after commands have been loaded with LOADCMD.
@@ -2037,13 +2020,20 @@ END ;---------------------------------------------------------------------------
 ;       
 ;          http://www.idlcoyote.com/graphics_tips/cgwindow.html
 ;          
-;    Example using run-time evaluated keywords and parameters.
+;    Example using different keyword parameters for the display and PostScript output.
 ;    
-;    cgPlot, cgDemoData(1), /Window, EvalKeywords=['thick','title'], $ 
-;       thick='(!d.name eq "PS")?5.0:1.0', $
-;       title="textoidl('sin(x/\alpha) e^{-x/\beta}')", $
-;       position=[0.1, 0.25, 0.9, 0.9]
-;     cgText, 0.1, 0.1, /Normal, '"Greek Psi Symbol (" + Greek("psi") + ")"', EvalParams=[0,0,1], /AddCmd
+;    IDL> cgPlot, cgDemoData(1), /WINDOW, $
+;           THICK=1.0, XTITLE='Distance (' + Greek('mu') + 'm)', $
+;           ALTPS_KEYWORDS={THICK:4.0, XTITLE:'Distance (' + Greek('mu', /PS) + 'm)'}
+;           
+;    Example using different positional parameters.
+;    
+;    IDL> cgText, 0.20, 0.85, /Normal, 'Line of Text', ALIGNMENT=0.0, $
+;           ALTPS_KEYWORDS={ALIGNMENT:1.0}, ALTPS_PARAMS={P1:0.88}, /ADDCMD
+;           
+;    Additional examples can be found here:
+;    
+;        http://www.idlcoyote.com/cg_tips/kwexpressions.php
 ;           
 ; :Notes:
 ;    Notes on using the program::
@@ -2118,6 +2108,15 @@ END ;---------------------------------------------------------------------------
 ;        Problem dereferencing a null pointer in DRAW method fixed. 3 Aug 2011. DWF.
 ;        Changes to handle inability to create raster files from PS encapsulated files in 
 ;           landscape mode. 26 Aug 2011. DWF.
+;        Added ability to set PostScript color mode. 30 Aug 2011. DWF.
+;        The method I was using for evaluating keyword and argument parameters at run-time
+;            was just WAY too complicated and difficult to use. I have eliminated this
+;            method (along with the EvalKeywords and EvalParams) in favor of a method that
+;            allows the user to supply alternative values to use in the PostScript device.
+;            This uses keywords AltPS_Keywords and AltPS_Params to collect these alternative
+;            arguments in structures that can be used at run-time to supply alternative values.
+;            As before, this is explained in detail at http://www.idlcoyote.com/cg_tips/kwexpressions.php.
+;            1 Sept 2011. DWF.
 ;   
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -2125,10 +2124,9 @@ END ;---------------------------------------------------------------------------
 PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.
    p1, p2, p3, $                    ; The three allowed positional parameters.
-   EvalKeywords=evalKeywords, $     ; A vector of command keyword names that should be "evaluated" at run-time.
-   EvalParams=evalParams, $         ; A three-element vector, whose value should be 1 if the command parameter in this 
-                                    ; position should be "evaluated" at run-time (e.g., EvalParams=[0,1,0] will evaluate
-                                    ; parameter p2 at runtime.
+   AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
+   AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. Fields 
+                                    ; should be "P1", "P2" or "P3".
    _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
    Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
    Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
@@ -2281,8 +2279,8 @@ PRO cgWindow, $
                     IF N_Params() GT 4 THEN $
                         Message, 'The maximum number of positional command parameters allowed is three.'
                     newCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
-                        P1=p1, P2=p2, P3=p3, KEYWORDS=extra, EvalKeywords=evalKeywords, $
-                        EvalParams=evalParams, TYPE=Keyword_Set(method))
+                        P1=p1, P2=p2, P3=p3, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
+                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
                         
                     ; If the cmdIndex is undefined, ALL current commands in the window are replaced.
                     thisWindowStruct.windowObj -> ReplaceCommand, newCommand, cmdIndex, MULTI=wmulti
@@ -2317,8 +2315,8 @@ PRO cgWindow, $
                 thisWindowStruct = structs[winID]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     newCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
-                        P1=p1, P2=p2, P3=p3, KEYWORDS=extra, EvalKeywords=evalKeywords, $
-                        EvalParams=evalParams, TYPE=Keyword_Set(method))
+                        P1=p1, P2=p2, P3=p3, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
+                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
                     thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                 ENDIF ELSE BEGIN
                     Message, 'The cgWindow referred to does not exist.'
@@ -2350,8 +2348,8 @@ PRO cgWindow, $
                 thisWindowStruct = structs[winID]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     newCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
-                        P1=p1, P2=p2, P3=p3, KEYWORDS=extra, EvalKeywords=evalKeywords, $
-                        EvalParams=evalParams, TYPE=Keyword_Set(method))
+                        P1=p1, P2=p2, P3=p3, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
+                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
                     thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                     thisWindowStruct.windowObj -> ExecuteCommands
                 ENDIF ELSE BEGIN
@@ -2369,10 +2367,9 @@ PRO cgWindow, $
        p1, p2, p3, $                    ; The three allowed positional parameters.
        _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
        CmdDelay = cmdDelay, $           ; The amount of time to "wait" between commands.
-       EvalKeywords=evalKeywords, $     ; A vector of command keyword names that should be "evaluated" at run-time.
-       EvalParams=evalParams, $         ; A three-element vector, whose value should be 1 if the command parameter in this 
-                                        ; position should be "evaluated" at run-time (e.g., EvalParams=[0,1,0] will evaluate
-                                        ; parameter p2 at runtime.
+       AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
+       AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. Fields 
+                                        ; should be "P1", "P2" or "P3".
        Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
        Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
        WBackground = wbackground, $     ; The background color. Not used unless set.

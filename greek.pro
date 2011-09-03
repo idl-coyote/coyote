@@ -61,6 +61,11 @@
 ;                  
 ;  EXAMPLE:        If this keyword is set, the names of the Greek characters and their
 ;                  symbols are written out in the current graphics window.
+;                  
+;  PS:             Normally, the PostScript version of the greek letter is returned if
+;                  the current device is PostScript and !P.Font is 0 or 1. But, the 
+;                  PostScript version of the greek letter can be obtained at any time
+;                  and in any device, by setting this keyword.
 ;                                    
 ;  UNICODE:        If this keyword is set, the function returns the Unicode for the Greek
 ;                  letter.
@@ -80,7 +85,7 @@
 ; 
 ;  See the following article for additional information: 
 ;  
-;       /http://www.dfanning.com/ps_tips/greeksym.pro
+;       http://www.idlcoyote.com/ps_tips/greeksym.html
 ;       
 ; RESTRICTIONS:
 ; 
@@ -132,7 +137,7 @@
 ;******************************************************************************************;
 Forward_Function Greek
 
-PRO Greek_Example, UNICODE=unicode
+PRO Greek_Example, UNICODE=unicode, PS=ps
 
     Compile_Opt hidden
     
@@ -146,23 +151,25 @@ PRO Greek_Example, UNICODE=unicode
     x = [0.25, 0.6]
     y = Reverse((Indgen(12) + 1) * (1.0 / 13))
     
-    ; Create a window, if needed.
-    IF (!D.Flags AND 256) NE 0 THEN BEGIN
-        thisWindow = !D.Window
-        Window, XSIZE=600, YSIZE=500, /Free
-        ERASE, COLOR=cgColor('white')
-    ENDIF
+    ; Need PostScript output?
+    IF Keyword_Set(ps) || (!D.Name EQ 'PS') THEN PS_Start
+    
+    ; Create a window.
+    cgDisplay, 600, 500
     
     ; Output the letters.
     FOR j=0,11 DO BEGIN
-        XYOuts, x[0], y[j], letter[j] + ': ' + $
+        cgText, x[0], y[j], letter[j] + ': ' + $
             Greek(letter[j], UNICODE=unicode) + Greek(letter[j], /CAPITAL, UNICODE=unicode), $
-            /NORMAL, COLOR=cgColor('Black'), CHARSIZE=1.5
-        XYOuts, x[1], y[j], letter[j+12] + ': ' + $
+            /NORMAL, CHARSIZE=1.5
+        cgText, x[1], y[j], letter[j+12] + ': ' + $
             Greek(letter[j+12], UNICODE=unicode) + Greek(letter[j+12], /CAPITAL, UNICODE=unicode), $
-            /NORMAL, COLOR=cgColor('Black'), CHARSIZE=1.5
+            /NORMAL, CHARSIZE=1.5
     ENDFOR
     
+    ; Clean up PostScript, if needed.
+    IF Keyword_Set(ps) || (!D.Name EQ 'PS') THEN PS_End
+
     ; Restore the users window.
     IF N_Elements(thisWindow) NE 0 THEN BEGIN
        IF thisWindow GE 0 THEN WSet, thisWindow
@@ -178,15 +185,24 @@ FUNCTION Greek, letter, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unicode
     ; Return to caller on error.
     ON_Error, 2
     
-    ; Set up PostScript device for working with Greek letters.
-    IF !D.Name EQ 'PS' THEN Device, ISOLATIN1=1
-    
     ; Do you wish to see an example?
     IF Keyword_Set(example) THEN BEGIN
-        Greek_Example, UNICODE=unicode
+        Greek_Example, UNICODE=unicode, PS=ps
         RETURN, ""
     ENDIF
 
+    ; A symbol name is required.
+    IF N_Elements(letter) EQ 0 THEN BEGIN
+       Print, 'Syntax: Greek("theLetter")
+       RETURN, ""
+    ENDIF
+    
+    ; Return quietly if the Greek letter is a null string.
+    IF letter  EQ "" THEN RETURN, ""
+    
+     ; Set up PostScript device for working with Greek letters.
+    IF !D.Name EQ 'PS' THEN Device, ISOLATIN1=1
+    
     ; Check keywords.
     IF N_Elements(letter) EQ 0 THEN letter = 'alpha'
     capital = Keyword_Set(capital)

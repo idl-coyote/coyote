@@ -81,7 +81,8 @@
 ;                     If this keyword is a string color name, then ANNOTATECOLOR=color.
 ;
 ;       DIVISIONS:    The number of divisions to divide the bar into. There will
-;                     be (divisions + 1) annotations. The default is 6.
+;                     be (divisions + 1) annotations. The default is 0, which allows
+;                     the plot command to determine how many divisions to make.
 ;                     
 ;       FIT:          If this keyword is set, the colorbar "fits" itself to the normalized
 ;                     coordinates of the last plot command executed. In other words, for
@@ -91,7 +92,8 @@
 ;
 ;       FONT:         Sets the font of the annotation. Hershey: -1, Hardware:0, True-Type: 1.
 ;
-;       FORMAT:       The format of the bar annotations. Default is '(I0)'.
+;       FORMAT:       The format of the bar annotations. Default is "", which allows
+;                     the Plot command to determine the appropriate format.
 ;
 ;       INVERTCOLORS: Setting this keyword inverts the colors in the color bar.
 ;
@@ -198,6 +200,7 @@
 ;          from being used inadvertently. 27 May 2011. DWF.
 ;       Fixed a problem with assigning the color with the ANNOTATECOLOR keyword in the
 ;          Z-graphics buffer. 30 Aug 2011. DWF.
+;       Changed the default DIVISIONS to 0 and the default FORMAT to "". 2 Sept 2011. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -365,7 +368,7 @@ PRO cgColorbar, $
        TVLCT, rrr, ggg, bbb, bottom
     ENDIF
     IF N_ELEMENTS(charsize) EQ 0 THEN charsize = cgDefCharsize() * charPercent
-    IF N_ELEMENTS(format) EQ 0 THEN format = '(I0)'
+    IF N_ELEMENTS(format) EQ 0 THEN format = ""
     IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
     minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange)
     maxrange = (N_ELEMENTS(maxrange) EQ 0) ? Float(ncolors) : Float(maxrange)
@@ -375,7 +378,7 @@ PRO cgColorbar, $
        minrange = Float(range[0])
        maxrange = Float(range[1])
     ENDIF
-    IF N_ELEMENTS(divisions) EQ 0 THEN divisions = 6
+    IF N_ELEMENTS(divisions) EQ 0 THEN divisions = 0
     IF N_ELEMENTS(font) EQ 0 THEN font = !P.Font
     IF N_ELEMENTS(title) EQ 0 THEN title = ''
     xlog = Keyword_Set(xlog)

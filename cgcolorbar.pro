@@ -201,6 +201,7 @@
 ;       Fixed a problem with assigning the color with the ANNOTATECOLOR keyword in the
 ;          Z-graphics buffer. 30 Aug 2011. DWF.
 ;       Changed the default DIVISIONS to 0 and the default FORMAT to "". 2 Sept 2011. DWF.
+;       Added code that will force MINRANGE and MAXRANGE values to be scalars. 5 Sept 2011. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -370,8 +371,8 @@ PRO cgColorbar, $
     IF N_ELEMENTS(charsize) EQ 0 THEN charsize = cgDefCharsize() * charPercent
     IF N_ELEMENTS(format) EQ 0 THEN format = ""
     IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
-    minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange)
-    maxrange = (N_ELEMENTS(maxrange) EQ 0) ? Float(ncolors) : Float(maxrange)
+    minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange[0])
+    maxrange = (N_ELEMENTS(maxrange) EQ 0) ? Float(ncolors) : Float(maxrange[0])
     IF N_ELEMENTS(ticklen) EQ 0 THEN ticklen = 0.2
     IF N_ELEMENTS(minor) EQ 0 THEN minor = 2
     IF N_ELEMENTS(range) NE 0 THEN BEGIN

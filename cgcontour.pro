@@ -614,7 +614,7 @@ PRO cgContour, data, x, y, $
     ; Do you need to calculate levels.
     IF N_Elements(levels) EQ 0 THEN BEGIN
         minData = Min(contourData, /NAN, MAX=maxData)
-        IF Size(minData ,/TYPE) EQ 3 THEN minData = Float(minData)     ;Avoid 16 bit integer overflow
+        IF Size(minData, /TYPE) EQ 2 THEN minData = Float(minData)     ;Avoid 16 bit integer overflow
         levels = ((maxData - minData) / Float(nlevels)) * Indgen(nlevels) + minData
     ENDIF
     

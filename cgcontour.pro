@@ -221,6 +221,7 @@
 ;           has been displayed with cgImage. This requires that the SAVE keyword is set in the 
 ;           cgImage call.
 ;        Improved error handling. 26 Aug 2011. DWF.
+;        Got the data type correct in the part of the code that creates levels. 6 Sept 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.

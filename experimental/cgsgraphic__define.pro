@@ -15,7 +15,6 @@ FUNCTION cgsGraphic::GetKeywords
         DATA: self.data, $
         DEVICE: self.device, $
         NORMAL: self.normal, $
-        FONT: self.font, $
         LINESTYLE: self.linestyle, $
         NOCLIP: self.noclip, $
         NODATA: self.nodata, $
@@ -76,6 +75,9 @@ FUNCTION cgsGraphic::GetKeywords
         
         IF N_Elements(*self.clip) NE 0 THEN BEGIN
             keywordStruct = Create_Struct(keywordStruct, 'clip', *self.clip)
+        ENDIF
+        IF N_Elements(*self.font) NE 0 THEN BEGIN
+            keywordStruct = Create_Struct(keywordStruct, 'font', *self.font)
         ENDIF
         IF N_Elements(*self.position) NE 0 THEN BEGIN
             keywordStruct = Create_Struct(keywordStruct, 'position', *self.position)
@@ -199,7 +201,7 @@ PRO cgsGraphic::GetProperty, $
     IF Arg_Present(data) THEN data = self.data 
     IF Arg_Present(device) THEN device = self.device
     IF Arg_Present(normal) THEN normal = self.normal
-    IF Arg_Present(font) THEN font = self.font 
+    IF Arg_Present(font) THEN IF N_Elements(*self.font) NE 0 THEN font = *self.font
     IF Arg_Present(linestyle) THEN linestyle = self.linestyle
     IF Arg_Present(noclip) THEN noclip = self.noclip
     IF Arg_Present(nodata) THEN nodata = self.nodata 
@@ -272,6 +274,7 @@ END ;---------------------------------------------------------------------------
 
 
 PRO cgsGraphic::SetProperty, $
+    ALTPS_KEYWORDS=altps_keywords, $
     BACKGROUND=background, $
     CHARSIZE=charsize, $
     CHARTHICK=charthick, $
@@ -358,11 +361,14 @@ PRO cgsGraphic::SetProperty, $
     ENDIF
     
     ; Set the properties of the object.
+    IF N_Elements(altps_keywords) NE 0 THEN BEGIN
+        self.altps_keywords = Ptr_New(altps_keywords)
+    ENDIF 
     IF N_Elements(background) NE 0 THEN self.background = background
     IF N_Elements(charsize) NE 0 THEN self.charsize = charsize
     IF N_Elements(charthick) NE 0 THEN self.charthick = charthick
     IF N_Elements(clip) NE 0 THEN BEGIN
-        self.clip = Ptr_New(clip) 
+        IF Ptr_Valid(self.clip) THEN *self.clip = clip ELSE self.clip = Ptr_New(clip) 
     ENDIF ELSE BEGIN
         IF ~Ptr_Valid(self.clip) THEN self.clip = Ptr_New(/ALLOCATE_HEAP)
     ENDELSE
@@ -370,13 +376,17 @@ PRO cgsGraphic::SetProperty, $
     IF N_Elements(data) NE 0 THEN self.data = Keyword_Set(data)
     IF N_Elements(device) NE 0 THEN self.device = Keyword_Set(device)
     IF N_Elements(normal) NE 0 THEN self.normal = Keyword_Set(normal)
-    IF N_Elements(font) NE 0 THEN self.font = font
+    IF N_Elements(font) NE 0 THEN BEGIN
+        IF Ptr_Valid(self.font) THEN *self.font = font ELSE self.font = Ptr_New(font) 
+    ENDIF ELSE BEGIN
+        IF ~Ptr_Valid(self.font) THEN self.font = Ptr_New(/ALLOCATE_HEAP)
+    ENDELSE
     IF N_Elements(linestyle) NE 0 THEN self.linestyle = linestyle
     IF N_Elements(noclip) NE 0 THEN self.noclip = Keyword_Set(noclip)
     IF N_Elements(nodata) NE 0 THEN self.nodata = Keyword_Set(nodata)
     IF N_Elements(noerase) NE 0 THEN self.noerase = Keyword_Set(noerase)
     IF N_Elements(position) NE 0 THEN BEGIN
-        self.position = Ptr_New(position) 
+        IF Ptr_Valid(self.position) THEN *self.position = position ELSE self.position = Ptr_New(position) 
     ENDIF ELSE BEGIN
         IF ~Ptr_Valid(self.position) THEN self.position = Ptr_New(/ALLOCATE_HEAP)
     ENDELSE
@@ -403,14 +413,14 @@ PRO cgsGraphic::SetProperty, $
     IF N_Elements(xticklayout) NE 0 THEN self.xticklayout = xticklayout
     IF N_Elements(xticklen) NE 0 THEN self.xticklen = xticklen
     IF N_Elements(xtickname) NE 0 THEN BEGIN
-        self.xtickname = Ptr_New(xtickname) 
+        IF Ptr_Valid(self.xtickname) THEN *self.xtickname = xtickname ELSE self.xtickname = Ptr_New(xtickname) 
     ENDIF ELSE BEGIN
         IF ~Ptr_Valid(self.xtickname) THEN self.xtickname = Ptr_New(/ALLOCATE_HEAP)
     ENDELSE
     IF N_Elements(xticks) NE 0 THEN self.xticks = xticks
     IF N_Elements(xtickunits) NE 0 THEN self.xtickunits = xtickunits
     IF N_Elements(xtickv) NE 0 THEN BEGIN
-        self.xtickv = Ptr_New(xtickv) 
+        IF Ptr_Valid(self.xtickv) THEN *self.xtickv = xtickv ELSE self.xtickv = Ptr_New(xtickv) 
     ENDIF ELSE BEGIN
         IF ~Ptr_Valid(self.xtickv) THEN self.xtickv = Ptr_New(/ALLOCATE_HEAP)
     ENDELSE
@@ -428,14 +438,14 @@ PRO cgsGraphic::SetProperty, $
     IF N_Elements(yticklayout) NE 0 THEN self.yticklayout = yticklayout
     IF N_Elements(yticklen) NE 0 THEN self.yticklen = yticklen
     IF N_Elements(ytickname) NE 0 THEN BEGIN
-        self.ytickname = Ptr_New(ytickname) 
+        IF Ptr_Valid(self.ytickname) THEN *self.ytickname = ytickname ELSE self.ytickname = Ptr_New(ytickname) 
     ENDIF ELSE BEGIN
         IF ~Ptr_Valid(self.ytickname) THEN self.ytickname = Ptr_New(/ALLOCATE_HEAP)
     ENDELSE
     IF N_Elements(yticks) NE 0 THEN self.yticks = yticks
     IF N_Elements(ytickunits) NE 0 THEN self.ytickunits = ytickunits
     IF N_Elements(ytickv) NE 0 THEN BEGIN
-        self.ytickv = Ptr_New(ytickv) 
+        IF Ptr_Valid(self.ytickv) THEN *self.ytickv = ytickv ELSE self.ytickv = Ptr_New(ytickv) 
     ENDIF ELSE BEGIN
         IF ~Ptr_Valid(self.ytickv) THEN self.ytickv = Ptr_New(/ALLOCATE_HEAP)
     ENDELSE
@@ -460,7 +470,7 @@ PRO cgsGraphic::SetProperty, $
     IF N_Elements(zticks) NE 0 THEN self.zticks = zticks
     IF N_Elements(ztickunits) NE 0 THEN self.ztickunits = ztickunits
     IF N_Elements(ztickv) NE 0 THEN BEGIN
-        self.ztickv = Ptr_New(ztickv) 
+        IF Ptr_Valid(self.ztickv) THEN *self.ztickv = ztickv ELSE self.ztickv = Ptr_New(ztickv) 
     ENDIF ELSE BEGIN
         IF ~Ptr_Valid(self.ztickv) THEN self.ztickv = Ptr_New(/ALLOCATE_HEAP)
     ENDELSE
@@ -473,7 +483,9 @@ END ;---------------------------------------------------------------------------
 
 PRO cgsGraphic::CLEANUP
 
+   Ptr_Free, self.altps_keywords
    Ptr_Free, self.clip
+   Ptr_Free, self.font
    Ptr_Free, self.position
    Ptr_Free, self.xtick_get
    Ptr_Free, self.xtickname
@@ -489,6 +501,7 @@ END ;---------------------------------------------------------------------------
 
 
 FUNCTION cgsGraphic::INIT, $
+    ALTPS_KEYWORDS=altps_keywords, $
     BACKGROUND=background, $
     CHARSIZE=charsize, $
     CHARTHICK=charthick, $
@@ -576,8 +589,9 @@ FUNCTION cgsGraphic::INIT, $
     ; Default values.
     IF N_Elements(background) EQ 0 THEN background = 'white'
     IF N_Elements(color) EQ 0 THEN color = 'black'
-    IF N_Elements(font) EQ 0 THEN font = !P.FONT
-    IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
+    IF N_Elements(font) EQ 0 THEN self.font = Ptr_New(/ALLOCATE_HEAP) ELSE self.font = Ptr_New(font)
+    thisFont = *self.font
+    IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=thisFont)
     IF N_Elements(ticklen) EQ 0 THEN ticklen = !P.TICKLEN
     IF N_Elements(xmargin) EQ 0 THEN xmargin = [10.0, 4.0]
     IF N_Elements(ymargin) EQ 0 THEN ymargin = [4.0, 4.0]
@@ -590,6 +604,7 @@ FUNCTION cgsGraphic::INIT, $
         
     ; Set all the keywords.
     self -> SetProperty, $
+        ALTPS_KEYWORDS=altps_keywords, $
         BACKGROUND=background, $
         CHARSIZE=charsize, $
         CHARTHICK=charthick, $
@@ -598,7 +613,6 @@ FUNCTION cgsGraphic::INIT, $
         DATA=data, $
         DEVICE=device, $
         NORMAL=normal, $
-        FONT=font, $
         LINESTYLE=linestyle, $
         NOCLIP=noclip, $
         NODATA=nodata, $
@@ -679,6 +693,7 @@ PRO cgsGraphic__DEFINE, class
     
         class = { CGSGRAPHIC, $
                   INHERITS IDL_OBJECT, $
+                  ALTPS_KEYWORDS: Ptr_New(), $
                   BACKGROUND: "", $
                   CHARSIZE: 0.0, $
                   CHARTHICK: 0.0, $
@@ -687,7 +702,7 @@ PRO cgsGraphic__DEFINE, class
                   DATA: 0B, $
                   DEVICE: 0B, $
                   NORMAL: 0B, $
-                  FONT: 0S, $
+                  FONT: Ptr_New(), $
                   LINESTYLE: 0S, $
                   NOCLIP: 0B, $
                   NODATA: 0B, $
@@ -760,6 +775,7 @@ PRO cgsGraphic__DEFINE, class
     ENDIF ELSE BEGIN
     
         class = { CGSGRAPHIC, $
+                  ALTPS_KEYWORDS: Ptr_New(), $
                   BACKGROUND: "", $
                   CHARSIZE: 0.0, $
                   CHARTHICK: 0.0, $
@@ -768,7 +784,7 @@ PRO cgsGraphic__DEFINE, class
                   DATA: 0B, $
                   DEVICE: 0B, $
                   NORMAL: 0B, $
-                  FONT: 0S, $
+                  FONT: Ptr_New(), $
                   LINESTYLE: 0S, $
                   NOCLIP: 0B, $
                   NODATA: 0B, $

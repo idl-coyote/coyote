@@ -222,6 +222,8 @@
 ;           cgImage call.
 ;        Improved error handling. 26 Aug 2011. DWF.
 ;        Got the data type correct in the part of the code that creates levels. 6 Sept 2011. DWF.
+;        Small change to allow cgWindow to set the current graphics window if it is the only
+;           window on the display. 15 Sept 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -496,7 +498,10 @@ PRO cgContour, data, x, y, $
                     IF (!D.Window LT 0) &&  Keyword_Set(noerase) THEN BEGIN
                         Window
                         IF ~Keyword_Set(traditional) THEN cgErase, 'WHITE'
-                    ENDIF
+                    ENDIF ELSE BEGIN
+                        wid = cgQuery(/CURRENT)
+                        WSet, wid
+                    ENDELSE
                     pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
                     IF (Total(pixel) EQ 765) THEN background = 'WHITE'
                     IF (Total(pixel) EQ 0) THEN background = 'BLACK'

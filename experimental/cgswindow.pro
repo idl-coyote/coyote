@@ -97,6 +97,7 @@ PRO CGS_CmdWindow::AutoPostScriptFile, filename
 
     ; Allow the user to configure the PostScript file.
     PS_Start, GUI=0, $
+        DECOMPOSED=self.ps_decomposed, $
         FILENAME=filename, $
         EUROPEAN=self.ps_metric, $
         ENCAPSULATED=self.ps_encapsulated, $
@@ -164,6 +165,7 @@ PRO CGS_CmdWindow::AutoRasterFile, filetype, filename
 
            ; Create a PostScript file first.
            PS_Start, $
+                DECOMPOSED=self.ps_decomposed, $
                 FILENAME=outputFilename + '.ps', $
                 EUROPEAN=self.ps_metric, $
                 SCALE_FACTOR=self.ps_scale_factor, $
@@ -234,6 +236,7 @@ PRO CGS_CmdWindow::CreatePostScriptFile, event
     ; Allow the user to configure the PostScript file.
     PS_Start, /GUI, $
         CANCEL=cancelled, $
+        DECOMPOSED=self.ps_decomposed, $
         EUROPEAN=self.ps_metric, $
         ENCAPSULATED=self.ps_encapsulated, $
         SCALE_FACTOR=self.ps_scale_factor, $
@@ -404,7 +407,7 @@ PRO CGS_CmdWindow::ExecuteCommands, KEYWORDS=keywords
         ; Did you successfully draw this command?
         IF ~success THEN BEGIN
         
-            thisCmdObj -> List
+            ;thisCmdObj -> List
             answer = Dialog_Message('Problem executing the command shown ' + $
                                     'in the console output. Delete command?', /QUESTION)
             IF StrUpCase(answer) EQ 'YES' THEN BEGIN
@@ -747,6 +750,7 @@ PRO CGS_CmdWindow::SaveAsRaster, event
            ; Create a PostScript file first.
            thisname = outname + '.ps'
            PS_Start, $
+                DECOMPOSED=self.ps_decomposed, $
                 FILENAME=thisname, $
                 EUROPEAN=self.ps_metric, $
                 SCALE_FACTOR=self.ps_scale_factor, $
@@ -948,6 +952,7 @@ PRO CGS_CmdWindow::SetProperty, $
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
     IM_RASTER=im_raster, $                        ; Sets whether to use ImageMagick to create raster files.
+    PS_DECOMPOSED=ps_decomposed, $                ; Set the PS color decomposition mode.
     PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
     PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
     PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
@@ -999,6 +1004,7 @@ PRO CGS_CmdWindow::SetProperty, $
     IF N_Elements(im_resize) NE 0 THEN self.im_resize = im_resize
     IF N_Elements(im_options) NE 0 THEN self.im_options = im_options
     IF N_Elements(im_raster) NE 0 then self.im_raster = im_raster
+    IF N_Elements(ps_decomposed) NE 0 THEN self.ps_decomposed = ps_decomposed
     IF N_Elements(ps_delete) NE 0 THEN self.ps_delete = ps_delete
     IF N_Elements(ps_metric) NE 0 THEN self.ps_metric = ps_metric
     IF N_Elements(ps_encapsulated) NE 0 THEN self.ps_encapsulated = ps_encapsulated
@@ -1023,7 +1029,7 @@ END ;---------------------------------------------------------------------------
 
 
 PRO CGS_CmdWindow::SetWindow
-    WSet, self.wid
+    IF (!D.Flags AND 256) NE 0 THEN WSet, self.wid
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -1086,6 +1092,7 @@ FUNCTION CGS_CmdWindow::Init, $
        IM_Options = d_im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
        
        ; PostScript properties.
+       PS_Decomposed = d_ps_decomposed, $                ; Sets the PS color decomposition mode.
        PS_Delete = d_ps_delete, $                        ; Delete PS file when making IM raster.
        PS_Metric = d_ps_metric, $                        ; Select metric measurements in PostScript output.
        PS_Encapsulated = d_ps_encapsulated, $            ; Create Encapsulated PostScript output.    
@@ -1214,6 +1221,7 @@ FUNCTION CGS_CmdWindow::Init, $
     self.im_options = d_im_options
     self.im_raster = d_im_raster
     self.im_resize = d_im_resize
+    self.ps_decomposed = d_ps_decomposed
     self.ps_delete = d_ps_delete
     self.ps_encapsulated = d_ps_encapsulated
     self.ps_metric = d_ps_metric
@@ -1337,6 +1345,7 @@ PRO CGS_CmdWindow__Define, class
               b: Ptr_New(), $               ; The blue color table vector.
               
               ; PostScript options.
+              ps_decomposed: 0L, $          ; Set the PS decomposed color mode.
               ps_delete: 0L, $              ; Delete the PS file when making IM image file.
               ps_encapsulated: 0L, $        ; Encapsulated PostScript
               ps_metric: 0L, $              ; Metric measurements in PostScript.
@@ -1525,22 +1534,7 @@ END ;---------------------------------------------------------------------------
 ;
 ; :History:
 ;     Change History::
-;        Written, 17 January 2011. DWF.
-;        Fixed a problem with the example code, and added EMPTY to end of Draw method
-;           to force UNIX machines to empty the graphics buffer after CALL_PROCEDURE. 20 Jan 2011. DWF.
-;        Improved documentation and error handling. 19 Jan 2011. DWF.
-;        More improved error handling and messages. 26 Jan 2011. DWF.
-;        Made changes to accommodate the new cgControl routine. 27 Jan 2011. DWF.
-;        Added WXOMARGIN and WYOMARGIN keywords. 28 Jan 2011. DWF.
-;        Numerous changes leading up to official release. 4 Feb 2011. DWF.
-;        Added workaround for UNIX bug for draw widget creation. 5 Feb 2011. DWF.
-;        Corrected a window aspect ratio problem with PostScript output by making the
-;           window the current window before calling PS_Start. 17 Feb 2011. DWF.
-;        Added machinery for programmatically generating raster files. 18 Feb 2011. Jeremy Bailin.
-;        Problem with restoring visualizations fixed. 6 March 2011. DWF.
-;        Fixed a problem with CALL_METHOD, which requires one positional parameter. 8 March 2011. DWF.
-;        Added the ability to set and unset adjustable text size in the window. 24 April 2011. DWF.
-;        Fixed a problem in the ReplaceCommand method that had input parameters reversed. 6 May 2011. DWF.
+;        Written, 7 September 2011, DWF.
 ;   
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -1548,16 +1542,16 @@ END ;---------------------------------------------------------------------------
 FUNCTION cgsWindow, $
    command, $                       ; The graphics "command" to execute. A CGS object.
    Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
-   Background = wbackground, $     ; The background color. Set to !P.Background by default.
-   Erase = weraseit, $             ; Set this keyword to erase the display before executing the command.
-   Multi = wmulti, $               ; Set this in the same way !P.Multi is used.   
-   OXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
-   OYMargin = woymargin, $         ; Set the !Y.OMargin. A two element array
-   XSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 640.
-   YSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 512.
-   Title = wtitle, $               ; The window title.
-   XPos = wxpos, $                 ; The X offset of the window on the display. The window is tiled if not set.
-   YPos = wypos                    ; The Y offset of the window on the display. The window is tiled if not set. 
+   Background = wbackground, $      ; The background color. Set to !P.Background by default.
+   Erase = weraseit, $              ; Set this keyword to erase the display before executing the command.
+   Multi = wmulti, $                ; Set this in the same way !P.Multi is used.   
+   OXMargin = woxmargin, $          ; Set the !X.OMargin. A two element array.
+   OYMargin = woymargin, $          ; Set the !Y.OMargin. A two element array
+   XSize = wxsize, $                ; The X size of the cgWindow graphics window in pixels. By default: 640.
+   YSize = wysize, $                ; The Y size of the cgWindow graphics window in pixels. By default: 512.
+   Title = wtitle, $                ; The window title.
+   XPos = wxpos, $                  ; The X offset of the window on the display. The window is tiled if not set.
+   YPos = wypos                     ; The Y offset of the window on the display. The window is tiled if not set. 
 
     Compile_Opt idl2
     

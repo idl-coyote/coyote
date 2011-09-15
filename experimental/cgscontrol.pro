@@ -1,11 +1,11 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   cgControl
+;   cgsControl
 ;
 ; PURPOSE:
-;   Allows the user to set various properties of an cgWindow object. This is essentially
-;   a wrapper to the cgWindow SetProperty method.
+;   Allows the user to set various properties of an cgsWindow object. This is essentially
+;   a wrapper to the cgsWindow SetProperty method.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -37,17 +37,17 @@
 ;
 ;+
 ; :Description:
-;   Allows the user to set various properties of an cgWindow object. This is essentially
-;   a wrapper to the cgWindow SetProperty method.
+;   Allows the user to set various properties of an cgsWindow object. This is essentially
+;   a wrapper to the cgsWindow SetProperty method.
 ;
 ; :Categories:
 ;    Graphics
 ;    
 ; :Params:
 ;    selection: in, required, type=varies
-;       Normally, a window index number of an cgWindow application. But, the selection
+;       Normally, a window index number of an cgsWindow application. But, the selection
 ;       can be a widget identifier, an object reference, or a window title, depending on
-;       which keywords are set. The cgWindow matching the selection has its properties set.
+;       which keywords are set. The cgsWindow matching the selection has its properties set.
 ;       
 ; :Keywords:
 ;     all: in, optional, type=boolean
@@ -64,40 +64,40 @@
 ;         for which the action is desired.
 ;     create_bmp: in, optional, type='string', default='cgwindow.bmp'
 ;          Set this keyword to the name of a bitmap file to create automatically from the window.
-;          Using this keyword is a way to create a bitmap file programmatically from a cgWindow application.
+;          Using this keyword is a way to create a bitmap file programmatically from a cgsWindow application.
 ;          The raster file will be created via ImageMagick if im_raster has been set (default).
 ;     create_gif: in, optional, type='string', default='cgwindow.gif'
 ;          Set this keyword to the name of a GIF file to create automatically from the window.
-;          Using this keyword is a way to create a GIF file programmatically from a cgWindow application.
+;          Using this keyword is a way to create a GIF file programmatically from a cgsWindow application.
 ;          The raster file will be created via ImageMagick if im_raster has been set (default).
 ;     create_jpeg: in, optional, type='string', default='cgwindow.jpeg'
 ;          Set this keyword to the name of a JPEG file to create automatically from the window.
-;          Using this keyword is a way to create a JPEG file programmatically from a cgWindow application.
+;          Using this keyword is a way to create a JPEG file programmatically from a cgsWindow application.
 ;          The raster file will be created via ImageMagick if im_raster has been set (default).
 ;     create_png: in, optional, type='string', default='cgwindow.png'
 ;          Set this keyword to the name of a PNG file to create automatically from the window.
-;          Using this keyword is a way to create a PNG file programmatically from a cgWindow application.
+;          Using this keyword is a way to create a PNG file programmatically from a cgsWindow application.
 ;          The raster file will be created via ImageMagick if im_raster has been set (default).
 ;     create_ps: in, optional, type='string', default='cgwindow.ps'
 ;          Set this keyword to the name of a PostScript file to create automatically from the window.
-;          Using this keyword is a way to create a PostScript file programmatically from a cgWindow application.
+;          Using this keyword is a way to create a PostScript file programmatically from a cgsWindow application.
 ;     create_tiff: in, optional, type='string', default='cgwindow.tiff'
 ;          Set this keyword to the name of a TIFF file to create automatically from the window.
-;          Using this keyword is a way to create a TIFF file programmatically from a cgWindow application.
+;          Using this keyword is a way to create a TIFF file programmatically from a cgsWindow application.
 ;          The raster file will be created via ImageMagick if im_raster has been set (default).
 ;     delay: in, optional, type=float
 ;         Set this keyword to the amount of "delay" you want between commands in the command list.
 ;     deletecmd: in, optional, type=boolean
-;          Set this keyword to delete a command in the cgWindow. The keywords cmdIndex and All
+;          Set this keyword to delete a command in the cgsWindow. The keywords cmdIndex and All
 ;          are used in deleting the specified command.
 ;     destroy: in, optional, type=boolean
-;          Set this keyword to destroy the cgWindow program. This keyword should not be used
+;          Set this keyword to destroy the cgsWindow program. This keyword should not be used
 ;          with other keywords.
 ;     dimensions: in, optional, type=intarr(2)
 ;          Set this keyword to a two-element array giving the xsize and ysize
 ;          of the draw widget.
 ;     eraseit: in, optional, type=boolean
-;         If this property is set, the cgWindow erases with the background color before
+;         If this property is set, the cgsWindow erases with the background color before
 ;         displaying the commands in the window's command list.
 ;     execute: in, optional, type=boolean
 ;         Set this keyword to 1 to exectute the commands in the window's command list. 
@@ -110,7 +110,7 @@
 ;         The name of the keyword whose value you want to return in get_keyvalue. The name must
 ;         be spelled EXACTLY as you used the keyword, except that case does not matter. The string
 ;         is converted to UPPERCASE to locate the proper keyword. Although it was my intention to use
-;         this to retrieve output keyword values, this is not possible using cgWindow due to the way
+;         this to retrieve output keyword values, this is not possible using cgsWindow due to the way
 ;         Call_Procedure and keyword inheritance work.
 ;     get_keyvalue: out, optional, type=any
 ;         The value of the keyword specified in get_keyword. If the keyword cannot be found, this
@@ -170,9 +170,9 @@
 ;         Sets the !Y.OMargin system variable when multiple plots are displayed in the window.
 ;          
 ; :Examples:
-;    Used to set cgWindow properties::
-;       IDL> cgControl, Background='gray', EraseIt=1
-;       IDL> cgControl, Multi=[0,2,2]
+;    Used to set cgsWindow properties::
+;       IDL> cgsControl, Background='gray', EraseIt=1
+;       IDL> cgsControl, Multi=[0,2,2]
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -185,20 +185,13 @@
 ;
 ; :History:
 ;     Change History::
-;     Written, 28 January 2011. DWF.
-;     Added CREATE_PS keyword. 16 Feb 2011. DWF.
-;     Added PS_QUIET, GET_KEYCMDINDEX, GET_KEYWORD, and GET_KEYVALUE keywords. 17 Feb 2011. DWF.
-;     Added im_raster and the create_... raster options. 18 Feb 2011. Jeremy Bailin
-;     Added the ability to set and unset adjustable text size in 
-;        cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
-;     Added the ability to set the dimensions of the draw widget programmatically. 14 June 2011.
-;     Added PS_DECOMPOSED keyword to set the PostScript color mode. 30 Aug 2011. DWF.
-;     Added SAVE_VISUALIZATION and RESTORE_VISUALIZATION keywords. 15 Sept 2011. DWF.
+;        Written, 7 Sept 2011. DWF.
+;        Added SAVE_VISUALIZATION and RESTORE_VISUALIZATION keywords. 15 Sept 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-PRO cgControl, selection, $
+PRO cgsControl, selection, $
     ADJUSTSIZE=adjustsize, $                      ; Adjusts text size to fit display window size.
     ALL=all, $                                    ; Apply the command operation to all the commands (i.e., DeleteCMD)
     BACKGROUND=background, $                      ; Sets the background color of the window
@@ -221,7 +214,7 @@ PRO cgControl, selection, $
     GET_KEYVALUE=get_keyvalue, $                  ; Returns the keyword value. Will be undefined if the keyword is not found.
     LISTCMD=listCmd, $                            ; List a command or ALL commands.
     MULTI=multi, $                                ; Set the multiple property of the window. Identical to !P.Multi.
-    OBJECT=object, $                              ; If this keyword is set, the selection is an object reference.
+    OBJECTREF=objectref, $                        ; If this keyword is set, the selection is an object reference.
     TITLE=title, $                                ; If this keyword is set, the selection is the title.
     UPDATE=update, $                              ; If this keyword is set, the commands are immediately executed after properties are set.
     WIDGETID=widgetID, $                          ; If this keyword is set, the selection is a widget ID.
@@ -255,7 +248,7 @@ PRO cgControl, selection, $
    ENDIF
    
    ; Make sure there is something here to control.
-   void = cgQuery(COUNT=count)
+   void = cgsQuery(COUNT=count)
    IF count EQ 0 THEN RETURN
    
    ; Always update, unless told otherwise.
@@ -264,10 +257,10 @@ PRO cgControl, selection, $
    ; If there is no selection match, use the current window. If there
    ; is no current window, create one.
    IF N_Elements(selection) EQ 0 THEN BEGIN
-        selection = cgQuery(/CURRENT, COUNT=count)
+        selection = cgsQuery(/CURRENT, COUNT=count)
         IF count EQ 0 THEN BEGIN
-            cgWindow
-            selection = cgQuery(/CURRENT, COUNT=count)
+            cgsWindow
+            selection = cgsQuery(/CURRENT, COUNT=count)
         ENDIF
    ENDIF
    
@@ -276,11 +269,11 @@ PRO cgControl, selection, $
    IF Size(selection, /TNAME) EQ 'STRING' THEN title = 1
    
    ; Get the values you need.
-   wid = cgQuery(WIDGETID=tlb, OBJECT=objref, TITLE=titles, COUNT=count)
-   IF count EQ 0 THEN Message, 'There are no cgWindows currently on the display.', /Infomational
+   wid = cgsQuery(WIDGETID=tlb, OBJECTREF=objref, TITLE=titles, COUNT=count)
+   IF count EQ 0 THEN Message, 'There are no cgsWindows currently on the display.', /Infomational
    
    ; Get the window list.
-   list = !FSC_Window_List
+   list = !CGS_WINDOW_LIST
    
    ; Decide what to do based on the type of match.
    CASE 1 OF
@@ -288,25 +281,25 @@ PRO cgControl, selection, $
         Keyword_Set(widgetID): BEGIN
             index = Where(tlb EQ selection, selectCount)
             IF selectCount EQ 0 THEN $
-                Message, 'No cgWindow matches the selection criteria.', /Infomational
+                Message, 'No cgsWindow matches the selection criteria.', /Infomational
             END
             
-        Keyword_Set(object): BEGIN
+        Keyword_Set(objectref): BEGIN
             index = Where(objref EQ selection, selectCount)
             IF selectCount EQ 0 THEN $
-                Message, 'No cgWindow matches the selection criteria.', /Infomational
+                Message, 'No cgsWindow matches the selection criteria.', /Infomational
             END
             
         Keyword_Set(title): BEGIN
             index = Where(StrUpCase(titles) EQ StrUpCase(selection), selectCount)
             IF selectCount EQ 0 THEN $
-                Message, 'No cgWindow matches the selection criteria.', /Infomational
+                Message, 'No cgsWindow matches the selection criteria.', /Infomational
             END
 
         ELSE: BEGIN
             index = Where(wid EQ selection, selectCount)
             IF selectCount EQ 0 THEN $
-                Message, 'No cgWindow matches the selection criteria.', /Infomational
+                Message, 'No cgsWindow matches the selection criteria.', /Infomational
             END
    
    ENDCASE
@@ -387,7 +380,7 @@ PRO cgControl, selection, $
             filename = create_ps
             END
           (typeName EQ 'INT') && (create_ps[0] EQ 1): BEGIN
-               filename = 'cgwindow.ps'
+               filename = 'cgswindow.ps'
             END
           ELSE: Message, 'Incorrect input to CREATE_PS keyword.'
        ENDCASE
@@ -404,7 +397,7 @@ PRO cgControl, selection, $
             filename = create_bmp
             END
           (typeName EQ 'INT') && (create_bmp[0] EQ 1): BEGIN
-               filename = 'cgwindow.bmp'
+               filename = 'cgswindow.bmp'
             END
           ELSE: Message, 'Incorrect input to CREATE_BMP keyword.'
        ENDCASE
@@ -421,7 +414,7 @@ PRO cgControl, selection, $
             filename = create_gif
             END
           (typeName EQ 'INT') && (create_gif[0] EQ 1): BEGIN
-               filename = 'cgwindow.gif'
+               filename = 'cgswindow.gif'
             END
           ELSE: Message, 'Incorrect input to CREATE_GIF keyword.'
        ENDCASE
@@ -438,7 +431,7 @@ PRO cgControl, selection, $
             filename = create_jpeg
             END
           (typeName EQ 'INT') && (create_jpeg[0] EQ 1): BEGIN
-               filename = 'cgwindow.jpeg'
+               filename = 'cgswindow.jpeg'
             END
           ELSE: Message, 'Incorrect input to CREATE_JPEG keyword.'
        ENDCASE
@@ -455,7 +448,7 @@ PRO cgControl, selection, $
             filename = create_png
             END
           (typeName EQ 'INT') && (create_png[0] EQ 1): BEGIN
-               filename = 'cgwindow.png'
+               filename = 'cgswindow.png'
             END
           ELSE: Message, 'Incorrect input to CREATE_PNG keyword.'
        ENDCASE
@@ -472,14 +465,14 @@ PRO cgControl, selection, $
             filename = create_tiff
             END
           (typeName EQ 'INT') && (create_tiff[0] EQ 1): BEGIN
-               filename = 'cgwindow.tiff'
+               filename = 'cgswindow.tiff'
             END
           ELSE: Message, 'Incorrect input to CREATE_TIFF keyword.'
        ENDCASE
        
        IF Obj_Valid(objref[index]) THEN objref[index] -> AutoRasterFile, 'TIFF', filename 
    ENDIF
-   
+    
    ; Are you saving a visualization?
    IF N_Elements(save_visualization) NE 0 THEN BEGIN
    

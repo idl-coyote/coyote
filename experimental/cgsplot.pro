@@ -1,3 +1,70 @@
+;
+; :Description:
+;     This method evaluates a keyword structure and creates a new keyword list
+;     with the evaluated values.
+;
+FUNCTION cgsPlot::EvaluateKeywords, keywords, SUCCESS=success
+
+  ; Error handling.
+  Catch, theError
+  IF theError NE 0 THEN BEGIN
+     Catch, /CANCEL
+     success = 0
+     void = Error_Message()
+     IF N_Elements(keywords) NE 0 THEN RETURN, keywords ELSE RETURN, 0
+  ENDIF
+  
+  Compile_Opt idl2
+  
+  ; Assume success.
+  success = 1
+  
+  ; Need to have keywords.
+  IF N_Elements(keywords) EQ 0 THEN $
+      Message, 'A keyword structure must be passed to the method.'
+
+  ; Get the keyword names.
+  tags = Tag_Names(keywords)
+  
+  ; Find the keywords to be evaluated in this keyword structure.
+  evalTags = Tag_Names(*self.altps_keywords)
+  theseTags = Ptr_New(/Allocate_Heap)
+  FOR j=0,N_Elements(evalTags)-1 DO BEGIN
+     index = Where(tags EQ evalTags[j], count)
+     IF (count EQ 1) THEN BEGIN
+        IF N_Elements(*theseTags) NE 0 THEN *theseTags = [*theseTags, index] ELSE *theseTags = [index] 
+     ENDIF ELSE IF count GT 1 THEN Message, 'Ambiguous keywords to evaluate.'
+  ENDFOR
+  
+  ; Evaluate the keywords and, if necessary, replace the keyword value
+  ; with the evaluated value. The evaluated keyword value must initially be a 
+  ; STRING that can be evaluated with the EXECUTE command.
+  FOR j=0,N_Elements(tags)-1 DO BEGIN
+    index = Where(*theseTags EQ j, count)
+    IF count EQ 0 THEN BEGIN
+      IF N_Elements(mkeys) EQ 0 THEN BEGIN
+        mkeys = Create_Struct(tags[j], keywords.(j)) 
+      ENDIF ELSE BEGIN
+        mkeys = Create_Struct(mkeys, tags[j], keywords.(j))
+      ENDELSE
+    ENDIF ELSE BEGIN
+    
+      ; If this is PostScript, use the alternative keyword value.
+      tagValue = (!D.Name EQ 'PS') ? (*self.altps_keywords).(index) : keywords.(j)
+      IF N_Elements(mkeys) EQ 0 THEN BEGIN
+        mkeys = Create_Struct(tags[j], tagValue)
+      ENDIF ELSE BEGIN
+        mkeys = Create_Struct(mkeys, tags[j], tagValue)
+      ENDELSE
+    ENDELSE
+    
+  ENDFOR
+ 
+  Ptr_Free, theseTags
+  RETURN, mkeys
+END ;----------------------------------------------------------------------------------------------------------------
+
+
 PRO cgsPlot::SetData, x, y, NODRAW=nodraw
 
     ; Error handling.
@@ -84,6 +151,7 @@ PRO cgsPlot::Save, filename, RESOLUTION=resolution
        IM_Options = d_im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
        
        ; PostScript properties.
+       PS_Decomposed = d_ps_decomposed, $                ; Set the PS color decomposition state.
        PS_Delete = d_ps_delete, $                        ; Delete PS file when making IM raster.
        PS_Metric = d_ps_metric, $                        ; Select metric measurements in PostScript output.
        PS_Encapsulated = d_ps_encapsulated, $            ; Create Encapsulated PostScript output.    
@@ -117,6 +185,7 @@ PRO cgsPlot::Save, filename, RESOLUTION=resolution
            ; Create a PostScript file first.
            thisname = Filepath(ROOT_Dir=dirName, rootName + '.ps')
            PS_Start, FILENAME=thisname, $
+                DECOMPOSED=d_ps_decomposed, $
                 METRIC=d_ps_metric, $
                 SCALE_FACTOR=d_ps_scale_factor, $
                 CHARSIZE=d_ps_charsize, $
@@ -175,6 +244,7 @@ PRO cgsPlot::PS, filename, GUI=gui
     ; Get the global CGS PostScript defaults.
     cgWindow_GetDefs, $
        ; PostScript properties.
+       PS_Decomposed = d_ps_decomposed, $                ; Set the PS color decomposition state.
        PS_Delete = d_ps_delete, $                        ; Delete PS file when making IM raster.
        PS_Metric = d_ps_metric, $                        ; Select metric measurements in PostScript output.
        PS_Encapsulated = d_ps_encapsulated, $            ; Create Encapsulated PostScript output.    
@@ -186,6 +256,7 @@ PRO cgsPlot::PS, filename, GUI=gui
 
     ; Allow the user to configure the PostScript file.
     PS_Start, GUI=Keyword_Set(gui), CANCEL=cancelled, FILENAME=filename, $
+                DECOMPOSED=d_ps_decomposed, $
                 METRIC=d_ps_metric, $
                 SCALE_FACTOR=d_ps_scale_factor, $
                 CHARSIZE=d_ps_charsize, $
@@ -212,6 +283,7 @@ PRO cgsPlot::Draw, SUCCESS=success
         Catch, /Cancel
         Print, 'Problem executing cgsPlot command:'
         Print, '   ' + !Error_State.MSG
+        void = Error_Message()
         success = 0
         RETURN
     ENDIF
@@ -223,8 +295,34 @@ PRO cgsPlot::Draw, SUCCESS=success
     ; carries a valid WinObject, then it should ask the window to draw
     ; its commands.
     IF self.update THEN BEGIN
+    
+        ; Get the keywords.
+        keywords = self -> GetKeywords()
+        
+        ; Do we have alternative parameters?
+        IF Ptr_Valid(self.altps_params) THEN BEGIN
+        
+            altTags = Tag_Names(*self.altps_params)
+            IF (Where(altTags EQ 'P1') NE -1) THEN BEGIN
+                IF (!D.Name EQ 'PS') $
+                    THEN p1 = (*self.altps_params).p1 $
+                    ELSE IF Ptr_Valid(self.indep) THEN p1 = *self.indep
+            ENDIF ELSE IF Ptr_Valid(self.indep) THEN p1 = *self.indep
+            IF (Where(altTags EQ 'P2') NE -1) THEN BEGIN
+                IF (!D.Name EQ 'PS') $
+                    THEN p2 = (*self.altps_params).p2 $
+                    ELSE IF Ptr_Valid(self.dep) THEN p2 = *self.dep
+            ENDIF ELSE IF Ptr_Valid(self.dep) THEN p2 = *self.dep
+        
+        ENDIF ELSE BEGIN
+            IF Ptr_Valid(self.indep) THEN p1 = *self.indep
+            IF Ptr_Valid(self.dep) THEN p2 = *self.dep
+        ENDELSE
+
+        ; Set the current window.
         IF Obj_Valid(self.winObject) THEN self.winObject -> SetWindow
-        cgPlot, *self.dep, *self.indep, _EXTRA=self->getKeywords()
+
+        cgPlot, p1, p2, _EXTRA=keywords
     ENDIF
     
 END ; ----------------------------------------------------------------------  
@@ -267,6 +365,12 @@ FUNCTION cgsPlot::GetKeywords
     superKeywords = self -> cgsGraphic::GetKeywords()
     keywordStruct = Create_Struct(keywordStruct, superKeywords)
     
+    ; Do you have any alternative PostScript keywords?
+    IF Ptr_Valid(self.altps_keywords) THEN BEGIN
+        ps_keywords = self -> EvaluateKeywords(keywordStruct, SUCCESS=success)
+        IF success THEN keywordStruct = Temporary(ps_keywords)
+    ENDIF
+        
     RETURN, keywordStruct
     
 END ; ----------------------------------------------------------------------  
@@ -326,6 +430,8 @@ END ; ----------------------------------------------------------------------
 
 
 PRO cgsPlot::SetProperty, $
+    AltPS_Keywords=altps_Keywords, $ 
+    AltPS_Params=altps_Params, $     
     ASPECT=aspect, $
     AXISCOLOR=axiscolor, $
     ISOTROPIC=isotropic, $
@@ -352,9 +458,12 @@ PRO cgsPlot::SetProperty, $
     ENDIF
     
     ; Set superclass keywords.
-    IF N_Elements(extraKeywords) NE 0 THEN self -> cgsGraphic::SetProperty, _STRICT_EXTRA=extraKeywords
-  
+    IF N_Elements(extraKeywords) NE 0 THEN BEGIN
+        self -> cgsGraphic::SetProperty, AltPS_Keywords=altps_Keywords, _STRICT_EXTRA=extraKeywords
+    ENDIF
+    
     ; Set the properties of the object.
+    IF N_Elements(altps_Params) NE 0 THEN self.altps_Params = Ptr_New(altps_Params)
     IF (N_Elements(aspect) NE 0) $
         THEN self.aspect = Ptr_New(aspect) $
         ELSE IF ~Ptr_Valid(self.aspect) THEN self.aspect = Ptr_New(/ALLOCATE_HEAP)
@@ -398,12 +507,15 @@ PRO cgsPlot::CLEANUP
     Ptr_Free, self.layout
     Ptr_Free, self.max_value
     Ptr_Free, self.min_value
+    Ptr_Free, self.altps_params
     self -> cgsGraphic::CLEANUP
   
 END ; ----------------------------------------------------------------------  
 
 
 FUNCTION cgsPlot::INIT, x, y, $
+    ALTPS_KEYWORDS=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
+    ALTPS_PARAMS=altps_Params, $     ; A structure of PostScript alternative parameters and values. 
     ASPECT=aspect, $
     AXISCOLOR=axiscolor, $
     ISOTROPIC=isotropic, $
@@ -428,7 +540,7 @@ FUNCTION cgsPlot::INIT, x, y, $
     ENDIF
  
     ; Initialize sub-class objects.
-    ok = self -> cgsGraphic::INIT(_EXTRA=extraKeywords) 
+    ok = self -> cgsGraphic::INIT(_EXTRA=extraKeywords, ALTPS_KEYWORDS=altps_keywords) 
     IF ~ok THEN Message, 'Cannot initialize cgsGraphic superclass object.'
         
      ; Sort out which is the dependent and which is independent data.
@@ -452,6 +564,7 @@ FUNCTION cgsPlot::INIT, x, y, $
     IF N_Elements(axiscolor) EQ 0 THEN axiscolor = 'black'
     IF N_Elements(symcolor) EQ 0 THEN symcolor = self.color
     self -> SetProperty, $
+        ALTPS_PARAMS=altps_params, $
         ASPECT=aspect, $
         AXISCOLOR=axiscolor, $
         ISOTROPIC=isotropic, $
@@ -475,6 +588,7 @@ PRO cgsPlot__DEFINE, class
 
          class = { CGSPLOT, $
                    INHERITS cgsGraphic, $
+                   altps_params: Ptr_New(), $
                    indep: Ptr_New(), $
                    dep: Ptr_New(), $
                    aspect: Ptr_New(), $
@@ -496,6 +610,8 @@ END ; ----------------------------------------------------------------------
 
 
 FUNCTION cgsPlot, x, y, $
+    ALTPS_KEYWORDS=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
+    ALTPS_PARAMS=altps_Params, $     ; A structure of PostScript alternative parameters and values. 
     ASPECT=aspect, $
     AXISCOLOR=axiscolor, $
     CURRENT=current, $              ; If set, add the command to the current graphics window.
@@ -532,7 +648,9 @@ FUNCTION cgsPlot, x, y, $
     ENDCASE
 
         
-    plotObject = Obj_New('cgsPlot', dep, indep, $
+    plotObject = Obj_New('cgsPlot', indep, dep, $
+        ALTPS_KEYWORDS=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
+        ALTPS_PARAMS=altps_Params, $     ; A structure of PostScript alternative parameters and values. 
         ASPECT=aspect, $
         AXISCOLOR=axiscolor, $
         ISOTROPIC=isotropic, $
@@ -550,6 +668,7 @@ FUNCTION cgsPlot, x, y, $
         _EXTRA=extraKeywords)
         
     plotObject -> GetProperty, Layout=t
+    
     ; If the CURRENT keyword is set, check to see if there is a current
     ; graphics window you can add this to. Otherwise, create a new window.
     ; If NOWINDOW is set, skip this part and just draw yourself.

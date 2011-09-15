@@ -185,6 +185,7 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
 
            ; Create a PostScript file first.
            PS_Start, $
+                DECOMPOSED=self.ps_decomposed, $
                 FILENAME=thisname, $
                 EUROPEAN=self.ps_metric, $
                 KEYWORDS=keywords, $ ; Returned PSConfig keywords.
@@ -880,6 +881,7 @@ PRO FSC_CmdWindow::SaveAsRaster, event
            ; Create a PostScript file first.
            thisname = outname + '.ps'
            PS_Start, $
+                DECOMPOSED=self.ps_decomposed, $
                 FILENAME=thisname, $
                 EUROPEAN=self.ps_metric, $
                 KEYWORDS=keywords, $ ; Returned PSConfig keywords.
@@ -2117,7 +2119,8 @@ END ;---------------------------------------------------------------------------
 ;            arguments in structures that can be used at run-time to supply alternative values.
 ;            As before, this is explained in detail at http://www.idlcoyote.com/cg_tips/kwexpressions.php.
 ;            1 Sept 2011. DWF.
-;   
+;         Missed a couple of places to set decomposition color mode. 7 Sept 2011. DWF.
+;         
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-

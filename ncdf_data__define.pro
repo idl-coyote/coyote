@@ -858,7 +858,6 @@ PRO NCDF_DATA::ParseFile
             
             ; This code is not quite ready. Bypassing this for the moment.
             ;self -> Parse_HDF_EOS_File
-            self -> Parse_HDF_File
         ENDIF ELSE self -> Parse_HDF_File
         RETURN
    ENDIF
@@ -1057,8 +1056,7 @@ PRO NCDF_DATA::Parse_HDF_File
           theAttributes[j].name = attribute_name
           IF N_Elements(theAttribute) EQ 1 THEN theAttribute = theAttribute[0]
           theAttributes[j].value = Ptr_New(theAttribute)
-          help, theAttribute
-      ENDFOR
+       ENDFOR
       self.theAttributes = Ptr_New(theAttributes, /No_Copy)
    ENDIF
 
@@ -1186,221 +1184,223 @@ PRO NCDF_DATA::Parse_HDF_EOS_File
    ok = EOS_Query(filename, info)
    
    ; Process the swaths first.
-   theSwaths = Replicate({NCDF_DATA_SWATH}, info.num_swaths)
-   FOR j=0, info.num_swaths-1 DO BEGIN
-        swathNames = StrSplit(info.swath_names, ',', /EXTRACT)
-        fileID = EOS_SW_OPEN(filename, /READ)
-        swathID = EOS_SW_Attach(fileID, swathNames[j])
-        Print, 'Swath Name: ', swathNames[j]
-        theSwaths[j].name = swathNames[j]
-        nattr = EOS_SW_INQATTRS(swathID, attrlist)
-        IF nattr GT 0 THEN BEGIN
-            theAttributes = Replicate({NCDF_DATA_ATTRIBUTE}, nattr)
-            attrNames = StrSplit(attrlist, ',', /EXTRACT)
-            FOR k=0,nattr-1 DO BEGIN
-                ok = EOS_SW_READATTR(swathID, attrNames[k], attrValue)
-                theAttributes[k].name = attrNames[k]
-                theAttributes[k].attrType = 'SWATH ATTRIBUTE'
-                theAttributes[k].datatype = Size(attrValue, /TNAME)
-                theAttributes[k].length = N_Elements(attrValue)
-                IF N_Elements(attrValue) EQ 1 THEN attrValue = attrValue[0]
-                theAttributes[k].value = Ptr_New(attrValue)
-                Help, attrValue
-            ENDFOR
-            theSwaths[j].attributes = Ptr_New(theAttributes)
-            theSwaths[j].nattrs = nattr
-        ENDIF
-        ndims = EOS_SW_INQDIMS(swathID, dimslist, dimSize)
-        IF ndims GT 0 THEN BEGIN
-           dimNames = StrSplit(dimslist, ',', /EXTRACT)
-           theDimensions = Replicate({NCDF_DATA_DIMENSION}, ndims)
-            FOR k=0,ndims-1 DO BEGIN
-                theDimensions[k].name = dimNames[k]
-                theDimensions[k].value = dimSize[k]
-            ENDFOR
-            theSwaths[j].dimensions = Ptr_New(theDimensions)
-            theSwaths[j].ndims = ndims
-        ENDIF
-        ngeofields = EOS_SW_INQGEOFIELDS(swathID, geofieldslist, rank, numbertype)
-        IF ngeofields GT 0 THEN BEGIN
-           geoFieldNames = StrSplit(geofieldslist, ',', /EXTRACT)
-           theGeoFields = Replicate({NCDF_DATA_VARIABLE}, ngeofields)
-            FOR k=0,ngeofields-1 DO BEGIN
-
-                ; Get information about the variable.
-                sdFileID = HDF_SD_START(filename)
-                sdIndex = HDF_SD_NameToIndex(sdFileID, geoFieldNames[k])
-                sdID = HDF_SD_Select(sdFileID, sdIndex)
-             
-                ; This routine throws all kinds of scary messages if CALDATA, for example, is
-                ; not in the file. Turn this off for this call.
-                !QUIET = 1
-                HDF_SD_GetInfo, sdID, DIMS=dims, NAME=name, NATTS=natts, NDIMS=ndims, $
-                    RANGE=range, TYPE=datatype, CALDATA=calData
-                !QUIET = 0
-             
-                theGeoFields[k].name = geoFieldNames[k]
-                theGeoFields[k].datatype = datatype
-                theGeoFields[k].calibration = Ptr_New(calData)
-                theGeoFields[k].datasize = Ptr_New(dims)
-                IF N_Elements(range) NE 0 THEN BEGIN
-                    theGeoFields[k].minValue = range[0]
-                    theGeoFields[k].maxValue = range[1]
-                    Undefine, range ; Do this so it is not hanging around for the next variable.
-                ENDIF ELSE BEGIN
-                    IF self.no_read_on_parse THEN BEGIN
-                        theGeoFields[k].minValue = !VALUES.F_NAN
-                        theGeoFields[k].maxValue = !VALUES.F_NAN             
+   IF info.num_swaths GT 0 THEN BEGIN
+       theSwaths = Replicate({NCDF_DATA_SWATH}, info.num_swaths)
+       FOR j=0, info.num_swaths-1 DO BEGIN
+            swathNames = StrSplit(info.swath_names, ',', /EXTRACT)
+            fileID = EOS_SW_OPEN(filename, /READ)
+            swathID = EOS_SW_Attach(fileID, swathNames[j])
+            Print, 'Swath Name: ', swathNames[j]
+            theSwaths[j].name = swathNames[j]
+            nattr = EOS_SW_INQATTRS(swathID, attrlist)
+            IF nattr GT 0 THEN BEGIN
+                theAttributes = Replicate({NCDF_DATA_ATTRIBUTE}, nattr)
+                attrNames = StrSplit(attrlist, ',', /EXTRACT)
+                FOR k=0,nattr-1 DO BEGIN
+                    ok = EOS_SW_READATTR(swathID, attrNames[k], attrValue)
+                    theAttributes[k].name = attrNames[k]
+                    theAttributes[k].attrType = 'SWATH ATTRIBUTE'
+                    theAttributes[k].datatype = Size(attrValue, /TNAME)
+                    theAttributes[k].length = N_Elements(attrValue)
+                    IF N_Elements(attrValue) EQ 1 THEN attrValue = attrValue[0]
+                    theAttributes[k].value = Ptr_New(attrValue)
+                    Help, attrValue
+                ENDFOR
+                theSwaths[j].attributes = Ptr_New(theAttributes)
+                theSwaths[j].nattrs = nattr
+            ENDIF
+            ndims = EOS_SW_INQDIMS(swathID, dimslist, dimSize)
+            IF ndims GT 0 THEN BEGIN
+               dimNames = StrSplit(dimslist, ',', /EXTRACT)
+               theDimensions = Replicate({NCDF_DATA_DIMENSION}, ndims)
+                FOR k=0,ndims-1 DO BEGIN
+                    theDimensions[k].name = dimNames[k]
+                    theDimensions[k].value = dimSize[k]
+                ENDFOR
+                theSwaths[j].dimensions = Ptr_New(theDimensions)
+                theSwaths[j].ndims = ndims
+            ENDIF
+            ngeofields = EOS_SW_INQGEOFIELDS(swathID, geofieldslist, rank, numbertype)
+            IF ngeofields GT 0 THEN BEGIN
+               geoFieldNames = StrSplit(geofieldslist, ',', /EXTRACT)
+               theGeoFields = Replicate({NCDF_DATA_VARIABLE}, ngeofields)
+                FOR k=0,ngeofields-1 DO BEGIN
+    
+                    ; Get information about the variable.
+                    sdFileID = HDF_SD_START(filename)
+                    sdIndex = HDF_SD_NameToIndex(sdFileID, geoFieldNames[k])
+                    sdID = HDF_SD_Select(sdFileID, sdIndex)
+                 
+                    ; This routine throws all kinds of scary messages if CALDATA, for example, is
+                    ; not in the file. Turn this off for this call.
+                    !QUIET = 1
+                    HDF_SD_GetInfo, sdID, DIMS=dims, NAME=name, NATTS=natts, NDIMS=ndims, $
+                        RANGE=range, TYPE=datatype, CALDATA=calData
+                    !QUIET = 0
+                 
+                    theGeoFields[k].name = geoFieldNames[k]
+                    theGeoFields[k].datatype = datatype
+                    theGeoFields[k].calibration = Ptr_New(calData)
+                    theGeoFields[k].datasize = Ptr_New(dims)
+                    IF N_Elements(range) NE 0 THEN BEGIN
+                        theGeoFields[k].minValue = range[0]
+                        theGeoFields[k].maxValue = range[1]
+                        Undefine, range ; Do this so it is not hanging around for the next variable.
                     ENDIF ELSE BEGIN
-                        HDF_SD_GetData, sdID, data
-                        IF calData.cal NE 0 THEN BEGIN
-                            data = calData.cal * (Temporary(data) - calData.offset)
-                        ENDIF
-                        minData = Min(data, MAX=maxData)
-                        theGeoFields[k].minValue = minData
-                        theGeoFields[k].maxValue = maxData
-                        Undefine, data
-                     ENDELSE
-                ENDELSE
-              
-                ; If this variable has attributes, get those, too.
-                ; If this variable has attributes, get those, too.
-                IF natts GT 0 THEN BEGIN
-                     varAttributes = Replicate({NCDF_DATA_ATTRIBUTE}, natts+1)
-                     FOR m=0,natts-1 DO BEGIN
-                         HDF_SD_ATTRINFO, sdID, m, DATA=theAttribute, NAME=attribute_name, TYPE=attribute_datatype
-                                 
-                         varAttributes[m].attrType = StrUpCase(name)
-                         varAttributes[m].dataType = attribute_datatype
-                         varAttributes[m].length = N_Elements(theAttribute)
-                         varAttributes[m].name = attribute_name
-                         IF N_Elements(theAttribute) EQ 1 THEN theAttribute = theAttribute[0]
-                         varAttributes[m].value = Ptr_New(theAttribute)
-                     ENDFOR
-                   
-                     ; Add the calibration data as an attibute.
-                     IF calData.cal EQ 0 THEN BEGIN
-                        varAttributes[natts].attrType = StrUpCase(name)
-                        varAttributes[natts].dataType = 'STRING'
-                        varAttributes[natts].length = 0
-                        varAttributes[natts].name = '_calibration_data'
-                        varAttributes[natts].value = Ptr_New('Not Present in File')               
-                     ENDIF ELSE BEGIN
-                        varAttributes[natts].attrType = StrUpCase(name)
-                        varAttributes[natts].dataType = 'STRUCT'
-                        varAttributes[natts].length = N_Tags(calData, /Length)
-                        varAttributes[natts].name = '_calibration_data'
-                        varAttributes[natts].value = Ptr_New(calData)
-                     ENDELSE
-                   
-                     theGeoFields[k].var_attributes = Ptr_New(varAttributes)
-                 ENDIF
-                 theSwaths[j].ngeoFields = ngeoFields
-                 HDF_SD_EndAccess, sdID
-            ENDFOR
-        ENDIF
-        ndatafields = EOS_SW_INQDATAFIELDS(swathID, datafieldslist, rank, numbertype)
-        IF ndatafields GT 0 THEN BEGIN
-           dataFieldNames = StrSplit(datafieldslist, ',', /EXTRACT)
-           theDataFields = Replicate({NCDF_DATA_VARIABLE}, ndatafields)
-            FOR k=0,ndatafields-1 DO BEGIN
-
-                ; Get information about the variable.
-                sdFileID = HDF_SD_START(filename)
-                sdIndex = HDF_SD_NameToIndex(sdFileID, dataFieldNames[k])
-                sdID = HDF_SD_Select(sdFileID, sdIndex)
-             
-                ; This routine throws all kinds of scary messages if CALDATA, for example, is
-                ; not in the file. Turn this off for this call.
-                !QUIET = 1
-                HDF_SD_GetInfo, sdID, DIMS=dims, NAME=name, NATTS=natts, NDIMS=ndims, $
-                    RANGE=range, TYPE=datatype, CALDATA=calData
-                !QUIET = 0
-             Print, 'number of swath dataset attributes for variable ' + name + ': ', natts
-                theDataFields[k].name = dataFieldNames[k]
-                theDataFields[k].datatype = datatype
-                theDataFields[k].calibration = Ptr_New(calData)
-                theDataFields[k].datasize = Ptr_New(dims)
-                IF N_Elements(range) NE 0 THEN BEGIN
-                    theDataFields[k].minValue = range[0]
-                    theDataFields[k].maxValue = range[1]
-                    Undefine, range ; Do this so it is not hanging around for the next variable.
-                ENDIF ELSE BEGIN
-                    IF self.no_read_on_parse THEN BEGIN
-                        theDataFields[k].minValue = !VALUES.F_NAN
-                        theDataFields[k].maxValue = !VALUES.F_NAN             
+                        IF self.no_read_on_parse THEN BEGIN
+                            theGeoFields[k].minValue = !VALUES.F_NAN
+                            theGeoFields[k].maxValue = !VALUES.F_NAN             
+                        ENDIF ELSE BEGIN
+                            HDF_SD_GetData, sdID, data
+                            IF calData.cal NE 0 THEN BEGIN
+                                data = calData.cal * (Temporary(data) - calData.offset)
+                            ENDIF
+                            minData = Min(data, MAX=maxData)
+                            theGeoFields[k].minValue = minData
+                            theGeoFields[k].maxValue = maxData
+                            Undefine, data
+                         ENDELSE
+                    ENDELSE
+                  
+                    ; If this variable has attributes, get those, too.
+                    ; If this variable has attributes, get those, too.
+                    IF natts GT 0 THEN BEGIN
+                         varAttributes = Replicate({NCDF_DATA_ATTRIBUTE}, natts+1)
+                         FOR m=0,natts-1 DO BEGIN
+                             HDF_SD_ATTRINFO, sdID, m, DATA=theAttribute, NAME=attribute_name, TYPE=attribute_datatype
+                                     
+                             varAttributes[m].attrType = StrUpCase(name)
+                             varAttributes[m].dataType = attribute_datatype
+                             varAttributes[m].length = N_Elements(theAttribute)
+                             varAttributes[m].name = attribute_name
+                             IF N_Elements(theAttribute) EQ 1 THEN theAttribute = theAttribute[0]
+                             varAttributes[m].value = Ptr_New(theAttribute)
+                         ENDFOR
+                       
+                         ; Add the calibration data as an attibute.
+                         IF calData.cal EQ 0 THEN BEGIN
+                            varAttributes[natts].attrType = StrUpCase(name)
+                            varAttributes[natts].dataType = 'STRING'
+                            varAttributes[natts].length = 0
+                            varAttributes[natts].name = '_calibration_data'
+                            varAttributes[natts].value = Ptr_New('Not Present in File')               
+                         ENDIF ELSE BEGIN
+                            varAttributes[natts].attrType = StrUpCase(name)
+                            varAttributes[natts].dataType = 'STRUCT'
+                            varAttributes[natts].length = N_Tags(calData, /Length)
+                            varAttributes[natts].name = '_calibration_data'
+                            varAttributes[natts].value = Ptr_New(calData)
+                         ENDELSE
+                       
+                         theGeoFields[k].var_attributes = Ptr_New(varAttributes)
+                     ENDIF
+                     theSwaths[j].ngeoFields = ngeoFields
+                     HDF_SD_EndAccess, sdID
+                ENDFOR
+            ENDIF
+            ndatafields = EOS_SW_INQDATAFIELDS(swathID, datafieldslist, rank, numbertype)
+            IF ndatafields GT 0 THEN BEGIN
+               dataFieldNames = StrSplit(datafieldslist, ',', /EXTRACT)
+               theDataFields = Replicate({NCDF_DATA_VARIABLE}, ndatafields)
+                FOR k=0,ndatafields-1 DO BEGIN
+    
+                    ; Get information about the variable.
+                    sdFileID = HDF_SD_START(filename)
+                    sdIndex = HDF_SD_NameToIndex(sdFileID, dataFieldNames[k])
+                    sdID = HDF_SD_Select(sdFileID, sdIndex)
+                 
+                    ; This routine throws all kinds of scary messages if CALDATA, for example, is
+                    ; not in the file. Turn this off for this call.
+                    !QUIET = 1
+                    HDF_SD_GetInfo, sdID, DIMS=dims, NAME=name, NATTS=natts, NDIMS=ndims, $
+                        RANGE=range, TYPE=datatype, CALDATA=calData
+                    !QUIET = 0
+                 Print, 'number of swath dataset attributes for variable ' + name + ': ', natts
+                    theDataFields[k].name = dataFieldNames[k]
+                    theDataFields[k].datatype = datatype
+                    theDataFields[k].calibration = Ptr_New(calData)
+                    theDataFields[k].datasize = Ptr_New(dims)
+                    IF N_Elements(range) NE 0 THEN BEGIN
+                        theDataFields[k].minValue = range[0]
+                        theDataFields[k].maxValue = range[1]
+                        Undefine, range ; Do this so it is not hanging around for the next variable.
                     ENDIF ELSE BEGIN
-                        HDF_SD_GetData, sdID, data
-                        IF calData.cal NE 0 THEN BEGIN
-                            data = calData.cal * (Temporary(data) - calData.offset)
-                        ENDIF
-                        minData = Min(data, MAX=maxData)
-                        theGeoFields[k].minValue = minData
-                        theGeoFields[k].maxValue = maxData
-                        Undefine, data
-                     ENDELSE
-                ENDELSE
-              
-                ; If this variable has attributes, get those, too.
-                ; If this variable has attributes, get those, too.
-                IF natts GT 0 THEN BEGIN
-                     varAttributes = Replicate({NCDF_DATA_ATTRIBUTE}, natts+1)
-                     FOR m=0,natts-1 DO BEGIN
-                         HDF_SD_ATTRINFO, sdID, m, DATA=theAttribute, NAME=attribute_name, TYPE=attribute_datatype
-                                 
-                         varAttributes[m].attrType = StrUpCase(name)
-                         varAttributes[m].dataType = attribute_datatype
-                         varAttributes[m].length = N_Elements(theAttribute)
-                         varAttributes[m].name = attribute_name
-                         IF N_Elements(theAttribute) EQ 1 THEN theAttribute = theAttribute[0]
-                         varAttributes[m].value = Ptr_New(theAttribute)
-                     ENDFOR
-                   
-                     ; Add the calibration data as an attibute.
-                     IF calData.cal EQ 0 THEN BEGIN
-                        varAttributes[natts].attrType = StrUpCase(name)
-                        varAttributes[natts].dataType = 'STRING'
-                        varAttributes[natts].length = 0
-                        varAttributes[natts].name = '_calibration_data'
-                        varAttributes[natts].value = Ptr_New('Not Present in File')               
-                     ENDIF ELSE BEGIN
-                        varAttributes[natts].attrType = StrUpCase(name)
-                        varAttributes[natts].dataType = 'STRUCT'
-                        varAttributes[natts].length = N_Tags(calData, /Length)
-                        varAttributes[natts].name = '_calibration_data'
-                        varAttributes[natts].value = Ptr_New(calData)
-                     ENDELSE
-                   
-                     theDataFields[k].var_attributes = Ptr_New(varAttributes)
-                 ENDIF
-                 theSwaths[j].ndataFields = ndataFields
-                 HDF_SD_EndAccess, sdID
-            ENDFOR
-        ENDIF
-        nmaps = EOS_SW_INQMAPS(swathID, mapslist, offset, increment)
-        theSwaths[j].nmaps = nmaps
-        IF nmaps GT 0 THEN BEGIN
-           mapNames = StrSplit(mapslist, ',', /EXTRACT)
-            FOR k=0,nmaps-1 DO BEGIN
-                Print, 'Map Name: ', mapNames[k], $
-                    '   Offset: ', offset[k], '   Increment: ', increment[k]
-            ENDFOR
-            Print, ''
-        ENDIF
-        nidxmaps = EOS_SW_INQIDXMAPS(swathID, mapslist, sizes)
-        theSwaths[j].nidxmaps = nidxmaps
-        IF nidxmaps GT 0 THEN BEGIN
-           mapNames = StrSplit(mapslist, ',', /EXTRACT)
-            FOR k=0,nidxmaps-1 DO BEGIN
-                Print, 'Map Name: ', mapNames[k], '   Size: ', sizes[k]
-            ENDFOR
-            Print, ''
-        ENDIF
-        ok = EOS_SW_DETACH(swathID)
-        ok = EOS_SW_CLOSE(fileID)
-    ENDFOR 
+                        IF self.no_read_on_parse THEN BEGIN
+                            theDataFields[k].minValue = !VALUES.F_NAN
+                            theDataFields[k].maxValue = !VALUES.F_NAN             
+                        ENDIF ELSE BEGIN
+                            HDF_SD_GetData, sdID, data
+                            IF calData.cal NE 0 THEN BEGIN
+                                data = calData.cal * (Temporary(data) - calData.offset)
+                            ENDIF
+                            minData = Min(data, MAX=maxData)
+                            theGeoFields[k].minValue = minData
+                            theGeoFields[k].maxValue = maxData
+                            Undefine, data
+                         ENDELSE
+                    ENDELSE
+                  
+                    ; If this variable has attributes, get those, too.
+                    ; If this variable has attributes, get those, too.
+                    IF natts GT 0 THEN BEGIN
+                         varAttributes = Replicate({NCDF_DATA_ATTRIBUTE}, natts+1)
+                         FOR m=0,natts-1 DO BEGIN
+                             HDF_SD_ATTRINFO, sdID, m, DATA=theAttribute, NAME=attribute_name, TYPE=attribute_datatype
+                                     
+                             varAttributes[m].attrType = StrUpCase(name)
+                             varAttributes[m].dataType = attribute_datatype
+                             varAttributes[m].length = N_Elements(theAttribute)
+                             varAttributes[m].name = attribute_name
+                             IF N_Elements(theAttribute) EQ 1 THEN theAttribute = theAttribute[0]
+                             varAttributes[m].value = Ptr_New(theAttribute)
+                         ENDFOR
+                       
+                         ; Add the calibration data as an attibute.
+                         IF calData.cal EQ 0 THEN BEGIN
+                            varAttributes[natts].attrType = StrUpCase(name)
+                            varAttributes[natts].dataType = 'STRING'
+                            varAttributes[natts].length = 0
+                            varAttributes[natts].name = '_calibration_data'
+                            varAttributes[natts].value = Ptr_New('Not Present in File')               
+                         ENDIF ELSE BEGIN
+                            varAttributes[natts].attrType = StrUpCase(name)
+                            varAttributes[natts].dataType = 'STRUCT'
+                            varAttributes[natts].length = N_Tags(calData, /Length)
+                            varAttributes[natts].name = '_calibration_data'
+                            varAttributes[natts].value = Ptr_New(calData)
+                         ENDELSE
+                       
+                         theDataFields[k].var_attributes = Ptr_New(varAttributes)
+                     ENDIF
+                     theSwaths[j].ndataFields = ndataFields
+                     HDF_SD_EndAccess, sdID
+                ENDFOR
+            ENDIF
+            nmaps = EOS_SW_INQMAPS(swathID, mapslist, offset, increment)
+            theSwaths[j].nmaps = nmaps
+            IF nmaps GT 0 THEN BEGIN
+               mapNames = StrSplit(mapslist, ',', /EXTRACT)
+                FOR k=0,nmaps-1 DO BEGIN
+                    Print, 'Map Name: ', mapNames[k], $
+                        '   Offset: ', offset[k], '   Increment: ', increment[k]
+                ENDFOR
+                Print, ''
+            ENDIF
+            nidxmaps = EOS_SW_INQIDXMAPS(swathID, mapslist, sizes)
+            theSwaths[j].nidxmaps = nidxmaps
+            IF nidxmaps GT 0 THEN BEGIN
+               mapNames = StrSplit(mapslist, ',', /EXTRACT)
+                FOR k=0,nidxmaps-1 DO BEGIN
+                    Print, 'Map Name: ', mapNames[k], '   Size: ', sizes[k]
+                ENDFOR
+                Print, ''
+            ENDIF
+            ok = EOS_SW_DETACH(swathID)
+            ok = EOS_SW_CLOSE(fileID)
+        ENDFOR 
+        self.theSwaths = Ptr_New(theSwaths)
+   ENDIF
    
-   self.theSwaths = Ptr_New(theSwaths)
    
    fileID = HDF_SD_START(Filepath(ROOT_DIR=self.directory, self.filename), /READ)
    HDF_SD_Fileinfo, fileID, num_vars, num_attr
@@ -1421,84 +1421,7 @@ PRO NCDF_DATA::Parse_HDF_EOS_File
 ;      ENDFOR
 ;      self.theAttributes = Ptr_New(theAttributes, /No_Copy)
 ;   ENDIF
-self.theAttributes = (*self.theSwaths)[0].attributes
-   ; Next, get the variables.
-   IF num_vars GT 0 THEN BEGIN
-      theVariables = REPLICATE({NCDF_DATA_VARIABLE}, num_vars)
-      FOR j=0,num_vars-1 DO BEGIN
-
-         ; Get information about the variable.
-         sdID = HDF_SD_Select(fileID, j)
-         
-         ; This routine throws all kinds of scary messages if CALDATA, for example, is
-         ; not in the file. Turn this off for this call.
-         !QUIET = 1
-         HDF_SD_GetInfo, sdID, DIMS=dims, NAME=name, NATTS=natts, NDIMS=ndims, $
-            RANGE=range, TYPE=datatype, CALDATA=calData
-         !QUIET = 0
-         
-         theVariables[j].datatype = datatype
-         theVariables[j].name = name
-         theVariables[j].calibration = Ptr_New(calData)
-
-          ; If this variable has attributes, get those, too.
-          IF natts GT 0 THEN BEGIN
-               varAttributes = Replicate({NCDF_DATA_ATTRIBUTE}, natts+1)
-               FOR k=0,natts-1 DO BEGIN
-                   HDF_SD_ATTRINFO, sdID, k, DATA=theAttribute, NAME=attribute_name, TYPE=attribute_datatype
-                             
-                   varAttributes[k].attrType = StrUpCase(name)
-                   varAttributes[k].dataType = attribute_datatype
-                   varAttributes[k].length = N_Elements(theAttribute)
-                   varAttributes[k].name = attribute_name
-                   IF N_Elements(theAttribute) EQ 1 THEN theAttribute = theAttribute[0]
-                   varAttributes[k].value = Ptr_New(theAttribute)
-               ENDFOR
-               
-               ; Add the calibration data as an attibute.
-               IF calData.cal EQ 0 THEN BEGIN
-                    varAttributes[natts].attrType = StrUpCase(name)
-                    varAttributes[natts].dataType = 'STRING'
-                    varAttributes[natts].length = 0
-                    varAttributes[natts].name = '_calibration_data'
-                    varAttributes[natts].value = Ptr_New('Not Present in File')               
-               ENDIF ELSE BEGIN
-                    varAttributes[natts].attrType = StrUpCase(name)
-                    varAttributes[natts].dataType = 'STRUCT'
-                    varAttributes[natts].length = N_Tags(calData, /Length)
-                    varAttributes[natts].name = '_calibration_data'
-                    varAttributes[natts].value = Ptr_New(calData)
-               ENDELSE
-               
-               theVariables[j].var_attributes = Ptr_New(varAttributes)
-          ENDIF
-
-          ; Now, read the data so you can collect information about it.
-          theVariables[j].dataSize = Ptr_New(dims)
-          IF N_Elements(range) NE 0 THEN BEGIN
-              theVariables[j].minValue = range[0]
-              theVariables[j].maxValue = range[1]
-          ENDIF ELSE BEGIN
-              IF self.no_read_on_parse THEN BEGIN
-                  theVariables[j].minValue = !VALUES.F_NAN
-                  theVariables[j].maxValue = !VALUES.F_NAN             
-              ENDIF ELSE BEGIN
-                  HDF_SD_GetData, sdID, data
-                  IF calData.cal NE 0 THEN BEGIN
-                        data = calData.cal * (Temporary(data) - calData.offset)
-                  ENDIF
-                  minData = Min(data, MAX=maxData)
-                  theVariables[j].minValue = minData
-                  theVariables[j].maxValue = maxData
-                  Undefine, data
-              ENDELSE
-          ENDELSE
-          HDF_SD_EndAccess, sdID
-      ENDFOR
-      self.theVariables = Ptr_New(theVariables, /No_Copy)
-   ENDIF
-
-   ; Successfully parsed file.
+  ; Successfully parsed file.
    self.hasBeenParsed = 1
    
    ; Close the file

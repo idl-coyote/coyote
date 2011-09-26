@@ -81,8 +81,11 @@
 ;                     If this keyword is a string color name, then ANNOTATECOLOR=color.
 ;
 ;       DIVISIONS:    The number of divisions to divide the bar into. There will
-;                     be (divisions + 1) annotations. The default is 0, which allows
-;                     the plot command to determine how many divisions to make.
+;                     be (divisions + 1) annotations. The default is 0 if using the
+;                     default color bar formatting, which allows the plot command to 
+;                     determine how many divisions to make. Otherwise, if you are specifying
+;                     some other format for the tick labels, the default number of divisions
+;                     is six.
 ;                     
 ;       FIT:          If this keyword is set, the colorbar "fits" itself to the normalized
 ;                     coordinates of the last plot command executed. In other words, for
@@ -202,6 +205,8 @@
 ;          Z-graphics buffer. 30 Aug 2011. DWF.
 ;       Changed the default DIVISIONS to 0 and the default FORMAT to "". 2 Sept 2011. DWF.
 ;       Added code that will force MINRANGE and MAXRANGE values to be scalars. 5 Sept 2011. DWF.
+;       Problem with division by zero when FORMAT is not default value. Now, if format
+;          is the default value, then default is DIVISIONS=0, else DIVISIONS=6.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -379,7 +384,9 @@ PRO cgColorbar, $
        minrange = Float(range[0])
        maxrange = Float(range[1])
     ENDIF
-    IF N_ELEMENTS(divisions) EQ 0 THEN divisions = 0
+    IF N_ELEMENTS(divisions) EQ 0 THEN BEGIN
+      IF format EQ "" THEN divisions = 0 ELSE divisions = 6
+    ENDIF
     IF N_ELEMENTS(font) EQ 0 THEN font = !P.Font
     IF N_ELEMENTS(title) EQ 0 THEN title = ''
     xlog = Keyword_Set(xlog)

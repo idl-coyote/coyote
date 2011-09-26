@@ -1085,6 +1085,9 @@ END ;---------------------------------------------------------------------------
 ;         The title character size. By default 1.25 times the CHARSIZE.
 ;     title: in, optional, type=string
 ;        The title of the plot. It will be written "flat to the screen", rather than rotated.
+;     transform: in, optional, type=4x4 double array
+;         A homogeneous transformation matrix to be applied to the initial surface. Such a 
+;         transformation matrix can be obtained, for example, with the T3D procedure.
 ;     tsize: in, optional, type=float, default=1.25*CHARSIZE
 ;        The character size for the title. By default, the title character size is 1.25 times
 ;        the character size of the surface annotation.
@@ -1124,6 +1127,13 @@ END ;---------------------------------------------------------------------------
 ;       cgSurface, data, /Shaded
 ;       cgSurface, data, /Shaded, Texture_Image=cgDemoData(16) 
 ;       
+;       Setting up the initial surface rotation.
+;       IDL> T3D, /RESET, ROTATE=[0, 0, 30]
+;       IDL> T3D, ROTATE=[-90, 0, 0]
+;       IDL> T3D, ROTATE=[0, 30, 0]
+;       IDL> T3D, ROTATE=[30, 0, 0]
+;       IDL> cgSurface, cgDemoData(2), Transform=!P.T
+;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
 ;           David W. Fanning 
@@ -1143,6 +1153,8 @@ END ;---------------------------------------------------------------------------
 ;        Added Axes ON/OFF button. 4 Jan 2011. DWF.
 ;        Rotation is throwing underflow warnings, so switched to code that surpress 
 ;            these warnings. 26 Aug 2011. DWF
+;        Added TRANSFORM keyword to allow the initial surface to be rotated to user 
+;            specifications. 26 Sept 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -1169,6 +1181,7 @@ PRO cgSurface, data, x, y, $
     Title=plotTitleText, $
     TCharsize=tcharsize, $
     TColor=tcolorName, $
+    Transform=transform, $
     XOffset=xoffset, $
     XRange=xrange_u, $
     XSize=xsize, $
@@ -1478,10 +1491,15 @@ PRO cgSurface, data, x, y, $
     thisModel->Add, yAxis
     thisModel->Add, zAxis
     
-    ; Rotate the surface model to the standard surface view.
-    thisModel->Rotate,[1,0,0], -90  ; To get the Z-axis vertical.
-    thisModel->Rotate,[0,1,0],  30  ; Rotate it slightly to the right.
-    thisModel->Rotate,[1,0,0],  30  ; Rotate it down slightly.
+    ; Rotate the surface model to the standard surface view or 
+    ; apply a transformation matrix, if you have one.
+    IF N_Elements(transform) NE 0 THEN BEGIN
+      thisModel -> SetProperty, Transform=transform
+    ENDIF ELSE BEGIN
+      thisModel->Rotate,[1,0,0], -90  ; To get the Z-axis vertical.
+      thisModel->Rotate,[0,1,0],  30  ; Rotate it slightly to the right.
+      thisModel->Rotate,[1,0,0],  30  ; Rotate it down slightly.
+    ENDELSE
     
     ; Create some lights to view the surface. Surfaces will look
     ; best if there is some ambient lighting to illuminate them
@@ -1528,10 +1546,15 @@ PRO cgSurface, data, x, y, $
     fillLight->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys, ZCoord_Conv=zs
     nonrotatingLight->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys, ZCoord_Conv=zs
     
-    ; Rotate the non-rotating model to the standard surface view.
-    nonrotatingModel->Rotate,[1,0,0], -90  ; To get the Z-axis vertical.
-    nonrotatingModel->Rotate,[0,1,0],  30  ; Rotate it slightly to the right.
-    nonrotatingModel->Rotate,[1,0,0],  30  ; Rotate it down slightly.
+    ; Rotate the non-rotating model to the standard surface view or apply
+    ; the transformation matrix, if you have one.
+    IF N_Elements(transform) NE 0 THEN BEGIN
+      nonrotatingModel -> SetProperty, Transform=transform
+    ENDIF ELSE BEGIN
+      nonrotatingModel->Rotate,[1,0,0], -90  ; To get the Z-axis vertical.
+      nonrotatingModel->Rotate,[0,1,0],  30  ; Rotate it slightly to the right.
+      nonrotatingModel->Rotate,[1,0,0],  30  ; Rotate it down slightly.
+    ENDELSE
     
     ; Check for availability of GIF files.
     thisVersion = Float(!Version.Release)

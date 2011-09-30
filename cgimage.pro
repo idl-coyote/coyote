@@ -348,6 +348,8 @@
 ;       Whoops! Documented a CHARSIZE keyword, but forgot to define it. 7 July 2011.
 ;       Damnation! I did the same thing with the FONT keyword! 25 July 2011.
 ;       And now a TITLE keyword! What the devil is going on!? 29 Aug 2011.
+;       Very slight modifications to image size and start position so that the image is
+;          positioned completely inside the axes. 30 Sept 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
@@ -1142,11 +1144,15 @@ PRO cgImage, image, x, y, $
     ; Set the output position.
     oposition = position
     
-    ; Calculate the image size and start locations.
-    xsize = Ceil((position[2] - position[0]) * !D.X_VSIZE)
-    ysize = Ceil((position[3] - position[1]) * !D.Y_VSIZE)
-    xstart = Round(position[0] * !D.X_VSIZE)
-    ystart = Round(position[1] * !D.Y_VSIZE)
+    ; Calculate the image size and start locations. The plus and minus
+    ; 1 values are designed to keep the image completely inside the axes.
+    ; In other words, if you draw the axes first, then put the image in
+    ; the display window, the axes should remain visible and not be covered
+    ; up by the image.
+    xsize = Ceil((position[2] - position[0]) * !D.X_VSIZE)-1
+    ysize = Ceil((position[3] - position[1]) * !D.Y_VSIZE)-1
+    xstart = Round(position[0] * !D.X_VSIZE)+1
+    ystart = Round(position[1] * !D.Y_VSIZE)+1
     
     ; Display the image. Sizing different for scalable pixels devices.
     IF (!D.Flags AND 1) NE 0 THEN BEGIN

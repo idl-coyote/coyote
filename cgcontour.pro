@@ -224,6 +224,9 @@
 ;        Got the data type correct in the part of the code that creates levels. 6 Sept 2011. DWF.
 ;        Small change to allow cgWindow to set the current graphics window if it is the only
 ;           window on the display. 15 Sept 2011. DWF.
+;        Had to add XTICKV, YTICKV, XTICKS, and YTICKS keywords to get repaired axes to work
+;            properly on filled contour plots. There may be other keywords needed, but I am 
+;            going to add them on an as-needed basis. 30 Sept 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -258,9 +261,13 @@ PRO cgContour, data, x, y, $
     XSTYLE=xstyle, $
     XTHICK=xthick, $
     XTICKLEN=xticklen, $
+    XTICKV=xtickv, $
+    XTICKS=xticks, $
     YSTYLE=ystyle, $
     YTHICK=ythick, $
     YTICKLEN=yticklen, $
+    YTICKV=ytickv, $
+    YTICKS=yticks, $
     _REF_EXTRA=extra
     
     Compile_Opt idl2
@@ -319,9 +326,13 @@ PRO cgContour, data, x, y, $
                 XSTYLE=xstyle, $
                 XTHICK=xthick, $
                 XTICKLEN=xticklen, $
+                XTICKV=xtickv, $
+                XTICKS=xticks, $
                 YSTYLE=ystyle, $
                 YTHICK=ythick, $
                 YTICKLEN=yticklen, $
+                YTICKV=ytickv, $
+                YTICKS=yticks, $
                 ADDCMD=1, $
                 _Extra=extra
              RETURN
@@ -356,9 +367,13 @@ PRO cgContour, data, x, y, $
             XSTYLE=xstyle, $
             XTHICK=xthick, $
             XTICKLEN=xticklen, $
+            XTICKV=xtickv, $
+            XTICKS=xticks, $
             YSTYLE=ystyle, $
             YTHICK=ythick, $
             YTICKLEN=yticklen, $
+            YTICKV=ytickv, $
+            YTICKS=yticks, $
             REPLACECMD=replaceCmd, $
             _Extra=extra
             
@@ -701,7 +716,8 @@ PRO cgContour, data, x, y, $
                      Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
                         BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=xstyle, $
                         POSITION=position, _STRICT_EXTRA=extra, XTHICK=xthick, YTHICK=ythick, $
-                        FONT=font, /NODATA, C_CHARSIZE=c_charsize
+                        FONT=font, /NODATA, C_CHARSIZE=c_charsize, XTICKV=xtickv, XTICKS=xticks, $
+                        YTICKV=ytickv, YTICKS=yticks
                     
                     ; Save the "after plot" system variables. Will use later. 
                     afterx = !X
@@ -739,7 +755,8 @@ PRO cgContour, data, x, y, $
             BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
             POSITION=position, _STRICT_EXTRA=extra, /NODATA, NOERASE=tempNoErase, $
             XTHICK=xthick, YTHICK=ythick, FONT=font, C_CHARSIZE=c_charsize, $
-            XTICKLEN=xticklen, YTICKLEN=yticklen
+            XTICKLEN=xticklen, YTICKLEN=yticklen, XTICKV=xtickv, XTICKS=xticks, $
+            YTICKV=ytickv, YTICKS=yticks
                     
     ENDIF
     
@@ -747,7 +764,8 @@ PRO cgContour, data, x, y, $
     Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
        LEVELS=levels, C_Labels=c_labels, C_COLORS=con_colors, XTHICK=xthick, YTHICK=ythick, $
        POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, CHARSIZE=charsize, $
-       FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize, XTICKLEN=xticklen, YTICKLEN=yticklen
+       FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize, XTICKLEN=xticklen, YTICKLEN=yticklen, $
+       XTICKV=xtickv, XTICKS=xticks, YTICKV=ytickv, YTICKS=yticks
         
     ; If this is the first plot in PS, then we have to make it appear that we have
     ; drawn a plot, even though we haven't.
@@ -759,10 +777,14 @@ PRO cgContour, data, x, y, $
         
     ; If we filled the contour plot, we need to repair the axes. 
     IF ~Keyword_Set(overplot) AND (Keyword_Set(fill) OR Keyword_Set(cell_fill)) THEN BEGIN  
-       cgAxis, XAXIS=0, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle
-       cgAxis, XAXIS=1, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle
-       cgAxis, YAXIS=0, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)', YSTYLE=ystyle
-       cgAxis, YAXIS=1, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)', YSTYLE=ystyle
+       cgAxis, XAXIS=0, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle, $
+          XTICKV=xtickv, XTICKS=xticks
+       cgAxis, XAXIS=1, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle, $
+          XTICKV=xtickv, XTICKS=xticks
+       cgAxis, YAXIS=0, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)', YSTYLE=ystyle, $
+          YTICKV=ytickv, YTICKS=yticks
+       cgAxis, YAXIS=1, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)', YSTYLE=ystyle, $
+          YTICKV=ytickv, YTICKS=yticks
     ENDIF
     
     ; Restore the decomposed color state if you can.

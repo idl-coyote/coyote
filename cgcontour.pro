@@ -227,6 +227,8 @@
 ;        Had to add XTICKV, YTICKV, XTICKS, and YTICKS keywords to get repaired axes to work
 ;            properly on filled contour plots. There may be other keywords needed, but I am 
 ;            going to add them on an as-needed basis. 30 Sept 2011. DWF.
+;        Other keywords WERE needed! I added XTICKLEN and YTICKLEN keywords to the repaired axes
+;            code. 3 Oct 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -750,7 +752,7 @@ PRO cgContour, data, x, y, $
     ; If you are not overploting, draw the contour plot now. Only the axes are
     ; drawn here, no data.
     IF Keyword_Set(overplot) EQ 0 THEN BEGIN
-    
+
         Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
             BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
             POSITION=position, _STRICT_EXTRA=extra, /NODATA, NOERASE=tempNoErase, $
@@ -778,13 +780,13 @@ PRO cgContour, data, x, y, $
     ; If we filled the contour plot, we need to repair the axes. 
     IF ~Keyword_Set(overplot) AND (Keyword_Set(fill) OR Keyword_Set(cell_fill)) THEN BEGIN  
        cgAxis, XAXIS=0, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle, $
-          XTICKV=xtickv, XTICKS=xticks
+          XTICKV=xtickv, XTICKS=xticks, XTICKLEN=xticklen
        cgAxis, XAXIS=1, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle, $
-          XTICKV=xtickv, XTICKS=xticks
+          XTICKV=xtickv, XTICKS=xticks, XTICKLEN=xticklen
        cgAxis, YAXIS=0, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)', YSTYLE=ystyle, $
-          YTICKV=ytickv, YTICKS=yticks
+          YTICKV=ytickv, YTICKS=yticks, YTICKLEN=yticklen
        cgAxis, YAXIS=1, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)', YSTYLE=ystyle, $
-          YTICKV=ytickv, YTICKS=yticks
+          YTICKV=ytickv, YTICKS=yticks, YTICKLEN=yticklen
     ENDIF
     
     ; Restore the decomposed color state if you can.

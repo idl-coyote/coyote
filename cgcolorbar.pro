@@ -142,6 +142,14 @@
 ;       RIGHT:        This puts the labels on the right-hand side of a vertical
 ;                     color bar. It applies only to vertical color bars.
 ;
+;       TICKLEN:      Set this keyword to the major tick length desired. Default is
+;                     0.25. Setting this keyword to a value greater than or equal
+;                     to 0.5 will result in major tick marks extending the width
+;                     of the color bar. Note that setting this keyword to 0.3 or
+;                     greater will result in minor tick mark lengths being set
+;                     to 0.01, which is almost too small to be seen. All direct
+;                     graphics tick marks act in this (strange!) way.
+;                     
 ;       TICKNAMES:    A string array of names or values for the tick marks.
 ;
 ;       TITLE:        This is title for the color bar. The default is to have
@@ -207,6 +215,7 @@
 ;       Added code that will force MINRANGE and MAXRANGE values to be scalars. 5 Sept 2011. DWF.
 ;       Problem with division by zero when FORMAT is not default value. Now, if format
 ;          is the default value, then default is DIVISIONS=0, else DIVISIONS=6.
+;       Documented the TICKLEN keyword and set the default tick length to 0.25. 3 Oct 2011. DWF.
 ;-             
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -378,7 +387,7 @@ PRO cgColorbar, $
     IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
     minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange[0])
     maxrange = (N_ELEMENTS(maxrange) EQ 0) ? Float(ncolors) : Float(maxrange[0])
-    IF N_ELEMENTS(ticklen) EQ 0 THEN ticklen = 0.2
+    IF N_ELEMENTS(ticklen) EQ 0 THEN ticklen = 0.25
     IF N_ELEMENTS(minor) EQ 0 THEN minor = 2
     IF N_ELEMENTS(range) NE 0 THEN BEGIN
        minrange = Float(range[0])

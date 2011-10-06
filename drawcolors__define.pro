@@ -24,8 +24,8 @@
 ;   2642 Bradbury Court
 ;   Fort Collins, CO 80521 USA
 ;   Phone: 970-221-0438
-;   E-mail: davidf@dfanning.com
-;   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+;   E-mail: david@idlcoyote.com
+;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 ;
 ; CATEGORY:
 ;
@@ -59,7 +59,7 @@
 ;   If you are going to use the XCOLORS method, you will need
 ;   the XColors program from the Coyote library:
 ;
-;     http://www.dfanning.com/programs/xcolors.pro
+;     http://www.idlcoyote.com/programs/xcolors.pro
 ;
 ;   The program is set up to handle 16 drawing colors. You may
 ;   modify the program to have a different number, but you will
@@ -547,7 +547,7 @@ PRO DrawColors::XColors
 Catch, theError
 IF theError NE 0 THEN BEGIN
     Message, ['The XCOLORS program is missing.', 'Download from the Coyote library:', $
-       'http://www.dfanning.com/'], /Informational
+       'http://www.idlcoyote.com/'], /Informational
     RETURN
 ENDIF
 

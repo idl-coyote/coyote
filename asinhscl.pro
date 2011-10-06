@@ -30,8 +30,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -88,7 +88,7 @@
 ;
 ;     Requires SCALE_VECTOR from the Coyote Library:
 ;
-;        http://www.dfanning.com/programs/scale_vector.pro
+;        http://www.idlcoyote.com/programs/scale_vector.pro
 ;
 ;     Incorporates ASINH from the NASA Astronomy Library and renamed ASINHSCL_ASINH.
 ;

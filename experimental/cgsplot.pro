@@ -37,8 +37,7 @@ FUNCTION cgsPlot::EvaluateKeywords, keywords, SUCCESS=success
   ENDFOR
   
   ; Evaluate the keywords and, if necessary, replace the keyword value
-  ; with the evaluated value. The evaluated keyword value must initially be a 
-  ; STRING that can be evaluated with the EXECUTE command.
+  ; with the PostScript alternative value.
   FOR j=0,N_Elements(tags)-1 DO BEGIN
     index = Where(*theseTags EQ j, count)
     IF count EQ 0 THEN BEGIN
@@ -323,6 +322,7 @@ PRO cgsPlot::Draw, SUCCESS=success
         IF Obj_Valid(self.winObject) THEN self.winObject -> SetWindow
 
         cgPlot, p1, p2, _EXTRA=keywords
+        
     ENDIF
     
 END ; ----------------------------------------------------------------------  
@@ -464,20 +464,12 @@ PRO cgsPlot::SetProperty, $
     
     ; Set the properties of the object.
     IF N_Elements(altps_Params) NE 0 THEN self.altps_Params = Ptr_New(altps_Params)
-    IF (N_Elements(aspect) NE 0) $
-        THEN self.aspect = Ptr_New(aspect) $
-        ELSE IF ~Ptr_Valid(self.aspect) THEN self.aspect = Ptr_New(/ALLOCATE_HEAP)
+    IF (N_Elements(aspect) NE 0) THEN *self.aspect = aspect 
     IF N_Elements(axiscolor) NE 0 THEN self.axiscolor = axiscolor
     IF N_Elements(isotropic) NE 0 THEN self.isotropic = Keyword_Set(isotropic)
-    IF (N_Elements(layout) NE 0) $
-        THEN self.layout = Ptr_New(layout) $
-        ELSE IF ~Ptr_Valid(self.layout) THEN self.layout = Ptr_New(/ALLOCATE_HEAP)
-    IF (N_Elements(max_value) NE 0) $
-        THEN self.max_value = Ptr_New(max_value) $
-        ELSE IF ~Ptr_Valid(self.max_value) THEN self.max_value = Ptr_New(/ALLOCATE_HEAP)
-    IF (N_Elements(min_value) NE 0) $
-        THEN self.min_value = Ptr_New(min_value) $
-        ELSE IF ~Ptr_Valid(self.min_value) THEN self.min_value = Ptr_New(/ALLOCATE_HEAP)
+    IF (N_Elements(layout) NE 0) THEN *self.layout = layout
+    IF (N_Elements(max_value) NE 0) THEN *self.max_value = max_value
+    IF (N_Elements(min_value) NE 0) THEN *self.min_value = min_value
     IF N_Elements(nsum) NE 0 THEN self.nsum = nsum
     IF N_Elements(update) NE 0 THEN self.update = Keyword_Set(update)  
     IF N_Elements(polar) NE 0 THEN self.polar = Keyword_Set(polar)
@@ -563,6 +555,14 @@ FUNCTION cgsPlot::INIT, x, y, $
     IF N_Elements(axisColor) EQ 0 AND N_Elements(axescolor) NE 0 THEN axiscolor = axescolor
     IF N_Elements(axiscolor) EQ 0 THEN axiscolor = 'black'
     IF N_Elements(symcolor) EQ 0 THEN symcolor = self.color
+    
+    ; Initialize all keyword pointers.
+    self.aspect = Ptr_New(/Allocate_Heap)
+    self.layout = Ptr_New(/Allocate_Heap)
+    self.max_value = Ptr_New(/Allocate_Heap)
+    self.min_value = Ptr_New(/Allocate_Heap)
+    
+    ; Set the properties of the object.
     self -> SetProperty, $
         ALTPS_PARAMS=altps_params, $
         ASPECT=aspect, $
@@ -667,6 +667,9 @@ FUNCTION cgsPlot, x, y, $
         YNOZERO=ynozero, $
         _EXTRA=extraKeywords)
         
+    ; Out of here if you failed to get a valid object.
+    IF ~Obj_Valid(plotObject) THEN RETURN, Obj_New()
+        
     plotObject -> GetProperty, Layout=t
     
     ; If the CURRENT keyword is set, check to see if there is a current
@@ -685,7 +688,7 @@ FUNCTION cgsPlot, x, y, $
         IF Obj_Valid(plotObject) THEN plotObject -> Draw
     ENDELSE
 
-    ; Draw the object and return it.    
+    ; Return the object, if you have a valid one.    
     IF Obj_Valid(plotObject) THEN BEGIN
         RETURN, plotObject
     ENDIF ELSE BEGIN

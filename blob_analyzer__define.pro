@@ -23,8 +23,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ; 
@@ -108,11 +108,11 @@
 ;       changed specifically for this release, so by sure you get a copy of that with this
 ;       source code.
 ;       
-;       http://www.dfanning.com/programs/coyoteprograms.zip
+;       http://www.idlcoyote.com/programs/coyoteprograms.zip
 ;       
-;       ERROR_MESSAGE     http://www.dfanning.com/programs/error_message.pro
-;       FIND_BOUNDARY     http://www.dfanning.com/programs/find_boundary.pro
-;       FIT_ELLIPSE       http://www.dfanning.com/programs/fit_ellipse.pro
+;       ERROR_MESSAGE     http://www.idlcoyote.com/programs/error_message.pro
+;       FIND_BOUNDARY     http://www.idlcoyote.com/programs/find_boundary.pro
+;       FIT_ELLIPSE       http://www.idlcoyote.com/programs/fit_ellipse.pro
 ;       
 ;       The program currently works only with 2D bi-level images.
 ;

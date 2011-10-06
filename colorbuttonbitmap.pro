@@ -14,8 +14,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -48,7 +48,7 @@
 ;
 ;       Reqires cgColor from the Coyote Library:
 ;
-;                     http://www.dfanning.com/programs/cgColor.pro
+;                     http://www.idlcoyote.com/programs/cgColor.pro
 ;
 ; EXAMPLE:
 ;
@@ -61,7 +61,7 @@
 ; MODIFICATION HISTORY:
 ;
 ;       Written by David Fanning, May 25, 2007 based on code named BitmapForButtonText supplied to the IDL
-;       newsgroup by Dick Jackson: http://www.dfanning.com/tip_examples/bitmapforbuttontext.pro.
+;       newsgroup by Dick Jackson: http://www.idlcoyote.com/tip_examples/bitmapforbuttontext.pro.
 ;       Fixed a problem with foreground and background colors that caused them to work correctly only
 ;           when color decomposition is on--as it should be :-). 6 May 2009.
 ;-

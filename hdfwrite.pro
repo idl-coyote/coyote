@@ -40,7 +40,7 @@ version = 'MacOS 4.0.1b'
 date = "Jan 1, 1997"
 experiment = "Experiment 25A36M"
 name = 'David Fanning'
-email = 'davidf@dfanning.com'
+email = 'david@idlcoyote.com'
 
 HDF_SD_ATTRSET, fileID, 'VERSION', version
 HDF_SD_ATTRSET, fileID, 'DATE', date

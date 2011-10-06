@@ -18,8 +18,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -383,7 +383,7 @@ PRO ContrastZoom_VColorBar__Define
 ; For details on how this colorbar object works, see the VCOLORBAR__DEFINE.PRO
 ; program in the Coyote Library.
 ;
-;   http://www.dfanning.com/programs/vcolorbar__define.pro
+;   http://www.idlcoyote.com/programs/vcolorbar__define.pro
 
 colorbar = { ContrastZoom_VColorBar, $
              INHERITS IDLgrMODEL, $      ; Inherits the Model Object.

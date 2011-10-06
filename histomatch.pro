@@ -17,8 +17,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -62,7 +62,7 @@
 ;
 ;       There is an example program at the end of this file. It will require cgImage
 ;       from the Coyote Library to run. You can also find an explanation of this program
-;       at http://www.dfanning.com/ip_tips/histomatch.html.
+;       at http://www.idlcoyote.com/ip_tips/histomatch.html.
 ;
 ; MODIFICATION HISTORY:
 ;

@@ -23,8 +23,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 
@@ -62,7 +62,7 @@
 ;                      NOTE: YOU WILL HAVE TO DOWNLOAD THE FSC_BREWER.TBL FILE FROM THE COYOTE LIBRARY AND
 ;                      PLACE IT IN ONE OF THE THREE PLACES OUTLINED ABOVE:
 ;
-;                      http://www.dfanning.com/programs/fsc_brewer.tbl
+;                      http://www.idlcoyote.com/programs/fsc_brewer.tbl
 ;
 ;       CLIP:          A one- or two-element integer array that indicates how to clip
 ;                      the original color table vectors. This is useful if you are

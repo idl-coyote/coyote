@@ -163,7 +163,7 @@
 ;       cgContour, data, /ONIMAGE
 ;          
 ;       
-;       See http://www.dfanning.com/graphics_tips/cgcontour.html for additional examples.
+;       See http://www.idlcoyote.com/graphics_tips/cgcontour.html for additional examples.
 ;
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -171,8 +171,8 @@
 ;           1645 Sheely Drive
 ;           Fort Collins, CO 80526 USA
 ;           Phone: 970-221-0438
-;           E-mail: davidf@dfanning.com
-;           Coyote's Guide to IDL Programming: http://www.dfanning.com
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; :History:
 ;     Change History::

@@ -15,8 +15,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -132,27 +132,27 @@
 ;        The following programs are required to reside in your !PATH. They can be
 ;        obtained from the Coyote Library:
 ;
-;                     http://www.dfanning.com/programs/adjustposition.pro
-;                     http://www.dfanning.com/programs/cw_drawcolor.pro
-;                     http://www.dfanning.com/programs/cw_spacer.pro
-;                     http://www.dfanning.com/programs/error_message.pro
-;                     http://www.dfanning.com/programs/cgColor.pro
-;                     http://www.dfanning.com/programs/fsc_droplist.pro
-;                     http://www.dfanning.com/programs/fsc_field.pro
-;                     http://www.dfanning.com/programs/fsc_fileselect.pro
-;                     http://www.dfanning.com/programs/fsc_inputfield.pro
-;                     http://www.dfanning.com/programs/fsc_psconfig__define.pro
-;                     http://www.dfanning.com/programs/mpi_plotconfig__define.pro
-;                     http://www.dfanning.com/programs/mpi_axis.pro
-;                     http://www.dfanning.com/programs/mpi_axis__define.pro
-;                     http://www.dfanning.com/programs/pickcolorname.pro
-;                     http://www.dfanning.com/programs/psconfig.pro
-;                     http://www.dfanning.com/programs/pswindow.pro
-;                     http://www.dfanning.com/programs/cgsnapshot.pro
+;                     http://www.idlcoyote.com/programs/adjustposition.pro
+;                     http://www.idlcoyote.com/programs/cw_drawcolor.pro
+;                     http://www.idlcoyote.com/programs/cw_spacer.pro
+;                     http://www.idlcoyote.com/programs/error_message.pro
+;                     http://www.idlcoyote.com/programs/cgColor.pro
+;                     http://www.idlcoyote.com/programs/fsc_droplist.pro
+;                     http://www.idlcoyote.com/programs/fsc_field.pro
+;                     http://www.idlcoyote.com/programs/fsc_fileselect.pro
+;                     http://www.idlcoyote.com/programs/fsc_inputfield.pro
+;                     http://www.idlcoyote.com/programs/fsc_psconfig__define.pro
+;                     http://www.idlcoyote.com/programs/mpi_plotconfig__define.pro
+;                     http://www.idlcoyote.com/programs/mpi_axis.pro
+;                     http://www.idlcoyote.com/programs/mpi_axis__define.pro
+;                     http://www.idlcoyote.com/programs/pickcolorname.pro
+;                     http://www.idlcoyote.com/programs/psconfig.pro
+;                     http://www.idlcoyote.com/programs/pswindow.pro
+;                     http://www.idlcoyote.com/programs/cgsnapshot.pro
 ;
 ;         All these programs can be obtained at once by downloading the MPI_PLOT zip file:
 ;
-;                     http://www.dfanning.com/programs/mpi_plot.zip
+;                     http://www.idlcoyote.com/programs/mpi_plot.zip
 ;
 ;
 ; COMMON BLOCK:

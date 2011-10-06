@@ -5,7 +5,7 @@
 ;       on 25 Sept 2010 to avoid conflicts with an IDL 8.0 routine of the
 ;       same name. See the article "IDL 8 Name Conflicts" here:
 ;       
-;           http://www.dfanning.com/ng_tips/idl8_name_conflicts.html
+;           http://www.idlcoyote.com/ng_tips/idl8_name_conflicts.html
 ;
 ; PURPOSE:
 ;       The purpose of this routine is to implement a FSC_COLORBAR object
@@ -17,8 +17,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;       Graphics.

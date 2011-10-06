@@ -15,8 +15,8 @@
 ;   1645 Sheely Drive
 ;   Fort Collins, CO 80526 USA
 ;   Phone: 970-221-0438
-;   E-mail: davidf@dfanning.com
-;   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+;   E-mail: david@idlcoyote.com
+;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 ;
 ; CATEGORY:
 ;
@@ -28,11 +28,11 @@
 ;   keyword and method descriptions, and example programs using the object
 ;   can be found on the Coyote's Guide to IDL Programming web page:
 ;
-;     http://www.dfanning.com/programs/docs/fsc_psconfig.html
+;     http://www.idlcoyote.com/programs/docs/fsc_psconfig.html
 ;
 ;   Or, if you would prefer, you can download a self-contained PDF file:
 ;
-;     http://www.dfanning.com/programs/docs/fsc_psconfig.pdf
+;     http://www.idlcoyote.com/programs/docs/fsc_psconfig.pdf
 ;
 ; KEYWORDS:
 ;
@@ -1559,7 +1559,7 @@ helptext = [ $
 "  by David Fanning of Fanning Software Consulting. Complete   ", $
 "  program documenation is available on the FSC web page:      ", $
 "                                                              ", $
-"     http://www.dfanning.com/programs/docs/fsc_psconfig.html  ", $
+"     http://www.idlcoyote.com/programs/docs/fsc_psconfig.html  ", $
 "                                                              ", $
 "  Other IDL programs, as well as many IDL programming tips    ", $
 "  and techniques can be found on the Coyote's Guide to IDL    ", $
@@ -1569,9 +1569,9 @@ helptext = [ $
 "     1645 Sheely Drive                                        ", $
 "     Fort Collins, CO 80526                                   ", $
 "     Phone: 970-221-0438   Fax: 970-221-4762                  ", $
-"     E-Mail: david@dfanning.com                               ", $
+"     E-Mail: david@idlcoyote.com                               ", $
 "     IDL Book Orders: 1-888-461-0155                          ", $
-"     Coyote's Guide: http://www.dfanning.com/                 ", $
+"     Coyote's Guide: http://www.idlcoyote.com/                 ", $
 "                                                              " ]
 textsize = 19
 

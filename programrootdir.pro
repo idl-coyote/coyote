@@ -18,7 +18,7 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
+;       E-mail: david@idlcoyote.com
 ;
 ; SYNTAX:
 ;

@@ -19,8 +19,8 @@
 ;   1645 Sheely Drive
 ;   Fort Collins, CO 80526 USA
 ;   Phone: 970-221-0438
-;   E-mail: davidf@dfanning.com
-;   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+;   E-mail: david@idlcoyote.com
+;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 ;
 ; CATEGORY:
 ;
@@ -95,7 +95,7 @@
 ;       to PNG, JPEG, GIF, and TIFF files requires ImageMagick be installed on your
 ;       computer and configured correctly. You can download Coyote Library programs here:
 ;
-;             http://www.dfanning.com/programs/coyoteprograms.zip
+;             http://www.idlcoyote.com/programs/coyoteprograms.zip
 ;
 ;       ImageMagick can be found here:
 ;

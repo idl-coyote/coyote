@@ -16,8 +16,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 
@@ -74,11 +74,11 @@
 ;
 ;     MAPCOORD:        A MapCoord object which implements a map coordinate system using the
 ;                      GCTP map projections, as implemented with MAP_PROJ_INIT. For more information
-;                      about MapCoord objects, see http://www.dfanning.com/catalyst/maponimage.html.
+;                      about MapCoord objects, see http://www.idlcoyote.com/catalyst/maponimage.html.
 ;                      Note that this could also be a map structure as returned from MAP_PROJ_INIT,
 ;                      but in that case the user is resposible for setting up the XY map
 ;                      coordinate space independently and outside of this program. Details on 
-;                      how this can be done can be found at http://www.dfanning.com/map_tips/ephemeral.html.
+;                      how this can be done can be found at http://www.idlcoyote.com/map_tips/ephemeral.html.
 ;
 ;
 ;     THICK:           The line thickness. By default, 1.0.
@@ -95,7 +95,7 @@
 ;
 ;     Programs from the Coyote and Catalyst Libraries are required.
 ;     
-;         http://www.dfanning.com/catalyst/howtoinstall.html
+;         http://www.idlcoyote.com/catalyst/howtoinstall.html
 ;
 ; EXAMPLES:
 ;
@@ -274,7 +274,7 @@ PRO DrawShapes, shapeFile, $
    ; Error handling.
    Catch, theError
    IF theError NE 0 THEN BEGIN
-      ok = Error_Message(/Traceback)
+      ok = Error_Message()
       IF Obj_Valid(shapefile) THEN Obj_Destroy, shapefile
       IF Ptr_Valid(entities) THEN Heap_Free, entities
       RETURN

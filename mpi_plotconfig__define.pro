@@ -14,8 +14,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -207,18 +207,18 @@
 ;      Required Programs: The following programs are required to reside in your !PATH. They can be
 ;         obtained from the Coyote Library:
 ;
-;                     http://www.dfanning.com/programs/adjustposition.pro
-;                     http://www.dfanning.com/programs/cw_drawcolor.pro
-;                     http://www.dfanning.com/programs/cw_spacer.pro
-;                     http://www.dfanning.com/programs/error_message.pro
-;                     http://www.dfanning.com/programs/cgColor.pro
-;                     http://www.dfanning.com/programs/fsc_droplist.pro
-;                     http://www.dfanning.com/programs/fsc_field.pro
-;                     http://www.dfanning.com/programs/fsc_plotwindow.pro
-;                     http://www.dfanning.com/programs/mpi_axis__define.pro
-;                     http://www.dfanning.com/programs/pickcolorname.pro
-;                     http://www.dfanning.com/programs/pswindow.pro
-;                     http://www.dfanning.com/programs/cgsnapshot.pro
+;                     http://www.idlcoyote.com/programs/adjustposition.pro
+;                     http://www.idlcoyote.com/programs/cw_drawcolor.pro
+;                     http://www.idlcoyote.com/programs/cw_spacer.pro
+;                     http://www.idlcoyote.com/programs/error_message.pro
+;                     http://www.idlcoyote.com/programs/cgColor.pro
+;                     http://www.idlcoyote.com/programs/fsc_droplist.pro
+;                     http://www.idlcoyote.com/programs/fsc_field.pro
+;                     http://www.idlcoyote.com/programs/fsc_plotwindow.pro
+;                     http://www.idlcoyote.com/programs/mpi_axis__define.pro
+;                     http://www.idlcoyote.com/programs/pickcolorname.pro
+;                     http://www.idlcoyote.com/programs/pswindow.pro
+;                     http://www.idlcoyote.com/programs/cgsnapshot.pro
 ;
 ; EXAMPLE:
 ;
@@ -227,7 +227,7 @@
 ;       it can be used as a wrapper program for the PLOT command that you can use with
 ;       your own data. The program can be downloaded here:
 ;
-;                     http://www.dfanning.com/programs/mpi_plot.pro
+;                     http://www.idlcoyote.com/programs/mpi_plot.pro
 ;
 ; MODIFICATION HISTORY:
 ;

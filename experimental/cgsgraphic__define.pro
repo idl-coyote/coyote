@@ -367,29 +367,17 @@ PRO cgsGraphic::SetProperty, $
     IF N_Elements(background) NE 0 THEN self.background = background
     IF N_Elements(charsize) NE 0 THEN self.charsize = charsize
     IF N_Elements(charthick) NE 0 THEN self.charthick = charthick
-    IF N_Elements(clip) NE 0 THEN BEGIN
-        IF Ptr_Valid(self.clip) THEN *self.clip = clip ELSE self.clip = Ptr_New(clip) 
-    ENDIF ELSE BEGIN
-        IF ~Ptr_Valid(self.clip) THEN self.clip = Ptr_New(/ALLOCATE_HEAP)
-    ENDELSE
+    IF N_Elements(clip) NE 0 THEN *self.clip = clip 
     IF N_Elements(color) NE 0 THEN self.color = color
     IF N_Elements(data) NE 0 THEN self.data = Keyword_Set(data)
     IF N_Elements(device) NE 0 THEN self.device = Keyword_Set(device)
     IF N_Elements(normal) NE 0 THEN self.normal = Keyword_Set(normal)
-    IF N_Elements(font) NE 0 THEN BEGIN
-        IF Ptr_Valid(self.font) THEN *self.font = font ELSE self.font = Ptr_New(font) 
-    ENDIF ELSE BEGIN
-        IF ~Ptr_Valid(self.font) THEN self.font = Ptr_New(/ALLOCATE_HEAP)
-    ENDELSE
+    IF N_Elements(font) NE 0 THEN *self.font = font 
     IF N_Elements(linestyle) NE 0 THEN self.linestyle = linestyle
     IF N_Elements(noclip) NE 0 THEN self.noclip = Keyword_Set(noclip)
     IF N_Elements(nodata) NE 0 THEN self.nodata = Keyword_Set(nodata)
     IF N_Elements(noerase) NE 0 THEN self.noerase = Keyword_Set(noerase)
-    IF N_Elements(position) NE 0 THEN BEGIN
-        IF Ptr_Valid(self.position) THEN *self.position = position ELSE self.position = Ptr_New(position) 
-    ENDIF ELSE BEGIN
-        IF ~Ptr_Valid(self.position) THEN self.position = Ptr_New(/ALLOCATE_HEAP)
-    ENDELSE
+    IF N_Elements(position) NE 0 THEN *self.position = position 
     IF N_Elements(psym) NE 0 THEN BEGIN
         thisSym = SymCat(Abs(psym))
         IF psym LT 0 THEN self.psym = -thisSym ELSE self.psym = thisSym
@@ -412,18 +400,10 @@ PRO cgsGraphic::SetProperty, $
     IF N_Elements(xtickinterval) NE 0 THEN self.xtickinterval = xtickinterval
     IF N_Elements(xticklayout) NE 0 THEN self.xticklayout = xticklayout
     IF N_Elements(xticklen) NE 0 THEN self.xticklen = xticklen
-    IF N_Elements(xtickname) NE 0 THEN BEGIN
-        IF Ptr_Valid(self.xtickname) THEN *self.xtickname = xtickname ELSE self.xtickname = Ptr_New(xtickname) 
-    ENDIF ELSE BEGIN
-        IF ~Ptr_Valid(self.xtickname) THEN self.xtickname = Ptr_New(/ALLOCATE_HEAP)
-    ENDELSE
+    IF N_Elements(xtickname) NE 0 THEN *self.xtickname = xtickname 
     IF N_Elements(xticks) NE 0 THEN self.xticks = xticks
     IF N_Elements(xtickunits) NE 0 THEN self.xtickunits = xtickunits
-    IF N_Elements(xtickv) NE 0 THEN BEGIN
-        IF Ptr_Valid(self.xtickv) THEN *self.xtickv = xtickv ELSE self.xtickv = Ptr_New(xtickv) 
-    ENDIF ELSE BEGIN
-        IF ~Ptr_Valid(self.xtickv) THEN self.xtickv = Ptr_New(/ALLOCATE_HEAP)
-    ENDELSE
+    IF N_Elements(xtickv) NE 0 THEN *self.xtickv = xtickv 
     IF N_Elements(xtitle) NE 0 THEN self.xtitle = xtitle
 
     IF N_Elements(ycharsize) NE 0 THEN self.ycharsize = ycharsize
@@ -437,18 +417,10 @@ PRO cgsGraphic::SetProperty, $
     IF N_Elements(ytickinterval) NE 0 THEN self.ytickinterval = ytickinterval
     IF N_Elements(yticklayout) NE 0 THEN self.yticklayout = yticklayout
     IF N_Elements(yticklen) NE 0 THEN self.yticklen = yticklen
-    IF N_Elements(ytickname) NE 0 THEN BEGIN
-        IF Ptr_Valid(self.ytickname) THEN *self.ytickname = ytickname ELSE self.ytickname = Ptr_New(ytickname) 
-    ENDIF ELSE BEGIN
-        IF ~Ptr_Valid(self.ytickname) THEN self.ytickname = Ptr_New(/ALLOCATE_HEAP)
-    ENDELSE
+    IF N_Elements(ytickname) NE 0 THEN *self.ytickname = ytickname 
     IF N_Elements(yticks) NE 0 THEN self.yticks = yticks
     IF N_Elements(ytickunits) NE 0 THEN self.ytickunits = ytickunits
-    IF N_Elements(ytickv) NE 0 THEN BEGIN
-        IF Ptr_Valid(self.ytickv) THEN *self.ytickv = ytickv ELSE self.ytickv = Ptr_New(ytickv) 
-    ENDIF ELSE BEGIN
-        IF ~Ptr_Valid(self.ytickv) THEN self.ytickv = Ptr_New(/ALLOCATE_HEAP)
-    ENDELSE
+    IF N_Elements(ytickv) NE 0 THEN *self.ytickv = ytickv 
     IF N_Elements(ytitle) NE 0 THEN self.ytitle = ytitle
 
     IF N_Elements(zcharsize) NE 0 THEN self.zcharsize = zcharsize
@@ -462,18 +434,10 @@ PRO cgsGraphic::SetProperty, $
     IF N_Elements(ztickinterval) NE 0 THEN self.ztickinterval = ztickinterval
     IF N_Elements(zticklayout) NE 0 THEN self.zticklayout = zticklayout
     IF N_Elements(zticklen) NE 0 THEN self.zticklen = zticklen
-    IF N_Elements(ztickname) NE 0 THEN BEGIN
-        self.ztickname = Ptr_New(ztickname) 
-    ENDIF ELSE BEGIN
-        IF ~Ptr_Valid(self.ztickname) THEN self.ztickname = Ptr_New(/ALLOCATE_HEAP)
-    ENDELSE
+    IF N_Elements(ztickname) NE 0 THEN *self.ztickname = ztickname
     IF N_Elements(zticks) NE 0 THEN self.zticks = zticks
     IF N_Elements(ztickunits) NE 0 THEN self.ztickunits = ztickunits
-    IF N_Elements(ztickv) NE 0 THEN BEGIN
-        IF Ptr_Valid(self.ztickv) THEN *self.ztickv = ztickv ELSE self.ztickv = Ptr_New(ztickv) 
-    ENDIF ELSE BEGIN
-        IF ~Ptr_Valid(self.ztickv) THEN self.ztickv = Ptr_New(/ALLOCATE_HEAP)
-    ENDELSE
+    IF N_Elements(ztickv) NE 0 THEN *self.ztickv = ztickv 
     IF N_Elements(ztitle) NE 0 THEN self.ztitle = ztitle
     IF N_Elements(zvalue) NE 0 THEN self.zvalue = zvalue
     
@@ -596,11 +560,21 @@ FUNCTION cgsGraphic::INIT, $
     IF N_Elements(xmargin) EQ 0 THEN xmargin = [10.0, 4.0]
     IF N_Elements(ymargin) EQ 0 THEN ymargin = [4.0, 4.0]
     
+        
+    ; Allocate heap for variables.
+    self.clip = Ptr_New(/ALLOCATE_HEAP)
+   self.font = Ptr_New(/ALLOCATE_HEAP)
+   self.position = Ptr_New(/ALLOCATE_HEAP)
+   self.xtick_get = Ptr_New(/ALLOCATE_HEAP)
+   self.xtickname = Ptr_New(/ALLOCATE_HEAP)
+   self.xtickv = Ptr_New(/ALLOCATE_HEAP)
+   self.ytick_get = Ptr_New(/ALLOCATE_HEAP)
+   self.ytickname = Ptr_New(/ALLOCATE_HEAP)
+   self.ytickv = Ptr_New(/ALLOCATE_HEAP)
+   self.ztick_get = Ptr_New(/ALLOCATE_HEAP)
+   self.ztickname = Ptr_New(/ALLOCATE_HEAP)
+   self.ztickv = Ptr_New(/ALLOCATE_HEAP)
     
-    ; Allocate heap for return variables.
-    self.xtick_get = Ptr_New(/ALLOCATE_HEAP)
-    self.ytick_get = Ptr_New(/ALLOCATE_HEAP)
-    self.ztick_get = Ptr_New(/ALLOCATE_HEAP)
         
     ; Set all the keywords.
     self -> SetProperty, $

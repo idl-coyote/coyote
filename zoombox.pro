@@ -16,8 +16,8 @@
 ;   1645 Sheely Drive
 ;   Fort Collins, CO 80526 USA
 ;   Phone: 970-221-0438
-;   E-mail: davidf@dfanning.com
-;   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+;   E-mail: david@idlcoyote.com
+;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 ;
 ; CATEGORY:
 ;
@@ -59,8 +59,8 @@
 ;
 ;       Uses XCOLORS and PICKCOLOR from the Coyote Library:
 ;
-;          http://www.dfanning.com/programs/xcolors.pro
-;          http://www.dfanning.com/programs/pickcolor.pro
+;          http://www.idlcoyote.com/programs/xcolors.pro
+;          http://www.idlcoyote.com/programs/pickcolor.pro
 ;
 ; PROCEDURE:
 ;
@@ -77,7 +77,7 @@
 ;       Colors are decidedly ugly in 256 color environments.
 ;       Requires FSC_NORMALIZE from the Coyote Library.
 ;       
-;          http://www.dfanning.com/programs/fsc_normalize.pro
+;          http://www.idlcoyote.com/programs/fsc_normalize.pro
 ;
 ; MODIFICATION HISTORY:
 ;

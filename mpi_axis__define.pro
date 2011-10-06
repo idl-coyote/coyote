@@ -14,8 +14,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -126,10 +126,10 @@
 ;      Required Programs: The following programs are required to reside in your !PATH. They can be
 ;         obtained from the Coyote Library:
 ;
-;                     http://www.dfanning.com/programs/cw_spacer.pro
-;                     http://www.dfanning.com/programs/error_message.pro
-;                     http://www.dfanning.com/programs/fsc_droplist.pro
-;                     http://www.dfanning.com/programs/fsc_field.pro
+;                     http://www.idlcoyote.com/programs/cw_spacer.pro
+;                     http://www.idlcoyote.com/programs/error_message.pro
+;                     http://www.idlcoyote.com/programs/fsc_droplist.pro
+;                     http://www.idlcoyote.com/programs/fsc_field.pro
 ;
 ; EXAMPLE:
 ;
@@ -138,7 +138,7 @@
 ;       MPI_AXIS__DEFINE programs, it can be used as a wrapper program for the PLOT command
 ;       that you can use with your own data. The program can be downloaded here:
 ;
-;                     http://www.dfanning.com/programs/mpi_plot.pro
+;                     http://www.idlcoyote.com/programs/mpi_plot.pro
 ;
 ; MODIFICATION HISTORY:
 ;

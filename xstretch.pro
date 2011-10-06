@@ -28,8 +28,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -52,11 +52,11 @@
 ;       BLOCK:         Set this keyword if you wish the program to be a blocking widget.
 ;       
 ;       BREWER:        Set this keyword if you wish to use the Brewer Colors, as explained
-;                      in this reference: http://www.dfanning.com/color_tips/brewer.html. The
+;                      in this reference: http://www.idlcoyote.com/color_tips/brewer.html. The
 ;                      Brewer color table file, fsc_brewer.tbl must be found somewhere in your
 ;                      IDL path for this option to be available. The file can be downloaded here.
 ;
-;                      http://www.dfanning.com/programs/fsc_brewer.tbl
+;                      http://www.idlcoyote.com/programs/fsc_brewer.tbl
 ;
 ;       COLORS:        A five element string array, listing the cgColorS colors for drawing the
 ;                      histogram plot. The colors are used as follows:

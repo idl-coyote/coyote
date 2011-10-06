@@ -6,7 +6,7 @@
 ;      on 25 Sept 2010 to avoid conflicts with an IDL 8.0 routine of the
 ;      same name. See the article "IDL 8 Name Conflicts" here:
 ;       
-;           http://www.dfanning.com/ng_tips/idl8_name_conflicts.html
+;           http://www.idlcoyote.com/ng_tips/idl8_name_conflicts.html
 ;           
 ; NOTE: Program development on FSC_COLORBAR has been stopped as of 4 Feb 2011.
 ;       All future development of color bar technology will occur in cgColorbar,
@@ -24,8 +24,8 @@
 ;   1645 Sheely Drive
 ;   Fort Collins, CO 80526 USA
 ;   Phone: 970-221-0438
-;   E-mail: davidf@dfanning.com
-;   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+;   E-mail: david@idlcoyote.com
+;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 ;
 ; CATEGORY:
 ;
@@ -164,7 +164,7 @@
 ;
 ;       Requires the cgCOLOR program from the Coyote Library:
 ;
-;          http://www.dfanning.com/programs/cgcolor.pro
+;          http://www.idlcoyote.com/programs/cgcolor.pro
 ;
 ; EXAMPLE:
 ;
@@ -224,7 +224,7 @@
 ;           colorbar axis labels before PLOT command. DWF.
 ;       5/25/07. Previous change has unanticipated effect on color bars using
 ;           logarithmic scaling, which is not really supported, but I have an
-;           article on my web page describing how to do it: http://www.dfanning.com/graphics_tips/logcb.html.
+;           article on my web page describing how to do it: http://www.idlcoyote.com/graphics_tips/logcb.html.
 ;           Thus, I've fixed the program to accommodate log scaling, while still not OFFICIALLY
 ;           supporting it. DWF.
 ;       10/3/07. Method used to calculate TICKNAMES produces incorrect values in certain cases when

@@ -13,8 +13,8 @@
 ;   1645 Sheely Drive
 ;   Fort Collins, CO 80526 USA
 ;   Phone: 970-221-0438
-;   E-mail: davidf@dfanning.com
-;   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+;   E-mail: david@idlcoyote.com
+;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 ;
 ; CATEGORY:
 ;
@@ -45,7 +45,7 @@
 ;  IDL> Print, SetUnion(set_a, set_b)
 ;          1  2  3  4  5  6  7  8  9  10  11
 ;
-;  See http://www.dfanning.com/tips/set_operations.html for other types of set operations.
+;  See http://www.idlcoyote.com/tips/set_operations.html for other types of set operations.
 ;  
 ; NOTES:
 ; 

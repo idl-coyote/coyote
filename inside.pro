@@ -15,8 +15,8 @@
 ;   1645 Sheely Drive
 ;   Fort Collins, CO 80526 USA
 ;   Phone: 970-221-0438
-;   E-mail: davidf@dfanning.com
-;   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+;   E-mail: david@idlcoyote.com
+;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 ;
 ; CATEGORY:
 ;
@@ -48,7 +48,7 @@
 ;    Based on discussions on the IDL newsgroup (comp.lang.idl-pvwave) and
 ;    discussed here:
 ;
-;      http://www.dfanning.com/tips/point_in_polygon.html
+;      http://www.idlcoyote.com/tips/point_in_polygon.html
 ;
 ;    Primarily the work of B�rd Krane and William Connelly.
 ;

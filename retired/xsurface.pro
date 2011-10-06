@@ -15,8 +15,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -115,7 +115,7 @@
 ;       Added HIDDEN_LINE keyword. 8 May 2000. DWF.
 ;       Renamed NORMALIZE to FSC_NORMALIZE to avoid numerous naming conflicts. 17 October 2008. DWF.
 ;       Made the draw widget render in software to eliminate a window read-through problem
-;          (http://www.dfanning.com/ographics_tips/snapshot.html). 30 December 2008. DWF.
+;          (http://www.idlcoyote.com/ographics_tips/snapshot.html). 30 December 2008. DWF.
 ;       
 ;-
 ;******************************************************************************************;

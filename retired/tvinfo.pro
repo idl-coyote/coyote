@@ -18,8 +18,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com/
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 ;
 ; CATEGORY:
 ;
@@ -65,7 +65,7 @@
 ;      If the program doesn't compile, you probably need library routines. They
 ;      can be found here:
 ;
-;           http:/www.dfanning.com/documents/programs.html
+;           http:/www.idlcoyote.com/documents/programs.html
 ;
 ; EXAMPLE:
 ;

@@ -13,8 +13,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;       Widgets, IDL 5 Object Graphics.
@@ -65,7 +65,7 @@
 ;
 ;       Requires FSC_NORMALIZE  from the Coyote library.
 ;
-;          http://www.dfanning.com/programs/fsc_normalize.pro
+;          http://www.idlcoyote.com/programs/fsc_normalize.pro
 ;
 ; EXAMPLE:
 ;       To use this program with your 2D data, type:
@@ -89,7 +89,7 @@
 ;       Removed NORMALIZE from the source code. 29 November 2005. DWF.
 ;       Renamed NORMALIZE to FSC_NORMALIZE to avoid numerous naming conflicts. 17 October 2008. DWF.
 ;       Made the draw widget render in software to eliminate a window read-through problem
-;          (http://www.dfanning.com/ographics_tips/snapshot.html). 30 December 2008. DWF.
+;          (http://www.idlcoyote.com/ographics_tips/snapshot.html). 30 December 2008. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;

@@ -14,7 +14,7 @@
 ;
 ;      An article describing how to use this program can be found here.
 ;
-;         http://www.dfanning.com/map_tips/gshhs.html
+;         http://www.idlcoyote.com/map_tips/gshhs.html
 ;         
 ;      Note, the authors of the GSHHS software *continually* change the header
 ;      structure, which you MUST know to read the data file. There are are now
@@ -29,8 +29,8 @@
 ;      1645 Sheely Drive
 ;      Fort Collins, CO 80526 USA
 ;      Phone: 970-221-0438
-;      E-mail: davidf@dfanning.com
-;      Coyote's Guide to IDL Programming: http://www.dfanning.com
+;      E-mail: david@idlcoyote.com
+;      Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 
@@ -69,9 +69,9 @@
 ;
 ;     Requires the following programs from the Coyote Library:
 ;
-;         http://www.dfanning.com/programs/error_message.pro
-;         http://www.dfanning.com/programs/cgColor.pro
-;         http://www.dfanning.com/programs/undefine.pro
+;         http://www.idlcoyote.com/programs/error_message.pro
+;         http://www.idlcoyote.com/programs/cgColor.pro
+;         http://www.idlcoyote.com/programs/undefine.pro
 ;
 ; EXAMPLE:
 ;

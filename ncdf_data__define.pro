@@ -27,8 +27,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;       File I/O
@@ -89,13 +89,13 @@
 ;     good idea to make sure you have the latest version of the Coyote Library code,
 ;     as updates are irregular and frequent.
 ;
-;              http://www.dfanning.com/programs/netcdf_data__define.pro
-;              http://www.dfanning.com/programs/error_message.pro
-;              http://www.dfanning.com/programs/centertlb.pro
-;              http://www.dfanning.com/programs/undefine.pro
-;              http://www.dfanning.com/programs/textbox.pro
-;              http://www.dfanning.com/programs/fsc_base_filename.pro
-;              http://www.dfanning.com/programs/textlineformat.pro
+;              http://www.idlcoyote.com/programs/netcdf_data__define.pro
+;              http://www.idlcoyote.com/programs/error_message.pro
+;              http://www.idlcoyote.com/programs/centertlb.pro
+;              http://www.idlcoyote.com/programs/undefine.pro
+;              http://www.idlcoyote.com/programs/textbox.pro
+;              http://www.idlcoyote.com/programs/fsc_base_filename.pro
+;              http://www.idlcoyote.com/programs/textlineformat.pro
 ;
 ; METHODS:
 ;

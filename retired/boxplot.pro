@@ -17,8 +17,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ; 
@@ -93,12 +93,12 @@
 ;      
 ; REQUIRES:
 ;
-;       Several program from the Coyote Library (http://www.dfanning.com/documents/programs.html)
+;       Several program from the Coyote Library (http://www.idlcoyote.com/documents/programs.html)
 ;       are required. Among them are these:
 ;       
-;       ERROR_MESSAGE (http://www.dfanning.com/programs/error_message.pro)
-;       cgColor (http://www.dfanning.com/programs/cgColor.pro)
-;       SYMCAT (http://www.dfanning.com/programs/symcat.pro)
+;       ERROR_MESSAGE (http://www.idlcoyote.com/programs/error_message.pro)
+;       cgColor (http://www.idlcoyote.com/programs/cgColor.pro)
+;       SYMCAT (http://www.idlcoyote.com/programs/symcat.pro)
 ;
 ; EXAMPLE:
 ; 
@@ -106,7 +106,7 @@
 ;       in which they made five experiments of 20 measurements of the speed of light each.
 ;       The data can be downloaded from here:
 ;       
-;          http://www.dfanning.com/misc/mm_data.dat
+;          http://www.idlcoyote.com/misc/mm_data.dat
 ;          
 ;       Here are the IDL commands to read the data and produce a box plot of it.
 ;       
@@ -120,7 +120,7 @@
 ;           
 ;       An article about his program can be found here:
 ;       
-;            http://www.dfanning.com/graphics_tips/box_whisker.html
+;            http://www.idlcoyote.com/graphics_tips/box_whisker.html
 ;
 ; MODIFICATION HISTORY:
 ;

@@ -13,7 +13,7 @@ this routine, refer to the IDL Online Help Navigator
 or type: <P>
 <PRE>     ? mk_html_help</PRE>
 <P>at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Fri Aug 05 08:15:59 2011.<P>
+<STRONG>Last modified: </STRONG>Thu Oct 06 08:41:09 2011.<P>
  
 <HR>
  
@@ -22,6 +22,7 @@ or type: <P>
 <UL>
 <LI><A HREF="#ADDTOPATH">ADDTOPATH</A>
 <LI><A HREF="#ADJUSTPOSITION">ADJUSTPOSITION</A>
+<LI><A HREF="#ANSI_VALUE">ANSI_VALUE</A>
 <LI><A HREF="#ARCSAMPLE">ARCSAMPLE</A>
 <LI><A HREF="#ASINHSCL">ASINHSCL</A>
 <LI><A HREF="#ASPECT">ASPECT</A>
@@ -33,6 +34,7 @@ or type: <P>
 <LI><A HREF="#CENTERTLB">CENTERTLB</A>
 <LI><A HREF="#CGARROW">CGARROW</A>
 <LI><A HREF="#CGAXIS">CGAXIS</A>
+<LI><A HREF="#CGBARPLOT">CGBARPLOT</A>
 <LI><A HREF="#CGBLENDIMAGE">CGBLENDIMAGE</A>
 <LI><A HREF="#CGBOXPLOT">CGBOXPLOT</A>
 <LI><A HREF="#CGCOLOR">CGCOLOR</A>
@@ -60,6 +62,7 @@ or type: <P>
 <LI><A HREF="#CGSNAPSHOT">CGSNAPSHOT</A>
 <LI><A HREF="#CGSURF">CGSURF</A>
 <LI><A HREF="#CGSURFACE">CGSURFACE</A>
+<LI><A HREF="#CGSYMBOL">CGSYMBOL</A>
 <LI><A HREF="#CGTEXT">CGTEXT</A>
 <LI><A HREF="#CGWINDOW">CGWINDOW</A>
 <LI><A HREF="#CGWINDOW_GETDEFS">CGWINDOW_GETDEFS</A>
@@ -232,8 +235,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Written, 20 Sept 2010.
@@ -247,7 +250,7 @@ or type: <P>
 <A NAME="ADJUSTPOSITION">
 <H2>ADJUSTPOSITION</H2></A>
 <A HREF="#ADDTOPATH">[Previous Routine]</A>
-<A HREF="#ARCSAMPLE">[Next Routine]</A>
+<A HREF="#ANSI_VALUE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -267,8 +270,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -311,8 +314,8 @@ or type: <P>
 
        Reqires FSC_FIELD and FSC_PLOTWINDOW from the Coyote Library:
 
-                     http://www.dfanning.com/programs/fsc_field.pro
-                     http://www.dfanning.com/programs/fsc_plotwindow.pro
+                     http://www.idlcoyote.com/programs/fsc_field.pro
+                     http://www.idlcoyote.com/programs/fsc_plotwindow.pro
 
  MODIFICATION HISTORY:
 
@@ -321,9 +324,47 @@ or type: <P>
 <STRONG>(See adjustposition.pro)</STRONG><P>
 <HR>
  
+<A NAME="ANSI_VALUE">
+<H2>ANSI_VALUE</H2></A>
+<A HREF="#ADJUSTPOSITION">[Previous Routine]</A>
+<A HREF="#ARCSAMPLE">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   Provides a way to display non-printable characters in widget elements.
+
+ :Categories:
+    Widgets
+    
+ :Params:
+    str_in: in, required, type=string
+         The input string that you wish to render on a widget element.
+       
+ :Keywords:
+     example: in, optional, type=boolean, default=0
+         Set this keyword to see an example of non-printable characters
+         rendered in a Dialog_Pickfile widget.
+          
+ :Examples:
+    Call the built-in example::
+       IDL> void = ANSI_Value(/EXAMPLE)
+       
+ :Author:
+       Bernat Puigdomenech
+
+ :History:
+     Change History::
+        Written, 2 September 2011. Bernat Puigdomenech.
+
+ :Copyright:
+     Copyright (c) 2011, Bernat Puigdomenech.
+</PRE><P>
+<STRONG>(See ansi_value.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="ARCSAMPLE">
 <H2>ARCSAMPLE</H2></A>
-<A HREF="#ADJUSTPOSITION">[Previous Routine]</A>
+<A HREF="#ANSI_VALUE">[Previous Routine]</A>
 <A HREF="#ASINHSCL">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -343,8 +384,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -416,8 +457,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -474,7 +515,7 @@ or type: <P>
 
      Requires SCALE_VECTOR from the Coyote Library:
 
-        http://www.dfanning.com/programs/scale_vector.pro
+        http://www.idlcoyote.com/programs/scale_vector.pro
 
      Incorporates ASINH from the NASA Astronomy Library and renamed ASINHSCL_ASINH.
 
@@ -513,8 +554,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -590,8 +631,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -660,8 +701,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -725,8 +766,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
  
@@ -810,11 +851,11 @@ or type: <P>
        changed specifically for this release, so by sure you get a copy of that with this
        source code.
        
-       http://www.dfanning.com/programs/coyoteprograms.zip
+       http://www.idlcoyote.com/programs/coyoteprograms.zip
        
-       ERROR_MESSAGE     http://www.dfanning.com/programs/error_message.pro
-       FIND_BOUNDARY     http://www.dfanning.com/programs/find_boundary.pro
-       FIT_ELLIPSE       http://www.dfanning.com/programs/fit_ellipse.pro
+       ERROR_MESSAGE     http://www.idlcoyote.com/programs/error_message.pro
+       FIND_BOUNDARY     http://www.idlcoyote.com/programs/find_boundary.pro
+       FIT_ELLIPSE       http://www.idlcoyote.com/programs/fit_ellipse.pro
        
        The program currently works only with 2D bi-level images.
 
@@ -861,8 +902,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -922,8 +963,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -975,8 +1016,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -1107,8 +1148,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -1125,7 +1166,7 @@ or type: <P>
 <A NAME="CGAXIS">
 <H2>CGAXIS</H2></A>
 <A HREF="#CGARROW">[Previous Routine]</A>
-<A HREF="#CGBLENDIMAGE">[Next Routine]</A>
+<A HREF="#CGBARPLOT">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  :Description:
@@ -1194,8 +1235,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -1209,9 +1250,165 @@ or type: <P>
 <STRONG>(See cgaxis.pro)</STRONG><P>
 <HR>
  
+<A NAME="CGBARPLOT">
+<H2>CGBARPLOT</H2></A>
+<A HREF="#CGAXIS">[Previous Routine]</A>
+<A HREF="#CGBLENDIMAGE">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ :Description:
+   Provides a device-independent and color-model-independent way to create a bar
+   plot or to overplot on an existing bar plot.
+
+ :Categories:
+    Graphics
+    
+ :Params:
+    values: in, required
+         A vector containing the values to be represented by bars. Each element in
+         the vector will be represented by a bar. 
+       
+ :Keywords:
+     addcmd: in, optional, type=boolean, default=0
+         Set this keyword to add the command to a cgWindow resizeable graphics window.
+     axiscolor: in, optional, type=string/integer, default='black'
+        If this keyword is a string, the name of the axis color. By default, 'black'.
+        Otherwise, the keyword is assumed to be a color index into the current color table.
+     background: in, optional, type=string/integer, default='white'
+        If this keyword is a string, the name of the background color. By default, 'white'.
+        Otherwise, the keyword is assumed to be a color index into the current color table.
+     barnames: in, optional, type=string, default=""
+        A string array, containing one string label per bar. If the bars are vertical, 
+        the labels are placed beneath them.  If horizontal (rotated) bars are specified, 
+        the labels are placed to the left of the bars.
+     baroffset: in, optional, type=float, default=barspace/barwidth*1.5
+        A scalar that specifies the offset to be applied to the first bar, in units of 
+        "nominal bar width".  This keyword allows, for example, different groups of bars 
+        to be overplotted on the same graph.  
+     barspace: in, optional, type=float, default=barwidth*0.20
+        A scalar that specifies, in units of "nominal bar width", the spacing between bars.  
+        For example, if BARSPACE is 1.0, then all bars will have one bar-width of space 
+        between them. If not specified, the bars are spaced apart by 20% of the bar width.
+     barwidth: in, optional, type=float, default=barwidth*0.20
+         A floating-point value that specifies the width of the bars in units of "nominal bar 
+         width".  The nominal bar width is computed so that all the bars (and the space 
+         between them, set by default to 20% of the width of the bars) will fill the
+         available space (optionally controlled with the BASERANGE keyword).
+     baselines: in, optional, type=float, default=0.0
+         A vector, the same size as VALUES, that contains the base value associated 
+         with each bar.  If not specified, a base value of zero is used for all bars.
+     baserange: in, optional, type=float, default=1.0
+         A floating-point scalar in the range 0.0 to 1.0, that determines the fraction of 
+         the total available plotting area (in the direction perpendicular to the bars) to 
+         be used. If not specified, the full available area is used.
+     colors: in, optional, type=varies
+         A vector of color values, the same size as VALUES, containing either the color
+         names, 24-bit color values, or color index numbers (byte values) of the colors to
+         be used for the bars. If not specified, the colors are selected based on the 
+         available colors in the current color table.
+     layout: in, optional, type=intarr(3)
+         This keyword specifies a grid with a graphics window and determines where the
+         graphic should appear. The syntax of LAYOUT is three numbers: [ncolumns, nrows, location].
+         The grid is determined by the number of columns (ncolumns) by the number of 
+         rows (nrows). The location of the graphic is determined by the third number. The
+         grid numbering starts in the upper left (1) and goes sequentually by column and then
+         by row.
+     noerase: in, optional, type=boolean, default=0
+         Set this keyword to draw the plot without erasing the display first.
+     outline: in, optional, type=boolean, default=0
+         Set this keyword to draw an outline around each bar in the OPLOTCOLORS.
+     oplotcolors: in, optional, type=varies, default='charcoal'
+         A vector of color values, similar to colors for overplot outlines on the bars.
+         If a scalar value (e.g., "charcoal") the same value is used for all outlines.
+     overplot: in, optional, type=boolean, default=0
+         Set this keyword if you wish to overplot data on an already exisiting set of
+         axes. It is like calling the IDL OPLOT command.
+     position: in, optional, type=fltarr(4)
+         The usual four-element normalized position vector for the Plot comamnd. 
+     rotate: in, optional, type=boolean, default=0
+         If set, this keyword indicates that horizontal rather than vertical bars should 
+         be drawn.  The bases of horizontal bars are on the left, "Y" axis and the bars 
+         extend to the right.
+     title: in, optional, type=string, default=""
+         The title of the plot, if supplied.
+     window: in, optional, type=boolean, default=0
+         Set this keyword if you want to display the plot in a resizable graphics window.
+     xtitle: in, optional, type=string, default=""
+         The X title of the plot, if supplied.
+     ytitle: in, optional, type=string, default=""
+         The Y title of the plot, if supplied.
+     _extra: in, optional, type=any
+        Any keyword appropriate for the IDL Plot command is allowed in the program.
+          
+ :Examples:
+    To create bar plots of four different bar classes. Example uses AL_Legend from
+    the NASA Astronomy Library. Comment out if not available.::
+       
+    ; Create data.
+    seed = -5L
+    data1 = RandomU(seed, 5) * 10.0
+    data2 = RandomU(seed, 5) * 7.5
+    data3 = RandomU(seed, 5) * 7.5
+    data4 = RandomU(seed, 5) * 10.0
+    
+    ; Display as four different plots.
+    !P.Multi=[0,2,2]
+    cgDisplay, WID=0
+    cgBarPlot, data1, /OUTLINE, OPLOTCOLOR='charcoal', YRANGE=[0, 12], COLORS='red', XTITLE='Class 1'
+    cgBarPlot, data2, /OUTLINE, OPLOTCOLOR='charcoal', YRANGE=[0, 12], COLORS='blue', XTITLE='Class 2'
+    cgBarPlot, data3, /OUTLINE, OPLOTCOLOR='charcoal', YRANGE=[0, 12], COLORS='gold', XTITLE='Class 3'
+    cgBarPlot, data4, /OUTLINE, OPLOTCOLOR='charcoal', YRANGE=[0, 12], COLORS='dark green', XTITLE='Class 4'
+    !P.Multi=0
+
+    ; Display as accumulated bar plots.
+    cgDisplay, WID=1
+    barnames = ['Exp 1', 'Exp 2', 'Exp 3', 'Exp 4', 'Exp 5']
+    cgBarPlot, data1, YRANGE=[0, 35], COLORS='red', BARNAMES=barnames
+    cgBarplot, data2, /OVERPLOT, BASELINE=data1, COLORS='blue'
+    cgBarplot, data3, /OVERPLOT, BASELINE=data1+data2, COLORS='gold'
+    cgBarplot, data4, /OVERPLOT, BASELINE=data1+data2+data3, COLORS='dark green'
+    colors = ['red', 'blue', 'gold', 'dark green']
+    items = ['Class 1', 'Class 2', 'Class 3', 'Class 4']
+    Al_Legend, items, /FILL, PSYM=Replicate(15,4), COLORS=colors, SYMSIZE=Replicate(1.75,4), $
+       POSITION=[0.20, 0.92], /NORMAL, CHARSIZE=cgDefCharSize()
+
+    ; Display all on same plot.
+    cgDisplay, WID=2
+    cgBarPlot, data1, YRANGE=[0, 12], BAROFFSET=2.5, BASERANGE=0.20, COLORS='red'
+    cgBarplot, data2, /OVERPLOT, BAROFFSET=9.5, BASERANGE=0.20, COLORS='blue'
+    cgBarplot, data3, /OVERPLOT, BAROFFSET=17.0, BASERANGE=0.20, COLORS='gold'
+    cgBarplot, data4, /OVERPLOT, BAROFFSET=24.5, BASERANGE=0.20, COLORS='dark green'
+    colors = ['red', 'blue', 'gold', 'dark green']
+    items = ['Class 1', 'Class 2', 'Class 3', 'Class 4']
+    Al_Legend, items, /FILL, PSYM=Replicate(15,4), COLORS=colors, SYMSIZE=Replicate(1.75,4), $
+       POSITION=[0.45, 0.92], /NORMAL, CHARSIZE=cgDefCharSize()
+
+ :Author:
+       FANNING SOFTWARE CONSULTING::
+           David W. Fanning 
+           1645 Sheely Drive
+           Fort Collins, CO 80526 USA
+           Phone: 970-221-0438
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+
+ :History:
+     Change History::
+        Written, 3 October 2011. DWF. Written as a straight-forward translation of
+            the IDL Bar_Plot program. In retrospect, maybe not the best idea, as I 
+            don't think the Bar_Plot program actually works and the interface is clunky.
+            But, this is a start. The interface may change to something more elegant over
+            time.
+
+ :Copyright:
+     Copyright (c) 2011, Fanning Software Consulting, Inc.
+</PRE><P>
+<STRONG>(See cgbarplot.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="CGBLENDIMAGE">
 <H2>CGBLENDIMAGE</H2></A>
-<A HREF="#CGAXIS">[Previous Routine]</A>
+<A HREF="#CGBARPLOT">[Previous Routine]</A>
 <A HREF="#CGBOXPLOT">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -1229,8 +1426,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -1286,8 +1483,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
  
@@ -1362,12 +1559,12 @@ or type: <P>
       
  REQUIRES:
 
-       Several program from the Coyote Library (http://www.dfanning.com/documents/programs.html)
+       Several program from the Coyote Library (http://www.idlcoyote.com/documents/programs.html)
        are required. Among them are these:
        
-       ERROR_MESSAGE (http://www.dfanning.com/programs/error_message.pro)
-       cgColor (http://www.dfanning.com/programs/cgColor.pro)
-       SYMCAT (http://www.dfanning.com/programs/symcat.pro)
+       ERROR_MESSAGE (http://www.idlcoyote.com/programs/error_message.pro)
+       cgColor (http://www.idlcoyote.com/programs/cgColor.pro)
+       SYMCAT (http://www.idlcoyote.com/programs/symcat.pro)
 
  EXAMPLE:
  
@@ -1375,7 +1572,7 @@ or type: <P>
        in which they made five experiments of 20 measurements of the speed of light each.
        The data can be downloaded from here:
        
-          http://www.dfanning.com/misc/mm_data.dat
+          http://www.idlcoyote.com/misc/mm_data.dat
           
        Here are the IDL commands to read the data and produce a box plot of it.
        
@@ -1389,7 +1586,7 @@ or type: <P>
            
        An article about his program can be found here:
        
-            http://www.dfanning.com/graphics_tips/box_whisker.html
+            http://www.idlcoyote.com/graphics_tips/box_whisker.html
 
  MODIFICATION HISTORY:
 
@@ -1449,8 +1646,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -1729,8 +1926,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -1796,7 +1993,11 @@ or type: <P>
                      If this keyword is a string color name, then ANNOTATECOLOR=color.
 
        DIVISIONS:    The number of divisions to divide the bar into. There will
-                     be (divisions + 1) annotations. The default is 6.
+                     be (divisions + 1) annotations. The default is 0 if using the
+                     default color bar formatting, which allows the plot command to 
+                     determine how many divisions to make. Otherwise, if you are specifying
+                     some other format for the tick labels, the default number of divisions
+                     is six.
                      
        FIT:          If this keyword is set, the colorbar "fits" itself to the normalized
                      coordinates of the last plot command executed. In other words, for
@@ -1806,7 +2007,8 @@ or type: <P>
 
        FONT:         Sets the font of the annotation. Hershey: -1, Hardware:0, True-Type: 1.
 
-       FORMAT:       The format of the bar annotations. Default is '(I0)'.
+       FORMAT:       The format of the bar annotations. Default is "", which allows
+                     the Plot command to determine the appropriate format.
 
        INVERTCOLORS: Setting this keyword inverts the colors in the color bar.
 
@@ -1852,6 +2054,14 @@ or type: <P>
        RIGHT:        This puts the labels on the right-hand side of a vertical
                      color bar. It applies only to vertical color bars.
 
+       TICKLEN:      Set this keyword to the major tick length desired. Default is
+                     0.25. Setting this keyword to a value greater than or equal
+                     to 0.5 will result in major tick marks extending the width
+                     of the color bar. Note that setting this keyword to 0.3 or
+                     greater will result in minor tick mark lengths being set
+                     to 0.01, which is almost too small to be seen. All direct
+                     graphics tick marks act in this (strange!) way.
+                     
        TICKNAMES:    A string array of names or values for the tick marks.
 
        TITLE:        This is title for the color bar. The default is to have
@@ -1881,7 +2091,7 @@ or type: <P>
 
        Requires the cgCOLOR program from the Coyote Library:
 
-          http://www.dfanning.com/programs/cgcolor.pro
+          http://www.idlcoyote.com/programs/cgcolor.pro
 
  EXAMPLE:
 
@@ -1911,6 +2121,13 @@ or type: <P>
        Added CHARPERCENT keyword 18 March 2011. DWF.
        Added XTITLE and YTITLE keywords, which do nothing except prevent these keywords
           from being used inadvertently. 27 May 2011. DWF.
+       Fixed a problem with assigning the color with the ANNOTATECOLOR keyword in the
+          Z-graphics buffer. 30 Aug 2011. DWF.
+       Changed the default DIVISIONS to 0 and the default FORMAT to "". 2 Sept 2011. DWF.
+       Added code that will force MINRANGE and MAXRANGE values to be scalars. 5 Sept 2011. DWF.
+       Problem with division by zero when FORMAT is not default value. Now, if format
+          is the default value, then default is DIVISIONS=0, else DIVISIONS=6.
+       Documented the TICKLEN keyword and set the default tick length to 0.25. 3 Oct 2011. DWF.
 </PRE><P>
 <STRONG>(See cgcolorbar.pro)</STRONG><P>
 <HR>
@@ -1968,8 +2185,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -2117,7 +2334,7 @@ or type: <P>
        cgContour, data, /ONIMAGE
           
        
-       See http://www.dfanning.com/graphics_tips/cgcontour.html for additional examples.
+       See http://www.idlcoyote.com/graphics_tips/cgcontour.html for additional examples.
 
  :Author:
        FANNING SOFTWARE CONSULTING::
@@ -2125,8 +2342,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -2174,6 +2391,16 @@ or type: <P>
         Added an ONIMAGE keyword that allows the contours to be overplotted on top of an image that
            has been displayed with cgImage. This requires that the SAVE keyword is set in the 
            cgImage call.
+        Improved error handling. 26 Aug 2011. DWF.
+        Got the data type correct in the part of the code that creates levels. 6 Sept 2011. DWF.
+        Small change to allow cgWindow to set the current graphics window if it is the only
+           window on the display. 15 Sept 2011. DWF.
+        Had to add XTICKV, YTICKV, XTICKS, and YTICKS keywords to get repaired axes to work
+            properly on filled contour plots. There may be other keywords needed, but I am 
+            going to add them on an as-needed basis. 30 Sept 2011. DWF.
+        Other keywords WERE needed! I added XTICKLEN and YTICKLEN keywords to the repaired axes
+            code. 3 Oct 2011. DWF.
+        
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
 </PRE><P>
@@ -2290,6 +2517,9 @@ or type: <P>
          Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
          R, G, and B vectors of a color table. It is probably easier to use cgLoadCT or
          XCOLORS to load color tables for the window, but this is provided as another option.
+     ps_decomposed: in, optional, type=boolean, default=0
+         Set this keyword to zero to set the PostScript color mode to indexed color and to
+         one to set the PostScript color mode to decomposed color.
      ps_delete: in, optional, type=boolean, default=1
          Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
          when making raster file output.
@@ -2299,6 +2529,10 @@ or type: <P>
           Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
      ps_quiet: in, optional, type=boolean, default=0
           Set this keyword to set the QUIET keyword on PS_Start.
+     restore_visualization: in, optional, type=string
+          Set this keyword to the name of a visualization save file to restore.
+     save_visualization: in, optional, type=string, default='graphic.cgs'
+          Set this keyword to the name of a file where the visualization should be saved.
      title: in, optional, type=boolean
          If this keyword is set, the selection is assumed to be a window title. All
          matching is done in uppercase characters.
@@ -2323,21 +2557,23 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  :History:
      Change History::
-        Written, 28 January 2011. DWF.
-        Added im_raster and the create_... raster options. 18 Feb 2011. Jeremy Bailin
-        Added the ability to set and unset adjustable text size in 
-          cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
-        Added the ability to set the dimensions of the draw widget programmatically. 14 June 2011.
+     Written, 28 January 2011. DWF.
+     Added CREATE_PS keyword. 16 Feb 2011. DWF.
+     Added PS_QUIET, GET_KEYCMDINDEX, GET_KEYWORD, and GET_KEYVALUE keywords. 17 Feb 2011. DWF.
+     Added im_raster and the create_... raster options. 18 Feb 2011. Jeremy Bailin
+     Added the ability to set and unset adjustable text size in 
+        cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
+     Added the ability to set the dimensions of the draw widget programmatically. 14 June 2011.
+     Added PS_DECOMPOSED keyword to set the PostScript color mode. 30 Aug 2011. DWF.
+     Added SAVE_VISUALIZATION and RESTORE_VISUALIZATION keywords. 15 Sept 2011. DWF.
 
  :Copyright:
      Copyright (c) 2011, Fanning Software Consulting, Inc.
-     Added CREATE_PS keyword. 16 Feb 2011. DWF.
-     Added PS_QUIET, GET_KEYCMDINDEX, GET_KEYWORD, and GET_KEYVALUE keywords. 17 Feb 2011. DWF.
 </PRE><P>
 <STRONG>(See cgcontrol.pro)</STRONG><P>
 <HR>
@@ -2364,8 +2600,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -2464,14 +2700,14 @@ or type: <P>
 
        The number of programs are required from the Coyote Library.
        
-          http://www.dfanning.com/documents/programs.html
+          http://www.idlcoyote.com/documents/programs.html
           
        Known to be among these are the following.
 
-          http://www.dfanning.com/programs/color24.pro
-          http://www.dfanning.com/programs/cgLoadCT.pro
-          http://www.dfanning.com/programs/error_message.pro
-          http://www.dfanning.com/programs/cgcolor.pro
+          http://www.idlcoyote.com/programs/color24.pro
+          http://www.idlcoyote.com/programs/cgLoadCT.pro
+          http://www.idlcoyote.com/programs/error_message.pro
+          http://www.idlcoyote.com/programs/cgcolor.pro
 
  EXAMPLE:
 
@@ -2504,6 +2740,8 @@ or type: <P>
        Added Window and AddCmd keywords. 28 Jan 2011. DWF.
        Added a Right keyword and changed the title spacing a little bit for
            aesthetic reasons. 2 July 2011. DWF.
+       Fixed a problem with assigning the color with the COLOR keyword in the Z-buffer. 
+           30 Aug 2011. DWF.
 </PRE><P>
 <STRONG>(See cgdcbar.pro)</STRONG><P>
 <HR>
@@ -2538,8 +2776,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -2598,8 +2836,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -2643,8 +2881,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CALLING SEQUENCE:
 
@@ -2762,8 +3000,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -2832,8 +3070,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -2874,8 +3112,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -2976,6 +3214,9 @@ or type: <P>
                          
        PROBCOLORNAME:    The name of the probability color for overplotting the cumulative probability
                          on the plot.  Default: "Blue".
+                         
+       ROTATE:           Set this keyword to cause the histogram bins to be drawn from left
+                         to right, rather than from bottom to top.
        
        THICK:            Set this keyword to a value greater than 1 to draw thicker axes and lines.
        
@@ -3069,6 +3310,7 @@ or type: <P>
        Added YTITLE keyword. 9 May 2011. DWF.
        Worked around a PLOT problem when setting the X axis range that caused the Y axis
           range to be corrupted. 19 May 2011. DWF.
+       Added the ROTATE keyword. 18 Aug 2011. DWF.
 </PRE><P>
 <STRONG>(See cghistoplot.pro)</STRONG><P>
 <HR>
@@ -3094,7 +3336,7 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
+       E-mail: david@idlcoyote.com
        Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
@@ -3427,6 +3669,9 @@ or type: <P>
        Corrected a problem with restoring color tables if a PALETTE is used. 31 March 2011. DWF.
        Whoops! Documented a CHARSIZE keyword, but forgot to define it. 7 July 2011.
        Damnation! I did the same thing with the FONT keyword! 25 July 2011.
+       And now a TITLE keyword! What the devil is going on!? 29 Aug 2011.
+       Very slight modifications to image size and start position so that the image is
+          positioned completely inside the axes. 30 Sept 2011. DWF.
 </PRE><P>
 <STRONG>(See cgimage.pro)</STRONG><P>
 <HR>
@@ -3456,7 +3701,7 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
+       E-mail: david@idlcoyote.com
        Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
@@ -3586,8 +3831,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -3625,7 +3870,7 @@ or type: <P>
                       NOTE: YOU WILL HAVE TO DOWNLOAD THE FSC_BREWER.TBL FILE FROM THE COYOTE LIBRARY AND
                       PLACE IT IN ONE OF THE THREE PLACES OUTLINED ABOVE:
 
-                      http://www.dfanning.com/programs/fsc_brewer.tbl
+                      http://www.idlcoyote.com/programs/fsc_brewer.tbl
 
        CLIP:          A one- or two-element integer array that indicates how to clip
                       the original color table vectors. This is useful if you are
@@ -3737,8 +3982,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -3894,8 +4139,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -3996,8 +4241,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -4074,8 +4319,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -4133,8 +4378,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -4192,8 +4437,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -4229,8 +4474,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -4463,8 +4708,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -4507,7 +4752,7 @@ or type: <P>
 <A NAME="CGSURFACE">
 <H2>CGSURFACE</H2></A>
 <A HREF="#CGSURF">[Previous Routine]</A>
-<A HREF="#CGTEXT">[Next Routine]</A>
+<A HREF="#CGSYMBOL">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  :Description:
@@ -4580,6 +4825,9 @@ or type: <P>
          The title character size. By default 1.25 times the CHARSIZE.
      title: in, optional, type=string
         The title of the plot. It will be written "flat to the screen", rather than rotated.
+     transform: in, optional, type=4x4 double array
+         A homogeneous transformation matrix to be applied to the initial surface. Such a 
+         transformation matrix can be obtained, for example, with the T3D procedure.
      tsize: in, optional, type=float, default=1.25*CHARSIZE
         The character size for the title. By default, the title character size is 1.25 times
         the character size of the surface annotation.
@@ -4619,14 +4867,21 @@ or type: <P>
        cgSurface, data, /Shaded
        cgSurface, data, /Shaded, Texture_Image=cgDemoData(16) 
        
+       Setting up the initial surface rotation.
+       IDL> T3D, /RESET, ROTATE=[0, 0, 30]
+       IDL> T3D, ROTATE=[-90, 0, 0]
+       IDL> T3D, ROTATE=[0, 30, 0]
+       IDL> T3D, ROTATE=[30, 0, 0]
+       IDL> cgSurface, cgDemoData(2), Transform=!P.T
+       
  :Author:
        FANNING SOFTWARE CONSULTING::
            David W. Fanning 
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -4636,6 +4891,10 @@ or type: <P>
             current light color. 28 Nov 2010. DWF.
         I was ANDing [XYZ]Style keywords with 8 instead of 4 for hidded axes. Fixed. 4 Jan 2011. DWF.
         Added Axes ON/OFF button. 4 Jan 2011. DWF.
+        Rotation is throwing underflow warnings, so switched to code that surpress 
+            these warnings. 26 Aug 2011. DWF
+        Added TRANSFORM keyword to allow the initial surface to be rotated to user 
+            specifications. 26 Sept 2011. DWF.
 
  :Copyright:
      Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -4643,9 +4902,119 @@ or type: <P>
 <STRONG>(See cgsurface.pro)</STRONG><P>
 <HR>
  
+<A NAME="CGSYMBOL">
+<H2>CGSYMBOL</H2></A>
+<A HREF="#CGSURFACE">[Previous Routine]</A>
+<A HREF="#CGTEXT">[Next Routine]</A>
+<A HREF="#ROUTINELIST">[List of Routines]</A>
+<PRE>
+ NAME:
+  cgSymbol
+
+ PURPOSE:
+
+   This function provides a device-independent way to ask for commonly-used
+   symbols (e.g., less than or equal to, Angstrom, degree symbol, etc.),
+   including all 24 Greek symbols in upper and lower case, to display with text.
+   
+ AUTHOR:
+
+   FANNING SOFTWARE CONSULTING
+   David Fanning, Ph.D.
+   1645 Sheely Drive
+   Fort Collins, CO 80526 USA
+   Phone: 970-221-0438
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
+
+ CATEGORY:
+
+   Graphics, Utilities
+
+ CALLING SEQUENCE:
+
+   symbol = cgSymbol(theSymbol)
+
+ RETURN VALUE:
+
+   symbol    A string that represents the requested symbol.
+
+ ARGUMENTS:
+
+  theSymbol:     The name of the symbol desired. A string. Default: 'alpha'.
+                  Valid string names are the 24 characters of the Greek alphabet,
+                  plus commonly used graphical symbols.
+                     alpha        nu        leq
+                     beta         xi        geq
+                     gamma        omicron   neg
+                     delta        pi        deg
+                     epsilon      rho       equiv
+                     zeta         sigma     prime
+                     eta          tau       angstrom
+                     theta        upsilon   sun
+                     iota         phi       varphi
+                     kappa        chi       infinity
+                     lambda       psi       copyright
+                     mu           omega
+                    
+                   Note that if the first letter of the name is capitalized, this is
+                   the equivalent of setting the CAPITAL keyword. Only Greek characters
+                   use this method of selecting symbols.
+
+ KEYWORDRS:
+
+  CAPTIAL:        If this keyword is set, the captial Greek letter is returned rather 
+                  than the lowercase Greek letter. An alternative way of capitalizing
+                  the letter is to make the first letter of the name an uppercase letter.
+                  
+  EXAMPLE:        If this keyword is set, the names of the Greek characters and their
+                  symbols are written out in the current graphics window.
+                                    
+  PS:             Normally, the PostScript version of the symbol is returned if
+                  the current device is PostScript and !P.Font is 0 or 1. But, the 
+                  PostScript version of the greek letter can be obtained at any time
+                  and in any device, by setting this keyword.
+                                    
+  UNICODE:        If this keyword is set, the function returns the Unicode value for the symbol.
+
+ EXAMPLE:
+
+  Lowercase PSI:
+  
+     IDL> Plot, findgen(11), XTitle='This title contains ' + $
+           cgSymbol('psi') + ' as a Greek letter' 
+
+  Angstrom sign:
+  
+     IDL> Plot, findgen(11), XTitle='This title contains (' + $
+           cgSymbol('Angstrom') +  ') an Angstrom sign.' 
+ NOTES:
+ 
+  See the following articles for additional information: 
+  
+       http://www.idlcoyote.com/ps_tips/greeksym.html
+       http://www.idlcoyote.com/cg_tips/cgsymbol.html
+       
+  Greek symbols are simply passed along to the Greek function.
+  
+       http://www.idlcoyote.com/programs/greek.pro
+       
+ RESTRICTIONS:
+ 
+  For this program to work correctly on your graphics display, you should be using
+  Hershey fonts (!P.Font=-1). It will work correctly in PostScript with either 
+  hardware fonts (!P.Font=0) or True-Type fonts (!P.Font=1).
+  
+ MODIFICATION HISTORY:
+
+  Written by: David W. Fanning, 2 September 2011. 
+</PRE><P>
+<STRONG>(See cgsymbol.pro)</STRONG><P>
+<HR>
+ 
 <A NAME="CGTEXT">
 <H2>CGTEXT</H2></A>
-<A HREF="#CGSURFACE">[Previous Routine]</A>
+<A HREF="#CGSYMBOL">[Previous Routine]</A>
 <A HREF="#CGWINDOW">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -4721,8 +5090,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -4786,6 +5155,17 @@ or type: <P>
        not behavior you desire, use the LOADCMD keyword instead. If CMDINDEX
        is used to select a command index, the new command is added before
        the command currently occuping that index in the command list.
+    altps_Keywords: in, optional, type=string
+       A structure containing alternative keyword names (as tags) and values for
+       those keywords to be used when the current device is the PostScript device.
+       See http://www.idlcoyote.com/cg_tips/kwexpressions.php and the examples
+       below for details on how to use this keyword.
+    altps_Params: in, optional, type=IntArr(3)
+       A structure containing alternative parameter values to be used when 
+       the current device is the PostScript device. Structure names are restricted
+       to the names "P1", "P2" and "P3" to correspond to the equivalent positional
+       parameter. See http://www.idlcoyote.com/cg_tips/kwexpressions.php and the 
+       examples below for details on how to use this keyword.
     cmddelay: in, optional, type=float
        If this keyword is set to a value other than zero, there will be a 
        delay of this many seconds between command execution. This will permit
@@ -4801,23 +5181,6 @@ or type: <P>
        deleted. It is not possible to delete the last command in the window.
        Use WinID to identify the cgWindow you are interested in. If WinID 
        is undefined, the last cgWindow created is used.
-    evalKeywords: in, optional, type=string
-       A scalar or vector of keyword names. Keywords listed here will be evaluated
-       every time the command associated with the keyword is executed. For example,
-       this allows different values to be used for the keyword in different devices.
-       The actual value of the keyword should be a string that can be evaluated by
-       the IDL Execute function and assigned to a value. This value will be used as
-       the keyword value when the command is executed. See the example below or the article
-       http://www.idlcoyote.com/cg_tips/kwexpressions.php for additional information.
-       Use of this keyword precludes using cgWindow in a Virtual Machine application.
-    evalParams: in, optional, type=IntArr(3)
-       A three-element vector. Set the value of the vector to 1 to have the positional
-       parameter in that position of the command evaluated at run-time. The actual parameter 
-       should be a string that can be evaluated by the IDL Execute function and assigned to  
-       a value. This value will be used as the parameter value when the command is executed.  
-       See the example below or the article http://www.idlcoyote.com/cg_tips/kwexpressions.php 
-       for additional information. Use of this keyword precludes using cgWindow in a 
-       Virtual Machine application.
     executecmd: in, optional, type=boolean, default=0
        Set this keyword to immediate execute all the commands in an cgWindow.
        Normally, this is used after commands have been loaded with LOADCMD.
@@ -4889,13 +5252,20 @@ or type: <P>
        
           http://www.idlcoyote.com/graphics_tips/cgwindow.html
           
-    Example using run-time evaluated keywords and parameters.
+    Example using different keyword parameters for the display and PostScript output.
     
-    cgPlot, cgDemoData(1), /Window, EvalKeywords=['thick','title'], $ 
-       thick='(!d.name eq "PS")?5.0:1.0', $
-       title="textoidl('sin(x/\alpha) e^{-x/\beta}')", $
-       position=[0.1, 0.25, 0.9, 0.9]
-     cgText, 0.1, 0.1, /Normal, '"Greek Psi Symbol (" + Greek("psi") + ")"', EvalParams=[0,0,1], /AddCmd
+    IDL> cgPlot, cgDemoData(1), /WINDOW, $
+           THICK=1.0, XTITLE='Distance (' + Greek('mu') + 'm)', $
+           ALTPS_KEYWORDS={THICK:4.0, XTITLE:'Distance (' + Greek('mu', /PS) + 'm)'}
+           
+    Example using different positional parameters.
+    
+    IDL> cgText, 0.20, 0.85, /Normal, 'Line of Text', ALIGNMENT=0.0, $
+           ALTPS_KEYWORDS={ALIGNMENT:1.0}, ALTPS_PARAMS={P1:0.88}, /ADDCMD
+           
+    Additional examples can be found here:
+    
+        http://www.idlcoyote.com/cg_tips/kwexpressions.php
            
  :Notes:
     Notes on using the program::
@@ -4942,7 +5312,7 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@idlcoyote.com
+           E-mail: david@idlcoyote.com
            Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
@@ -4968,7 +5338,19 @@ or type: <P>
             keywords at run-time. See http://www.idlcoyote.com/cg_tips/kwexpressions.php for
             additional details and explanations of how these keywords should be used. 2 Aug 2011.
         Problem dereferencing a null pointer in DRAW method fixed. 3 Aug 2011. DWF.
-   
+        Changes to handle inability to create raster files from PS encapsulated files in 
+           landscape mode. 26 Aug 2011. DWF.
+        Added ability to set PostScript color mode. 30 Aug 2011. DWF.
+        The method I was using for evaluating keyword and argument parameters at run-time
+            was just WAY too complicated and difficult to use. I have eliminated this
+            method (along with the EvalKeywords and EvalParams) in favor of a method that
+            allows the user to supply alternative values to use in the PostScript device.
+            This uses keywords AltPS_Keywords and AltPS_Params to collect these alternative
+            arguments in structures that can be used at run-time to supply alternative values.
+            As before, this is explained in detail at http://www.idlcoyote.com/cg_tips/kwexpressions.php.
+            1 Sept 2011. DWF.
+         Missed a couple of places to set decomposition color mode. 7 Sept 2011. DWF.
+         
  :Copyright:
      Copyright (c) 2011, Fanning Software Consulting, Inc.
 </PRE><P>
@@ -5014,6 +5396,8 @@ or type: <P>
          The !P.MULTI setting for the window.
      palette: out, optional, type=BytArr(N,3)
          The window color palette.
+     ps_decomposed: out, optional, type=boolean
+         The PostScript decomposed status of the window.
      ps_delete: out, optional, type=boolean
          The delete PostScript file status of the window.
      ps_encapsulated: out, optional, type=boolean
@@ -5045,8 +5429,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -5055,6 +5439,8 @@ or type: <P>
         Added Raster_IM.  18 Feb 2011. Jeremy Bailin
         Added the ability to set and unset adjustable text size in 
           cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
+        Added PS_DECOMPOSED keyword to allow getting/setting of PostScript decomposed 
+          value. 30 Aug 2011. DWF.
 
  :Copyright:
      Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -5116,6 +5502,8 @@ or type: <P>
      ps_charsize: in, optional, type=float, default=0.0
          Set this value to the !P.Charsize value to use when creating PostScript output. This
          value is not used if !P.Charsize is set to anything other than 0.0.
+     ps_decomposed: in, optional, type=boolean
+         If set, use decomposed color in the PostScript device.
      ps_delete: in, optional, type=boolean, default=1
          Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
          when making raster file output.
@@ -5162,8 +5550,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -5175,6 +5563,7 @@ or type: <P>
  :Copyright:
      Copyright (c) 2011, Fanning Software Consulting, Inc.
      Small bug fixes, and addition of PS_QUIET keyword. 17 Feb 2011. DWF.
+     Added PS_DECOMPOSED keyword to set the PostScript color mode. 30 Aug 2011. DWF.
 </PRE><P>
 <STRONG>(See cgwindow_setdefs.pro)</STRONG><P>
 <HR>
@@ -5199,8 +5588,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -5268,8 +5657,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY: Graphics
 
@@ -5300,8 +5689,8 @@ or type: <P>
 
  RESTRICTIONS:   Reqires XCOLORS and cgImage from the Coyote Library:
 
-                     http://www.dfanning.com/programs/xcolors.pro
-                     http://www.dfanning.com/programs/cgImage.pro
+                     http://www.idlcoyote.com/programs/xcolors.pro
+                     http://www.idlcoyote.com/programs/cgImage.pro
 
  PROCEDURE:
 
@@ -5343,8 +5732,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -5425,8 +5814,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -5481,7 +5870,7 @@ or type: <P>
 
      Requires SCALE_VECTOR from the Coyote Library:
 
-        http://www.dfanning.com/programs/scale_vector.pro
+        http://www.idlcoyote.com/programs/scale_vector.pro
 
  MODIFICATION HISTORY:
 
@@ -5514,8 +5903,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com/
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -5583,8 +5972,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -5617,7 +6006,7 @@ or type: <P>
 
        Reqires cgColor from the Coyote Library:
 
-                     http://www.dfanning.com/programs/cgColor.pro
+                     http://www.idlcoyote.com/programs/cgColor.pro
 
  EXAMPLE:
 
@@ -5630,7 +6019,7 @@ or type: <P>
  MODIFICATION HISTORY:
 
        Written by David Fanning, May 25, 2007 based on code named BitmapForButtonText supplied to the IDL
-       newsgroup by Dick Jackson: http://www.dfanning.com/tip_examples/bitmapforbuttontext.pro.
+       newsgroup by Dick Jackson: http://www.idlcoyote.com/tip_examples/bitmapforbuttontext.pro.
        Fixed a problem with foreground and background colors that caused them to work correctly only
            when color decomposition is on--as it should be :-). 6 May 2009.
 </PRE><P>
@@ -5670,8 +6059,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -5710,8 +6099,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -5801,8 +6190,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -5876,8 +6265,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -5911,8 +6300,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -5964,8 +6353,8 @@ or type: <P>
 
        Reqires cgColor and PICKCOLORNAME from the Coyote Library:
 
-                     http://www.dfanning.com/programs/cgColor.pro
-                     http://www.dfanning.com/programs/pickcolorname.pro
+                     http://www.idlcoyote.com/programs/cgColor.pro
+                     http://www.idlcoyote.com/programs/pickcolorname.pro
 
  MODIFICATION HISTORY:
 
@@ -6001,8 +6390,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins,  CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -6061,8 +6450,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -6128,8 +6517,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -6196,8 +6585,8 @@ or type: <P>
    2642 Bradbury Court
    Fort Collins, CO 80521 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -6231,7 +6620,7 @@ or type: <P>
    If you are going to use the XCOLORS method, you will need
    the XColors program from the Coyote library:
 
-     http://www.dfanning.com/programs/xcolors.pro
+     http://www.idlcoyote.com/programs/xcolors.pro
 
    The program is set up to handle 16 drawing colors. You may
    modify the program to have a different number, but you will
@@ -6643,8 +7032,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -6740,8 +7129,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -6798,11 +7187,11 @@ or type: <P>
 
      MAPCOORD:        A MapCoord object which implements a map coordinate system using the
                       GCTP map projections, as implemented with MAP_PROJ_INIT. For more information
-                      about MapCoord objects, see http://www.dfanning.com/catalyst/maponimage.html.
+                      about MapCoord objects, see http://www.idlcoyote.com/catalyst/maponimage.html.
                       Note that this could also be a map structure as returned from MAP_PROJ_INIT,
                       but in that case the user is resposible for setting up the XY map
                       coordinate space independently and outside of this program. Details on 
-                      how this can be done can be found at http://www.dfanning.com/map_tips/ephemeral.html.
+                      how this can be done can be found at http://www.idlcoyote.com/map_tips/ephemeral.html.
 
 
      THICK:           The line thickness. By default, 1.0.
@@ -6819,7 +7208,7 @@ or type: <P>
 
      Programs from the Coyote and Catalyst Libraries are required.
      
-         http://www.dfanning.com/catalyst/howtoinstall.html
+         http://www.idlcoyote.com/catalyst/howtoinstall.html
 
  EXAMPLES:
 
@@ -6883,8 +7272,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -6981,8 +7370,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -7118,8 +7507,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -7224,8 +7613,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -7290,8 +7679,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -7360,7 +7749,7 @@ or type: <P>
 
        Requires ERROR_MESSAGE from the Coyote Library.
 
-           http://www.dfanning.com/programs/error_message.pro
+           http://www.idlcoyote.com/programs/error_message.pro
 
  MODIFICATION HISTORY:
 
@@ -7413,8 +7802,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -7487,8 +7876,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -7579,8 +7968,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -7659,8 +8048,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -7736,8 +8125,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -7807,8 +8196,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -7877,7 +8266,7 @@ or type: <P>
        on 25 Sept 2010 to avoid conflicts with an IDL 8.0 routine of the
        same name. See the article "IDL 8 Name Conflicts" here:
        
-           http://www.dfanning.com/ng_tips/idl8_name_conflicts.html
+           http://www.idlcoyote.com/ng_tips/idl8_name_conflicts.html
 
  PURPOSE:
        The purpose of this routine is to implement a FSC_COLORBAR object
@@ -7889,8 +8278,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
        Graphics.
@@ -8039,8 +8428,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -8152,7 +8541,7 @@ or type: <P>
  DEPENDENCIES:
 
    Requires the Coyote Library:
-     http://www.dfanning.com/programs/coyoteprograms.zip
+     http://www.idlcoyote.com/programs/coyoteprograms.zip
 
  MODIFICATION HISTORY:
 
@@ -8185,8 +8574,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -8363,8 +8752,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -8465,7 +8854,7 @@ or type: <P>
  RESTRICTIONS:
 
    Requires DBLTOSTR from the Coyote Library:
-      http://www.dfanning.com/programs/dbltostr.pro
+      http://www.idlcoyote.com/programs/dbltostr.pro
 
  EVENT STRUCTURE:
 
@@ -8688,8 +9077,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -8748,7 +9137,7 @@ or type: <P>
 
    Requires the folling files from the Coyote Library:
 
-      http://www.dfanning.com/programs/error_message.pro
+      http://www.idlcoyote.com/programs/error_message.pro
 
  EVENT STRUCTURE:
 
@@ -8948,8 +9337,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -9167,7 +9556,7 @@ or type: <P>
  DEPENDENCIES:
 
    Requires DBLTOSTR from the Coyote Library:
-     http://www.dfanning.com/programs/dbltostr.pro
+     http://www.idlcoyote.com/programs/dbltostr.pro
 
  MODIFICATION HISTORY:
 
@@ -9244,8 +9633,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -9306,8 +9695,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -9379,8 +9768,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -9392,11 +9781,11 @@ or type: <P>
    keyword and method descriptions, and example programs using the object
    can be found on the Coyote's Guide to IDL Programming web page:
 
-     http://www.dfanning.com/programs/docs/fsc_psconfig.html
+     http://www.idlcoyote.com/programs/docs/fsc_psconfig.html
 
    Or, if you would prefer, you can download a self-contained PDF file:
 
-     http://www.dfanning.com/programs/docs/fsc_psconfig.pdf
+     http://www.idlcoyote.com/programs/docs/fsc_psconfig.pdf
 
  KEYWORDS:
 
@@ -9405,6 +9794,7 @@ or type: <P>
 
    Bits_per_Pixel - The number of image bits saved for each image pixel: 2, 4, or 8. The default is 8.
    Color - Set this keyword to select Color PostScript output. Turned on by default.
+   Decomposed - Set this keyword to 0 to select indexed color and to 1 to select decomposed color.
    DefaultSetup - Set this keyword to the "name" of a default style. Current styles (you can easily
      create and add your own to the source code) are the following:
 
@@ -9524,7 +9914,10 @@ or type: <P>
    Fixed a problem with 24-bit color support that allowed only IDL 7 versions to work correctly. 20 Sept 2009. DWF.
    Added a LANGUAGE_LEVEL keyword. 13 Dec 2010. DWF.
    Added the FONTYPE value to the keyword return structure. 14 Dec 2010. DWF.
-   Modified the return structure to turn landscape mode off and set offsets to zero if in encapsulated mode. 19 Feb 2011. DWF.
+   Modified the return structure to turn landscape mode off and set offsets to zero if in 
+        encapsulated mode. 19 Feb 2011. DWF.
+   Changes to handle inability to create raster files from PS encapsulated files in 
+        landscape mode. Also removed changes of 19 Feb 2011 as no longer needed. 26 Aug 2011. DWF.
 </PRE><P>
 <STRONG>(See fsc_psconfig__define.pro)</STRONG><P>
 <HR>
@@ -9552,8 +9945,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -9572,6 +9965,8 @@ or type: <P>
 
        Separated from PS_START file, 7 April 2009, by David W. Fanning.
        Added PAGETYPE field to structure. 8 August 2009. DWF.
+       Changes to handle inability to create raster files from PS encapsulated files in 
+           landscape mode. Added "encapsulated" field to structure. 26 Aug 2011. DWF.
 </PRE><P>
 <STRONG>(See fsc_ps_setup__define.pro)</STRONG><P>
 <HR>
@@ -9621,8 +10016,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -9694,8 +10089,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -9770,8 +10165,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -9804,8 +10199,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -9856,7 +10251,7 @@ or type: <P>
 
      Requires SCALE_VECTOR from the Coyote Library:
 
-        http://www.dfanning.com/programs/scale_vector.pro
+        http://www.idlcoyote.com/programs/scale_vector.pro
 
  MODIFICATION HISTORY:
 
@@ -9895,8 +10290,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -10100,8 +10495,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -10172,8 +10567,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -10232,7 +10627,7 @@ or type: <P>
 
      Requires SCALE_VECTOR from the Coyote Library:
 
-        http://www.dfanning.com/programs/scale_vector.pro
+        http://www.idlcoyote.com/programs/scale_vector.pro
 
  MODIFICATION HISTORY:
 
@@ -10267,8 +10662,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -10310,6 +10705,11 @@ or type: <P>
                   
   EXAMPLE:        If this keyword is set, the names of the Greek characters and their
                   symbols are written out in the current graphics window.
+                  
+  PS:             Normally, the PostScript version of the greek letter is returned if
+                  the current device is PostScript and !P.Font is 0 or 1. But, the 
+                  PostScript version of the greek letter can be obtained at any time
+                  and in any device, by setting this keyword.
                                     
   UNICODE:        If this keyword is set, the function returns the Unicode for the Greek
                   letter.
@@ -10329,7 +10729,7 @@ or type: <P>
  
   See the following article for additional information: 
   
-       /http://www.dfanning.com/ps_tips/greeksym.pro
+       http://www.idlcoyote.com/ps_tips/greeksym.html
        
  RESTRICTIONS:
  
@@ -10348,6 +10748,9 @@ or type: <P>
       what the documentation says, and what I intended.) 13 Dec 2010. DWF.
   I don't think the last change did quite want I wanted. More tweaking to make
       this more responsive to being in a PostScript file. 31 July 2011. DWF.
+  Added PS keyword so the return value is the PostScript file. This is for
+      convenience only, as the return value will be the PostScript value if
+      the current graphics device is PS and FONT is not equal to -1. 30 Aug 2011. DWF.
 </PRE><P>
 <STRONG>(See greek.pro)</STRONG><P>
 <HR>
@@ -10374,8 +10777,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -10476,6 +10879,12 @@ or type: <P>
        Written by David W. Fanning, 17 March 2009.
        Fixed problems in calculating default window sizes in the Z and PS devices. 25 June 2011. DWF.
        Fixed the example code to work with Coyote Graphics routines. 27 June 2011.
+       Although GridPositions was not intended to be used to configure the PostScript
+          device, I find that people are using it to do just that. To that end, I am now
+          allowing PostScript device keywords to be collected and passed along to the
+          PostScript device through the GridPositions interface. This is strictly a 
+          convenience, and not the way I would recommend using the program, to be truthful. 
+          29 Aug 2011. DWF
 </PRE><P>
 <STRONG>(See gridpositions.pro)</STRONG><P>
 <HR>
@@ -10511,8 +10920,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -10550,8 +10959,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com/
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -10645,7 +11054,7 @@ or type: <P>
 
        Requires FSC_NORMALIZE from Coyote Library:
 
-         http://www.dfanning.com/programs/fsc_normalize.pro
+         http://www.idlcoyote.com/programs/fsc_normalize.pro
 
  EXAMPLE:
 
@@ -10702,8 +11111,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -10767,8 +11176,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -10812,7 +11221,7 @@ or type: <P>
 
        There is an example program at the end of this file. It will require cgImage
        from the Coyote Library to run. You can also find an explanation of this program
-       at http://www.dfanning.com/ip_tips/histomatch.html.
+       at http://www.idlcoyote.com/ip_tips/histomatch.html.
 
  MODIFICATION HISTORY:
 
@@ -10857,8 +11266,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -11051,8 +11460,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -11129,8 +11538,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CALLING SEQUENCE:
 
@@ -11208,8 +11617,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -11241,7 +11650,7 @@ or type: <P>
     Based on discussions on the IDL newsgroup (comp.lang.idl-pvwave) and
     discussed here:
 
-      http://www.dfanning.com/tips/point_in_polygon.html
+      http://www.idlcoyote.com/tips/point_in_polygon.html
 
     Primarily the work of B�rd Krane and William Connelly.
 
@@ -11274,8 +11683,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -11304,7 +11713,7 @@ or type: <P>
  
     Requires THEMONTHS from the Coyote Library.
     
-         http://www.dfanning.com/programs/themonths.pro
+         http://www.idlcoyote.com/programs/themonths.pro
 
  MODIFICATION HISTORY:
 
@@ -11334,8 +11743,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -11362,7 +11771,7 @@ or type: <P>
  
     Requires THEMONTHS from the Coyote Library.
     
-         http://www.dfanning.com/programs/themonths.pro
+         http://www.idlcoyote.com/programs/themonths.pro
 
  MODIFICATION HISTORY:
 
@@ -11392,8 +11801,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -11454,8 +11863,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
  
@@ -11818,8 +12227,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -11874,7 +12283,7 @@ or type: <P>
 
      Requires SCALE_VECTOR from the Coyote Library:
 
-        http://www.dfanning.com/programs/scale_vector.pro
+        http://www.idlcoyote.com/programs/scale_vector.pro
 
  MODIFICATION HISTORY:
 
@@ -11943,8 +12352,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -11977,7 +12386,7 @@ or type: <P>
 
       An article describing how to use this program can be found here.
 
-         http://www.dfanning.com/map_tips/gshhs.html
+         http://www.idlcoyote.com/map_tips/gshhs.html
          
       Note, the authors of the GSHHS software *continually* change the header
       structure, which you MUST know to read the data file. There are are now
@@ -11992,8 +12401,8 @@ or type: <P>
       1645 Sheely Drive
       Fort Collins, CO 80526 USA
       Phone: 970-221-0438
-      E-mail: davidf@dfanning.com
-      Coyote's Guide to IDL Programming: http://www.dfanning.com
+      E-mail: david@idlcoyote.com
+      Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -12032,9 +12441,9 @@ or type: <P>
 
      Requires the following programs from the Coyote Library:
 
-         http://www.dfanning.com/programs/error_message.pro
-         http://www.dfanning.com/programs/cgColor.pro
-         http://www.dfanning.com/programs/undefine.pro
+         http://www.idlcoyote.com/programs/error_message.pro
+         http://www.idlcoyote.com/programs/cgColor.pro
+         http://www.idlcoyote.com/programs/undefine.pro
 
  EXAMPLE:
 
@@ -12118,8 +12527,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
     
  :History:
      Change History::
@@ -12168,8 +12577,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -12205,8 +12614,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -12317,10 +12726,10 @@ or type: <P>
       Required Programs: The following programs are required to reside in your !PATH. They can be
          obtained from the Coyote Library:
 
-                     http://www.dfanning.com/programs/cw_spacer.pro
-                     http://www.dfanning.com/programs/error_message.pro
-                     http://www.dfanning.com/programs/fsc_droplist.pro
-                     http://www.dfanning.com/programs/fsc_field.pro
+                     http://www.idlcoyote.com/programs/cw_spacer.pro
+                     http://www.idlcoyote.com/programs/error_message.pro
+                     http://www.idlcoyote.com/programs/fsc_droplist.pro
+                     http://www.idlcoyote.com/programs/fsc_field.pro
 
  EXAMPLE:
 
@@ -12329,7 +12738,7 @@ or type: <P>
        MPI_AXIS__DEFINE programs, it can be used as a wrapper program for the PLOT command
        that you can use with your own data. The program can be downloaded here:
 
-                     http://www.dfanning.com/programs/mpi_plot.pro
+                     http://www.idlcoyote.com/programs/mpi_plot.pro
 
  MODIFICATION HISTORY:
 
@@ -12360,8 +12769,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -12477,27 +12886,27 @@ or type: <P>
         The following programs are required to reside in your !PATH. They can be
         obtained from the Coyote Library:
 
-                     http://www.dfanning.com/programs/adjustposition.pro
-                     http://www.dfanning.com/programs/cw_drawcolor.pro
-                     http://www.dfanning.com/programs/cw_spacer.pro
-                     http://www.dfanning.com/programs/error_message.pro
-                     http://www.dfanning.com/programs/cgColor.pro
-                     http://www.dfanning.com/programs/fsc_droplist.pro
-                     http://www.dfanning.com/programs/fsc_field.pro
-                     http://www.dfanning.com/programs/fsc_fileselect.pro
-                     http://www.dfanning.com/programs/fsc_inputfield.pro
-                     http://www.dfanning.com/programs/fsc_psconfig__define.pro
-                     http://www.dfanning.com/programs/mpi_plotconfig__define.pro
-                     http://www.dfanning.com/programs/mpi_axis.pro
-                     http://www.dfanning.com/programs/mpi_axis__define.pro
-                     http://www.dfanning.com/programs/pickcolorname.pro
-                     http://www.dfanning.com/programs/psconfig.pro
-                     http://www.dfanning.com/programs/pswindow.pro
-                     http://www.dfanning.com/programs/cgsnapshot.pro
+                     http://www.idlcoyote.com/programs/adjustposition.pro
+                     http://www.idlcoyote.com/programs/cw_drawcolor.pro
+                     http://www.idlcoyote.com/programs/cw_spacer.pro
+                     http://www.idlcoyote.com/programs/error_message.pro
+                     http://www.idlcoyote.com/programs/cgColor.pro
+                     http://www.idlcoyote.com/programs/fsc_droplist.pro
+                     http://www.idlcoyote.com/programs/fsc_field.pro
+                     http://www.idlcoyote.com/programs/fsc_fileselect.pro
+                     http://www.idlcoyote.com/programs/fsc_inputfield.pro
+                     http://www.idlcoyote.com/programs/fsc_psconfig__define.pro
+                     http://www.idlcoyote.com/programs/mpi_plotconfig__define.pro
+                     http://www.idlcoyote.com/programs/mpi_axis.pro
+                     http://www.idlcoyote.com/programs/mpi_axis__define.pro
+                     http://www.idlcoyote.com/programs/pickcolorname.pro
+                     http://www.idlcoyote.com/programs/psconfig.pro
+                     http://www.idlcoyote.com/programs/pswindow.pro
+                     http://www.idlcoyote.com/programs/cgsnapshot.pro
 
          All these programs can be obtained at once by downloading the MPI_PLOT zip file:
 
-                     http://www.dfanning.com/programs/mpi_plot.zip
+                     http://www.idlcoyote.com/programs/mpi_plot.zip
 
 
  COMMON BLOCK:
@@ -12557,8 +12966,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -12750,18 +13159,18 @@ or type: <P>
       Required Programs: The following programs are required to reside in your !PATH. They can be
          obtained from the Coyote Library:
 
-                     http://www.dfanning.com/programs/adjustposition.pro
-                     http://www.dfanning.com/programs/cw_drawcolor.pro
-                     http://www.dfanning.com/programs/cw_spacer.pro
-                     http://www.dfanning.com/programs/error_message.pro
-                     http://www.dfanning.com/programs/cgColor.pro
-                     http://www.dfanning.com/programs/fsc_droplist.pro
-                     http://www.dfanning.com/programs/fsc_field.pro
-                     http://www.dfanning.com/programs/fsc_plotwindow.pro
-                     http://www.dfanning.com/programs/mpi_axis__define.pro
-                     http://www.dfanning.com/programs/pickcolorname.pro
-                     http://www.dfanning.com/programs/pswindow.pro
-                     http://www.dfanning.com/programs/cgsnapshot.pro
+                     http://www.idlcoyote.com/programs/adjustposition.pro
+                     http://www.idlcoyote.com/programs/cw_drawcolor.pro
+                     http://www.idlcoyote.com/programs/cw_spacer.pro
+                     http://www.idlcoyote.com/programs/error_message.pro
+                     http://www.idlcoyote.com/programs/cgColor.pro
+                     http://www.idlcoyote.com/programs/fsc_droplist.pro
+                     http://www.idlcoyote.com/programs/fsc_field.pro
+                     http://www.idlcoyote.com/programs/fsc_plotwindow.pro
+                     http://www.idlcoyote.com/programs/mpi_axis__define.pro
+                     http://www.idlcoyote.com/programs/pickcolorname.pro
+                     http://www.idlcoyote.com/programs/pswindow.pro
+                     http://www.idlcoyote.com/programs/cgsnapshot.pro
 
  EXAMPLE:
 
@@ -12770,7 +13179,7 @@ or type: <P>
        it can be used as a wrapper program for the PLOT command that you can use with
        your own data. The program can be downloaded here:
 
-                     http://www.dfanning.com/programs/mpi_plot.pro
+                     http://www.idlcoyote.com/programs/mpi_plot.pro
 
  MODIFICATION HISTORY:
 
@@ -12876,8 +13285,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
        File I/O
@@ -12951,8 +13360,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -13004,13 +13413,13 @@ or type: <P>
 
         The following programs are required from the Coyote Library.
 
-              http://www.dfanning.com/netcdf_data__define.pro
-              http://www.dfanning.com/error_message.pro
-              http://www.dfanning.com/centertlb.pro
-              http://www.dfanning.com/undefine.pro
-              http://www.dfanning.com/textbox.pro
-              http://www.dfanning.com/fsc_base_filename.pro
-              http://www.dfanning.com/textlineformat.pro
+              http://www.idlcoyote.com/netcdf_data__define.pro
+              http://www.idlcoyote.com/error_message.pro
+              http://www.idlcoyote.com/centertlb.pro
+              http://www.idlcoyote.com/undefine.pro
+              http://www.idlcoyote.com/textbox.pro
+              http://www.idlcoyote.com/fsc_base_filename.pro
+              http://www.idlcoyote.com/textlineformat.pro
 
  MODIFICATION HISTORY:
        Written by:  David W. Fanning, 03 Feb 2008. Used ideas from many
@@ -13049,8 +13458,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -13123,8 +13532,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -13187,8 +13596,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
        File I/O
@@ -13249,13 +13658,13 @@ or type: <P>
      good idea to make sure you have the latest version of the Coyote Library code,
      as updates are irregular and frequent.
 
-              http://www.dfanning.com/programs/netcdf_data__define.pro
-              http://www.dfanning.com/programs/error_message.pro
-              http://www.dfanning.com/programs/centertlb.pro
-              http://www.dfanning.com/programs/undefine.pro
-              http://www.dfanning.com/programs/textbox.pro
-              http://www.dfanning.com/programs/fsc_base_filename.pro
-              http://www.dfanning.com/programs/textlineformat.pro
+              http://www.idlcoyote.com/programs/netcdf_data__define.pro
+              http://www.idlcoyote.com/programs/error_message.pro
+              http://www.idlcoyote.com/programs/centertlb.pro
+              http://www.idlcoyote.com/programs/undefine.pro
+              http://www.idlcoyote.com/programs/textbox.pro
+              http://www.idlcoyote.com/programs/fsc_base_filename.pro
+              http://www.idlcoyote.com/programs/textlineformat.pro
 
  METHODS:
 
@@ -13358,8 +13767,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
        File I/O
@@ -13423,8 +13832,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
        File I/O
@@ -13466,20 +13875,20 @@ or type: <P>
      good idea to make sure you have the latest version of the Coyote Library code,
      as updates are irregular and frequent.
 
-              http://www.dfanning.com/programs/ncdf_attribute__define.pro
-              http://www.dfanning.com/programs/ncdf_data__define.pro
-              http://www.dfanning.com/programs/ncdf_browser.pro
-              http://www.dfanning.com/programs/ncdf_castdatatype.pro
-              http://www.dfanning.com/programs/ncdf_container__define.pro
-              http://www.dfanning.com/programs/ncdf_dimension__define.pro
-              http://www.dfanning.com/programs/ncdf_variable__define.pro
-              http://www.dfanning.com/programs/errorlogger__define.pro
-              http://www.dfanning.com/programs/error_message.pro
-              http://www.dfanning.com/programs/centertlb.pro
-              http://www.dfanning.com/programs/undefine.pro
-              http://www.dfanning.com/programs/textbox.pro
-              http://www.dfanning.com/programs/fsc_base_filename.pro
-              http://www.dfanning.com/programs/textlineformat.pro
+              http://www.idlcoyote.com/programs/ncdf_attribute__define.pro
+              http://www.idlcoyote.com/programs/ncdf_data__define.pro
+              http://www.idlcoyote.com/programs/ncdf_browser.pro
+              http://www.idlcoyote.com/programs/ncdf_castdatatype.pro
+              http://www.idlcoyote.com/programs/ncdf_container__define.pro
+              http://www.idlcoyote.com/programs/ncdf_dimension__define.pro
+              http://www.idlcoyote.com/programs/ncdf_variable__define.pro
+              http://www.idlcoyote.com/programs/errorlogger__define.pro
+              http://www.idlcoyote.com/programs/error_message.pro
+              http://www.idlcoyote.com/programs/centertlb.pro
+              http://www.idlcoyote.com/programs/undefine.pro
+              http://www.idlcoyote.com/programs/textbox.pro
+              http://www.idlcoyote.com/programs/fsc_base_filename.pro
+              http://www.idlcoyote.com/programs/textlineformat.pro
               
      These files may be (almost certainly are!) dependent on other Coyote Library files.
 
@@ -13596,8 +14005,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -13643,8 +14052,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -13701,8 +14110,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -13777,8 +14186,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -13854,8 +14263,8 @@ or type: <P>
        2642 Bradbury Court
        Fort Collins, CO 80521 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -13907,8 +14316,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
        Widgets, IDL 5 Object Graphics.
@@ -13990,8 +14399,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -14128,8 +14537,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -14287,7 +14696,7 @@ or type: <P>
        precipitation image that is in a polar stereographic map projection, and
        for which the latitudes and longitudes of its four corners are known.
 
-       For additional details, see http://www.dfanning.com/map_tips/precipmap.html.
+       For additional details, see http://www.idlcoyote.com/map_tips/precipmap.html.
 
  AUTHOR:
 
@@ -14296,8 +14705,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -14310,13 +14719,13 @@ or type: <P>
  INPUTS:
 
       filename:   The name of the precipitation file. For demo, download
-                  ST4.2005010112.24h.bin from ftp://ftp.dfanning.com/pub/dfanning/outgoing/misc.
+                  ST4.2005010112.24h.bin from http://www.idlcoyote.com/misc.
 
  RESTRICTIONS:
 
      Requires files from the Coyote Library:
 
-     http://www.dfanning.com/documents/programs.html
+     http://www.idlcoyote.com/documents/programs.html
 
  MODIFICATION HISTORY:
 
@@ -14324,6 +14733,7 @@ or type: <P>
        by James Kuyper in the IDL newsgroup.
   Renamed Colorbar procedure to cgColorbar to avoid conflict with IDL 8 Colorbar function.
         26 September 2010. DWF.
+  Got the polar stereo map projection correct. 5 September 2011. DWF.
 </PRE><P>
 <STRONG>(See precipmap.pro)</STRONG><P>
 <HR>
@@ -14348,8 +14758,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -14417,7 +14827,7 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
+       E-mail: david@idlcoyote.com
 
  SYNTAX:
 
@@ -14519,8 +14929,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -14649,7 +15059,7 @@ or type: <P>
 
        This program requires cgColor from the Coyote Library:
 
-          http://www.dfanning.com/programs/cgColor.pro
+          http://www.idlcoyote.com/programs/cgColor.pro
 
  MODIFICATION HISTORY:
 
@@ -14705,8 +15115,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CALLING SEQUENCE:
 
@@ -14722,7 +15132,7 @@ or type: <P>
    keyword and method descriptions, and example programs using the object
    can be found on the Coyote's Guide to IDL Programming web page:
 
-     http://www.dfanning.com/programs/docs/fsc_psconfig.html
+     http://www.idlcoyote.com/programs/docs/fsc_psconfig.html
 
  INPUT:
 
@@ -14862,8 +15272,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -15036,8 +15446,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -15076,8 +15486,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -15115,6 +15525,10 @@ or type: <P>
        
        NOFIX:        If this keyword is set, then the FixPS program to fix IDL landscape
                      PostScript files is not called.
+                     
+       NOMESSAGE:    If this keyword is set, then no error messages are issued. The
+                     keyword is used primarily to allow PS_END to reset the internal
+                     structure without a lot of ruckus.
 
        PNG:          Set this keyword to convert the PostScript output file to a PNG image.
 
@@ -15152,7 +15566,7 @@ or type: <P>
        to PNG, JPEG, and TIFF files requires ImageMagick be installed on your
        computer and configured correctly. You can download Coyote Library programs here:
 
-             http://www.dfanning.com/programs/coyoteprograms.zip
+             http://www.idlcoyote.com/programs/coyoteprograms.zip
 
        ImageMagick can be found here:
 
@@ -15210,6 +15624,8 @@ or type: <P>
        Added DELETE_PS keyword. 16 Jan 2011. DWF.
        Better protection of code from not finding ImageMagick. 17 Jan 2011. DWF.
        Collecting result of SPAWN command. Only printing if QUIET=0. 16 Feb 2011. DWF.
+       Changes to handle inability to create raster files from PS encapsulated files in 
+           landscape mode. Added NOMESSAGE keyword. 26 Aug 2011. DWF.
 </PRE><P>
 <STRONG>(See ps_end.pro)</STRONG><P>
 <HR>
@@ -15240,8 +15656,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -15316,7 +15732,7 @@ or type: <P>
        to PNG, JPEG, GIF, and TIFF files requires ImageMagick be installed on your
        computer and configured correctly. You can download Coyote Library programs here:
 
-             http://www.dfanning.com/programs/coyoteprograms.zip
+             http://www.idlcoyote.com/programs/coyoteprograms.zip
 
        ImageMagick can be found here:
 
@@ -15373,6 +15789,8 @@ or type: <P>
        Added Charsize keyword to PS_START. 14 Nov 2010. DWF.
        Changed the way default character sizes are set. 19 Nov 2010. DWF.
        Added CANCEL and KEYWORDS output keywords. 16 Jan 2011. DWF.
+       Changes to handle inability to create raster files from PS encapsulated files in 
+           landscape mode. 26 Aug 2011. DWF.
 </PRE><P>
 <STRONG>(See ps_start.pro)</STRONG><P>
 <HR>
@@ -15400,8 +15818,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -15463,8 +15881,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -15522,8 +15940,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -15595,8 +16013,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -15622,7 +16040,7 @@ or type: <P>
   A discussion of this routine, and of the problem the routine was written to address can
   be found here:
   
-     http://www.dfanning.com/tips/saved_objects.html
+     http://www.idlcoyote.com/tips/saved_objects.html
      
  MODIFICATION HISTORY:
 
@@ -15681,8 +16099,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Written by David W. Fanning at suggestion of Ben Tupper. 7 January 2011.
@@ -15715,8 +16133,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -15800,8 +16218,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -15857,8 +16275,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -15937,8 +16355,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -15998,8 +16416,8 @@ or type: <P>
 
      Requires the following programs from the Coyote Library:
 
-        http://www.dfanning.com/programs/convert_to_type.pro
-        http://www.dfanning.com/programs/fpufix.pro
+        http://www.idlcoyote.com/programs/convert_to_type.pro
+        http://www.idlcoyote.com/programs/fpufix.pro
 
  MODIFICATION HISTORY:
 
@@ -16047,8 +16465,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -16126,8 +16544,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
        Object Graphics.
@@ -16149,7 +16567,7 @@ or type: <P>
 
  RESTRICTIONS:
        Requires VCOLORBAR from the Coyote Library:
-           http://www.dfanning.com/programs/vcolorbar__define.pro.
+           http://www.idlcoyote.com/programs/vcolorbar__define.pro.
 
  EXAMPLE:
        Select_Objects
@@ -16207,8 +16625,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -16245,8 +16663,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -16315,8 +16733,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -16350,7 +16768,7 @@ or type: <P>
   IDL> Print, SetDifference(set_a, set_b)
           1  2  3 
 
-  See http://www.dfanning.com/tips/set_operations.html for other types of set operations.
+  See http://www.idlcoyote.com/tips/set_operations.html for other types of set operations.
   
  NOTES:
  
@@ -16388,8 +16806,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -16423,7 +16841,7 @@ or type: <P>
   IDL> Print, SetIntersection(set_a, set_b)
           4   5
 
-  See http://www.dfanning.com/tips/set_operations.html for other types of set operations.
+  See http://www.idlcoyote.com/tips/set_operations.html for other types of set operations.
   
  NOTES:
  
@@ -16463,8 +16881,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -16495,7 +16913,7 @@ or type: <P>
   IDL> Print, SetUnion(set_a, set_b)
           1  2  3  4  5  6  7  8  9  10  11
 
-  See http://www.dfanning.com/tips/set_operations.html for other types of set operations.
+  See http://www.idlcoyote.com/tips/set_operations.html for other types of set operations.
   
  NOTES:
  
@@ -16551,8 +16969,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -16623,8 +17041,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -16701,8 +17119,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -16754,7 +17172,7 @@ or type: <P>
  RESTRICTIONS:
        Requires FSC_NORMALIZE from the Coyote Library.
 
-          http://www.dfanning.com/programs/fsc_normalize.pro
+          http://www.idlcoyote.com/programs/fsc_normalize.pro
 
  EXAMPLE:
        To use this program with your 2D data, type:
@@ -16835,8 +17253,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -16863,7 +17281,7 @@ or type: <P>
 
        Requires cgColor from the Coyote Library:
 
-           http://www.dfanning.com/programs/cgColor.pro
+           http://www.idlcoyote.com/programs/cgColor.pro
 
  EXAMPLE:
 
@@ -16912,8 +17330,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -17008,8 +17426,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -17128,8 +17546,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -17216,8 +17634,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -17272,8 +17690,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -17466,8 +17884,8 @@ or type: <P>
        1642 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
        Utilities.
@@ -17542,8 +17960,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com/
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -17632,7 +18050,7 @@ or type: <P>
 
        Requires FSC_NORMALIZE from Coyote Library:
 
-         http://www.dfanning.com/programs/fsc_normalize.pro
+         http://www.idlcoyote.com/programs/fsc_normalize.pro
 
  EXAMPLE:
 
@@ -17727,8 +18145,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -17792,8 +18210,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -17825,8 +18243,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -17881,8 +18299,8 @@ or type: <P>
 
        Requires cgColor and STATIONPLOT from the Coyote Library:
 
-           http://www.dfanning.com/programs/cgColor.pro
-           http://www.dfanning.com/programs/stationplot.pro
+           http://www.idlcoyote.com/programs/cgColor.pro
+           http://www.idlcoyote.com/programs/stationplot.pro
 
  EXAMPLE:
 
@@ -17949,8 +18367,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -18032,8 +18450,8 @@ or type: <P>
            1645 Sheely Drive
            Fort Collins, CO 80526 USA
            Phone: 970-221-0438
-           E-mail: davidf@dfanning.com
-           Coyote's Guide to IDL Programming: http://www.dfanning.com
+           E-mail: david@idlcoyote.com
+           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  :History:
      Change History::
@@ -18136,8 +18554,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -18161,11 +18579,11 @@ or type: <P>
           is called from another widget program.
 
        BREWER: Set this keyword if you wish to use the Brewer Colors, as explained
-           in this reference: http://www.dfanning.com/color_tips/brewer.html. The
+           in this reference: http://www.idlcoyote.com/color_tips/brewer.html. The
            Brewer color table file, fsc_brewer.tbl must be found somewhere in your
            IDL path for this option to be available. The file can be downloaded here.
 
-                      http://www.dfanning.com/programs/fsc_brewer.tbl
+                      http://www.idlcoyote.com/programs/fsc_brewer.tbl
              
            Note that if this file is found, the Brewer colors are automatically added
            to the program as an option. In this case, the BREWER keyword just makes sure
@@ -18544,8 +18962,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -18633,8 +19051,8 @@ or type: <P>
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
-       E-mail: davidf@dfanning.com
-       Coyote's Guide to IDL Programming: http://www.dfanning.com
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
  CATEGORY:
 
@@ -18657,11 +19075,11 @@ or type: <P>
        BLOCK:         Set this keyword if you wish the program to be a blocking widget.
        
        BREWER:        Set this keyword if you wish to use the Brewer Colors, as explained
-                      in this reference: http://www.dfanning.com/color_tips/brewer.html. The
+                      in this reference: http://www.idlcoyote.com/color_tips/brewer.html. The
                       Brewer color table file, fsc_brewer.tbl must be found somewhere in your
                       IDL path for this option to be available. The file can be downloaded here.
 
-                      http://www.dfanning.com/programs/fsc_brewer.tbl
+                      http://www.idlcoyote.com/programs/fsc_brewer.tbl
 
        COLORS:        A five element string array, listing the cgColorS colors for drawing the
                       histogram plot. The colors are used as follows:
@@ -18937,8 +19355,8 @@ or type: <P>
    1645 Sheely Drive
    Fort Collins, CO 80526 USA
    Phone: 970-221-0438
-   E-mail: davidf@dfanning.com
-   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+   E-mail: david@idlcoyote.com
+   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 
  CATEGORY:
 
@@ -18980,8 +19398,8 @@ or type: <P>
 
        Uses XCOLORS and PICKCOLOR from the Coyote Library:
 
-          http://www.dfanning.com/programs/xcolors.pro
-          http://www.dfanning.com/programs/pickcolor.pro
+          http://www.idlcoyote.com/programs/xcolors.pro
+          http://www.idlcoyote.com/programs/pickcolor.pro
 
  PROCEDURE:
 
@@ -18998,7 +19416,7 @@ or type: <P>
        Colors are decidedly ugly in 256 color environments.
        Requires FSC_NORMALIZE from the Coyote Library.
        
-          http://www.dfanning.com/programs/fsc_normalize.pro
+          http://www.idlcoyote.com/programs/fsc_normalize.pro
 
  MODIFICATION HISTORY:
 

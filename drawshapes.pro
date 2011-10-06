@@ -79,7 +79,10 @@
 ;                      but in that case the user is resposible for setting up the XY map
 ;                      coordinate space independently and outside of this program. Details on 
 ;                      how this can be done can be found at http://www.idlcoyote.com/map_tips/ephemeral.html.
-;
+;                     
+;     MINNUMVERTS:     Set this keyword to the minimum number of vertices required to actually
+;                      draw a polygon. In other words, to to drawn, a polygon must have at least
+;                      this number of vertices. The default value is 3.
 ;
 ;     THICK:           The line thickness. By default, 1.0.
 ;
@@ -133,7 +136,11 @@
 ;          general, 13 May 2010. DWF.
 ;       Added the AUTODRAW keyword for automatic drawing. 15 May 2010. DWF.
 ;       Added COMPILE_OPT idl2 to make sure all loop variables are longs. 5 July 2010. DWF.
-;       Corrected an aspect ratio problem with AUTODRAW and upgraded to Coyote Graphics. 3 January 2011. DWF.
+;       Corrected an aspect ratio problem with AUTODRAW and upgraded to Coyote Graphics. 
+;          3 January 2011. DWF.
+;       Previous method of freeing entity pointers took 10 times times longer than freeing
+;          pointers as I go. Also added MinNumVerts keyword to screen out the drawing of
+;          small polygons. 6 October 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -267,6 +274,7 @@ PRO DrawShapes, shapeFile, $
    FILL=fill, $
    LINESTYLE=linestyle, $
    MAPCOORD=mapCoord, $
+   MINNUMVERTS=minNumVerts, $
    THICK=thick
    
    Compile_Opt idl2
@@ -296,6 +304,7 @@ PRO DrawShapes, shapeFile, $
    IF N_Elements(fill) EQ 0 THEN fill = Keyword_Set(fill)
    IF N_Elements(linestyle) EQ 0 THEN linestyle = 0
    IF N_Elements(thick) EQ 0 THEN thick = 1.0
+   IF N_Elements(minNumVerts) EQ 0 THEN minNumVerts = 3
    IF N_Elements(attrvalues) EQ 0 THEN attrvalues = 'ALL'
 
    ; Make sure arrays have the same number of elements.
@@ -374,7 +383,9 @@ PRO DrawShapes, shapeFile, $
          Position=Aspect(aspectRatio), /NoData
    ENDIF
    
-   ; Cycle through each entity and draw it, if required.
+   ; Cycle through each entity and draw it, if required. Free each pointer
+   ; as you go, because it take at least 10 times as long to free them with
+   ; HEAP_FREE at the end if you don't do this!
    FOR j=0,N_Elements(*entities)-1 DO BEGIN
       thisEntity = (*entities)[j]
       theEntityName = StrUpCase(StrTrim((*thisEntity.attributes).(attIndex), 2))
@@ -383,13 +394,24 @@ PRO DrawShapes, shapeFile, $
          index = 0
          test = 1
       ENDIF
-      IF (test EQ 1) THEN DrawShapes_DrawEntity, (*entities)[j], Color=(colors[index])[0], $
-         Fill=(fill[index])[0], LineStyle=(linestyle[index])[0], Thick=(thick[index])[0], $
-         MapCoord=mapCoord, FCOLOR=(fcolors[index])[0]
+      IF (test EQ 1) THEN BEGIN
+          IF N_Elements(*thisEntity.vertices) GE minNumVerts THEN BEGIN
+              DrawShapes_DrawEntity, (*entities)[j], Color=(colors[index])[0], $
+                 Fill=(fill[index])[0], LineStyle=(linestyle[index])[0], $
+                 Thick=(thick[index])[0], $
+                 MapCoord=mapCoord, FCOLOR=(fcolors[index])[0]
+          ENDIF
+      ENDIF
+      Ptr_Free, thisEntity.vertices
+      Ptr_Free, thisEntity.measure
+      Ptr_Free, thisEntity.parts
+      Ptr_Free, thisEntity.part_types
+      Ptr_Free, thisEntity.attributes
+      
    ENDFOR
 
    ; Clean up.
    Obj_Destroy, shapefileObj
-   Heap_Free, entities
+   Ptr_Free, entities
 
 END ;---------------------------------------------------------------------------------

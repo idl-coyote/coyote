@@ -51,6 +51,10 @@
 ;                      By default, set to 0 and solid lines. May be a vector of the same
 ;                      size as STATENAMES.
 ;
+;     MINNUMVERTS:     Set this keyword to the minimum number of vertices required to actually
+;                      draw a polygon. In other words, to to drawn, a polygon must have at least
+;                      this number of vertices. The default value is 3.
+;
 ;     STATENAMES:      The names of the states you wish to draw. Normally, these are two-element
 ;                      state abbreviations, but this will depend upon the entity attributes in your
 ;                      shapefile. If this keyword is undefined, then all the states in the
@@ -74,9 +78,9 @@
 ;
 ; EXAMPLE:
 ;
-;       Window, XSize=700, YSize=800
-;       Map_Set, 37.5, -117.5, /Albers, /IsoTropic, Limit=[30, -125, 45, -108], Position=[0.05, 0.05, 0.95, 0.95]
-;       Erase, Color=cgColor('ivory')
+;       cgDisplay, 700, 600
+;       Map_Set, 37.5, -117.5, /Albers, /IsoTropic, Limit=[30, -125, 45, -108], $
+;          Position=[0.05, 0.05, 0.95, 0.95], /NoErase
 ;       DrawStates, Statenames=['CA', 'OR', 'WA', 'AZ', 'UT', 'ID'], Thick=1, $
 ;           Colors=['firebrick', 'indian red', 'indian red', 'indian red', 'steel blue', 'indian red'], $
 ;           Fill = [1,0,0,0,1,0]
@@ -85,6 +89,8 @@
 ; MODIFICATION HISTORY:
 ;
 ;       Written by David W. Fanning, 2 April 2005.
+;       Added MINNUMVERTS keyword. Modifed the way entity pointers are cleaned up. 
+;          Upgraded to use Coyote Graphics. 6 Oct 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -118,7 +124,7 @@ PRO DrawStates_DrawEntity, entity, COLOR=color, FILL=fill, LINESTYLE=linestyle, 
    ; Error handling.
    Catch, theError
    IF theError NE 0 THEN BEGIN
-      ok = Error_Message(/Traceback)
+      ok = Error_Message()
       IF Obj_Valid(shapefile) THEN Obj_Destroy, shapefile
       IF Ptr_Valid(entities) THEN Heap_Free, entities
       RETURN
@@ -137,13 +143,13 @@ PRO DrawStates_DrawEntity, entity, COLOR=color, FILL=fill, LINESTYLE=linestyle, 
             FOR j=0, entity.n_parts-1 DO BEGIN
                CASE fill OF
 
-                  0: PlotS, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
+                  0: cgPlotS, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
                             (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
-                            COLOR=cgColor(color), LINESTYLE=linestyle, THICK=thick
+                            COLOR=color, LINESTYLE=linestyle, THICK=thick
 
-                  1: PolyFill, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
+                  1: cgColorFill, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
                                (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
-                               COLOR=cgColor(color)
+                               COLOR=color
 
                ENDCASE
             ENDFOR
@@ -160,13 +166,13 @@ PRO DrawStates_DrawEntity, entity, COLOR=color, FILL=fill, LINESTYLE=linestyle, 
             FOR j=0, entity.n_parts-1 DO BEGIN
                CASE fill OF
 
-                  0: PlotS, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
+                  0: cgPlotS, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
                             (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
-                            COLOR=cgColor(color), LINESTYLE=linestyle, THICK=thick
+                            COLOR=color, LINESTYLE=linestyle, THICK=thick
 
-                  1: PolyFill, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
+                  1: cgColorFill, (*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
                                (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
-                               COLOR=cgColor(color)
+                               COLOR=color
 
                ENDCASE
             ENDFOR
@@ -186,13 +192,14 @@ PRO DrawStates, stateFile, $
    COLORS=colors, $
    FILL=fill, $
    LINESTYLE=linestyle, $
+   MINNUMVERTS=minNumVerts, $
    STATENAMES=statenames, $
    THICK=thick
 
    ; Error handling.
    Catch, theError
    IF theError NE 0 THEN BEGIN
-      ok = Error_Message(/Traceback)
+      ok = Error_Message()
       IF Obj_Valid(shapefile) THEN Obj_Destroy, shapefile
       IF Ptr_Valid(entities) THEN Heap_Free, entities
       RETURN
@@ -207,6 +214,7 @@ PRO DrawStates, stateFile, $
    IF N_Elements(colors) EQ 0 THEN colors = 'Sky Blue'
    IF N_Elements(fill) EQ 0 THEN fill = Keyword_Set(fill)
    IF N_Elements(linestyle) EQ 0 THEN linestyle = 0
+   IF N_Elements(minNumVerts) EQ 0 THEN minNumVerts = 3
    IF N_Elements(thick) EQ 0 THEN thick = 1.0
    IF N_Elements(statenames) EQ 0 THEN statenames = 'ALL'
 
@@ -244,7 +252,9 @@ PRO DrawStates, stateFile, $
    entities = Ptr_New(/Allocate_Heap)
    *entities = shapefile -> GetEntity(/All, /Attributes)
 
-   ; Cycle through each entity and draw it, if required.
+   ; Cycle through each entity and draw it, if required. Free each pointer
+   ; as you go, because it take at least 10 times as long to free them with
+   ; HEAP_FREE at the end if you don't do this!
    FOR j=0,N_Elements(*entities)-1 DO BEGIN
       thisEntity = (*entities)[j]
       theState = StrUpCase(StrTrim((*thisEntity.attributes).(attIndex), 2))
@@ -253,12 +263,22 @@ PRO DrawStates, stateFile, $
          index = 0
          test = 1
       ENDIF
-      IF (test EQ 1) THEN DrawStates_DrawEntity, (*entities)[j], Color=(colors[index])[0], $
-         Fill=(fill[index])[0], LineStyle=(linestyle[index])[0], Thick=(thick[index])[0]
+      IF (test EQ 1) THEN BEGIN
+          IF N_Elements(*thisEntity.vertices) GE minNumVerts THEN BEGIN
+              DrawStates_DrawEntity, (*entities)[j], Color=(colors[index])[0], $
+                   Fill=(fill[index])[0], LineStyle=(linestyle[index])[0], $
+                   Thick=(thick[index])[0]
+          ENDIF
+      ENDIF
+      Ptr_Free, thisEntity.vertices
+      Ptr_Free, thisEntity.measure
+      Ptr_Free, thisEntity.parts
+      Ptr_Free, thisEntity.part_types
+      Ptr_Free, thisEntity.attributes
    ENDFOR
 
    ; Clean up.
    Obj_Destroy, shapefile
-   Heap_Free, entities
+   Ptr_Free, entities
 
 END ;---------------------------------------------------------------------------------

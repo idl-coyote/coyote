@@ -15,7 +15,6 @@ FUNCTION cgsGraphic::GetKeywords
         DATA: self.data, $
         DEVICE: self.device, $
         NORMAL: self.normal, $
-        LINESTYLE: self.linestyle, $
         NOCLIP: self.noclip, $
         NODATA: self.nodata, $
         NOERASE: self.noerase, $
@@ -116,7 +115,6 @@ PRO cgsGraphic::GetProperty, $
     DEVICE=device, $
     NORMAL=normal, $
     FONT=font, $
-    LINESTYLE=linestyle, $
     NOCLIP=noclip, $
     NODATA=nodata, $
     NOERASE=noerase, $
@@ -202,7 +200,6 @@ PRO cgsGraphic::GetProperty, $
     IF Arg_Present(device) THEN device = self.device
     IF Arg_Present(normal) THEN normal = self.normal
     IF Arg_Present(font) THEN IF N_Elements(*self.font) NE 0 THEN font = *self.font
-    IF Arg_Present(linestyle) THEN linestyle = self.linestyle
     IF Arg_Present(noclip) THEN noclip = self.noclip
     IF Arg_Present(nodata) THEN nodata = self.nodata 
     IF Arg_Present(noerase) THEN noerase = self.noerase
@@ -284,7 +281,6 @@ PRO cgsGraphic::SetProperty, $
     DEVICE=device, $
     NORMAL=normal, $
     FONT=font, $
-    LINESTYLE=linestyle, $
     NOCLIP=noclip, $
     NODATA=nodata, $
     NOERASE=noerase, $
@@ -373,7 +369,6 @@ PRO cgsGraphic::SetProperty, $
     IF N_Elements(device) NE 0 THEN self.device = Keyword_Set(device)
     IF N_Elements(normal) NE 0 THEN self.normal = Keyword_Set(normal)
     IF N_Elements(font) NE 0 THEN *self.font = font 
-    IF N_Elements(linestyle) NE 0 THEN self.linestyle = linestyle
     IF N_Elements(noclip) NE 0 THEN self.noclip = Keyword_Set(noclip)
     IF N_Elements(nodata) NE 0 THEN self.nodata = Keyword_Set(nodata)
     IF N_Elements(noerase) NE 0 THEN self.noerase = Keyword_Set(noerase)
@@ -475,7 +470,6 @@ FUNCTION cgsGraphic::INIT, $
     DEVICE=device, $
     NORMAL=normal, $
     FONT=font, $
-    LINESTYLE=linestyle, $
     NOCLIP=noclip, $
     NODATA=nodata, $
     NOERASE=noerase, $
@@ -553,8 +547,6 @@ FUNCTION cgsGraphic::INIT, $
     ; Default values.
     IF N_Elements(background) EQ 0 THEN background = 'white'
     IF N_Elements(color) EQ 0 THEN color = 'black'
-    IF N_Elements(font) EQ 0 THEN self.font = Ptr_New(/ALLOCATE_HEAP) ELSE self.font = Ptr_New(font)
-    thisFont = *self.font
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=thisFont)
     IF N_Elements(ticklen) EQ 0 THEN ticklen = !P.TICKLEN
     IF N_Elements(xmargin) EQ 0 THEN xmargin = [10.0, 4.0]
@@ -563,17 +555,17 @@ FUNCTION cgsGraphic::INIT, $
         
     ; Allocate heap for variables.
     self.clip = Ptr_New(/ALLOCATE_HEAP)
-   self.font = Ptr_New(/ALLOCATE_HEAP)
-   self.position = Ptr_New(/ALLOCATE_HEAP)
-   self.xtick_get = Ptr_New(/ALLOCATE_HEAP)
-   self.xtickname = Ptr_New(/ALLOCATE_HEAP)
-   self.xtickv = Ptr_New(/ALLOCATE_HEAP)
-   self.ytick_get = Ptr_New(/ALLOCATE_HEAP)
-   self.ytickname = Ptr_New(/ALLOCATE_HEAP)
-   self.ytickv = Ptr_New(/ALLOCATE_HEAP)
-   self.ztick_get = Ptr_New(/ALLOCATE_HEAP)
-   self.ztickname = Ptr_New(/ALLOCATE_HEAP)
-   self.ztickv = Ptr_New(/ALLOCATE_HEAP)
+    self.font = Ptr_New(/ALLOCATE_HEAP)
+    self.position = Ptr_New(/ALLOCATE_HEAP)
+    self.xtick_get = Ptr_New(/ALLOCATE_HEAP)
+    self.xtickname = Ptr_New(/ALLOCATE_HEAP)
+    self.xtickv = Ptr_New(/ALLOCATE_HEAP)
+    self.ytick_get = Ptr_New(/ALLOCATE_HEAP)
+    self.ytickname = Ptr_New(/ALLOCATE_HEAP)
+    self.ytickv = Ptr_New(/ALLOCATE_HEAP)
+    self.ztick_get = Ptr_New(/ALLOCATE_HEAP)
+    self.ztickname = Ptr_New(/ALLOCATE_HEAP)
+    self.ztickv = Ptr_New(/ALLOCATE_HEAP)
     
         
     ; Set all the keywords.
@@ -586,8 +578,8 @@ FUNCTION cgsGraphic::INIT, $
         COLOR=color, $
         DATA=data, $
         DEVICE=device, $
+        FONT=font, $
         NORMAL=normal, $
-        LINESTYLE=linestyle, $
         NOCLIP=noclip, $
         NODATA=nodata, $
         NOERASE=noerase, $
@@ -677,7 +669,6 @@ PRO cgsGraphic__DEFINE, class
                   DEVICE: 0B, $
                   NORMAL: 0B, $
                   FONT: Ptr_New(), $
-                  LINESTYLE: 0S, $
                   NOCLIP: 0B, $
                   NODATA: 0B, $
                   NOERASE: 0B, $
@@ -759,7 +750,6 @@ PRO cgsGraphic__DEFINE, class
                   DEVICE: 0B, $
                   NORMAL: 0B, $
                   FONT: Ptr_New(), $
-                  LINESTYLE: 0S, $
                   NOCLIP: 0B, $
                   NODATA: 0B, $
                   NOERASE: 0B, $

@@ -69,11 +69,11 @@
 ;        A scalar that specifies, in units of "nominal bar width", the spacing between bars.  
 ;        For example, if BARSPACE is 1.0, then all bars will have one bar-width of space 
 ;        between them. If not specified, the bars are spaced apart by 20% of the bar width.
-;     barwidth: in, optional, type=float, default=barwidth*0.20
+;     barwidth: in, optional, type=float
 ;         A floating-point value that specifies the width of the bars in units of "nominal bar 
 ;         width".  The nominal bar width is computed so that all the bars (and the space 
-;         between them, set by default to 20% of the width of the bars) will fill the
-;         available space (optionally controlled with the BASERANGE keyword).
+;         between them will fill the available space (optionally controlled with the BASERANGE 
+;         keyword).
 ;     baselines: in, optional, type=float, default=0.0
 ;         A vector, the same size as VALUES, that contains the base value associated 
 ;         with each bar.  If not specified, a base value of zero is used for all bars.

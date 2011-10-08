@@ -341,6 +341,7 @@ FUNCTION cgsPlot::GetKeywords
     keywordStruct = { $
         AXISCOLOR: self.axiscolor, $
         ISOTROPIC: self.isotropic, $
+        LINESTYLE=self.linestyle, $
         NSUM: self.nsum, $
         POLAR: self.polar, $
         SYMCOLOR: self.symcolor, $
@@ -381,6 +382,7 @@ PRO cgsPlot::GetProperty, $
     AXISCOLOR=axiscolor, $
     ISOTROPIC=isotropic, $
     LAYOUT=layout, $
+    LINESTYLE=linestyle, $
     MAX_VALUE=max_value, $
     MIN_VALUE=min_value, $
     NSUM=nsum, $
@@ -409,6 +411,7 @@ PRO cgsPlot::GetProperty, $
     IF Arg_Present(axiscolor) THEN axiscolor = self.axiscolor
     IF Arg_Present(isotropic) THEN isotropic = self.isotropic
     IF Arg_Present(layout) THEN IF N_Elements(*self.layout) NE 0 THEN layout = *self.layout
+    IF Arg_Present(linestyle) THEN linesytle = self.linestyle
     IF Arg_Present(max_value) THEN IF N_Elements(*self.max_value) NE 0 THEN max_value = *self.max_value
     IF Arg_Present(min_value) THEN IF N_Elements(*self.min_value) NE 0 THEN min_value = *self.min_value
     IF Arg_Present(nsum) THEN nsum = self.nsum
@@ -436,6 +439,7 @@ PRO cgsPlot::SetProperty, $
     AXISCOLOR=axiscolor, $
     ISOTROPIC=isotropic, $
     LAYOUT=layout, $
+    LINESTYLE=linestyle, $
     MAX_VALUE=max_value, $
     MIN_VALUE=min_value, $
     NODRAW=nodraw, $
@@ -468,6 +472,7 @@ PRO cgsPlot::SetProperty, $
     IF N_Elements(axiscolor) NE 0 THEN self.axiscolor = axiscolor
     IF N_Elements(isotropic) NE 0 THEN self.isotropic = Keyword_Set(isotropic)
     IF (N_Elements(layout) NE 0) THEN *self.layout = layout
+    IF (N_Elements(linestyle) NE 0) THEN *self.linestyle = linestyle
     IF (N_Elements(max_value) NE 0) THEN *self.max_value = max_value
     IF (N_Elements(min_value) NE 0) THEN *self.min_value = min_value
     IF N_Elements(nsum) NE 0 THEN self.nsum = nsum
@@ -512,6 +517,7 @@ FUNCTION cgsPlot::INIT, x, y, $
     AXISCOLOR=axiscolor, $
     ISOTROPIC=isotropic, $
     LAYOUT=layout, $
+    LINESTYLE=linestyle, $
     MAX_VALUE=max_value, $
     MIN_VALUE=min_value, $
     NSUM=nsum, $
@@ -554,6 +560,7 @@ FUNCTION cgsPlot::INIT, x, y, $
     IF N_Elements(update) EQ 0 THEN update = 1
     IF N_Elements(axisColor) EQ 0 AND N_Elements(axescolor) NE 0 THEN axiscolor = axescolor
     IF N_Elements(axiscolor) EQ 0 THEN axiscolor = 'black'
+    IF N_Elements(linestyle) EQ 0 THEN linestyle = 0
     IF N_Elements(symcolor) EQ 0 THEN symcolor = self.color
     
     ; Initialize all keyword pointers.
@@ -569,6 +576,7 @@ FUNCTION cgsPlot::INIT, x, y, $
         AXISCOLOR=axiscolor, $
         ISOTROPIC=isotropic, $
         LAYOUT=layout, $
+        LINESTYLE=linestyle, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
         NSUM=nsum, $
@@ -595,6 +603,7 @@ PRO cgsPlot__DEFINE, class
                    axiscolor: "", $
                    isotropic: 0B, $
                    layout: Ptr_New(), $
+                   linestyle: 0L, $
                    max_value: Ptr_New(), $
                    min_Value: Ptr_New(), $
                    nsum: 0L, $
@@ -617,6 +626,7 @@ FUNCTION cgsPlot, x, y, $
     CURRENT=current, $              ; If set, add the command to the current graphics window.
     ISOTROPIC=isotropic, $
     LAYOUT=layout, $
+    LINESTYLE=linestyle, $
     MAX_VALUE=max_value, $
     MIN_VALUE=min_value, $
     NOWINDOW=nowindow, $
@@ -655,6 +665,7 @@ FUNCTION cgsPlot, x, y, $
         AXISCOLOR=axiscolor, $
         ISOTROPIC=isotropic, $
         LAYOUT=layout, $
+        LINESTYLE=linestyle, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
         NODRAW=1, $

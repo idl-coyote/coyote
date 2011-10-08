@@ -354,8 +354,7 @@ FUNCTION cgsContour::GetKeywords
         OVERPLOT: self.overplot, $
         TRADITIONAL: self.traditional, $
         XLOG: self.xlog, $
-        YLOG: self.ylog, $
-        YNOZERO: self.ynozero }
+        YLOG: self.ylog }
         
     IF N_Elements(*self.c_colors) NE 0 THEN BEGIN
        keywordStruct = Create_Struct(keywordStruct, 'c_colors', *self.c_colors)
@@ -496,7 +495,6 @@ PRO cgsContour::SetProperty, $
         WINOBJECT=winobject, $
         XLOG=xlog, $
         YLOG=ylog, $
-        YNOZERO=ynozero, $
         _EXTRA=extraKeywords
     
     ; Error handling.
@@ -535,7 +533,6 @@ PRO cgsContour::SetProperty, $
     IF N_Elements(winObject) NE 0 THEN self.winObject = winObject
     IF N_Elements(xlog) NE 0 THEN self.xlog = Keyword_Set(xlog)
     IF N_Elements(ylog) NE 0 THEN self.ylog = Keyword_Set(ylog)
-    IF N_Elements(ynozero) NE 0 THEN self.ynozero = Keyword_Set(ynozero)
         
     ; Update the display, if you can. If you belong to a window, ask the window
     ; to draw itself.
@@ -554,7 +551,6 @@ PRO cgsContour::CLEANUP
     Ptr_Free, self.array
     Ptr_Free, self.x
     Ptr_Free, self.y
-    Ptr_Free, self.aspect
     Ptr_Free, self.c_colors
     Ptr_Free, self.c_labels
     Ptr_Free, self.c_charsize
@@ -617,6 +613,11 @@ FUNCTION cgsContour::INIT, array, x, y, $
     s = Size(array, /DIMENSIONS)
     IF N_Elements(x) EQ 0 THEN x = Indgen(s[0])
     IF N_Elements(y) EQ 0 THEN y = Indgen(s[1])
+    
+    ; Fill the data pointers.
+    self.array = Ptr_New(array)
+    self.x =  Ptr_New(x)
+    self.y =  Ptr_New(y)
     
     ; Set properties.
     IF N_Elements(update) EQ 0 THEN update = 1
@@ -694,8 +695,7 @@ PRO cgsContour__DEFINE, class
                    update: 0B, $
                    winObject: Obj_New(), $
                    xlog: 0B, $
-                   ylog: 0B, $
-                   ynozero: 0B }
+                   ylog: 0B }
                    
 END ; ----------------------------------------------------------------------
 
@@ -725,7 +725,6 @@ FUNCTION cgsContour, array, x, y, $
     UPDATE=update, $
     XLOG=xlog, $
     YLOG=ylog, $
-    YNOZERO=ynozero, $
     _EXTRA=extraKeywords 
         
     contourObject = Obj_New('cgsContour', array, x, y, $
@@ -753,7 +752,6 @@ FUNCTION cgsContour, array, x, y, $
         UPDATE=update, $
         XLOG=xlog, $
         YLOG=ylog, $
-        YNOZERO=ynozero, $
         _EXTRA=extraKeywords)
         
     ; Out of here is you don't get a valid contour object.

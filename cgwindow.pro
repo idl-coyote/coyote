@@ -186,7 +186,7 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
            ; Create a PostScript file first.
            PS_Start, $
                 DECOMPOSED=self.ps_decomposed, $
-                FILENAME=thisname, $
+                FILENAME=outputFilename + '.ps', $
                 EUROPEAN=self.ps_metric, $
                 KEYWORDS=keywords, $ ; Returned PSConfig keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $
@@ -2120,7 +2120,8 @@ END ;---------------------------------------------------------------------------
 ;            As before, this is explained in detail at http://www.idlcoyote.com/cg_tips/kwexpressions.php.
 ;            1 Sept 2011. DWF.
 ;         Missed a couple of places to set decomposition color mode. 7 Sept 2011. DWF.
-;         
+;         Fixed a problem with improper filename when creating raster file vis
+;             Imagemagick via cgControl. 10 Oct 2011. DWF.
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-

@@ -341,7 +341,7 @@ FUNCTION cgsPlot::GetKeywords
     keywordStruct = { $
         AXISCOLOR: self.axiscolor, $
         ISOTROPIC: self.isotropic, $
-        LINESTYLE=self.linestyle, $
+        LINESTYLE: self.linestyle, $
         NSUM: self.nsum, $
         POLAR: self.polar, $
         SYMCOLOR: self.symcolor, $
@@ -472,7 +472,7 @@ PRO cgsPlot::SetProperty, $
     IF N_Elements(axiscolor) NE 0 THEN self.axiscolor = axiscolor
     IF N_Elements(isotropic) NE 0 THEN self.isotropic = Keyword_Set(isotropic)
     IF (N_Elements(layout) NE 0) THEN *self.layout = layout
-    IF (N_Elements(linestyle) NE 0) THEN *self.linestyle = linestyle
+    IF (N_Elements(linestyle) NE 0) THEN self.linestyle = linestyle
     IF (N_Elements(max_value) NE 0) THEN *self.max_value = max_value
     IF (N_Elements(min_value) NE 0) THEN *self.min_value = min_value
     IF N_Elements(nsum) NE 0 THEN self.nsum = nsum

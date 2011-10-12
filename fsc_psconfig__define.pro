@@ -165,10 +165,12 @@
 ;        encapsulated mode. 19 Feb 2011. DWF.
 ;   Changes to handle inability to create raster files from PS encapsulated files in 
 ;        landscape mode. Also removed changes of 19 Feb 2011 as no longer needed. 26 Aug 2011. DWF.
+;   The PAGETYPE was not getting set properly in the return keywords when the Metric 
+;        option was selected on the GUI. 12 October 2011. DWF.
 ;-
 
 ;******************************************************************************************;
-;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
+;  Copyright (c) 2008-2011, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -736,6 +738,7 @@ IF event.select EQ 1 THEN BEGIN
    ENDIF
    self.inchesSet = 0
    self.pageTypeSet = 'A4'
+   self.pageType = 'A4'
    self.plotID->SetUnits, 'Centimeters'
    Widget_Control, event.top, Update=1
 
@@ -750,6 +753,7 @@ ENDIF ELSE BEGIN
       self.xoffsetSet = sizes[2] / 2.54
       self.yoffsetSet = sizes[3] / 2.54
    self.inchesSet = 1
+   self.pageType = 'LETTER'
    self.pageTypeSet = 'LETTER'
    self.plotID->SetUnits, 'Inches'
    Widget_Control, event.top, Update=1

@@ -441,6 +441,8 @@ PRO FSC_CmdWindow::ExecuteCommands, KEYWORDS=keywords
     
     ; Are we doing multiple commands?
     IF Total(self.pmulti) NE 0 THEN !P.Multi = self.pmulti
+    IF Total(self.xomargin) NE 0 THEN !X.OMargin = self.xomargin
+    IF Total(self.yomargin) NE 0 THEN !Y.OMargin = self.yomargin
 
     ; How many commands are there?
     n_cmds = self.cmds -> Get_Count()

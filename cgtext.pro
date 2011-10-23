@@ -211,7 +211,7 @@ PRO cgText, xloc, yloc, text, $
             
         ; Print some instructions.
         Print, ""
-        Print, 'Click in current graphics window (window index' + $
+        Print, 'Click in current graphics window (window index ' + $
             StrTrim(!D.Window,2) + ') to place text.'
     
         ; The text string is the only positional parameter.

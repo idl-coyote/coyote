@@ -857,7 +857,7 @@ PRO NCDF_DATA::ParseFile
             ENDIF
             
             ; This code is not quite ready. Bypassing this for the moment.
-            ;self -> Parse_HDF_EOS_File
+            self -> Parse_HDF_File
         ENDIF ELSE self -> Parse_HDF_File
         RETURN
    ENDIF

@@ -190,6 +190,7 @@ PRO PS_START, $
     ENCAPSULATED=encapsulated, $
     GUI=gui, $
     KEYWORDS=keywords, $
+    LANDSCAPE=landscape, $
     NOMATCH=nomatch, $
     QUIET=quiet, $
     SCALE_FACTOR=scale_factor, $
@@ -206,6 +207,11 @@ PRO PS_START, $
    
    gui = Keyword_Set(gui)
    quiet = Keyword_Set(quiet)
+   
+   ; Handle encapsulated and landscape keywords appropriately.
+   encapsulated = Keyword_Set(encapsulated)
+   landscape = Keyword_Set(landscape)
+   IF encapsulated THEN landscape = 0
 
    ; Define the PS structure.
    IF N_Elements(ps_struct) EQ 0 THEN ps_struct = {FSC_PS_SETUP}
@@ -256,7 +262,8 @@ PRO PS_START, $
          XOFFSET=sizes.xoffset, YOFFSET=sizes.yoffset, Cancel=cancelled, NOGUI=(~gui), $
          LANDSCAPE=sizes.landscape, ENCAPSULATED=encapsulated)
    ENDIF ELSE BEGIN
-      keywords = PSConfig(_Extra=extra, ENCAPSULATED=encapsulated, CANCEL=cancelled, NOGUI=(~gui))
+      keywords = PSConfig(_Extra=extra, ENCAPSULATED=encapsulated, $
+          LANDSCAPE=landscape, CANCEL=cancelled, NOGUI=(~gui))
    ENDELSE
    IF cancelled THEN BEGIN
         PS_END, /NoFix, /NoMessage

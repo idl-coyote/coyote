@@ -655,8 +655,20 @@ END ;---------------------------------------------------------------------------
 PRO FSC_PSCONFIG::Encapsulate, event
 
 ; This method responds to a change in the Encapsulation droplist widget.
+IF event.index THEN BEGIN
+    self.previewID->Sensitive, 1 
+    self.landscapeSet = 0
+    self.encapsulationSet = 1
+    self->UpdateDisplay
+    self.orientationID->Sensitive, 0
+    
+ENDIF ELSE BEGIN
+    self.previewID->Sensitive, 0
+    self.encapsulationSet = 0
+    self->UpdateDisplay
+    self.orientationID->Sensitive, 1
+ENDELSE
 
-IF event.index THEN self.previewID->Sensitive, 1  ELSE self.previewID->Sensitive, 0
 END ;--------------------------------------------------------------------------------
 
 
@@ -1009,6 +1021,7 @@ values = ['Portrait', 'Landscape']
 self.orientationID = FSC_Droplist(controlBase, Value=values, Title='Orientation:', $
    UValue={Method:'Orientation', Object:self}, Event_Pro='FSC_PSCONFIG_Events')
 self.orientationID->SetIndex, self.landscapeSet
+IF self.encapsulationSet THEN self.orientationID -> Sensitive, 0
 
 values = ['Centimeters', 'Inches']
 self.unitsID = FSC_Droplist(controlBase, Value=values, Title='Units:', $
@@ -2620,7 +2633,9 @@ ENDIF
 
 self.debug = 1; Keyword_Set(debug)
 decomposed = Keyword_Set(decomposed)
+encapsulated = Keyword_Set(encapsulated) ; Must come before LANDSCAPE.
 landscape = Keyword_Set(landscape)
+IF encapsulated THEN landscape = 0
 
    ; Set the available PostScript fonts.
 
@@ -2706,8 +2721,6 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
    cmyk = Keyword_Set(cmyk)
    courier = Keyword_Set(courier)
    demi = Keyword_Set(demi)
-   encapsulated = Keyword_Set(encapsulated)
-;   european = Keyword_Set(european)
    helvetica = Keyword_Set(helvetica)
    IF N_Elements(isolatin) EQ 0 THEN isolatin = 1 ELSE isolatin = Keyword_Set(isolatin)
    italic = Keyword_Set(italic)

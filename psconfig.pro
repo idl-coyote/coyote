@@ -241,6 +241,9 @@ On_Error, 2
 ; Depreciated keywords.
 IF N_Elements(metric) EQ 0 THEN metric = Keyword_Set(european) ELSE metric = Keyword_Set(metric)
 
+; Cannot have landscape orientation with encapsulated PostScript output.
+IF Keyword_Set(encapsulated) THEN landscape = 0
+
 ; Did the user ask us to match the aspect ratio of the current graphics window?
 IF Keyword_Set(match) THEN BEGIN
     

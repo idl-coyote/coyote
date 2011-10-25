@@ -187,6 +187,7 @@ PRO PS_START, $
     CANCEL=cancelled, $
     CHARSIZE=charsize, $
     FONT=font , $
+    ENCAPSULATED=encapsulated, $
     GUI=gui, $
     KEYWORDS=keywords, $
     NOMATCH=nomatch, $
@@ -249,11 +250,13 @@ PRO PS_START, $
    cancelled = 0
    IF ~Keyword_Set(nomatch) THEN BEGIN
       IF !D.X_Size GT !D.Y_Size THEN landscape = 1 ELSE landscape = 0
+      IF Keyword_Set(encapsulated) THEN landscape = 0
       sizes = PSWindow(_Extra=extra, LANDSCAPE=landscape)
       keywords = PSConfig(_Extra=extra, INCHES=sizes.inches, XSIZE=sizes.xsize, YSIZE=sizes.ysize, $
-         XOFFSET=sizes.xoffset, YOFFSET=sizes.yoffset, Cancel=cancelled, NOGUI=(~gui), LANDSCAPE=sizes.landscape)
+         XOFFSET=sizes.xoffset, YOFFSET=sizes.yoffset, Cancel=cancelled, NOGUI=(~gui), $
+         LANDSCAPE=sizes.landscape, ENCAPSULATED=encapsulated)
    ENDIF ELSE BEGIN
-      keywords = PSConfig(_Extra=extra, Cancel=cancelled, NOGUI=(~gui))
+      keywords = PSConfig(_Extra=extra, ENCAPSULATED=encapsulated, CANCEL=cancelled, NOGUI=(~gui))
    ENDELSE
    IF cancelled THEN BEGIN
         PS_END, /NoFix, /NoMessage

@@ -78,6 +78,8 @@
 ; MODIFICATION HISTORY:
 ;
 ;       Written by:  David W. Fanning, 6 September 2007.
+;       Not sure what this program was doing, but not what I thought. I've reworked
+;          the algorithm to scale the data appropriately. 25 Oct 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -144,7 +146,8 @@ FUNCTION ClipScl, image, clip, $
    maxr = Max(image, MIN=minr, /NAN)
    range = maxr - minr
    IF Size(image, /TName) EQ 'BYTE' THEN binsize = 1.0 ELSE binsize = range / 1000.
-   h = Histogram(image, BINSIZE=binsize, OMIN=omin, OMAX=omax)
+   IF Size(image, /TName) NE Size(binsize, /TName) THEN image = Convert_To_Type(image, Size(binsize, /TName))
+   h = Histogram(image, BINSIZE=binsize, OMIN=omin, OMAX=omax, /NAN)
    n = N_Elements(image)
    cumTotal = Total(h, /CUMULATIVE)
    minIndex = Value_Locate(cumTotal, n * (clip/100.))
@@ -162,13 +165,9 @@ FUNCTION ClipScl, image, clip, $
 
    ; Save the thresholds.
    threshold = [minThresh, maxThresh]
-
-   ; Scale it into the thresholds.
-   output = Temporary(output - (Min(output)))
-   output = output * (Float(maxThresh)/Max(output)) + minThresh
-
-   ; Scale it into the output values.
-   output = Byte(Scale_Vector(Temporary(output), minOut, MaxOut))
+   
+   ; Scale the data.
+   output = Scale_Vector(Temporary(output), MIN=threshold[0], MAX=threshold [1], minOut, maxOut)
 
    IF Keyword_Set(negative) THEN RETURN, 0B > (maxout - output + minOut) < 255B $
       ELSE RETURN, output

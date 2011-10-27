@@ -228,7 +228,7 @@ PRO cgLoadCT, table, $
            REVERSE=reverse, $
            ROW=row, $
            SILENT=silent, $
-           WINID=winID
+           WINID=winID, $
            ADDCMD=1
          RETURN
     ENDIF

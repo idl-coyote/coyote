@@ -167,6 +167,8 @@
 ;        landscape mode. Also removed changes of 19 Feb 2011 as no longer needed. 26 Aug 2011. DWF.
 ;   The PAGETYPE was not getting set properly in the return keywords when the Metric 
 ;        option was selected on the GUI. 12 October 2011. DWF.
+;   The program now remembers the last directory you used and will start in that
+;       directory, unless told otherwise. 26 Oct 2011. DWF.
 ;-
 
 ;******************************************************************************************;
@@ -504,6 +506,14 @@ ENDIF
    ; Get the filename information.
 
 self.filenameID->GetProperty, File=filename, Directory=directory
+
+; Save the name of the directory, if you can.
+DEFSYSV, '!cgPostScript_LastDir', EXISTS=exists
+IF exists THEN BEGIN
+    !cgPostScript_LastDir = directory 
+ENDIF ELSE BEGIN
+    DEFSYSV, '!cgPostScript_LastDir', directory
+ENDELSE
 self.filenameSet = filename
 self.directorySet = directory
 self.fullFilenameSet=self.filenameID->GetFileName()
@@ -2675,8 +2685,16 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
    IF N_Elements(color) EQ 0 THEN color = 1 ELSE color = 0 > color < color
    IF N_Elements(filename) EQ 0 THEN filename = "idl.ps"
    IF N_Elements(directory) EQ 0 THEN BEGIN
+        dirName = File_Dirname(filename)
         basename = FSC_Base_Filename(filename, EXTENSION=ext, DIRECTORY=directory)
-        IF directory EQ "" THEN CD, Current=directory ELSE filename = basename + '.' + ext
+        
+        ; If no directory is provide, go get the last directory saved if you can.
+        ; Otherwise, use the current directory.
+        IF dirName EQ "." THEN BEGIN
+            CD, Current=thisDir
+            DEFSYSV, '!cgPostScript_LastDir', EXISTS=exists
+            IF ~exists THEN directory = thisDir ELSE directory = !cgPostScript_LastDir
+        ENDIF
    ENDIF
    IF N_Elements(fontsize) EQ 0 THEN fontsize = 12
    IF Keyword_Set(inches) EQ 0 THEN IF Keyword_Set(metric) THEN inches = 0 ELSE inches = 1

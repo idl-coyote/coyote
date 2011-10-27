@@ -154,6 +154,8 @@
 ;       Added CANCEL and KEYWORDS output keywords. 16 Jan 2011. DWF.
 ;       Changes to handle inability to create raster files from PS encapsulated files in 
 ;           landscape mode. 26 Aug 2011. DWF.
+;       The SCALE_FACTOR is called at the time the PostScript file is opened to avoid problems
+;           with the bounding box not being set to the correct values. 26 October 2011. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -212,6 +214,7 @@ PRO PS_START, $
    encapsulated = Keyword_Set(encapsulated)
    landscape = Keyword_Set(landscape)
    IF encapsulated THEN landscape = 0
+   SetDefaultValue, scale_factor, 1
 
    ; Define the PS structure.
    IF N_Elements(ps_struct) EQ 0 THEN ps_struct = {FSC_PS_SETUP}
@@ -274,12 +277,7 @@ PRO PS_START, $
    IF ~quiet THEN Print, 'PostScript output will be created here: ', keywords.filename
    
    Set_Plot, 'PS'
-   Device, _EXTRA=keywords
-   
-   ; What about scale factor?
-   IF N_Elements(scale_factor) NE 0 THEN $
-        DEVICE, SCALE_FACTOR=scale_factor ELSE $
-        DEVICE, SCALE_FACTOR=1
+   Device, _EXTRA=keywords, SCALE_FACTOR=scale_factor
    
    ; Store filename and other pertinent information.
    ps_struct.filename = keywords.filename

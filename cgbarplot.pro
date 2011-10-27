@@ -179,6 +179,8 @@
 ;            don't think the Bar_Plot program actually works and the interface is clunky.
 ;            But, this is a start. The interface may change to something more elegant over
 ;            time.
+;         Updated the BACKGROUND color selection from lessons learned in 27 Oct 2011 cgContour 
+;             corrections. 27 Oct 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -326,13 +328,28 @@ PRO cgBarPlot, values, $
                 background = 'WHITE' 
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    havewindow = 0
                     IF (!D.Window LT 0) &&  Keyword_Set(noerase) THEN BEGIN
                         Window
                         IF ~Keyword_Set(traditional) THEN cgErase, 'WHITE'
-                    ENDIF
-                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF (Total(pixel) EQ 765) THEN background = 'WHITE'
-                    IF (Total(pixel) EQ 0) THEN background = 'BLACK'
+                        havewindow = 1
+                    ENDIF ELSE BEGIN
+                        IF (!D.Window GE 0) THEN BEGIN
+                           WSet, !D.Window
+                           havewindow = 1
+                        ENDIF ELSE BEGIN
+                           wid = cgQuery(/CURRENT)
+                           IF wid GE 0 THEN BEGIN
+                               WSet, wid
+                               havewindow = 1
+                           ENDIF
+                        ENDELSE
+                    ENDELSE
+                    IF havewindow THEN BEGIN
+                        pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                        IF (Total(pixel) EQ 765) THEN background = 'WHITE'
+                        IF (Total(pixel) EQ 0) THEN background = 'BLACK'
+                    ENDIF ELSE background = 'WHITE'
                     IF N_Elements(background) EQ 0 THEN background = 'OPPOSITE'
                 ENDIF ELSE background = 'OPPOSITE'
            ENDELSE

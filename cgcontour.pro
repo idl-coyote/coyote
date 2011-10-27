@@ -229,6 +229,8 @@
 ;            going to add them on an as-needed basis. 30 Sept 2011. DWF.
 ;        Other keywords WERE needed! I added XTICKLEN and YTICKLEN keywords to the repaired axes
 ;            code. 3 Oct 2011. DWF.
+;        Change from 15 Sept 2011 forgot to include the possibility of pixmap windows. Algorithm
+;            made more robust. 27 Oct 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -512,16 +514,28 @@ PRO cgContour, data, x, y, $
                 background = 'WHITE' 
            ENDIF ELSE BEGIN
                 IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    havewindow = 0
                     IF (!D.Window LT 0) &&  Keyword_Set(noerase) THEN BEGIN
                         Window
                         IF ~Keyword_Set(traditional) THEN cgErase, 'WHITE'
+                        havewindow = 1
                     ENDIF ELSE BEGIN
-                        wid = cgQuery(/CURRENT)
-                        WSet, wid
+                        IF (!D.Window GE 0) THEN BEGIN
+                           WSet, !D.Window
+                           havewindow = 1
+                        ENDIF ELSE BEGIN
+                           wid = cgQuery(/CURRENT)
+                           IF wid GE 0 THEN BEGIN
+                               WSet, wid
+                               havewindow = 1
+                           ENDIF
+                        ENDELSE
                     ENDELSE
-                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF (Total(pixel) EQ 765) THEN background = 'WHITE'
-                    IF (Total(pixel) EQ 0) THEN background = 'BLACK'
+                    IF havewindow THEN BEGIN
+                        pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                        IF (Total(pixel) EQ 765) THEN background = 'WHITE'
+                        IF (Total(pixel) EQ 0) THEN background = 'BLACK'
+                    ENDIF ELSE background = 'WHITE'
                     IF N_Elements(background) EQ 0 THEN background = 'OPPOSITE'
                 ENDIF ELSE background = 'OPPOSITE'
            ENDELSE

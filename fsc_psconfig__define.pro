@@ -169,6 +169,7 @@
 ;        option was selected on the GUI. 12 October 2011. DWF.
 ;   The program now remembers the last directory you used and will start in that
 ;       directory, unless told otherwise. 26 Oct 2011. DWF.
+;   Parsing of full filename failing. Fixed 27 Oct 2011. DWF.
 ;-
 
 ;******************************************************************************************;
@@ -510,9 +511,9 @@ self.filenameID->GetProperty, File=filename, Directory=directory
 ; Save the name of the directory, if you can.
 DEFSYSV, '!cgPostScript_LastDir', EXISTS=exists
 IF exists THEN BEGIN
-    !cgPostScript_LastDir = directory 
+    IF File_Test(directory, /DIRECTORY) THEN !cgPostScript_LastDir = directory 
 ENDIF ELSE BEGIN
-    DEFSYSV, '!cgPostScript_LastDir', directory
+    IF File_Test(directory, /DIRECTORY) THEN DEFSYSV, '!cgPostScript_LastDir', directory
 ENDELSE
 self.filenameSet = filename
 self.directorySet = directory
@@ -2684,18 +2685,28 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
    ENDIF
    IF N_Elements(color) EQ 0 THEN color = 1 ELSE color = 0 > color < color
    IF N_Elements(filename) EQ 0 THEN filename = "idl.ps"
+   
+   ; Is this a fully-qualified filename?
+   dirName = File_Dirname(filename)  
+    
+   ; Parse the filename and the directory name     
    IF N_Elements(directory) EQ 0 THEN BEGIN
-        dirName = File_Dirname(filename)
-        basename = FSC_Base_Filename(filename, EXTENSION=ext, DIRECTORY=directory)
-        
         ; If no directory is provide, go get the last directory saved if you can.
         ; Otherwise, use the current directory.
         IF dirName EQ "." THEN BEGIN
-            CD, Current=thisDir
             DEFSYSV, '!cgPostScript_LastDir', EXISTS=exists
-            IF ~exists THEN directory = thisDir ELSE directory = !cgPostScript_LastDir
-        ENDIF
-   ENDIF
+            IF exists THEN directory = !cgPostScript_LastDir ELSE CD, Current=directory
+        ENDIF ELSE BEGIN
+            basename = File_Basename(filename)
+            filename = basename
+            directory = dirName
+        ENDELSE
+   ENDIF ELSE BEGIN
+        IF dirName NE "." THEN BEGIN
+            basename = File_Basename(filename)
+            filename = basename
+        ENDIF 
+   ENDELSE
    IF N_Elements(fontsize) EQ 0 THEN fontsize = 12
    IF Keyword_Set(inches) EQ 0 THEN IF Keyword_Set(metric) THEN inches = 0 ELSE inches = 1
    IF N_Elements(name) EQ 0 THEN name = ""

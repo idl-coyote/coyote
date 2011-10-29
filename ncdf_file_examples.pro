@@ -38,6 +38,7 @@
 ; MODIFICATION HISTORY:
 ;
 ;       Written by:  David W. Fanning, 3 February 2010.
+;       Updated to use a time variable for the frame number. 29 Oct 2011.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc.                                ;
@@ -108,10 +109,10 @@ PRO NCDF_File_Examples
     ; Add dimensions to the file.
     fileObj -> WriteDim, 'xsize', dims[0], OBJECT=xdimObj
     fileObj -> WriteDim, 'ysize', dims[1], OBJECT=ydimObj
-    fileObj -> WriteDim, 'frames', /UNLIMITED, OBJECT=framesObj
+    fileObj -> WriteDim, 'time', 24, OBJECT=timeDimObj
     
     ; Get the dimension names.
-    dimNames = [xdimObj->GetName(), ydimObj->GetName(), framesObj->GetName()]
+    dimNames = [xdimObj->GetName(), ydimObj->GetName(), timeDimObj->GetName()]
 
     ; Define a variable for the file.
     fileObj -> WriteVarDef, 'data', dimNames, DATATYPE='BYTE', OBJECT=dataObj
@@ -121,10 +122,23 @@ PRO NCDF_File_Examples
     fileObj -> WriteVarAttr, dataObj, 'comment', 'Frames of a data animation.'
     fileObj -> WriteVarAttr, 'data', 'colortable', colortable, DATATYPE='SHORT'
     
-    ; Write the data to the file. Here we are going to write 10 frames of data.
-    FOR j=0,9 DO BEGIN
+    ; Define a time variable for the file. Months, starting 15 Jan 2008 and going
+    ; for 24 months. Offset to 1 Jan 1600 00:00:00.
+    offset = Julday(1,1,1600,0,0,0)
+    time = TimeGen(24, START=Julday(01,15,2008, 0, 0, 0), UNITS='Months', STEP_SIZE=1) - offset
+    fileObj -> WriteVarDef, 'time', [timeDimObj->GetName()], DATATYPE='DOUBLE', OBJECT=timeObj
+    IF Obj_Valid(timeObj) EQ 0 THEN Message, 'Invalid time object returned.'
+    
+    ; Define variable attributes.
+    fileObj -> WriteVarAttr, timeObj, 'Units', 'Julian days since 1 January 1600 00:00:00.'
+
+    ; Write the data to the file. Here we are going to write 24 frames of data.
+    FOR j=0,23 DO BEGIN
         fileObj -> WriteVarData, 'data', cgDemoData(18), OFFSET=[0,0,j]
     ENDFOR
+    
+    ; Write the time into the file.
+    fileObj -> WriteVarData, 'time', time
     
     ; Sync the file by writing memory to disk.
     fileObj -> Sync
@@ -203,16 +217,19 @@ PRO NCDF_File_Examples
     check = sObj -> HasDim('ysize', OBJECT=ysizeObj)
     IF check THEN ysize = ysizeObj -> GetSize() ELSE Message, 'Cannot find dimension YSIZE.'
     
-    check = sObj -> HasDim('frames', OBJECT=framesObj)
-    IF check THEN frames = framesObj -> GetSize() ELSE Message, 'Cannot find dimension FRAMES.'
+    check = sObj -> HasDim('time', OBJECT=timeDimObj)
+    IF check THEN numMonths = timeDimObj -> GetSize() ELSE Message, 'Cannot find dimension TIME.'
     
     ; Set up the animation.
-    XInterAnimate, SET=[xsize, ysize, frames], /SHOWLOAD
-    FOR j=0,frames-1 DO BEGIN
+    XInterAnimate, SET=[xsize, ysize, numMonths], /SHOWLOAD
+    time = sObj -> GetVarData('time')
+    time = time + Julday(1,1,1600,0,0,0)
+    FOR j=0,numMonths-1 DO BEGIN
         data = sObj -> GetVarData('data', COUNT=[xsize, ysize, 1], OFFSET=[0,0,j])
         cgImage, data, /KEEP, /NOINTERP
-        XYOUTS, 0.1, 0.05, /NORMAL, 'Frame Number: ' + StrTrim(j,2), $
-            COLOR=cgColor('black'), FONT=0
+        CalDat, time[j], month, day, year
+        theDate = StrTrim(day,2) + ' ' + theMonths(month) + ' ' + StrTrim(year,2)
+        cgText, 0.1, 0.05, /NORMAL, 'Date: ' + theDate, COLOR='black', FONT=0
         XInterAnimate, FRAME=j, WINDOW=!D.Window
     ENDFOR
     XInterAnimate, 25

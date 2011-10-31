@@ -141,6 +141,7 @@
 ;       Previous method of freeing entity pointers took 10 times times longer than freeing
 ;          pointers as I go. Also added MinNumVerts keyword to screen out the drawing of
 ;          small polygons. 6 October 2011. DWF.
+;       Wrong string case for discovering particular attributes caused them not to be drawn. 27 Oct 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -371,7 +372,8 @@ PRO DrawShapes, shapeFile, $
        xrange = [Min(entityMinX), Max(entityMaxX)]
        yrange = [Min(entityMinY), Max(entityMaxY)]
       
-      aspectRatio = Abs(yrange[1] - yrange[0]) / Abs(xrange[1]-xrange[0])
+      ; Generally two degrees of longitude for each degree of latitude.
+      aspectRatio = Abs(yrange[1]-yrange[0]) / Abs((xrange[1]-xrange[0])/2.)
       IF (!D.Flags AND 256) NE 0 THEN BEGIN
           IF aspectRatio LE 1 THEN BEGIN
              cgDisplay, 700, 700*aspectRatio, /FREE, Title='Shapefile Contents'
@@ -389,7 +391,7 @@ PRO DrawShapes, shapeFile, $
    FOR j=0,N_Elements(*entities)-1 DO BEGIN
       thisEntity = (*entities)[j]
       theEntityName = StrUpCase(StrTrim((*thisEntity.attributes).(attIndex), 2))
-      index = Where(attrvalues EQ theEntityName, test)
+      index = Where(StrUpCase(attrvalues) EQ theEntityName, test)
       IF attrvalues[0] EQ 'ALL' THEN BEGIN
          index = 0
          test = 1

@@ -84,7 +84,6 @@
 ;  See the following articles for additional information: 
 ;  
 ;       http://www.idlcoyote.com/ps_tips/greeksym.html
-;       http://www.idlcoyote.com/cg_tips/cgsymbol.html
 ;       
 ;  Greek symbols are simply passed along to the Greek function.
 ;  
@@ -99,6 +98,7 @@
 ; MODIFICATION HISTORY:
 ;
 ;  Written by: David W. Fanning, 2 September 2011. 
+;  Added plus-minus symbol. 2 Nov 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
@@ -138,12 +138,12 @@ PRO cgSymbol_Example, PS=ps, UNICODE=unicode
                 'eta', 'theta', 'iota', 'kappa', 'lambda', 'mu', $
                 'nu', 'xi', 'omicron', 'pi', 'rho', 'sigma', 'tau', $
                 'upsilon', 'phi', 'chi', 'psi', 'omega', 'leq', 'geq', $
-                'neq', 'deg', 'equiv', 'prime', 'angstrom', 'sun', $
-                'varphi', 'infinity', 'copyright', '' ]
+                'neq', 'deg', '+-', 'equiv', 'prime', 'angstrom', 'sun', $
+                'varphi', 'infinity', 'copyright' ]
     
     ; Output positions.
     x = [0.15, 0.4, 0.65]
-    y = Reverse((Indgen(12) + 1) * (1.0 / 13))
+    y = Reverse((Indgen(13) + 1) * (1.0 / 14))
     
     ; Need PostScript output?
     IF Keyword_Set(ps) || (!D.Name EQ 'PS') THEN PS_Start
@@ -159,7 +159,7 @@ PRO cgSymbol_Example, PS=ps, UNICODE=unicode
         cgText, x[1], y[j], symbol[j+12] + ': ' + $
             cgSymbol(symbol[j+12], UNICODE=unicode) + cgSymbol(symbol[j+12], /CAPITAL, UNICODE=unicode), $
             /NORMAL, CHARSIZE=1.5
-        IF j NE 11 THEN cgText, x[2], y[j], symbol[j+24] + ': ' + $
+        IF j NE 12 THEN cgText, x[2], y[j], symbol[j+24] + ': ' + $
             cgSymbol(symbol[j+24], UNICODE=unicode), $
             /NORMAL, CHARSIZE=1.5
     ENDFOR
@@ -287,6 +287,7 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
             'geq':     retSymbol = '!9' + String("263B) + '!X'
             'neq':     retSymbol = '!9' + String("271B) + '!X' 
             'deg':     retSymbol = '!9' + String("260B) + '!X'
+            '+-':      retSymbol = '!9' + String("261B) + '!X'
             'equiv':   retSymbol = '!9' + String("272B) + '!X'
             'prime':   retSymbol = '!9' + String("242B) + '!X'
             'angstrom':retSymbol = '!3' + String("305B) + '!X'
@@ -334,6 +335,7 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
             'geq':     retSymbol = '!9' + String("142B) + '!X'
             'neq':     retSymbol = '!9' + String("75B) + '!X' 
             'deg':     retSymbol = '!9' + String("45B) + '!X'
+            '+-':      retSymbol = '!9' + String("53B) + '!X'
             'equiv':   retSymbol = '!9' + String("72B) + '!X'
             'prime':   retSymbol = '!9' + String("140B) + '!X'
             'angstrom':retSymbol = '!3' + String("305B) + '!X'

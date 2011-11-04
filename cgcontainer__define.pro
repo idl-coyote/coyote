@@ -136,9 +136,9 @@ END ;------------------------------------------------------------------
    
 PRO cgContainer::CLEANUP
 
-    self -> IDL_Container::CleanUp
     Ptr_Free, self._cg_uvalue
     Obj_Destroy, self._cg_trash
+    self -> IDL_Container::CleanUp
 
 END ;------------------------------------------------------------------
 

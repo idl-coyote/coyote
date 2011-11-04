@@ -91,6 +91,9 @@
 ; MODIFICATION_HISTORY:
 ;
 ;       Written by: David W. Fanning, modified from GeoCoord in Catalyst Library. 28 Oct 2011.
+;       Switch UTM datum from WGS84 to WALBECK to avoid UTM projection bug in all versions
+;            of IDL prior to IDL 8.2, when it is suppose to be fixed. For more information,
+;            see this article: http://www.idlcoyote.com/map_tips/utmwrong.php. 31 Oct 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;

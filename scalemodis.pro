@@ -118,7 +118,8 @@ FUNCTION ScaleModis_ScaleIt, image, input, output
     IF inum NE onum THEN Message, 'Scaling vectors must be the same length.'
     
     ; Partition the image into input values.
-    h = Histogram(Value_Locate(input[1:inum-2], image) + 2, REVERSE_INDICES=ri)
+    h = Histogram(Value_Locate(input[1:inum-2], image) + 2, $
+       MIN=0, MAX=255, REVERSE_INDICES=ri)
     
     ; Differentially scale the image.
     FOR index=0,N_Elements(input)-2 DO BEGIN

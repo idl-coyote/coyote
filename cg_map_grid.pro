@@ -1,28 +1,26 @@
-; $Id: //depot/idl/IDL_71/idldir/lib/map_grid.pro#1 $
-;
-; Copyright (c) 1996-2009, ITT Visual Information Solutions. All
-;       rights reserved. Unauthorized reproduction is prohibited.
 ;+
 ; NAME:
-;	MODIFIED_MAP_GRID
+;	 cg_MAP_GRID
 ;
 ; PURPOSE:
-;       The MODIFIED_MAP_GRID procedure draws the graticule of parallels and meridians,
-; according to the specifications established by MAP_SET. MAP_SET must be called
-; before MODIFIED_MAP_GRID to establish the projection type, the center of the
-; projection, polar rotation and geographical limits.
+;  The CG_MAP_GRID procedure draws the graticule of parallels and meridians,
+;  according to the specifications established by MAP_SET (or CG_MAP_SET). MAP_SET 
+;  must be called before CG_MAP_GRID to establish the projection type, the center of the
+;  projection, polar rotation and geographical limits. CG_MAP_GRID can also work
+;  with map projections created with MAP_PROJ_INIT, provided the map structure
+;  created by MAP_PROJ_INIT is passed to CG_MAP_GRID with the MAP_STRUCTURE keyword.
 ;
 ; CATEGORY:
-;	Mapping.
+;	 Mapping.
 ;
 ; CALLING SEQUENCE:
-;       MODIFIED_MAP_GRID
+;  CG_MAP_GRID
 ;
 ; INPUTS:
-;	NONE
+;	 NONE
 ;
 ; OPTIONAL INPUTS:
-;	NONE
+;	 NONE
 ;
 ; KEYWORD PARAMETERS:
 ;
@@ -39,14 +37,14 @@
 ;	      window for the annotation, usually by specifying the XMARGIN and
 ;	      YMARGIN keywords to MAP_SET.  See the example below.
 ;   CHARSIZE: The size of the characters used for the labels. The default is 1.
-;      COLOR: The color index for the grid lines.
+;      COLOR: The color for the grid lines. Uses any color allowed by cgColor.
 ;FILL_HORIZON: Fills the current map_horizon.
 ;    HORIZON: Draws the current map horizon.
 ;  INCREMENT: Determines the spacing between graticle points.
-; GLINESTYLE: If set, the line style used to draw the grid of parallels and
+; LINESTYLE: If set, the line style used to draw the grid of parallels and
 ;             meridians. See the IDL User's Guide for options. The default is
 ;             dotted.
-; GLINETHICK: The thickness of the grid lines. Default is 1.
+; THICK: The thickness of the grid lines. Default is 1.
 ;      LABEL: Set this keyword to label the parallels and meridians with their
 ;             corresponding latitudes and longitudes. Setting this keyword to
 ;             an integer will cause every LABEL gridline to be labeled (i.e,
@@ -141,12 +139,11 @@
 ; EXAMPLE:
 ;	  map_set,10,20,23.5,/cont,/ortho,/horizon     ; establish a projection
 ;         lats=[-65,-52,-35,-20,-2.59,15,27.6,35,45,55,75,89]
-;                     ; choose the parallels to draw
-;         map_grid,lats=lats,londel=20,lons=-13,label=2,lonlab=-2.5,latlab=7
-;                     ;draw the grid
+;   cg_map_grid,lats=lats,londel=20,lons=-13,label=2,lonlab=-2.5,latlab=7
+;                     
 ;   Make a map with a grid surrounded by a box style axis:
-;	map_set, /STEREO, 40, -90,scale=50e6,/CONTINENTS, XMARGIN=3, YMARGIN=3
-;	map_grid, /BOX_AXES, COLOR=3, CHARSIZE=1.5  ;
+;	  map_set, /STEREO, 40, -90,scale=50e6,/CONTINENTS, XMARGIN=3, YMARGIN=3
+;	  cg_map_grid, /BOX_AXES, COLOR='charcoal', CHARSIZE=1.5  
 ;
 ; MODIFICATION HISTORY:
 ; 	Written by:	SVP, May, 23 1996.
@@ -169,11 +166,13 @@
 ;      properly. Renamed the file modified_map_grid.pro.
 ;   DWF, July 5, 2010. Added FORMAT keyword.
 ;   DWF, 4 November, 2011. Fixed a problem with POLYLINES keyword to Map_Proj_Forward
-;      changing the latitude values that are output from Map_Proj_Forward.
+;      changing the latitude values that are output from Map_Proj_Forward. Added
+;      numerous changes to allow the program to work correctly with map projections
+;      created with MAP_PROJ_INIT.
 ;-
 
 ;-------------------------------------------------------------------------
-function modified_map_grid_check_range, xy
+function cg_map_grid_check_range, xy
 ;
 ; Determine if the xy label point is inside the plot coordinate axes.
 ; If not, return a single value, which is NOT drawn on the plot. This
@@ -191,7 +190,7 @@ function modified_map_grid_check_range, xy
 end
 
 
-function modified_map_grid_incr, span
+function cg_map_grid_incr, span
 ;
 ; Determine LONDEL or LATDEL if not specified
 ;
@@ -218,7 +217,7 @@ end
 ; Otherwise, return the device coordinate, X if Icoord = 0, or Y if
 ; Icoord = 1, of the intersection.
 ;
-Function modified_map_grid_solve, c0, c1, Icoord, Gwant, $
+Function cg_map_grid_solve, c0, c1, Icoord, Gwant, $
     MAP_STRUCTURE=mapStruct, RECURSIVE=recursive
 
     COMPILE_OPT hidden, IDL2
@@ -278,26 +277,77 @@ end
 
 
 ;-------------------------------------------------------------------------
-PRO modified_map_grid, LABEL=label, LATDEL = latdel, NO_GRID=no_grid, $
+PRO cg_map_grid, LABEL=label, LATDEL = latdel, NO_GRID=no_grid, $
        LONDEL=londel, GLINESTYLE=glinestyle, GLINETHICK=glinethick, $
        LONLAB=lonlab, LATLAB=latlab, LONALIGN=lonalign, $
        LATALIGN=latalign, LONNAMES=lonnames, LATNAMES=latnames, $
        LATS=lats, LONS=lons, ZVALUE=zvalue, $
-       COLOR=color, T3D=t3d, CHARSIZE=charsize, ORIENTATION=orientation, $
+       COLOR=scolor, T3D=t3d, CHARSIZE=charsize, ORIENTATION=orientation, $
        HORIZON=horizon, FILL_HORIZON=fill_horizon, _EXTRA=extra, $
        INCREMENT=increment, CLIP_TEXT=clip_text, BOX_AXES=box_axes, $
-       MAP_STRUCTURE=mapStruct, FORMAT=format, $
-       WHOLE_MAP=obsolete_keyword
+       MAP_STRUCTURE=mapStruct, FORMAT=format, LINESTYLE=linestyle, THICK=thick, $
+       WHOLE_MAP=obsolete_keyword, ADDCMD=addcmd
 
+    Compile_Opt strictarr
 
-compile_opt idl2
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
 
-ON_ERROR, 2
+    ; Should this be added to a resizeable graphics window?
+    IF (Keyword_Set(addcmd)) && ((!D.Flags && 256) NE 0) THEN BEGIN
+    
+        cgWindow, 'cg_map_grid', LABEL=label, LATDEL = latdel, NO_GRID=no_grid, $
+           LONDEL=londel, GLINESTYLE=glinestyle, GLINETHICK=glinethick, $
+           LONLAB=lonlab, LATLAB=latlab, LONALIGN=lonalign, $
+           LATALIGN=latalign, LONNAMES=lonnames, LATNAMES=latnames, $
+           LATS=lats, LONS=lons, ZVALUE=zvalue, $
+           COLOR=scolor, T3D=t3d, CHARSIZE=charsize, ORIENTATION=orientation, $
+           HORIZON=horizon, FILL_HORIZON=fill_horizon, _EXTRA=extra, $
+           INCREMENT=increment, CLIP_TEXT=clip_text, BOX_AXES=box_axes, $
+           MAP_STRUCTURE=mapStruct, FORMAT=format, LINESTYLE=linestyle, THICK=thick, $
+           WHOLE_MAP=obsolete_keyword, ADDCMD=1
+            
+         RETURN
+    ENDIF
+    
+    ; Set up PostScript device for working with colors.
+    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
+    ; I want to use the more natural LINESTYLE and THICK keywords to this routine.
+    IF (N_Elements(linestyle) EQ 0) && (N_Elements(glinestyle) NE 0) THEN BEGIN
+      linestyle = glinestyle 
+    ENDIF ELSE IF (N_Elements(linestyle) EQ 0) THEN linestyle = 1 ; dotted
+    IF (N_Elements(thick) EQ 0) && (N_Elements(gthick) NE 0) THEN BEGIN
+      thick = gthick 
+    ENDIF ELSE IF (N_Elements(thick) EQ 0) THEN thick = 1 
+
+    ; Choose a color.
+    IF N_Elements(sColor) EQ 0 THEN BEGIN
+           IF !D.Name EQ 'PS' THEN BEGIN
+                sColor = 'BLACK' 
+           ENDIF ELSE BEGIN
+                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
+                    IF !D.Window LT 0 THEN Window
+                    IF (!P.Multi[0] EQ 0) THEN cgErase
+                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+                    IF (Total(pixel) EQ 765) THEN sColor = 'BLACK'
+                    IF (Total(pixel) EQ 0) THEN sColor = 'WHITE'
+                    IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
+                ENDIF ELSE sColor = 'OPPOSITE'
+           ENDELSE
+    ENDIF
+    IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
+    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Byte(color)
+    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
 
 hasMap = N_TAGS(mapStruct) gt 0
 
 if ((!x.type NE 3) && ~hasMap) THEN $
-   message, 'modified_map_grid---Current ploting device must have mapping coordinates'
+   message, 'cg_map_grid---Current ploting device must have mapping coordinates'
 
 ; Put a grid on a previously established map projection.
 ;
@@ -319,17 +369,8 @@ if n_elements(zvalue) eq 0 THEN zvalue = 0
 ; 0 to not clip text.
 noclip = (N_ELEMENTS(clip_text) gt 0) ? ~KEYWORD_SET(clip_text) : 0
 
-;	Append the graphics keywords:
-if n_elements(t3d) then map_struct_append, extra,'T3D',t3d
-if n_elements(color) then map_struct_append, extra, 'COLOR',color
 
-if n_elements(glinestyle) eq 0 then glinestyle = 1 ;Default = dotted
-map_struct_append, extra, 'LINESTYLE', glinestyle ;Append it
-
-if n_elements(glinethick) then map_struct_append, extra,'THICK',glinethick
-if n_elements(charsize) then map_struct_append, extra,'CHARSIZE', charsize
-
-                                ;Orientation is reversed & conflicts w/box_axes
+;Orientation is reversed & conflicts w/box_axes
 if n_elements(orientation) and (keyword_set(box_axes) eq 0) then $
   map_struct_append, extra,'ORIENTATION', -1 * orientation
 
@@ -346,10 +387,10 @@ if n_elements(orientation) and (keyword_set(box_axes) eq 0) then $
 ; Require that LATS be specified when LATNAMES is ALSO SPECIFIED
 ;
 if (n_elements(latnames) gt 0) and n_elements(lats) le 1 then $
-  message,'modified_map_grid---The LATNAMES keyword MUST be used in conjuction '+$
+  message,'cg_map_grid---The LATNAMES keyword MUST be used in conjuction '+$
   'with the LATS keyword.'
 if n_elements(lonnames) gt 0 and have_lons eq 0 then $
-  message,'modified_map_grid---The LONNAMES keyword MUST be used in conjuction '+$
+  message,'cg_map_grid---The LONNAMES keyword MUST be used in conjuction '+$
   'with the LONS keyword.'
 
 ; Get lat/lon ranges from !MAP. Did MAP_SET specify 4 element limit?
@@ -379,12 +420,12 @@ IF lonmax le lonmin THEN lonmax = lonmax + 360.
 
 			;Default grid spacings...
 IF n_elements(latdel) eq 0 THEN begin
-    latdel = modified_map_grid_incr(latmax - latmin)
+    latdel = cg_map_grid_incr(latmax - latmin)
     latd = 1
 endif else latd = latdel
 
 IF n_elements(londel) eq 0 THEN begin
-    londel = modified_map_grid_incr(lonmax - lonmin)
+    londel = cg_map_grid_incr(lonmax - lonmin)
     lond = 1
 endif else lond = londel
 
@@ -533,9 +574,11 @@ if keyword_set(box_axes) then begin ;Draw a Box legend?
     xp = xw[0] - [0,bdel, bdel,0] ;X  & Y polygon coords for outer box
     yp = yw[0] - [0,0,bdel,bdel]
                                 ;Draw the outline of the box
-    plots, xw[[0,1,1,0,0]], yw[[0,0,1,1,0]], /DEVICE, COLOR=bcolor
-    plots, xw[[0,1,1,0,0]]+[-bdel, bdel, bdel, -bdel, -bdel], $
-      yw[[0,0,1,1,0]]+[-bdel, -bdel, bdel, bdel, -bdel], /DEVICE, COLOR=bcolor
+    cgPlotS, xw[[0,1,1,0,0]], yw[[0,0,1,1,0]], /DEVICE, $
+        COLOR=bcolor, LINESTYLE=0, THICK=thick
+    cgPlotS, xw[[0,1,1,0,0]]+[-bdel, bdel, bdel, -bdel, -bdel], $
+      yw[[0,0,1,1,0]]+[-bdel, -bdel, bdel, bdel, -bdel], /DEVICE, $
+        COLOR=bcolor, LINESTYLE=0, THICK=thick
 
     ychar = [yw[0]-bdel-dc, yw[1]+bdel+dc/4.]
     xchar = [xw[0] - bdel - dc/4., xw[1]+bdel+dc/4.]
@@ -549,8 +592,9 @@ if keyword_set(box_axes) then begin ;Draw a Box legend?
 endif else box_thick = 0
 
                                 ;  Do the horizon if specified.
-if keyword_set(horizon) then map_horizon, _EXTRA=e
-if keyword_set(fill_horizon) then map_horizon, _EXTRA=e, /FILL
+hcolor = (Size(color, /TNAME) EQ 'STRING') ? cgColor(color) : color
+if keyword_set(horizon) then map_horizon, COLOR=hcolor, _EXTRA=e
+if keyword_set(fill_horizon) then map_horizon, COLOR=hcolor, _EXTRA=e, /FILL
 
 ;
 ;   ****************** Draw/Label the meridians ******************
@@ -592,15 +636,17 @@ FOR i=0,n_lons-1 DO BEGIN
                     break
                 if (nline gt 0) then begin
                     indices = polylines[index + 1 : index + nline]
-                    PLOTS, REFORM(uv[0,indices]), REFORM(uv[1,indices]), $
-                        ;zvalue, $
+                    cgPlotS, REFORM(uv[0,indices]), REFORM(uv[1,indices]), $
+                        zvalue, $
                         NOCLIP=0, $
+                        COLOR=bcolor, LINESTYLE=linestyle, THICK=thick, $
                         _EXTRA=extra
                 endif
                 index += nline + 1
             endwhile
         endif else begin
-            PLOTS, lon, lati, zvalue, NOCLIP=0, _EXTRA=extra
+            cgPlotS, lon, lati, zvalue, NOCLIP=0, $
+                 COLOR=bcolor, LINESTYLE=linestyle, THICK=thick, _EXTRA=extra
         endelse
     endif
 
@@ -627,16 +673,16 @@ FOR i=0,n_lons-1 DO BEGIN
                 uv = MAP_PROJ_FORWARD(lon, LonLab, MAP_STRUCTURE=mapStruct)
                 if (FINITE(uv[0]) && FINITE(uv[1])) then begin
                     xy = uv[0:1]
-                    xy = modified_map_grid_check_range(xy)
+                    xy = cg_map_grid_check_range(xy)
                 endif
             endif else begin
                 if (noclip eq 1) || map_point_valid(lon, LonLab) then $
-                    xy = [lon, LonLab]
+                    if (N_ELEMENTS(xy) eq 2) THEN xy = [lon, LonLab]
             endelse
             if (N_ELEMENTS(xy) eq 2) then BEGIN
-                xy = modified_map_grid_check_range(xy)
-                XYOUTS, xy[0], xy[1], lonname, ALIGNMENT=lonalign, $
-                    NOCLIP=1, Z=zvalue, _EXTRA=extra
+                xy = cg_map_grid_check_range(xy)
+                cgText, xy[0], xy[1], lonname, ALIGNMENT=lonalign, $
+                    NOCLIP=1, Z=zvalue, COLOR=color, CHARSIZE=charsize, _EXTRA=extra
             ENDIF
         endif
 
@@ -649,7 +695,7 @@ FOR i=0,n_lons-1 DO BEGIN
             ; Try to find longitude crossings.  If it doesn't cross exactly
             ; at the edge, try going in until it crosses and is valid.
             while ~finite(boxpos[i,j,0]) && abs(k) lt 3 do begin
-                boxpos[i, j, 0] = modified_map_grid_solve( $
+                boxpos[i, j, 0] = cg_map_grid_solve( $
                     [xww[0], yw[j]+k*dy], $
                     [xww[1], yw[j]+k*dy], 0, lon, $
                     MAP_STRUCTURE=mapStruct)
@@ -687,16 +733,16 @@ FOR i=0,n_lats-1 DO BEGIN
                 uv = MAP_PROJ_FORWARD(latlab, lat, MAP_STRUCTURE=mapStruct)
                 if (FINITE(uv[0]) && FINITE(uv[1])) then begin
                     xy = uv[0:1]
-                    xy = modified_map_grid_check_range(xy)
+                    xy = cg_map_grid_check_range(xy)
                 endif
             endif else begin
                 if (noclip eq 1) || map_point_valid(latlab, lat) then $
-                    xy = [latlab, lat]
+                    if (N_ELEMENTS(xy) eq 2) then xy = [latlab, lat]
             endelse
             if (N_ELEMENTS(xy) eq 2) then BEGIN
-                xy = modified_map_grid_check_range(xy)
-                XYOUTS, xy[0], xy[1], latname, $
-                    alignment=latalign, NOCLIP=1, Z=zvalue, _EXTRA=extra
+                xy = cg_map_grid_check_range(xy)
+                cgText, xy[0], xy[1], latname, CHARSIZE=charsize, $
+                    alignment=latalign, NOCLIP=1, COLOR=color, Z=zvalue, _EXTRA=extra
             ENDIF
         endif
     ENDIF
@@ -724,15 +770,17 @@ FOR i=0,n_lats-1 DO BEGIN
                     break
                 if (nline gt 0) then begin
                     indices = polylines[index + 1 : index + nline]
-                    PLOTS, REFORM(uv[0,indices]), REFORM(uv[1,indices]), $
-                        ;zvalue, $
+                    cgPLOTS, REFORM(uv[0,indices]), REFORM(uv[1,indices]), $
+                        zvalue, $
                         NOCLIP=0, $
+                        COLOR=bcolor, LINESTYLE=linestyle, THICK=thick, $
                         _EXTRA=extra
                 endif
                 index += nline + 1
             endwhile
         endif else $
-            PLOTS, loni, lat, zvalue, NOCLIP=0, _EXTRA=extra
+            cgPLOTS, loni, lat, zvalue, NOCLIP=0, $
+                COLOR=bcolor, LINESTYLE=linestyle, THICK=thick, _EXTRA=extra
     endif
 
     if box_thick ne 0 then begin
@@ -742,7 +790,7 @@ FOR i=0,n_lats-1 DO BEGIN
             k = 0
             dx = (xw[1] - xw[0]) * 0.01
             while ~finite(boxpos[i,j,1]) && abs(k) lt 3 do begin
-                boxpos[i, j, 1] = modified_map_grid_solve( $
+                boxpos[i, j, 1] = cg_map_grid_solve( $
                     [xw[j]+dx*k, yww[0]], $
                     [xw[j]+dx*k, yww[1]], 1, lat, $
                     MAP_STRUCTURE=mapStruct)
@@ -778,12 +826,12 @@ if box_thick ne 0 then begin
                     [v0, xw[1], xw[1], v0] : [v0, z, z, v0]
             endif else yp0 = [v0, v0, z, z]
             if (i and 1) then $
-                polyfill, xp0, yp0, /DEVICE, COLOR=bcolor
+                cgColorFill, xp0, yp0, /DEVICE, COLOR=bcolor
             xychar[iaxis] = z
             if strlen(vtext[i]) gt 0 then begin
-                xyouts, xychar[0], xychar[1], vtext[i], $
-                    ORIENTATION=dy * (90-180*j), $
-                    ALIGN=0.5, CLIP=0, Z=zvalue, /DEVICE, _EXTRA=extra
+                cgText, xychar[0], xychar[1], vtext[i], $
+                    ORIENTATION=dy * (90-180*j), CHARSIZE=charsize, $
+                    ALIGN=0.5, CLIP=0, Z=zvalue, COLOR=color, /DEVICE, _EXTRA=extra
             endif
             v0 = z
         endfor
@@ -791,7 +839,7 @@ if box_thick ne 0 then begin
         if i and 1 then begin
             if iaxis eq 0 then xp0 = [v0, xw[1], xw[1], v0] $
             else yp0 = [v0, v0, yw[1], yw[1]]
-            polyfill, xp0, yp0, /DEVICE, COLOR=bcolor
+            cgColorFill, xp0, yp0, /DEVICE, COLOR=bcolor
         endif
     endfor
 endif   ; box_thick

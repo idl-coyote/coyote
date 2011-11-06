@@ -320,50 +320,28 @@ PRO cgMapGrid::Draw, _EXTRA=extrakeywords
     ENDIF
     
     ; Draw the map grid.
-    IF self._cg_fixed_map_grid THEN BEGIN
-        Fixed_Map_Grid, $
-            BOX_AXES=self._cg_box_axes, $
-            CLIP_TEXT=self._cg_clip_text, $
-            CHARSIZE=self._cg_charsize, $
-            COLOR=cgColor(self._cg_color), $
-            FILL_HORIZON=self._cg_fill_horizon, $
-            GLINESTYLE=self._cg_linestyle, $
-            GLINETHICK=self._cg_thick, $
-            HORIZON=self._cg_horizon, $
-            INCREMENT=*self._cg_increment, $
-            LABEL=self._cg_label, $
-            LATDEL=*self._cg_latdel, $
-            LATLAB=*self._cg_latlab, $
-            LATNAMES=*self._cg_latnames, $
-            LATS=*self._cg_lats, $
-            LONDEL=*self._cg_londel, $
-            LONLAB=*self._cg_lonlab, $
-            LONNAMES=*self._cg_lonnames, $
-            LONS=*self._cg_lons, $
-            MAP_STRUCTURE=mapStruct    
-    ENDIF ELSE BEGIN
-        Modified_Map_Grid, $
-            BOX_AXES=self._cg_box_axes, $
-            CLIP_TEXT=1, $
-            CHARSIZE=self._cg_charsize, $
-            COLOR=cgColor(self._cg_color), $
-            FILL_HORIZON=self._cg_fill_horizon, $
-            GLINESTYLE=self._cg_linestyle, $
-            GLINETHICK=self._cg_thick, $
-            FORMAT=self._cg_format, $
-            HORIZON=self._cg_horizon, $
-            INCREMENT=*self._cg_increment, $
-            LABEL=self._cg_label, $
-            LATDEL=*self._cg_latdel, $
-            LATLAB=*self._cg_latlab, $
-            LATNAMES=*self._cg_latnames, $
-            LATS=*self._cg_lats, $
-            LONDEL=*self._cg_londel, $
-            LONLAB=*self._cg_lonlab, $
-            LONNAMES=*self._cg_lonnames, $
-            LONS=*self._cg_lons, $
-            MAP_STRUCTURE=mapStruct
-    ENDELSE
+    cg_Map_Grid, $
+       BOX_AXES=self._cg_box_axes, $
+       CLIP_TEXT=1, $
+       CHARSIZE=self._cg_charsize, $
+       COLOR=cgColor(self._cg_color), $
+       FILL_HORIZON=self._cg_fill_horizon, $
+       GLINESTYLE=self._cg_linestyle, $
+       GLINETHICK=self._cg_thick, $
+       FORMAT=self._cg_format, $
+       HORIZON=self._cg_horizon, $
+       INCREMENT=*self._cg_increment, $
+       LABEL=self._cg_label, $
+       LATDEL=*self._cg_latdel, $
+       LATLAB=*self._cg_latlab, $
+       LATNAMES=*self._cg_latnames, $
+       LATS=*self._cg_lats, $
+       LONDEL=*self._cg_londel, $
+       LONLAB=*self._cg_lonlab, $
+       LONNAMES=*self._cg_lonnames, $
+       LONS=*self._cg_lons, $
+       MAP_STRUCTURE=mapStruct
+
     
     ; Turn messages back on.
     void = Check_Math()
@@ -521,7 +499,6 @@ FUNCTION cgMapGrid::INIT, mapCoordObj, $
     CHARSIZE=charsize, $
     COLOR=color, $
     FILL_HORIZON=fill_horizon, $
-    FIXED_cgMapGrid=fixed_map_grid, $
     FORMAT=format, $
     LINESTYLE=linestyle, $
     THICK=thick, $
@@ -570,7 +547,6 @@ FUNCTION cgMapGrid::INIT, mapCoordObj, $
     self._cg_clip_text = clip_text
     self._cg_charsize = charsize
     self._cg_color = color
-    self._cg_fixed_map_grid = fixed_map_grid
     self._cg_label = label
     self._cg_linestyle = linestyle
     self._cg_thick = thick
@@ -623,7 +599,6 @@ PRO cgMapGrid__DEFINE, class
               _cg_charsize: 0.0, $
               _cg_color: "", $
               _cg_fill_horizon: 0B, $
-              _cg_fixed_map_grid: 0B, $
               _cg_format: "", $
               _cg_linestyle: 0, $
               _cg_thick: 0, $

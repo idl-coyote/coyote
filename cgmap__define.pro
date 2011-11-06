@@ -657,7 +657,7 @@ END ;--------------------------------------------------------------------------
 
 FUNCTION cgMap::INIT, map_projection, $
     BACKGROUND=background, $
-    COLOR=_color, $
+    COLOR=color, $
     CONTINENTS=continents, $
     ERASE=erase, $
     GRID=grid, $

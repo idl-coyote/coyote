@@ -13,6 +13,17 @@
 ;            of IDL prior to IDL 8.2, when it is suppose to be fixed. For more information,
 ;            see this article: http://www.idlcoyote.com/map_tips/utmwrong.php. 31 Oct 2011. DWF.
 ;-
+PRO cgMap::AddCmd, REPLACE=replace
+
+   currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
+   IF wincnt EQ 0 THEN cgWindow
+   IF Keyword_Set(replace) $
+      THEN cgWindow, "Draw", self, /Method, /ReplaceCmd $ ; Replace all commands in the window
+      ELSE cgWindow, "Draw", self, /Method, /AddCmd       ; Add this command to the window.
+   
+END ;--------------------------------------------------------------------------
+
+
 PRO cgMap::AddOverlay, overLayObject
 
    ; Required parameter must be a valid object with a DRAW method.
@@ -30,7 +41,31 @@ PRO cgMap::AddOverlay, overLayObject
 END ;--------------------------------------------------------------------------
 
 
-PRO cgMap::Draw, _EXTRA=extra
+PRO cgMap::Advance, DRAW=draw
+
+   IF Total(!P.Multi) NE 0 THEN BEGIN
+   
+          ; Draw the invisible plot to get plot position.
+          IF Size(self._cg_background, /TNAME) EQ 'STRING' $
+             THEN background = cgColor(self._cg_background)$
+             ELSE background = self._cg_background
+          TVLCT, rr, gg, bb, /Get
+          Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background
+          TVLCT, rr, gg, bb
+          
+          ; Use position coordinates to indicate position in this set of coordinates.
+          ; New position based on !P.MULTI position.
+          position = [!x.window[0], !y.window[0], !x.window[1], !y.window[1]]
+          self._cg_multi_position = position
+          
+   ENDIF ELSE self._cg_multi_position = FltArr(4)
+   
+   IF Keyword_Set(draw) THEN self -> Draw
+   
+END ;--------------------------------------------------------------------------
+
+
+PRO cgMap::Draw, ERASE=erase, _EXTRA=extra
  
     Compile_Opt idl2
     
@@ -41,9 +76,38 @@ PRO cgMap::Draw, _EXTRA=extra
       RETURN
     ENDIF
     
+    ; If this is a graphics device, and there is no current graphics window,
+    ; then set the erase flag.
+    IF (!D.Name EQ 'WIN' || !D.Name EQ 'X') && (!D.Window LT 0) THEN BEGIN
+        erase = 1
+    ENDIF
+    
+    ; Temporary erase?
+    IF N_Elements(erase) NE 0 THEN erase = Keyword_Set(erase)
+    
     ; Do you need to erase in the background color?
-    IF self._cg_erase THEN cgErase, Color=self._cg_background
-   
+    IF N_Elements(erase) EQ 0 THEN erase = self._cg_erase
+    IF erase THEN cgErase, Color=self._cg_background
+    
+    IF Total(!P.Multi) NE 0 THEN BEGIN
+        self -> Advance 
+        position = self._cg_multi_position
+        old_position = self._cg_position
+        self -> SetProperty, POSITION=position
+    ENDIF 
+    
+    
+    ; Are you putting this on an image? If so, get the position from
+    ; the last image position in.
+    IF self._cg_onimage THEN BEGIN
+        COMMON FSC_$CGIMAGE, _cgimage_xsize, _cgimage_ysize, $
+                             _cgimage_winxsize, _cgimage_winysize, $
+                             _cgimage_position, _cgimage_winID, $
+                             _cgimage_current
+        old_position = self._cg_position
+        self -> SetProperty, POSITION=_cgimage_position
+    ENDIF
+    
    ; Draw the map data coordinate system.
     mapStruct = self -> SetMapProjection()
     self -> cgCoord::Draw, _EXTRA=extra
@@ -71,9 +135,11 @@ PRO cgMap::Draw, _EXTRA=extra
        p = self._cg_position
        px = (p[2]-p[0])/2.0 + p[0]
        py = p[3]+ (0.025 * (512.0/!D.Y_Size))
-       cgText, px, py, /Normal, Alignment=0.5, self._cg_title
+       cgText, px, py, /Normal, Alignment=0.5, self._cg_title, Charsize=cgDefCharsize()*1.25
     ENDIF
     
+    ; If you changed the position for some reason, put it back.
+    IF N_Elements(old_position) NE 0 THEN self -> SetProperty, POSITION=old_position
 END ;--------------------------------------------------------------------------
 
 
@@ -107,19 +173,14 @@ END ;--------------------------------------------------------------------------
 PRO cgMap::GetProperty, $
     BACKGROUND=background, $
     COLOR=color, $
-    CONTINENETS=continents, $
     OVERLAYS=overlays, $
     ERASE=erase, $
-    GRID=grid_object, $
     LATLON_RANGES=latlon_ranges, $
     MAP_STRUCTURE=mapStruct, $
-    OUTLINE_OBJECT=outline_object, $
     POSITION=position, $
-    MAP_OVERLAY=map_overlay, $
     MAP_PROJ_KEYWORDS=map_proj_keywords, $
     MAP_PROJECTION=map_projection, $
     NOBORDER=noborder, $
-    OVERLAY_POSITION=overlay_position, $
     XRANGE=xrange, $
     YRANGE=yrange, $
     ; MAP_PROJ_INIT keywords (partial list)
@@ -160,21 +221,6 @@ PRO cgMap::GetProperty, $
             llcoords = Map_Proj_Inverse(self._cg_xrange, self._cg_yrange, MAP_STRUCTURE=mapStruct)
             yrange = Reform(llcoords[1,*])
       ENDIF ELSE yrange = self._cg_yrange
-   ENDIF
-   IF Arg_Present(grid_object) THEN BEGIN
-        IF N_Elements(overlay_position) EQ 0 $
-            THEN grid_object = self._cg_overlays-> Get(Position=1) $
-            ELSE grid_object = self._cg_overlays-> Get(Position=overlay_position)
-   ENDIF
-   IF Arg_Present(outline_object) THEN BEGIN
-        IF N_Elements(overlay_position) EQ 0 $
-            THEN outline_object = self._cg_overlays -> Get(Position=0) $
-            ELSE outline_object = self._cg_overlays -> Get(Position=overlay_position)
-   ENDIF
-   IF Arg_Present(map_overlay) THEN BEGIN
-        IF N_Elements(overlay_position) EQ 0 $
-            THEN map_overlay = self._cg_overlays-> Get(/ALL) $
-            ELSE map_overlay = self._cg_overlays -> Get(Position=overlay_position)
    ENDIF
    
    ; Other keywords.
@@ -272,19 +318,19 @@ PRO cgMap::SetProperty, $
     BACKGROUND=background, $
     COLOR=color, $
     CONTINENTS=continents, $
-    DRAW_OVERLAYS=draw_overlays, $
+    DRAW=draw, $
     ERASE=erase, $
     GRID=grid, $
     LATLON_RANGES=latlon_ranges, $
+    ONIMAGE=onimage, $
     PARENT=parent, $
     POSITION=position, $
     NOBORDER=noborder, $
-    MAP_OVERLAY=map_overlay, $
     MAP_PROJ_KEYWORDS=map_proj_keywords, $
     MAP_PROJECTION=map_projection, $
-    OVERLAY_POSITION=overlay_position, $
     XRANGE=xrange, $
     YRANGE=yrange, $
+    TITLE=title, $
     ; MAP_PROJ_INIT keywords (partial list)
     DATUM=datum, $
     ELLIPSOID=ellipsoid, $
@@ -400,6 +446,8 @@ PRO cgMap::SetProperty, $
    IF N_Elements(center_longitude) NE 0 THEN self._cg_center_longitude = center_longitude
    IF N_Elements(erase) NE 0 THEN self._cg_erase = Keyword_Set(erase)
    IF N_Elements(noborder) NE 0 THEN self._cg_noborder = Keyword_Set(noborder)
+   IF N_Elements(onimage) NE 0 THEN self._cg_onimage = Keyword_Set(onimage)
+   IF N_Elements(title) NE 0 THEN self._cg_title = title
    
    ; If you change the limit, you really also need to change the XRANGE and YRANGE.
    changedLimit = 0
@@ -407,7 +455,6 @@ PRO cgMap::SetProperty, $
         *self._cg_limit = limit
         changedLimit = 1
    ENDIF
-   IF N_Elements(draw_overlays) NE 0 THEN self._cg_draw_overlays = Keyword_Set(draw_overlays)
    IF N_Elements(sphere_radius) NE 0 THEN BEGIN
       self._cg_thisDatum.semimajor_axis = sphere_radius
       self._cg_thisDatum.semiminor_axis = sphere_radius
@@ -444,38 +491,11 @@ PRO cgMap::SetProperty, $
             self -> cgCOORD::SetProperty, YRANGE=yrange
       ENDIF
    ENDELSE
-   IF N_Elements(outline_object) NE 0 THEN BEGIN
-   
-        IF N_Elements(overlay_position) EQ 0 THEN thisPosition = 0 ELSE thisPosition = overlay_position
-        
-        ; Parent will be added to object in SetOverlay method.
-        self -> SetOverlay, outline_object, thisPosition, /OVERWRITE
-                
-   ENDIF 
-   IF N_Elements(grid_object) NE 0 THEN BEGIN
-   
-        IF N_Elements(overlay_position) EQ 0 THEN thisPosition = 1 ELSE thisPosition = overlay_position
-
-        ; Parent will be added to object in SetOverlay method.
-        self -> SetOverlay, grid_object, thisPosition, /OVERWRITE
-        
-   ENDIF 
-   IF N_Elements(map_overlay) NE 0 THEN BEGIN
-   
-        count = N_Elements(map_overlay)
-        IF N_Elements(overlay_position) EQ 0 THEN BEGIN
-            FOR j=0,count-1 DO BEGIN
-                thisOverlay = map_overlay[j]
-                IF Obj_Valid(thisOverlay) THEN self -> SetOverlay, thisOverlay
-            ENDFOR
-        ENDIF ELSE BEGIN
-            FOR j=0,count-1 DO BEGIN
-                self -> SetOverlay, map_overlay[j], overlay_position[j]
-            ENDFOR
-        ENDELSE
-   ENDIF
    
    IF (N_ELEMENTS(extraKeywords) GT 0) THEN self -> cgCOORD::SetProperty,  _EXTRA=extraKeywords
+   
+   ; Need to draw after setting properties?
+   IF Keyword_Set(draw) THEN self -> Draw
    
 END ;--------------------------------------------------------------------------
 
@@ -656,15 +676,19 @@ END ;--------------------------------------------------------------------------
 
 
 FUNCTION cgMap::INIT, map_projection, $
+    ADDCMD=addcmd, $
     BACKGROUND=background, $
     COLOR=color, $
     CONTINENTS=continents, $
+    DRAW=draw, $
     ERASE=erase, $
     GRID=grid, $
     LATLON_RANGES=latlon_ranges, $
     NOBORDER=noborder, $
+    ONIMAGE=onimage, $
     POSITION=position, $
     TITLE=title, $
+    WINDOW=window, $
     XRANGE=xrange, $
     YRANGE=yrange, $
     ; MAP_PROJ_INIT keywords (partial list)
@@ -702,7 +726,7 @@ FUNCTION cgMap::INIT, map_projection, $
    ENDIF ELSE background = 'white'
    erase = Keyword_Set(erase)
    IF N_Elements(color) EQ 0 THEN color = "opposite"
-   IF N_Elements(position) EQ 0 THEN position = [0.075, 0.075, 0.925, 0.825]
+   IF N_Elements(position) EQ 0 THEN position = [0.075, 0.075, 0.925, 0.900]
    IF N_Elements(title) EQ 0 THEN title = ""
 
    ; Default map projection.
@@ -841,7 +865,9 @@ FUNCTION cgMap::INIT, map_projection, $
    self._cg_background = background
    self._cg_color = color
    self._cg_erase = erase
+   self._cg_multi_position = FltArr(4)
    self._cg_noborder = Keyword_Set(noborder)
+   self._cg_onimage = Keyword_Set(onimage)
    self._cg_radians = Keyword_Set(radians)
    self._cg_theDatums = Ptr_New(theDatums)
    self._cg_theProjections = Ptr_New(projections)
@@ -892,7 +918,7 @@ FUNCTION cgMap::INIT, map_projection, $
            IF continentsName EQ "" THEN continentsName = 'MAPCONTINENTS'
            self._cg_overlays -> Add, continents
        ENDIF ELSE BEGIN
-           continents = Obj_New('cgContinents', self, /COUNTRIES, $
+           continents = Obj_New('cgMapContinents', self, /COUNTRIES, $
                COLOR=self._cg_color, NAME='MAPCONTINENTS')
            self._cg_overlays -> Add, continents
        ENDELSE
@@ -911,7 +937,14 @@ FUNCTION cgMap::INIT, map_projection, $
            self._cg_overlays -> Add, grid
        ENDELSE
    ENDIF
-
+   
+   ; Need to add this command to a resizeable cgWindow?
+   IF Keyword_Set(window) THEN self -> AddCmd, /REPLACE
+   IF Keyword_Set(addcmd) THEN self -> AddCmd
+   
+   ; Need immediate draw?
+   IF Keyword_Set(draw) THEN self -> Draw
+   
    RETURN, 1
 
 END ;--------------------------------------------------------------------------
@@ -932,6 +965,8 @@ PRO cgMap__Define, class
              _cg_limit: Ptr_New(), $                    ; The limit of the map projection.
              _cg_map_projection_keywords: Ptr_New(), $  ; A storage location for MAP_PROJ_INIT keywords.
              _cg_noborder: 0B, $                        ; A flag that indicates a border should not be drawn.
+             _cg_multi_position: FltArr(4), $           ; The position of a multiple plot.
+             _cg_onimage: 0B, $                         ; A flag that, if set, will get the position from the last image position.
              _cg_overlays: Obj_New(), $                 ; A storage location for map overlays.
              _cg_radians: 0B, $                         ; A flag that indicated values are in radians, not degrees.
              _cg_theDatums: Ptr_New(), $                ; Information about available map datums.

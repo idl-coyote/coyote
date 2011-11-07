@@ -83,7 +83,7 @@ PRO cgCoord::SetProperty, $
    IF N_Elements(yrange) NE 0 THEN self._cg_yrange = yrange
 
    ; Need to set superclass properties?
-   IF N_Elements(extraKeywords) NE 0 THEN self -> CATATOM::SetProperty, _Extra=extraKeywords
+   IF N_Elements(extraKeywords) NE 0 THEN self -> cgContainer::SetProperty, _Extra=extraKeywords
 
 END ; -------------------------------------------------------------------------
 

@@ -188,6 +188,17 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+PRO cgMapGrid::AddCmd, REPLACE=replace
+
+   currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
+   IF wincnt EQ 0 THEN cgWindow
+   IF Keyword_Set(replace) $
+      THEN cgWindow, "Draw", self, /Method, /ReplaceCmd $ ; Replace all commands in the window
+      ELSE cgWindow, "Draw", self, /Method, /AddCmd       ; Add this command to the window.
+   
+END ;--------------------------------------------------------------------------
+
+
 PRO cgMapGrid::AutoDrawGrid, SUCCESS=success
 
     ; Error handling
@@ -493,6 +504,7 @@ END ; --------------------------------------------------------------------------
 
 
 FUNCTION cgMapGrid::INIT, mapCoordObj, $
+    ADDCMD=addcmd, $
     AUTODRAWGRID=autodrawgrid, $
     BOX_AXES=box_axes, $
     CLIP_TEXT=clip_text, $
@@ -514,6 +526,7 @@ FUNCTION cgMapGrid::INIT, mapCoordObj, $
     LONNAMES=lonnames, $
     LONS=lons, $
     MAP_OBJECT=map_object, $
+    WINDOW=window, $
     _EXTRA=extra
     
     ; Error handling
@@ -585,6 +598,10 @@ FUNCTION cgMapGrid::INIT, mapCoordObj, $
        THEN self._cg_map_object = mapCoordObj $
        ELSE Message, 'A valid map object is required to create a cgMapGrid object.'
        
+   ; Need to add this command to a resizeable cgWindow?
+   IF Keyword_Set(window) THEN self -> AddCmd, /REPLACE
+   IF Keyword_Set(addcmd) THEN self -> AddCmd
+   
     RETURN, 1
     
 END ; -------------------------------------------------------------------------------------

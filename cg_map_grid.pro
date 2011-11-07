@@ -172,20 +172,33 @@
 ;-
 
 ;-------------------------------------------------------------------------
-function cg_map_grid_check_range, xy
+function cg_map_grid_check_range, xy, GCTP=gctp
 ;
 ; Determine if the xy label point is inside the plot coordinate axes.
 ; If not, return a single value, which is NOT drawn on the plot. This
 ; solves the problem of non-Hershey fonts not being clipped to the plot
 ; area.
-    
+
+    ; You need at least two points coming in here.
+    IF N_Elements(xy) NE 2 THEN RETURN, xy
     x = xy[0]
     y = xy[1]
-    factor = 0.0125
-    IF x LT (Min(!X.CRange)- factor*(!X.CRange[1]-!X.CRange[0])) THEN RETURN, xy[0]
-    IF x GT (Max(!X.CRange)+ factor*(!X.CRange[1]-!X.CRange[0])) THEN RETURN, xy[0]
-    IF y LT (Min(!Y.CRange)- factor*(!Y.CRange[1]-!Y.CRange[0])) THEN RETURN, xy[0]
-    IF y GT (Max(!Y.CRange)+ factor*(!Y.CRange[1]-!Y.CRange[0])) THEN RETURN, xy[0]
+    
+    ; If this is a CGTP projection, then check the axis range values. Otherwise,
+    ; use the LL_BOX form the map structure !MAP. The latter is more strict about
+    ; being inside the box.
+    IF Keyword_Set(gctp) THEN BEGIN
+        factor = 0.0125
+        IF x LT (Min(!X.CRange)- factor*(!X.CRange[1]-!X.CRange[0])) THEN RETURN, xy[0]
+        IF x GT (Max(!X.CRange)+ factor*(!X.CRange[1]-!X.CRange[0])) THEN RETURN, xy[0]
+        IF y LT (Min(!Y.CRange)- factor*(!Y.CRange[1]-!Y.CRange[0])) THEN RETURN, xy[0]
+        IF y GT (Max(!Y.CRange)+ factor*(!Y.CRange[1]-!Y.CRange[0])) THEN RETURN, xy[0]
+    ENDIF ELSE BEGIN
+        IF x LT (!Map.ll_box[1]) THEN RETURN, xy[0]
+        IF x GT (!Map.ll_box[3]) THEN RETURN, xy[0]
+        IF y LT (!Map.ll_box[0]) THEN RETURN, xy[0]
+        IF y GT (!Map.ll_box[2]) THEN RETURN, xy[0]
+    ENDELSE
     RETURN, xy
 end
 
@@ -595,7 +608,7 @@ endif else box_thick = 0
 hcolor = (Size(color, /TNAME) EQ 'STRING') ? cgColor(color) : color
 if keyword_set(horizon) then map_horizon, COLOR=hcolor, _EXTRA=e
 if keyword_set(fill_horizon) then map_horizon, COLOR=hcolor, _EXTRA=e, /FILL
-
+bcolor = (Size(color, /TNAME) EQ 'STRING') ? cgColor(color) : color
 ;
 ;   ****************** Draw/Label the meridians ******************
 ;
@@ -673,16 +686,17 @@ FOR i=0,n_lons-1 DO BEGIN
                 uv = MAP_PROJ_FORWARD(lon, LonLab, MAP_STRUCTURE=mapStruct)
                 if (FINITE(uv[0]) && FINITE(uv[1])) then begin
                     xy = uv[0:1]
-                    xy = cg_map_grid_check_range(xy)
+                    gctp = 1
                 endif
             endif else begin
                 if (noclip eq 1) || map_point_valid(lon, LonLab) then $
-                    if (N_ELEMENTS(xy) eq 2) THEN xy = [lon, LonLab]
+                    xy = [lon, LonLab]
             endelse
-            if (N_ELEMENTS(xy) eq 2) then BEGIN
-                xy = cg_map_grid_check_range(xy)
-                cgText, xy[0], xy[1], lonname, ALIGNMENT=lonalign, $
-                    NOCLIP=1, Z=zvalue, COLOR=color, CHARSIZE=charsize, _EXTRA=extra
+            IF N_Elements(xy) NE 0 THEN xy = cg_map_grid_check_range(xy, GCTP=gctp)
+            IF N_Elements(xy) EQ 2 THEN BEGIN
+               cgText, xy[0], xy[1], lonname, ALIGNMENT=lonalign, $
+                   NOCLIP=1, Z=zvalue, COLOR=color, CHARSIZE=charsize, _EXTRA=extra
+               Undefine, xy
             ENDIF
         endif
 
@@ -712,7 +726,6 @@ ENDFOR
 FOR i=0,n_lats-1 DO BEGIN
 
     lat=latitudes[i]
-
     IF N_Elements(format) EQ 0 THEN BEGIN
         fmt = (lat ne long(lat)) ? '(f7.2)' : '(i4)' 
     ENDIF ELSE BEGIN 
@@ -733,16 +746,17 @@ FOR i=0,n_lats-1 DO BEGIN
                 uv = MAP_PROJ_FORWARD(latlab, lat, MAP_STRUCTURE=mapStruct)
                 if (FINITE(uv[0]) && FINITE(uv[1])) then begin
                     xy = uv[0:1]
-                    xy = cg_map_grid_check_range(xy)
+                    gctp = 1
                 endif
             endif else begin
                 if (noclip eq 1) || map_point_valid(latlab, lat) then $
-                    if (N_ELEMENTS(xy) eq 2) then xy = [latlab, lat]
+                    xy = [latlab, lat]
             endelse
-            if (N_ELEMENTS(xy) eq 2) then BEGIN
-                xy = cg_map_grid_check_range(xy)
-                cgText, xy[0], xy[1], latname, CHARSIZE=charsize, $
-                    alignment=latalign, NOCLIP=1, COLOR=color, Z=zvalue, _EXTRA=extra
+            IF N_Elements(xy) NE 0 THEN xy = cg_map_grid_check_range(xy, GCTP=gctp)
+            IF N_Elements(xy) EQ 2 THEN BEGIN
+               cgText, xy[0], xy[1], latname, CHARSIZE=charsize, $
+                   alignment=latalign, NOCLIP=1, COLOR=color, Z=zvalue, _EXTRA=extra
+               Undefine, xy
             ENDIF
         endif
     ENDIF

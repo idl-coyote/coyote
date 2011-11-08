@@ -167,6 +167,45 @@ PRO cgMapContinents::AddCmd, REPLACE=replace
 END ;--------------------------------------------------------------------------
 
 
+FUNCTION cgMapContinents::Confirm_Filename, filename
+
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN, ""
+    ENDIF
+    
+    returnName = filename
+
+    ; Can you locate the file?
+    found = File_Test(filename, /READ)
+       
+    ; If you can't find it, do a search in resource directories for it.
+    IF ~found THEN BEGIN
+       resourceFile = Find_Resource_File(filename, SUCCESS=success)
+       IF success THEN BEGIN
+           returnName = resourceFile
+       ENDIF ELSE BEGIN
+           Message, 'Cannot locate the file: ' + filename + '.', /Informational
+           returnName = ""
+       ENDELSE
+    ENDIF ELSE BEGIN
+       
+        ; Is this a fully-qualified path to the file?
+        IF StrUpCase(returnName) EQ StrUpCase(File_Basename(returnName)) THEN BEGIN
+           CD, CURRENT=thisDir
+            returnName = Filepath(ROOT_DIR=thisDir, returnName)
+        ENDIF
+    ENDELSE
+
+    ; Return the filename.
+    RETURN, returnName
+       
+END ; --------------------------------------------------------------------------------------------
+
+
 PRO cgMapContinents::Draw, _EXTRA=extrakeywords
 
     ; Error handling.
@@ -351,7 +390,10 @@ PRO cgMapContinents::SetProperty, $
     IF N_Elements(coasts) NE 0 THEN self.coasts = Keyword_Set(coasts)
     IF N_Elements(color) NE 0 THEN self.color = color
     IF N_Elements(continents) NE 0 THEN self.continents = Keyword_Set(continents)
-    IF N_Elements(filename) NE 0 THEN self.filename = filename
+    IF N_Elements(filename) NE 0 THEN BEGIN
+       newfilename = self -> Confirm_Filename(filename)
+       IF newfilename NE "" THEN self.filename = newfilename
+    ENDIF
     IF N_Elements(fill) NE 0 THEN self.fill = Keyword_Set(fill)
     IF N_Elements(gshhs) NE 0 THEN self.gshhs = Keyword_Set(gshhs)    
     IF N_Elements(hires) NE 0 THEN self.hires = Keyword_Set(hires)
@@ -422,7 +464,7 @@ FUNCTION cgMapContinents::INIT, mapCoordObj, $
         AND Keyword_Set(usa)) EQ 0 THEN continents = 1
     coasts = Keyword_Set(coasts)
     countries = Keyword_Set(countries)
-    IF Keyword_Set(color) EQ 0 THEN color = 'white'
+    IF Keyword_Set(color) EQ 0 THEN color = 'opposite'
     IF N_Elements(land_color) EQ 0 THEN land_color = color
     continents = Keyword_Set(continents)
     fill = Keyword_Set(fill)
@@ -438,10 +480,18 @@ FUNCTION cgMapContinents::INIT, mapCoordObj, $
     IF N_Elements(water_color) EQ 0 THEN water_color = 'SKY BLUE'
     IF Keyword_Set(zvalue) EQ 0 THEN zvalue = 0.0
     
+    ; If only the GSHHS keyword is set, suggest a filename.
     IF gshhs AND N_Elements(filename) EQ 0 THEN BEGIN
-        IF hires THEN filename = 'gshhs_h.b' ELSE filename = 'gshhs_l.b'
+        IF hires THEN filename = 'gshhs_h.b' ELSE filename = 'gshhs_i.b'
     ENDIF
     
+    ; Can you find the file? Is this a fully-qualified file path?
+    IF N_Elements(filename) NE 0 THEN BEGIN
+       confirmedName = self -> Confirm_Filename(filename)
+       IF confirmedName NE "" THEN filename = confirmedName ELSE $
+            Message, 'Cannot locate the file ' + filename + '.'
+    ENDIF
+        
     self.coasts = coasts
     self.color = color
     self.continents = continents
@@ -470,7 +520,8 @@ FUNCTION cgMapContinents::INIT, mapCoordObj, $
         self.map_object = map_object
         
     ; Make sure you have a valid map object at this point.
-    IF ~Obj_Valid(self.map_object) THEN Message, 'A valid map object is required to create a CGMAPCONTINENTS object.'
+    IF ~Obj_Valid(self.map_object) THEN $
+       Message, 'A valid map object is required to create a cgMapContinents object.'
 
     ; Need to add this command to a resizeable cgWindow?
     IF Keyword_Set(window) THEN self -> AddCmd, /REPLACE

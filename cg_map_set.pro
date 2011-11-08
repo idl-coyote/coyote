@@ -86,7 +86,8 @@ PRO CG_Map_Set, p0lat, p0lon, rot, $
     ; Coyote Graphics Keywords.
     BACKGROUND=background, $
     ERASE=erase, $
-    ADDCMD=addcmd
+    ADDCMD=addcmd, $
+    WINDOW=window
     
     
     Catch, theError
@@ -97,6 +98,7 @@ PRO CG_Map_Set, p0lat, p0lon, rot, $
       RETURN
     ENDIF
       
+    ; Add this command to a cgWindow.
     IF Keyword_Set(addcmd) THEN BEGIN
     
        cgWindow, 'CG_Map_Set', p0lat, p0lon, rot, $
@@ -150,6 +152,62 @@ PRO CG_Map_Set, p0lat, p0lon, rot, $
        
     ENDIF
     
+    ; Replace the commands in or create a cgWindow.
+    IF Keyword_Set(window) THEN BEGIN
+    
+       currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
+       IF wincnt EQ 0 THEN cgWindow
+       cgWindow, 'CG_Map_Set', p0lat, p0lon, rot, $
+          PROJECTION=proj, $              
+          NAME=name, $                    
+          STEREOGRAPHIC = stereographic, $
+          ORTHOGRAPHIC = orthographic, $
+          CONIC = conic, $
+          LAMBERT = lambert, $
+          GNOMIC = gnomic, $
+          AZIMUTHAL = azimuth, $
+          SATELLITE = satellite, $      
+          CYLINDRICAL = cylindrical, $
+          MERCATOR = mercator, $
+          MILLER_CYLINDRICAL=miller, $
+          MOLLWEIDE = mollweide, $
+          SINUSOIDAL = sinusoidal, $
+          AITOFF = aitoff, $            
+          HAMMER = hammer, $            
+          ALBERS = albers, $            
+          TRANSVERSE_MERCATOR = utm, $  
+          ROBINSON = robinson, $        
+          GOODESHOMOLOSINE = goodes, $                                                    
+          ELLIPSOID = ellips, $         
+          CENTRAL_AZIMUTH=cent_azim, $    
+          STANDARD_PARALLELS = std_p, $   
+          SAT_P = Sat_p, $                
+          CLIP=clip, $                    
+          REVERSE=reverse, $              
+          SCALE=scale, $                  
+          ISOTROPIC = iso, $,             
+          LIMIT = limit, $                
+          NOERASE=noerase, TITLE=title,$
+          ADVANCE = advance, COLOR=color, POSITION = position, $
+          NOBORDER=noborder, T3D=t3d, ZVALUE=zvalue, $
+          CHARSIZE = charsize, XMARGIN=xmargin, YMARGIN=ymargin, $
+          HORIZON=horizon, E_HORIZON=ehorizon, $ ; E_HORIZON = structure containing
+          CONTINENTS = continents, E_CONTINENTS=econt, $ ;E_CONTINENTS = structure
+          USA=usa, HIRES = hires, $
+          MLINESTYLE=mlinestyle, MLINETHICK=mlinethick, CON_COLOR=con_color, $
+          GRID=grid, E_GRID=egrid, $    ;E_GRID = extra keywords structure
+          GLINESTYLE=glinestyle, GLINETHICK=glinethick, $
+          LABEL=label, LATALIGN=latalign, LATDEL=latdel, LATLAB=latlab, $
+          LONALIGN=lonalign, LONDEL=londel, LONLAB=lonlab, $
+          WHOLE_MAP=whole_map, $
+          BACKGROUND=background, $
+          ERASE=erase, $
+          REPLACECMD=1
+          
+       RETURN
+       
+    ENDIF
+
     ; If you specify a BACKGROUND keyword, then ERASE is set automatically.
     IF N_Elements(background) NE 0 THEN BEGIN
         CASE Size(background, /TNAME) OF

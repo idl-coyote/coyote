@@ -57,13 +57,6 @@
 ;      
 ;      FILL_HORIZON:    Set this keyword to fill the current map horizon.
 ;      
-;      FIXED_MAP_GRID:  The cgMapGrid command supplied with IDL does not always draw the grids
-;                       correctly. This can sometimes be fixed by using a modified version of
-;                       cgMapGrid, named FIXED_MAP_GRID. Unfortunately, the FIXED_MAP_GRID command
-;                       caused other problem with other applications. Thus, if you are having
-;                       map grid problems, this is something to try. The FIXED_MAP_GRID program
-;                       is in the Coyote Library.
-;                     
 ;      FORMAT:          Set this keyword to a particular string format for formatting
 ;                       the grid labels.
 ;      
@@ -551,7 +544,6 @@ FUNCTION cgMapGrid::INIT, mapCoordObj, $
     IF N_Elements(charsize) EQ 0 THEN $
         charsize = (StrUpCase(!Version.OS_Family) EQ 'WINDOWS') ? 0.75 : 1.0
     SetDefaultValue, color, 'opposite'
-    SetDefaultValue, fixed_map_grid, 0
     SetDefaultValue, label, 1
     SetDefaultValue, linestyle, 1
     SetDefaultValue, thick, 1.0

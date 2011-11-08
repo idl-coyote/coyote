@@ -1,680 +1,167 @@
-;*****************************************************************************************************
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;       cgMAP__DEFINE
+;   cgMap
 ;
 ; PURPOSE:
+;   Provides an easy way to set up a map projection coordinate space using GCTP map 
+;   projections normally accessed via Map_Proj_Init.
 ;
-;       The purpose of this object is to set up a map coordinate space for
-;       for other objects. The program assumes you will use MAP_PROJ_INIT
-;       to set up the map structure that is the basis for the map projection
-;       space. 
-;       Switch UTM datum from WGS84 to WALBECK to avoid UTM projection bug in all versions
-;            of IDL prior to IDL 8.2, when it is suppose to be fixed. For more information,
-;            see this article: http://www.idlcoyote.com/map_tips/utmwrong.php. 31 Oct 2011. DWF.
-;-
-PRO cgMap::AddCmd, REPLACE=replace
-
-   currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
-   IF wincnt EQ 0 THEN cgWindow
-   IF Keyword_Set(replace) $
-      THEN cgWindow, "Draw", self, /Method, /ReplaceCmd $ ; Replace all commands in the window
-      ELSE cgWindow, "Draw", self, /Method, /AddCmd       ; Add this command to the window.
-   
-END ;--------------------------------------------------------------------------
-
-
-PRO cgMap::AddOverlay, overLayObject
-
-   ; Required parameter must be a valid object with a DRAW method.
-   IF N_Elements(overLayObject) EQ 0 THEN $
-      Message, 'A map overlay object is a required parameter.'
-   IF ~Obj_Valid(overLayObject) THEN Message, 'A valid overlay object is required.'
-   IF Float(!Version.Release) GT 6.4 THEN BEGIN
-        hasMethod = Call_Function('Obj_HasMethod', overLayObject, 'DRAW')
-        IF ~hasMethod THEN Message, 'The overlay object must have a DRAW method.'
-   ENDIF
-   
-   ; Add the object to the overlay container.
-   self._cg_overlays -> Add, overLayObject   
-   
-END ;--------------------------------------------------------------------------
-
-
-PRO cgMap::Advance, DRAW=draw
-
-   IF Total(!P.Multi) NE 0 THEN BEGIN
-   
-          ; Draw the invisible plot to get plot position.
-          IF Size(self._cg_background, /TNAME) EQ 'STRING' $
-             THEN background = cgColor(self._cg_background)$
-             ELSE background = self._cg_background
-          TVLCT, rr, gg, bb, /Get
-          Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background
-          TVLCT, rr, gg, bb
-          
-          ; Use position coordinates to indicate position in this set of coordinates.
-          ; New position based on !P.MULTI position.
-          position = [!x.window[0], !y.window[0], !x.window[1], !y.window[1]]
-          self._cg_multi_position = position
-          
-   ENDIF ELSE self._cg_multi_position = FltArr(4)
-   
-   IF Keyword_Set(draw) THEN self -> Draw
-   
-END ;--------------------------------------------------------------------------
-
-
-PRO cgMap::Draw, ERASE=erase, _EXTRA=extra
- 
-    Compile_Opt idl2
-    
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-      Catch, /CANCEL
-      void = Error_Message()
-      RETURN
-    ENDIF
-    
-    ; If this is a graphics device, and there is no current graphics window,
-    ; then set the erase flag.
-    IF (!D.Name EQ 'WIN' || !D.Name EQ 'X') && (!D.Window LT 0) THEN BEGIN
-        erase = 1
-    ENDIF
-    
-    ; Temporary erase?
-    IF N_Elements(erase) NE 0 THEN erase = Keyword_Set(erase)
-    
-    ; Do you need to erase in the background color?
-    IF N_Elements(erase) EQ 0 THEN erase = self._cg_erase
-    IF erase THEN cgErase, Color=self._cg_background
-    
-    IF Total(!P.Multi) NE 0 THEN BEGIN
-        self -> Advance 
-        position = self._cg_multi_position
-        old_position = self._cg_position
-        self -> SetProperty, POSITION=position
-    ENDIF 
-    
-    
-    ; Are you putting this on an image? If so, get the position from
-    ; the last image position in.
-    IF self._cg_onimage THEN BEGIN
-        COMMON FSC_$CGIMAGE, _cgimage_xsize, _cgimage_ysize, $
-                             _cgimage_winxsize, _cgimage_winysize, $
-                             _cgimage_position, _cgimage_winID, $
-                             _cgimage_current
-        old_position = self._cg_position
-        self -> SetProperty, POSITION=_cgimage_position
-    ENDIF
-    
-   ; Draw the map data coordinate system.
-    mapStruct = self -> SetMapProjection()
-    self -> cgCoord::Draw, _EXTRA=extra
-    
-    ; Draw overlays?
-    count = self._cg_overlays -> Count()
-    IF count GT 0 THEN BEGIN
-    
-        ; Get the overlay objects out of the overlay container.
-        FOR j=0,count-1 DO BEGIN
-            thisOverlay = self._cg_overlays -> Get(POSITION=j)
-            IF Obj_Valid(thisOverlay) THEN thisOverlay -> Draw
-        ENDFOR
-    ENDIF
-    
-    ; Draw a border around the map?
-    IF ~Keyword_Set(self._cg_noborder) THEN BEGIN
-        p = self._cg_position
-        cgPlots, [p[0],p[0],p[2],p[2],p[0]], [p[1],p[3],p[3],p[1],p[1]], $
-            /NORMAL, COLOR=self._cg_color
-    ENDIF
-    
-    ; Draw a title?
-    IF self._cg_title NE "" THEN BEGIN
-       p = self._cg_position
-       px = (p[2]-p[0])/2.0 + p[0]
-       py = p[3]+ (0.025 * (512.0/!D.Y_Size))
-       cgText, px, py, /Normal, Alignment=0.5, self._cg_title, Charsize=cgDefCharsize()*1.25
-    ENDIF
-    
-    ; If you changed the position for some reason, put it back.
-    IF N_Elements(old_position) NE 0 THEN self -> SetProperty, POSITION=old_position
-END ;--------------------------------------------------------------------------
-
-
-;*****************************************************************************************************
-;+
-; NAME:
-;       cgMap::GETMAPSTRUCTURE
+;******************************************************************************************;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
+;                                                                                          ;
+;  Redistribution and use in source and binary forms, with or without                      ;
+;  modification, are permitted provided that the following conditions are met:             ;
+;                                                                                          ;
+;      * Redistributions of source code must retain the above copyright                    ;
+;        notice, this list of conditions and the following disclaimer.                     ;
+;      * Redistributions in binary form must reproduce the above copyright                 ;
+;        notice, this list of conditions and the following disclaimer in the               ;
+;        documentation and/or other materials provided with the distribution.              ;
+;      * Neither the name of Fanning Software Consulting, Inc. nor the names of its        ;
+;        contributors may be used to endorse or promote products derived from this         ;
+;        software without specific prior written permission.                               ;
+;                                                                                          ;
+;  THIS SOFTWARE IS PROVIDED BY FANNING SOFTWARE CONSULTING, INC. ''AS IS'' AND ANY        ;
+;  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES    ;
+;  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT     ;
+;  SHALL FANNING SOFTWARE CONSULTING, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,             ;
+;  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED    ;
+;  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;         ;
+;  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND             ;
+;  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
+;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
+;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
+;******************************************************************************************;
 ;
-; PURPOSE:
+;+--------------------------------------------------------------------------
+; :Description:
+;   Provides an easy way to set up a map projection coordinate space using GCTP map 
+;   projections normally accessed via Map_Proj_Init. Allows an unlimited number of map
+;   overlays, and can provide a fresh map structure on demand, eliminating the problem
+;   of ephemerial map structures that plaqued Map_Proj_Init until IDL 8.x. This program
+;   is basically a wrapper for Map_Proj_Init, with additional features that make it 
+;   superiour for working with map projections in IDL.
 ;
-;       This method allows the user to obtain the map projection structure.
-;
-; SYNTAX:
-;
-;       mapStruct = theObject -> GetMapStructure()
-;
-; ARGUMENTS:
-;
-;     None.
-;
-; KEYWORDS:
-;
-;     None.
-;-
-;*****************************************************************************************************
-FUNCTION cgMap::GetMapStruct
-    RETURN, self -> SetMapProjection()
-END ;--------------------------------------------------------------------------
-
-
-PRO cgMap::GetProperty, $
-    BACKGROUND=background, $
-    COLOR=color, $
-    OVERLAYS=overlays, $
-    ERASE=erase, $
-    LATLON_RANGES=latlon_ranges, $
-    MAP_STRUCTURE=mapStruct, $
-    POSITION=position, $
-    MAP_PROJ_KEYWORDS=map_proj_keywords, $
-    MAP_PROJECTION=map_projection, $
-    NOBORDER=noborder, $
-    XRANGE=xrange, $
-    YRANGE=yrange, $
-    ; MAP_PROJ_INIT keywords (partial list)
-    DATUM=datum, $
-    ELLIPSOID=ellipsoid, $
-    SPHERE_RADIUS=sphere_radius, $
-    SEMIMAJOR_AXIS=semimajor_axis, $
-    SEMIMINOR_AXIS=semiminor_axis, $
-    CENTER_LATITUDE=center_latitude, $
-    CENTER_LONGITUDE=center_longitude, $
-    LIMIT=limit, $
-    RADIANS=radians, $
-    ZONE=zone, $
-    _REF_EXTRA=extraKeywords
-
-    Compile_Opt idl2
-    
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-      Catch, /CANCEL
-      void = Error_Message()
-      RETURN
-    ENDIF
-   
-   ; Make sure the map structure is up to date by always calculating it in real-time.
-   mapStruct = self -> SetMapProjection() 
-   
-   IF Arg_Present(overlays) THEN overlays = self._cg_draw_overlays -> Get(/ALL)
-   position = self._cg_position
-   IF Arg_Present(xrange) THEN BEGIN
-      IF Keyword_Set(latlon_ranges) THEN BEGIN
-            llcoords = Map_Proj_Inverse(self._cg_xrange, self._cg_yrange, MAP_STRUCTURE=mapStruct)
-            xrange = Reform(llcoords[0,*])
-      ENDIF ELSE xrange = self._cg_xrange
-   ENDIF
-   IF Arg_Present(yrange) THEN BEGIN
-      IF Keyword_Set(latlon_ranges) THEN BEGIN
-            llcoords = Map_Proj_Inverse(self._cg_xrange, self._cg_yrange, MAP_STRUCTURE=mapStruct)
-            yrange = Reform(llcoords[1,*])
-      ENDIF ELSE yrange = self._cg_yrange
-   ENDIF
-   
-   ; Other keywords.
-   background = self._cg_background
-   color = self._cg_color
-   center_latitude = self._cg_center_latitude
-   center_longitude = self._cg_center_longitude
-   erase = self._cg_erase
-   IF N_Elements(*self._cg_limit) NE 0 THEN limit = *self._cg_limit
-   noborder = self._cg_noborder
-   map_projection = self._cg_thisProjection.name
-   IF Arg_Present(map_proj_keywords) THEN BEGIN
-        IF Ptr_Valid(self._cg_map_projection_keywords) THEN BEGIN
-            IF N_Elements(*self._cg_map_projection_keywords) NE 0 THEN $
-                map_proj_keywords = *self._cg_map_projection_keywords
-        ENDIF
-   ENDIF
-   datum = self._cg_thisDatum.name
-   ellipsoid = self._cg_thisDatum.name
-   sphere_radius = self._cg_thisDatum.semimajor_axis
-   semimajor_axis = self._cg_thisDatum.semimajor_axis
-   semiminor_axis = self._cg_thisDatum.semiminor_axis
-   zone = self._cg_zone
-   
-   ; Superclass keywords.
-   IF (N_ELEMENTS(extraKeywords) GT 0) THEN self -> cgCOORD::GetProperty, _EXTRA=extraKeywords
-
-END ;--------------------------------------------------------------------------
-
-
-;*****************************************************************************************************
-;+
-; NAME:
-;       cgMap::MapInfo
-;
-; PURPOSE:
-;
-;       The purpose of this routine is to return information about the current map
-;       projection in an IDL structure variable. Fields of the structure will reflect
-;       values that are used in MAP_PROJ_INIT to create a map structure.
-;
-; SYNTAX:
-;
-;       information = object -> MapInfo()
-;
-; ARGUMENTS:
-;
-;       None.
+; :Categories:
+;    Graphics, Map Projections
+;    
+; :Params:
+;    map_projection: in, optional, type=string/integer, default='Equirectangular'
+;        The name or index number of the map projection desired. Passed directly
+;        to Map_Proj_Init as the map projection value. Only GCTP projections are
+;        allowed. If you wish to use projections normally set up with Map_Set, use
+;        the comparable cg_Map_Set command.
 ;       
-; KEYWORDS: 
-;       
-;       None.
+; :Keywords:
+;     addcmd: in, optional, type=boolean, default=0
+;        If this keyword is set, the object is added to the resizeable graphics
+;        window, cgWindow. The DRAW method of the object is called in cgWindow.
+;     background: in, optional, type=string, default='white'
+;        The name of the background color. Used only if the map object erases
+;        the display when it draws its contents.
+;     center_latitude: in, optional, type=float, default=varies
+;        The center latitude of the map projection.
+;     center_longitude: in, optional, type=float, default=varies
+;        The center longitude of the map projection.
+;     color: in, optional, type=string, default='opposite'
+;        The name of the drawing color for the object. Passed along to the mapGrid
+;        and MapContinents object if these are requested.
+;     continents: in, optional, type=boolean, default=0
+;         Set this keyword if you wish to create an overlay object of continental outlines
+;         that will be rendered when the draw method is called.
+;     datum: in, optional, type=string/integer, default='Sphere'
+;          This keyword is being depreciated in favor of the keyword ELLIPSOID,
+;          corresponding to changes to Map_Proj_Init initiated in IDL 7.
+;     draw: in, optional, type=boolean, default=0
+;         Set this keyword if you wish to immediately call the DRAW method after the
+;         object has been completely initialized.
+;     ellipsoid: in, optional, type=string/integer, default='Sphere'
+;         Set this to the name or index number of the ellopsoid or datum you wish to use
+;         for the map projection. The value is passed directly to Map_Proj_Init.
+;     erase: in, optional, type=boolean, default=0
+;         Set this keyword if you wish to have the object erase the current graphics display
+;         before drawing its content in the DRAW method. The graphics display will be erased
+;         in the background color.
+;     grid: in, optional, type=boolean, default=0
+;         Set this keyword if you wish to create an overlay object of map grid lines
+;         that will be rendered when the draw method is called.
+;     latlon_ranges: in, optional, type=boolean, default=0
+;         Normally the XRANGE and YRANGE keywords are set in terms of projected meters. If 
+;         this keyword is set, then the values of XRANGE and YRANGE are assumed to be in longitude
+;         and latitude values, respectively, and will be converted to projected meters prior to 
+;         being stored in the object.
+;      limit: in, optional, type=FltArr(4), default=none
+;         The normal LIMIT keyword to Map_Proj_Init, specifying the limit of the map
+;         projection in terms of latitude and longitude. Normally, little used when using
+;         Map_Proj_Init. Most work is done by specifying the projected XY rectangular
+;         coordinate system with the keywords XRANGE and YRANGE.
+;      name: in, optional, type=string, default=selected by cgContainer.
+;         Use this keyword to name the object. Names are often used to select objects in 
+;         program code. 
+;      noborder: in, optional, type=boolean, default=0
+;         If this keyword is set, the customary border than surrounds the map projection is
+;         not drawn.
+;      onimage: in, optional, type=boolean, default=0
+;         If this keyword is set, the position of the map projection in the graphics window
+;         is obtained from the last image displayed with cgImage. This makes it extremely
+;         easy to display an image and immediately set up a map projection space that will
+;         allow you to annotate the image using map locations.
+;      position: in, optional, type=FltArr(4), default=[[0.075, 0.075, 0.925, 0.900]
+;         The normalized position of the map projection space in the graphics window.
+;      semimajor_axis: in, optional, type=double, default=varies
+;          The length of the semimajor axis of the ellipsoid in meters. Normally calculated
+;          from the ELLIPSOID keyword values.
+;      semiminor_axis: in, optional, type=double, default=varies
+;          The length of the semiminor axis of the ellipsoid in meters. Normally calculated
+;          from the ELLIPSOID keyword values.
+;      sphere_radius: in, optional, type=double, default=varies
+;          The length of the ellipsoidal sphere in meters. Normally calculated from the 
+;          ELLIPSOID keyword values.
+;      title: in, optional, type=string, default=""
+;          The title of the map projection display.
+;      uvalue: in, optional, type=any, default=none
+;         A storage space for storing any kind of IDL variable of importance to the user.
+;      window: in, optional, type=boolean, default=0
+;        If this keyword is set, the object replaces any commands in a current
+;        cgWindow or it opens a new cgWindow and adds itself to it.
+;      zone: in, optional, type=integer, default=varies
+;         The zone (normally in UTM projections) of the map projection. If not given and needed,
+;         calculated from the CENTER_LATITUDE and CENTER_LONGITUDE keyword values.
+;      _EXTRA: in, optional
+;          Other keywords accepted by the MAP_PROJ_INIT command are allowed and are passed
+;          directly to the MAP_PROJ_INIT program.
 ;
-;-
-;*****************************************************************************************************
-FUNCTION cgMap::MapInfo
-
-    Compile_Opt idl2
-    
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-      Catch, /CANCEL
-      void = Error_Message()
-      RETURN, -1
-    ENDIF
-   
-   
-   map_keywords = Create_Struct( $
-       'projection', self._cg_thisProjection.name, $
-       'datum', self._cg_thisDatum.name, $
-       'gctp', 1, $
-       'center_latitude', self._cg_center_latitude, $
-       'center_longitude', self._cg_center_longitude )
-   IF N_Elements(*self._cg_limit) NE 0 THEN map_keywords = Create_Struct(map_keywords, 'limit', *self._cg_limit)
-   IF self._cg_thisProjection.sphereOnly THEN BEGIN
-       map_keywords = Create_Struct(map_keywords, 'sphere_radius', self._cg_thisDatum.semimajor_axis)
-   ENDIF ELSE BEGIN
-       map_keywords = Create_Struct(map_keywords, $
-            'semimajor_axis', self._cg_thisDatum.semimajor_axis, $
-            'semiminor_axis', self._cg_thisDatum.semiminor_axis)        
-   ENDELSE
-   IF N_Elements(*self._cg_map_projection_keywords) NE 0 THEN BEGIN
-        keywords = *self._cg_map_projection_keywords
-        fields = Tag_Names(keywords)
-        FOR j=0,N_Elements(fields) DO BEGIN
-           map_keywords = Create_Struct(map_keywords, fields[j], keywords[j])
-        ENDFOR
-   ENDIF   
-   RETURN, map_keywords
-   
-END ;--------------------------------------------------------------------------
-
-
-PRO cgMap::SetProperty, $
-    BACKGROUND=background, $
-    COLOR=color, $
-    CONTINENTS=continents, $
-    DRAW=draw, $
-    ERASE=erase, $
-    GRID=grid, $
-    LATLON_RANGES=latlon_ranges, $
-    ONIMAGE=onimage, $
-    PARENT=parent, $
-    POSITION=position, $
-    NOBORDER=noborder, $
-    MAP_PROJ_KEYWORDS=map_proj_keywords, $
-    MAP_PROJECTION=map_projection, $
-    XRANGE=xrange, $
-    YRANGE=yrange, $
-    TITLE=title, $
-    ; MAP_PROJ_INIT keywords (partial list)
-    DATUM=datum, $
-    ELLIPSOID=ellipsoid, $
-    CENTER_LATITUDE=center_latitude, $
-    CENTER_LONGITUDE=center_longitude, $
-    LIMIT=limit, $
-    SEMIMAJOR_AXIS=semimajor_axis, $
-    SEMIMINOR_AXIS=semiminor_axis, $
-    SPHERE_RADIUS=sphere_radius, $
-    _EXTRA=extraKeywords
-    
-    Compile_Opt idl2
-    
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-      Catch, /CANCEL
-      void = Error_Message()
-      RETURN
-    ENDIF
-      
-   ; Are we changing the map projection?
-   IF N_Elements(map_projection) NE 0 THEN BEGIN
-        projections = *self._cg_theProjections
-        IF Size(map_projection, /TNAME) EQ 'STRING' THEN BEGIN
-            index = Where(StrUpCase(projections.name[*]) EQ StrUpCase(map_projection))
-            IF index[0] EQ -1 THEN Message, 'Cannot find map projection ' + map_projection + ' in the projection list.'
-        ENDIF
-        IF (N_Elements(index) EQ 0) THEN BEGIN
-            index = Where(projections.index EQ map_projection, count)
-            IF count EQ 0 THEN Message, 'Cannot find map projection index ' + StrTrim(map_projection,2) + ' in projection list.' 
-        ENDIF
-        self._cg_thisProjection = projections[index]
-   ENDIF
-   
-   ; Are we changing the map datum.
-   IF N_Elements(datum) NE 0 THEN BEGIN
-        IF Size(datum, /TNAME) EQ 'STRING' THEN BEGIN
-            index = Where(StrUpCase((*self._cg_theDatums).name) EQ StrUpCase(datum))
-            IF index[0] EQ -1 THEN Message, 'Cannot find datum ' + datum + ' in datum list.' 
-            thisDatum = (*self._cg_theDatums)[index]
-        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > datum < 19]
-        self._cg_thisDatum = thisDatum
-   ENDIF
-   
-   ; Are we changing the map ellipsoid.
-   IF N_Elements(ellipsoid) NE 0 THEN BEGIN
-        IF Size(ellipsoid, /TNAME) EQ 'STRING' THEN BEGIN
-            index = Where(StrUpCase((*self._cg_theDatums).name) EQ StrUpCase(ellipsoid))
-            IF index[0] EQ -1 THEN Message, 'Cannot find ellipsoid ' + ellipsoid + ' in datum list.' 
-            thisDatum = (*self._cg_theDatums)[index]
-        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > ellipsoid < 19]
-        self._cg_thisDatum = thisDatum
-   ENDIF
-
-   ; Are there map projection keywords to deal with?
-   IF N_Elements(map_proj_keywords) NE 0 THEN BEGIN
-   
-        ; Make the pointer a valid pointer, if necessary.
-        IF ~Ptr_Valid(self._cg_map_projection_keywords) THEN self._cg_map_projection_keywords = Ptr_New(/ALLOCATE_HEAP)
-        
-        ; Is there a NULL field in the current structure that means erase what is currently in the pointer?
-        index = Where(Tag_Names(map_proj_keywords) EQ 'NULL', count)
-        IF count GT 0 THEN BEGIN
-            IF map_proj_keywords.(index) EQ 1 THEN self._cg_map_projection_keywords = Ptr_New(/ALLOCATE_HEAP)
-        ENDIF
-        
-        ; Add these fields to the structure, or modify the tag value if it is already present.
-        IF N_Elements(*self._cg_map_projection_keywords) GT 0 THEN BEGIN
-            ntags = N_Tags(map_proj_keywords)
-            tags = Tag_Names(map_proj_keywords)
-            FOR j=0,ntags-1 DO BEGIN
-               thisTag = tags[j]
-               index = Where(Tag_Names(*self._cg_map_projection_keywords) EQ thisTag, count)
-               IF count GT 0 THEN BEGIN
-                   (*self._cg_map_projection_keywords).(index) = map_proj_keywords.(j)
-               ENDIF ELSE BEGIN
-                   *self._cg_map_projection_keywords = Create_Struct(*self._cg_map_projection_keywords, thisTag, map_proj_keywords.(j))
-               ENDELSE
-            ENDFOR
-        ENDIF ELSE BEGIN
-            
-            ; Add all the tags, except for NULL tags
-            ntags = N_Tags(map_proj_keywords)
-            tags = Tag_Names(map_proj_keywords)
-            FOR j=0,ntags-1 DO BEGIN
-               thisTag = tags[j]
-               IF thisTag EQ 'NULL' THEN Continue
-               IF N_Elements(*self._cg_map_projection_keywords) EQ 0 THEN BEGIN
-                    count = 0
-               ENDIF ELSE BEGIN
-                    index = Where(Tag_Names(*self._cg_map_projection_keywords) EQ thisTag, count)
-               ENDELSE
-               IF count GT 0 THEN BEGIN
-                   (*self._cg_map_projection_keywords).(index) = map_proj_keywords.(j)
-               ENDIF ELSE BEGIN
-                   IF N_Elements(*self._cg_map_projection_keywords) EQ 0 THEN BEGIN
-                        *self._cg_map_projection_keywords = Create_Struct(thisTag, map_proj_keywords.(j))
-                   ENDIF ELSE BEGIN
-                        *self._cg_map_projection_keywords = Create_Struct(*self._cg_map_projection_keywords, $
-                            thisTag, map_proj_keywords.(j))
-                   ENDELSE
-               ENDELSE
-            ENDFOR
-        ENDELSE
-        
-        ; For debugging purposes.
-        ;Help, *self._cg_map_projection_keywords, /Structure
-   ENDIF
-   
-   IF N_Elements(background) NE 0 THEN self._cg_background = background
-   IF N_Elements(color) NE 0 THEN self._cg_color = color
-   IF N_Elements(center_latitude) NE 0 THEN self._cg_center_latitude = center_latitude
-   IF N_Elements(center_longitude) NE 0 THEN self._cg_center_longitude = center_longitude
-   IF N_Elements(erase) NE 0 THEN self._cg_erase = Keyword_Set(erase)
-   IF N_Elements(noborder) NE 0 THEN self._cg_noborder = Keyword_Set(noborder)
-   IF N_Elements(onimage) NE 0 THEN self._cg_onimage = Keyword_Set(onimage)
-   IF N_Elements(title) NE 0 THEN self._cg_title = title
-   
-   ; If you change the limit, you really also need to change the XRANGE and YRANGE.
-   changedLimit = 0
-   IF N_Elements(limit) NE 0 THEN BEGIN
-        *self._cg_limit = limit
-        changedLimit = 1
-   ENDIF
-   IF N_Elements(sphere_radius) NE 0 THEN BEGIN
-      self._cg_thisDatum.semimajor_axis = sphere_radius
-      self._cg_thisDatum.semiminor_axis = sphere_radius
-   ENDIF
-   IF N_Elements(semimajor_axis) NE 0 THEN self._cg_thisDatum.semimajor_axis = semimajor_axis
-   IF N_Elements(semiminor_axis) NE 0 THEN self._cg_thisDatum.semiminor_axis = semiminor_axis
-   
-   ; Make sure the map structure is up to date.
-   map_structure = self -> SetMapProjection() 
-
-   IF N_Elements(parent) NE 0 THEN self -> cgCOORD::SetProperty, PARENT=parent
-   IF N_Elements(position) NE 0 THEN self -> cgCOORD::SetProperty, POSITION=position
-   IF N_Elements(xrange) NE 0 THEN BEGIN
-      IF Keyword_Set(latlon_ranges) THEN BEGIN
-        uvcoords = Map_Proj_Forward(xrange, [-5000,5000], MAP_STRUCTURE=map_structure)
-        xrange = Reform(uvcoords[0,*])   
-      ENDIF
-      self -> cgCOORD::SetProperty, XRANGE=xrange
-   ENDIF ELSE BEGIN
-      IF changedLimit THEN BEGIN
-            xrange = map_structure.uv_box[[0,2]]
-            self -> cgCOORD::SetProperty, XRANGE=xrange
-      ENDIF
-   ENDELSE
-   IF N_Elements(yrange) NE 0 THEN BEGIN
-      IF Keyword_Set(latlon_ranges) THEN BEGIN
-        uvcoords = Map_Proj_Forward([-5000,5000], yrange, MAP_STRUCTURE=map_structure)
-        yrange = Reform(uvcoords[1,*])     
-      ENDIF
-      self -> cgCOORD::SetProperty, YRANGE=yrange
-   ENDIF ELSE BEGIN
-      IF changedLimit THEN BEGIN
-            yrange = map_structure.uv_box[[1,3]]
-            self -> cgCOORD::SetProperty, YRANGE=yrange
-      ENDIF
-   ENDELSE
-   
-   IF (N_ELEMENTS(extraKeywords) GT 0) THEN self -> cgCOORD::SetProperty,  _EXTRA=extraKeywords
-   
-   ; Need to draw after setting properties?
-   IF Keyword_Set(draw) THEN self -> Draw
-   
-END ;--------------------------------------------------------------------------
-
-
-FUNCTION cgMap::SetMapProjection, map_projection, $
-    LATLON_RANGES=latlon_ranges, $
-    POSITION=position, $
-    XRANGE=xrange, $
-    YRANGE=yrange, $
-    ; MAP_PROJ_INIT keywords (partial list)
-    CENTER_LATITUDE=center_latitude, $
-    CENTER_LONGITUDE=center_longitude, $
-    DATUM=datum, $
-    ELLIPSOID=ellipsoid, $
-    LIMIT=limit, $
-    RADIANS=radians, $
-    SEMIMAJOR_AXIS=semimajor_axis, $
-    SEMIMINOR_AXIS=semiminor_axis, $
-    SPHERE_RADIUS=sphere_radius, $
-    ZONE=zone, $
-    _EXTRA=extraKeywords
-
-    Compile_Opt idl2
-    
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-      Catch, /CANCEL
-      void = Error_Message()
-      RETURN, 1
-    ENDIF
-   
-   ; Need a new map projection?
-   IF N_Elements(map_projection) NE 0 THEN BEGIN
-        ; Find the map projection.
-        IF Size(map_projection, /TNAME) EQ 'STRING' THEN BEGIN
-            index = Where(StrUpCase((*self._cg_theProjections).name) EQ StrUpCase(map_projection))
-            IF index[0] EQ -1 THEN Message, 'Cannot find map projection ' + map_projection + ' in the projection list.'
-        ENDIF
-        IF (N_Elements(index) EQ 0) AND (N_Elements(map_projection) NE 0) THEN BEGIN
-            index = Where((*self._cg_theProjections).index EQ map_projection, count)
-            IF count EQ 0 THEN Message, 'Cannot find map projection index ' + StrTrim(map_projection,2) + ' in projection list.' 
-        ENDIF 
-        thisProjection = (*self._cg_theProjections)[index]
-        self._cg_thisProjection = thisProjection
-   ENDIF
-   
-   ; Need a new datum?
-   IF N_Elements(datum) NE 0 THEN BEGIN
-        IF Size(datum, /TNAME) EQ 'STRING' THEN BEGIN
-            index = Where(StrUpCase((*self._cg_theDatums).name) EQ StrUpCase(datum))
-            IF index[0] EQ -1 THEN Message, 'Cannot find datum ' + datum + ' in datum list.' 
-            thisDatum = (*self._cg_theDatums)[index]
-        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > datum < 19]
-        self._cg_thisDatum = thisDatum
-   ENDIF
-
-   ; Need a new ellipsoid?
-   IF N_Elements(ellipsoid) NE 0 THEN BEGIN
-        IF Size(ellipsoid, /TNAME) EQ 'STRING' THEN BEGIN
-            index = Where(StrUpCase((*self._cg_theDatums).name) EQ StrUpCase(ellipsoid))
-            IF index[0] EQ -1 THEN Message, 'Cannot find ellipsoid ' + ellipsoid + ' in datum list.' 
-            thisDatum = (*self._cg_theDatums)[index]
-        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > ellipsoid < 19]
-        self._cg_thisDatum = thisDatum
-   ENDIF
-   
-   ; Other map keywords?
-   IF N_Elements(center_latitude) NE 0 THEN self._cg_center_latitude = center_latitude
-   IF N_Elements(center_longitude) NE 0 THEN self._cg_center_longitude = center_longitude
-   IF N_Elements(radians) NE 0 THEN self._cg_radians = radians
-   IF N_Elements(sphere_radius) NE 0 THEN BEGIN
-      self._cg_thisDatum.semimajor_axis = sphere_radius
-      self._cg_thisDatum.semiminor_axis = sphere_radius
-   ENDIF
-   IF N_Elements(semimajor_axis) NE 0 THEN self._cg_thisDatum.semimajor_axis = semimajor_axis
-   IF N_Elements(semiminor_axis) NE 0 THEN self._cg_thisDatum.semiminor_axis = semiminor_axis
-   IF N_Elements(limit) NE 0 THEN *self._cg_limit = limit
-   IF N_Elements(zone) NE 0 THEN self._cg_zone = zone
-   IF N_Elements(extrakeywords) NE 0 THEN *self._cg_map_projection_keywords = extrakeywords
-   
-   ; Extract the values you need to call MAP_PROJ_INIT.
-   thisProjection = self._cg_thisProjection.name
-   sphereOnly = self._cg_thisProjection.sphereOnly
-   thisDatum = self._cg_thisDatum.name
-   radians = self._cg_radians
-   semimajor_axis = self._cg_thisDatum.semimajor_axis 
-   semiminor_axis = self._cg_thisDatum.semiminor_axis
-   center_lon = self._cg_center_longitude
-   center_lat = self._cg_center_latitude
-   IF N_Elements(*self._cg_limit) NE 0 THEN limit = *self._cg_limit
-   zone = self._cg_zone
-   IF N_Elements(*self._cg_map_projection_keywords) NE 0 THEN keywords = *self._cg_map_projection_keywords
-   
-   ; Center latitudes are not allowed in some projections. Here are the ones where
-   ; they are prohibited.
-   centerlatOK = 1
-   badprojstr = ['GOODES HOMOLOSINE', 'STATE PLANE', 'MERCATOR', 'SINUSOIDAL', 'EQUIRECTANGULAR', $
-      'MILLER CYLINDRICAL', 'ROBINSON', 'SPACE OBLIQUE MERCATOR A', 'SPACE OBLIQUE MERCATOR B', $
-      'ALASKA CONFORMAL', 'INTERRUPTED GOODE', 'MOLLWEIDE', 'INTERRUPED MOLLWEIDE', 'HAMMER', $
-      'WAGNER IV', 'WAGNER VII', 'INTEGERIZED SINUSOIDAL']
-   void = Where(badprojstr EQ StrUpCase(thisProjection), count)
-   IF count GT 0 THEN centerlatOK = 0
-    
-    ; UTM and State Plane projections have to be handled differently.
-    IF (StrUpCase(thisProjection) EQ 'UTM') OR (StrUpCase(thisProjection) EQ 'STATE PLANE') THEN BEGIN
-    
-        CASE StrUpCase(thisProjection) OF
-            'UTM': BEGIN
-                mapStruct = Map_Proj_Init(thisProjection, DATUM=self._cg_thisDatum.(0), /GCTP, $
-                    CENTER_LATITUDE=center_lat, CENTER_LONGITUDE=center_lon, RADIANS=radians, ZONE=zone)
-                END
-            'STATE PLANE': BEGIN
-                mapStruct = Map_Proj_Init(thisProjection, DATUM=self._cg_thisDatum.(0), /GCTP, $
-                    RADIANS=radians, ZONE=zone)
-                END
-        ENDCASE
-        
-    ENDIF ELSE BEGIN
-
-        ; Call MAP_PROJ_INIT to get the map projection structure.
-        CASE 1 OF
-        
-            centerLatOK AND sphereOnly: BEGIN
-                mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
-                    CENTER_LATITUDE=center_lat, $
-                    CENTER_LONGITUDE=center_lon, $
-                    SPHERE_RADIUS=semimajor_axis, $
-                    LIMIT=limit, RADIANS=radians, $
-                    _EXTRA=keywords)
-                END
-                
-            ~centerLatOK AND sphereOnly: BEGIN
-
-                mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
-                    CENTER_LONGITUDE=center_lon, $
-                    SPHERE_RADIUS=semimajor_axis, $
-                    LIMIT=limit, RADIANS=radians, $
-                    _EXTRA=keywords)
-                END
-                
-            ~centerLatOK AND ~sphereOnly: BEGIN
-                mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
-                    CENTER_LONGITUDE=center_lon, $
-                    SEMIMAJOR_AXIS=semimajor_axis, $
-                    SEMIMINOR_AXIS=semiminor_axis, $
-                    LIMIT=limit, RADIANS=radians, $
-                    _EXTRA=keywords)
-                END
-    
-            centerLatOK AND ~sphereOnly: BEGIN
-                mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
-                    CENTER_LATITUDE=center_lat, $
-                    CENTER_LONGITUDE=center_lon, $
-                    SEMIMAJOR_AXIS=semimajor_axis, $
-                    SEMIMINOR_AXIS=semiminor_axis, $
-                    LIMIT=limit, RADIANS=radians, $
-                    _EXTRA=keywords)
-                END
-        ENDCASE
-   ENDELSE
-        
-    RETURN, mapStruct
-    
-END ;--------------------------------------------------------------------------
-
-
-PRO cgMap::CLEANUP
-
-   Ptr_Free, self._cg_limit
-   Ptr_Free, self._cg_map_projection_keywords
-   Ptr_Free, self._cg_theDatums
-   Ptr_Free, self._cg_theProjections
-   Obj_Destroy, self._cg_overlays
-   
-   self -> cgCOORD::CLEANUP 
-
-END ;--------------------------------------------------------------------------
-
-
+; :Superclasses:
+;      cgCoord
+;      cgContainer
+;      IDL_Container
+;      IDL_Object: A stub, except in IDL 8.x and higher.
+;      
+; :Restrictions:
+;     Only GCTP projections are allowed. If you wish to use projections normally 
+;     set up with Map_Set, use the comparable cg_Map_Set command. 
+;
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Brought over to the Coyote Library from a similar routine in the Catalyst Library.
+;        Updated to account for the bug that creates incorrect result in UTM projections
+;        when using the WGS84 ellipsoid. The Wallbeck ellipsoid is substituted for the
+;        WGS84 ellipsoid in this instance. David W. Fanning, 7 November 2011.
+;        
+; :Copyright:
+;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;---------------------------------------------------------------------------
 FUNCTION cgMap::INIT, map_projection, $
     ADDCMD=addcmd, $
     BACKGROUND=background, $
@@ -947,9 +434,745 @@ FUNCTION cgMap::INIT, map_projection, $
    
    RETURN, 1
 
-END ;--------------------------------------------------------------------------
+END 
+
+;+--------------------------------------------------------------------------
+; :Description:
+;   Adds the object as a command (the DRAW method is called) in a cgWindow 
+;   resizeable graphics window. If there is no current cgWindow, one is
+;   created.
+;
+; :Params:
+;    None.
+;       
+; :Keywords:
+;     replace: in, optional, type=boolean, default=0
+;        If this keyword is set, object DRAW method replaces any commands in the
+;        current graphics window.
+;---------------------------------------------------------------------------
+PRO cgMap::AddCmd, REPLACE=replace
+
+   currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
+   IF wincnt EQ 0 THEN cgWindow
+   IF Keyword_Set(replace) $
+      THEN cgWindow, "Draw", self, /Method, /ReplaceCmd $ ; Replace all commands in the window
+      ELSE cgWindow, "Draw", self, /Method, /AddCmd       ; Add this command to the window.
+   
+END 
 
 
+;+--------------------------------------------------------------------------
+; :Description:
+;   Adds the an overlay object into the overlay container of the object.
+;   Overlay objects are drawn (by calling their DRAW methods) after the
+;   map coordinate space is set up in the DRAW method of the object. They
+;   are drawn in the order they appear in the object.
+;
+; :Params:
+;    overlayObject: required, type=object
+;       The object that will draw a graphic overlay in the map projection space
+;       created by this map object. Typically, overlay objects contain map grid
+;       lines (cgMapGrid object), continental outlines (cgMapContinents object), or 
+;       other types of graphical overlays. The only requirement of an overlay  
+;       object is that is have a DRAW method and that it draw into a map 
+;       projection space.
+;       
+; :Keywords:
+;     None.
+;---------------------------------------------------------------------------
+PRO cgMap::AddOverlay, overLayObject
+
+   ; Required parameter must be a valid object with a DRAW method.
+   IF N_Elements(overLayObject) EQ 0 THEN $
+      Message, 'A map overlay object is a required parameter.'
+   IF ~Obj_Valid(overLayObject) THEN Message, 'A valid overlay object is required.'
+   IF Float(!Version.Release) GT 6.4 THEN BEGIN
+        hasMethod = Call_Function('Obj_HasMethod', overLayObject, 'DRAW')
+        IF ~hasMethod THEN Message, 'The overlay object must have a DRAW method.'
+   ENDIF
+   
+   ; Add the object to the overlay container.
+   self._cg_overlays -> Add, overLayObject   
+   
+END 
+
+
+;+--------------------------------------------------------------------------
+; :Description:
+;   Advances the map projection position to the next position of a multiple
+;   plot (using !P.MULTI). Does not need to be called directly, as the object
+;   will call this method as needed.
+;
+; :Params:
+;    None.
+;       
+; :Keywords:
+;     draw: in, optional, type=boolean, default=0
+;        Set this keyword to immediately call the draw method after the position
+;        has been advanced.
+;---------------------------------------------------------------------------
+PRO cgMap::Advance, DRAW=draw
+
+   IF Total(!P.Multi) NE 0 THEN BEGIN
+   
+          ; Draw the invisible plot to get plot position.
+          IF Size(self._cg_background, /TNAME) EQ 'STRING' $
+             THEN background = cgColor(self._cg_background)$
+             ELSE background = self._cg_background
+          TVLCT, rr, gg, bb, /Get
+          Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background
+          TVLCT, rr, gg, bb
+          
+          ; Use position coordinates to indicate position in this set of coordinates.
+          ; New position based on !P.MULTI position.
+          position = [!x.window[0], !y.window[0], !x.window[1], !y.window[1]]
+          self._cg_multi_position = position
+          
+   ENDIF ELSE self._cg_multi_position = FltArr(4)
+   
+   IF Keyword_Set(draw) THEN self -> Draw
+   
+END 
+
+
+;+--------------------------------------------------------------------------
+; :Description:
+;   This method sets up the map projection space of the object. Also, if map
+;   borders or titles are required, they are drawn here. If the object contains
+;   any overlay objects, they are also drawn at this time.
+;
+; :Params:
+;    None.
+;       
+; :Keywords:
+;     erase: in, optional, type=boolean, default=0
+;        Set this keyword to erase the current graphics window for one time only
+;        in this Draw method. It does NOT set the Erase parameter for the object.
+;---------------------------------------------------------------------------
+PRO cgMap::Draw, ERASE=erase, _EXTRA=extra
+ 
+    Compile_Opt idl2
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+      Catch, /CANCEL
+      void = Error_Message()
+      RETURN
+    ENDIF
+    
+    ; If this is a graphics device, and there is no current graphics window,
+    ; then set the erase flag.
+    IF (!D.Name EQ 'WIN' || !D.Name EQ 'X') && (!D.Window LT 0) THEN BEGIN
+        erase = 1
+    ENDIF
+    
+    ; Temporary erase?
+    IF N_Elements(erase) NE 0 THEN erase = Keyword_Set(erase)
+    
+    ; Do you need to erase in the background color?
+    IF N_Elements(erase) EQ 0 THEN erase = self._cg_erase
+    IF erase THEN cgErase, Color=self._cg_background
+    
+    IF Total(!P.Multi) NE 0 THEN BEGIN
+        self -> Advance 
+        position = self._cg_multi_position
+        old_position = self._cg_position
+        self -> SetProperty, POSITION=position
+    ENDIF 
+    
+    
+    ; Are you putting this on an image? If so, get the position from
+    ; the last image position in.
+    IF self._cg_onimage THEN BEGIN
+        COMMON FSC_$CGIMAGE, _cgimage_xsize, _cgimage_ysize, $
+                             _cgimage_winxsize, _cgimage_winysize, $
+                             _cgimage_position, _cgimage_winID, $
+                             _cgimage_current
+        old_position = self._cg_position
+        self -> SetProperty, POSITION=_cgimage_position
+    ENDIF
+    
+   ; Draw the map data coordinate system.
+    mapStruct = self -> SetMapProjection()
+    self -> cgCoord::Draw, _EXTRA=extra
+    
+    ; Draw overlays?
+    count = self._cg_overlays -> Count()
+    IF count GT 0 THEN BEGIN
+    
+        ; Get the overlay objects out of the overlay container.
+        FOR j=0,count-1 DO BEGIN
+            thisOverlay = self._cg_overlays -> Get(POSITION=j)
+            IF Obj_Valid(thisOverlay) THEN thisOverlay -> Draw
+        ENDFOR
+    ENDIF
+    
+    ; Draw a border around the map?
+    IF ~Keyword_Set(self._cg_noborder) THEN BEGIN
+        p = self._cg_position
+        cgPlots, [p[0],p[0],p[2],p[2],p[0]], [p[1],p[3],p[3],p[1],p[1]], $
+            /NORMAL, COLOR=self._cg_color
+    ENDIF
+    
+    ; Draw a title?
+    IF self._cg_title NE "" THEN BEGIN
+       p = self._cg_position
+       px = (p[2]-p[0])/2.0 + p[0]
+       py = p[3]+ (0.025 * (512.0/!D.Y_Size))
+       cgText, px, py, /Normal, Alignment=0.5, self._cg_title, Charsize=cgDefCharsize()*1.25
+    ENDIF
+    
+    ; If you changed the position for some reason, put it back.
+    IF N_Elements(old_position) NE 0 THEN self -> SetProperty, POSITION=old_position
+END 
+
+
+;+--------------------------------------------------------------------------
+; :Description:
+;   This method returns a map structure that is the result of calling Map_Proj_Init.
+;   It is important to get a fresh map structure because up until IDL 8, the map
+;   structure was ephemeral (http://www.idlcoyote.com/map_tips/ephemeral.php).
+;   Every time this function is called, a new map structure is created.
+;
+; :Params:
+;    None.
+;       
+; :Keywords:
+;     None.
+;---------------------------------------------------------------------------
+FUNCTION cgMap::GetMapStruct
+    RETURN, self -> SetMapProjection()
+END 
+
+
+;+--------------------------------------------------------------------------
+; :Description:
+;   This method allows the user to get various properties of the object. In general,
+;   the same keywords that are used for the INIT method can be used here.
+;---------------------------------------------------------------------------
+PRO cgMap::GetProperty, $
+    BACKGROUND=background, $
+    COLOR=color, $
+    OVERLAYS=overlays, $
+    ERASE=erase, $
+    LATLON_RANGES=latlon_ranges, $
+    MAP_STRUCTURE=mapStruct, $
+    POSITION=position, $
+    MAP_PROJ_KEYWORDS=map_proj_keywords, $
+    MAP_PROJECTION=map_projection, $
+    NOBORDER=noborder, $
+    XRANGE=xrange, $
+    YRANGE=yrange, $
+    ; MAP_PROJ_INIT keywords (partial list)
+    DATUM=datum, $
+    ELLIPSOID=ellipsoid, $
+    SPHERE_RADIUS=sphere_radius, $
+    SEMIMAJOR_AXIS=semimajor_axis, $
+    SEMIMINOR_AXIS=semiminor_axis, $
+    CENTER_LATITUDE=center_latitude, $
+    CENTER_LONGITUDE=center_longitude, $
+    LIMIT=limit, $
+    RADIANS=radians, $
+    ZONE=zone, $
+    _REF_EXTRA=extraKeywords
+
+    Compile_Opt idl2
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+      Catch, /CANCEL
+      void = Error_Message()
+      RETURN
+    ENDIF
+   
+   ; Make sure the map structure is up to date by always calculating it in real-time.
+   mapStruct = self -> SetMapProjection() 
+   
+   IF Arg_Present(overlays) THEN overlays = self._cg_draw_overlays -> Get(/ALL)
+   position = self._cg_position
+   IF Arg_Present(xrange) THEN BEGIN
+      IF Keyword_Set(latlon_ranges) THEN BEGIN
+            llcoords = Map_Proj_Inverse(self._cg_xrange, self._cg_yrange, MAP_STRUCTURE=mapStruct)
+            xrange = Reform(llcoords[0,*])
+      ENDIF ELSE xrange = self._cg_xrange
+   ENDIF
+   IF Arg_Present(yrange) THEN BEGIN
+      IF Keyword_Set(latlon_ranges) THEN BEGIN
+            llcoords = Map_Proj_Inverse(self._cg_xrange, self._cg_yrange, MAP_STRUCTURE=mapStruct)
+            yrange = Reform(llcoords[1,*])
+      ENDIF ELSE yrange = self._cg_yrange
+   ENDIF
+   
+   ; Other keywords.
+   background = self._cg_background
+   color = self._cg_color
+   center_latitude = self._cg_center_latitude
+   center_longitude = self._cg_center_longitude
+   erase = self._cg_erase
+   IF N_Elements(*self._cg_limit) NE 0 THEN limit = *self._cg_limit
+   noborder = self._cg_noborder
+   map_projection = self._cg_thisProjection.name
+   IF Arg_Present(map_proj_keywords) THEN BEGIN
+        IF Ptr_Valid(self._cg_map_projection_keywords) THEN BEGIN
+            IF N_Elements(*self._cg_map_projection_keywords) NE 0 THEN $
+                map_proj_keywords = *self._cg_map_projection_keywords
+        ENDIF
+   ENDIF
+   datum = self._cg_thisDatum.name
+   ellipsoid = self._cg_thisDatum.name
+   sphere_radius = self._cg_thisDatum.semimajor_axis
+   semimajor_axis = self._cg_thisDatum.semimajor_axis
+   semiminor_axis = self._cg_thisDatum.semiminor_axis
+   zone = self._cg_zone
+   
+   ; Superclass keywords.
+   IF (N_ELEMENTS(extraKeywords) GT 0) THEN $
+       self -> cgCOORD::GetProperty, _EXTRA=extraKeywords
+
+END 
+
+
+;+--------------------------------------------------------------------------
+; :Description:
+;   This method returns information about the current map projection in an 
+;   IDL structure variable. Fields of the structure will reflect
+;   values that are used in MAP_PROJ_INIT to create a map structure.
+;
+; :Params:
+;    None.
+;       
+; :Keywords:
+;     None.
+;---------------------------------------------------------------------------
+FUNCTION cgMap::MapInfo
+
+    Compile_Opt idl2
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+      Catch, /CANCEL
+      void = Error_Message()
+      RETURN, -1
+    ENDIF
+   
+   map_keywords = Create_Struct( $
+       'projection', self._cg_thisProjection.name, $
+       'datum', self._cg_thisDatum.name, $
+       'gctp', 1, $
+       'center_latitude', self._cg_center_latitude, $
+       'center_longitude', self._cg_center_longitude )
+   IF N_Elements(*self._cg_limit) NE 0 THEN map_keywords = Create_Struct(map_keywords, 'limit', *self._cg_limit)
+   IF self._cg_thisProjection.sphereOnly THEN BEGIN
+       map_keywords = Create_Struct(map_keywords, 'sphere_radius', self._cg_thisDatum.semimajor_axis)
+   ENDIF ELSE BEGIN
+       map_keywords = Create_Struct(map_keywords, $
+            'semimajor_axis', self._cg_thisDatum.semimajor_axis, $
+            'semiminor_axis', self._cg_thisDatum.semiminor_axis)        
+   ENDELSE
+   IF N_Elements(*self._cg_map_projection_keywords) NE 0 THEN BEGIN
+        keywords = *self._cg_map_projection_keywords
+        fields = Tag_Names(keywords)
+        FOR j=0,N_Elements(fields) DO BEGIN
+           map_keywords = Create_Struct(map_keywords, fields[j], keywords[j])
+        ENDFOR
+   ENDIF   
+   RETURN, map_keywords
+   
+END 
+
+
+;+--------------------------------------------------------------------------
+; :Description:
+;   This method allows the user to set various properties of the object. In general,
+;   the same keywords that are used for the INIT method can be used here.
+;---------------------------------------------------------------------------
+PRO cgMap::SetProperty, $
+    BACKGROUND=background, $
+    COLOR=color, $
+    CONTINENTS=continents, $
+    DRAW=draw, $
+    ERASE=erase, $
+    GRID=grid, $
+    LATLON_RANGES=latlon_ranges, $
+    ONIMAGE=onimage, $
+    PARENT=parent, $
+    POSITION=position, $
+    NOBORDER=noborder, $
+    MAP_PROJ_KEYWORDS=map_proj_keywords, $
+    MAP_PROJECTION=map_projection, $
+    XRANGE=xrange, $
+    YRANGE=yrange, $
+    TITLE=title, $
+    ; MAP_PROJ_INIT keywords (partial list)
+    DATUM=datum, $
+    ELLIPSOID=ellipsoid, $
+    CENTER_LATITUDE=center_latitude, $
+    CENTER_LONGITUDE=center_longitude, $
+    LIMIT=limit, $
+    RADIANS=radians, $
+    SEMIMAJOR_AXIS=semimajor_axis, $
+    SEMIMINOR_AXIS=semiminor_axis, $
+    SPHERE_RADIUS=sphere_radius, $
+    _EXTRA=extraKeywords
+    
+    Compile_Opt idl2
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+      Catch, /CANCEL
+      void = Error_Message()
+      RETURN
+    ENDIF
+      
+   ; Are we changing the map projection?
+   IF N_Elements(map_projection) NE 0 THEN BEGIN
+        projections = *self._cg_theProjections
+        IF Size(map_projection, /TNAME) EQ 'STRING' THEN BEGIN
+            index = Where(StrUpCase(projections.name[*]) EQ StrUpCase(map_projection))
+            IF index[0] EQ -1 THEN Message, 'Cannot find map projection ' + map_projection + ' in the projection list.'
+        ENDIF
+        IF (N_Elements(index) EQ 0) THEN BEGIN
+            index = Where(projections.index EQ map_projection, count)
+            IF count EQ 0 THEN Message, 'Cannot find map projection index ' + StrTrim(map_projection,2) + ' in projection list.' 
+        ENDIF
+        self._cg_thisProjection = projections[index]
+   ENDIF
+   
+   ; Are we changing the map datum.
+   IF N_Elements(datum) NE 0 THEN BEGIN
+        IF Size(datum, /TNAME) EQ 'STRING' THEN BEGIN
+            index = Where(StrUpCase((*self._cg_theDatums).name) EQ StrUpCase(datum))
+            IF index[0] EQ -1 THEN Message, 'Cannot find datum ' + datum + ' in datum list.' 
+            thisDatum = (*self._cg_theDatums)[index]
+        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > datum < 19]
+        self._cg_thisDatum = thisDatum
+   ENDIF
+   
+   ; Are we changing the map ellipsoid.
+   IF N_Elements(ellipsoid) NE 0 THEN BEGIN
+        IF Size(ellipsoid, /TNAME) EQ 'STRING' THEN BEGIN
+            index = Where(StrUpCase((*self._cg_theDatums).name) EQ StrUpCase(ellipsoid))
+            IF index[0] EQ -1 THEN Message, 'Cannot find ellipsoid ' + ellipsoid + ' in datum list.' 
+            thisDatum = (*self._cg_theDatums)[index]
+        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > ellipsoid < 19]
+        self._cg_thisDatum = thisDatum
+   ENDIF
+
+   ; Are there map projection keywords to deal with?
+   IF N_Elements(map_proj_keywords) NE 0 THEN BEGIN
+   
+        ; Make the pointer a valid pointer, if necessary.
+        IF ~Ptr_Valid(self._cg_map_projection_keywords) THEN self._cg_map_projection_keywords = Ptr_New(/ALLOCATE_HEAP)
+        
+        ; Is there a NULL field in the current structure that means erase what is currently in the pointer?
+        index = Where(Tag_Names(map_proj_keywords) EQ 'NULL', count)
+        IF count GT 0 THEN BEGIN
+            IF map_proj_keywords.(index) EQ 1 THEN self._cg_map_projection_keywords = Ptr_New(/ALLOCATE_HEAP)
+        ENDIF
+        
+        ; Add these fields to the structure, or modify the tag value if it is already present.
+        IF N_Elements(*self._cg_map_projection_keywords) GT 0 THEN BEGIN
+            ntags = N_Tags(map_proj_keywords)
+            tags = Tag_Names(map_proj_keywords)
+            FOR j=0,ntags-1 DO BEGIN
+               thisTag = tags[j]
+               index = Where(Tag_Names(*self._cg_map_projection_keywords) EQ thisTag, count)
+               IF count GT 0 THEN BEGIN
+                   (*self._cg_map_projection_keywords).(index) = map_proj_keywords.(j)
+               ENDIF ELSE BEGIN
+                   *self._cg_map_projection_keywords = Create_Struct(*self._cg_map_projection_keywords, thisTag, map_proj_keywords.(j))
+               ENDELSE
+            ENDFOR
+        ENDIF ELSE BEGIN
+            
+            ; Add all the tags, except for NULL tags
+            ntags = N_Tags(map_proj_keywords)
+            tags = Tag_Names(map_proj_keywords)
+            FOR j=0,ntags-1 DO BEGIN
+               thisTag = tags[j]
+               IF thisTag EQ 'NULL' THEN Continue
+               IF N_Elements(*self._cg_map_projection_keywords) EQ 0 THEN BEGIN
+                    count = 0
+               ENDIF ELSE BEGIN
+                    index = Where(Tag_Names(*self._cg_map_projection_keywords) EQ thisTag, count)
+               ENDELSE
+               IF count GT 0 THEN BEGIN
+                   (*self._cg_map_projection_keywords).(index) = map_proj_keywords.(j)
+               ENDIF ELSE BEGIN
+                   IF N_Elements(*self._cg_map_projection_keywords) EQ 0 THEN BEGIN
+                        *self._cg_map_projection_keywords = Create_Struct(thisTag, map_proj_keywords.(j))
+                   ENDIF ELSE BEGIN
+                        *self._cg_map_projection_keywords = Create_Struct(*self._cg_map_projection_keywords, $
+                            thisTag, map_proj_keywords.(j))
+                   ENDELSE
+               ENDELSE
+            ENDFOR
+        ENDELSE
+        
+        ; For debugging purposes.
+        ;Help, *self._cg_map_projection_keywords, /Structure
+   ENDIF
+   
+   IF N_Elements(background) NE 0 THEN self._cg_background = background
+   IF N_Elements(color) NE 0 THEN self._cg_color = color
+   IF N_Elements(center_latitude) NE 0 THEN self._cg_center_latitude = center_latitude
+   IF N_Elements(center_longitude) NE 0 THEN self._cg_center_longitude = center_longitude
+   IF N_Elements(erase) NE 0 THEN self._cg_erase = Keyword_Set(erase)
+   IF N_Elements(noborder) NE 0 THEN self._cg_noborder = Keyword_Set(noborder)
+   IF N_Elements(onimage) NE 0 THEN self._cg_onimage = Keyword_Set(onimage)
+   IF N_Elements(radians) NE 0 THEN self._cg_radians = Keyword_Set(radians)
+   IF N_Elements(title) NE 0 THEN self._cg_title = title
+   
+   ; If you change the limit, you really also need to change the XRANGE and YRANGE.
+   changedLimit = 0
+   IF N_Elements(limit) NE 0 THEN BEGIN
+        *self._cg_limit = limit
+        changedLimit = 1
+   ENDIF
+   IF N_Elements(sphere_radius) NE 0 THEN BEGIN
+      self._cg_thisDatum.semimajor_axis = sphere_radius
+      self._cg_thisDatum.semiminor_axis = sphere_radius
+   ENDIF
+   IF N_Elements(semimajor_axis) NE 0 THEN self._cg_thisDatum.semimajor_axis = semimajor_axis
+   IF N_Elements(semiminor_axis) NE 0 THEN self._cg_thisDatum.semiminor_axis = semiminor_axis
+   
+   ; Make sure the map structure is up to date.
+   map_structure = self -> SetMapProjection() 
+
+   IF N_Elements(parent) NE 0 THEN self -> cgCOORD::SetProperty, PARENT=parent
+   IF N_Elements(position) NE 0 THEN self -> cgCOORD::SetProperty, POSITION=position
+   IF N_Elements(xrange) NE 0 THEN BEGIN
+      IF Keyword_Set(latlon_ranges) THEN BEGIN
+        uvcoords = Map_Proj_Forward(xrange, [-5000,5000], MAP_STRUCTURE=map_structure)
+        xrange = Reform(uvcoords[0,*])   
+      ENDIF
+      self -> cgCOORD::SetProperty, XRANGE=xrange
+   ENDIF ELSE BEGIN
+      IF changedLimit THEN BEGIN
+            xrange = map_structure.uv_box[[0,2]]
+            self -> cgCOORD::SetProperty, XRANGE=xrange
+      ENDIF
+   ENDELSE
+   IF N_Elements(yrange) NE 0 THEN BEGIN
+      IF Keyword_Set(latlon_ranges) THEN BEGIN
+        uvcoords = Map_Proj_Forward([-5000,5000], yrange, MAP_STRUCTURE=map_structure)
+        yrange = Reform(uvcoords[1,*])     
+      ENDIF
+      self -> cgCOORD::SetProperty, YRANGE=yrange
+   ENDIF ELSE BEGIN
+      IF changedLimit THEN BEGIN
+            yrange = map_structure.uv_box[[1,3]]
+            self -> cgCOORD::SetProperty, YRANGE=yrange
+      ENDIF
+   ENDELSE
+   
+   IF (N_ELEMENTS(extraKeywords) GT 0) THEN self -> cgCOORD::SetProperty,  _EXTRA=extraKeywords
+   
+   ; Need to draw after setting properties?
+   IF Keyword_Set(draw) THEN self -> Draw
+   
+END 
+
+
+;+--------------------------------------------------------------------------
+; :Description:
+;   This method calls MAP_PROJ_INIT to create a map structure variable.
+;   This method should not be called directly. Use GetMapStruct() instead.
+;
+;---------------------------------------------------------------------------
+FUNCTION cgMap::SetMapProjection, map_projection, $
+    LATLON_RANGES=latlon_ranges, $
+    POSITION=position, $
+    XRANGE=xrange, $
+    YRANGE=yrange, $
+    ; MAP_PROJ_INIT keywords (partial list)
+    CENTER_LATITUDE=center_latitude, $
+    CENTER_LONGITUDE=center_longitude, $
+    DATUM=datum, $
+    ELLIPSOID=ellipsoid, $
+    LIMIT=limit, $
+    RADIANS=radians, $
+    SEMIMAJOR_AXIS=semimajor_axis, $
+    SEMIMINOR_AXIS=semiminor_axis, $
+    SPHERE_RADIUS=sphere_radius, $
+    ZONE=zone, $
+    _EXTRA=extraKeywords
+
+    Compile_Opt idl2
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+      Catch, /CANCEL
+      void = Error_Message()
+      RETURN, 1
+    ENDIF
+   
+   ; Need a new map projection?
+   IF N_Elements(map_projection) NE 0 THEN BEGIN
+        ; Find the map projection.
+        IF Size(map_projection, /TNAME) EQ 'STRING' THEN BEGIN
+            index = Where(StrUpCase((*self._cg_theProjections).name) EQ StrUpCase(map_projection))
+            IF index[0] EQ -1 THEN Message, 'Cannot find map projection ' + map_projection + ' in the projection list.'
+        ENDIF
+        IF (N_Elements(index) EQ 0) AND (N_Elements(map_projection) NE 0) THEN BEGIN
+            index = Where((*self._cg_theProjections).index EQ map_projection, count)
+            IF count EQ 0 THEN Message, 'Cannot find map projection index ' + StrTrim(map_projection,2) + ' in projection list.' 
+        ENDIF 
+        thisProjection = (*self._cg_theProjections)[index]
+        self._cg_thisProjection = thisProjection
+   ENDIF
+   
+   ; Need a new datum?
+   IF N_Elements(datum) NE 0 THEN BEGIN
+        IF Size(datum, /TNAME) EQ 'STRING' THEN BEGIN
+            index = Where(StrUpCase((*self._cg_theDatums).name) EQ StrUpCase(datum))
+            IF index[0] EQ -1 THEN Message, 'Cannot find datum ' + datum + ' in datum list.' 
+            thisDatum = (*self._cg_theDatums)[index]
+        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > datum < 19]
+        self._cg_thisDatum = thisDatum
+   ENDIF
+
+   ; Need a new ellipsoid?
+   IF N_Elements(ellipsoid) NE 0 THEN BEGIN
+        IF Size(ellipsoid, /TNAME) EQ 'STRING' THEN BEGIN
+            index = Where(StrUpCase((*self._cg_theDatums).name) EQ StrUpCase(ellipsoid))
+            IF index[0] EQ -1 THEN Message, 'Cannot find ellipsoid ' + ellipsoid + ' in datum list.' 
+            thisDatum = (*self._cg_theDatums)[index]
+        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > ellipsoid < 19]
+        self._cg_thisDatum = thisDatum
+   ENDIF
+   
+   ; Other map keywords?
+   IF N_Elements(center_latitude) NE 0 THEN self._cg_center_latitude = center_latitude
+   IF N_Elements(center_longitude) NE 0 THEN self._cg_center_longitude = center_longitude
+   IF N_Elements(radians) NE 0 THEN self._cg_radians = radians
+   IF N_Elements(sphere_radius) NE 0 THEN BEGIN
+      self._cg_thisDatum.semimajor_axis = sphere_radius
+      self._cg_thisDatum.semiminor_axis = sphere_radius
+   ENDIF
+   IF N_Elements(semimajor_axis) NE 0 THEN self._cg_thisDatum.semimajor_axis = semimajor_axis
+   IF N_Elements(semiminor_axis) NE 0 THEN self._cg_thisDatum.semiminor_axis = semiminor_axis
+   IF N_Elements(limit) NE 0 THEN *self._cg_limit = limit
+   IF N_Elements(zone) NE 0 THEN self._cg_zone = zone
+   IF N_Elements(extrakeywords) NE 0 THEN *self._cg_map_projection_keywords = extrakeywords
+   
+   ; Extract the values you need to call MAP_PROJ_INIT.
+   thisProjection = self._cg_thisProjection.name
+   sphereOnly = self._cg_thisProjection.sphereOnly
+   thisDatum = self._cg_thisDatum.name
+   radians = self._cg_radians
+   semimajor_axis = self._cg_thisDatum.semimajor_axis 
+   semiminor_axis = self._cg_thisDatum.semiminor_axis
+   center_lon = self._cg_center_longitude
+   center_lat = self._cg_center_latitude
+   IF N_Elements(*self._cg_limit) NE 0 THEN limit = *self._cg_limit
+   zone = self._cg_zone
+   IF N_Elements(*self._cg_map_projection_keywords) NE 0 THEN keywords = *self._cg_map_projection_keywords
+   
+   ; Center latitudes are not allowed in some projections. Here are the ones where
+   ; they are prohibited.
+   centerlatOK = 1
+   badprojstr = ['GOODES HOMOLOSINE', 'STATE PLANE', 'MERCATOR', 'SINUSOIDAL', 'EQUIRECTANGULAR', $
+      'MILLER CYLINDRICAL', 'ROBINSON', 'SPACE OBLIQUE MERCATOR A', 'SPACE OBLIQUE MERCATOR B', $
+      'ALASKA CONFORMAL', 'INTERRUPTED GOODE', 'MOLLWEIDE', 'INTERRUPED MOLLWEIDE', 'HAMMER', $
+      'WAGNER IV', 'WAGNER VII', 'INTEGERIZED SINUSOIDAL']
+   void = Where(badprojstr EQ StrUpCase(thisProjection), count)
+   IF count GT 0 THEN centerlatOK = 0
+    
+    ; UTM and State Plane projections have to be handled differently.
+    IF (StrUpCase(thisProjection) EQ 'UTM') OR (StrUpCase(thisProjection) EQ 'STATE PLANE') THEN BEGIN
+    
+        CASE StrUpCase(thisProjection) OF
+            'UTM': BEGIN
+                mapStruct = Map_Proj_Init(thisProjection, DATUM=self._cg_thisDatum.(0), /GCTP, $
+                    CENTER_LATITUDE=center_lat, CENTER_LONGITUDE=center_lon, RADIANS=radians, ZONE=zone)
+                END
+            'STATE PLANE': BEGIN
+                mapStruct = Map_Proj_Init(thisProjection, DATUM=self._cg_thisDatum.(0), /GCTP, $
+                    RADIANS=radians, ZONE=zone)
+                END
+        ENDCASE
+        
+    ENDIF ELSE BEGIN
+
+        ; Call MAP_PROJ_INIT to get the map projection structure.
+        CASE 1 OF
+        
+            centerLatOK AND sphereOnly: BEGIN
+                mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
+                    CENTER_LATITUDE=center_lat, $
+                    CENTER_LONGITUDE=center_lon, $
+                    SPHERE_RADIUS=semimajor_axis, $
+                    LIMIT=limit, RADIANS=radians, $
+                    _EXTRA=keywords)
+                END
+                
+            ~centerLatOK AND sphereOnly: BEGIN
+
+                mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
+                    CENTER_LONGITUDE=center_lon, $
+                    SPHERE_RADIUS=semimajor_axis, $
+                    LIMIT=limit, RADIANS=radians, $
+                    _EXTRA=keywords)
+                END
+                
+            ~centerLatOK AND ~sphereOnly: BEGIN
+                mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
+                    CENTER_LONGITUDE=center_lon, $
+                    SEMIMAJOR_AXIS=semimajor_axis, $
+                    SEMIMINOR_AXIS=semiminor_axis, $
+                    LIMIT=limit, RADIANS=radians, $
+                    _EXTRA=keywords)
+                END
+    
+            centerLatOK AND ~sphereOnly: BEGIN
+                mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
+                    CENTER_LATITUDE=center_lat, $
+                    CENTER_LONGITUDE=center_lon, $
+                    SEMIMAJOR_AXIS=semimajor_axis, $
+                    SEMIMINOR_AXIS=semiminor_axis, $
+                    LIMIT=limit, RADIANS=radians, $
+                    _EXTRA=keywords)
+                END
+        ENDCASE
+   ENDELSE
+        
+    RETURN, mapStruct
+    
+END 
+
+
+;+--------------------------------------------------------------------------
+; :Description:
+;   This is the clean-up routine for the object.
+;
+;---------------------------------------------------------------------------
+PRO cgMap::CLEANUP
+
+   Ptr_Free, self._cg_limit
+   Ptr_Free, self._cg_map_projection_keywords
+   Ptr_Free, self._cg_theDatums
+   Ptr_Free, self._cg_theProjections
+   Obj_Destroy, self._cg_overlays
+   
+   self -> cgCOORD::CLEANUP 
+
+END
+
+
+;+--------------------------------------------------------------------------
+; :Description:
+;   This is the class definition module. Structures used to manipulate
+;   map projection and map datum information are also created here.
+;
+; :Params:
+;    class: out, optional, type=structure
+;       Occasionally, it is useful to have an object class definition as
+;       a structure variable. Using this output keyword will allow that.
+;       
+; :Keywords:
+;     None.
+;---------------------------------------------------------------------------
 PRO cgMap__Define, class
 
    ; Structures used in the object.

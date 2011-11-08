@@ -213,6 +213,8 @@
 ;       Worked around a PLOT problem when setting the X axis range that caused the Y axis
 ;          range to be corrupted. 19 May 2011. DWF.
 ;       Added the ROTATE keyword. 18 Aug 2011. DWF.
+;       I was calculating and displaying the cumulative probability distribution function
+;           incorrectly. Now changed to what I think is the correct result. 8 Nov 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2007-2011, by Fanning Software Consulting, Inc.                           ;
@@ -595,7 +597,7 @@ PRO cgHistoplot, $                    ; The program name.
    ; Need a probability distribution?
    IF Arg_Present(probablity) OR Keyword_Set(oprob) THEN BEGIN
        cumTotal = Total(histData, /CUMULATIVE)
-       probability = Scale_Vector(cumTotal, 0, 1)
+       probability = Total(Double(histdata)/Total(Double(histdata)), /CUMULATIVE)
    ENDIF
 
    ; Calculate the range of the plot output.
@@ -814,12 +816,12 @@ PRO cgHistoplot, $                    ; The program name.
    ; Need to overplot probability function?
    IF Keyword_Set(oprob) THEN BEGIN
         IF Keyword_Set(rotate) THEN BEGIN
-            probx = Scale_Vector(cumTotal, !X.CRange[0], !X.CRange[1])
+            probx = Scale_Vector(probability, !X.CRange[0], !X.CRange[1], MIN=0, MAX=1)
             IF Keyword_Set(oplot) THEN bsize = 0 ELSE bsize = binsize
             proby = Scale_Vector(Findgen(N_Elements(probx)), !Y.CRange[0] + bsize, !Y.CRange[1] - bsize)
             Oplot, probx, proby, COLOR=probcolor
         ENDIF ELSE BEGIN
-            proby = Scale_Vector(cumTotal, !Y.CRange[0], !Y.CRange[1])
+            proby = Scale_Vector(probability, !Y.CRange[0], !Y.CRange[1], MIN=0, MAX=1)
             IF Keyword_Set(oplot) THEN bsize = 0 ELSE bsize = binsize
             probx = Scale_Vector(Findgen(N_Elements(proby)), !X.CRange[0] + bsize, !X.CRange[1] - bsize)
             Oplot, probx, proby, COLOR=probcolor

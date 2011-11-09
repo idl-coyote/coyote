@@ -805,8 +805,22 @@ PRO FSC_CmdWindow::Resize, event
         void = Error_Message()
         RETURN
     ENDIF
+    
+    ; Do you need to maintain the aspect ratio of the window?
+    IF self.aspect NE 0 THEN BEGIN
+         IF self.aspect GE 1 THEN BEGIN
+             ysize = event.y
+             xsize = Round(event.y / self.aspect)
+         ENDIF ELSE BEGIN
+             xsize = event.x
+             ysize = Round(event.x * self.aspect)         
+         ENDELSE
+    ENDIF ELSE BEGIN
+        xsize = event.x
+        ysize = event.y
+    ENDELSE
 
-    Widget_Control, self.drawID, DRAW_XSIZE=event.x, DRAW_YSIZE=event.y
+    Widget_Control, self.drawID, DRAW_XSIZE=xsize, DRAW_YSIZE=ysize
     self -> ExecuteCommands
     
 END ;----------------------------------------------------------------------------------------------------------------
@@ -1210,6 +1224,8 @@ FUNCTION FSC_CmdWindow::Init, $
    CmdDelay=cmdDelay, $             ; Set this keyword to a value to "wait" before executing the next command.
    Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
    ReplaceCmd=replacecmd, $         ; Replace the current command and execute in the current window.
+   WAspect = waspect, $             ; Set the window aspect ratio to this value.
+   WBackground = wbackground, $     ; The background color. Set to !P.Background by default.
    WEraseIt = Weraseit, $           ; Set this keyword to erase the display before executing the command.
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
    WOXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
@@ -1218,8 +1234,7 @@ FUNCTION FSC_CmdWindow::Init, $
    WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 400.
    WTitle = wtitle, $               ; The window title.
    WXPos = wxpos, $                 ; The X offset of the window on the display. The window is centered if not set.
-   WYPos = wypos, $                 ; The Y offset of the window on the display. The window is centered if not set.
-   WBackground = wbackground        ; The background color. Set to !P.Background by default.
+   WYPos = wypos                    ; The Y offset of the window on the display. The window is centered if not set.
 
     Compile_Opt idl2
     
@@ -1235,7 +1250,8 @@ FUNCTION FSC_CmdWindow::Init, $
     
     ; Get the global defaults.
     cgWindow_GetDefs, $
-       AdjustSize = d_adjustsize, $                     ; Adjust charsize to window size.
+       AdjustSize = d_adjustsize, $                      ; Adjust charsize to window size.
+       Aspect = d_aspect, $                              ; The aspect ratio of the window.
        Background = d_background, $                      ; The background color. 
        Delay = d_delay, $                                ; The amount of delay between command execution.
        EraseIt = d_eraseit, $                            ; Set this keyword to erase the display before executing the commands.
@@ -1275,6 +1291,7 @@ FUNCTION FSC_CmdWindow::Init, $
         IF ~Obj_Valid(p1) THEN $
             Message, 'The first positional parameter must be a valid object reference when making method calls.'
     ENDIF
+    IF N_Elements(waspect) EQ 0 THEN aspect = d_aspect ELSE aspect = waspect
     IF N_Elements(wxsize) EQ 0 THEN xsize = d_xsize ELSE xsize = wxsize
     IF N_Elements(wysize) EQ 0 THEN ysize = d_ysize ELSE ysize = wysize
     IF N_Elements(wxpos) EQ 0 THEN xpos = d_xpos ELSE xpos = wxpos
@@ -1345,6 +1362,16 @@ FUNCTION FSC_CmdWindow::Init, $
     button = Widget_Button(fileID, Value='Restore Visualization', UVALUE='RESTORECOMMANDS')
     button = Widget_Button(fileID, Value='Quit', /Separator, UVALUE='QUIT')
     
+    ; Check to see if you have to create a window with a particular aspect ratio.
+    ; If so, your xsize and ysize values will need to be adjusted.
+    IF aspect NE 0 THEN BEGIN
+         IF aspect GE 1 THEN BEGIN
+            xsize = Round(ysize / aspect)
+         ENDIF ELSE BEGIN
+            ysize = Round(xsize * aspect)
+         ENDELSE
+     ENDIF
+    
     ; Create draw widget. UNIX versions of IDL have a bug in which creating
     ; a draw widget as the very first window in an IDL session causes both
     ; !P.Background and !P.Color to be set to white. I know, it's odd. But
@@ -1399,6 +1426,7 @@ FUNCTION FSC_CmdWindow::Init, $
     IF N_Elements(wxomargin) NE 0 THEN self.xomargin = wxomargin ELSE self.xomargin = d_xomargin
     IF N_Elements(wyomargin) NE 0 THEN self.yomargin = wyomargin ELSE self.yomargin = d_yomargin
     self.adjustsize = d_adjustsize
+    self.aspect = aspect
     self.im_transparent = d_im_transparent
     self.im_density = d_im_density
     self.im_options = d_im_options
@@ -1504,6 +1532,7 @@ PRO FSC_CmdWindow__Define, class
               drawid: 0L, $                 ; The identifier of the draw widget.
               
               ; cgWindow parameters
+              aspect: 0.0, $                ; The aspect ratio of the window.
               adjustsize: 0B, $             ; Adjust character size to display window.
               background: Ptr_New(), $      ; The background color.
               delay: 0.0, $                 ; The command delay.
@@ -1981,6 +2010,11 @@ END ;---------------------------------------------------------------------------
 ;       Set this keyword if the command is an object method call rather than a 
 ;       procedure call. If this keyword is set, the first positional parameter, p1,
 ;       must be present and must be a valid object reference.
+;    waspect: in, optional, type=float, default=normal
+;       Set this keyword to the aspect ratio you would like the window to have.
+;       The aspect ratio is calculated as (ysize/xsize). Must be a float value.
+;       If this keyword is set, the window will maintain this aspect ratio,
+;       even when it is resized.
 ;    wbackground: in, optional, type=varies, default=!P.Background
 ;       The background color of the window. Specifying a background color 
 ;       automatically sets the WErase keyword.
@@ -2124,6 +2158,8 @@ END ;---------------------------------------------------------------------------
 ;         Missed a couple of places to set decomposition color mode. 7 Sept 2011. DWF.
 ;         Fixed a problem with improper filename when creating raster file vis
 ;             Imagemagick via cgControl. 10 Oct 2011. DWF.
+;         Added WASPECT keyword to allow window aspect ratio to be set. 9 Nov 2011. DWF.
+;         
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
@@ -2136,6 +2172,7 @@ PRO cgWindow, $
    _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
    Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
    Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
+   WAspect = waspect, $             ; Set the window aspect ratio to this value.
    WBackground = wbackground, $     ; The background color. Set to !P.Background by default.
    WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.   
@@ -2378,6 +2415,7 @@ PRO cgWindow, $
                                         ; should be "P1", "P2" or "P3".
        Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
        Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
+       WAspect = waspect, $             ; Set the window aspect ratio to this value.
        WBackground = wbackground, $     ; The background color. Not used unless set.
        WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
        WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.

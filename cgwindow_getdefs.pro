@@ -47,6 +47,8 @@
 ; :Keywords:
 ;     adjustsize: out, optional, type=boolean
 ;         If set, adjust the default text size to match the display window size.
+;     aspect: out, optional, type=float
+;         The aspect ratio of the window.
 ;     background: out, optional, type=string
 ;         The background color of the window.
 ;     delay: out, optional, type=float
@@ -113,12 +115,14 @@
 ;          cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
 ;        Added PS_DECOMPOSED keyword to allow getting/setting of PostScript decomposed 
 ;          value. 30 Aug 2011. DWF.
+;        Added ASPECT keyword to allow getting/setting of window aspect ratio.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
 PRO cgWindow_GetDefs, $
    AdjustSize = adjustsize, $                      ; Adjusts text size to fit display window size.
+   Aspect = aspect, $                              ; The window aspect ratio.
    Background = background, $                      ; The background color. 
    Delay = delay, $                                ; The amount of delay between command execution.
    EraseIt = eraseit, $                            ; Set this keyword to erase the display before executing the commands.
@@ -161,6 +165,7 @@ PRO cgWindow_GetDefs, $
    
    ; If the user asked for the default, give it to them.
    IF Arg_Present(adjustsize) THEN adjustsize = !FSC_WINDOW_DEFAULTS.adjustsize
+   IF Arg_Present(aspect) THEN aspect = !FSC_WINDOW_DEFAULTS.aspect
    IF Arg_Present(background) THEN background = !FSC_WINDOW_DEFAULTS.background
    IF Arg_Present(delay) THEN delay = !FSC_WINDOW_DEFAULTS.delay
    IF Arg_Present(eraseit) THEN eraseit = !FSC_WINDOW_DEFAULTS.eraseit

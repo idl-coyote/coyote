@@ -56,6 +56,8 @@
 ;         apply the action to.
 ;     adjustsize: in, optional, type=boolean
 ;         Set this keyword to adjust default character size to the display window size.
+;     aspect: in, optional, type=boolean
+;         Set this keyword to the desired aspect ratio (ysize/xsize) of the window.
 ;     background: in, optional, type=string
 ;         The background color of the window. Only use if the ERASEIT property is also set.
 ;     cmdindex: in, optional, type=integer
@@ -194,12 +196,14 @@
 ;     Added the ability to set the dimensions of the draw widget programmatically. 14 June 2011.
 ;     Added PS_DECOMPOSED keyword to set the PostScript color mode. 30 Aug 2011. DWF.
 ;     Added SAVE_VISUALIZATION and RESTORE_VISUALIZATION keywords. 15 Sept 2011. DWF.
+;     Added ASPECT keyword to control window aspect ratio. 9 Nov 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
 PRO cgControl, selection, $
     ADJUSTSIZE=adjustsize, $                      ; Adjusts text size to fit display window size.
+    ASPECT=aspect, $                              ; Sets the aspect ratio of the window.
     ALL=all, $                                    ; Apply the command operation to all the commands (i.e., DeleteCMD)
     BACKGROUND=background, $                      ; Sets the background color of the window
     CMDINDEX=cmdIndex, $                          ; Apply the command operation to this command only.
@@ -347,6 +351,7 @@ PRO cgControl, selection, $
    ; Set the properties of the window.
    IF Obj_Valid(objref[index]) THEN objref[index] -> SetProperty, $
         ADJUSTSIZE=adjustsize, $
+        ASPECT=aspect, $
         BACKGROUND=background, $
         DELAY=delay, $
         DIMENSIONS=dimensions, $

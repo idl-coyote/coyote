@@ -48,6 +48,10 @@
 ;     adjustsize: in, optional, type=boolean, default=0
 ;         Set this keyword to have the default text size adjusted to fit the size of the 
 ;         display window.
+;     aspect: in, optional, type=float, default=0.0
+;         Set the aspect ratio of the window. If set to 0, the normal "default" window
+;         aspect ratio is used and nothing special is done when the window is resize.
+;         If aspect is not 0, then the window is confined to this aspect ratio.
 ;     background: in, optional, type=string
 ;         The background color of the window. Only use if the ERASEIT property is also set.
 ;     delay: in, optional, type=float, default=0
@@ -145,12 +149,14 @@
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;     Small bug fixes, and addition of PS_QUIET keyword. 17 Feb 2011. DWF.
 ;     Added PS_DECOMPOSED keyword to set the PostScript color mode. 30 Aug 2011. DWF.
+;     Added ASPECT keyword to allow getting/setting of window aspect ratio.
 ;-
 PRO cgWindow_SetDefs, $
    Reset=reset, $                                  ; Reset to original values.
    
    ; cgWindow properties.
    AdjustSize = adjustsize, $                      ; Adjusts text size to fit display window size.
+   Aspect = aspect, $                              ; Set the aspect ratio of the window.
    Background = background, $                      ; The background color. 
    Delay = delay, $                                ; The delay between command execution.
    EraseIt = eraseit, $                            ; Set this keyword to erase the display before executing the commands.
@@ -193,6 +199,7 @@ PRO cgWindow_SetDefs, $
    
         ; Check the various keywords. Create defaults.
         IF N_Elements(adjustsize) EQ 0 THEN adjustsize = 0
+        IF N_Elements(aspect) EQ 0 THEN aspect = 0.0
         IF N_Elements(background) EQ 0 THEN background = 'white'
         IF N_Elements(delay) EQ 0 THEN delay = 0
         IF N_Elements(eraseit) EQ 0 THEN eraseit = 0
@@ -225,6 +232,7 @@ PRO cgWindow_SetDefs, $
         ; Define the default structure.
         fsc_window_defaults = { _$_FSC_WINDOW_DEFAULTS, $
            Adjustsize:adjustsize, $                      ; Adjust text size.
+           Aspect:aspect, $                              ; The window aspect ratio.
            Background:background, $                      ; The background color. 
            Delay: delay, $                               ; Set this keyword to the delay between command execution.
            EraseIt:eraseit, $                            ; Set this keyword to erase the display before executing the commands.
@@ -260,6 +268,7 @@ PRO cgWindow_SetDefs, $
    ENDIF ELSE BEGIN
     
         IF N_Elements(adjustsize) NE 0 THEN !FSC_WINDOW_DEFAULTS.adjustsize = adjustsize
+        IF N_Elements(aspect) NE 0 THEN !FSC_WINDOW_DEFAULTS.aspect = aspect
         IF N_Elements(background) NE 0 THEN !FSC_WINDOW_DEFAULTS.background = background
         IF N_Elements(delay) NE 0 THEN !FSC_WINDOW_DEFAULTS.delay = delay
         IF N_Elements(eraseit) NE 0 THEN !FSC_WINDOW_DEFAULTS.eraseit = eraseit

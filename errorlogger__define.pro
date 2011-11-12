@@ -303,7 +303,7 @@ END
 ;                     output.
 ;
 ;******************************************************************************************;
-PRO ErrorLogger::AddText, theText, PRINT=print
+PRO ErrorLogger::AddText, theText, PRINT=print, ADD_CALLER=add_caller
     
     Compile_Opt idl2
     
@@ -322,13 +322,19 @@ PRO ErrorLogger::AddText, theText, PRINT=print
     thisType = Size(theText, /TNAME)
     IF thisType NE 'STRING' THEN Message, 'Only strings can be written into the error log file.'
     
+    IF Keyword_Set(add_caller) THEN BEGIN
+        ; Get the call stack and the calling routine's name.
+        Help, Calls=callStack
+        callingRoutine = (StrSplit(StrCompress(callStack[1])," ", /Extract))[0]
+        theText = callingRoutine + ': ' + theText
+    ENDIF
+    
     ; Write the text to the file and to standard output, if requested.
     IF self.lun EQ 0 THEN BEGIN
             success = self -> OpenFile(self.filename)
             IF ~success THEN Message, 'Cannot successfully open the error log file.'
     ENDIF
     numLines = N_Elements(theText)
-    print=1
     FOR j=0L, N_Elements(theText) -1 DO BEGIN
         PrintF, self.lun, theText[j]
         IF Keyword_Set( print ) THEN Print, theText[ j ]

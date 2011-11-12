@@ -157,7 +157,17 @@ FUNCTION ClipScl, image, clip, $
    ENDWHILE
    minThresh = minIndex * binsize + omin
 
+   ; Not all files can be clipped appropriately. If maxIndex
+   ; is -1 or N_Elements(cumTotal), or maxIndex=minIndex then 
+   ; just byte scale the image and get out of here.
    maxIndex  = Value_Locate(cumTotal, n * ((100-clip)/100.))
+   IF (maxIndex EQ -1) || (maxIndex EQ N_Elements(cumTotal)) || (maxIndex EQ minIndex) THEN BEGIN
+       threshold = [minr, maxr]
+       Message, 'Image histogram could not be clipped successfully. Image is byte scaled.', /Informational
+       IF Keyword_Set(negative) THEN RETURN, 255B - BytScl(image) ELSE RETURN, BytScl(image)
+   ENDIF
+   
+   ; If you are still here, try to clip the histogram.
    WHILE cumTotal[maxIndex] EQ cumTotal[maxIndex - 1] DO BEGIN
        maxIndex = maxIndex - 1
    ENDWHILE

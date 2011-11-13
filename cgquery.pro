@@ -36,16 +36,12 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Provides information about any cgWindow applications currently on the display. Returns
 ;   the window index numbers of any cgWindow applications current on the display.
 ;
 ; :Categories:
 ;    Graphics
 ;    
-; :Params:
-;    none
-;       
 ; :Keywords:
 ;     current: in, optional, type=boolean
 ;         If set, the current cgWindow application information is returned in the result
@@ -63,7 +59,7 @@
 ;         A vector of widget identifiers of the top-level base widget for each cgWindow
 ;         application currently on the display.
 ;          
-; :Return Value:
+; :Returns:
 ;      windowIndexID: out, type=long
 ;          An array of window index numbers for each cgWindow application currently on the display.
 ;          

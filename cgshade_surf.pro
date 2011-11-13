@@ -36,6 +36,32 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+;
+;+
+;   The purpose of cgShade_Surf is simply to make it easier for people to remember
+;   how to create a shaded surface with cgSurf. See the documentation for cgSurf to
+;   learn more about surface rendering. All this program does is make sure the SHADED
+;   keyword to cgSurf is set.
+;
+; :Categories:
+;    Graphics
+;    
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Written, 1 February 2011. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;-
 PRO cgShade_Surf, data, x, y, $
     ADDCMD=addcmd, $
     AXISCOLOR=saxiscolor, $

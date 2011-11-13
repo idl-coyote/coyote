@@ -39,7 +39,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   The purpose of cgContour is to create a wrapper for the traditional IDL graphics
 ;   command, Contour. The Contour command has a number of deficiencies that make it
 ;   difficult to use in a modern computing environment. cgContour corrects these

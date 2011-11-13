@@ -37,7 +37,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Allows the user to delete one or more cgWindow applications. The cgWindow can
 ;   be identifed by window index number, widget identifier, title, or object reference,
 ;   depending on which keywords are set.

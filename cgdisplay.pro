@@ -39,7 +39,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   The purpose of cgDisplay is to open a graphics window on the display, or in the
 ;   PostScript device, or in the Z-graphics buffer, depending upon the current graphics
 ;   device. In PostScript a window of the proper aspect ratio is created with PSWindow.

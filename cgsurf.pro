@@ -37,7 +37,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   The purpose of cgSurf is to create a wrapper for the traditional IDL graphics
 ;   commands, Surface and Shade_Surf. The primary purpose of this is to create surface 
 ;   commands that work and look identically both on the display and in PostScript files.

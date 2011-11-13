@@ -37,7 +37,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Allows the user to select the cgWindow application to be the "current" application.
 ;   Selection can be made based on window index number, widget identifier, object reference,
 ;   or window title.

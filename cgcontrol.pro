@@ -36,7 +36,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Allows the user to set various properties of an cgWindow object. This is essentially
 ;   a wrapper to the cgWindow SetProperty method.
 ;

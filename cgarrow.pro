@@ -36,7 +36,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Provides a device-independent and color-model-independent way of drawing an arrow
 ;   in a specified color.
 ;

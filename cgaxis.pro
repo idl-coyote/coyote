@@ -36,7 +36,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Provides a device-independent and color-model-independent way to draw an axis into
 ;   a graphics window. It is a wrapper to the AXIS command.
 ;

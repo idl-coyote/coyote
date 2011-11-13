@@ -36,7 +36,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Defines a default character size for Coyote Graphics routines (cgPlot, cgContour, etc.)
 ;   IF !P.Charsize is set, the function simply returns !P.Charsize.
 ;

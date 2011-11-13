@@ -35,15 +35,11 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Allows the user to get the global defaults for resizeable cgWindow programs.
 ;
 ; :Categories:
 ;    Graphics
 ;    
-; :Params:
-;    None
-;       
 ; :Keywords:
 ;     adjustsize: out, optional, type=boolean
 ;         If set, adjust the default text size to match the display window size.

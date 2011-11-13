@@ -37,7 +37,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   The purpose of cgPlotS is to create a wrapper for the traditional IDL graphics
 ;   command, PlotS. The primary purpose of this is to create plot commands that work
 ;   and look identically both on the display and in PostScript files.

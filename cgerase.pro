@@ -36,7 +36,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Provides a device-independent and color-model-independent way to erase a graphics
 ;   window with a particular color.
 ;

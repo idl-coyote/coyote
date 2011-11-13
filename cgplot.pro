@@ -37,7 +37,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   The purpose of cgPlot is to create a wrapper for the traditional IDL graphics
 ;   command, Plot. The primary purpose of this is to create plot commands that work
 ;   and look identically both on the display and in PostScript files.
@@ -123,13 +122,13 @@
 ;       cgPlot, Findgen(11), Color='blue', SymColor='red', PSym=-16
 ;       
 ; :Author:
-;       FANNING SOFTWARE CONSULTING::
-;           David W. Fanning 
-;           1645 Sheely Drive
-;           Fort Collins, CO 80526 USA
-;           Phone: 970-221-0438
-;           E-mail: david@idlcoyote.com
-;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;    FANNING SOFTWARE CONSULTING::
+;        David W. Fanning 
+;        1645 Sheely Drive
+;        Fort Collins, CO 80526 USA
+;        Phone: 970-221-0438
+;        E-mail: david@idlcoyote.com
+;        Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; :History:
 ;     Change History::

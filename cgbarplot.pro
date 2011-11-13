@@ -36,7 +36,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Provides a device-independent and color-model-independent way to create a bar
 ;   plot or to overplot on an existing bar plot.
 ;

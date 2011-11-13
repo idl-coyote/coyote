@@ -36,7 +36,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Provides a device-independent and color-model-independent way to fill a polygon
 ;   with a particular color. This is a wrapper to the PolyFill command in IDL.
 ;

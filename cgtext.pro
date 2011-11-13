@@ -36,7 +36,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Provides a device-independent and color-model-independent way to write text into
 ;   a graphics window. It is a wrapper to the XYOUTS command.
 ;

@@ -37,7 +37,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   This simple just identifies a routine as a Coyote Graphic routine. It is written
 ;   primarily so I can identify such routines before I assign a background color to
 ;   a graphics window.
@@ -45,12 +44,6 @@
 ; :Categories:
 ;    Graphics
 ;    
-; :Params:
-;    None.
-;       
-; :Keywords:
-;     None.
-;          
 ; :Examples:
 ;    Used in graphics programs::
 ;       IDL> IF CoyoteGraphic() THEN background = 'white'

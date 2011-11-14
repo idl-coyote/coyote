@@ -92,7 +92,7 @@
 ;         in normalized coordinate units.
 ;     window: in, optional, type=boolean
 ;         Set this keyword to add the command to the in the current cgWindow application.
-;     _extra: in, optional
+;     _ref_extra: in, optional
 ;          Any keywords appropriate for the XYOUTS command.
 ;     
 ;          

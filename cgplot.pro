@@ -111,7 +111,7 @@
 ;         graphics windows on the display is used and PostScript files always use a white background.
 ;     window: in, optional, type=boolean, default=0
 ;         Set this keyword if you want to display the plot in a resizable graphics window.
-;     _extra: in, optional, type=any
+;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot command is allowed in the program.
 ;
 ; :Examples:

@@ -63,17 +63,20 @@
 ;   The initialization method of the object.
 ;
 ; :Keywords:
-;      position: in, optional, type=DblArr(4), default=[[0.075, 0.075, 0.925, 0.900]
+;      position: in, optional, type=float
 ;         The normalized position of the map projection space in the graphics window.
+;         The default position is [0.075, 0.075, 0.925, 0.900].
 ;      xlog: in, optional, type=boolean, default=0
 ;         Set this keyword if you wish the X axis range to be logarithmic.
 ;      ylog: in, optional, type=boolean, default=0
 ;         Set this keyword if you wish the Y axis range to be logarithmic.
-;      xrange: in, optional, type=various, default=[0.0, 1.0]
+;      xrange: in, optional, type=various
 ;         Set this keyword to the X axis range desired in the data coordinate system.
-;      yrange: in, optional, type=various, default=[0.0, 1.0]
+;         The default os [0,1].
+;      yrange: in, optional, type=various
 ;         Set this keyword to the Y axis range desired in the data coordinate system.
-;      _EXTRA: in, optional, type=various
+;         The default os [0,1].
+;      _ref_extra: in, optional, type=various
 ;          Any keywords appropriate for superclass objects can also be specified.
 ;
 ;---------------------------------------------------------------------------

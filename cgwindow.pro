@@ -196,7 +196,8 @@ END ;---------------------------------------------------------------------------
 ; Call by setting the CREATE_PS keyword with cgControl.
 ;
 ; :Params:
-;     filename:  The name of the PostScript file.
+;     filename:  in, required, type=string
+;         The name of the PostScript file to generate.
 ;-
 PRO FSC_CmdWindow::AutoPostScriptFile, filename
 
@@ -253,8 +254,10 @@ END ;---------------------------------------------------------------------------
 ; Call by setting the create_png, etc. keyword with cgControl.
 ;
 ; :Params:
-;     filetype:  The type of raster file (e.g., PNG, JPEG, etc.)
-;     filename:  The name of the output file.
+;     filetype:  in, required, type=string
+;         The type of raster file (e.g., PNG, JPEG, etc.).
+;     filename:  in, required, type=string
+;         The name of the output file.
 ;-
 PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
 
@@ -2155,7 +2158,7 @@ END ;---------------------------------------------------------------------------
 ;       The x size in device coordinates of the graphics window.
 ;    wysize: in, optional, type=integer, default=5
 ;       The y size in device coordinates of the the graphics window.
-;    wtitle: in, opetional, type=string, default='Resizeable Graphics Window'
+;    wtitle: in, optional, type=string, default='Resizeable Graphics Window'
 ;       The title of the graphics window. A window index number is appended to the
 ;       title so multiple cgWindow programs can be selected.
 ;          
@@ -2187,9 +2190,7 @@ END ;---------------------------------------------------------------------------
 ;    
 ;        http://www.idlcoyote.com/cg_tips/kwexpressions.php
 ;           
-; :Notes:
-;    Notes on using the program::
-;    
+; :File_comments:
 ;       The program is designed to work with any IDL traditional graphics routine
 ;       that is a procedure and includes no more than three positional parameters.
 ;       Any number of keywords can be used to specify properties of the graphical

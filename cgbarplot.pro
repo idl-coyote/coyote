@@ -116,7 +116,7 @@
 ;         The X title of the plot, if supplied.
 ;     ytitle: in, optional, type=string, default=""
 ;         The Y title of the plot, if supplied.
-;     _extra: in, optional, type=any
+;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot command is allowed in the program.
 ;          
 ; :Examples:

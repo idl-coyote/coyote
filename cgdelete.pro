@@ -83,7 +83,7 @@
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-PRO cgDelete, selectMatch, ALL=all, OBJECT=object, WIDGETID=widgetID, TITLE=title
+PRO cgDelete, selection, ALL=all, OBJECT=object, WIDGETID=widgetID, TITLE=title
 
    Compile_Opt idl2
     
@@ -100,9 +100,9 @@ PRO cgDelete, selectMatch, ALL=all, OBJECT=object, WIDGETID=widgetID, TITLE=titl
    IF count EQ 0 THEN RETURN
 
    ; Check the match criteria.
-   IF N_Elements(selectMatch) NE 0 THEN BEGIN
-       IF Size(selectMatch, /TNAME) EQ 'OBJREF' THEN object = 1
-       IF Size(selectMatch, /TNAME) EQ 'STRING' THEN title = 1
+   IF N_Elements(selection) NE 0 THEN BEGIN
+       IF Size(selection, /TNAME) EQ 'OBJREF' THEN object = 1
+       IF Size(selection, /TNAME) EQ 'STRING' THEN title = 1
    ENDIF
    
    ; Get the window list.
@@ -112,26 +112,26 @@ PRO cgDelete, selectMatch, ALL=all, OBJECT=object, WIDGETID=widgetID, TITLE=titl
    CASE 1 OF
    
         Keyword_Set(widgetID): BEGIN
-            IF N_Elements(selectMatch) EQ 0 THEN selectMatch = tlb[count-1]
-            index = Where(tlb EQ selectMatch, selectCount)
+            IF N_Elements(selection) EQ 0 THEN selection = tlb[count-1]
+            index = Where(tlb EQ selection, selectCount)
             IF selectCount EQ 0 THEN Message, 'No cgWindow matches the selection criteria.'
             END
             
         Keyword_Set(object): BEGIN
-            IF N_Elements(selectMatch) EQ 0 THEN selectMatch = objref[count-1]
-            index = Where(objref EQ selectMatch, selectCount)
+            IF N_Elements(selection) EQ 0 THEN selection = objref[count-1]
+            index = Where(objref EQ selection, selectCount)
             IF selectCount EQ 0 THEN Message, 'No cgWindow matches the selection criteria.'
             END
             
         Keyword_Set(title): BEGIN
-            IF N_Elements(selectMatch) EQ 0 THEN selectMatch = title[count-1]
-            index = Where(StrUpCase(titles) EQ StrUpCase(selectMatch), selectCount)
+            IF N_Elements(selection) EQ 0 THEN selection = title[count-1]
+            index = Where(StrUpCase(titles) EQ StrUpCase(selection), selectCount)
             IF selectCount EQ 0 THEN Message, 'No cgWindow matches the selection criteria.'
             END
 
         ELSE: BEGIN
-            IF N_Elements(selectMatch) EQ 0 THEN selectMatch = wid[count-1]
-            index = Where(wid EQ selectMatch, selectCount)
+            IF N_Elements(selection) EQ 0 THEN selection = wid[count-1]
+            index = Where(wid EQ selection, selectCount)
             IF selectCount EQ 0 THEN Message, 'No cgWindow matches the selection criteria.'
             END
    

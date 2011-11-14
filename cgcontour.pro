@@ -124,8 +124,8 @@
 ;     overplot: in, optional, type=boolean
 ;        Set this keyword to overplot the contours onto a previously established
 ;        data coordinate system.
-;     palette: in, optional, type=bytarr(256,3)
-;        A color palette containing the RGB color vectors to use for coloring contours.
+;     palette: in, optional, type=byte
+;        A (256x3) color palette containing the RGB color vectors to use for coloring contours.
 ;        Contour colors will be sampled from the color table palette into the number 
 ;        of contour levels required. If the palette is NOT 256 elements in length, then
 ;        it is assumed that the length corresponds to the number of levels to be contoured.
@@ -145,7 +145,7 @@
 ;        If unused in the program, set to 1 to force exact axis scaling.
 ;     ystyle: in, optional, type=integer, default=1
 ;        If unused in the program, set to 1 to force exact axis scaling.
-;     _extra: in, optional, type=any
+;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Contour command is allowed in the program.
 ;
 ; :Examples:

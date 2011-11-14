@@ -93,7 +93,7 @@
 ;     noerase: in, optional, type=boolean, default=0
 ;        Set this keyword to prevent the window from erasing the contents before displaying
 ;        the surface plot.
-;     palette: in, optional, type=bytarr(3,N)
+;     palette: in, optional, type=byte
 ;         Set this keyword to a 3 x N or N x 3 byte array containing the RGB color vectors 
 ;         to be loaded before the surface is displayed. Such vectors can be obtained, for 
 ;         example, from cgLoadCT with the RGB_TABLE keyword:
@@ -138,7 +138,7 @@
 ;         The normal YSTYLE keyword.
 ;     zstyle: in, hidden
 ;         The normal ZSTYLE keyword.
-;     _extra: in, optional, type=any
+;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot command is allowed in the program.
 ;
 ; :Examples:

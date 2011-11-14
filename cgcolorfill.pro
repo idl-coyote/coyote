@@ -63,11 +63,11 @@
 ;         table.
 ;     device: in, optional, type=boolean, default=0
 ;         Set to indicate the polygon vertices are in device coordinates.
-;     normalized: in, optional, type=boolean, default=0
+;     normal: in, optional, type=boolean, default=0
 ;         Set to indicate the polygon vertices are in normalized coordinates.
 ;     window: in, optional, type=boolean, default=0
 ;         Set this keyword to add the command to the current cgWindow application.
-;     _extra: in, optional, type=appropriate
+;     _ref_extra: in, optional, type=appropriate
 ;         Any other keywords to the IDL POLYFILL command may be used.
 ;     
 ;          

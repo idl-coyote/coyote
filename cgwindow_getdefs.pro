@@ -64,7 +64,7 @@
 ;         The transparent background setting.
 ;     multi: out, optional, type=Intarr(5)
 ;         The !P.MULTI setting for the window.
-;     palette: out, optional, type=BytArr(N,3)
+;     palette: out, optional, type=byte
 ;         The window color palette.
 ;     ps_decomposed: out, optional, type=boolean
 ;         The PostScript decomposed status of the window.

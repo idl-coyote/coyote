@@ -49,9 +49,9 @@
 ;    Graphics
 ;    
 ; :Params:
-;    xsize: in, optional, type=integer, default=640
+;    pxsize: in, optional, type=integer, default=640
 ;         The X size of the graphics window created. By default, 640.
-;    ysize: in, optional, type=integer, default=512
+;    pysize: in, optional, type=integer, default=512
 ;         The Y size of the graphics window created. By default, 512.
 ;         
 ; :Keywords:
@@ -66,10 +66,10 @@
 ;    wid: in, optional, type=integer, default=0
 ;         The window index number of the IDL graphics window to create.
 ;    xsize: in, optional, type=integer, default=640
-;         The X size of the graphics window created. By default, 640. The XSIZE parameter 
+;         The X size of the graphics window created. By default, 640. The PXSIZE parameter 
 ;         is used in preference to the XSIZE keyword value.
 ;    ysize: in, optional, type=integer, default=512
-;         The Y size of the graphics window created. By default, 512. The YSIZE parameter 
+;         The Y size of the graphics window created. By default, 512. The PYSIZE parameter 
 ;         is used in preference to the YSIZE keyword value.
 ;     _extra: in, optional, type=any
 ;         Any keywords supported by the WINDOW command are allowed.

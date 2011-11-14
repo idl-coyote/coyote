@@ -43,12 +43,12 @@
 ;    Graphics
 ;    
 ; :Keywords:
+;     count: out, optional, type=long
+;         The number of cgWindow applications currently on the display.
 ;     current: in, optional, type=boolean
 ;         If set, the current cgWindow application information is returned in the result
 ;         of the function and in the information keywords.
-;     count: out, optional, type=long
-;         The number of cgWindow applications currently on the display.
-;     dimensions: out, optional, type=intarr(2,count)
+;     dimensions: out, optional, type=integer
 ;         The dimensions of the ctWindow application, [xdim, ydim, n].
 ;     objectref: out, optional, type=object
 ;         A vector of FSC_CMDWINDOW object references for each cgWindow application currently 

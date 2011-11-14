@@ -42,9 +42,6 @@
 ; :Categories:
 ;    Graphics, Utilities
 ;    
-; :Params:
-;    None.
-;       
 ; :Keywords:
 ;     adjustsize: in, optional, type=boolean, default=0
 ;        If this keyword is set, the output character size is adjusted to

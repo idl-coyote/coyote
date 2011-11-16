@@ -298,6 +298,9 @@ END
 ;       theText :    The message text you wish to add to the file. 
 ;
 ; KEYWORDS:
+; 
+;       ADD_CALLER:   If this keyword is set, the name of the caller routine is
+;                     prepended to the text message.
 ;
 ;       PRINT:        If this keyword is set, the added text is also sent to standard
 ;                     output.

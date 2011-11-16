@@ -132,7 +132,7 @@ PRO cgCoord::Draw, _EXTRA=extra
    
    ; Shouldn't be getting keywords here.
    IF N_Elements(extra) NE 0 THEN BEGIN
-       Message, 'Received unexpected keywords.', /Infomational
+       Message, 'Received unexpected keywords.', /Informational
        Help, extra
    ENDIF
 

@@ -164,7 +164,7 @@ FUNCTION ClipScl, image, clip, $
    IF (maxIndex EQ -1) || (maxIndex EQ N_Elements(cumTotal)) || (maxIndex EQ minIndex) THEN BEGIN
        threshold = [minr, maxr]
        Message, 'Image histogram could not be clipped successfully. Image is byte scaled.', /Informational
-       IF Keyword_Set(negative) THEN RETURN, 255B - BytScl(image) ELSE RETURN, BytScl(image)
+       IF Keyword_Set(negative) THEN RETURN, 255B - BytScl(image, /NAN) ELSE RETURN, BytScl(image, /NAN)
    ENDIF
    
    ; If you are still here, try to clip the histogram.

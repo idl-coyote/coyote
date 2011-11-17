@@ -350,6 +350,9 @@
 ;       And now a TITLE keyword! What the devil is going on!? 29 Aug 2011.
 ;       Very slight modifications to image size and start position so that the image is
 ;          positioned completely inside the axes. 30 Sept 2011. DWF.
+;       Fitting the image inside the axes causes image matching problems (and lines!) in
+;          other programs, so I've decided to only do positioning inside axes when the
+;          user asks for this capability by setting the FIT_INSIDE keyword. 16 Nov 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
@@ -523,6 +526,7 @@ PRO cgImage, image, x, y, $
    CHARSIZE=charsize, $
    COLOR=color, $
    ERASE=obsolte_erase, $ ; Added for compatibility with TVIMAGE.
+   FIT_INSIDE=fit_inside, $
    FONT=font, $
    INTERPOLATE=interp, $
    KEEP_ASPECT_RATIO=keep_aspect, $
@@ -603,6 +607,7 @@ PRO cgImage, image, x, y, $
                BOTTOM=bottom, $
                CHARSIZE=charsize, $
                COLOR=color, $
+               FIT_INSIDE=fit_inside, $
                FONT=font, $
                INTERPOLATE=interp, $
                KEEP_ASPECT_RATIO=keep_aspect, $
@@ -645,6 +650,7 @@ PRO cgImage, image, x, y, $
                BOTTOM=bottom, $
                CHARSIZE=charsize, $
                COLOR=color, $
+               FIT_INSIDE=fit_inside, $
                FONT=font, $
                INTERPOLATE=interp, $
                KEEP_ASPECT_RATIO=keep_aspect, $
@@ -1145,14 +1151,16 @@ PRO cgImage, image, x, y, $
     oposition = position
     
     ; Calculate the image size and start locations. The plus and minus
-    ; 1 values are designed to keep the image completely inside the axes.
+    ; factor values are designed to keep the image completely inside the axes.
     ; In other words, if you draw the axes first, then put the image in
     ; the display window, the axes should remain visible and not be covered
-    ; up by the image.
-    xsize = Ceil((position[2] - position[0]) * !D.X_VSIZE)-1
-    ysize = Ceil((position[3] - position[1]) * !D.Y_VSIZE)-1
-    xstart = Round(position[0] * !D.X_VSIZE)+1
-    ystart = Round(position[1] * !D.Y_VSIZE)+1
+    ; up by the image. Do this only if the user requests it with the FIT_INSIDE
+    ; keyword.
+    IF Keyword_Set(fit_inside) THEN factor = 1 ELSE factor = 0
+    xsize = Ceil((position[2] - position[0]) * !D.X_VSIZE) - factor
+    ysize = Ceil((position[3] - position[1]) * !D.Y_VSIZE) - factor
+    xstart = Round(position[0] * !D.X_VSIZE) + factor
+    ystart = Round(position[1] * !D.Y_VSIZE) + factor
     
     ; Display the image. Sizing different for scalable pixels devices.
     IF (!D.Flags AND 1) NE 0 THEN BEGIN

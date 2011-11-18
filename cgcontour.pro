@@ -230,6 +230,7 @@
 ;            code. 3 Oct 2011. DWF.
 ;        Change from 15 Sept 2011 forgot to include the possibility of pixmap windows. Algorithm
 ;            made more robust. 27 Oct 2011. DWF.
+;        There was a problem with axes when plotting contours in 3D that has been fixed. 18 Nov 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -252,6 +253,7 @@ PRO cgContour, data, x, y, $
     LAYOUT=layout, $
     LEVELS=levels, $
     NLEVELS=nlevels, $
+    NOCLIP=noclip, $
     NOERASE=noerase, $
     MISSINGVALUE=missingvalue, $
     ONIMAGE=onImage, $
@@ -259,6 +261,7 @@ PRO cgContour, data, x, y, $
     PALETTE=palette, $
     POSITION=position, $
     RESOLUTION=resolution, $
+    T3D=t3d, $
     TRADITIONAL=traditional, $
     WINDOW=window, $
     XSTYLE=xstyle, $
@@ -271,6 +274,7 @@ PRO cgContour, data, x, y, $
     YTICKLEN=yticklen, $
     YTICKV=ytickv, $
     YTICKS=yticks, $
+    ZVALUE=zvalue, $
     _REF_EXTRA=extra
     
     Compile_Opt idl2
@@ -312,12 +316,14 @@ PRO cgContour, data, x, y, $
                 CELL_FILL=cell_fill, $
                 CHARSIZE=charsize, $
                 COLOR=scolor, $
+                FONT=font, $
                 FILL=fill, $
                 IRREGULAR=irregular, $
                 LABEL=label, $
                 LAYOUT=layout, $
                 LEVELS=levels, $
                 NLEVELS=nlevels, $
+                NOCLIP=noclip, $
                 NOERASE=noerase, $
                 MISSINGVALUE=missingvalue, $
                 ONIMAGE=onimage, $
@@ -325,6 +331,7 @@ PRO cgContour, data, x, y, $
                 PALETTE=palette, $
                 POSITION=position, $
                 RESOLUTION=resolution, $
+                T3D=t3d, $
                 TRADITIONAL=traditional, $
                 XSTYLE=xstyle, $
                 XTHICK=xthick, $
@@ -336,6 +343,7 @@ PRO cgContour, data, x, y, $
                 YTICKLEN=yticklen, $
                 YTICKV=ytickv, $
                 YTICKS=yticks, $
+                ZVALUE=zvalue, $
                 ADDCMD=1, $
                 _Extra=extra
              RETURN
@@ -353,12 +361,14 @@ PRO cgContour, data, x, y, $
             CELL_FILL=cell_fill, $
             CHARSIZE=charsize, $
             COLOR=scolor, $
+            FONT=font, $
             FILL=fill, $
             IRREGULAR=irregular, $
             LABEL=label, $
             LAYOUT=layout, $
             LEVELS=levels, $
             NLEVELS=nlevels, $
+            NOCLIP=noclip, $
             NOERASE=noerase, $
             MISSINGVALUE=missingvalue, $
             ONIMAGE=onimage, $
@@ -366,6 +376,7 @@ PRO cgContour, data, x, y, $
             PALETTE=palette, $
             POSITION=position, $
             RESOLUTION=resolution, $
+            T3D=t3d, $
             TRADITIONAL=traditional, $
             XSTYLE=xstyle, $
             XTHICK=xthick, $
@@ -377,6 +388,7 @@ PRO cgContour, data, x, y, $
             YTICKLEN=yticklen, $
             YTICKV=ytickv, $
             YTICKS=yticks, $
+            ZVALUE=zvalue, $
             REPLACECMD=replaceCmd, $
             _Extra=extra
             
@@ -414,6 +426,7 @@ PRO cgContour, data, x, y, $
 
     ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font
+    IF Keyword_Set(t3d) && (!D.Name EQ 'PS') THEN font = -1
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     IF N_Elements(c_charsize) EQ 0 THEN c_charsize = charsize * 0.75
     
@@ -619,6 +632,12 @@ PRO cgContour, data, x, y, $
     IF N_Elements(nlevels) EQ 0 THEN BEGIN
         IF N_Elements(levels) EQ 0 THEN nlevels = 6 ELSE nlevels = N_Elements(levels)
     ENDIF    
+    t3d = Keyword_Set(t3d)
+    IF t3d THEN BEGIN
+        IF N_Elements(zvalue) EQ 0 THEN zvalue = 0
+        IF N_Elements(noclip) EQ 0 THEN noclip = 1
+    ENDIF
+    noclip = Keyword_Set(noclip)
     IF N_Elements(xstyle) EQ 0 THEN xstyle=1
     IF N_Elements(ystyle) EQ 0 THEN ystyle=1
     IF N_Elements(missingvalue) NE 0 THEN BEGIN
@@ -730,9 +749,9 @@ PRO cgContour, data, x, y, $
                     ; Draw the plot that doesn't draw anything.
                      Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
                         BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=xstyle, $
-                        POSITION=position, _STRICT_EXTRA=extra, XTHICK=xthick, YTHICK=ythick, $
+                        POSITION=position, _STRICT_EXTRA=extra, T3D=t3d, XTHICK=xthick, YTHICK=ythick, $
                         FONT=font, /NODATA, C_CHARSIZE=c_charsize, XTICKV=xtickv, XTICKS=xticks, $
-                        YTICKV=ytickv, YTICKS=yticks
+                        YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip
                     
                     ; Save the "after plot" system variables. Will use later. 
                     afterx = !X
@@ -768,19 +787,19 @@ PRO cgContour, data, x, y, $
 
         Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
             BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
-            POSITION=position, _STRICT_EXTRA=extra, /NODATA, NOERASE=tempNoErase, $
+            POSITION=position, _STRICT_EXTRA=extra, T3D=t3d, /NODATA, NOERASE=tempNoErase, $
             XTHICK=xthick, YTHICK=ythick, FONT=font, C_CHARSIZE=c_charsize, $
             XTICKLEN=xticklen, YTICKLEN=yticklen, XTICKV=xtickv, XTICKS=xticks, $
-            YTICKV=ytickv, YTICKS=yticks
+            YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip
                     
     ENDIF
     
     ; This is where we actually draw the data. 
     Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
        LEVELS=levels, C_Labels=c_labels, C_COLORS=con_colors, XTHICK=xthick, YTHICK=ythick, $
-       POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, CHARSIZE=charsize, $
+       POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, T3D=t3d, CHARSIZE=charsize, $
        FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize, XTICKLEN=xticklen, YTICKLEN=yticklen, $
-       XTICKV=xtickv, XTICKS=xticks, YTICKV=ytickv, YTICKS=yticks
+       XTICKV=xtickv, XTICKS=xticks, YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip
         
     ; If this is the first plot in PS, then we have to make it appear that we have
     ; drawn a plot, even though we haven't.
@@ -793,13 +812,13 @@ PRO cgContour, data, x, y, $
     ; If we filled the contour plot, we need to repair the axes. 
     IF ~Keyword_Set(overplot) AND (Keyword_Set(fill) OR Keyword_Set(cell_fill)) THEN BEGIN  
        cgAxis, XAXIS=0, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle, $
-          XTICKV=xtickv, XTICKS=xticks, XTICKLEN=xticklen
+          XTICKV=xtickv, XTICKS=xticks, XTICKLEN=xticklen, T3D=t3D, ZVALUE=zvalue
        cgAxis, XAXIS=1, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle, $
-          XTICKV=xtickv, XTICKS=xticks, XTICKLEN=xticklen
+          XTICKV=xtickv, XTICKS=xticks, XTICKLEN=xticklen, T3D=t3D, ZVALUE=zvalue
        cgAxis, YAXIS=0, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)', YSTYLE=ystyle, $
-          YTICKV=ytickv, YTICKS=yticks, YTICKLEN=yticklen
+          YTICKV=ytickv, YTICKS=yticks, YTICKLEN=yticklen, T3D=t3D, ZVALUE=zvalue
        cgAxis, YAXIS=1, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)', YSTYLE=ystyle, $
-          YTICKV=ytickv, YTICKS=yticks, YTICKLEN=yticklen
+          YTICKV=ytickv, YTICKS=yticks, YTICKLEN=yticklen, T3D=t3D, ZVALUE=zvalue
     ENDIF
     
     ; Restore the decomposed color state if you can.

@@ -94,6 +94,15 @@
 ;     
 ;     CHARSIZE: Sets the character size. Used only if the AXES keyword is also set.
 ;               By default, the value from cgDefCharsize().
+;               
+;     FIT_INSIDE: Set this keyword if you want the image to be positioned inside the
+;               image axes. Normally, the image axes are placed over the top of the
+;               first and last column and row of the image. Often, this is a detail
+;               that doesn't matter in the slightest, but when it does matter, it is
+;               extremely important. Always fitting the image inside the axes causes
+;               problems when I want to stitch images together or warp an image to
+;               a map projection, etc. So, I have decided you can have your cake and
+;               eat it, too, by just setting this keyword.
 ;
 ;     FONT:     Set this to the type of font wanted on axis annotation. By default
 ;               FONT = !P.Font. Used only if the AXES keyword is also set.

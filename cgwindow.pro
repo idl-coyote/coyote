@@ -44,123 +44,54 @@
 ;  files. If ImageMagick is installed on your machine, the raster image files can be 
 ;  created in very high quality from PostScript files.
 ;
+;  The program is designed to work with any IDL traditional graphics routine
+;  that is a procedure and includes no more than three positional parameters.
+;  Any number of keywords can be used to specify properties of the graphical
+;  output. Any number of graphics commands can be "added" the the cgWindow.
+;  Simply use the ADDCMD keyword to add commands.
+;  
+;  If your program does not load its own color tables, the color tables in
+;  effect when cgWindow is first called are used to display the graphics
+;  commands.
+;    
+;  To create PostScript output from within cgWindow, your graphics program
+;  has to be written in such a way that it can work properly in the PostScript
+;  device. This means there are no Window commands, WSet commands, and the like
+;  that are not allowed in the PostScript device. Such commands are allowed in 
+;  programs, of course, if they are "protected". Usually such protection looks 
+;  like this:
+;  
+;     IF (!D.Flags AND 256) NE 0 THEN Window, ...
+;     
+;   cgDisplay is a good program for opening graphics "windows", because such
+;   PostScript protection is built into the program. In a PostScript device,
+;   cgDisplay produces a "window" with the same aspect ratio as the current
+;   dislay graphics window, which is an aid in producing PostScript output that
+;   looks like the same output in the display window.
+;   
+;   Much better looking raster files can be created from the cgWindow contents,
+;   if the raster files are created by converting PostScript files to the raster 
+;   file. If the ImageMagick "convert" command can be found on your machine, you
+;   will have the option to create raster files using this method. I *highly*
+;   recommend doing so, as fonts and other plot annotation will be of much higher
+;   quality using this method.
+;   
+;   cgWindow has been designed to work with other Coyote Graphics routines: cgPlot,
+;   cgContour, cgSurf, and so on, although I expect it to work with any IDL
+;   traditional graphics routine, if the routine is well written.
+;        
 ; :Categories:
 ;    Graphics
 ;    
-; :Examples:
-;    Test code::
-;       data = cgDemoData(17)
-;       cgWindow, 'cgPlot', data, COLOR='red'
-;       cgWindow, 'cgPlot', data, PSYM=2, /Overplot, COLOR='dodger blue', /AddCmd
-;       cgWIndow, 'cgPlot', cgDemoData(17), color='olive', linestyle = 2, /Overplot, /AddCmd
-;       cgWindow, /ListCmd
-;       cgWindow, 'cgPlot', data, COLOR='purple', /ReplaceCMD, CMDINDEX=0
-;       
-;       Additional examples can be found here:
-;       
-;          http://www.idlcoyote.com/graphics_tips/cgwindow.html
-;          
-;    Example using different keyword parameters for the display and PostScript output.
-;    
-;    IDL> cgPlot, cgDemoData(1), /WINDOW, $
-;           THICK=1.0, XTITLE='Distance (' + Greek('mu') + 'm)', $
-;           ALTPS_KEYWORDS={THICK:4.0, XTITLE:'Distance (' + Greek('mu', /PS) + 'm)'}
-;           
-;    Example using different positional parameters.
-;    
-;    IDL> cgText, 0.20, 0.85, /Normal, 'Line of Text', ALIGNMENT=0.0, $
-;           ALTPS_KEYWORDS={ALIGNMENT:1.0}, ALTPS_PARAMS={P1:0.88}, /ADDCMD
-;           
-;    Additional examples can be found here:
-;    
-;        http://www.idlcoyote.com/cg_tips/kwexpressions.php
-;           
-; :File_comments:
-;    
-;       The program is designed to work with any IDL traditional graphics routine
-;       that is a procedure and includes no more than three positional parameters.
-;       Any number of keywords can be used to specify properties of the graphical
-;       output. Any number of graphics commands can be "added" the the cgWindow.
-;       Simply use the ADDCMD keyword to add commands.
-;       
-;       If your program does not load its own color tables, the color tables in
-;       effect when cgWindow is first called are used to display the graphics
-;       commands.
-;    
-;       To create PostScript output from within cgWindow, your graphics program
-;       has to be written in such a way that it can work properly in the PostScript
-;       device. This means there are no Window commands, WSet commands, and the like
-;       that are not allowed in the PostScript device. Such commands are allowed in 
-;       programs, of course, if they are "protected". Usually such protection looks 
-;       like this:
-;       
-;          IF (!D.Flags AND 256) NE 0 THEN Window, ...
-;          
-;        cgDisplay is a good program for opening graphics "windows", because such
-;        PostScript protection is built into the program. In a PostScript device,
-;        cgDisplay produces a "window" with the same aspect ratio as the current
-;        dislay graphics window, which is an aid in producing PostScript output that
-;        looks like the same output in the display window.
-;        
-;        Much better looking raster files can be created from the cgWindow contents,
-;        if the raster files are created by converting PostScript files to the raster 
-;        file. If the ImageMagick "convert" command can be found on your machine, you
-;        will have the option to create raster files using this method. I *highly*
-;        recommend doing so, as fonts and other plot annotation will be of much higher
-;        quality using this method.
-;        
-;        cgWindow has been designed to work with other Coyote Graphics routines: cgPlot,
-;        cgContour, cgSurf, and so on, although I expect it to work with any IDL
-;        traditional graphics routine, if the routine is well written.
-;        
 ; :Author:
-;       FANNING SOFTWARE CONSULTING::
-;           David W. Fanning 
-;           1645 Sheely Drive
-;           Fort Collins, CO 80526 USA
-;           Phone: 970-221-0438
-;           E-mail: david@idlcoyote.com
-;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning 
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
-; :History:
-;     Change History::
-;        Written, 17 January 2011. DWF.
-;        Fixed a problem with the example code, and added EMPTY to end of Draw method
-;           to force UNIX machines to empty the graphics buffer after CALL_PROCEDURE. 20 Jan 2011. DWF.
-;        Improved documentation and error handling. 19 Jan 2011. DWF.
-;        More improved error handling and messages. 26 Jan 2011. DWF.
-;        Made changes to accommodate the new cgControl routine. 27 Jan 2011. DWF.
-;        Added WXOMARGIN and WYOMARGIN keywords. 28 Jan 2011. DWF.
-;        Numerous changes leading up to official release. 4 Feb 2011. DWF.
-;        Added workaround for UNIX bug for draw widget creation. 5 Feb 2011. DWF.
-;        Corrected a window aspect ratio problem with PostScript output by making the
-;           window the current window before calling PS_Start. 17 Feb 2011. DWF.
-;        Added machinery for programmatically generating raster files. 18 Feb 2011. Jeremy Bailin.
-;        Problem with restoring visualizations fixed. 6 March 2011. DWF.
-;        Fixed a problem with CALL_METHOD, which requires one positional parameter. 8 March 2011. DWF.
-;        Added the ability to set and unset adjustable text size in the window. 24 April 2011. DWF.
-;        Fixed a problem in the ReplaceCommand method that had input parameters reversed. 6 May 2011. DWF.
-;        Added the ability to set the dimensions of the draw widget programmatically. 14 June 2011.
-;        Added the keywords EvalKeywords and EvalParams to allow evaluation of command parameters and
-;            keywords at run-time. See http://www.idlcoyote.com/cg_tips/kwexpressions.php for
-;            additional details and explanations of how these keywords should be used. 2 Aug 2011.
-;        Problem dereferencing a null pointer in DRAW method fixed. 3 Aug 2011. DWF.
-;        Changes to handle inability to create raster files from PS encapsulated files in 
-;           landscape mode. 26 Aug 2011. DWF.
-;        Added ability to set PostScript color mode. 30 Aug 2011. DWF.
-;        The method I was using for evaluating keyword and argument parameters at run-time
-;            was just WAY too complicated and difficult to use. I have eliminated this
-;            method (along with the EvalKeywords and EvalParams) in favor of a method that
-;            allows the user to supply alternative values to use in the PostScript device.
-;            This uses keywords AltPS_Keywords and AltPS_Params to collect these alternative
-;            arguments in structures that can be used at run-time to supply alternative values.
-;            As before, this is explained in detail at http://www.idlcoyote.com/cg_tips/kwexpressions.php.
-;            1 Sept 2011. DWF.
-;         Missed a couple of places to set decomposition color mode. 7 Sept 2011. DWF.
-;         Fixed a problem with improper filename when creating raster file vis
-;             Imagemagick via cgControl. 10 Oct 2011. DWF.
-;         Added WASPECT keyword to allow window aspect ratio to be set. 9 Nov 2011. DWF.
-;         
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
@@ -609,6 +540,11 @@ END ;---------------------------------------------------------------------------
 ;        The name of the keyword you would like to retrieve from the command.
 ;     cmdindex: in, required, type=integer
 ;        The index number of the command you wish to retrieve the keyword from.
+;        
+; :Keywords:
+;     success: out, optional, type=boolean
+;         If the program can successfully get the keyword, this variable will
+;         contain the value 1. Otherwise, it will contain the value 0.
 ;-
 FUNCTION FSC_CmdWindow::GetCommandKeyword, keyword, cmdIndex, SUCCESS=success
 
@@ -1684,6 +1620,21 @@ PRO FSC_CmdWindow__Define, class
 END ;----------------------------------------------------------------------------------------------------------------
 
 
+;+
+; This procedure builds a command structure and saves the structure
+; to the main IDL level. Its purpose is to allow the user to work
+; with restored commands independently of the window interface.
+;
+; :Params:
+;     structname: in, optional, type=string, default="cmd"
+;         The name of the command structure to be saved at the 
+;         main IDL level.
+;
+; :Keywords:
+;     quiet: in, optional, type=boolean
+;         If set, the message indicated where the variable was saved
+;         and what its name is is not printed in the IDL command window.
+;-
 PRO FSC_Window_Command::CreateCommandStruct, structName, Quiet=quiet
 
     Compile_Opt idl2
@@ -1719,6 +1670,9 @@ PRO FSC_Window_Command::CreateCommandStruct, structName, Quiet=quiet
 END ;----------------------------------------------------------------------------------------------------------------
 
 
+;+
+; This procedure makes and returns a copy of a command object.
+;-
 FUNCTION FSC_Window_Command::Copy
 
     IF Ptr_Valid(self.keywords) THEN BEGIN
@@ -1746,6 +1700,15 @@ FUNCTION FSC_Window_Command::Copy
 END ;----------------------------------------------------------------------------------------------------------------
 
 
+;+
+; This procedure returns the keyword in a command object, if there
+; are any keywords.
+;
+; :Keywords:
+;     has_keywords: out, optional, type=boolean
+;         If set to 1, the function returned keywords. If set to 0,
+;         there were no keywords in the command to return.
+;-
 FUNCTION FSC_Window_Command::Get_Keywords, HAS_KEYWORDS=has_keywords
     IF Ptr_Valid(self.keywords) THEN BEGIN
         has_keywords = 1
@@ -1869,11 +1832,20 @@ END ;---------------------------------------------------------------------------
 
 
 
-;
-; :Description:
-;     This method evaluates a keyword structure and creates a new keyword list
-;     with the evaluated values.
-;
+;+
+; This method replaces stored keyword values with alternative keyword values, if they
+; are available. The return variable is a list of the keywords with the
+; alternative values substituted for the stored values.
+;     
+; :Params:
+;    keywords: in, required, type=structure
+;       The list of input keywords.
+;       
+; :Keywords:
+;     success: out, optional, type=boolean
+;         If the command executed successfully, return a 1. Otherwise
+;         return a 0.
+;-
 FUNCTION FSC_Window_Command::EvaluateKeywords, keywords, SUCCESS=success
 
   ; Error handling.
@@ -1936,6 +1908,15 @@ FUNCTION FSC_Window_Command::EvaluateKeywords, keywords, SUCCESS=success
 END ;----------------------------------------------------------------------------------------------------------------
 
 
+;+
+; This method lists the current command by printing a representation
+; of the command in the command log window.
+;     
+; :Params:
+;    prefix: in, optional, type=string
+;       A prefix for the printed command (e.g., an index number, etc.).
+;       
+;-
 PRO FSC_Window_Command::List, prefix
 
     Compile_Opt idl2
@@ -1967,7 +1948,9 @@ PRO FSC_Window_Command::List, prefix
     Print, prefix + cmdString
 END ;----------------------------------------------------------------------------------------------------------------
 
-
+;+
+; The clean-up routine for the command object.
+;-
 PRO FSC_Window_Command::Cleanup
     Ptr_Free, self.p1
     Ptr_Free, self.p2
@@ -1978,12 +1961,37 @@ PRO FSC_Window_Command::Cleanup
 END ;----------------------------------------------------------------------------------------------------------------
 
 
+;+
+; The initialization routine for the command object.
+; 
+; :Keywords:
+;   altps_keywords: in, optional, type=structure
+;       A structure of alternative keyword names and values to be used
+;       when the PostScript device is the current graphics device.
+;   altps_params: in, optional, type=structure
+;       A structure of alternative parameters and values to be used
+;       when the PostScript device is the current graphics device.
+;   command: in, required, type=string
+;       The command that is being stored in the command object.
+;   keywords: in, optional, type=structure
+;        A structure containing keyword:value pairs to be executed
+;        with the command.
+;    P1: in, optional, type=varies
+;        The first positional parameter of the command being stored
+;        in the structure.
+;    P2: in, optional, type=varies
+;        The second positional parameter of the command being stored
+;        in the structure.
+;    P3: in, optional, type=varies
+;        The third positional parameter of the command being stored
+;        in the structure.
+;-
 FUNCTION FSC_Window_Command::INIT, $
+    ALTPS_KEYWORDS=altps_keywords, $
+    ALTPS_PARAMS=altps_params, $
     COMMAND=command, $
-    P1=p1, P2=p2, P3=p3, $
     KEYWORDS=keywords, $
-    AltPS_Keywords=altps_keywords, $
-    AltPS_Params=altps_params, $
+    P1=p1, P2=p2, P3=p3, $
     TYPE=type
     
     Compile_Opt idl2
@@ -2009,7 +2017,9 @@ FUNCTION FSC_Window_Command::INIT, $
     
 END ;----------------------------------------------------------------------------------------------------------------
 
-
+;+
+; The class definition module for the FSC_Window_Command object.
+;-
 PRO FSC_Window_Command__Define
 
    ; The definition of the command object.
@@ -2027,6 +2037,10 @@ PRO FSC_Window_Command__Define
 END ;----------------------------------------------------------------------------------------------------------------
 
 
+;+
+; The structure definition module for structure that is stored
+; on the window manager list.
+;-
 PRO FSC_Window_ID__Define
 
    struct = { FSC_WINDOW_ID, $
@@ -2039,19 +2053,12 @@ END ;---------------------------------------------------------------------------
 
 
 ;+
-; :Name
-;     cgWindow
-;     
-; :Description:
 ;   Creates a resizeable graphics window for IDL traditional commands (Plot, Contour, 
 ;   Surface, etc. or for Coyote Graphics routines, cgPlot, cgContour, cgSurf, etc.). 
 ;   In addition, the window contents can be saved as PostScript files or as raster image 
 ;   files. If ImageMagick is installed on your machine, the raster image files can be 
 ;   created in very high quality from PostScript files.
 ;
-; :Categories:
-;    Graphics
-;    
 ; :Params:
 ;    command: in, required, type=string
 ;       The graphics procedure command to be executed. This parameter
@@ -2190,52 +2197,6 @@ END ;---------------------------------------------------------------------------
 ;    
 ;        http://www.idlcoyote.com/cg_tips/kwexpressions.php
 ;           
-; :File_comments:
-;       The program is designed to work with any IDL traditional graphics routine
-;       that is a procedure and includes no more than three positional parameters.
-;       Any number of keywords can be used to specify properties of the graphical
-;       output. Any number of graphics commands can be "added" the the cgWindow.
-;       Simply use the ADDCMD keyword to add commands.
-;       
-;       If your program does not load its own color tables, the color tables in
-;       effect when cgWindow is first called are used to display the graphics
-;       commands.
-;    
-;       To create PostScript output from within cgWindow, your graphics program
-;       has to be written in such a way that it can work properly in the PostScript
-;       device. This means there are no Window commands, WSet commands, and the like
-;       that are not allowed in the PostScript device. Such commands are allowed in 
-;       programs, of course, if they are "protected". Usually such protection looks 
-;       like this:
-;       
-;          IF (!D.Flags AND 256) NE 0 THEN Window, ...
-;          
-;        cgDisplay is a good program for opening graphics "windows", because such
-;        PostScript protection is built into the program. In a PostScript device,
-;        cgDisplay produces a "window" with the same aspect ratio as the current
-;        dislay graphics window, which is an aid in producing PostScript output that
-;        looks like the same output in the display window.
-;        
-;        Much better looking raster files can be created from the cgWindow contents,
-;        if the raster files are created by converting PostScript files to the raster 
-;        file. If the ImageMagick "convert" command can be found on your machine, you
-;        will have the option to create raster files using this method. I *highly*
-;        recommend doing so, as fonts and other plot annotation will be of much higher
-;        quality using this method.
-;        
-;        cgWindow has been designed to work with other Coyote Graphics routines: cgPlot,
-;        cgContour, cgSurf, and so on, although I expect it to work with any IDL
-;        traditional graphics routine, if the routine is well written.
-;        
-; :Author:
-;       FANNING SOFTWARE CONSULTING::
-;           David W. Fanning 
-;           1645 Sheely Drive
-;           Fort Collins, CO 80526 USA
-;           Phone: 970-221-0438
-;           E-mail: david@idlcoyote.com
-;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-;
 ; :History:
 ;     Change History::
 ;        Written, 17 January 2011. DWF.
@@ -2273,10 +2234,7 @@ END ;---------------------------------------------------------------------------
 ;         Missed a couple of places to set decomposition color mode. 7 Sept 2011. DWF.
 ;         Fixed a problem with improper filename when creating raster file vis
 ;             Imagemagick via cgControl. 10 Oct 2011. DWF.
-;         Added WASPECT keyword to allow window aspect ratio to be set. 9 Nov 2011. DWF.
-;         
-; :Copyright:
-;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;         Added WASPECT keyword to allow window aspect ratio to be set. 9 Nov 2011. DWF.   
 ;-
 PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.

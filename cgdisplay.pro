@@ -95,6 +95,11 @@
 ;        Moved the window index argument to the WID keyword. 9 Dec 2010. DWF.
 ;        Modified to produce a window in PostScript and the Z-buffer, too. 15 Dec 2010. DWF.
 ;        Added the FREE keyword. 3 January 2011. DWF.
+;        I made a change that allows you to call cgDisplay inside a program that is
+;           going to be added to a cgWindow. The program will not open a graphics window
+;           if the current graphics window ID is found in a list of cgWindow window IDs.
+;           It is now possible to use cgDisplay in any graphics program, even those that
+;           will be run in cgWindow. 17 Nov 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -129,16 +134,36 @@ PRO cgDisplay, pxsize, pysize, $
     IF N_Elements(pxsize) EQ 0 THEN pxsize = xsize
     IF N_Elements(pysize) EQ 0 THEN pysize = ysize
     
+    ; If you are on a machine that supports windows, you can create a window
+    ; if the current graphics window ID cannot be found in the list of cgWindow IDs.
+    ; This will allow you to create a window in a program that can still run in
+    ; a resizeable graphics window.
     IF (!D.Flags AND 256) NE 0 THEN BEGIN
-        Window, windowIndex, XSIZE=pxsize, YSIZE=pysize, FREE=free, _STRICT_EXTRA=extra
+    
+        ; Assume you can create a window.
+        createWindow = 1
         
-        ; cgErase will take care of sorting out what kind of "color" indicator
-        ; we are using. No need to do it here.
-        cgErase, color   
+        ; Get the window ids of all cgWindows.
+        windowIDs = cgQuery(COUNT=windowCnt)
+        IF windowCnt NE 0 THEN BEGIN
+            index = Where(windowIDs EQ !D.Window, foundit)
+            IF foundit THEN createWindow = 0
+        ENDIF 
+        
+        ; If you are not running this program in a cgWindow, feel
+        ; free to create a window!
+        IF createWindow THEN BEGIN
+            Window, windowIndex, XSIZE=pxsize, YSIZE=pysize, $
+                 FREE=free, _STRICT_EXTRA=extra
+            
+            ; cgErase will take care of sorting out what kind of 
+            ; "color" indicator we are using. No need to do it here.
+            cgErase, color   
+        ENDIF
     ENDIF ELSE BEGIN
         CASE !D.Name OF
         
-            ; There can be some strange interactions with PS_START is PS_START
+            ; There can be some strange interactions with PS_START if PS_START
             ; is called with no current windows open, and cgDisplay is called with
             ; an aspect ratio that results in a PORTRAIT mode display. This checks
             ; for that problem.

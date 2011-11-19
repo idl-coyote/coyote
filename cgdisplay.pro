@@ -55,6 +55,11 @@
 ;         The Y size of the graphics window created. By default, 512.
 ;         
 ; :Keywords:
+;    aspect, in, optional, type=float
+;        Set this keyword to create a window with this aspect ratio (ysize/xsize).
+;        If aspect is greater than 1, then the ysize will be used in the aspect
+;        ratio calculation. If the aspect is less than or equal to 1, then the
+;        xsize will be used in the aspect ratio calculation of the final window size.
 ;    color: in, optional, type=string/integer, default='white'
 ;        If this keyword is a string, the name of the data color. By default, 'white'.
 ;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
@@ -100,11 +105,13 @@
 ;           if the current graphics window ID is found in a list of cgWindow window IDs.
 ;           It is now possible to use cgDisplay in any graphics program, even those that
 ;           will be run in cgWindow. 17 Nov 2011. DWF.
+;        Added ASPECT keyword. 18 Nov 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO cgDisplay, pxsize, pysize, $
+    ASPECT=aspect, $
     COLOR=scolor, $
     FREE=free, $
     WID=windowIndex, $
@@ -133,6 +140,15 @@ PRO cgDisplay, pxsize, pysize, $
     IF N_Elements(ysize) EQ 0 THEN ysize = 512
     IF N_Elements(pxsize) EQ 0 THEN pxsize = xsize
     IF N_Elements(pysize) EQ 0 THEN pysize = ysize
+    
+    ; Do you need a window with a particular aspect ratio?
+    IF N_Elements(aspect) NE 0 THEN BEGIN
+       IF aspect GT 1.0 THEN BEGIN
+          pxsize = pysize / aspect
+       ENDIF ELSE BEGIN
+          pysize = pxsize * aspect
+       ENDELSE
+    ENDIF
     
     ; If you are on a machine that supports windows, you can create a window
     ; if the current graphics window ID cannot be found in the list of cgWindow IDs.

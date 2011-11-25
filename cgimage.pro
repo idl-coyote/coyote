@@ -1,371 +1,14 @@
-;+
-; NAME:
-;     cgIMAGE
+; docformat = 'rst'
 ;
 ; PURPOSE:
-;     This purpose of cgIMAGE is to create a device-independent TV command
+;     The purpose of cgIMAGE is to create a device-independent TV command
 ;     with the power and functionality to be used in sophisticated graphics
 ;     programs, as well as at the IDL command line. It can be thought of as 
 ;     a "smart" TV command.
 ;
-; AUTHOR:
-;       FANNING SOFTWARE CONSULTING:
-;       David Fanning, Ph.D.
-;       1645 Sheely Drive
-;       Fort Collins, CO 80526 USA
-;       Phone: 970-221-0438
-;       E-mail: david@idlcoyote.com
-;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CATEGORY:
-;     Graphics display.
-;
-; CALLING SEQUENCE:
-;
-;     cgIMAGE, image
-;
-; INPUTS:
-;     image:    A 2D (MxN) or 24-bit (e.g., MxNx3) byte array. A
-;               24-bit image with an alpha channel (e.g., MxNx4) is
-;               also permitted. The alpha channel will be blended with
-;               the current background image. See the AlphaBackgroundImage
-;               keyword for details.
-;
-;       x  :    The X position of the lower-left corner of the image.
-;               This parameter is only recognized if the TV keyword is set.
-;               If the Y position is not used, X is taken to be the image
-;               "position" in the window. See the TV command documenation
-;               for details.
-;
-;       y  :    The Y position of the lower-left corner of the image.
-;               This parameter is only recognized if the TV keyword is set.
-;
-; KEYWORD PARAMETERS:
-;
-;     ADDCMD:   Set this keyword to add the cgImage command to an cgWindow
-;               command list. Setting this command will force ERASEIT to be set
-;               to 0, so the cgImage command can exist peacefully with other commands
-;               in an cgWindow command list. Setting this keyword automatically sets
-;               the WINDOW keyword.
-;               
-;     ALPHABACKGROUNDIMAGE: Normally, when a image with an alpha channel is displayed,
-;               the image is blended with the image currently in the display window.
-;               This means, the program has to obtain that background image. This is not a 
-;               problem on devices (e.g., WIN, X, Z) that allow this kind of operation,
-;               but it is on devices (e.g., the PostScript device, PS) that do not.
-;               To get around this problem, you can pass the background image to the
-;               cgImage program, along with the alpha channel image you wish to display
-;               (via the image parameter) and the alpha channel image will be blended
-;               with this image appropriately on all devices. If an alpha channel image
-;               is displayed on a device in which there is no way to obtain the background
-;               image, and this keyword is not used to pass a background image, then
-;               the alpha channel image will be blended with a white background image.
-;               This keyword is only used if an alpha channel image is passed to the 
-;               program via the image parameter. The AlphaBackgroundImage does not need
-;               to have the same dimensions as the alpha channel image.
-;             
-;     ALPHABGPOSITION: Normally, the alpha background image is displayed in the current graphics
-;               window, or is taken from the current graphics window. This is not always correct.
-;               Sometimes you want to actually position both the background and foreground image
-;               in a window. If this keyword is used to specify a position, the alphabackground image
-;               will be positioned at this location before the blending occurs.
-;
-;     AXES:     Set this keyword to draw a set of axes around the image. Setting this
-;               keyword also sets SAVE=1, unless told otherwise.
-;
-;     AXKEYWORDS:   An IDL structure variable of PLOT keywords as structure fields
-;               and keyword values as the values of the fields. Pass directly to the
-;               PLOT command that draws the axes for the image. Ignored unless the
-;               AXES keyword is set. For example,
-;
-;               cgImage, image, /AXES, AXKEYWORDS={TICKLEN:-0.025}
-;               
-;               The axis color, range, title, font and character size must be 
-;               set with cgImage keywords ACOLOR, [XY]RANGE, [XY]TITLE, FONT, and
-;               CHARSIZE.
-;
-;     BACKGROUND:   This keyword specifies the name of the background color. The default is "white".
-;
-;     BOTTOM:   IF SCALE=1, the image is scaled so that all displayed pixels have values
-;               greater than or equal to BOTTOM and less than or equal to TOP.
-;               The value of BOTTOM is 0 by default.
-;
-;     COLOR:    Set this keyword to the name of an axis color. Default = "black".
-;     
-;     CHARSIZE: Sets the character size. Used only if the AXES keyword is also set.
-;               By default, the value from cgDefCharsize().
-;               
-;     FIT_INSIDE: Set this keyword if you want the image to be positioned inside the
-;               image axes. Normally, the image axes are placed over the top of the
-;               first and last column and row of the image. Often, this is a detail
-;               that doesn't matter in the slightest, but when it does matter, it is
-;               extremely important. Always fitting the image inside the axes causes
-;               problems when I want to stitch images together or warp an image to
-;               a map projection, etc. So, I have decided you can have your cake and
-;               eat it, too, by just setting this keyword.
-;
-;     FONT:     Set this to the type of font wanted on axis annotation. By default
-;               FONT = !P.Font. Used only if the AXES keyword is also set.
-;
-;     _EXTRA:   This keyword picks up any TV keywords you wish to use.
-;     
-;     INTERPOLATE: Normally, nearest neightbor sampling is done when the image size changes.
-;               Setting this keyword will cause linear interpolation to be used instead.
-;
-;     KEEP_ASPECT: An image uses the POSITION keyword to located itself in a graphics
-;               window. If this keyword is set, then the image arranges itself in the
-;               window in a manner that maintains its orginal aspect ratio (ratio of
-;               height to width). 
-;
-;     LAYOUT:   This keyword specifies a grid with a graphics window and determines 
-;               where the graphic should appear. The syntax of LAYOUT is a 3-element 
-;               array: [ncolumns, nrows, location]. The grid is determined by the 
-;               number of columns (ncolumns) by the number of rows (nrows). The location 
-;               of the graphic is determined by the third number. The grid numbering 
-;               starts in the upper left (1) and goes sequentually by column and then
-;               by row.
-;               
-;     MARGIN:   A single value, expressed as a normalized coordinate, that
-;               can easily be used to calculate a position in the window.
-;               The margin is used to calculate a POSITION that gives
-;               the image an equal margin around the edge of the window.
-;               The margin must be a number in the range 0.0 to 0.333. This
-;               keyword is ignored if the POSITION or OVERPLOT keywords are
-;               used. It is also ignored when cgImage is executed in a
-;               multi-plot window, EXCEPT if it's value is zero. In this
-;               special case, the image will be drawn into its position in
-;               the multi-plot window with no margins whatsoever. (The
-;               default is to have a slight margin about the image to separate
-;               it from other images or graphics. The default margin is 0.05.
-;
-;      MAXVALUE: If defined, the data is linearly scaled between MINVALUE
-;               and MAXVALUE. MAXVALUE is set to MAX(image) by default.
-;               Setting this keyword to a value implies SCALE=1. If the maximum
-;               value of the image is GT 255, this implies SCALE=1.
-;
-;      MINVALUE: If defined, the data is linearly scaled between MINVALUE
-;               and MAXVALUE. MINVALUE is set to MIN(image) by default.
-;               Setting this keyword to a value implies SCALE=1. If the minimum
-;               value of the image is LT 0, this implies SCALE=1.
-;               
-;      MULTIMARGIN: Sometimes, when displaying multiple images with !P.Multi, you
-;               want the images to be slightly smaller than the position created
-;               by !P.Multi so you can add, for example, a colorbar or an annotation
-;               to the image. This keyword can be used to adjust the image position
-;               by a small margin. A four-element array, the margins apply to the 
-;               [bottom, left, top, right] of the image position. So, to
-;               leave room at the top of an image for a color bar, you might
-;               type this:
-;               
-;                  cgImage, image, MultiMargin=[0, 0, 4, 0]
-;                  
-;               This keyword applies *only* to images displayed with !P.Multi, and if
-;               passed a scalar value, will use the same value for all four positions.
-;               
-;     MINUS_ONE: The value of this keyword is passed along to the FSC_RESIZE_IMAGE
-;               command. It prevents FSC_RESIZE_IMAGE from adding an extra row and
-;               column to the resulting array, which can be a problem with
-;               small image arrays. This keyword is set to 0 by default.
-;
-;     NCOLORS:  If this keyword is supplied, the TOP keyword is ignored and
-;               the TOP keyword is set equal to  NCOLORS - 1. This
-;               keyword is provided to make cgImage easier to use with the
-;               color-loading programs such as LOADCT:
-;
-;                  LoadCT, 5, NColors=100, Bottom=100
-;                  cgImage, image, NColors=100, Bottom=100
-;                  
-;               Setting this keyword to a value implies SCALE=1.
-;               
-;     NOERASE:  The default behavior is to erase the display before displaying
-;               the image. Setting this keyword prevents the erasure.
-;
-;     NORMAL:   Setting this keyword means image position coordinates x and y
-;               are interpreted as being in normalized coordinates. This keyword
-;               is only valid if the TV keyword is set.
-;               
-;     OPOSITION: If the KEEP_ASPECT keyword is set, there is a good chance the
-;               image's actual position in the window will differ from its input
-;               position. This keyword will report the image's actual output
-;               position, after it has been displayed and its position adjusted
-;               to account for aspect ratio. Note that the POSITION keyword is 
-;               both an input and output keyword if the input position is passed
-;               as a variable. The OPOSITION keyword allows you to obtain the
-;               output position even if you pass the position in as a value.
-;
-;     OVERPLOT: Setting this keyword causes the POSITION keyword to be ignored
-;               and the image is positioned in the location established by the
-;               last graphics command. For example:
-;
-;                    Plot, Findgen(11), Position=[0.1, 0.3, 0.8, 0.95]
-;                    cgImage, image, /Overplot
-;
-;     PALETTE:  Set this keyword to a 3 x N or N x 3 byte array containing
-;               the RGB color vectors to be loaded before the image is displayed.
-;               Such vectors can be obtained, for example, from cgLoadCT with the
-;               RGB_TABLE keyword:
-;               
-;                    cgLoadCT, 4, /BREWER, /REVERSE, RGB_TABLE=palette
-;                    cgImage, cgDemoData(7), PALETTE=palette
-;                    
-;     POSITION: The location of the image in the output window. This is
-;               a four-element floating array of normalized coordinates of
-;               the type given by !P.POSITION or the POSITION keyword to
-;               other IDL graphics commands. The form is [x0, y0, x1, y1].
-;               The default is [0.0, 0.0, 1.0, 1.0]. Note that this keyword is ALSO
-;               an output keyword. That is to say, upon return from cgImage
-;               this keyword (if passed by reference) contains the actual
-;               position in the window where the image was displayed. This
-;               may be different from the input values if the KEEP_ASPECT_RATIO
-;               keyword is set, or if you are using cgImage with the POSITION
-;               keyword when !P.MULTI is set to something other than a single
-;               plot. One use for the output values might be to position other
-;               graphics (e.g., a colorbar) in relation to the image.
-;
-;               Note that the POSITION keyword should not, normally, be used
-;               when displaying multiple images with !P.MULTI. If it *is* used,
-;               its meaning differs slightly from its normal meaning. !P.MULTI
-;               is responsible for calculating the position of graphics in the
-;               display window. Normally, it would be a mistake to use a POSITION
-;               graphics keyword on a graphics command that was being drawn with
-;               !P.MULTI. But in this special case, cgImage will use the POSITION
-;               coordinates to calculate an image position in the actual position
-;               calculated for the image by !P.MULTI. The main purpose of this
-;               functionality is to allow the user to display images along with
-;               colorbars when using !P.MULTI. See the example below.
-;
-;    QUIET:      There are situations when you would prefer that cgIMAGE does not
-;                advertise itself by filling out the FSC_$CGIMAGE common block. For
-;                example, if you are using cgImage to draw a color bar, it would
-;                not be necessary. Setting this keyword means that cgImage just
-;                goes quietly about it's business without bothering anyone else.
-;             
-;    SAVE:      Set this to cause a data coordinate system to be established
-;               for the image. The XRANGE and YRANGE keyword values will be used
-;               to establish a data coordinate system coincident with the final
-;               image position. Setting the AXES keyword automatically sets SAVE=1.
-;
-;    SCALE:     Set this keyword to byte scale the image before display. If this
-;               keyword is not set, the image is not scaled before display.
-;               
-;    TITLE:     The title annotation. Used only if the keyword AXES is set.
-;               
-;    TOP:       IF SCALE=1, the image is scaled so that all displayed pixels have values
-;               greater than or equal to BOTTOM and less than or equal to TOP.
-;               The value of TOP is !D.Table_Size by default.
-;
-;    TV:        Setting this keyword makes the cgImage command work much
-;               like the TV command, although better. That is to say, it
-;               will still set the correct DECOMPOSED state depending upon
-;               the kind of image to be displayed (8-bit or 24-bit). It will
-;               also allow the image to be "positioned" in the window by
-;               specifying the coordinates of the lower-left corner of the
-;               image. The NORMAL keyword is activated when the TV keyword
-;               is set, which will indicate that the position coordinates
-;               are given in normalized coordinates rather than device
-;               coordinates.
-;
-;               Setting this keyword will ensure that the keywords
-;               KEEP_ASPECT_RATIO, MARGIN, MINUS_ONE, MULTI, and POSITION
-;               are ignored. Alpha channels are also ignored when this keyword
-;               is set.
-;               
-;      WINDOW:  Set this keyword to add the command to an cgWindow application.
-;               Setting this keyword ALWAYS sets the ERASEIT keyword. If you want
-;               to add an image to an cgWindow without the ERASEIT keyword set,
-;               use the ADDCMD keyword.
-;               
-;      XRANGE:  If the AXES keyword is set, this keyword is a two-element vector
-;               giving the X axis range. By default, [0, size of image in X].
-;            
-;      XTITLE:  The X title string to use for the X image axis. Used only if the AXES
-;               keyword is set.
-;
-;      YRANGE:  If the AXES keyword is set, this keyword is a two-element vector
-;               giving the Y axis range. By default, [0, size of image in Y].
-;
-;      YTITLE:  The Y title string to use for the Y image axis. Used only if the AXES
-;               keyword is set.
-; OUTPUTS:
-;     None.
-;
-; SIDE EFFECTS:
-;     Unless the KEEP_ASPECT keyword is set, the displayed image
-;     may not have the same aspect ratio as the input data set.
-;
-; RESTRICTIONS:
-;     If the POSITION keyword and the KEEP_ASPECT keyword are
-;     used together, there is an excellent chance the POSITION
-;     parameters will change. If the POSITION is passed in as a
-;     variable, the new positions will be returned in the same variable
-;     as an output parameter.
-;
-; EXAMPLE:
-;     To display an image with a contour plot on top of it, type:
-;
-;        filename = FILEPATH(SUBDIR=['examples','data'], 'worldelv.dat')
-;        image = BYTARR(360,360)
-;        OPENR, lun, filename, /GET_LUN
-;        READU, lun, image
-;        FREE_LUN, lun
-;
-;        thisPostion = [0.1, 0.1, 0.9, 0.9]
-;        cgIMAGE, image, POSITION=thisPosition, /KEEP_ASPECT_RATIO
-;        CONTOUR, image, POSITION=thisPosition, /NOERASE, XSTYLE=1, $
-;            YSTYLE=1, XRANGE=[0,360], YRANGE=[0,360], NLEVELS=10
-;
-;     To display four images in a window without spacing between them:
-;
-;     !P.Multi=[0,2,2]
-;     cgImage, image, Margin=0
-;     cgImage, image, Margin=0
-;     cgImage, image, Margin=0
-;     cgImage, image, Margin=0
-;     !P.Multi = 0
-;
-;     To display four image in a window with associated color bars:
-;
-;     !P.Multi=[0,2,2]
-;     p = [0.02, 0.3, 0.98, 0.98]
-;     LoadCT, 0
-;     cgImage, image, Position=p
-;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
-;     p = [0.02, 0.3, 0.98, 0.98]
-;     LoadCT, 2
-;     cgImage, image, Position=p
-;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
-;     p = [0.02, 0.3, 0.98, 0.98]
-;     LoadCT, 3
-;     cgImage, image, Position=p
-;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
-;     p = [0.02, 0.3, 0.98, 0.98]
-;     LoadCT, 5
-;     cgImage, image, Position=p
-;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
-;     !P.Multi =0
-;
-; MODIFICATION HISTORY:
-;      Written by: David W. Fanning, from modifications to TVIMAGE. 3 Feb 2011.
-;      8 Feb 2011. Added OPOSITION keyword. DWF.
-;      27 Feb 2011. Added keywords to make cgImage more compatible with TVImage calls. DWF.
-;      Color table vectors must be obtained AFTER loading the color palette. 6 March 2011. DWF.
-;      I have been convinced (conversations with Wayne Landsman) that if the 
-;         CENTER keyword is set, the MINUS_ONE keyword is not needed, since 
-;         it was created to solve the same problem. So, I have changed the 
-;         default setting of MINUS_ONE to 0. 14 March 2011. DWF.
-;       Corrected a problem with restoring color tables if a PALETTE is used. 31 March 2011. DWF.
-;       Whoops! Documented a CHARSIZE keyword, but forgot to define it. 7 July 2011.
-;       Damnation! I did the same thing with the FONT keyword! 25 July 2011.
-;       And now a TITLE keyword! What the devil is going on!? 29 Aug 2011.
-;       Very slight modifications to image size and start position so that the image is
-;          positioned completely inside the axes. 30 Sept 2011. DWF.
-;       Fitting the image inside the axes causes image matching problems (and lines!) in
-;          other programs, so I've decided to only do positioning inside axes when the
-;          user asks for this capability by setting the FIT_INSIDE keyword. 16 Nov 2011. DWF.
-;-
 ;******************************************************************************************;
-;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -390,9 +33,140 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-FUNCTION cgImage_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
-    ALPHABGPOSITION=alphapos, $
-    NOINTERP=nointerp, $
+;
+;+
+; The purpose of cgIMAGE is to create a device-independent TV command
+; with the power and functionality to be used in sophisticated graphics
+; programs, as well as at the IDL command line. It can be thought of as 
+; a "smart" TV command.
+;   
+; There is a common block in cgImage that is defined as follows upon exiting
+; this command::
+; 
+;    COMMON FSC_$CGIMAGE, $
+;       _cgimage_xsize, $    ; The X size of the image.
+;       _cgimage_ysize, $    ; The Y size of the imge.
+;       _cgimage_winxsize, $ ; The X size of the window displaying the image.
+;       _cgimage_winysize, $ ; The Y size of the window displaying the image.
+;       _cgimage_position, $ ; The final position of the image in the window.
+;       _cgimage_winID, $    ; The window index number of the window displaying the image.
+;       _cgimage_current     ; Set to 1 if a call to cgImage is made.
+;
+; :Categories:
+;    Graphics
+;       
+; :Examples:
+;     To display an image with a contour plot on top of it, type::
+;
+;        filename = FILEPATH(SUBDIR=['examples','data'], 'worldelv.dat')
+;        image = BYTARR(360,360)
+;        OPENR, lun, filename, /GET_LUN
+;        READU, lun, image
+;        FREE_LUN, lun
+;
+;        thisPostion = [0.1, 0.1, 0.9, 0.9]
+;        cgIMAGE, image, POSITION=thisPosition, /KEEP_ASPECT_RATIO
+;        CONTOUR, image, POSITION=thisPosition, /NOERASE, XSTYLE=1, $
+;            YSTYLE=1, XRANGE=[0,360], YRANGE=[0,360], NLEVELS=10
+;
+;     To display four images in a window without spacing between them::
+;
+;     !P.Multi=[0,2,2]
+;     cgImage, image, Margin=0
+;     cgImage, image, Margin=0
+;     cgImage, image, Margin=0
+;     cgImage, image, Margin=0
+;     !P.Multi = 0
+;
+;     To display four image in a window with associated color bars::
+;
+;     !P.Multi=[0,2,2]
+;     p = [0.02, 0.3, 0.98, 0.98]
+;     LoadCT, 0
+;     cgImage, image, Position=p
+;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;     p = [0.02, 0.3, 0.98, 0.98]
+;     LoadCT, 2
+;     cgImage, image, Position=p
+;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;     p = [0.02, 0.3, 0.98, 0.98]
+;     LoadCT, 3
+;     cgImage, image, Position=p
+;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;     p = [0.02, 0.3, 0.98, 0.98]
+;     LoadCT, 5
+;     cgImage, image, Position=p
+;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;     !P.Multi =0
+;       
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;        David W. Fanning 
+;        1645 Sheely Drive
+;        Fort Collins, CO 80526 USA
+;        Phone: 970-221-0438
+;        E-mail: david@idlcoyote.com
+;        Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
+;
+; :History:
+;    Modification History::
+;      Written by: David W. Fanning, from modifications to TVIMAGE. 3 Feb 2011.
+;      8 Feb 2011. Added OPOSITION keyword. DWF.
+;      27 Feb 2011. Added keywords to make cgImage more compatible with TVImage calls. DWF.
+;      Color table vectors must be obtained AFTER loading the color palette. 6 March 2011. DWF.
+;      I have been convinced (conversations with Wayne Landsman) that if the 
+;         CENTER keyword is set, the MINUS_ONE keyword is not needed, since 
+;         it was created to solve the same problem. So, I have changed the 
+;         default setting of MINUS_ONE to 0. 14 March 2011. DWF.
+;       Corrected a problem with restoring color tables if a PALETTE is used. 31 March 2011. DWF.
+;       Whoops! Documented a CHARSIZE keyword, but forgot to define it. 7 July 2011.
+;       Damnation! I did the same thing with the FONT keyword! 25 July 2011.
+;       And now a TITLE keyword! What the devil is going on!? 29 Aug 2011.
+;       Very slight modifications to image size and start position so that the image is
+;          positioned completely inside the axes. 30 Sept 2011. DWF.
+;       Fitting the image inside the axes causes image matching problems (and lines!) in
+;          other programs, so I've decided to only do positioning inside axes when the
+;          user asks for this capability by setting the new FIT_INSIDE keyword. 16 Nov 2011. DWF.
+;       Problem with transparent images with alpha channels caused by changes in the TVImage->cgImage
+;          transition. Added AlphaFGPosition keyword to address issues. Cleaned up the
+;          code and improved the internal documentation. 22 Nov 2011. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;-
+;
+;+
+; This routine prepares a transparent image (an image with an alpha channel)
+; for display.
+; 
+; :Returns:
+;     Returns an image that has been blended with the background image and is
+;     suitable for display with cgImage.
+; 
+; :Params:
+;    image: in, required
+;       The input image that is being prepared for display. It will contain
+;       an alpha channel.
+;    alphaBackgroundImage: in, required
+;       The background image. The foregroundimage, image, will be blended
+;       with the background image.
+;   
+; :Keywords:
+;    alphabgposition: in, required, type=fltarr
+;       The normalized position in the window where the background 
+;       image is to be located.
+;    alphafgposition: in, required, type=fltarr
+;       The normalized position in the window where the foreground 
+;       image is to be located.
+;    tv: in, optional, type=boolean, default=0
+;       If this keyword is set, the alpha channel is removed from the
+;       input image, because we cannot display an image with an alpha
+;       channel if the cgImage command is acting like a smarter IDL 
+;       TV command.
+;-
+FUNCTION cgIMAGE_PREPARE_ALPHA, image, alphaBackgroundImage, $
+    ALPHABGPOSITION=alphabgpos, $
+    ALPHAFGPOSITION=alphafgpos, $    
     TV=tv
 
     ; Error handling.
@@ -407,7 +181,6 @@ FUNCTION cgImage_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
        IF N_Elements(thisDevice) NE 0 THEN Set_Plot, thisDevice
        RETURN, image
     ENDIF
-
 
     ; Prepare an alpha image, if needed.
     index = Where(Size(image,/DIMENSIONS) EQ 4)
@@ -437,18 +210,7 @@ FUNCTION cgImage_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
     ; Now we have an alpha channel.
     alpha_channel = Scale_Vector(alpha_channel, 0.0, 1.0)
     foregndImage = aImage[*,*,0:2]
-       
-    ; If we don't have a background image, check to see if we
-    ; are on a device where we could get such an image.
-    IF N_Elements(alphaBackgroundImage) EQ 0 THEN BEGIN
-        IF (!D.Flags AND 256) NE 0 THEN BEGIN
-           alphaBackgroundImage = cgSnapshot()
-        ENDIF ELSE BEGIN
-            ss = Size(foregndImage, /DIMENSIONS)
-            alphaBackgroundImage = BytArr(ss[0], ss[1], 3) + 255B
-        ENDELSE
-    ENDIF
-    
+           
     ; Get the size and dimensions of the background image.
     ndim = Size(alphaBackgroundImage, /N_DIMENSIONS)
     CASE ndim OF
@@ -480,24 +242,24 @@ FUNCTION cgImage_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
     Device, Get_Decomposed=theState
     Device, Set_Resolution=sb[0:1], Decomposed=1, Set_Pixel_Depth=24
    
-    IF N_Elements(alphapos) EQ 0 THEN BEGIN
-        cgImage, bImage, /NOINTERP
+    IF N_Elements(alphabgpos) EQ 0 THEN BEGIN
+        cgImage, bImage
     ENDIF ELSE BEGIN
-        cgImage, bImage, Position=alphapos, /NOINTERP
+        cgImage, bImage, Position=alphabgpos
     ENDELSE
     
     ; Calculate the parameters for taking a snapshot of the
     ; relevant portion of the window.
-    xstart = position[0]*sb[0]
-    cols = (position[2] - position[0]) * sb[0]
-    ystart = position[1]*sb[1]
-    rows = (position[3] - position[1]) * sb[1]
+    xstart = alphafgpos[0]*sb[0]
+    cols = Round((alphafgpos[2] - alphafgpos[0]) * sb[0])
+    ystart = alphafgpos[1]*sb[1]
+    rows = Round((alphafgpos[3] - alphafgpos[1]) * sb[1])
             
     ; Take a snapshot
-    bImage = TVRD(xstart, ystart, cols, rows, TRUE=3)
+    bsnap = TVRD(xstart, ystart, cols, rows, TRUE=3)
             
     ; Get the size of the snapshot.
-    sb = Size(bImage, /DIMENSIONS)
+    sb = Size(bsnap, /DIMENSIONS)
     Device, Decomposed=theState
     Set_Plot, thisDevice
             
@@ -506,8 +268,12 @@ FUNCTION cgImage_PREPARE_ALPHA, image, position, alphaBackgroundImage, $
      alpha = FSC_Resize_Image(alpha_channel, sb[0], sb[1], /INTERPOLATE)
      alpha = Rebin(alpha, sb[0], sb[1], 3)
             
-     ; Blend the two images.
-     outImage = foregndImage*alpha + (1 - alpha)*bImage   
+     ; Blend the two images in the location of the POSITION.
+     blendImage = foregndImage*alpha + (1 - alpha)*bsnap  
+     
+     ; Now put this blended portion back into the background image.
+     outimage = bimage
+     outimage[xstart:xstart+cols-1, ystart:ystart+rows-1, *] = blendImage
             
      ; Put the dimensions back the way they came in.   
      index = Where(Size(foregndImage,/DIMENSIONS) EQ 3)
@@ -522,11 +288,260 @@ END
 ;--------------------------------------------------------------------------
 
 
-
+;+
+; The purpose of this program is to create a TV command that works the way
+; the TV command would be expected to work if it was written today, rather
+; than 25 years ago. In other words, it knows the difference between an
+; 8-bit device and a 24-bit device, it honors the POSITION keyword like 
+; other graphics commands in IDL, it honors the !P.MULTI value, like other
+; graphics commands in IDL, it works seamlessly with both 8-bit and 24-bit
+; images. In addition to other modern features, this program can also 
+; display images that contain an alpha channel.
+; 
+; :Params:
+;    image:  in, required, type=various
+;        An 8-bit (MxN), 24-bit (e.g., MxNx3), or a 24-bit + alpha channel
+;        (e.g., MxNx4) image  to display.
+;    x: in, optional, type=integer
+;        The X position of the lower-left corner of the image in device
+;        coordinates. This parameter is only recognized if the TV keyword 
+;        is set. If the Y position is not used, X is taken to be the image
+;        "position" in the window. See the TV command documenation for details. 
+;    y: in, optional, type=integer      
+;        The Y position of the lower-left corner of the image in device
+;        coordinates. This parameter is only recognized if the TV keyword 
+;        is set.
+;        
+; :Keywords:
+;    addcmd: in, optional, type=boolean, default=0
+;         Set this keyword to add this command to an already open cgWindow to
+;         be executed when the window is resized.
+;    alphabackgroundimage: in, optional, type=varies
+;         Normally, when a image with an alpha channel is displayed, the image is 
+;         blended with whatever is currently in the display window. This means, the 
+;         program has to obtain that background image. This is not a problem on devices 
+;         (e.g., WIN, X, Z) that allow this kind of operation, but it is on devices 
+;         (e.g., the PostScript device, PS) that do not. To get around this problem, 
+;         you can pass the background image to the cgImage program. This background image
+;         will be blended with the alpha channel image you wish to display. If an alpha 
+;         channel image is displayed on a device in which there is no way to obtain the 
+;         background image, and this keyword is not used to pass a background image, then
+;         the alpha channel image will be blended with a white background image.
+;         This keyword is only used if an alpha channel image is passed to the 
+;         program via the IMAGE parameter. The AlphaBackgroundImage does not need
+;         to have the same dimensions as the alpha channel image. The background image
+;         can be either a 2D image or a 24-bit image.
+;    alphabgposition: in, optional, type=fltarr(4)
+;         The normalized position where the background image is to be displayed in the
+;         graphics window. By default, the position is calculated to position the image 
+;         so that it covers the entire graphics window, [0.0, 0.0, 1.0, 1.0].
+;    alphafgposition: in, optional, type=fltarr(4)
+;         The normalized position where the foreground image (the image parameter) is to 
+;         be displayed in the graphics window. By default, the position is calculated to 
+;         position the image so that it covers the entire graphics window, [0.0, 0.0, 1.0, 1.0].
+;    axis: in, optional, type=boolean, default=0
+;         A misspelled version of the AXES keyword. Provided as a service to people whose
+;         fingers have minds of their own.
+;    axes: in, optional, type=boolean, default=0
+;         Set this keyword to display the image with axes surrounding the image. If the POSITION
+;         keyword is not used, a MARGIN of 0.1 is used to allow the axes to show. If you wish
+;         to make the image fit entirely inside the axes, set the `FIT_INSIDE` keyword. Otherwise,
+;         the axis sit on top of the image data.
+;    axkeywords: in, optional, type=structure
+;         A structure of AXIS keywords and values that can be used to configure the axes
+;         in whatever way the user desires. Many of the most often used axis keywords are available 
+;         as cgImage keywords.
+;    background: in, optional, type=string, default='white'
+;         The name of the background color for the image display. Unlike the TV command in IDL,
+;         the cgImage command will erase the display before executing the command like other
+;         fundamental graphics commands (e.g., Plot, Contour, Surface) in IDL.
+;    bottom, in, optional, type=integer, default=0
+;         If the SCALE keyword is set, the image is scaled before display so that all 
+;         displayed pixels have values greater than or equal to BOTTOM and less than 
+;         or equal to TOP.
+;    charsize: in, optional, type=float
+;         Sets the character size. Used only if the AXES keyword is also set. By default, 
+;         the value from cgDefCharsize().
+;    color: in, optional, type=string, default='opposite'
+;         The name of the color in which to draw the axes. Used only if the `AXES` keyword is set.
+;    erase: in, optional, type=boolean, default=1
+;         An obsolete keyword. Used only for compatibility with the earlier TVImage command. The
+;         default for cgImage is to always erase the graphics display before displaying the image
+;         unless told otherwise by setting the `NOERASE` keyword. This makes cgImage consistent with
+;         other IDL graphics commands.
+;    fit_inside: in, optional, type=boolean, default=0
+;         When the AXES keyword is set, the default is to position the axes on top of the image
+;         using the POSITION. However, if this keyword is set, the axes are positioned at POSITION
+;         and the image is sized so that it fits entirely inside the axes.
+;    font: in, optional, type=integer
+;         This keyword selects the font used for axis and title display. The default is to use
+;         the value of !P.Font.
+;    interpolate: in, optional, type=boolean, default=0
+;         Set this keyword to interpolate with bilinear interpolation the display image as it 
+;         is sized to its final position in the display window. Interpolation will potentially 
+;         create image values that do not exist in the original image. The default is to do no
+;         interpolation, so that image values to not change upon resizing. Interpolation can
+;         result in smoother looking final images.
+;    keep_aspect_ratio: in, optional, type=boolean, default=0
+;         By default, the output image is resized into the `POSITION` in the graphics window.
+;         This can result in a distortion of the image aspect ratio (the Y size of the image
+;         divided by the X size of the image). Setting this keyword will preserve the original
+;         aspect ratio of the image in the output display window. In effect, the image will
+;         be placed in the window `POSITION` in a way that preserves its aspect ratio. The
+;         actual final location of the image in the display window can be obtained via the 
+;         `OPOSITION` keyword.
+;    layout: in, optional, type=intarr
+;         This keyword specifies a grid with a graphics window and determines 
+;         where the graphic should appear. The syntax of LAYOUT is a 3-element 
+;         array: [ncolumns, nrows, location]. The grid is determined by the 
+;         number of columns (ncolumns) by the number of rows (nrows). The location 
+;         of the graphic is determined by the third number. The grid numbering 
+;         starts in the upper left (1) and goes sequentually by column and then
+;         by row. Note that using the LAYOUT keyword automatically sets the NOERASE 
+;         keyword to 1.
+;    margin: in, optional, type=float, default=0.0
+;         A single value, expressed as a normalized coordinate, that
+;         can easily be used to calculate a position in the window.
+;         The margin is used to calculate a `POSITION` that gives
+;         the image an equal margin around the edge of the window.
+;         The margin must be a number in the range 0.0 to 0.333. This
+;         keyword is ignored if the `POSITION` or `OVERPLOT` keywords are
+;         used. It is also ignored when cgImage is executed in a
+;         multi-plot window, EXCEPT if it's value is zero. In this
+;         special case, the image will be drawn into its position in
+;         the multi-plot window with no margins whatsoever. (The
+;         default is to have a slight margin about the image to separate
+;         it from other images or graphics. The default margin is 0.05.)
+;    maxvalue: in, optional, type=varies
+;         If this value is defined, the data is linearly scaled between MINVALUE
+;         and MAXVALUE. MAXVALUE is set to MAX(image) by default. Setting this 
+;         keyword to a value automatically sets `SCALE` to 1. If the maximum value of the 
+;         image is greater than 255, this keyword is defined and SCALE=1.
+;    minus_one: in, optional, type=boolean, default=0
+;         The value of this keyword is passed along to the FSC_RESIZE_IMAGE
+;         command. It prevents FSC_RESIZE_IMAGE from adding an extra row and
+;         column to the resulting array, which can be a problem with
+;         small image arrays. 
+;    minvalue: in, optional, type=varies
+;         If this value is defined, the data is linearly scaled between MINVALUE
+;         and `MAXVALUE`. MINVALUE is set to MIN(image) by default. Setting this 
+;         keyword to a value automatically sets SCALE=1. If the minimum value of the 
+;         image is less than 0, this keyword is defined and SCALE=1.
+;    multimargin: in, optional, type=varies
+;         Sometimes, when displaying multiple images with !P.Multi, you
+;         want the images to be slightly smaller than the position created
+;         by !P.Multi so you can add, for example, a colorbar or an annotation
+;         to the image. This keyword can be used to adjust the image position
+;         by a small margin. A four-element array, the margins apply to the 
+;         [bottom, left, top, right] of the image position. So, to
+;         leave room at the top of an image for a color bar, you might
+;         type this::
+;               
+;             cgImage, image, MultiMargin=[0, 0, 4, 0]
+;                  
+;         This keyword applies *only* to images displayed with !P.Multi, and if
+;         passed a scalar value, will use the same value for all four positions.
+;    ncolors: in, optional, type=integer, default=256
+;         If this keyword is supplied, the `TOP` keyword is ignored and the TOP keyword 
+;         is set equal to  NCOLORS-1. This keyword is provided to make cgImage easier 
+;         to use with the color-loading programs such as cgLOADCT::
+;
+;              cgLoadCT, 5, NColors=100, Bottom=100
+;              cgImage, image, NColors=100, Bottom=100
+;                  
+;         Setting this keyword to a value automatically sets SCALE=1.
+;    noerase: in, optional, type=boolean, default=0
+;         Set this keyword to prevent the command from first erasing the graphics
+;         display before displaying the image.
+;    nointerpolation: in, optional, type=boolean, default=0
+;         This is an obsolete keyword that is included here only for compatibility with
+;         the older TVImage command. Use the `INTERPOLATE` keyword.
+;    normal: in, optional, type=boolean, default=0
+;         Setting this keyword means image position coordinates x and y are interpreted 
+;         as being in normalized coordinates. This keyword is only valid if the TV 
+;         keyword is set.
+;    oposition: out, optional, type=float
+;         Set this keyword to a named variable to obtain the actual position in the
+;         graphics window where the image was located. The output position may be
+;         different from the input `POSITION`, especially if the `KEEP_ASPECT_RATIO`
+;         keyword is set. Note that the output position is also stored in a 
+;         FSC_$CGIMAGE common block so that other programs (e.g., cgMap, cgImageInfo, 
+;         etc.) can take advantage of this information.
+;    overplot: in, optional, type=boolean, default=0
+;         Setting this keyword causes the POSITION keyword to be ignored
+;         and the image is positioned in the location established by the
+;         last graphics command.
+;    palette: in, optional, type=byte
+;         Set this keyword to a 3x256 or 256x3 byte array containing the RGB color 
+;         vectors to be loaded before the image is displayed. Such vectors can be 
+;         obtained, for example, from cgLoadCT with the RGB_TABLE keyword::
+;               
+;                cgLoadCT, 4, /BREWER, /REVERSE, RGB_TABLE=palette
+;                cgImage, cgDemoData(7), PALETTE=palette
+;    position: in, optional, type=float
+;         The location of the image in the output window. This is a four-element 
+;         floating array of normalized coordinates of the type given by !P.POSITION 
+;         or the POSITION keyword to other IDL graphics commands. The form is [x0, y0, x1, y1].
+;         The default is [0.0, 0.0, 1.0, 1.0]. Note that this keyword is ALSO an output 
+;         keyword. That is to say, upon return from cgImage this keyword (if passed by 
+;         reference) contains the actual position in the window where the image was 
+;         displayed. This may be different from the input values if the KEEP_ASPECT_RATIO
+;         keyword is set, or if you are using cgImage with the POSITION keyword when !P.MULTI 
+;         is set to something other than a single plot. Note that the POSITION keyword should 
+;         not, normally, be used when displaying multiple images with !P.MULTI. If it is used,
+;         its meaning differs slightly from its normal meaning. !P.MULTI is responsible for 
+;         calculating the position of graphics in the display window. Normally, it would be a 
+;         mistake to use a POSITION graphics keyword on a graphics command that was being drawn with
+;         !P.MULTI. But in this special case, cgImage will use the POSITION coordinates to calculate 
+;         an image position in the actual position calculated for the image by !P.MULTI. The main 
+;         purpose of this functionality is to allow the user to display images along with
+;         color bars when using !P.MULTI. 
+;    quiet: in, optional, type=boolean, default=0
+;         There are situations when you would prefer that cgIMAGE does not advertise itself by 
+;         filling out the FSC_$CGIMAGE common block. For example, if you are using cgImage to 
+;         draw a color bar, it would not be necessary. Setting this keyword means that cgImage 
+;         just goes quietly about it's business without bothering anyone else.    
+;    save: in, optional, type=boolean, default=0
+;         Set this to cause a data coordinate system to be established for the image. The XRANGE 
+;         and YRANGE keyword values will be used to establish a data coordinate system coincident 
+;         with the final image position. Setting the `AXES` keyword automatically sets SAVE=1.
+;    scale: in, optional, type=boolean, default=0
+;         Set this keyword to byte scale the image before display. If this keyword is not set, 
+;         the image is not scaled before display. This keyword will be set automatically by using
+;         any of the keywords normally associated with byte scaling an image.
+;    title: in, optional, type=string, default=""
+;         Set this keyword to the title of the image plot. No title will appear with the
+;         image unless the `AXES` keyword is also set.
+;    top: in, optional, type=integer, default=255
+;         If the SCALE keyword is set, the image is scaled before display so that all 
+;         displayed pixels have values greater than or equal to BOTTOM and less than 
+;         or equal to TOP.
+;    tv: in, optional, type=boolean, default=0
+;         Setting this keyword makes the cgImage command work much like the brain-dead
+;         TV command except that it will get colors right on all output devices. Most of
+;         the cgImage keywords are ignored if this keyword is set.
+;    window: in, optional, type=boolean, default=0
+;         Set this keyword to replace all the commands in a current cgWindow or to
+;         create a new cgWindow for displaying this command.
+;    xrange: in, optional, type=fltarr(2)
+;         A two element array giving the X range of the image. By default set to
+;         [0, size of image in X].
+;    xtitle: in, optional, type=string, default=""
+;         The X title of the image plot. Used only if `AXES` is set.
+;    yrange: in, optional, type=fltarr(2)
+;         A two element array giving the Y range of the image. By default set to
+;         [0, size of image in Y].
+;    ytitle: in, optional, type=string, default=""
+;         The Y title of the image plot. Used only if `AXES` is set.
+;    _ref_extra: in, optional, type=varies
+;         Any keywords defined for the TV command can be used. This applies only
+;         if the TV keyword is set.
+;-           
 PRO cgImage, image, x, y, $
    ADDCMD=addcmd, $
    ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
-   ALPHABGPOSITION=alphapos, $
+   ALPHABGPOSITION=alphabgpos, $
+   ALPHAFGPOSITION=alphafgpos, $
    AXIS=axis, $
    AXES=axes, $
    AXKEYWORDS=axkeywords, $
@@ -534,7 +549,7 @@ PRO cgImage, image, x, y, $
    BOTTOM=bottom, $
    CHARSIZE=charsize, $
    COLOR=color, $
-   ERASE=obsolte_erase, $ ; Added for compatibility with TVIMAGE.
+   ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
    FIT_INSIDE=fit_inside, $
    FONT=font, $
    INTERPOLATE=interp, $
@@ -586,10 +601,13 @@ PRO cgImage, image, x, y, $
     IF N_Elements(obsolete_nointerpolation) NE 0 THEN interp = 1 - obsolete_nointerpolation
     
     ; Set up a common block as input to TVINFO.
-    COMMON FSC_$CGIMAGE, _cgimage_xsize, _cgimage_ysize, $
-                         _cgimage_winxsize, _cgimage_winysize, $
-                         _cgimage_position, _cgimage_winID, $
-                         _cgimage_current
+    COMMON FSC_$CGIMAGE, _cgimage_xsize, $    ; The X size of the image.
+                         _cgimage_ysize, $    ; The Y size of the imge.
+                         _cgimage_winxsize, $ ; The X size of the window displaying the image.
+                         _cgimage_winysize, $ ; The Y size of the window displaying the image.
+                         _cgimage_position, $ ; The final position of the image in the window.
+                         _cgimage_winID, $    ; The window index number of the window displaying the image.
+                         _cgimage_current     ; Set to 1 if a call to cgImage is made.
     
     ; Add the command to cgWindow?
     IF Keyword_Set(addcmd) THEN BEGIN
@@ -608,7 +626,8 @@ PRO cgImage, image, x, y, $
         IF Keyword_Set(addcmd) THEN BEGIN
             cgWindow, 'cgImage', image, x, y, $
                ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
-               ALPHABGPOSITION=alphapos, $
+               ALPHABGPOSITION=alphabgpos, $
+               ALPHAFGPOSITION=alphafgpos, $
                AXIS=axis, $
                AXES=axes, $
                AXKEYWORDS=axkeywords, $
@@ -651,7 +670,8 @@ PRO cgImage, image, x, y, $
         ; Otherwise, we are replacing the commands in a new or existing window.
         cgWindow, 'cgImage', image, x, y, $
                ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
-               ALPHABGPOSITION=alphapos, $
+               ALPHABGPOSITION=alphabgpos, $
+               ALPHAFGPOSITION=alphafgpos, $
                AXIS=axis, $
                AXES=axes, $
                AXKEYWORDS=axkeywords, $
@@ -716,10 +736,10 @@ PRO cgImage, image, x, y, $
        ENDELSE
     ENDIF
 
-     ; Character size has to be determined *after* the layout has been decided.
+    ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
-    IF N_Elements(color) EQ 0 THEN acolorname = 'black' ELSE acolorname = color
+    IF N_Elements(color) EQ 0 THEN acolorname = 'oppostite' ELSE acolorname = color
     interp = Keyword_Set(interp)
     
     ; Doing multiple plots?
@@ -743,7 +763,9 @@ PRO cgImage, image, x, y, $
     ENDIF
     ncolors = top-bottom+1
     scale = Keyword_Set(scale)
-
+    SetDefaultValue, alphabgpos, [0.0, 0.0, 1.0, 1.0]
+    SetDefaultValue, alphafgpos, [0.0, 0.0, 1.0, 1.0]
+    
     ; Check for mis-spelling of AXES as AXIS.
     IF Keyword_Set(axis) THEN axes = 1    
     axes = Keyword_Set(axes)
@@ -801,6 +823,25 @@ PRO cgImage, image, x, y, $
     ; Before you do anything, get the current color table vectors
     ; so they can be restored later. Must do AFTER loading a palette!
     TVLCT, rr, gg, bb, /Get
+    
+    ; If this is an image with an alpha channel, and there is no alphachannel background image
+    ; supplied, you will have to take a snapshot of the current window right now before you
+    ; erase the window. If the smallest image dimension is a 4, then we will assume this is
+    ; an image with an alpha channel.
+    IF Min(Size(image, /DIMENSIONS)) EQ 4 THEN BEGIN
+    
+       ; We can get the background image on devices that support windows.
+       IF (!D.Flags AND 256) NE 0 THEN BEGIN
+           IF N_Elements(alphabackgroundImage) EQ 0 THEN BEGIN
+               alphabackgroundImage = cgSnapshot()
+           ENDIF
+       ENDIF ELSE BEGIN
+           IF N_Elements(alphabackgroundImage) EQ 0 THEN BEGIN
+               ; Otherwise, blend this with a white image.
+               alphabackgroundImage = BytArr(100,100) + 255B
+           ENDIF
+       ENDELSE
+    ENDIF
     
     ; Do you need to erase the window before image display?
     IF ~Keyword_Set(noerase) && (!P.MULTI[0] EQ 0) && (N_Elements(layout) EQ 0) THEN BEGIN
@@ -1072,8 +1113,8 @@ PRO cgImage, image, x, y, $
          IF N_Elements(y) EQ 0 THEN y = 0
          IF Keyword_Set(normal) THEN BEGIN
             IF alphaImage THEN BEGIN
-               outImage = cgImage_Prepare_Alpha(image, position, alphaBackgroundImage, $
-                    TV=1, ALPHABGPOSITION=alphapos)
+               outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
+                    TV=1, ALPHABGPOSITION=alphapos, ALPHAFGPOSITION=alphafgpos)
                TV, outImage, x, y, True=3, _STRICT_EXTRA=extra, /Normal
             ENDIF ELSE BEGIN
                CASE scale OF
@@ -1084,8 +1125,8 @@ PRO cgImage, image, x, y, $
             ENDELSE
          ENDIF ELSE BEGIN
             IF alphaImage THEN BEGIN
-               outImage = cgImage_Prepare_Alpha(image, position, alphaBackgroundImage, $
-                    TV=1, ALPHABGPOSITION=alphapos)
+               outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
+                    TV=1, ALPHABGPOSITION=alphapos, ALPHAFGPOSITION=alphafgpos)
                TV, outImage, x, y, True=3, _STRICT_EXTRA=extra, /Device
             ENDIF ELSE BEGIN
                CASE scale OF
@@ -1099,8 +1140,8 @@ PRO cgImage, image, x, y, $
          IF N_Params() EQ 2 THEN BEGIN
             IF Keyword_Set(normal) THEN BEGIN
                 IF alphaImage THEN BEGIN
-                   outImage = cgImage_Prepare_Alpha(image, position, alphaBackgroundImage, $
-                       TV=1, ALPHABGPOSITION=alphapos)
+                   outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
+                       TV=1, ALPHABGPOSITION=alphapos, ALPHAFGPOSITION=alphafgpos)
                    TV, outImage, x,  True=3, _STRICT_EXTRA=extra, /Normal
                 ENDIF ELSE BEGIN
                    CASE scale OF 
@@ -1111,8 +1152,8 @@ PRO cgImage, image, x, y, $
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
-                   outImage = cgImage_Prepare_Alpha(image, position, alphaBackgroundImage, $
-                        TV=1, ALPHABGPOSITION=alphapos)
+                   outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
+                        TV=1, ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
                    TV, outImage, x,  True=3, _STRICT_EXTRA=extra, /Device
                 ENDIF ELSE BEGIN
                    CASE scale OF 
@@ -1178,7 +1219,8 @@ PRO cgImage, image, x, y, $
        ; color image.
        IF true GT 0 THEN LOADCT, 0, /Silent
        IF alphaImage THEN BEGIN
-           outImage = cgImage_Prepare_Alpha(image, position, alphaBackgroundImage)
+           outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
+                       ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
            TV, outImage, xstart, ystart, XSIZE=xsize, YSIZE=ysize, _STRICT_EXTRA=extra, True=3
        ENDIF ELSE BEGIN
            CASE scale OF 
@@ -1203,7 +1245,8 @@ PRO cgImage, image, x, y, $
              END
           1: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
-                    outImage = cgImage_Prepare_Alpha(image, position, alphaBackgroundImage)
+                    outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
+                       ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
                     TV, FSC_Resize_Image(outImage, xsize, ysize, INTERP=interp, $
                        MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDIF ELSE BEGIN
@@ -1218,7 +1261,8 @@ PRO cgImage, image, x, y, $
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
-                    outImage = cgImage_Prepare_Alpha(image, position, alphaBackgroundImage)
+                    outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
+                       ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
                     image2d = Color_Quan(outImage, 3, r, g, b, _EXTRA=extra)               
                 ENDIF ELSE BEGIN
                     image2d = Color_Quan(image, 1, r, g, b, _EXTRA=extra)   
@@ -1229,7 +1273,8 @@ PRO cgImage, image, x, y, $
              ENDELSE
           2: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
-                    outImage = cgImage_Prepare_Alpha(image, position, alphaBackgroundImage)
+                    outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
+                       ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
                     TV, FSC_Resize_Image(outImage, xsize, ysize, INTERP=interp, $
                        MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDIF ELSE BEGIN
@@ -1244,7 +1289,7 @@ PRO cgImage, image, x, y, $
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
-                    outImage = cgImage_Prepare_Alpha(image, position, alphaBackgroundImage)
+                    outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, ALPHABGPOSITION=alphapos)
                     image2d = Color_Quan(outImage, 3, r, g, b, _EXTRA=extra)               
                 ENDIF ELSE BEGIN
                     image2d = Color_Quan(image, 2, r, g, b, _EXTRA=extra)
@@ -1255,7 +1300,8 @@ PRO cgImage, image, x, y, $
              ENDELSE
           3: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
-                    outImage = cgImage_Prepare_Alpha(image, position, alphaBackgroundImage)
+                    outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
+                       ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
                     TV, FSC_Resize_Image(outImage, xsize, ysize, INTERP=interp, $
                        MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDIF ELSE BEGIN
@@ -1270,7 +1316,8 @@ PRO cgImage, image, x, y, $
                 ENDELSE
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
-                    outImage = cgImage_Prepare_Alpha(image, position, alphaBackgroundImage)
+                    outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
+                       ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
                     image2d = Color_Quan(outImage, 3, r, g, b, _EXTRA=extra)               
                 ENDIF ELSE BEGIN
                     image2d = Color_Quan(image, 3, r, g, b, _EXTRA=extra)

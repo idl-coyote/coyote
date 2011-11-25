@@ -71,8 +71,8 @@
 ;        If this keyword is a string, the name of the background color. By default, 'white'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     charsize: in, optional, type=float, default=cgDefCharSize()
-;         The character size for axes annotations. Uses cgDefCharSize to select default
-;         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
+;        The character size for axes annotations. Uses cgDefCharSize to select default
+;        character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, 'black'.
 ;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
@@ -80,37 +80,38 @@
 ;     font: in, optional, type=integer, default=!P.Font
 ;        The type of font desired for axis annotation.
 ;     isotropic: in, optional, type=boolean, default=0
-;         A short-hand way of setting the ASPECT keyword to 1.
+;        A short-hand way of setting the ASPECT keyword to 1.
 ;     layout: in, optional, type=intarr(3)
-;         This keyword specifies a grid with a graphics window and determines where the
-;         graphic should appear. The syntax of LAYOUT is three numbers: [ncolumns, nrows, location].
-;         The grid is determined by the number of columns (ncolumns) by the number of 
-;         rows (nrows). The location of the graphic is determined by the third number. The
-;         grid numbering starts in the upper left (1) and goes sequentually by column and then
-;         by row.
+;        This keyword specifies a grid with a graphics window and determines where the
+;        graphic should appear. The syntax of LAYOUT is three numbers: [ncolumns, nrows, location].
+;        The grid is determined by the number of columns (ncolumns) by the number of 
+;        rows (nrows). The location of the graphic is determined by the third number. The
+;        grid numbering starts in the upper left (1) and goes sequentually by column and then
+;        by row.
 ;     nodata: in, optional, type=boolean, default=0
-;         Set this keyword to draw axes, but no data.
+;        Set this keyword to draw axes, but no data.
 ;     noerase: in, optional, type=boolean, default=0
-;         Set this keyword to draw the plot without erasing the display first.
+;        Set this keyword to draw the plot without erasing the display first.
 ;     overplot: in, optional, type=boolean, default=0
-;         Set this keyword if you wish to overplot data on an already exisiting set of
-;         axes. It is like calling the IDL OPLOT command.
+;        Set this keyword if you wish to overplot data on an already exisiting set of
+;        axes. It is like calling the IDL OPLOT command.
 ;     position: in, optional, type=vector
-;         The usual four-element position vector for the Plot comamnd. Only monitored and
-;         possibly set if the ASPECT keyword is used.
+;        The usual four-element position vector for the Plot comamnd. Only monitored and
+;        possibly set if the ASPECT keyword is used.
 ;     psym: in, optional, type=integer
-;         Any normal IDL PSYM values, plus and value supported by the Coyote Library
-;         routine SYMCAT. An integer between 0 and 46.
+;        Any normal IDL PSYM values, plus and value supported by the Coyote Library
+;        routine SYMCAT. An integer between 0 and 46.
 ;     symcolor: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the symbol color. By default, 'black'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     symsize: in, optional, type=float, default=1.0
 ;        The symbol size.
 ;     traditional: in, optional, type=boolean, default=0
-;         If this keyword is set, the traditional color scheme of a black background for
-;         graphics windows on the display is used and PostScript files always use a white background.
+;        If this keyword is set, the traditional color scheme of a black background for
+;        graphics windows on the display is used and PostScript files always use a white background.
 ;     window: in, optional, type=boolean, default=0
-;         Set this keyword if you want to display the plot in a resizable graphics window.
+;        Set this keyword to replace all the commands in a current cgWindow or to
+;        create a new cgWindow for displaying this command.
 ;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot command is allowed in the program.
 ;

@@ -60,6 +60,8 @@
 ;        If aspect is greater than 1, then the ysize will be used in the aspect
 ;        ratio calculation. If the aspect is less than or equal to 1, then the
 ;        xsize will be used in the aspect ratio calculation of the final window size.
+;        If the input to the ASPECT keyword is an image, then the aspect ratio will
+;        be calculated from the image itself.
 ;    color: in, optional, type=string/integer, default='white'
 ;        If this keyword is a string, the name of the data color. By default, 'white'.
 ;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
@@ -106,6 +108,7 @@
 ;           It is now possible to use cgDisplay in any graphics program, even those that
 ;           will be run in cgWindow. 17 Nov 2011. DWF.
 ;        Added ASPECT keyword. 18 Nov 2011. DWF.
+;        Allowed the window ASPECT to be set with an image argument. 25 Nov 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -143,11 +146,22 @@ PRO cgDisplay, pxsize, pysize, $
     
     ; Do you need a window with a particular aspect ratio?
     IF N_Elements(aspect) NE 0 THEN BEGIN
-       IF aspect GT 1.0 THEN BEGIN
-          pxsize = pysize / aspect
+    
+       ; If aspect is not a scalar, but an image. Use the aspect
+       ; ratio of the image to determine the aspect ratio of the
+       ; display.
+       ndims = Size(aspect, /N_DIMENSIONS)
+       IF  (ndims GE 2) && (ndims LE 4) THEN BEGIN 
+           void = Image_Dimensions(aspect, XSIZE=xsize, YSIZE=ysize)
+           waspect = Float(ysize) / xsize
+       ENDIF ELSE waspect = aspect
+       
+       IF waspect GT 1.0 THEN BEGIN
+          pxsize = pysize / waspect
        ENDIF ELSE BEGIN
-          pysize = pxsize * aspect
+          pysize = pxsize * waspect
        ENDELSE
+       
     ENDIF
     
     ; If you are on a machine that supports windows, you can create a window

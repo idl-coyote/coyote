@@ -111,7 +111,7 @@
 ;        Added WINDOW keyword. 24 Jan 2011. DWF. 
 ;        Made a modification that allows THICK and COLOR keywords apply to symbols, too. 24 Feb 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
-;
+;        Fixed a problem in which the colors of the line was not accurate in some cases. 29 November 2011. DWF.
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -235,6 +235,7 @@ PRO cgPlotS, x, y, z, $
    
         FOR j=0,xsize-2 DO BEGIN
             thisColor = color[j]
+            IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = cgColor(thisColor)
             CASE n_params OF
                 1: IF psym[0] LE 0 THEN BEGIN
                        PlotS, [x[0,j],x[0,j+1]], [x[1,j],x[1,j+1]], [x[2,j],x[2,j+1]], $

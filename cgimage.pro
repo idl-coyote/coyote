@@ -98,6 +98,13 @@
 ;     cgImage, image, Position=p
 ;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
 ;     !P.Multi =0
+;     
+;     To set a missing value to -32767 and the color white and do
+;     a 3% histogram clip of the image.
+;     
+;     cgLoadCT, 4, /Brewer, NColors=254
+;     TVLCT, palette, /Get
+;     cgImage, image, Missing_Value=-32767, Missing_Color='white', Stretch='Clip', Clip=3
 ;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -130,6 +137,8 @@
 ;       Problem with transparent images with alpha channels caused by changes in the TVImage->cgImage
 ;          transition. Added AlphaFGPosition keyword to address issues. Cleaned up the
 ;          code and improved the internal documentation. 22 Nov 2011. DWF.
+;       Added the ability to stretch 2D image arrays in various ways before display. 1 Dec 2011.
+;       Added the ability to handle missing data in 2D arrays before display. 1 Dec 2011.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -164,7 +173,7 @@
 ;       channel if the cgImage command is acting like a smarter IDL 
 ;       TV command.
 ;-
-FUNCTION cgIMAGE_PREPARE_ALPHA, image, alphaBackgroundImage, $
+FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
     ALPHABGPOSITION=alphabgpos, $
     ALPHAFGPOSITION=alphafgpos, $    
     TV=tv
@@ -289,6 +298,282 @@ END
 
 
 ;+
+; This routine scales or otherwise prepares an image to be displayed.
+; 
+; :Returns:
+;     Returns an image that can be displaye properly.
+; 
+; :Params:
+;    image: in, required
+;       The input image that is being prepared for display. 
+;    xsize: in, optional
+;       The output X size of the image.
+;    ysize: in, optional
+;       The output Y size of the image.
+;   
+; :Keywords:
+;    bottom: in, optional, type=integer, default=0
+;         If the SCALE keyword is set, the image is scaled before display so that all 
+;         displayed pixels have values greater than or equal to BOTTOM and less than 
+;         or equal to TOP.
+;    beta: in, optional, type=float, default=3.0
+;         The beta factor in a Hyperpolic Sine stretch.
+;    clip: in, optional, type=float, default=2
+;         A number between 0 and 50 that indicates the percentage of pixels to clip
+;         off either end of the image histogram before performing a linear stretch.
+;    exponent: in, optional, type=float, default=4.0
+;         The logarithm exponent in a logarithmic stretch.
+;    gamma: in, optional, type=float, default=1.5
+;         The gamma factor in a gamma stretch.
+;    interpolate: in, optional, type=boolean, default=0
+;         Set this keyword to interpolate with bilinear interpolation the display image as it 
+;         is sized to its final position in the display window. Interpolation will potentially 
+;         create image values that do not exist in the original image. The default is to do no
+;         interpolation, so that image values to not change upon resizing. Interpolation can
+;         result in smoother looking final images.
+;    maxvalue: in, optional, type=varies
+;         If this value is defined, the data is linearly scaled between MINVALUE
+;         and MAXVALUE. MAXVALUE is set to MAX(image) by default. Setting this 
+;         keyword to a value automatically sets `SCALE` to 1. If the maximum value of the 
+;         image is greater than 255, this keyword is defined and SCALE=1.
+;    mean: in, optional, type=float, default=0.5
+;         The mean factor in a logarithmic stretch.
+;    minus_one: in, optional, type=boolean, default=0
+;         The value of this keyword is passed along to the FSC_RESIZE_IMAGE
+;         command. It prevents FSC_RESIZE_IMAGE from adding an extra row and
+;         column to the resulting array, which can be a problem with
+;         small image arrays. 
+;    minvalue: in, optional, type=varies
+;         If this value is defined, the data is linearly scaled between MINVALUE
+;         and `MAXVALUE`. MINVALUE is set to MIN(image) by default. Setting this 
+;         keyword to a value automatically sets SCALE=1. If the minimum value of the 
+;         image is less than 0, this keyword is defined and SCALE=1.
+;    missing_index: in, optional, type=integer, default=255
+;         The index of the missing color in the final byte scaled image.
+;    missing_value: in, optional, type=integer
+;         The number that represents the missing value in the image.
+;    ncolors: in, optional, type=integer, default=256
+;         If this keyword is supplied, the `TOP` keyword is ignored and the TOP keyword 
+;         is set equal to  NCOLORS-1. This keyword is provided to make cgImage easier 
+;         to use with the color-loading programs such as cgLOADCT::
+;
+;              cgLoadCT, 5, NColors=100, Bottom=100
+;              cgImage, image, NColors=100, Bottom=100
+;                  
+;         Setting this keyword to a value automatically sets SCALE=1.
+;    negative: in, optional, type=boolean, default=0
+;         Set this keyword if you want to display the image with a negative or reverse stretch.
+;    scale: in, optional, type=boolean, default=0
+;         Set this keyword to byte scale the image before display. If this keyword is not set, 
+;         the image is not scaled before display. This keyword will be set automatically by using
+;         any of the keywords normally associated with byte scaling an image.
+;    stretch: in, optional, type=integer/string, default=1
+;         The type of scaling performed prior to display. 
+;         May be specified as a number or as a string (e.g, 3 or "Log").
+;
+;           Number   Type of Stretch
+;             0         None           No scaling whatsoever is done.
+;             1         Linear         scaled = BytScl(image, MIN=minValue, MAX=maxValue)
+;             2         Clip           A histogram stretch, with a percentage of pixels clipped at both the top and bottom
+;             3         Gamma          scaled = GmaScl(image, MIN=minValue, MAX=maxValue, Gamma=gamma)
+;             4         Log            scaled = LogScl(image, MIN=minValue, MAX=maxValue, Mean=mean, Exponent=exponent)
+;             5         Asinh          scaled = AsinhScl(image, MIN=minValue, MAX=maxValue, Beta=beta)
+;             6         SquareRoot     A linear stretch of the square root histogram of the image values.
+;             7         Equalization   A linear stretch of the histogram equalized image histogram.
+;             8         Gaussian       A Gaussian normal function is applied to the image histogram.
+;             9         MODIS          Scaling done in the differential manner of the MODIS Rapid Response Team
+;                                      and implemented in the Coyote Library routine ScaleModis.
+;    sigma: in, optional, type=float, default=1.0
+;         The sigma scale factor in a Gaussian stretch.
+;    top: in, optional, type=integer, default=255
+;         If the SCALE keyword is set, the image is scaled before display so that all 
+;         displayed pixels have values greater than or equal to BOTTOM and less than 
+;         or equal to TOP.
+;-
+FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
+   BOTTOM=bottom, $
+   BETA=beta, $
+   CLIP=clip, $
+   EXPONENT=exponent, $
+   GAMMA=gamma, $
+   INTERPOLATE=interpolate, $
+   MAXVALUE=maxvalue, $
+   MEAN=mean, $
+   MINUS_ONE=minus_one, $
+   MINVALUE=minvalue, $
+   MISSING_INDEX=missing_index, $
+   MISSING_VALUE=missing_value, $
+   NEGATIVE=negative, $
+   SCALE=scale, $
+   STRETCH=stretch, $
+   SIGMA=sigma, $
+   TOP=top
+
+   Compile_Opt idl2
+   
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+       Catch, /Cancel
+       ok = Error_Message()
+       RETURN, image
+    ENDIF
+    
+   ; I would like to avoid making a copy of the image, if possible.
+   ; If nothing needs to be done, just return the image.
+   IF (N_Elements(xsize) EQ 0) && $
+      (N_Elements(missing_value) EQ 0) && $
+      ~scale THEN RETURN, image
+      
+   ; Is there a missing value to worry about? We can only worry
+   ; about missing values with 2D image arrays.
+   ndims = Size(image, /N_DIMENSIONS)
+   IF (N_Elements(missing_value) NE 0) && (ndims EQ 2) THEN BEGIN
+   
+       ; Get the image type.
+       imageType = Size(image, /TNAME)
+       
+       ; Create a temporary image variable. If you will be scaling the data,
+       ; make the image a float if it is not float or double already.
+       CASE imageType OF
+          'FLOAT': tempImage = image
+          'DOUBLE': tempImage = image
+          ELSE: tempImage = Float(image) 
+       ENDCASE
+       
+       ; The missing value may be the symbol for NAN.
+       IF Finite(missing_value) THEN BEGIN
+           missingIndices = Where(tempImage EQ missing_value, missingCnt)
+       ENDIF ELSE BEGIN
+           missingIndices = Where(Finite(tempImage) EQ 0, missingCnt)
+       ENDELSE
+       
+       ; Set the missing indices to the correct NAN value.
+       IF imageType EQ 'DOUBLE' THEN BEGIN
+           IF missingCnt GT 0 THEN tempImage[missingIndices] = !Values.D_NAN
+       ENDIF ELSE BEGIN
+           IF missingCnt GT 0 THEN tempImage[missingIndices] = !Values.F_NAN
+       ENDELSE
+   
+   ENDIF
+   
+   ; Do you need scaling?
+   IF Keyword_Set(scale) || (stretch NE 0) THEN BEGIN
+   
+      ; Create a temporary image, if you don't already have one.
+      IF N_Elements(tempImage) EQ 0 THEN BEGIN
+          imageType = Size(image, /TNAME)
+          CASE imageType OF
+              'FLOAT': tempimage = image
+              'DOUBLE': tempimage = image
+              ELSE: tempImage = Float(image) 
+          ENDCASE
+       ENDIF
+      
+      ; Select the particular kind of stretch you want to do. Unfortunately, we
+      ; can still cause underflow error messages when doing stretch, despite best
+      ; attempts to prevent this. Turn these messages off here.
+      curExcept = !Except
+      !Except = 0      
+       CASE stretch OF
+       
+;             0         None           No scaling whatsoever is done.
+;             1         Linear         scaled = BytScl(image, MIN=minValue, MAX=maxValue)
+;             2         Clip           A histogram stretch, with a percentage of pixels clipped at both the top and bottom
+;             3         Gamma          scaled = GmaScl(image, MIN=minValue, MAX=maxValue, Gamma=gamma)
+;             4         Log            scaled = LogScl(image, MIN=minValue, MAX=maxValue, Mean=mean, Exponent=exponent)
+;             5         Asinh          scaled = AsinhScl(image, MIN=minValue, MAX=maxValue, Beta=beta)
+;             6         SquareRoot     A linear stretch of the square root histogram of the image values.
+;             7         Equalization   A linear stretch of the histogram equalized image histogram.
+;             8         Gaussian       A Gaussian normal function is applied to the image histogram.
+;             9         MODIS          Scaling done in the differential manner of the MODIS Rapid Response Team
+
+          0: ; No stretch at all. 
+       
+          1: BEGIN ; Linear stretch.
+             tempImage = BytScl(tempImage, Max=maxvalue, Min=minvalue, /NAN, TOP=top) + bottom
+             IF negative THEN tempImage = Byte(top) - tempImage
+             END
+    
+          2: BEGIN ; Histogram clip stretch.
+             tempImage = ClipScl(tempImage, clip, OMIN=bottom, OMAX=top, NEGATIVE=negative)
+             END
+
+          3: BEGIN ; Gamma log scale stretch.
+             tempImage = GmaScl(tempImage, Max=maxvalue, Min=minvalue, $
+                       Gamma=gamma, Negative=negative, OMAX=top, OMIN=bottom)
+             END
+    
+          4: BEGIN ; Log scale stretch.
+             tempImage =  LogScl(tempImage, Max=maxvalue, Min=minvalue, $
+                       Mean=mean, Exponent=exponent, Negative=negative, $
+                       OMIN=bottom, OMAX=top)
+             END
+    
+          5: BEGIN ; Hyperpolic sine stretch.
+             tempImage = ASinhScl(tempImage, Max=maxvalue, Min=minvalue, $
+                      BETA=beta, Negative=negative, OMAX=top, OMIN=bottom)
+             END
+               
+    
+          6: BEGIN ; Square Root stretch.
+             tempImage = BytScl(SQRT(tempImage), Max=maxvalue, Min=minvalue, /NAN, TOP=top) + bottom
+             IF negative THEN tempImage = Byte(top) - tempImage
+             END
+    
+          7: BEGIN ; Histogram equalization stretch.
+             tempImage = BytScl(Hist_Equal(tempImage), Max=maxvalue, Min=minvalue, /NAN, TOP=top) + bottom
+             IF negative THEN tempImage = Byte(top) - tempImage
+             END
+    
+          8: BEGIN ; Gaussian stretch.
+             tempImage = GaussScl(tempImage, Max=maxvalue, Min=minvalue, $
+                       Sigma=sigma, Negative=negative, OMIN=bottom, OMAX=top)
+             END
+         
+          9: BEGIN ; MODIS image stretch.
+             tempImage = ScaleModis(tempImage)
+             END
+    
+            ELSE: Message, 'Unknown scaling index.'
+            
+       ENDCASE
+       
+       ; Clear the math error register and turn normal error checking on.
+       void = Check_Math()
+       !Except = curExcept
+       
+   ENDIF
+   
+   
+   ; After scaling, you may need to replace missing values with the
+   ; missing index.
+   IF N_Elements(missingCnt) NE 0 THEN BEGIN
+      IF missingCnt GT 0 THEN tempImage[missingIndices] = missing_index
+   ENDIF
+   
+   ; If you created a temporary image, then return that.
+   ; Otherwise you can return the original image, modified
+   ; to the appropriate size.
+   IF N_Elements(tempImage) EQ 0 THEN BEGIN
+       IF (N_Elements(xsize) EQ 0) THEN BEGIN
+           RETURN, image
+       ENDIF ELSE BEGIN
+           RETURN, FSC_Resize_Image(image, xsize, ysize, $
+                    INTERP=interpolate, MINUS_ONE=minus_one)
+       ENDELSE
+   ENDIF ELSE BEGIN
+       IF (N_Elements(xsize) EQ 0) THEN BEGIN
+           RETURN, tempImage
+       ENDIF ELSE BEGIN
+           RETURN, FSC_Resize_Image(tempImage, xsize, ysize, $
+                    INTERP=interpolate, MINUS_ONE=minus_one)
+       ENDELSE
+   ENDELSE
+END
+
+
+;+
 ; The purpose of this program is to create a TV command that works the way
 ; the TV command would be expected to work if it was written today, rather
 ; than 25 years ago. In other words, it knows the difference between an
@@ -297,6 +582,11 @@ END
 ; graphics commands in IDL, it works seamlessly with both 8-bit and 24-bit
 ; images. In addition to other modern features, this program can also 
 ; display images that contain an alpha channel.
+; 
+; Also, two-dimensional image arrays can be manipulated, stretched,
+; and scaled directly with keywords to cgImage. These keywords do not
+; work with alpha channel images, or if the TV keyword is used with
+; cgImage.
 ; 
 ; :Params:
 ;    image:  in, required, type=various
@@ -315,7 +605,8 @@ END
 ; :Keywords:
 ;    addcmd: in, optional, type=boolean, default=0
 ;         Set this keyword to add this command to an already open cgWindow to
-;         be executed when the window is resized.
+;         be executed when the window is resized. If the DISPLAY keyword is also
+;         set, this keyword will act as if the WINDOW keyword were set.
 ;    alphabackgroundimage: in, optional, type=varies
 ;         Normally, when a image with an alpha channel is displayed, the image is 
 ;         blended with whatever is currently in the display window. This means, the 
@@ -355,20 +646,33 @@ END
 ;         The name of the background color for the image display. Unlike the TV command in IDL,
 ;         the cgImage command will erase the display before executing the command like other
 ;         fundamental graphics commands (e.g., Plot, Contour, Surface) in IDL.
-;    bottom, in, optional, type=integer, default=0
+;    beta: in, optional, type=float, default=3.0
+;         The beta factor in a Hyperpolic Sine stretch. Available only with 2D images.
+;    bottom: in, optional, type=integer, default=0
 ;         If the SCALE keyword is set, the image is scaled before display so that all 
 ;         displayed pixels have values greater than or equal to BOTTOM and less than 
-;         or equal to TOP.
+;         or equal to TOP. Available only with 2D images.
 ;    charsize: in, optional, type=float
 ;         Sets the character size. Used only if the AXES keyword is also set. By default, 
 ;         the value from cgDefCharsize().
+;    clip: in, optional, type=float, default=2
+;         A number between 0 and 50 that indicates the percentage of pixels to clip
+;         off either end of the image histogram before performing a linear stretch.
+;         Available only with 2D images.
 ;    color: in, optional, type=string, default='opposite'
 ;         The name of the color in which to draw the axes. Used only if the `AXES` keyword is set.
+;    display: in, optional, type=boolean, default=0
+;         If this keyword is set, a new display window is created (with cgDisplay) that has the
+;         same aspect ratio as the image. The image is displayed in that window. If the WINDOW
+;         keyword is also set, a new cgWindow is created with the WASPECT keyword set to the image
+;         aspect ratio, and the image is displayed in that new cgwindow. 
 ;    erase: in, optional, type=boolean, default=1
 ;         An obsolete keyword. Used only for compatibility with the earlier TVImage command. The
 ;         default for cgImage is to always erase the graphics display before displaying the image
 ;         unless told otherwise by setting the `NOERASE` keyword. This makes cgImage consistent with
 ;         other IDL graphics commands.
+;    exponent: in, optional, type=float, default=4.0
+;         The logarithm exponent in a logarithmic stretch. Available only with 2D images.
 ;    fit_inside: in, optional, type=boolean, default=0
 ;         When the AXES keyword is set, the default is to position the axes on top of the image
 ;         using the POSITION. However, if this keyword is set, the axes are positioned at POSITION
@@ -376,6 +680,8 @@ END
 ;    font: in, optional, type=integer
 ;         This keyword selects the font used for axis and title display. The default is to use
 ;         the value of !P.Font.
+;    gamma: in, optional, type=float, default=1.5
+;         The gamma factor in a gamma stretch. Available only with 2D images.
 ;    interpolate: in, optional, type=boolean, default=0
 ;         Set this keyword to interpolate with bilinear interpolation the display image as it 
 ;         is sized to its final position in the display window. Interpolation will potentially 
@@ -417,6 +723,8 @@ END
 ;         and MAXVALUE. MAXVALUE is set to MAX(image) by default. Setting this 
 ;         keyword to a value automatically sets `SCALE` to 1. If the maximum value of the 
 ;         image is greater than 255, this keyword is defined and SCALE=1.
+;    mean: in, optional, type=float, default=0.5
+;         The mean factor in a logarithmic stretch. Available only with 2D images.
 ;    minus_one: in, optional, type=boolean, default=0
 ;         The value of this keyword is passed along to the FSC_RESIZE_IMAGE
 ;         command. It prevents FSC_RESIZE_IMAGE from adding an extra row and
@@ -427,6 +735,12 @@ END
 ;         and `MAXVALUE`. MINVALUE is set to MIN(image) by default. Setting this 
 ;         keyword to a value automatically sets SCALE=1. If the minimum value of the 
 ;         image is less than 0, this keyword is defined and SCALE=1.
+;    missing_color: in, optional, type=string, default='white'
+;         The color name of the missing value. Available only with 2D images.
+;    missing_index: in, optional, type=integer, default=255 
+;         The index of the missing color in the final byte scaled image. Available only with 2D images.
+;    missing_value: in, optional, type=integer
+;         The number that represents the missing value in the image. Available only with 2D images.
 ;    multimargin: in, optional, type=varies
 ;         Sometimes, when displaying multiple images with !P.Multi, you
 ;         want the images to be slightly smaller than the position created
@@ -449,7 +763,10 @@ END
 ;              cgLoadCT, 5, NColors=100, Bottom=100
 ;              cgImage, image, NColors=100, Bottom=100
 ;                  
-;         Setting this keyword to a value automatically sets SCALE=1.
+;         Setting this keyword to a value automatically sets SCALE=1. Available only with 2D images.
+;    negative: in, optional, type=boolean, default=0
+;         Set this keyword if you want to display the image with a negative or reverse stretch.
+;         Available only with 2D images.
 ;    noerase: in, optional, type=boolean, default=0
 ;         Set this keyword to prevent the command from first erasing the graphics
 ;         display before displaying the image.
@@ -508,21 +825,41 @@ END
 ;    scale: in, optional, type=boolean, default=0
 ;         Set this keyword to byte scale the image before display. If this keyword is not set, 
 ;         the image is not scaled before display. This keyword will be set automatically by using
-;         any of the keywords normally associated with byte scaling an image.
+;         any of the keywords normally associated with byte scaling an image. Available only with 
+;         2D images. If set, STRETCH is set to 1, unless it is set to another value.
+;    stretch: in, optional, type=integer/string, default=1
+;         The type of scaling performed prior to display. May be specified as a number 
+;         or as a string (e.g, 3 or "Log"). Available only with 2D images.
+;
+;           Number   Type of Stretch
+;             0         None           No scaling whatsoever is done.
+;             1         Linear         scaled = BytScl(image, MIN=minValue, MAX=maxValue)
+;             2         Clip           A histogram stretch, with a percentage of pixels clipped at both the top and bottom
+;             3         Gamma          scaled = GmaScl(image, MIN=minValue, MAX=maxValue, Gamma=gamma)
+;             4         Log            scaled = LogScl(image, MIN=minValue, MAX=maxValue, Mean=mean, Exponent=exponent)
+;             5         Asinh          scaled = AsinhScl(image, MIN=minValue, MAX=maxValue, Beta=beta)
+;             6         SquareRoot     A linear stretch of the square root histogram of the image values.
+;             7         Equalization   A linear stretch of the histogram equalized image histogram.
+;             8         Gaussian       A Gaussian normal function is applied to the image histogram.
+;             9         MODIS          Scaling done in the differential manner of the MODIS Rapid Response Team
+;                                      and implemented in the Coyote Library routine ScaleModis.
+;    sigma: in, optional, type=float, default=1.0
+;         The sigma scale factor in a Gaussian stretch. Available only with 2D images.
 ;    title: in, optional, type=string, default=""
 ;         Set this keyword to the title of the image plot. No title will appear with the
 ;         image unless the `AXES` keyword is also set.
 ;    top: in, optional, type=integer, default=255
 ;         If the SCALE keyword is set, the image is scaled before display so that all 
 ;         displayed pixels have values greater than or equal to BOTTOM and less than 
-;         or equal to TOP.
+;         or equal to TOP. Available only with 2D images.
 ;    tv: in, optional, type=boolean, default=0
 ;         Setting this keyword makes the cgImage command work much like the brain-dead
 ;         TV command except that it will get colors right on all output devices. Most of
 ;         the cgImage keywords are ignored if this keyword is set.
 ;    window: in, optional, type=boolean, default=0
 ;         Set this keyword to replace all the commands in a current cgWindow or to
-;         create a new cgWindow for displaying this command.
+;         create a new cgWindow for displaying this command. If the DISPLAY keyword is
+;         also set, a new cgWindow will be created.
 ;    xrange: in, optional, type=fltarr(2)
 ;         A two element array giving the X range of the image. By default set to
 ;         [0, size of image in X].
@@ -547,16 +884,26 @@ PRO cgImage, image, x, y, $
    AXKEYWORDS=axkeywords, $
    BACKGROUND=background, $
    BOTTOM=bottom, $
+   BETA=beta, $
    CHARSIZE=charsize, $
+   CLIP=clip, $
    COLOR=color, $
+   DISPLAY=display, $      ; Make sure this keyword is NOT is the list of keywords passed to cgWindow.
    ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
+   EXPONENT=exponent, $
    FIT_INSIDE=fit_inside, $
    FONT=font, $
+   GAMMA=gamma, $
    INTERPOLATE=interp, $
    KEEP_ASPECT_RATIO=keep_aspect, $
    LAYOUT=layout, $
    MARGIN=margin, $
    MAXVALUE=max, $
+   MEAN=mean, $
+   MISSING_COLOR=missing_color, $
+   MISSING_INDEX=missing_index, $
+   MISSING_VALUE=missing_value, $
+   NEGATIVE=negative, $
    MINUS_ONE=minusOne, $
    MINVALUE=min, $
    MULTIMARGIN=multimargin, $
@@ -571,6 +918,8 @@ PRO cgImage, image, x, y, $
    QUIET=quiet, $
    SAVE=save, $
    SCALE=scale, $
+   SIGMA=sigma, $
+   STRETCH=stretch, $
    TITLE=title, $
    TOP=top, $
    TV=tv, $
@@ -600,7 +949,7 @@ PRO cgImage, image, x, y, $
     IF N_Elements(obsolete_erase) NE 0 THEN noerase = 1 - obsolete_erase
     IF N_Elements(obsolete_nointerpolation) NE 0 THEN interp = 1 - obsolete_nointerpolation
     
-    ; Set up a common block as input to TVINFO.
+    ; Set up a common block as input to cgImageInfo.
     COMMON FSC_$CGIMAGE, _cgimage_xsize, $    ; The X size of the image.
                          _cgimage_ysize, $    ; The Y size of the imge.
                          _cgimage_winxsize, $ ; The X size of the window displaying the image.
@@ -614,6 +963,24 @@ PRO cgImage, image, x, y, $
         noerase = 1
         window = 1
     ENDIF
+    
+    ; Do we want to display the image in a window with the proper aspect ratio?
+    IF Keyword_Set(display) THEN BEGIN
+    
+         ; Are we making a cgWindow?
+         IF Keyword_Set(window) THEN BEGIN
+             dims = Image_Dimensions(image, XSIZE=xsize, YSIZE=ysize)
+             imgaspect = Float(ysize) / xsize
+             cgWindow, WASPECT=imgaspect
+             addcmd = 0
+             noerase = 0
+         ENDIF ELSE BEGIN
+             IF ~Keyword_Set(addcmd) THEN cgDisplay, /Free, ASPECT=image
+         ENDELSE
+    
+    ENDIF
+    
+    ; If we want a cgWindow and we can make windows in this device, do so now.
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
         currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
@@ -633,20 +1000,31 @@ PRO cgImage, image, x, y, $
                AXKEYWORDS=axkeywords, $
                BACKGROUND=background, $
                BOTTOM=bottom, $
+               BETA=beta, $
                CHARSIZE=charsize, $
+               CLIP=clip, $
                COLOR=color, $
+               ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
+               EXPONENT=exponent, $
                FIT_INSIDE=fit_inside, $
                FONT=font, $
+               GAMMA=gamma, $
                INTERPOLATE=interp, $
                KEEP_ASPECT_RATIO=keep_aspect, $
                LAYOUT=layout, $
                MARGIN=margin, $
                MAXVALUE=max, $
+               MEAN=mean, $
+               MISSING_COLOR=missing_color, $
+               MISSING_INDEX=missing_index, $
+               MISSING_VALUE=missing_value, $
+               NEGATIVE=negative, $
                MINUS_ONE=minusOne, $
                MINVALUE=min, $
                MULTIMARGIN=multimargin, $
                NCOLORS=ncolors, $
                NOERASE=noerase, $
+               NOINTERPOLATION=obsolete_nointerpolation, $ ; Added for compatibility with TVIMAGE.
                NORMAL=normal, $
                OPOSITION=oposition, $
                OVERPLOT=overplot, $
@@ -655,6 +1033,8 @@ PRO cgImage, image, x, y, $
                QUIET=quiet, $
                SAVE=save, $
                SCALE=scale, $
+               SIGMA=sigma, $
+               STRETCH=stretch, $
                TITLE=title, $
                TOP=top, $
                TV=tv, $
@@ -677,20 +1057,31 @@ PRO cgImage, image, x, y, $
                AXKEYWORDS=axkeywords, $
                BACKGROUND=background, $
                BOTTOM=bottom, $
+               BETA=beta, $
                CHARSIZE=charsize, $
+               CLIP=clip, $
                COLOR=color, $
+               ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
+               EXPONENT=exponent, $
                FIT_INSIDE=fit_inside, $
                FONT=font, $
+               GAMMA=gamma, $
                INTERPOLATE=interp, $
                KEEP_ASPECT_RATIO=keep_aspect, $
                LAYOUT=layout, $
                MARGIN=margin, $
                MAXVALUE=max, $
+               MEAN=mean, $
+               MISSING_COLOR=missing_color, $
+               MISSING_INDEX=missing_index, $
+               MISSING_VALUE=missing_value, $
+               NEGATIVE=negative, $
                MINUS_ONE=minusOne, $
                MINVALUE=min, $
                MULTIMARGIN=multimargin, $
                NCOLORS=ncolors, $
                NOERASE=noerase, $
+               NOINTERPOLATION=obsolete_nointerpolation, $ ; Added for compatibility with TVIMAGE.
                NORMAL=normal, $
                OPOSITION=oposition, $
                OVERPLOT=overplot, $
@@ -699,13 +1090,14 @@ PRO cgImage, image, x, y, $
                QUIET=quiet, $
                SAVE=save, $
                SCALE=scale, $
+               SIGMA=sigma, $
+               STRETCH=stretch, $
                TITLE=title, $
                TOP=top, $
                TV=tv, $
                XRANGE=plotxrange, $
                XTITLE=plotxtitle, $
                YRANGE=plotyrange, $
-               YTITLE=plotytitle, $
                REPLACECMD=replacecmd, $
                _EXTRA=extra
              RETURN
@@ -716,7 +1108,7 @@ PRO cgImage, image, x, y, $
     
     ; Which release of IDL is this?
     thisRelease = Float(!Version.Release)
-    
+        
     ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
     ; done BEFORE checking the LAYOUT properties.
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
@@ -755,16 +1147,40 @@ PRO cgImage, image, x, y, $
     IF N_Elements(min) EQ 0 THEN min = Min(image, /NAN) ELSE scale = 1
     IF N_Elements(max) EQ 0 THEN max = Max(image, /NAN) ELSE scale = 1
     IF (min LT 0) OR (max GT 255) THEN scale = 1
-    IF N_Elements(top) EQ 0 THEN top = !D.TABLE_SIZE - 1
+    IF N_Elements(top) EQ 0 THEN top = (N_Elements(missing_value) NE 0) ? !D.TABLE_SIZE - 2 : !D.TABLE_SIZE - 1
     IF N_Elements(bottom) EQ 0 THEN bottom = 0B
     IF N_Elements(ncolors) NE 0 THEN BEGIN
-        top = (ncolors - 1) < 255
+        top = (N_Elements(missing_value) NE 0) ? (ncolors - 2) < 255 : (ncolors - 1)
         scale = 1
     ENDIF
+    
     ncolors = top-bottom+1
+    negative = Keyword_Set(negative)
     scale = Keyword_Set(scale)
+    IF scale THEN BEGIN
+       IF N_Elements(stretch) EQ 0 THEN stretch = 1
+    ENDIF 
     SetDefaultValue, alphabgpos, [0.0, 0.0, 1.0, 1.0]
     SetDefaultValue, alphafgpos, [0.0, 0.0, 1.0, 1.0]
+    SetDefaultValue, beta, 3.0
+    SetDefaultValue, clip, 2
+    SetDefaultValue, exponent, 4.0
+    SetDefaultValue, gamma, 1.5 
+    SetDefaultValue, mean, 1.0
+    SetDefaultValue, missing_index, 255
+    SetDefaultValue, negative, 0
+    SetDefaultValue, sigma, 1.0
+    SetDefaultValue, stretch, 0
+    
+    ; Make sure you can specify the type of stretch with a string name.
+    IF Size(stretch, /TNAME) EQ 'STRING' THEN BEGIN
+        stretches = ['None', 'Linear', 'Clip', 'Gamma', 'Log', 'ASinh', $
+              'SquareRoot', 'Equalization', 'Gaussian', 'MODIS']
+       
+       index = Where(StrUpCase(stretch) EQ StrUpCase(stretches), count)
+       IF count GT 0 THEN stretch=index ELSE Message, 'Cannot find stretch: ' + StrUpCase(stretch)
+    ENDIF
+    IF stretch NE 0 THEN scale = 1
     
     ; Check for mis-spelling of AXES as AXIS.
     IF Keyword_Set(axis) THEN axes = 1    
@@ -819,6 +1235,9 @@ PRO cgImage, image, x, y, $
         TVLCT, p_red, p_grn, p_blu, /Get ; Save the color vectors before loading the palette.
         TVLCT, palette
     ENDIF
+    
+    ; If you have a missing color, load it at the missing color index.
+    IF N_Elements(missing_color) NE 0 THEN TVLCT, cgColor(missing_color, /Triple), missing_index
     
     ; Before you do anything, get the current color table vectors
     ; so they can be restored later. Must do AFTER loading a palette!
@@ -1223,25 +1642,48 @@ PRO cgImage, image, x, y, $
                        ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
            TV, outImage, xstart, ystart, XSIZE=xsize, YSIZE=ysize, _STRICT_EXTRA=extra, True=3
        ENDIF ELSE BEGIN
-           CASE scale OF 
-                0: TV, image, xstart, ystart, XSIZE=xsize, $
-                        YSIZE=ysize, _STRICT_EXTRA=extra, True=true
-                1: TV, BytScl(image, Top=(top-bottom), Max=max, Min=min) + $
-                         bottom, xstart, ystart, XSIZE=xsize, YSIZE=ysize, $
-                         _STRICT_EXTRA=extra, True=true
-            ENDCASE
+           TV, cgImage_Prepare_Output(image, $
+                       BOTTOM=bottom, $
+                       BETA=beta, $
+                       CLIP=clip, $
+                       EXPONENT=exponent, $
+                       GAMMA=gamma, $
+                       INTERPOLATE=interpolate, $
+                       MAXVALUE=maxvalue, $
+                       MEAN=mean, $
+                       MINUS_ONE=minus_one, $
+                       MINVALUE=minvalue, $
+                       MISSING_INDEX=missing_index, $
+                       MISSING_VALUE=missing_value, $
+                       NEGATIVE=negative, $
+                       SCALE=scale, $
+                       STRETCH=stretch, $
+                       SIGMA=sigma, $
+                       TOP=top), xstart, ystart, XSIZE=xsize, $
+                       YSIZE=ysize, _STRICT_EXTRA=extra, True=true
        ENDELSE
     ENDIF ELSE BEGIN ; All other devices.
     
        CASE true OF
           0: BEGIN
-             CASE scale OF
-                 0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
-                        MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra
-                 1: TV, BYTSCL( FSC_Resize_Image(image, CEIL(xsize), CEIL(ysize), $
-                        INTERP=interp, MINUS_ONE=minusOne), Top=top, Max=max, Min=min) $
-                        + bottom, ROUND(xstart), ROUND(ystart), _STRICT_EXTRA=extra
-             ENDCASE
+               TV, cgImage_Prepare_Output(image, xsize, ysize, $
+                       BOTTOM=bottom, $
+                       BETA=beta, $
+                       CLIP=clip, $
+                       EXPONENT=exponent, $
+                       GAMMA=gamma, $
+                       INTERPOLATE=interpolate, $
+                       MAXVALUE=maxvalue, $
+                       MEAN=mean, $
+                       MINUS_ONE=minus_one, $
+                       MINVALUE=minvalue, $
+                       MISSING_INDEX=missing_index, $
+                       MISSING_VALUE=missing_value, $
+                       NEGATIVE=negative, $
+                       SCALE=scale, $
+                       STRETCH=stretch, $
+                       SIGMA=sigma, $
+                       TOP=top), xstart, ystart, _STRICT_EXTRA=extra
              END
           1: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
@@ -1253,10 +1695,9 @@ PRO cgImage, image, x, y, $
                     CASE scale OF
                         0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
                                 MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=1
-                        1: TV, BYTSCL(FSC_Resize_Image(image, CEIL(xsize), CEIL(ysize), $
+                        1: TV, BYTSCL(FSC_Resize_Image(image, xsize, ysize, $
                                 INTERP=interp, MINUS_ONE=minusOne), Top=top-bottom, $
-                                Max=max, Min=min) + bottom, ROUND(xstart), ROUND(ystart), $
-                                _STRICT_EXTRA=extra, True=1
+                                Max=max, Min=min) + bottom, xstart, ystart, _STRICT_EXTRA=extra, True=1
                      ENDCASE
                 ENDELSE
              ENDIF ELSE BEGIN
@@ -1281,10 +1722,9 @@ PRO cgImage, image, x, y, $
                     CASE scale OF
                         0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
                                 MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=2
-                        1: TV, BYTSCL(FSC_Resize_Image(image, CEIL(xsize), CEIL(ysize), $
+                        1: TV, BYTSCL(FSC_Resize_Image(image, xsize, ysize, $
                                 INTERP=interp, MINUS_ONE=minusOne), Top=top-bottom, Max=max, $
-                                Min=min) + bottom, ROUND(xstart), ROUND(ystart), $
-                                _STRICT_EXTRA=extra, True=2
+                                Min=min) + bottom, xstart, ystart, _STRICT_EXTRA=extra, True=2
                     ENDCASE
                 ENDELSE
              ENDIF ELSE BEGIN
@@ -1308,10 +1748,9 @@ PRO cgImage, image, x, y, $
                     CASE scale OF
                         0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
                                 MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
-                        1: TV, BYTSCL(FSC_Resize_Image(image, CEIL(xsize), CEIL(ysize), $
+                        1: TV, BYTSCL(FSC_Resize_Image(image, xsize, ysize, $
                                 INTERP=interp, MINUS_ONE=minusOne), Top=top-bottom, Max=max, $
-                                Min=min) + bottom, ROUND(xstart), ROUND(ystart), $
-                                _STRICT_EXTRA=extra, True=3
+                                Min=min) + bottom, xstart, ystart, _STRICT_EXTRA=extra, True=3
                     ENDCASE
                 ENDELSE
              ENDIF ELSE BEGIN

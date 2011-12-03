@@ -161,12 +161,12 @@ FUNCTION Scale_Vector, vector, minRange, maxRange, $
 
    ; Check keyword parameters.
    IF Keyword_Set(double) THEN BEGIN
-      IF N_Elements(vectorMin) EQ 0 THEN vectorMin = Double( Min(FPUFIX(vector), NAN=Keyword_Set(nan)) ) $
+      IF N_Elements(vectorMin) EQ 0 THEN vectorMin = Double( Min(FPUFIX(vector), NAN=1) ) $
          ELSE vectorMin = Double(vectorMin)
-      IF N_Elements(vectorMax) EQ 0 THEN vectorMax = DOUBLE( Max(FPUFIX(vector), NAN=Keyword_Set(nan)) ) $
+      IF N_Elements(vectorMax) EQ 0 THEN vectorMax = DOUBLE( Max(FPUFIX(vector), NAN=1) ) $
          ELSE vectorMax = DOUBLE( vectorMax )
    ENDIF ELSE BEGIN
-      IF N_Elements(vectorMin) EQ 0 THEN vectorMin = FLOAT( Min(FPUFIX(vector), NAN=Keyword_Set(nan)) ) $
+      IF N_Elements(vectorMin) EQ 0 THEN vectorMin = FLOAT( Min(FPUFIX(vector), NAN=1) ) $
          ELSE vectorMin = FLOAT( vectorMin )
       IF N_Elements(vectorMax) EQ 0 THEN vectorMax = FLOAT( Max(FPUFIX(vector), NAN=Keyword_Set(nan)) ) $
          ELSE vectorMax = FLOAT( vectorMax )

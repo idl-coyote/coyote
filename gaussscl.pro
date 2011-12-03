@@ -71,6 +71,7 @@
 ; MODIFICATION HISTORY:
 ;
 ;       Written by:  David W. Fanning, 5 September 2007.
+;       Now setting NAN keyword on all MIN and MAX functions. 2 Dec 2011. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -130,8 +131,8 @@ FUNCTION GaussScl, image, $
    output = image
 
    ; Check keywords.
-   IF N_Elements(imageMax) EQ 0 THEN imageMax = Max(output)
-   IF N_Elements(imageMin) EQ 0 THEN imageMin = Min(output)
+   IF N_Elements(imageMax) EQ 0 THEN imageMax = Max(output, /NAN)
+   IF N_Elements(imageMin) EQ 0 THEN imageMin = Min(output, /NAN)
    IF N_Elements(maxOut) EQ 0 THEN maxOut = 255B ELSE maxout = 0 > Byte(maxOut) < 255
    IF N_Elements(minOut) EQ 0 THEN minOut = 0B ELSE minOut = 0 > Byte(minOut) < 255
    IF minOut GE maxout THEN Message, 'OMIN must be less than OMAX.'
@@ -142,7 +143,7 @@ FUNCTION GaussScl, image, $
 
    ; Perform Gaussian scaling.
    output = Scale_Vector(Temporary(output), -!pi, !pi)
-   f = (1/(sigma*sqrt(2*!dpi)))*exp(-(Temporary(output)^2/(2*sigma^2)))
+   f = (1/(sigma*sqrt(2*!dpi)))*Exp(-(Temporary(output)^2/(2*sigma^2)))
    output = Scale_Vector(Temporary(f), minOut, maxOut)
 
    ; Does the user want the negative result?

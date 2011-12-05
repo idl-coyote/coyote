@@ -1,152 +1,18 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;       cgBoxPlot
+;   cgBoxPlot
 ;
 ; PURPOSE:
+;   This is graphics routine to display a box plot, also known as a box and
+;   whisker plot, in IDL direct graphics. The box encloses the interquartile
+;   range (IQR), defined at IQR75-IQR25. The whiskers extend out to the maximum
+;   or minimum value of the data, or to the 1.5 times either the IQR75 or IQR25,
+;   if there is data beyond this range. Outliers are identified with small circles.
 ;
-;       This is graphics routine to display a box plot, also known as a box and
-;       whisker plot, in IDL direct graphics. The box encloses the interquartile
-;       range (IQR), defined at IQR75-IQR25. The whiskers extend out to the maximum
-;       or minimum value of the data, or to the 1.5 times either the IQR75 or IQR25,
-;       if there is data beyond this range. Outliers are identified with small circles.
-;
-; AUTHOR:
-;
-;       FANNING SOFTWARE CONSULTING
-;       David Fanning, Ph.D.
-;       1645 Sheely Drive
-;       Fort Collins, CO 80526 USA
-;       Phone: 970-221-0438
-;       E-mail: david@idlcoyote.com
-;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-;
-; CATEGORY:
-; 
-;       Graphics
-;
-; CALLING SEQUENCE:
-;
-;       cgBoxPlot, data
-;
-; REQUIRED INPUTS:
-;
-;       data:    A two-dimensional array. The data for each box plot will be in
-;                the columns of the data array. There will be one box plot drawn 
-;                for each column in the data array. The maximum column size is 28.
-;                
-;                As an alternative, data can be a pointer array, in which case
-;                there will be one box plot drawn for each valid pointer in the array.
-;
-; INPUT KEYWORDS:
-; 
-;      ADDCMD:      Set this keyword to add the command to the resizeable graphics window cgWindow.
-;
-;      AXES_COLOR:  A string color name, as appropriate for the FSC_COLOR program.
-;                   By default, the same as the COLOR keyword. Used only if OVERPLOT 
-;                   keyword is not set.
-;                   
-;      BACKGROUND_COLOR: A string color name, as appropriate for the FSC_COLOR program.
-;                   By default, 'white'. Used only if OVERPLOT keyword is not set.
-;
-;      BOXCOLOR:    If FILLBOXES is set, the IQR box is filled with this color. By default, "ROSE".
-;      
-;      CHARSIZE:    Set this to the character size to use on the plot. If undefined, uses
-;                   the value of cgDefCharsize().
-;                   
-;      COLOR:       A string color name, as appropriate for the cgColor program.
-;                   By default, 'charcoal'. The boxplot will be drawn in this color.
-;
-;      FILLBOXES:   Set this keyword to fill the IQR box with a color, specified by BOXCOLOR.
-;                   
-;      LABELS:      A string array of the same length as the number of columns of data.
-;                   The boxplots will be labeled with these labels along the X axis.
-;                   Used only if OVERPLOT keyword is not set.
-;                   
-;      MISSING_DATA_VALUE: Set this keyword to a value that will be used to identify missing data.
-;                   Missing data is not used in the calculations of the box plot.
-;                   
-;      OVERPLOT:    If this keyword is set, the boxplots will be overdrawn on the current
-;                   set of axes. The X axis will be presumed to be scaled from 0 to 1 more
-;                   than the number of columns in data.
-;                   
-;      ROTATE:      Set to a value between -90 and 90 degree. The labels will be rotated this
-;                   amount. Positive values rotate in CCW fashion, negative values in CW fashion.
-;                   
-;      WINDOW:      Set this keyword to display the plot in a resizeable graphics window (cgWindow).
-;                   
-;      Any other keywords (e.g., POSITION, XTITLE, YTITLE, etc.) that are appropriate for 
-;      the PLOT command can be used with this procedure.
-;
-; OUTPUT KEYWORDS:
-;
-;      STATS:      Set this to a named variable that will return an array of structures
-;                  for each of the columns of data. The structure will be defined as
-;                  this:
-;
-;                      struct = { Median:0.0D, Mean: 0.0D, Min:0.0D, Max:0.0D, $
-;                                 Q25:0.0D, Q75:0.0D, IQR:0.0D, SDEV:0.0D, N:0L }
-;
-;                  Where "mean" is the median value of the data, "Q25" and "Q75" are the 25th percent
-;                  quartile and 75th percent quartile of the data, repectively, "IRG" is the
-;                  Interquartile Range, SDEV is the standard deviation, and N is the number of points
-;                  used to construct the box plot.
-;      
-; REQUIRES:
-;
-;       Several program from the Coyote Library (http://www.idlcoyote.com/documents/programs.html)
-;       are required. Among them are these:
-;       
-;       ERROR_MESSAGE (http://www.idlcoyote.com/programs/error_message.pro)
-;       cgColor (http://www.idlcoyote.com/programs/cgColor.pro)
-;       SYMCAT (http://www.idlcoyote.com/programs/symcat.pro)
-;
-; EXAMPLE:
-; 
-;       Here is an example, using data from the Michaelson-Morley speed of light experiment,
-;       in which they made five experiments of 20 measurements of the speed of light each.
-;       The data can be downloaded from here:
-;       
-;          http://www.idlcoyote.com/misc/mm_data.dat
-;          
-;       Here are the IDL commands to read the data and produce a box plot of it.
-;       
-;           OpenR, 1, Find_Resource_File('mm_data.dat')
-;           header = Strarr(2)
-;           Readf, 1, header
-;           data = Intarr(5, 20)
-;           Readf, 1, data
-;           Close, 1
-;           cgBoxPlot, data, XTITLE='Experiment Number', YTITLE='Speed of Light'
-;           
-;       An article about his program can be found here:
-;       
-;            http://www.idlcoyote.com/graphics_tips/box_whisker.html
-;
-; MODIFICATION HISTORY:
-;
-;       Written by David W. Fanning, 4 March 2009.
-;       Added STATS keyword to return data statistics. 5 March 2009. DWF.
-;       Added MISSING_DATA_VALUE keyword to identify missing values. 14 March 2009. DWF.
-;       Removed limitation of LABELS array having no more than 28 elements. 14 March 2009. DWF.
-;       Made it possible to pass a pointer array containing the data, if desired. 14 March 2009. DWF.
-;       Added ROTATE keyword to rotate labels. 16 March 2009. DWF.
-;       Added several modifications to guard against ill-formed data in the cgBoxPlot_Draw
-;          procedure. 23 March 2009. DWF.
-;       Added keywords FILLBOXES and BOXCOLOR. 24 March 2009. DWF.
-;       Redefined the STATS structure to include MEAN and to store values as doubles. 25 March 2009. DWF.
-;       Fixed in a bug that resulted in incorrect behavior when the MISSING_DATA_VALUE keyword
-;          was used. 8 April 2009. DWF.
-;       Fixed a typo that didn't allow a single column vector to be displayed as a box plot. 17 May 2009. DWF.
-;       Now allow a single row vector to be passed into program and displayed. 20 May 2009. DWF.
-;       Added NOCLIP=0 keyword to PLOTS command when drawing outliers. 15 July 2009. DWF.
-;       Minor adjustment of the X axis label position. 28 October 2010. DWF.
-;       Add the ability to change the label character size and thickness via the normal
-;          XCHARSIZE and XTHICK keywords you would use for a plot. 3 Dec 2010. DWF.
-;       Fixed a couple of typos, added ADDCMD, CHARSIZE, LAYOUT and WINDOW keywords. 2 Feb 2011. DWF.
-;-
 ;******************************************************************************************;
-;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -171,6 +37,83 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+;
+;+
+; This is graphics routine to display a box plot, also known as a box and
+; whisker plot, in IDL direct graphics. The box encloses the interquartile
+; range (IQR), defined at IQR75-IQR25. The whiskers extend out to the maximum
+; or minimum value of the data, or to the 1.5 times either the IQR75 or IQR25,
+; if there is data beyond this range. Outliers are identified with small circles.
+;
+; :Categories:
+;    Graphics
+;    
+; :Examples:
+;    Here is an example, using data from the Michaelson-Morley speed of light experiment,
+;    in which they made five experiments of 20 measurements of the speed of light each.
+;    The data can be downloaded from here::
+;       
+;       http://www.idlcoyote.com/misc/mm_data.dat
+;          
+;    Here are the IDL commands to read the data and produce a box plot of it::
+;       
+;        OpenR, 1, Find_Resource_File('mm_data.dat')
+;        header = Strarr(2)
+;        Readf, 1, header
+;        data = Intarr(5, 20)
+;        Readf, 1, data
+;        Close, 1
+;        cgBoxPlot, data, XTITLE='Experiment Number', YTITLE='Speed of Light'
+;           
+;    An article about his program can be found here::
+;       
+;         http://www.idlcoyote.com/graphics_tips/box_whisker.html
+;    
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Written by David W. Fanning, 4 March 2009.
+;        Added STATS keyword to return data statistics. 5 March 2009. DWF.
+;        Added MISSING_DATA_VALUE keyword to identify missing values. 14 March 2009. DWF.
+;        Removed limitation of LABELS array having no more than 28 elements. 14 March 2009. DWF.
+;        Made it possible to pass a pointer array containing the data, if desired. 14 March 2009. DWF.
+;        Added ROTATE keyword to rotate labels. 16 March 2009. DWF.
+;        Added several modifications to guard against ill-formed data in the cgBoxPlot_Draw
+;          procedure. 23 March 2009. DWF.
+;        Added keywords FILLBOXES and BOXCOLOR. 24 March 2009. DWF.
+;        Redefined the STATS structure to include MEAN and to store values as doubles. 25 March 2009. DWF.
+;        Fixed in a bug that resulted in incorrect behavior when the MISSING_DATA_VALUE keyword
+;          was used. 8 April 2009. DWF.
+;        Fixed a typo that didn't allow a single column vector to be displayed as a box plot. 17 May 2009. DWF.
+;        Now allow a single row vector to be passed into program and displayed. 20 May 2009. DWF.
+;        Added NOCLIP=0 keyword to PLOTS command when drawing outliers. 15 July 2009. DWF.
+;        Minor adjustment of the X axis label position. 28 October 2010. DWF.
+;        Add the ability to change the label character size and thickness via the normal
+;          XCHARSIZE and XTHICK keywords you would use for a plot. 3 Dec 2010. DWF.
+;        Fixed a couple of typos, added ADDCMD, CHARSIZE, LAYOUT and WINDOW keywords. 2 Feb 2011. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2009, Fanning Software Consulting, Inc.
+;-
+;
+;+
+; This function prepares the data for display by removing any
+; missing data values from further consideration.
+; 
+; :Params:
+;     data: in, required
+;        The data to be prepared.
+;     missing_data_value: in, required
+;        The missing data value that should be found and removed from the data.
+;-
 FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
    
       ; If there is no missing_data_value, then just return the data.
@@ -220,14 +163,38 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
       
    END ; ---------------------------------------------------------------------------------
    
-   
+;+
+; Draws the box plot in the display window.
+;
+; :Params:
+;    thisdata: in, required
+;       The data to be draw as a box plot.
+;       
+;  :Keywords:
+;    boxcolor: in, optional, type='string', default='rose'
+;       If FILLBOXES is set, the IQR box is filled with this color. 
+;    color: in, optional, type=string, default='charcoal'              
+;       A string color name, as appropriate for the cgColor program. The boxplot 
+;       will be drawn in this color.
+;    fillboxes: in, optional, type=boolean, default=0
+;       Set this keyword to fill the IQR box with a color, specified by BOXCOLOR.
+;    stats: in, optional
+;       Set this to a named variable that will return an array of structures
+;       for each of the columns of data. The statistics are calculated in this
+;       routine.
+;    width: in, optional
+;        The width of the box.
+;    xlocation: in, optional
+;        The x starting location of the box.
+;     
+;-
    PRO cgBoxPlot_Draw, thisdata, $
         BOXCOLOR=boxcolor, $
         COLOR=color, $
         FILLBOXES=fillboxes, $
+        STATS=stats, $
         WIDTH=width, $
-        XLOCATION=xlocation, $
-        STATS=stats
+        XLOCATION=xlocation
 
       On_Error, 1
 
@@ -350,7 +317,73 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
       IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState
    END ;-----------------------------------------------------------------------------------------------------
    
+;+
+;   This is graphics routine to display a box plot, also known as a box and
+;   whisker plot, in IDL direct graphics. The box encloses the interquartile
+;   range (IQR), defined at IQR75-IQR25. The whiskers extend out to the maximum
+;   or minimum value of the data, or to the 1.5 times either the IQR75 or IQR25,
+;   if there is data beyond this range. Outliers are identified with small circles.
 
+; :Params:
+;    data: in, required
+;       A two-dimensional array. The data for each box plot will be in
+;       the columns of the data array. There will be one box plot drawn 
+;       for each column in the data array. The maximum column size is 28.
+;       As an alternative, data can be a pointer array, in which case
+;       there will be one box plot drawn for each valid pointer in the array.
+;
+; :Keywords:
+;    addcmd: in, optional, type=boolean, default=0
+;       Set this keyword to add the command to the resizeable graphics window cgWindow.
+;    axes_color: in, optional, type=string
+;       A string color name, as appropriate for the cgCOLOR program.
+;       By default, the same as the COLOR keyword. Used only if OVERPLOT 
+;       keyword is not set.
+;    background_color: in, optional, type=string, default='white'     
+;       A string color name, as appropriate for the FSC_COLOR program.
+;       Used only if OVERPLOT keyword is not set.
+;    boxcolor: in, optional, type='string', default='rose'
+;       If FILLBOXES is set, the IQR box is filled with this color. 
+;    charsize: in, optional, type=float
+;       Set this to the character size to use on the plot. If undefined, uses
+;       the value of cgDefCharsize().
+;    color: in, optional, type=string, default='charcoal'              
+;       A string color name, as appropriate for the cgColor program. The boxplot 
+;       will be drawn in this color.
+;    fillboxes: in, optional, type=boolean, default=0
+;       Set this keyword to fill the IQR box with a color, specified by BOXCOLOR.
+;    labels: in, optional, type=string               
+;       A string array of the same length as the number of columns of data.
+;       The boxplots will be labeled with these labels along the X axis.
+;       Used only if OVERPLOT keyword is not set.
+;    missing_data_value: in, optional
+;       Set this keyword to a value that will be used to identify missing data.
+;       Missing data is not used in the calculations of the box plot.
+;    overplot: in, optional, type=boolean, default=0              
+;       If this keyword is set, the boxplots will be overdrawn on the current
+;       set of axes. The X axis will be presumed to be scaled from 0 to 1 more
+;       than the number of columns in data.
+;    rotate: in, optional, type=float, default=0.0               
+;       Set to a value between -90 and 90 degree. The labels will be rotated this
+;       amount. Positive values rotate in CCW fashion, negative values in CW fashion.
+;    stats: out, optional
+;       Set this to a named variable that will return an array of structures
+;       for each of the columns of data. The structure will be defined as
+;       this:
+;
+;           struct = { Median:0.0D, Mean: 0.0D, Min:0.0D, Max:0.0D, $
+;                      Q25:0.0D, Q75:0.0D, IQR:0.0D, SDEV:0.0D, N:0L }
+;
+;       Where "mean" is the median value of the data, "Q25" and "Q75" are the 25th percent
+;       quartile and 75th percent quartile of the data, repectively, "IRG" is the
+;       Interquartile Range, SDEV is the standard deviation, and N is the number of points
+;       used to construct the box plot.
+;    window: in, optional, type=boolean, default=0               
+;       Set this keyword to display the plot in a resizeable graphics window (cgWindow).
+;    _ref_extra: in, optional
+;         Any keyword appropriate for the cgPlot command is also accepted by keyword
+;         inheritance.
+;-
    PRO cgBoxPlot, data, $
         ADDCMD=addcmd, $
         AXES_COLOR=axes_color, $

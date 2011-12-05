@@ -1,52 +1,14 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;  cgBlendImage
+;   cgBlendImage
 ;
 ; PURPOSE:
-;
-;  This alpha blends two 24-bit images and displays them with the cgImage command.
-;
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: david@idlcoyote.com
-;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CATEGORY:
-;
-;  Graphics
-;
-; CALLING SEQUENCE:
-;
-;  cgBlendImage, foregroundImage, backgroundImage
-;
-; INPUTS:
-;
-;  foregroundImage:     A 24-bit foreground image with the same dimensions as the background image.
-;
-;  backgroundImage:     A 24-bit background image with the same dimensions as the foreground image.
-;
-; KEYWORD PARAMETERS:
-;
-;  ALPHA:               A number between 0 and 1 that indicates the percentage of the foreground image
-;                       to alpha-blend into the background image. For example, ALPHA=0.2 will give
-;                       a weigth of 20% to the foreground image pixels and 80% to the background image
-;                       pixels. By default, 0.5.
-;
-;  Note: Any keywords appropriate to the cgImage command are also accepted.
-;
-; MODIFICATION HISTORY:
-;
-;  Written by: David W. Fanning, 26 May 2009.
-;-
+;   This alpha blends two 24-bit images and displays them with the cgImage command.
 ;
 ;******************************************************************************************;
-;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -71,7 +33,46 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-PRO cgBlendImage, foreGroundImage, backGroundImage, ALPHA=alpha, _EXTRA=extra
+;
+;+
+;   This alpha blends two 24-bit images and displays them with the cgImage command.
+;
+; :Categories:
+;    Graphics
+;    
+; :Params:
+;    foregroundImage: in, required, type=truecolor
+;         A 24-bit foreground image with the same dimensions as the background image.
+;    backgroundImage: in, required, type=truecolor    
+;         A 24-bit background image with the same dimensions as the foreground image.
+;
+; :Keywords:
+;    alpha: in, optional, type=float, default=0.5
+;         A number between 0 and 1 that indicates the percentage of the foreground image
+;         to alpha-blend into the background image. For example, ALPHA=0.2 will give
+;         a weigth of 20% to the foreground image pixels and 80% to the background image
+;         pixels. 
+;    _ref_extra: in, optional
+;         Any keyword appropriate for the cgImage command is also accepted by keyword
+;         inheritance.
+;
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Written by: David W. Fanning, 26 May 2009.
+;
+; :Copyright:
+;     Copyright (c) 2009, Fanning Software Consulting, Inc.
+;-
+PRO cgBlendImage, foreGroundImage, backGroundImage, ALPHA=alpha, _REF_EXTRA=extra
 
     ; Error handling.
     Catch, theError
@@ -92,6 +93,6 @@ PRO cgBlendImage, foreGroundImage, backGroundImage, ALPHA=alpha, _EXTRA=extra
         THEN Message, 'Dimensions and/or size of input images do not match.'
         
     ; Output the blended image.
-    cgImage,  (foreGroundImage * alpha) + (1 - alpha) * backGroundImage, _EXTRA=extra
+    cgImage,  (foreGroundImage * alpha) + (1 - alpha) * backGroundImage, _STRICT_EXTRA=extra
         
 END

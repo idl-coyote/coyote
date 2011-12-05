@@ -1,225 +1,14 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;   cgCOLORBAR
-;   
+;   cgColorbar
+;
 ; PURPOSE:
+;   The purpose of this routine is to add a color bar to the current graphics window.
 ;
-;       The purpose of this routine is to add a color bar to the current
-;       graphics window.
-;
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: david@idlcoyote.com
-;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CATEGORY:
-;
-;       Graphics, Widgets.
-;
-; CALLING SEQUENCE:
-;
-;       cgColorbar
-;
-; INPUTS:
-;
-;       None.
-;
-; KEYWORD PARAMETERS:
-;
-;       ADDCMD:       Set this keyword to add the cgColorbar command to the current cgWindow
-;                     command list. 
-;               
-;       ANNOTATECOLOR: The name of the "annotation color" to use. The names are those for
-;                     cgCOLOR, and using the keyword implies that cgCOLOR is also in
-;                     your !PATH. If this keyword is used, the annotation color is loaded
-;                     *after* the color bar is displayed. The color will be represented
-;                     as theColor = cgCOLOR(ANNOTATECOLOR). This keyword is provide
-;                     to maintain backward compatibility, but also to solve the problem of
-;                     an extra line in the color bar when this kind of syntax is used in
-;                     conjunction with the indexed (DEVICE, DECOMPOSED=0) model is used:
-;
-;                          LoadCT, 33
-;                          cgImage, image
-;                          cgColorbar, Color=cgColor('firebrick')
-;
-;                     The proper syntax for device-independent color is like this:
-;
-;                          LoadCT, 33
-;                          cgImage, image
-;                          cgColorbar, AnnotateColor='firebrick', Color=255
-;                          
-;                    Set the Modification History note for 13 November 2010 for additional
-;                    information about default values.
-;
-;       BOTTOM:       The lowest color index of the colors to be loaded in
-;                     the bar.
-;                     
-;       CHARPERCENT:   A value from 0.0 go 1.0 that is multiplied by the CHARSIZE to produce
-;                     the character size for the color bar. The default is 0.85. This value
-;                     is only used if CHARSIZE is undefined. This keyword is primarily useful
-;                     for using color bars in resizeable graphics windows (cgWindow).
-;
-;       CHARSIZE:     The character size of the color bar annotations. Default is 
-;                     cgDefCharsize()*charPercent.
-;       
-;       CLAMP:        A two-element array in data units. The color bar is clamped to these
-;                     two values. This is mostly of interest if you are "window-leveling"
-;                     an image. The clamp is set to the "window" of the color bar.
-;                     Normally, when you are doing this, you would like the colors outside
-;                     the "window" to be set to a neutral color. Use the NEUTRALINDEX keyword
-;                     to set the netural color index in the color bar. (See the Example section
-;                     for more information.
-;
-;       COLOR:        The color index of the bar outline and characters. Default
-;                     is !P.Color. To display the color bar in a device indpendent
-;                     way, you should use the ANNOTATECOLOR keyword instead of this keyword.
-;                     If this keyword is a string color name, then ANNOTATECOLOR=color.
-;
-;       DIVISIONS:    The number of divisions to divide the bar into. There will
-;                     be (divisions + 1) annotations. The default is 0 if using the
-;                     default color bar formatting, which allows the plot command to 
-;                     determine how many divisions to make. Otherwise, if you are specifying
-;                     some other format for the tick labels, the default number of divisions
-;                     is six.
-;                     
-;       FIT:          If this keyword is set, the colorbar "fits" itself to the normalized
-;                     coordinates of the last plot command executed. In other words, for
-;                     a horizontal color bar, postition[[0,2]] = !X.Window, and for a vertical
-;                     color bar, position[[1,3]] = !Y.Window. Other positions are adjusted
-;                     to put the colorbar "reasonably" close to the plot.
-;
-;       FONT:         Sets the font of the annotation. Hershey: -1, Hardware:0, True-Type: 1.
-;
-;       FORMAT:       The format of the bar annotations. Default is "", which allows
-;                     the Plot command to determine the appropriate format.
-;
-;       INVERTCOLORS: Setting this keyword inverts the colors in the color bar.
-;
-;       MAXRANGE:     The maximum data value for the bar annotation. Default is
-;                     NCOLORS.
-;
-;       MINRANGE:     The minimum data value for the bar annotation. Default is 0.
-;
-;       MINOR:        The number of minor tick divisions. Default is 2.
-;
-;       NCOLORS:      This is the number of colors in the color bar.
-;       
-;       NEUTRALINDEX: This is the color index to use for color bar values outside the
-;                     clamping range when clamping the color bar with the CLAMP keyword.
-;                     If this keyword is absent, the highest color table value is used
-;                     for low range values and the lowest color table value is used
-;                     for high range values, in order to provide contrast with the
-;                     clamped region. See the Example section for more information.
-;
-;       NODISPLAY:    cgColorBAR uses cgCOLOR to specify some of it colors. Normally, 
-;                     cgCOLOR loads "system" colors as part of its palette of colors.
-;                     In order to do so, it has to create an IDL widget, which in turn 
-;                     has to make a connection to the windowing system. If your program 
-;                     is being run without a window connection, then this program will 
-;                     fail. If you can live without the system colors (and most people 
-;                     don't even know they are there, to tell you the truth), then setting 
-;                     this keyword will keep them from being loaded, and you can run
-;                     cgCOLORBAR without a display. As of 19 Oct 2010, set to 1  by default.
-;
-;       PALETTE:      A color palette containing the RGB color vectors to use for the color
-;                     bar. The program will sample NCOLORS from the color palette. 
-;                     
-;       POSITION:     A four-element array of normalized coordinates in the same
-;                     form as the POSITION keyword on a plot. Default is
-;                     [0.88, 0.10, 0.95, 0.90] for a vertical bar and
-;                     [0.10, 0.88, 0.90, 0.95] for a horizontal bar.
-;
-;       RANGE:        A two-element vector of the form [min, max]. Provides an
-;                     alternative way of setting the MINRANGE and MAXRANGE keywords.
-;
-;       REVERSE:      Setting this keyword reverses the colors in the colorbar.
-;
-;       RIGHT:        This puts the labels on the right-hand side of a vertical
-;                     color bar. It applies only to vertical color bars.
-;
-;       TICKLEN:      Set this keyword to the major tick length desired. Default is
-;                     0.25. Setting this keyword to a value greater than or equal
-;                     to 0.5 will result in major tick marks extending the width
-;                     of the color bar. Note that setting this keyword to 0.3 or
-;                     greater will result in minor tick mark lengths being set
-;                     to 0.01, which is almost too small to be seen. All direct
-;                     graphics tick marks act in this (strange!) way.
-;                     
-;       TICKNAMES:    A string array of names or values for the tick marks.
-;
-;       TITLE:        This is title for the color bar. The default is to have
-;                     no title.
-;
-;       TOP:          This puts the labels on top of the bar rather than under it.
-;                     The keyword only applies if a horizontal color bar is rendered.
-;
-;       VERTICAL:     Setting this keyword give a vertical color bar. The default
-;                     is a horizontal color bar.
-;                     
-;       WINDOW:       Set this keyword if you want to add the cgColorbar command to
-;                     the current cgWindow application.
-;
-; COMMON BLOCKS:
-;
-;       None.
-;
-; SIDE EFFECTS:
-;
-;       Color bar is drawn in the current graphics window.
-;
-; RESTRICTIONS:
-;
-;       The number of colors available on the graphics display device (not the
-;       PostScript device) is used unless the NCOLORS keyword is used.
-;
-;       Requires the cgCOLOR program from the Coyote Library:
-;
-;          http://www.idlcoyote.com/programs/cgcolor.pro
-;
-; EXAMPLE:
-;
-;       To display a horizontal color bar above a contour plot, type:
-;
-;       LOADCT, 5, NCOLORS=100
-;       CONTOUR, DIST(31,41), POSITION=[0.15, 0.15, 0.95, 0.75], $
-;          C_COLORS=INDGEN(25)*4, NLEVELS=25
-;       cgCOLORBAR, NCOLORS=100, POSITION=[0.15, 0.85, 0.95, 0.90]
-;       
-;       Example using the CLAMP and NEUTRALINDEX keywords.
-;       
-;       LOADCT, 33, NCOLORS=254
-;       TVLCT, cgCOLOR('gray', /TRIPLE), 255
-;       cgCOLORBAR, NCOLORS=254, NEUTRALINDEX=255, RANGE=[0,1500], $
-;           DIVISIONS=8, CLAMP=[400, 800]
-;
-; MODIFICATION HISTORY:
-;
-;       Written by: David W. Fanning, 4 February 2011, as a direct descendant of cgColorbar.
-;       Program developement stopped on cgColorbar as of this date, and this program has
-;       become a part of the Coyote Graphics System.
-;       
-;       Added FIT keyword. 28 Feb 2011. DWF
-;       Made default character size cgDefCharsize*0.85. 28 Feb 2011. DWF.
-;       Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
-;       Added CHARPERCENT keyword 18 March 2011. DWF.
-;       Added XTITLE and YTITLE keywords, which do nothing except prevent these keywords
-;          from being used inadvertently. 27 May 2011. DWF.
-;       Fixed a problem with assigning the color with the ANNOTATECOLOR keyword in the
-;          Z-graphics buffer. 30 Aug 2011. DWF.
-;       Changed the default DIVISIONS to 0 and the default FORMAT to "". 2 Sept 2011. DWF.
-;       Added code that will force MINRANGE and MAXRANGE values to be scalars. 5 Sept 2011. DWF.
-;       Problem with division by zero when FORMAT is not default value. Now, if format
-;          is the default value, then default is DIVISIONS=0, else DIVISIONS=6.
-;       Documented the TICKLEN keyword and set the default tick length to 0.25. 3 Oct 2011. DWF.
-;-             
 ;******************************************************************************************;
-;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -244,6 +33,164 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+;
+;+
+; The purpose of this routine is to add a color bar to the current graphics window.
+;
+; :Categories:
+;    Graphics
+;    
+; :Keywords:
+;    addcmd: in, optional, type=boolean, default=0
+;       Set this keyword to add the command to the resizeable graphics window cgWindow.
+;    annotatecolor: in, optional, type=string, default="opposite"
+;       The name of the "annotation color" to use. The names are those for
+;       cgCOLOR. If this keyword is used, the annotation color is loaded after
+;       the color bar is displayed. This keyword is provided to maintain backward 
+;       compatibility, but also to solve the potential problem of an extra line showing up
+;       in the color bar when the COLOR keyword is used in indexed color mode. In other words,
+;       use ANNOTATECOLOR in place of COLOR for complete color model independent results.
+;    bottom: in, optional, type=integer, default=0
+;       The lowest color index of the colors to be loaded in the color bar.
+;    charpercent: in, optional, type=float, default=0.85                 
+;       A value from 0.0 go 1.0 that is multiplied by the CHARSIZE to produce
+;       the character size for the color bar. This value is only used if CHARSIZE is 
+;       undefined. This keyword is primarily useful for using color bars in resizeable 
+;       graphics windows (cgWindow).
+;    charsize: in, optional, type=float
+;       The character size of the color bar annotations. Default is cgDefCharsize()*charPercent.
+;    clamp: in, optional, type=float
+;        A two-element array in data units. The color bar is clamped to these
+;        two values. This is mostly of interest if you are "window-leveling"
+;        an image. The clamp is set to the "window" of the color bar.
+;        Normally, when you are doing this, you would like the colors outside
+;        the "window" to be set to a neutral color. Use the NEUTRALINDEX keyword
+;        to set the netural color index in the color bar. (See the Examples section
+;        for more information.)
+;    color: in, optional, type=string
+;        The name of the color to use for color bar annotations. Ignored unless passed 
+;        the name of a cgColor color. The default value is to use the ANNOTATECOLOR.
+;    divisions: in, optional, type=integer
+;         The number of divisions to divide the bar into. There will
+;         be (divisions + 1) annotations. The default is 0 if using the
+;         default color bar formatting, which allows the plot command to 
+;         determine how many divisions to make. Otherwise, if you are specifying
+;         some other format for the tick labels, the default number of divisions
+;         is six.
+;    fit: in, optional, type=boolean, default=0
+;       If this keyword is set, the colorbar "fits" itself to the normalized
+;       coordinates of the last plot command executed. In other words, for
+;       a horizontal color bar, postition[[0,2]] = !X.Window, and for a vertical
+;       color bar, position[[1,3]] = !Y.Window. Other positions are adjusted
+;       to put the colorbar "reasonably" close to the plot.
+;    font: in, optional, type=integer, default=!P.Font
+;       Sets the font of the annotation. Hershey: -1, Hardware:0, True-Type: 1.
+;    format: in, optional, type=string, default=""
+;       The format of the color bar annotations. Default is "", which allows
+;       the Plot command to determine the appropriate format.
+;    invertcolors: in, optional, type=boolean, default=0
+;       Setting this keyword inverts the colors in the color bar.
+;    maxrange: in, optional
+;       The maximum data value for the color bar annotation. Default is NCOLORS.
+;    minrange: in, optional, type=float, default=0.0
+;       The minimum data value for the bar annotation. 
+;    minor: in, optional, type=integer, default=2
+;       The number of minor tick divisions. 
+;    ncolors: in, optional, type=integer, default=256
+;       This is the number of colors in the color bar.
+;    neutralindex: in, optional, type=integer   
+;       This is the color index to use for color bar values outside the
+;       clamping range when clamping the color bar with the CLAMP keyword.
+;       If this keyword is absent, the highest color table value is used
+;       for low range values and the lowest color table value is used
+;       for high range values, in order to provide contrast with the
+;       clamped region. (See the Examples section for more information.)
+;    nodisplay: in, optional
+;       This keyword is obsolete and is no longer used.
+;    palette: in, optional, type=byte
+;       A color palette containing the RGB color vectors to use for the color
+;       bar. The program will sample NCOLORS from the color palette. 
+;    position: in, optional, type=float          
+;       A four-element array of normalized coordinates in the same
+;       form as the POSITION keyword on a plot. Default is[0.88, 0.10, 0.95, 0.90] 
+;       for a vertical bar and [0.10, 0.88, 0.90, 0.95] for a horizontal bar.
+;       See the FIT keyword, also.
+;    range: in, optional, type=float
+;       A two-element vector of the form [min, max]. Provides an alternative 
+;       and faster way way of setting the MINRANGE and MAXRANGE keywords.
+;    reverse: in, optional, type=boolean, default=0
+;       An alternative keyword name (one I can actually remember!) for the INVERTCOLORS keyword.
+;       It reverses the colors in the color bar.
+;    right: in, optional, type=boolean, default=0   
+;       This puts the labels on the right-hand side of a vertical color bar. It applies 
+;       only to vertical color bars.
+;    ticklen: in, optional, type=float, default=0.25
+;       Set this keyword to the major tick length desired. Default is 0.25. Setting this 
+;       keyword to a value greater than or equal to 0.5 will result in major tick marks 
+;       extending the width of the color bar. Note that setting this keyword to 0.3 or
+;       greater will result in minor tick mark lengths being set to 0.01, which is almost 
+;       too small to be seen. All direct graphics tick marks act in this (strange!) way.
+;    ticknames: in, optional, type=string                 
+;       A string array of names or values for the color bar tick marks.
+;    title: in, optional, type=string, default=""
+;       This is title for the color bar. The default is to have no title.
+;    top: in, optional, type=boolean, default=0
+;       This puts the labels on top of the bar rather than under it. The keyword only 
+;       applies if a horizontal color bar is rendered.
+;    vertical: in, optional, type=boolean, default=0
+;       Setting this keyword give a vertical color bar. The default is a horizontal color bar.
+;    window: in, optional, type=boolean, default=0               
+;       Set this keyword to display the plot in a resizeable graphics window (cgWindow).
+;    _ref_extra: in, optional
+;         Any keyword appropriate for the PLOT and AXIS commands is also accepted by keyword
+;         inheritance.
+;    
+; :Examples:
+;    To display a horizontal color bar above a contour plot, type::
+;
+;       cgLOADCT, 5, NCOLORS=100
+;       cgCONTOUR, DIST(31,41), POSITION=[0.15, 0.15, 0.95, 0.75], $
+;          C_COLORS=INDGEN(25)*4, NLEVELS=25
+;       cgCOLORBAR, NCOLORS=100, POSITION=[0.15, 0.85, 0.95, 0.90]
+;       
+;    Example using the CLAMP and NEUTRALINDEX keywords::
+;       
+;       cgLOADCT, 33, NCOLORS=254
+;       TVLCT, cgCOLOR('gray', /TRIPLE), 255
+;       cgCOLORBAR, NCOLORS=254, NEUTRALINDEX=255, RANGE=[0,1500], $
+;           DIVISIONS=8, CLAMP=[400, 800]
+;
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;       Written by: David W. Fanning, 4 February 2011, as a direct descendant of cgColorbar.
+;       Program developement stopped on cgColorbar as of this date, and this program has
+;       become a part of the Coyote Graphics System.
+;       Added FIT keyword. 28 Feb 2011. DWF
+;       Made default character size cgDefCharsize*0.85. 28 Feb 2011. DWF.
+;       Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
+;       Added CHARPERCENT keyword 18 March 2011. DWF.
+;       Added XTITLE and YTITLE keywords, which do nothing except prevent these keywords
+;          from being used inadvertently. 27 May 2011. DWF.
+;       Fixed a problem with assigning the color with the ANNOTATECOLOR keyword in the
+;          Z-graphics buffer. 30 Aug 2011. DWF.
+;       Changed the default DIVISIONS to 0 and the default FORMAT to "". 2 Sept 2011. DWF.
+;       Added code that will force MINRANGE and MAXRANGE values to be scalars. 5 Sept 2011. DWF.
+;       Problem with division by zero when FORMAT is not default value. Now, if format
+;          is the default value, then default is DIVISIONS=0, else DIVISIONS=6.
+;       Documented the TICKLEN keyword and set the default tick length to 0.25. 3 Oct 2011. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2008, Fanning Software Consulting, Inc.
+;-
 PRO cgColorbar, $
     ADDCMD=addcmd, $
     ANNOTATECOLOR=annotatecolor, $

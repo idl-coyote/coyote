@@ -71,40 +71,40 @@
 ;
 ;     To display four images in a window without spacing between them::
 ;
-;     !P.Multi=[0,2,2]
-;     cgImage, image, Margin=0
-;     cgImage, image, Margin=0
-;     cgImage, image, Margin=0
-;     cgImage, image, Margin=0
-;     !P.Multi = 0
+;        !P.Multi=[0,2,2]
+;        cgImage, image, Margin=0
+;        cgImage, image, Margin=0
+;        cgImage, image, Margin=0
+;        cgImage, image, Margin=0
+;        !P.Multi = 0
 ;
 ;     To display four image in a window with associated color bars::
 ;
-;     !P.Multi=[0,2,2]
-;     p = [0.02, 0.3, 0.98, 0.98]
-;     LoadCT, 0
-;     cgImage, image, Position=p
-;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
-;     p = [0.02, 0.3, 0.98, 0.98]
-;     LoadCT, 2
-;     cgImage, image, Position=p
-;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
-;     p = [0.02, 0.3, 0.98, 0.98]
-;     LoadCT, 3
-;     cgImage, image, Position=p
-;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
-;     p = [0.02, 0.3, 0.98, 0.98]
-;     LoadCT, 5
-;     cgImage, image, Position=p
-;     cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
-;     !P.Multi =0
+;        !P.Multi=[0,2,2]
+;        p = [0.02, 0.3, 0.98, 0.98]
+;        LoadCT, 0
+;        cgImage, image, Position=p
+;        cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;        p = [0.02, 0.3, 0.98, 0.98]
+;        LoadCT, 2
+;        cgImage, image, Position=p
+;        cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;        p = [0.02, 0.3, 0.98, 0.98]
+;        LoadCT, 3
+;        cgImage, image, Position=p
+;        cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;        p = [0.02, 0.3, 0.98, 0.98]
+;        LoadCT, 5
+;        cgImage, image, Position=p
+;        cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
+;        !P.Multi =0
 ;     
 ;     To set a missing value to -32767 and the color white and do
-;     a 3% histogram clip of the image.
+;     a 3% histogram clip of the image::
 ;     
-;     cgLoadCT, 4, /Brewer, NColors=254
-;     TVLCT, palette, /Get
-;     cgImage, image, Missing_Value=-32767, Missing_Color='white', Stretch='Clip', Clip=3
+;        cgLoadCT, 4, /Brewer, NColors=254
+;        TVLCT, palette, /Get
+;        cgImage, image, Missing_Value=-32767, Missing_Color='white', Stretch='Clip', Clip=3
 ;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -139,6 +139,7 @@
 ;          code and improved the internal documentation. 22 Nov 2011. DWF.
 ;       Added the ability to stretch 2D image arrays in various ways before display. 1 Dec 2011.
 ;       Added the ability to handle missing data in 2D arrays before display. 1 Dec 2011.
+;       Added a DISPLAY keyword to display the image in windows with the image aspect ratio. 2 Dec 2011.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -352,15 +353,6 @@ END
 ;         The index of the missing color in the final byte scaled image.
 ;    missing_value: in, optional, type=integer
 ;         The number that represents the missing value in the image.
-;    ncolors: in, optional, type=integer, default=256
-;         If this keyword is supplied, the `TOP` keyword is ignored and the TOP keyword 
-;         is set equal to  NCOLORS-1. This keyword is provided to make cgImage easier 
-;         to use with the color-loading programs such as cgLOADCT::
-;
-;              cgLoadCT, 5, NColors=100, Bottom=100
-;              cgImage, image, NColors=100, Bottom=100
-;                  
-;         Setting this keyword to a value automatically sets SCALE=1.
 ;    negative: in, optional, type=boolean, default=0
 ;         Set this keyword if you want to display the image with a negative or reverse stretch.
 ;    scale: in, optional, type=boolean, default=0

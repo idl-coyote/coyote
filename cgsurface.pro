@@ -1049,7 +1049,8 @@ END ;---------------------------------------------------------------------------
 ;        Set this keyword to indicate that the colortable (CTABLE) is
 ;        to use Brewer color tables rather than IDL standard color tables.
 ;     charsize: in, optional, type=float, default=1.0
-;        The character size of the surface annotation. 
+;        The character size of the surface annotation. This value is multiplied
+;        times a 12 point character size.
 ;     color: in, optional, type=string, default='blu6'
 ;        The name of the data color. 
 ;     constrain_aspect: in, optional, type=boolean, default=0
@@ -1088,9 +1089,6 @@ END ;---------------------------------------------------------------------------
 ;     transform: in, optional, type=4x4 double array
 ;         A homogeneous transformation matrix to be applied to the initial surface. Such a 
 ;         transformation matrix can be obtained, for example, with the T3D procedure.
-;     tsize: in, optional, type=float, default=1.25*CHARSIZE
-;        The character size for the title. By default, the title character size is 1.25 times
-;        the character size of the surface annotation.
 ;     xoffset: in, optional, type=integer, default=50
 ;         The number of pixels the surface window should be offset in the X direction
 ;         from the upper-left corner of the display.

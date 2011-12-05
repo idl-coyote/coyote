@@ -314,7 +314,10 @@ FUNCTION cgColor, theColour, colorIndex, $
      ; If it is, we will define the USERDEF color with these values.
      ; Otherwise the USERDEF color will be unused.
      IF Size(theColor, /TNAME) NE 'STRING' THEN BEGIN
-        IF (N_Elements(theColor) EQ 3) && (Max(theColor) LE 255) && (Min(theColor) GE 0) THEN BEGIN
+        IF (Size(theColor, /N_DIMENSIONS) EQ 1) && $
+           (N_Elements(theColor) EQ 3) && $
+           (Max(theColor) LE 255) && $
+           (Min(theColor) GE 0) THEN BEGIN
            usercolor = theColor
            theColor = 'USERDEF'
         ENDIF
@@ -586,7 +589,7 @@ FUNCTION cgColor, theColour, colorIndex, $
    ENDELSE
    
     ; If you have a USERDEF color (from a color triple) then load it here.
-    IF StrUpCase(theColor) EQ 'USERDEF' THEN BEGIN
+    IF N_Elements(usercolor) NE 0 THEN BEGIN
        colors = [colors, 'USERDEF']
        rvalue = [rvalue, usercolor[0]]
        gvalue = [gvalue, usercolor[1]]

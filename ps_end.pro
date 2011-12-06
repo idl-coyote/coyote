@@ -1,169 +1,15 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
 ;   PS_END
 ;
 ; PURPOSE:
-;
 ;    The purpose of PS_START and PS_END is to make it easy to set-up
-;    for and close a PostScript file. The programs work in close conjunction
-;    with PSCONFIG, another program from the Coyote Library.
-;
-;    If ImageMagick  (http://www.imagemagick.org/script/index.php) is installed 
-;    on your computer, you can easily convert PostScript output to JPEG, PNG, and TIFF
-;    image output. (See the keywords to PS_END.)
-;
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: david@idlcoyote.com
-;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CATEGORY:
-;
-;       Graphics, File Output, PostScript
-;
-; CALLING SEQUENCE:
-;
-;       PS_START
-;       Various graphics commands here...
-;       PS_END
-;
-; KEYWORD PARAMETERS FOR PS_END:
-;
-;      All keywords for PS_END require that ImageMagick is installed on your computer
-;      and is configured correctly. Image conversion is done by spawning a "convert" 
-;      command to ImageMagick.
-;
-;       ALLOW_TRANSPARENT: To make the background of some image files white, rather than transparent,
-;                     you have to set the "-alpha off" string in the ImageMagick call. This
-;                     string is automatically added to the ImageMagick call unless this keyword
-;                     is set, in which case the string is not added and the image background will
-;                     be transparent.  (See RESTRICTIONS note below for more information.) 
-;                 
-;       DELETE_PS:    This keyword will delete the PostScript file that is created to make
-;                     other raster file types. It is only used if the PostScript file is being
-;                     converted to a raster file type with ImageMagick.
-;
-;       DENSITY:      The horizontal and vertical density of the image when the PostScript file
-;                     is converted to an image format by ImageMagick. By default, 300. Use this
-;                     keyword to set another value.
-;                     
-;       GIF:          Set this keyword to convert the PostScript output file to a GIF image.
-;
-;       JPEG:         Set this keyword to convert the PostScript output file to a JPEG image.
-;       
-;       NOFIX:        If this keyword is set, then the FixPS program to fix IDL landscape
-;                     PostScript files is not called.
-;                     
-;       NOMESSAGE:    If this keyword is set, then no error messages are issued. The
-;                     keyword is used primarily to allow PS_END to reset the internal
-;                     structure without a lot of ruckus.
-;
-;       PNG:          Set this keyword to convert the PostScript output file to a PNG image.
-;
-;       IM_OPTIONS:   A string of ImageMagick "convert" options that can be passed to
-;                     the  ImageMagick convert command. By default, a null string. No
-;                     error checking occurs with this string.
-;
-;       RESIZE:       If an image is being created from the PostScript file, it is often 
-;                     resized by some amount. The default value is 25 percent. You can use 
-;                     this keyword to change the value to some other amount (e.g, RESIZE=100).
-;                     The value is passed on to resize argument as a percentage in the 
-;                     ImageMagick call.
-;
-;       TIFF:         Set this keyword to convert the PostScript output file to a TIFF image.
-;       
-;       The convert command looks like this. You can modify it in the code if you want it to
-;       do something else for you.
-;       
-;          convert inputPostScriptFilename -resize 50% -density 300 -alpha off outputImageFilename 
-;
-; COMMON BLOCKS:
-;
-;       _$FSC_PS_START_   Contains the PS_STRUCT structure for communication between
-;                         PS_START and PS_END.
-;
-; SIDE EFFECTS:
-;
-;       When PS_START is called, the current graphics device is set to "PS" (the PostScript 
-;       device). When PS_END is called the current graphics device is returned to the device
-;       in effect when PS_START was called.
-;
-; RESTRICTIONS:
-;
-;       Requires numerous programs from the Coyote Library. To convert PostScript files
-;       to PNG, JPEG, and TIFF files requires ImageMagick be installed on your
-;       computer and configured correctly. You can download Coyote Library programs here:
-;
-;             http://www.idlcoyote.com/programs/coyoteprograms.zip
-;
-;       ImageMagick can be found here:
-;
-;              http://www.imagemagick.org/script/index.php
-;              
-;       NOTE: In this version of PS_END, I have added the "alpha" option to the ImageMagick
-;       command. This is a relatively recent addition to the convert command. (Added in ImageMagick
-;       version 6.3.4). I believe PS_END can discover which version of ImageMagick you are useing
-;       and act accordingly, but if it can't, set this alpha option to your liking. 
-;
-; EXAMPLE:
-;
-;       To create a line plot in a PostScript file named lineplot.ps and
-;       also create a PNG file named lineplot.png for display in a browser,
-;       type these commands.
-;
-;       PS_Start, FILENAME='lineplot.ps'
-;       Plot, Findgen(11), COLOR=cgColor('navy'), /NODATA, XTITLE='Time', YTITLE='Signal'
-;       OPlot, Findgen(11), COLOR=cgColor('indian red')
-;       OPlot, Findgen(11), COLOR=cgColor('olive'), PSYM=2
-;       PS_End, /PNG
-;
-; NOTES:
-;
-;       You can easily configure any modifications you like for your PostScript output
-;       by setting fields in the plot and axis system variables (!P, !X, !Y, and !Z).
-;       The modifications currently made by default in this program are these:
-;
-;          !P.Thick = 2
-;          !X.Thick = 2
-;          !Y.Thick = 2
-;          !Z.Thick = 2
-;          !P.Font = 1
-;
-; MODIFICATION HISTORY:
-;
-;       Written by: David W. Fanning, 20 May 2008.
-;       Slight modification to allow filenames with spaces in them.
-;       Added NoMatch keyword. 17 March 2009. DWF.
-;       Added a number of keywords to make these commands more configurable. 19 March 2009. DWF.
-;       Only set thickness system variables if starting system variables are set to their
-;           default values (namely, 0). This allows users to set their own system variables
-;           before they call PS_START, rather than after. 23 March  2009. DWF.
-;       Moved PS_END to its own file to allow the IDLExBr_Assistant to work properly. 7 April 2009. DWF.
-;       Reordered ImageMagick commands to put them in the proper sequence to get "alpha" switch to work. 23 April 2009. DWF.
-;       Put the switches *ahead* of the PostScript file name. Now resizing works and default size reduction
-;           returned to 25%. 23 April 2009. DWF.
-;       Still having a devil of a time getting the ImageMagick "convert" command right. Fonts
-;           have become a problem. Now trying a "flatten" option in the command. 12 May 2009. DWF.
-;       If the PostScript file is in Landscape mode, it is now "fixed" with FixPS to allow it
-;           to be displayed right-side up in PostScript viewers. 8 August 2009. DWF.
-;       Fixed a problem in not checking the GIF keyword properly. 4 December 2009. DWF.
-;       Added NOFIX keyword to the program. 1 November 2010. DWF.
-;       Added better handing of errors coming from FIXPS after update to FIXPS. 15 November 2010. DWF.
-;       Added DELETE_PS keyword. 16 Jan 2011. DWF.
-;       Better protection of code from not finding ImageMagick. 17 Jan 2011. DWF.
-;       Collecting result of SPAWN command. Only printing if QUIET=0. 16 Feb 2011. DWF.
-;       Changes to handle inability to create raster files from PS encapsulated files in 
-;           landscape mode. Added NOMESSAGE keyword. 26 Aug 2011. DWF.
-;- 
-;
+;    and close a PostScript file. These programs are used extensively
+;    in all Coyote Graphics routines.
 ;******************************************************************************************;
-;  Copyright (c) 2008-2011, by Fanning Software Consulting, Inc.                           ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -188,6 +34,111 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+;
+;+
+; The purpose of PS_START and PS_END is to make it easy to set-up
+; and close a PostScript file. These programs are used extensively
+; in all Coyote Graphics routines.
+;
+; If `ImageMagick  <http://www.imagemagick.org/script/index.php>` is installed 
+; on your computer, you can easily convert PostScript output to GIF, JPEG, PNG, and TIFF
+; raster output. If `Ghostscript <http://www.ghostscript.com/download/>` is installed
+; you can convert PostScript output to PDF files. See the appropriate keywords below.
+; 
+; When PS_START is called, the current graphics device is set to "PS" (the PostScript 
+; device). When PS_END is called the current graphics device is returned to the device
+; in effect when PS_START was called.
+
+; :Categories:
+;    Utilities, Graphics
+;    
+; :Keywords:
+;     allow_transparent: in, optional, type=boolean, default=0
+;         To make the background of some image files white, rather than transparent,
+;         you have to set the "-alpha off" string in the ImageMagick call. This
+;         string is automatically added to the ImageMagick call unless this keyword
+;         is set, in which case the string is not added and the image background will
+;         be transparent.  
+;     delete_ps: in, optional, type=boolean, default=0            
+;        Setting this keyword will delete the PostScript file that is used as the intermediate
+;        file in the conversion to other file types.
+;     density: in, optional, type=integer, default=300
+;        The horizontal and vertical density (in dots per inch, DPI) of the image when the PostScript file
+;        is converted to a raster format by ImageMagick. 
+;     gif: in, optional, type=boolean, default=0                 
+;        Set this keyword to convert the PostScript output file to a GIF image. Requires ImageMagick.
+;     jpeg: in, optional, type=boolean, default=0                 
+;        Set this keyword to convert the PostScript output file to a JPEG image. Requires ImageMagick.
+;     nofix: in, optional, type=boolean, default=0  
+;        If this keyword is set, then the FixPS program to fix IDL landscape
+;        PostScript files is not called.
+;     nomessage: in, optional, type=boolean, default=0                  
+;        If this keyword is set, then no error messages are issued. The keyword is used primarily 
+;        to allow PS_END to reset the internal structure without a lot of ruckus.               
+;     pdf: in, optional, type=boolean, default=0                 
+;        Set this keyword to convert the PostScript output file to a PDF file. Requires Ghostscript.
+;     png: in, optional, type=boolean, default=0                 
+;        Set this keyword to convert the PostScript output file to a PNG image. Requires ImageMagick.
+;     im_options: in, optional, type=string, default=""
+;        A string of ImageMagick "convert" options that can be passed to the ImageMagick convert 
+;        command. No error checking occurs with this string.
+;     resize: in, optional, type=integer, default=25
+;        If an image is being created from the PostScript file, it is often resized by some 
+;        amount. You can use this keyword to change the value (e.g, RESIZE=100).
+;        The value is passed on to resize argument as a percentage in the ImageMagick call.
+;     tiff: in, optional, type=boolean, default=0                 
+;        Set this keyword to convert the PostScript output file to a TIFF image. Requires ImageMagick.
+;          
+; :Examples:
+;    To create a line plot in a PostScript file named lineplot.ps and
+;    also create a PNG file named lineplot.png for display in a browser,
+;    type these commands::
+;
+;        PS_Start, FILENAME='lineplot.ps'
+;        cgPlot, Findgen(11), COLOR='navy', /NODATA, XTITLE='Time', YTITLE='Signal'
+;        cgPlot, Findgen(11), COLOR='indian red', /OVERPLOT
+;        cgPlot, Findgen(11), COLOR='olive', PSYM=2, /OVERPLOT
+;        PS_End, /PNG
+;       
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;       Written by: David W. Fanning, 20 May 2008.
+;       Slight modification to allow filenames with spaces in them.
+;       Added NoMatch keyword. 17 March 2009. DWF.
+;       Added a number of keywords to make these commands more configurable. 19 March 2009. DWF.
+;       Only set thickness system variables if starting system variables are set to their
+;           default values (namely, 0). This allows users to set their own system variables
+;           before they call PS_START, rather than after. 23 March  2009. DWF.
+;       Moved PS_END to its own file to allow the IDLExBr_Assistant to work properly. 7 April 2009. DWF.
+;       Reordered ImageMagick commands to put them in the proper sequence to get "alpha" switch to work. 23 April 2009. DWF.
+;       Put the switches *ahead* of the PostScript file name. Now resizing works and default size reduction
+;           returned to 25%. 23 April 2009. DWF.
+;       Still having a devil of a time getting the ImageMagick "convert" command right. Fonts
+;           have become a problem. Now trying a "flatten" option in the command. 12 May 2009. DWF.
+;       If the PostScript file is in Landscape mode, it is now "fixed" with FixPS to allow it
+;           to be displayed right-side up in PostScript viewers. 8 August 2009. DWF.
+;       Fixed a problem in not checking the GIF keyword properly. 4 December 2009. DWF.
+;       Added NOFIX keyword to the program. 1 November 2010. DWF.
+;       Added better handing of errors coming from FIXPS after update to FIXPS. 15 November 2010. DWF.
+;       Added DELETE_PS keyword. 16 Jan 2011. DWF.
+;       Better protection of code from not finding ImageMagick. 17 Jan 2011. DWF.
+;       Collecting result of SPAWN command. Only printing if QUIET=0. 16 Feb 2011. DWF.
+;       Changes to handle inability to create raster files from PS encapsulated files in 
+;           landscape mode. Added NOMESSAGE keyword. 26 Aug 2011. DWF.
+;        Added PDF keyword. Requires Ghostscript to use. 6 Dec 2011. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
+;-
 PRO PS_END, $
     ALLOW_TRANSPARENT=allow_transparent, $
     BMP=bmp, $
@@ -198,6 +149,7 @@ PRO PS_END, $
     JPEG=jpeg, $
     NOFIX=nofix, $
     NOMESSAGE=nomessage, $
+    PDF=pdf, $
     PNG=png, $
     RESIZE=resize, $
     TIFF=tiff
@@ -245,6 +197,7 @@ PRO PS_END, $
    allow_transparent = Keyword_Set(allow_transparent)
    IF Keyword_Set(bmp) THEN ps_struct.convert = 'BMP'
    IF Keyword_Set(gif) THEN ps_struct.convert = 'GIF'
+   IF Keyword_Set(pdf) THEN ps_struct.convert = 'PDF'
    IF Keyword_Set(png) THEN ps_struct.convert = 'PNG'
    IF Keyword_Set(jpeg) THEN ps_struct.convert = 'JPEG'
    IF Keyword_Set(tiff) THEN ps_struct.convert = 'TIFF'
@@ -256,6 +209,7 @@ PRO PS_END, $
         basename = FSC_Base_Filename(ps_struct.filename, DIRECTORY=theDir, EXTENSION=theExtension)
         CASE 1 OF
             ps_struct.convert EQ 'GIF':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.gif')
+            ps_struct.convert EQ 'PDF':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.pdf')
             ps_struct.convert EQ 'PNG':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.png')
             ps_struct.convert EQ 'JPEG': outfilename = Filepath(ROOT_DIR=theDir, basename + '.jpg')
             ps_struct.convert EQ 'TIFF': outfilename = Filepath(ROOT_DIR=theDir, basename + '.tif')
@@ -264,7 +218,7 @@ PRO PS_END, $
         
             ; ImageMagick is required for this section of the code.
             available = HasImageMagick(Version=version)
-            IF available THEN BEGIN
+            IF available && ~(ps_struct.convert EQ 'PDF') THEN BEGIN
             
                 ; Cannot successfully convert encapsulated landscape file to raster.
                 ; Limitation of ImageMagick, and specifically, GhostScript, which does
@@ -324,7 +278,13 @@ PRO PS_END, $
                     IF outfilename NE ps_filename THEN File_Delete, ps_filename
                 ENDIF
             ENDIF ELSE BEGIN
-                Message, 'ImageMagick could not be found. No conversion to raster was possible.'
+                IF ps_struct.convert EQ 'PDF' THEN BEGIN
+                    cgPS2PDF, ps_struct.filename, outfilename, $
+                        DELETE_PS=delete_ps, PAGETYPE=ps_struct.pagetype, SILENT=1, SUCCESS=success
+                    IF success EQ 0 THEN Print, 'Encountered problem creating PDF file. Proceeding...'
+                ENDIF ELSE BEGIN
+                    Message, 'ImageMagick could not be found. No conversion to raster was possible.'
+                ENDELSE
             ENDELSE
         ENDIF
         

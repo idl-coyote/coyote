@@ -1123,7 +1123,7 @@ PRO cgImage, image, x, y, $
     ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
-    IF N_Elements(color) EQ 0 THEN acolorname = 'oppostite' ELSE acolorname = color
+    IF N_Elements(color) EQ 0 THEN acolorname = 'opposite' ELSE acolorname = color
     interp = Keyword_Set(interp)
     
     ; Doing multiple plots?

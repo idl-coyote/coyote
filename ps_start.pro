@@ -1,166 +1,15 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
 ;   PS_START
 ;
 ; PURPOSE:
-;
 ;    The purpose of PS_START and PS_END is to make it easy to set-up
-;    for and close a PostScript file. The programs work in close conjunction
-;    with PSCONFIG, another program from the Coyote Library.
-;
-;    If ImageMagick  (http://www.imagemagick.org/script/index.php) is installed 
-;    on your computer, you can easily convert PostScript output to JPEG, PNG, and TIFF
-;    image output. (See the keywords to PS_END.)
-;
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: david@idlcoyote.com
-;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CATEGORY:
-;
-;       Graphics, File Output, PostScript
-;
-; CALLING SEQUENCE:
-;
-;       PS_START
-;       Various graphics commands here...
-;       PS_END
-;
-; KEYWORD PARAMETERS FOR PS_START:
-; 
-;       CANCEL:       An output keyword that is set to 1 if the user cancelled from
-;                     PS_Config. Otherwise, set to 0.
-; 
-;       CHARSIZE:     If this keyword is set, the !P.Charsize variable is set to this
-;                     value until PS_END is called.
-;                     
-;       FONT:         Set this to the type of font you want. A -1 selects Hershey 
-;                     fonts, a 0 selects hardware fonts (Helvetica, normally), and
-;                     a 1 selects a True-Type font. Set to 0 by default.
-;
-;       GUI:          The default behavior is to use PSCONFIG to configure the
-;                     PostScript device silently. If you wish to allow the user
-;                     to interatively configure the PostScript device, set this
-;                     keyword.
-;                     
-;       KEYWORDS:     This output keyword contains the keyword structure returned 
-;                     from PS_Config.
-;                     
-;       NOMATCH:      Normally, PS_Start will try to "match" the aspect ratio of the
-;                     PostScript file "window" to the current display window. If this
-;                     keyword is set, then this doesn't occur, giving the user the
-;                     option of specifying the size and offsets of the PostScript 
-;                     window directly though appropriate keywords.
-;
-;       QUIET:        If set, informational messages are not set. 
-;
-;       SCALE_FACTOR: Set this to the PostScript scale factor. By default: 1.
-;
-;       TT_FONT:      The name of a true-type font to use if FONT=1. By default, "HELVETICA".
-;
-;       Any keyword supported by PSCONFIG can be used to configure the PostScript device.
-;       Common keywords would include FILENAME, XSIZE, YSIZE, XOFFSET, YOFFSET, etc. See
-;       the PSCONFIG documentation for details. If size keywords are used, you *must* set
-;       the NOMATCH keyword.
-;
-; COMMON BLOCKS:
-;
-;       _$FSC_PS_START_   Contains the PS_STRUCT structure for communication between
-;                         PS_START and PS_END.
-;
-; SIDE EFFECTS:
-;
-;       When PS_START is called, the current graphics device is set to "PS" (the PostScript 
-;       device). When PS_END is called the current graphics device is returned to the device
-;       in effect when PS_START was called.
-;       
-;       PS_Start uses the current display window as a template for the Postscript
-;       file. Thus, if the display window is wider than it is higher, output is
-;       in Landscape mode. To set the size of the PostScript "window" yourself, be
-;       sure to set the NOMATCH keyword to 1.
-;       
-;       To display surface plots correctly the FONT keyword should be set to 1.
-;       Otherwise, the default font is 0, or hardware fonts when outputting to 
-;       PostScript.
-;
-; RESTRICTIONS:
-;
-;       Requires numerous programs from the Coyote Library. To convert PostScript files
-;       to PNG, JPEG, GIF, and TIFF files requires ImageMagick be installed on your
-;       computer and configured correctly. You can download Coyote Library programs here:
-;
-;             http://www.idlcoyote.com/programs/coyoteprograms.zip
-;
-;       ImageMagick can be found here:
-;
-;              http://www.imagemagick.org/script/index.php
-;              
-;       NOTE: In this version of PS_START, I have added the "alpha" option to the ImageMagick
-;       command. This is a relatively recent addition to the convert command. (Added in ImageMagick
-;       version 6.3.4). Your version of ImageMagick may not allow it. If so, simply comment out the
-;       alpha command in the code below (on or about line 242), or uncomment it, as the case may be. 
-;
-; EXAMPLE:
-;
-;       To create a line plot in a PostScript file named lineplot.ps and
-;       also create a PNG file named lineplot.png for display in a browser,
-;       type these commands.
-;
-;       PS_Start, FILENAME='lineplot.ps'
-;       Plot, Findgen(11), COLOR=cgColor('navy'), /NODATA, XTITLE='Time', YTITLE='Signal'
-;       OPlot, Findgen(11), COLOR=cgColor('indian red')
-;       OPlot, Findgen(11), COLOR=cgColor('olive'), PSYM=2
-;       PS_End, /PNG
-;
-; NOTES:
-;
-;       You can easily configure any modifications you like for your PostScript output
-;       by setting fields in the plot and axis system variables (!P, !X, !Y, and !Z).
-;       The modifications currently made by default in this program are these:
-;
-;          !P.Thick = 2
-;          !P.CharThick = 2
-;          !X.Thick = 2
-;          !Y.Thick = 2
-;          !Z.Thick = 2
-;          !P.Font = 0
-;          
-;        The !P.Charsize variable is set differently on Windows computers, and depending
-;        on whether !P.MULTI is being used. On Windows the default is 1.25, or 1.00 for
-;        multiple plots. On other computers, the default is 1.5, or 1.25 for multiple plots.
-;        If true-type fonts are being used (FONT=1), the default is 1.5, or 1.25 for 
-;        multiple plots.
-;
-; MODIFICATION HISTORY:
-;
-;       Written by: David W. Fanning, 20 May 2008.
-;       Slight modification to allow filenames with spaces in them.
-;       Added NoMatch keyword. 17 March 2009. DWF.
-;       Added a number of keywords to make these commands more configurable. 19 March 2009. DWF.
-;       Only set thickness system variables if starting system variables are set to their
-;           default values (namely, 0). This allows users to set their own system variables
-;           before they call PS_START, rather than after. 23 March  2009. DWF.
-;       Moved PS_END to its own file to allow the IDLExBr_Assistant to work properly. 7 April 2009. DWF.
-;       Modified to allow PostScript page type to be stored for future processing with FixPS. 9 August 2009. DWF.
-;       Added NoFix keyword to PS_END calls to repair previous, but unused set-ups. 1 Nov 2010. DWF.
-;       Added Charsize keyword to PS_START. 14 Nov 2010. DWF.
-;       Changed the way default character sizes are set. 19 Nov 2010. DWF.
-;       Added CANCEL and KEYWORDS output keywords. 16 Jan 2011. DWF.
-;       Changes to handle inability to create raster files from PS encapsulated files in 
-;           landscape mode. 26 Aug 2011. DWF.
-;       The SCALE_FACTOR is called at the time the PostScript file is opened to avoid problems
-;           with the bounding box not being set to the correct values. 26 October 2011. DWF.
-;-
-;
+;    and close a PostScript file. These programs are used extensively
+;    in all Coyote Graphics routines.
 ;******************************************************************************************;
-;  Copyright (c) 2008 - 2010, by Fanning Software Consulting, Inc.                         ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -185,6 +34,127 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+;
+;+
+; The purpose of PS_START and PS_END is to make it easy to set-up
+; and close a PostScript file. These programs are used extensively
+; in all Coyote Graphics routines.
+;
+; If `ImageMagick  <http://www.imagemagick.org/script/index.php>` is installed 
+; on your computer, you can easily convert PostScript output to GIF, JPEG, PNG, and TIFF
+; raster output. If `Ghostscript <http://www.ghostscript.com/download/>` is installed
+; you can convert PostScript output to PDF files. See the appropriate keywords to
+; PS_END.
+; 
+; When PS_START is called, the current graphics device is set to "PS" (the PostScript 
+; device). When PS_END is called the current graphics device is returned to the device
+; in effect when PS_START was called.
+; 
+; PS_Start uses the current display window as a template for the Postscript
+; file. Thus, if the display window is wider than it is higher, output is
+; in Landscape mode. To set the size of the PostScript "window" yourself, be
+; sure to set the NOMATCH keyword to 1.
+;       
+; To display surface plots correctly the FONT keyword should be set to 1.
+; Otherwise, the default font is 0, or hardware fonts when outputting to 
+; PostScript.
+;
+; You can easily configure any modifications you like for your PostScript output
+; by setting fields in the plot and axis system variables (!P, !X, !Y, and !Z).
+; The modifications currently made by default in this program are these::
+;
+;     !P.Thick = 2
+;     !P.CharThick = 2
+;     !X.Thick = 2
+;     !Y.Thick = 2
+;     !Z.Thick = 2
+;     !P.Font = 0
+;          
+; The !P.Charsize variable is set differently on Windows computers, and depending
+; on whether !P.MULTI is being used. On Windows the default is 1.25, or 1.00 for
+; multiple plots. On other computers, the default is 1.5, or 1.25 for multiple plots.
+; If true-type fonts are being used (FONT=1), the default is 1.5, or 1.25 for 
+; multiple plots.
+;
+; The PS_Start program contains the common block, _$FSC_PS_START_. See the FSC_PS_SETUP__DEFINE 
+; program in the Coyote Library for its definition.
+; 
+; :Categories:
+;    Utilities, Graphics
+;    
+; :Keywords:
+;     cancel: out, optional, type=boolean, default=0
+;         An output keyword that is set to 1 if the user cancelled from
+;         PS_Config. Otherwise, set to 0.
+;     charsize: in, optional, type=float
+;         If this keyword is set, the !P.Charsize variable is set to this value until PS_END is called.
+;     font: in, optional, type=integer, default=0                
+;         Set this to the type of font you want. A -1 selects Hershey fonts, a 0 selects hardware 
+;         fonts (Helvetica, normally), and a 1 selects a True-Type font. Set to 0 by default.
+;     gui: in, optional, type=boolean, default=0
+;         The default behavior is to use PSCONFIG to configure the PostScript device silently. 
+;         If you wish to allow the user to interatively configure the PostScript device, set this
+;         keyword.
+;     keywords: out, optional, type=structure                
+;         This output keyword contains the keyword structure returned from PS_Config.
+;     nomatch: in, optional, type=boolean, default=0                
+;        Normally, PS_Start will try to "match" the aspect ratio of the PostScript file "window" 
+;        to the current display window. If this keyword is set, then this doesn't occur, giving 
+;        the user the option of specifying the size and offsets of the PostScript window directly 
+;        though appropriate keywords.
+;     quiet: in, optional, type=boolean, default=0
+;         If set, informational messages are not set. 
+;     scale_factor: in, optional, type=float, default=1.0
+;         Set this to the PostScript scale factor. By default: 1.
+;     tt_font: in, optional, type=string, default="Helvetica"
+;         The name of a true-type font to use if FONT=1.
+;     _ref_extra: in, optional
+;         Any keyword appropriate for the PostScript configuration program PSConfig, from
+;         the Coyote Library can be used with PS_Start.
+;              
+; :Examples:
+;    To create a line plot in a PostScript file named lineplot.ps and
+;    also create a PNG file named lineplot.png for display in a browser,
+;    type these commands::
+;
+;        PS_Start, FILENAME='lineplot.ps'
+;        cgPlot, Findgen(11), COLOR='navy', /NODATA, XTITLE='Time', YTITLE='Signal'
+;        cgPlot, Findgen(11), COLOR='indian red', /OVERPLOT
+;        cgPlot, Findgen(11), COLOR='olive', PSYM=2, /OVERPLOT
+;        PS_End, /PNG
+;       
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;       Written by: David W. Fanning, 20 May 2008.
+;       Slight modification to allow filenames with spaces in them.
+;       Added NoMatch keyword. 17 March 2009. DWF.
+;       Added a number of keywords to make these commands more configurable. 19 March 2009. DWF.
+;       Only set thickness system variables if starting system variables are set to their
+;           default values (namely, 0). This allows users to set their own system variables
+;           before they call PS_START, rather than after. 23 March  2009. DWF.
+;       Moved PS_END to its own file to allow the IDLExBr_Assistant to work properly. 7 April 2009. DWF.
+;       Modified to allow PostScript page type to be stored for future processing with FixPS. 9 August 2009. DWF.
+;       Added NoFix keyword to PS_END calls to repair previous, but unused set-ups. 1 Nov 2010. DWF.
+;       Added Charsize keyword to PS_START. 14 Nov 2010. DWF.
+;       Changed the way default character sizes are set. 19 Nov 2010. DWF.
+;       Added CANCEL and KEYWORDS output keywords. 16 Jan 2011. DWF.
+;       Changes to handle inability to create raster files from PS encapsulated files in 
+;           landscape mode. 26 Aug 2011. DWF.
+;       The SCALE_FACTOR is called at the time the PostScript file is opened to avoid problems
+;           with the bounding box not being set to the correct values. 26 October 2011. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
+;-
 PRO PS_START, $
     CANCEL=cancelled, $
     CHARSIZE=charsize, $
@@ -197,7 +167,7 @@ PRO PS_START, $
     QUIET=quiet, $
     SCALE_FACTOR=scale_factor, $
     TT_FONT=tt_font, $
-   _EXTRA=extra
+   _REF_EXTRA=extra
  
    COMMON _$FSC_PS_START_, ps_struct
    
@@ -261,11 +231,11 @@ PRO PS_START, $
       IF !D.X_Size GT !D.Y_Size THEN landscape = 1 ELSE landscape = 0
       IF Keyword_Set(encapsulated) THEN landscape = 0
       sizes = PSWindow(_Extra=extra, LANDSCAPE=landscape)
-      keywords = PSConfig(_Extra=extra, INCHES=sizes.inches, XSIZE=sizes.xsize, YSIZE=sizes.ysize, $
+      keywords = PSConfig(_Strict_Extra=extra, INCHES=sizes.inches, XSIZE=sizes.xsize, YSIZE=sizes.ysize, $
          XOFFSET=sizes.xoffset, YOFFSET=sizes.yoffset, Cancel=cancelled, NOGUI=(~gui), $
          LANDSCAPE=sizes.landscape, ENCAPSULATED=encapsulated)
    ENDIF ELSE BEGIN
-      keywords = PSConfig(_Extra=extra, ENCAPSULATED=encapsulated, $
+      keywords = PSConfig(_Strict_Extra=extra, ENCAPSULATED=encapsulated, $
           LANDSCAPE=landscape, CANCEL=cancelled, NOGUI=(~gui))
    ENDELSE
    IF cancelled THEN BEGIN

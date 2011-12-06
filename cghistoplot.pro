@@ -1,163 +1,185 @@
-
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;       cgHISTOPLOT
+;   cgHistoplot
 ;
 ; PURPOSE:
+;   This program is used to draw a histogram plot in an IDL direct graphics window..
 ;
-;       This program is used to draw a histogram in an IDL direct graphics window.
+;******************************************************************************************;
+;                                                                                          ;
+;  Copyright (c) 2010, by Fanning Software Consulting, Inc. All rights reserved.           ;
+;                                                                                          ;
+;  Redistribution and use in source and binary forms, with or without                      ;
+;  modification, are permitted provided that the following conditions are met:             ;
+;                                                                                          ;
+;      * Redistributions of source code must retain the above copyright                    ;
+;        notice, this list of conditions and the following disclaimer.                     ;
+;      * Redistributions in binary form must reproduce the above copyright                 ;
+;        notice, this list of conditions and the following disclaimer in the               ;
+;        documentation and/or other materials provided with the distribution.              ;
+;      * Neither the name of Fanning Software Consulting, Inc. nor the names of its        ;
+;        contributors may be used to endorse or promote products derived from this         ;
+;        software without specific prior written permission.                               ;
+;                                                                                          ;
+;  THIS SOFTWARE IS PROVIDED BY FANNING SOFTWARE CONSULTING, INC. ''AS IS'' AND ANY        ;
+;  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES    ;
+;  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT     ;
+;  SHALL FANNING SOFTWARE CONSULTING, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,             ;
+;  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED    ;
+;  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;         ;
+;  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND             ;
+;  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
+;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
+;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
+;******************************************************************************************;
 ;
-; AUTHOR:
+;+
+;   This program is used to draw a histogram plot in an IDL direct graphics window..
 ;
-;       FANNING SOFTWARE CONSULTING
-;       David Fanning, Ph.D.
-;       1645 Sheely Drive
-;       Fort Collins, CO 80526 USA
-;       Phone: 970-221-0438
-;       E-mail: david@idlcoyote.com
-;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-;
-; CATEGORY:
-;
-;       Graphics
-;
-; CALLING SEQUENCE:
-;
-;      cgHistoplot, dataToHistogram
-;
-; ARGUMENTS:
-;
-;       dataToHistogram:  The data from which the histogram is created.
-;
-; INPUT KEYWORDS:
-;
-;       ADDCMD:           Set this keyword to add the command to an FSC_Window
-;                         command list. Setting this keyword automatically sets
-;                         the WINDOW keyword.
+; :Categories:
+;    Graphics
+;    
+; :Params:
+;    data: in, required, 
+;       The data from which the histogram is created.
+;       
+; :Keywords:
+;    addcmd: in, optional, type=boolean, default=0
+;       Set this keyword to add the command to the resizeable graphics window cgWindow.
+;    axiscolorname: in, optional, type=string, default='black'                     
+;       The name of the axis color. All color names are derived from cgColor.
+;    backcolorname: in, optional, type=string, default='white'
+;       The name of the background color. All color names are derived from cgColor.
+;    binsize: in, optional
+;       The binsize of the histogram. By default, Scott's Choice of bin size for histograms is used::
 ;                         
-;       AXISCOLORNAME:    The name of the axis color. Default: "Black". (All color names
-;                         derived from cgCOLOR.)
-;
-;       BACKCOLORNAME:    The name of the background color. Default: "White".
-;
-;       BINSIZE:          The binsize of the histogram. By default, Scott's Choice of
-;                         bin size for histograms is used:
-;                         
-;                            binsize = (3.5 * StdDev(data)) / N_Elements(data)^(0.3333)
+;           binsize = (3.5 * StdDev(data)) / N_Elements(data)^(0.3333)
 ;                            
-;                         If BINSIZE in not defined, and NBINS is defined, the BINSIZE is
-;                         calcuated as:
+;       If BINSIZE in not defined, and NBINS is defined, the BINSIZE is calcuated as::
 ;                         
-;                             binsize = (Max(dataToHistogram) - Min(dataToHistogram)) / (NBINS -1)
+;            binsize = (Max(dataToHistogram) - Min(dataToHistogram)) / (NBINS -1)
 ;                             
-;       CHARSIZE:         The character size. Default set by calling cgDefCharSize().
-;
-;       DATACOLORNAME:    The name of the data color for drawing the histogram outlines.
-;                         Default: "Indian Red".
-;
-;       FILE:             The name of a color name file to use with cgCOLOR.
-;
-;       FILLPOLYGON:      Set this keyword to fill the histogram polygons. If this keyword
-;                         is set, the following keyword can also be used.
-;
-;                         POLYCOLOR:    The name, or vector of names, of polygon colors.
-;                                       If a vector, the names are cycled though, as needed.
-;                                       Defaults to 'ROSE'.
-;
-;       FREQUENCY:        If this keyword is set, the relative frequency is plotted on the Y axis,
-;                         rather than the histogram density.
-;                         
-;       L64:              If set, the return value of HISTOGRAM are 64-bit integers, rather than
-;                         the default 32-bit integers.
-;
-;       LAYOUT:           This keyword specifies a grid with a graphics window and determines 
-;                         where the graphic should appear. The syntax of LAYOUT is a 3-element 
-;                         array: [ncolumns, nrows, location]. The grid is determined by the 
-;                         number of columns (ncolumns) by the number of rows (nrows). The location 
-;                         of the graphic is determined by the third number. The grid numbering 
-;                         starts in the upper left (1) and goes sequentually by column and then
-;                         by row.
-;               
-;       LINE_FILL:        If set, the polygons are filled with lines instead of solid color. If
-;                         this keyword is set, the following keywords can also be used.
-;
-;                         ORIENTATION:  The orientation of the lines in line-filled polygons in degrees.
-;                         PATTERN:      Set to rectangular array of pixel giving fill pattern.
-;                         POLYCOLOR:    The name, or vector of names, of line colors.
-;                                       If a vector, the names are cycled though, as needed.
-;                         SPACING:      The spacing, in centimeters, between parallel lines.
-;
-;       MAXINPUT:         The maximum value to use in calculating input histogram. Equivalent to MAX keyword
-;                         in HISTOGRAM documentation.
-;
-;       MAX_VALUE:        The maximum Y data value to represent on graphics plot. Default: Max(histdataToPlot) * 1.05
-;
-;       MININPUT:         The minimum value to use in calculating input histogram. Equivalent to MIN keyword
-;                         in HISTOGRAM documentation.
-;
-;       MIN_VALUE:        The minimum Y data value to represent on graphics plot. Default: 0.
-;
-;       MISSING:          The value that should be represented as "missing" and not used in the histogram.
-;                         Be aware that if the input data is not of type "float" or "double" that the input
-;                         data will be converted to floating point prior to calculating the histogram.
-;       
-;       NAN:              If set, ignore NAN values in calculating and plotting histogram.
-;
-;       NBINS:            The number of output bins in the histogram. Meaning is slightly different from
-;                         meaning in the HISTOGRAM command. Used only to calculate BINSIZE when BINSIZE is
-;                         not specified. In this case, binsize = rangeofData/(nbins-1).
-;
-;       OPROBABILITY:     Set this keyword if you want to overplot the cumulative probability on the plot.
-;       
-;       OPLOT:            Set this keyword if you want to overplot data on already established axes.
-;       
-;       OUTLINE:          Set this keyword if you wish to draw only the outline of the histogram plot,
-;                         in a manner similar to setting PSYM=10 on a PLOT command.
-;                         
-;       PROBCOLORNAME:    The name of the probability color for overplotting the cumulative probability
-;                         on the plot.  Default: "Blue".
-;                         
-;       ROTATE:           Set this keyword to cause the histogram bins to be drawn from left
-;                         to right, rather than from bottom to top.
-;       
-;       THICK:            Set this keyword to a value greater than 1 to draw thicker axes and lines.
-;       
-;       WINDOW:           Set this keyword to display the plot in a resizeable cgWindow program.
-;
-;       The user may also enter any other keywords suitable for the PLOT and POLYFILL commands in IDL.
-;
-; OUTPUT KEYWORDS:
-;
-;       HISTDATA:         The output value of the internal HISTOGRAM command.
-;
-;       LOCATIONS:        Starting locations of each bin. (See HISTOGRAM documentation.)
-;
-;       OMAX:             The maximum output value used to construct the histogram. (See HISTOGRAM documentation.)
-;
-;       OMIN:             The minimum output value used to construct the histogram. (See HISTOGRAM documentation.)
-;       
-;       PROBABILITY:      The total cummulative probability of the histogram plot, scaled from 0 to 1.
-;
-;       REVERSE_INDICES:  List of reverse indices. (See HISTOGRAM documentation.)
-;
-; EXAMPLES:
-;
-;      IDL> cgHistoplot, Dist(256)
-;      IDL> cgHistoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['charcoal', 'steel blue'], /FILLPOLYGON
-;      IDL> cgHistoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['navy', 'forest green'], /LINE_FILL, ORIENTATION=[45,-45]
-;        
-; NOTE:
-; 
 ;       While it is pointed out in the HISTOGRAM documentation, it is extremely
 ;       important that the BINSIZE be of the same data type as the data you are going to
 ;       calculate the histogram of. If it is not VERY strange things can happen. I've
 ;       tried to protect you from most of the bad things, but I don't have a high confidence
 ;       level that I have done it for every situation. If you see something that "just don't
 ;       look right", I would check first to see if your data types match. That might solve
-;       all the problems. :-)
+;       all your problems.
+;    charsize: in, optional, type=float
+;       The character size of the annotations. Default set by calling cgDefCharSize().
+;    datacolorname: in, optional, type=string, default="indian red"
+;       The name of the data color for drawing the histogram outlines.
+;    filename: in, optional, type=string
+;       The name of a color name file to use with cgCOLOR.
+;    fillpolygon: in, optional, type=boolean, default=0
+;       Set this keyword to fill the histogram polygons with the `POLYCOLOR`.
+;    frequency: in, optional, type=boolean, default=0
+;       If this keyword is set, the relative frequency is plotted on the Y axis,
+;       rather than the histogram density.
+;    histdata: out, optional
+;       The output value of the internal HISTOGRAM command.
+;    l64: in, optional, type=boolean, default=0                       
+;       If set, the return value of HISTOGRAM are 64-bit integers, rather than
+;       the default 32-bit integers.
+;    layout: in, optional, type=integer
+;       This keyword specifies a grid with a graphics window and determines 
+;       where the graphic should appear. The syntax of LAYOUT is a 3-element 
+;       array: [ncolumns, nrows, location]. The grid is determined by the 
+;       number of columns (ncolumns) by the number of rows (nrows). The location 
+;       of the graphic is determined by the third number. The grid numbering 
+;       starts in the upper left (1) and goes sequentually by column and then by row.
+;    line_fill: in, optional, type=boolean, default=0           
+;       If set, the polygons are filled with lines instead of solid color. If
+;       this keyword is set, the following keywords can also be used: `ORIENTATION`,
+;       `PATTERN`, `POLYCOLOR`, and `SPACING`.
+;    locations: out, optional
+;       Starting locations of each bin. (See the HISTOGRAM documentation for details.)
+;    maxinput: in, optional
+;       The maximum value to use in calculating input histogram. Equivalent to the MAX keyword
+;       in the HISTOGRAM documentation.
+;    max_value: in, optional
+;       The maximum Y data value to represent on graphics plot. Default: Max(data) * 1.05.
+;    mininput: in, optional
+;       The minimum value to use in calculating input histogram. Equivalent to the MIN keyword
+;       in the HISTOGRAM documentation.
+;    min_value: in, optional
+;       The minimum Y data value to represent on graphics plot. Default: 0.
+;    missing: in, optional
+;       The value that should be represented as "missing" and not used in the histogram.
+;       Be aware that if the input data is not of type "float" or "double" that the input
+;       data will be converted to floating point prior to calculating the histogram.
+;    nan: in, optional, type=boolean, default=0   
+;       If set, ignore NAN values in calculating and plotting histogram.
+;    nbins: in, optional, type=integer
+;       The number of output bins in the histogram. Meaning is slightly different from
+;       meaning in the HISTOGRAM command. Used only to calculate BINSIZE when BINSIZE is
+;       not specified. In this case, binsize = rangeofData/(nbins-1).
+;    omax: out, optional
+;       The maximum output value used to construct the histogram. (See HISTOGRAM documentation.)
+;    omin: out, optional
+;       The minimum output value used to construct the histogram. (See HISTOGRAM documentation.)
+;    oprobability: in, optional, type=boolean, default=0
+;       Set this keyword if you want to overplot the cumulative probability on the plot.
+;    oplot: in, optional, type=boolean, default=0
+;       Set this keyword if you want to overplot the histogram on already established axes.
+;    orientation: in, optional, type=float, default=0.0
+;       The orientation (rotations) of the lines used to fill the polygons if `LINE_FILL` is set.
+;       (See POLYFILL documentation.)
+;    outline: in, optional, type=boolean, default=0   
+;       Set this keyword if you wish to draw only the outline of the histogram plot,
+;       in a manner similar to setting PSYM=10 on a PLOT command.
+;    pattern: in, optional
+;       The fill pattern for the polygons if the `FILLPOLYGON` keyword is set. (See POLYFILL documentation.)
+;    polycolor: in, optional, type=string, default="rose"
+;       The name of the polygon fill color if the `FILLPOLYGON` keyword is set.
+;    probability_function: out, optional, type=float
+;       The total cummulative probability of the histogram plot, scaled from 0 to 1.
+;    probcolorname: in, optional, type=string, default="blue"                      
+;       The name of the probability color for overplotting the cumulative probability
+;       on the plot. 
+;    reverse_indices: out, optional
+;       The list of reverse indices returned from the HISTOGRAM command. (See HISTOGRAM documentation.)
+;    rotate: in, optional, type=boolean, default=0                     
+;       Set this keyword to cause the histogram bins to be drawn from left to right, rather 
+;       than from bottom to top.
+;    spacing: in, optional
+;       The spacing of fill line if the 'LINE_FILL` keyword is set. (See POLYFILL documentation.)
+;    thick: in, optional, type=integer, default=1   
+;       Set this keyword to a value greater than 1 to draw thicker axes and lines.
+;    window: in, optional, type=boolean, default=0
+;       Set this keyword to replace all the commands in a current cgWindow or to
+;       create a new cgWindow for displaying this command.
+;    xtitle: in, optional, type=string, default="Relative Frequency"
+;       The X title of the histogram plot.
+;    ytitle: in, optional, type=string, default="Histogram Density"
+;       The Y title of the histogram plot.
+;    _ref_extra: in, optional
+;       Any additional PLOT commands are passed via keyword inheritance.
+;          
+; :Examples:
+;    Some of the ways cgHistogram can be used::
+;    
+;       cgHistoplot, Dist(256)
+;       cgHistoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['charcoal', 'steel blue'], /FILLPOLYGON
+;       cgHistoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['navy', 'forest green'], /LINE_FILL, ORIENTATION=[45,-45]
+;       
+;    Additional examples can be found here::
+;    
+;        http://www.idlcoyote.com/graphics_tips/histoplot.php
+;        
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
-; MODIFICATION HISTORY:
-;
+; :History:
+;    Change History::
 ;       Written by:  David W. Fanning, 14 November 2007.
 ;       Modified to work with !P.MULTI. 20 Nov 2007. DWF.
 ;       Slight problem with extra space at the right end of the plot resolved. 20 Nov 2007. DWF.
@@ -215,43 +237,18 @@
 ;       Added the ROTATE keyword. 18 Aug 2011. DWF.
 ;       I was calculating and displaying the cumulative probability distribution function
 ;           incorrectly. Now changed to what I think is the correct result. 8 Nov 2011. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2007-2011, Fanning Software Consulting, Inc.
 ;-
-;******************************************************************************************;
-;  Copyright (c) 2007-2011, by Fanning Software Consulting, Inc.                           ;
-;  All rights reserved.                                                                    ;
-;                                                                                          ;
-;  Redistribution and use in source and binary forms, with or without                      ;
-;  modification, are permitted provided that the following conditions are met:             ;
-;                                                                                          ;
-;      * Redistributions of source code must retain the above copyright                    ;
-;        notice, this list of conditions and the following disclaimer.                     ;
-;      * Redistributions in binary form must reproduce the above copyright                 ;
-;        notice, this list of conditions and the following disclaimer in the               ;
-;        documentation and/or other materials provided with the distribution.              ;
-;      * Neither the name of Fanning Software Consulting, Inc. nor the names of its        ;
-;        contributors may be used to endorse or promote products derived from this         ;
-;        software without specific prior written permission.                               ;
-;                                                                                          ;
-;  THIS SOFTWARE IS PROVIDED BY FANNING SOFTWARE CONSULTING, INC. ''AS IS'' AND ANY        ;
-;  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES    ;
-;  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT     ;
-;  SHALL FANNING SOFTWARE CONSULTING, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,             ;
-;  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED    ;
-;  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;         ;
-;  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND             ;
-;  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
-;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
-;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
-;******************************************************************************************;
-PRO cgHistoplot, $                    ; The program name.
-   dataToHistogram, $               ; The data to draw a histogram of.
+PRO cgHistoplot, $                  ; The program name.
+   data, $                          ; The data to draw a histogram of.
    ADDCMD=addcmd, $                 ; Add this command to an cgWindow.
    AXISCOLORNAME=axisColorName, $   ; The axis color.
    BACKCOLORNAME=backcolorName, $   ; The background color.
    CHARSIZE=charsize, $
    DATACOLORNAME=datacolorName, $   ; The data color.
-   _REF_EXTRA=extra, $              ; For passing extra keywords.
-   FILE=file, $                     ; For specifying a color name file.
+   FILENAME=file, $                 ; For specifying a color name file.
    FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
    LAYOUT=layout, $                 ; Select the grid layout.
    MAX_VALUE=max_value, $           ; The maximum value to plot.
@@ -264,8 +261,10 @@ PRO cgHistoplot, $                    ; The program name.
    PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
    ROTATE=rotate, $                 ; Rotate plot so histogram bars are drawn left to right.
    THICK=thick, $                   ; Set to draw thicker lines and axes.
-   XTITLE=xtitle, $
+   WINDOW=window, $                 ; Display this in an cgWindow.
+   XTITLE=xtitle, $                 ; The X title.
    YTITLE=ytitle, $                 ; The Y title.
+    _REF_EXTRA=extra, $             ; For passing extra keywords.
    ;
    ; POLYFILL KEYWORDS
    ;
@@ -273,7 +272,7 @@ PRO cgHistoplot, $                    ; The program name.
    LINE_FILL=line_fill, $           ; Set if you want line-filled polygons.
    ORIENTATION=orientation, $       ; The orientation of the lines.
    PATTERN=pattern, $               ; The fill pattern.
-   POLYCOLOR=polycolorname, $           ; The name of the polygon draw/fill color.
+   POLYCOLOR=polycolorname, $       ; The name of the polygon draw/fill color.
    SPACING=spacing, $               ; The spacing of filled lines.
    ;
    ; HISTOGRAM OUTPUT KEYWORDS
@@ -292,9 +291,7 @@ PRO cgHistoplot, $                    ; The program name.
    MAXINPUT=maxinput, $             ; The maximum value to HISTOGRAM.
    MININPUT=mininput, $             ; The minimum value to HISTOGRAM.
    NAN=nan, $                       ; Check for NAN.
-   NBINS=nbins, $                   ; The number of bins to display.
-   
-   WINDOW=window                    ; Display this in an cgWindow.
+   NBINS=nbins                      ; The number of bins to display.
 
 
    ; Catch any error in the cgHistoplot program.
@@ -303,10 +300,10 @@ PRO cgHistoplot, $                    ; The program name.
       Catch, /Cancel
       ok = Error_Message(!Error_State.Msg + '. Returning...')
       IF N_Elements(nancount) EQ 0 THEN BEGIN
-            IF N_Elements(_dataToHistogram) NE 0 THEN dataToHistogram = Temporary(_dataToHistogram)
+            IF N_Elements(_data) NE 0 THEN data = Temporary(_data)
       ENDIF ELSE BEGIN
             IF nancount EQ 0 THEN BEGIN
-                IF N_Elements(_dataToHistogram) NE 0 THEN dataToHistogram = Temporary(_dataToHistogram)
+                IF N_Elements(_data) NE 0 THEN data = Temporary(_data)
             ENDIF
       ENDELSE
       IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
@@ -323,13 +320,13 @@ PRO cgHistoplot, $                    ; The program name.
         ; Have to do something different if we are overplotting or adding a command.
         IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
             cgWindow, 'cgHistoplot', $          ; The program name.
-               dataToHistogram, $               ; The data to draw a histogram of.
+               data, $                          ; The data to draw a histogram of.
                AXISCOLORNAME=axisColorName, $   ; The axis color.
                BACKCOLORNAME=backcolorName, $   ; The background color.
                CHARSIZE=charsize, $
                DATACOLORNAME=datacolorName, $   ; The data color.
                _EXTRA=extra, $                  ; For passing extra keywords.
-               FILE=file, $                     ; For specifying a color name file.
+               FILENAME=file, $                 ; For specifying a color name file.
                FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
                LAYOUT=layout, $
                MAX_VALUE=max_value, $           ; The maximum value to plot.
@@ -378,13 +375,13 @@ PRO cgHistoplot, $                    ; The program name.
             void = cgQuery(COUNT=wincnt)
             IF wincnt EQ 0 THEN replaceCmd=0 ELSE replaceCmd=1
             cgWindow, 'cgHistoplot', $          ; The program name.
-               dataToHistogram, $               ; The data to draw a histogram of.
+               data, $               ; The data to draw a histogram of.
                AXISCOLORNAME=axisColorName, $   ; The axis color.
                BACKCOLORNAME=backcolorName, $   ; The background color.
                CHARSIZE=charsize, $
                DATACOLORNAME=datacolorName, $   ; The data color.
                _EXTRA=extra, $                  ; For passing extra keywords.
-               FILE=file, $                     ; For specifying a color name file.
+               FILENAME=file, $                 ; For specifying a color name file.
                FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
                LAYOUT=layout, $
                MAX_VALUE=max_value, $           ; The maximum value to plot.
@@ -434,15 +431,15 @@ PRO cgHistoplot, $                    ; The program name.
    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
    ; Check for positional parameter.
-   IF N_Elements(dataToHistogram) EQ 0 THEN Message, 'Must pass data to histogram.'
+   IF N_Elements(data) EQ 0 THEN Message, 'Must pass data to histogram.'
    IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize()
    
    ; What kind of data are we doing a HISTOGRAM on?
-   dataType = Size(dataToHistogram, /TYPE)
+   dataType = Size(data, /TYPE)
       
    ; Check the data for NANs and alert the user if the NAN keyword is not set.
    IF dataType EQ 4 OR datatype EQ 5 THEN BEGIN
-        goodIndices = Where(Finite(dataToHistogram), count, NCOMPLEMENT=nancount, COMPLEMENT=nanIndices)
+        goodIndices = Where(Finite(data), count, NCOMPLEMENT=nancount, COMPLEMENT=nanIndices)
         IF nancount GT 0 THEN BEGIN
            IF ~Keyword_Set(nan) THEN BEGIN
                Message, 'NANs found in the data. NAN keyword is set to 1.', /INFORMATIONAL
@@ -454,40 +451,40 @@ PRO cgHistoplot, $                    ; The program name.
    ; The only sensible way to proceed is to make a copy of the data. Otherwise, I'll have
    ; a devil of a time putting it back together again at the end. There is a bug in
    ; HISTOGRAM when using BYTE data, so convert that here
-   IF N_Elements(_dataToHistogram) EQ 0 THEN BEGIN
-      IF Size(dataToHistogram, /TNAME) EQ 'BYTE' THEN BEGIN
-          _dataToHistogram = Fix(dataToHistogram) 
+   IF N_Elements(_data) EQ 0 THEN BEGIN
+      IF Size(data, /TNAME) EQ 'BYTE' THEN BEGIN
+          _data = Fix(data) 
        ENDIF ELSE BEGIN
-          _dataToHistogram = dataToHistogram
+          _data = data
        ENDELSE
    ENDIF
    
    ; If you have any "missing" data, then the data needs to be converted to float
    ; and the missing data set to F_NAN.
    IF N_Elements(missing) NE 0 THEN BEGIN
-      missingIndices = Where(_dataToHistogram EQ missing, missingCount)
+      missingIndices = Where(_data EQ missing, missingCount)
       IF missingCount GT 0 THEN BEGIN
          CASE datatype OF
-            4: _dataToHistogram[missingIndices] = !Values.F_NAN
-            5: _dataToHistogram[missingIndices] = !Values.D_NAN
+            4: _data[missingIndices] = !Values.F_NAN
+            5: _data[missingIndices] = !Values.D_NAN
             ELSE: BEGIN
-                _dataToHistogram = Float(_dataToHistogram)
+                _data = Float(_data)
                 dataType = 4
-                _dataToHistogram[missingIndices] = !Values.F_NAN
+                _data[missingIndices] = !Values.F_NAN
                 END
          ENDCASE
          nan = 1
       ENDIF ELSE BEGIN
-        IF missingCount EQ N_Elements(_dataToHistogram) THEN $
+        IF missingCount EQ N_Elements(_data) THEN $
             Message, 'All values are "missing"!'
       ENDELSE
    ENDIF
    
    ; Check for histogram keywords.
    IF N_Elements(binsize) EQ 0 THEN BEGIN
-      range = Max(_dataToHistogram, /NAN) - Min(_dataToHistogram, /NAN)
+      range = Max(_data, /NAN) - Min(_data, /NAN)
       IF N_Elements(nbins) EQ 0 THEN BEGIN  ; Scott's Choice
-         binsize = (3.5D * StdDev(_dataToHistogram, /NAN))/N_Elements(_dataToHistogram)^(1./3.0D) 
+         binsize = (3.5D * StdDev(_data, /NAN))/N_Elements(_data)^(1./3.0D) 
          IF (dataType LE 3) OR (dataType GE 12) THEN binsize = Round(binsize) > 1
          binsize = Convert_To_Type(binsize, dataType)
       ENDIF ELSE BEGIN
@@ -550,8 +547,8 @@ PRO cgHistoplot, $                    ; The program name.
       IF N_Elements(orientation) EQ 0 THEN orientation = 0
       IF N_Elements(spacing) EQ 0 THEN spacing = 0
    ENDIF
-   IF N_Elements(mininput) EQ 0 THEN mininput = Min(_dataToHistogram, NAN=nan)
-   IF N_Elements(maxinput) EQ 0 THEN maxinput = Max(_dataToHistogram, NAN=nan)
+   IF N_Elements(mininput) EQ 0 THEN mininput = Min(_data, NAN=nan)
+   IF N_Elements(maxinput) EQ 0 THEN maxinput = Max(_data, NAN=nan)
    IF N_Elements(thick) EQ 0 THEN thick = 1.0
 
    ; Load plot colors.
@@ -582,7 +579,7 @@ PRO cgHistoplot, $                    ; The program name.
    ENDELSE
    
   ; Calculate the histogram.
-   histdata = Histogram(_dataToHistogram, $
+   histdata = Histogram(_data, $
       BINSIZE=binsize, $
       L64=l64, $
       MAX=maxinput, $
@@ -592,7 +589,7 @@ PRO cgHistoplot, $                    ; The program name.
       OMAX=omax, $
       OMIN=omin, $
       REVERSE_INDICES=ri)
-   IF frequency THEN histdata = Float(histdata)/N_Elements(_dataToHistogram)
+   IF frequency THEN histdata = Float(histdata)/N_Elements(_data)
    
    ; Need a probability distribution?
    IF Arg_Present(probablity) OR Keyword_Set(oprob) THEN BEGIN

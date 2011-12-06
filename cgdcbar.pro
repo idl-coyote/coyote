@@ -143,8 +143,9 @@
 ;       Modified the spacing of the labels on the color bar, specifically for the PostScript device. 3 November 2010. DWF.
 ;       Added Window and AddCmd keywords. 28 Jan 2011. DWF.
 ;       Added a Right keyword and changed the title spacing a little bit for aesthetic reasons. 2 July 2011. DWF.
-;       Fixed a problem with assigning the color with the COLOR keyword in the Z-buffer.  30 Aug 2011. DWF.
-;
+;       Fixed a problem with assigning the color with the COLOR keyword in the Z-buffer. 30 Aug 2011. DWF.
+;       The default BOTTOM keyword value was incorrect. Fixed in this version. 5 December 2011. DWF.
+;       
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
 ;-
@@ -218,6 +219,7 @@ PRO cgDCBar, colors, $
         ENDIF
     ENDELSE
     IF N_Elements(barcolor) EQ 0 THEN barcolor = color
+    IF N_Elements(bottom) EQ 0 THEN bottom = 0
     IF N_Elements(charsize) EQ 0 THEN charsize = !P.Charsize
     IF N_Elements(colors) EQ 0 THEN BEGIN
         IF N_Elements(ncolors) EQ 0 THEN BEGIN
@@ -231,7 +233,6 @@ PRO cgDCBar, colors, $
         colors = Indgen(ncolors) + bottom
     ENDIF ELSE ncolors = N_Elements(colors)
     cbar_colors = colors
-    IF N_Elements(bottom) EQ 0 THEN bottom = 255 - ncolors
     IF N_Elements(font) EQ 0 THEN font = !P.Font
     IF N_Elements(labels) EQ 0 THEN labels = StrTrim(SIndgen(ncolors)+1,2)
     IF N_Elements(labels) NE N_Elements(colors) THEN $

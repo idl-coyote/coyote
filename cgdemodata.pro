@@ -1,97 +1,22 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;       cgDemoData
+;   cgDemoData
 ;
 ; PURPOSE:
-;
-;       The purpose of this function is to read a selection of standard
-;       data sets that are found in the normal IDL distribution in the
-;       subdirectory $IDL_DIR/examples/data. At least 25 data sets are
-;       available in all categories of data. The user selects one of the
-;       possible data sets with the mouse. Several of the data sets 
-;       simply create data used to illustrate graphics commands (numbers 1-3), 
-;       and two of the data sets produce random data. Data set 17 produces 
-;       a random vector of 101 elements. Data set 18 produces a 2D array of 
-;       random values, suitable for display as a contour plot or image.
-;
-; CATEGORY:
-;
-;       File I/O.
-;
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: david@idlcoyote.com
-;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CALLING SEQUENCE:
-;
-;       If calling from the IDL command line:
-;
-;          data = cgDemoData()
-;
-;       If calling from within a widget program:
-;
-;          data = cgDemoData(Cancel=cancelled, Group_Leader=event.top)
-;
-;       If you know which data set you want, you can load it directly:
-;
-;          data = cgDemoData(7)
-;
-; OPTIONAL INPUTS:
-;
-;       selection : The number of the data selection. Values start at 1,
-;           and go up to the number of data sets available (currently 25).
-;
-; KEYWORD PARAMETERS:
-;
-;       CANCEL : An output keyword that is 1 of the use clicked the CANCEL
-;           button and 0 otherwise.
-;
-;              data = cgDemoData(Cancel=cancelled)
-;              IF cancelled THEN RETURN
-;
-;        GROUP_LEADER: The group leader of the widget. This keyword
-;           is required if you wish cgDemoData to be a modal widget program.
-;           (Which you *always* do when calling it from a widget program.)
-;
-;        IMAGES: Set this keyword if you only want to select 2D image
-;           data sets. Note that the selection number does *not* change
-;           just because fewer data sets are available in the selection
-;           widget.
-;
-; COMMON BLOCKS:
-;       None.
-;
-; SIDE EFFECTS:
-;       None.
-;
-; RESTRICTIONS:
-;       None.
-;
-; EXAMPLE:
-;
-;       To load the world elevation data set:
-;
-;       image = cgDemoData(7)
-;
-; MODIFICATION HISTORY:
-;
-;       Written by:  David W. Fanning, 5 March 1999.
-;       Added some additonal random data capability. 29 April 99. DWF
-;       Added IMAGES keyword. 31 March 2000. DWF.
-;       Fixed a problem with the CANCEL button. 25 Oct 2002. DWF.
-;       Added new JPEG, DICOM, TIFF, and PGN images. 30 Oct 2002. DWF.
-;       Modified old program units to work with IDL strict arrays. 29 June 2003. DWF
-;-
+;   The purpose of this function is to read a selection of standard
+;   data sets that are found in the normal IDL distribution in the
+;   subdirectory $IDL_DIR/examples/data. At least 25 data sets are
+;   available in all categories of data. The user selects one of the
+;   possible data sets with the mouse. Several of the data sets 
+;   simply create data used to illustrate graphics commands (numbers 1-3), 
+;   and two of the data sets produce random data. Data set 17 produces 
+;   a random vector of 101 elements. Data set 18 produces a 2D array of 
+;   random values, suitable for display as a contour plot or image.
 ;
 ;******************************************************************************************;
-;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -116,6 +41,47 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+;
+;+
+;   The purpose of this function is to read a selection of standard
+;   data sets that are found in the normal IDL distribution in the
+;   subdirectory $IDL_DIR/examples/data. At least 25 data sets are
+;   available in all categories of data. The user selects one of the
+;   possible data sets with the mouse. Several of the data sets 
+;   simply create data used to illustrate graphics commands (numbers 1-3), 
+;   and two of the data sets produce random data. Data set 17 produces 
+;   a random vector of 101 elements. Data set 18 produces a 2D array of 
+;   random values, suitable for display as a contour plot or image.
+;
+; :Categories:
+;    Utilities
+;    
+; :Examples:
+;       To load the world elevation data set::
+;
+;           image = cgDemoData(7)
+;       
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;       Written by:  David W. Fanning, 5 March 1999.
+;       Added some additonal random data capability. 29 April 99. DWF
+;       Added IMAGES keyword. 31 March 2000. DWF.
+;       Fixed a problem with the CANCEL button. 25 Oct 2002. DWF.
+;       Added new JPEG, DICOM, TIFF, and PGN images. 30 Oct 2002. DWF.
+;       Modified old program units to work with IDL strict arrays. 29 June 2003. DWF
+;
+; :Copyright:
+;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;-
 ;
 ; NAME:
 ;       SMOOTH2
@@ -146,7 +112,18 @@
 ; whatsoever.  Other limitations apply as described in the file disclaimer.txt.
 ;
 ;-------------------------------------------------------------
-
+;+
+; Does multiple smoothing. A routine from the JHUAPL IDL Library.
+; 
+; :Params:
+;    i: in, required
+;        The input array to be smoothed.
+;    w: in, required, type=integer
+;        The size of the smoothing window. Forced to be an odd integer. 
+; :Keywords:
+;    help: in, optional, type=boolean, default=0
+;        Set this keyword to print function syntax help.
+;-
     function smooth2, i, w, help=hlp
 
     if (n_params(0) lt 2) or keyword_set(hlp)  then begin
@@ -204,9 +181,28 @@
 ; whatsoever.  Other limitations apply as described in the file disclaimer.txt.
 ;
 ;-------------------------------------------------------------
-
-    function makez, nx, ny, w, seed=seed0, lastseed=lseed, $
-      periodic=per, help=hlp
+;+
+; Make simulated 2-d data. A routine from the JHUAPL IDL Library.
+; 
+; :Params:
+;    nx: in, required
+;        The X size of the data to be created.
+;    ny: in, required, type=integer
+;        The Y size of the data to be created.
+;    w: in, required, type=integer
+;        The smoothing window size.
+; :Keywords:
+;    help: in, optional, type=boolean, default=0
+;        Set this keyword to print function syntax help.
+;    lastseed: out, optional
+;        Returns the last random seed used.
+;    periodic: in, optional, type=boolean, default=0
+;        Set this keyword to force the data to match at either end.
+;    seed: in, optional
+;        Sets the random seed for repeatable results.
+;-
+    function makez, nx, ny, w, help=hlp, lastseed=lseed, periodic=per, seed=seed0
+      
 
         common makez_com, seed
     ;-----------------------------------------------------------------
@@ -299,8 +295,24 @@
 ; whatsoever.  Other limitations apply as described in the file disclaimer.txt.
 ;
 ;-------------------------------------------------------------
-
-
+;+
+; Make simulated data vector. A routine from the JHUAPL IDL Library.
+; 
+; :Params:
+;    n: in, required
+;        The size of the data vector to be created.
+;    w: in, required, type=integer
+;        The smoothing window size.
+; :Keywords:
+;    help: in, optional, type=boolean, default=0
+;        Set this keyword to print function syntax help.
+;    lastseed: out, optional
+;        Returns the last random seed used.
+;    periodic: in, optional, type=boolean, default=0
+;        Set this keyword to force the data to match at either end.
+;    seed: in, optional
+;        Sets the random seed for repeatable results.
+;-
     function makey, n, w, seed=seed0, lastseed=lseed, $
       periodic=per, help=hlp
 
@@ -355,6 +367,13 @@
     end
 
 
+;+
+; Reads the data set from its current location.
+; 
+; :Params:
+;    number: in, required, type=integer
+;        The selection number.
+;-
 FUNCTION cgDemoData_ReadData, number
 
 COMMON cgDemoData_SEED, seed
@@ -570,29 +589,13 @@ END
 
 
 
-PRO cgDemoData_CenterTLB, tlb
-
-Device, Get_Screen_Size=screenSize
-IF screenSize[0] GT 2000 THEN screenSize[0] = screenSize[0]/2 ; Dual monitors.
-xCenter = screenSize(0) / 2
-yCenter = screenSize(1) / 2
-
-geom = Widget_Info(tlb, /Geometry)
-xHalfSize = geom.Scr_XSize / 2
-yHalfSize = geom.Scr_YSize / 2
-
-Widget_Control, tlb, XOffset = xCenter-xHalfSize, $
-   YOffset = yCenter-yHalfSize
-
-END ;; CenterTLB
-
-PRO cgDemoData_CANCEL, event
-WIDGET_CONTROL, event.top, /Destroy
-END
-;------------------------------------------------------------------
-
-
-
+;+
+; Reads the data set from its current location.
+; 
+; :Params:
+;    event: in, required, type=structure
+;        The event handler for the graphical user interface.
+;-
 PRO cgDemoData_EVENT, event
 WIDGET_CONTROL, event.top, GET_UVALUE=ptr
 WIDGET_CONTROL, event.id, GET_UVALUE=indexValue
@@ -602,9 +605,31 @@ END
 ;------------------------------------------------------------------
 
 
-
-FUNCTION cgDemoData, CANCEL=cancel, number, Group_Leader=groupleader, $
-   Images=images
+;+
+; Select a dataset either interactively or by selection.
+; 
+; :Params:
+; 
+;    selection: in, optional, type=integer
+;       The data set selection number. If not present, a graphical user
+;       interface is presented to the user so that a data set may be
+;       selected.
+;       
+; :Keywords:
+;    cancel: out, optional, type=boolean
+;       If a graphical user interface is used for the data selection, this output 
+;       keyword is set to 1 if the user clicks the CANCEL button. Otherwise, it is 
+;       set to 0.
+;    group_leader: in, optional, type=long
+;       The identifier of a widget group leader for this widget application. If the
+;       group leader dies, this program will die as well.
+;    images: in, optional, type=boolean, default=0
+;       Set this keyword if you wish to see only 2D images in the selection widget.
+;-
+FUNCTION cgDemoData, selection, $
+   CANCEL=cancel, $
+   GROUP_LEADER=groupleader, $
+   IMAGES=images
 
 On_Error, 1
 
@@ -615,13 +640,13 @@ COMMON cgDemoData_SEED, seed
    ; If a parameter is passed in, read that data set and return.
 
 IF N_Params() EQ 1 THEN BEGIN
-   type = Size(number)
+   type = Size(selection)
    type = type( type(0) + 1 )
    IF type EQ 0 THEN Message, 'Supplied argument is undefined.'
    IF type GT 5 THEN Message, 'Supplied argument must be a number.'
-   number = number - 1
-   number = 0 > number < 24
-   data = cgDemoData_ReadData(number)
+   selection = selection - 1
+   selection = 0 > selection < 24
+   data = cgDemoData_ReadData(selection)
    RETURN, data
 ENDIF
 
@@ -690,7 +715,7 @@ ENDELSE
 
 list = WIDGET_LIST(tlb, VALUE=value, SCR_XSIZE=400, YSIZE=listsize, UValue=indexValue)
 button = WIDGET_BUTTON(tlb, VALUE='Cancel', EVENT_PRO='cgDemoData_CANCEL')
-cgDemoData_CenterTLB, tlb
+CenterTLB, tlb
 WIDGET_CONTROL, tlb, /REALIZE
 
    ; Create a pointer to store the data.

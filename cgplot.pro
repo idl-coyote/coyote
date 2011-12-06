@@ -54,9 +54,7 @@
 ;       
 ; :Keywords:
 ;     addcmd: in, optional, type=boolean, default=0
-;        Set this keyword to add the command to an cgWindow. Setting this keyword
-;        automatically sets the WINDOW keyword, but the command does not erase the
-;        graphics window as it would normally.
+;       Set this keyword to add the command to the resizeable graphics window cgWindow.
 ;     aspect: in, optional, type=float, default=none
 ;        Set this keyword to a floating point ratio that represents the aspect ratio 
 ;        (ysize/xsize) of the resulting plot. The plot position may change as a result

@@ -101,7 +101,9 @@
 ;        Written by: David W. Fanning
 ;        Modified FSC_COLOR to create cgColor 9 February 2011. DWF.
 ;        Modified to allow a three-element color triple to be used in place of the color
-;           name parameter. This allows one user-defined color to be used.
+;           name parameter. This allows one user-defined color to be used. 4 Dec 2011. DWF.
+;        Modified to allow byte and 16-bit integer values to be used to specify colors
+;           in the current color table. 5 Dec 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
@@ -155,10 +157,12 @@ END ;---------------------------------------------------------------------------
 ; :Params:
 ;    theColour: required, optional, type=varies
 ;        Normally the name of the color desired. However, this can also be
-;        a string index number (e.g., '215'). If this is the case, the color
-;        in the current color table is used for the color that is returned.
-;        This may also be a vector of color names. The color may also be
-;        a three-element byte array specifying a user-defined color triple.
+;        a string index number (e.g., '215') or a byte or short integer
+;        value (e.g, 215B or 215S). If this is the case, the color
+;        in the current color table at this index number is used for the 
+;        color that is returned. The value may also be a vector of color names. 
+;        The color may also be a three-element byte or integer array specifying a 
+;        user-defined color triple. Only one color triple is allowed.
 ;
 ;        To see a list of the color names available set the NAMES keyword. Colors available are these::
 ;
@@ -310,10 +314,14 @@ FUNCTION cgColor, theColour, colorIndex, $
     IF N_Elements(theColour) NE 0 THEN theColor = theColour ELSE $
         theColor = 'OPPOSITE'
         
-     ; Allow the color to be a three-element array of byte values.
-     ; If it is, we will define the USERDEF color with these values.
-     ; Otherwise the USERDEF color will be unused.
+     ; Allow the color values to be something other than a string.
+     ; There will be some ambiguity between a color triple and a number
+     ; array of three elements, but I am willing to live with this.
      IF Size(theColor, /TNAME) NE 'STRING' THEN BEGIN
+     
+        ; Allow the color to be a three-element array of byte values.
+        ; If it is, we will define the USERDEF color with these values.
+        ; Otherwise the USERDEF color will be unused.
         IF (Size(theColor, /N_DIMENSIONS) EQ 1) && $
            (N_Elements(theColor) EQ 3) && $
            (Max(theColor) LE 255) && $
@@ -321,11 +329,30 @@ FUNCTION cgColor, theColour, colorIndex, $
            usercolor = theColor
            theColor = 'USERDEF'
         ENDIF
+        
+        ; If the input didn't qualify as a color triple, then see if you 
+        ; can somehow make sense of the number values.
+        IF Size(theColor, /TNAME) NE 'STRING' THEN BEGIN
+        
+          ; We can assume that any number that is a byte or short integer must
+          ; be an index into the color table.
+          IF (Size(theColor, /TYPE) LE 2) THEN theColor = StrTrim(Fix(theColor),2)
+          
+          ; Long integers are problematic. Can't deal with them sensibly.
+          IF (Size(theColor, /TYPE) EQ 3) THEN BEGIN
+             Message, 'Cannot specify colors with LONG data. Use BYTE or INTEGER.'
+          ENDIF
+          
+          ; Anything that is not an BYTE, INTEGER, or STRING causes problems.
+          IF (Size(theColor, /TYPE) GT 3) && (Size(theColor, /TNAME) NE 'STRING') THEN BEGIN
+             Message, 'Use BYTE, INTEGER, or STRING data to specify a color.'
+          ENDIF
+        ENDIF
      ENDIF
         
     ; Make sure the color parameter is a string.
-    varInfo = Size(theColor)
-    IF varInfo[varInfo[0] + 1] NE 7 THEN $
+    varName = Size(theColor, /TNAME)
+    IF varName NE 'STRING' THEN $
        Message, 'The color name parameter must be a string.', /NoName
        
     ; We don't want underscores in color names. Turn all underscores

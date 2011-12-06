@@ -107,6 +107,25 @@
 ;       clamped region. (See the Examples section for more information.)
 ;    nodisplay: in, optional
 ;       This keyword is obsolete and is no longer used.
+;    oob_factor: in, optional, type=float, default=1.0
+;       The default is to make the length of the out-of-bounds triangle the
+;       same distance as the height (or width, in the case of a vertical
+;       color bar) of the color bar. If you would prefer a shorted triangle length, 
+;       set this keyword to a value less than zero (e.g., 0.5). If you prefer a 
+;       longer length, set this keyword to a value greater than zero. The "standard"
+;       length will be multiplied by this value.
+;    oob_high: in, optional, type=string
+;       The name of an out-of-bounds high color. This color will be represented
+;       by a triangle on the right or top of the color bar. If the color is
+;       a string byte value (e.g., "215"), then this color in the current color
+;       table is used. The color can also be a three-element color triple 
+;       (e.g., [240, 200, 65]).
+;    oob_low: in, optional, type=string
+;       The name of an out-of-bounds low color. This color will be represented
+;       by a triangle on the left or bottom of the color bar. If the color is
+;       a string byte value (e.g., "215"), then this color in the current color
+;       table is used. The color can also be a three-element color triple 
+;       (e.g., [240, 200, 65]).
 ;    palette: in, optional, type=byte
 ;       A color palette containing the RGB color vectors to use for the color
 ;       bar. The program will sample NCOLORS from the color palette. 
@@ -187,6 +206,7 @@
 ;       Problem with division by zero when FORMAT is not default value. Now, if format
 ;          is the default value, then default is DIVISIONS=0, else DIVISIONS=6.
 ;       Documented the TICKLEN keyword and set the default tick length to 0.25. 3 Oct 2011. DWF.
+;       Added the OOB_FACTOR, OOB_HIGH and OOB_LOW keywords. 5 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008, Fanning Software Consulting, Inc.
@@ -210,6 +230,9 @@ PRO cgColorbar, $
     NCOLORS=ncolors, $
     NEUTRALINDEX=neutralIndex, $
     NODISPLAY=nodisplay, $
+    OOB_FACTOR=oob_factor, $
+    OOB_HIGH=oob_high, $
+    OOB_LOW=oob_low, $
     PALETTE=palette, $
     POSITION=position, $
     RANGE=range, $
@@ -262,6 +285,9 @@ PRO cgColorbar, $
             NCOLORS=ncolors, $
             NEUTRALINDEX=neutralIndex, $
             NODISPLAY=nodisplay, $
+            OOB_FACTOR=oob_factor, $
+            OOB_HIGH=oob_high, $
+            OOB_LOW=oob_low, $
             PALETTE=palette, $
             POSITION=position, $
             RANGE=range, $
@@ -321,21 +347,21 @@ PRO cgColorbar, $
     thisRelease = Float(!Version.Release)
 
     ; Check and define keywords.
-    IF N_ELEMENTS(ncolors) EQ 0 THEN ncolors = 256
-    IF N_ELEMENTS(bottom) EQ 0 THEN bottom = 0B
+    SetDefaultValue, ncolors, 256
+    SetDefaultValue, bottom, 0B
     IF N_Elements(palette) NE 0 THEN BEGIN
        rrr = Congrid(rr, ncolors)
        ggg = Congrid(gg, ncolors)
        bbb = Congrid(bb, ncolors)
        TVLCT, rrr, ggg, bbb, bottom
     ENDIF
-    IF N_ELEMENTS(charsize) EQ 0 THEN charsize = cgDefCharsize() * charPercent
-    IF N_ELEMENTS(format) EQ 0 THEN format = ""
+    SetDefaultValue, charsize, cgDefCharsize() * charPercent
+    SetDefaultValue, format, ""
     IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
     minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange[0])
     maxrange = (N_ELEMENTS(maxrange) EQ 0) ? Float(ncolors) : Float(maxrange[0])
-    IF N_ELEMENTS(ticklen) EQ 0 THEN ticklen = 0.25
-    IF N_ELEMENTS(minor) EQ 0 THEN minor = 2
+    SetDefaultValue, ticklen, 0.25
+    SetDefaultValue, minor, 2
     IF N_ELEMENTS(range) NE 0 THEN BEGIN
        minrange = Float(range[0])
        maxrange = Float(range[1])
@@ -343,8 +369,9 @@ PRO cgColorbar, $
     IF N_ELEMENTS(divisions) EQ 0 THEN BEGIN
       IF format EQ "" THEN divisions = 0 ELSE divisions = 6
     ENDIF
-    IF N_ELEMENTS(font) EQ 0 THEN font = !P.Font
-    IF N_ELEMENTS(title) EQ 0 THEN title = ''
+    SetDefaultValue, font, !P.Font
+    SetDefaultValue, title, ""
+    SetDefaultValue, oob_factor, 1.0
     xlog = Keyword_Set(xlog)
     ylog = Keyword_Set(ylog)
 
@@ -408,11 +435,24 @@ PRO cgColorbar, $
        ENDELSE
        IF Keyword_Set(fit) THEN BEGIN
             position[[0,2]] = !X.Window
-            distance = position[3] - position[1]
+            distance = (position[3] - position[1])
             position[1] = !Y.Window[1] + ((4*!D.Y_CH_SIZE*charsize) / !D.Y_Size)
             position[3] = position[1] + distance
        ENDIF
      ENDELSE
+     
+     ; Adjust the positions if you have OOB colors.
+     IF (N_Elements(oob_high) NE 0) || (N_Elements(oob_low) NE 0) THEN BEGIN
+         IF Keyword_Set(vertical) THEN BEGIN
+            length = (position[2]-position[0]) * oob_factor
+            IF (N_Elements(oob_high) NE 0) THEN position[3] = position[3] - length
+            IF (N_Elements(oob_low) NE 0) THEN position[1] = position[1] + length
+         ENDIF ELSE BEGIN
+            length = (position[3]-position[1]) * oob_factor
+            IF (N_Elements(oob_high) NE 0) THEN position[2] = position[2] - length
+            IF (N_Elements(oob_low) NE 0) THEN position[0] = position[0] + length
+         ENDELSE
+     ENDIF
 
      ; Scale the color bar.
      IF N_Elements(clamp) NE 0 THEN BEGIN
@@ -450,28 +490,29 @@ PRO cgColorbar, $
     ysize = (position[3] - position[1])
 
        
-    ; Decomposed color off if device supports it.
-    SetDecomposedState, 0, CURRENTSTATE=currentState
+    ; Let's do this in decomposed color, if possible.
+    SetDecomposedState, 1, CURRENTSTATE=currentState
        
     ; Display the color bar in the window. Sizing is
     ; different for PostScript and regular display.
     IF scalablePixels THEN BEGIN
 
        ; Display the color bar.
+       SetDecomposedState, 0
        TV, bar, xstart, ystart, XSIZE=xsize, YSIZE=ysize, /Normal
+       SetDecomposedState, 1 
 
     ENDIF ELSE BEGIN
 
        bar = CONGRID(bar, CEIL(xsize*!D.X_VSize), CEIL(ysize*!D.Y_VSize))
 
        ; Display the color bar.
+       SetDecomposedState, 0
        TV, bar, xstart, ystart, /Normal
+       SetDecomposedState, 1
 
     ENDELSE
    
-    ; Restore the decomposed state if needed.
-    IF currentState THEN SetDecomposedState, 1
-
     ; Get the current colortable.
     TVLCT, rr, gg, bb, /GET
     
@@ -555,6 +596,49 @@ PRO cgColorbar, $
         ENDELSE
 
     ENDELSE
+
+    ; If you have OOB colors, draw them now.
+    IF (N_Elements(oob_high) NE 0) || (N_Elements(oob_low) NE 0) THEN BEGIN
+         p = position
+         IF Keyword_Set(vertical) THEN BEGIN
+            IF (N_Elements(oob_high) NE 0) THEN BEGIN
+               phalf = (p[2]-p[0])/2.0 + p[0]
+               pdist = (p[2]-p[0]) * oob_factor
+               PolyFill, [p[0], phalf, p[2], p[0]], $
+                         [p[3], pdist+p[3], p[3], p[3]], /Normal, Color=cgColor(oob_high)
+               PlotS, [p[0], phalf, p[2], p[0]], $
+                      [p[3], pdist+p[3], p[3], p[3]], /Normal, Color=color
+            ENDIF
+            IF (N_Elements(oob_low) NE 0) THEN BEGIN
+               phalf = (p[2]-p[0])/2.0 + p[0]
+               pdist = (p[2]-p[0]) * oob_factor
+               PolyFill, [p[0], phalf, p[2], p[0]], $
+                         [p[1], p[1]-pdist, p[1], p[1]], /Normal, Color=cgColor(oob_low)
+               PlotS, [p[0], phalf, p[2], p[0]], $
+                      [p[1], p[1]-pdist, p[1], p[1]], /Normal, Color=color            
+            END
+         ENDIF ELSE BEGIN
+            IF (N_Elements(oob_high) NE 0) THEN BEGIN
+               phalf = (p[3]-p[1])/2.0 + p[1]
+               pdist = (p[3]-p[1]) * oob_factor
+               PolyFill, [p[2], p[2]+pdist, p[2], p[2]], $
+                         [p[1], phalf, p[3], p[1]], /Normal, Color=cgColor(oob_high)
+               PlotS, [p[2], p[2]+pdist, p[2], p[2]], $
+                      [p[1], +phalf, p[3], p[1]], /Normal, Color=color            
+            ENDIF
+            IF (N_Elements(oob_low) NE 0) THEN BEGIN
+               phalf = (p[3]-p[1])/2.0 + p[1]
+               pdist = (p[3]-p[1]) * oob_factor
+               PolyFill, [p[0], p[0]-pdist, p[0], p[0]], $
+                         [p[1], phalf, p[3], p[1]], /Normal, Color=cgColor(oob_low)
+               PlotS, [p[0], p[0]-pdist, p[0], p[0]], $
+                      [p[1], +phalf, p[3], p[1]], /Normal, Color=color            
+            END
+         ENDELSE
+    ENDIF
+
+    ; Restore the color state.
+    SetDecomposedState, currentState
 
     ; Restore the previous plot and map system variables.
     !P = bang_p

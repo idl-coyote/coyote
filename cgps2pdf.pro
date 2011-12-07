@@ -44,7 +44,7 @@
 ; an alternative UNIX command (e.g., pstopdf or epstopdf).
 ;
 ; :Categories:
-;    Utilities, Graphics, PostScript
+;    Utilities, Graphics
 ;    
 ; :Params:
 ;     ps_file: in, required, type=string
@@ -173,7 +173,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
       'WIN32': BEGIN
 
           ; Look for default locations, if not told otherwise.
-          IF N_Elements(gs_path) EQ 0 THEN gs_path = ['c:\program files\gs\','c:\gs\']
+          IF (N_Elements(gs_path) EQ 0) || (gs_path EQ "") THEN gs_path = ['c:\program files\gs\','c:\gs\']
           IF !Version.Arch EQ 'x86_64' THEN exefile = 'gswin64c.exe' ELSE exefile = 'gswin32c.exe'
           file = File_Search(gs_path, exefile, COUNT=count, /FOLD_CASE)
           IF count EQ 0 THEN BEGIN
@@ -185,7 +185,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
           
       'DARWIN': BEGIN
       	 
-          IF N_Elements(gs_path) EQ 0 THEN gs_path = '/usr/bin/'
+          IF (N_Elements(gs_path) EQ 0) || (gs_path EQ "") THEN gs_path = '/usr/bin/'
           file = File_Search(gs_path, 'pstopdf', COUNT=count, /FOLD_CASE)
           IF count EQ 0 THEN BEGIN
              IF ~Keyword_Set(silent) THEN Message, 'The Ghostscript executable file "pstopdf" cannot be found. Exiting without conversion.', /INFORMATIONAL
@@ -198,11 +198,11 @@ PRO cgPS2PDF, ps_file, pdf_file, $
         
            ; Maybe the user provided an alternative command. If not, use the
            ; standard "gs" command.
-           IF N_Elements(unix_convert_cmd) NE 0 THEN BEGIN
+           IF (N_Elements(unix_convert_cmd) NE 0) && (unix_convert_cmd NE "") THEN BEGIN
                gs_exe = unix_convert_cmd
                docmdtest = 0
            ENDIF ELSE BEGIN
-               IF N_Elements(gs_path) NE 0 THEN BEGIN
+               IF (N_Elements(gs_path) NE 0) && (gs_path NE "") THEN BEGIN
                     file = File_Search(gs_path, 'gs', COUNT=count)
                     IF count GT 0 THEN gs_exe = file[count-1]
                ENDIF ELSE gs_exe = 'gs'
@@ -241,7 +241,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
        cmd = gs_exe + " " + ps_file[0] + " -o " + pdf_file
    ENDIF ELSE BEGIN
    
-       IF N_Elements(unix_convert_cmd) NE 0 THEN BEGIN
+       IF (N_Elements(unix_convert_cmd) NE 0) && (unix_convert_cmd NE "") THEN BEGIN
            cmd = gs_exe + " " + ps_file 
        ENDIF ELSE BEGIN 
            cmd = gs_exe + ' -sDEVICE=pdfwrite -q -dNOPAUSE -dBATCH'+ $

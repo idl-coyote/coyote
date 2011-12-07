@@ -281,7 +281,9 @@ PRO PS_END, $
                 IF ps_struct.convert EQ 'PDF' THEN BEGIN
                     cgPS2PDF, ps_struct.filename, outfilename, $
                         DELETE_PS=delete_ps, PAGETYPE=ps_struct.pagetype, SILENT=1, SUCCESS=success
-                    IF success EQ 0 THEN Print, 'Encountered problem creating PDF file. Proceeding...'
+                    IF success THEN BEGIN
+                       IF ~ps_struct.quiet THEN Print, 'PDF Output File: ' + outfilename
+                    ENDIF ELSE Print, 'Encountered problem creating PDF file. Proceeding...'
                 ENDIF ELSE BEGIN
                     Message, 'ImageMagick could not be found. No conversion to raster was possible.'
                 ENDELSE

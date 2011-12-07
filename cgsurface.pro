@@ -39,6 +39,13 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 ;
+;+
+; Controls light intensity by handling selection events from the Intensity Value widget.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO CW_Light_Control_Intensity_Events, event
 
     ; Handles selection events from the Intensity Value widget.
@@ -84,6 +91,13 @@ END ;---------------------------------------------------------------------------
 
 
 
+;+
+; Controls light properties such as color, whether the light is on or off, etc.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO CW_Light_Control_Events, event
 
     ; Error handling.
@@ -166,8 +180,45 @@ END ;---------------------------------------------------------------------------
 
 
 
-FUNCTION CW_Light_Control, parent, theLight, Name=name, UValue=uvalue, Event_Pro=event_pro, $
-   LabelSize=labelsize, Index=index, Color=color, SETCOLOR_NAME=setColor_name
+;+
+; This is a compound widget that allows the user to manipulate various
+; properties of a light object via a graphical user interface.
+; 
+; :Params:
+;    parent: in, required
+;       The parent widget of this compound widget.
+;    thelight: in, required, type=object
+;       An object reference to a particular light object.
+;       
+; :Keywords:
+;   color: in, optional, type=bytarr
+;      A color triple representing the color of the light.
+;   event_pro: in, optional, type=string
+;      The name of an event handler that will handle events for this widget.
+;   index: in, optional, type=integer
+;      A color table index number. If the `Color` keyword is not used, the color
+;      will be obtained from the colors loaded in the current color table at this
+;      color table index number.
+;   labelsize: in, optional, type=integer
+;      The size of the label widget used in the compound widget in pixels.
+;      If not specified, the "natural" size of the label widget is used.
+;   name: in, optional, type=string, default=""
+;      A name for this widget. Provided to help identify the widget in
+;      event handlers.
+;   setcolor_name: in, optional, type=string, default=""
+;      This keyword sets the UNAME property of the Set Color button in the interface.
+;      It's purpose is to help you identify that button in event handlers.
+;   uvalue: in, optional
+;       A container to store any IDL variable needed by the user of this program.
+;-
+FUNCTION CW_Light_Control, parent, theLight, $
+  Color=color, $
+  Event_Pro=event_pro, $
+  Index=index, $
+  LabelSize=labelsize, $
+  Name=name, $
+  SetColor_Name=setColor_name, $
+  UValue=uvalue
 
 ; This is a compound widget that allows one to manipulate various
 ; properties of light objects.
@@ -224,12 +275,26 @@ END ;---------------------------------------------------------------------------
 
 
 
+;+
+; An event handler that destroys the light controller in the program.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Light_Done, event
     Widget_Control, event.top, /Destroy
 END ;--------------------------------------------------------------------
 
 
 
+;+
+; An event handler that renders the light controller's graphics.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Light_Controls_Event, event
     Widget_Control, event.top, Get_UValue=info
     info.theWindow->Draw, info.theView
@@ -238,6 +303,14 @@ END
 
 
 
+;+
+; An event handler that creates the graphical user interface for the
+; light controller.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Light_Controls, event
 
     ; Place the light control beside the current widget program.
@@ -276,6 +349,13 @@ END
 ;-------------------------------------------------------------------------
 
 
+;+
+; An event handler that turns the surface axes on or off.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Axes_OnOff, event
 
     ; This event handler turns the surface axes on or off.
@@ -316,6 +396,13 @@ PRO cgSurface_Axes_OnOff, event
 END ;------------------------------------------------------------------------------
 
 
+;+
+; An event handler that turns the bottom color on or off.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Bottom_OnOff, event
 
     ; This event handler turns the bottom color on or off.
@@ -348,6 +435,13 @@ PRO cgSurface_Bottom_OnOff, event
 END ;------------------------------------------------------------------------------
 
 
+;+
+; An event handler that changes the color tables for elevation shading.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Change_Colors, event
 
     ; This event handler changes color tables for elevation shading.
@@ -407,6 +501,14 @@ PRO cgSurface_Change_Colors, event
 END ;------------------------------------------------------------------------------
 
 
+;+
+; An event handler for draw events such as expose events and trackball
+; events. The trackball uses the IDL-supplied TRACKBALL_DEFINE.PRO.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Draw_Events, event
 
     ; Draw widget events handled here: expose events and trackball
@@ -527,6 +629,13 @@ PRO cgSurface_Draw_Events, event
 END ;------------------------------------------------------------------------------
 
 
+;+
+; An event handler changing the colors used in elevation shading.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Elevation_Colors, event
 
     ; This event handler changes color tables for elevation shading.
@@ -577,6 +686,13 @@ PRO cgSurface_Elevation_Colors, event
 END ;------------------------------------------------------------------------------
 
 
+;+
+; An event handler to set up elevation shading for the surface.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Elevation_Shading, event
 
     ; This event handler sets up elevation shading for the surface.
@@ -620,6 +736,13 @@ PRO cgSurface_Elevation_Shading, event
 END ;------------------------------------------------------------------------------
 
 
+;+
+; An event handler to destroy the GUI for this program.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Exit, event
 
    ; Exit the program. This will cause the CLEANUP
@@ -629,6 +752,13 @@ PRO cgSurface_Exit, event
 END ;-----------------------------------------------------------------------------------------
 
 
+;+
+; An event handler to allow the surface to move in the graphics window.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Move_Surface, event
 
     ; This event handler moves the surface.
@@ -671,6 +801,13 @@ PRO cgSurface_Move_Surface, event
 END ;------------------------------------------------------------------------------
 
 
+;+
+; An event handler to allow the title to move in the graphics window.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Move_Title, event
 
     ; This event handler moves the surface title.
@@ -713,6 +850,15 @@ PRO cgSurface_Move_Title, event
 END ;------------------------------------------------------------------------------
 
 
+;+
+; An event handler to allow the user to save the graphics window
+; in a variety of output formats, including raster formats and
+; PostScript.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Output, event
 
    ; This event handler creates GIF and JPEG files.
@@ -786,6 +932,13 @@ PRO cgSurface_Output, event
 END ;------------------------------------------------------------------------------
 
 
+;+
+; An event handler to allow the user to change various surface properties.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Properties, event
 
     ; Event handler to set program properties.
@@ -837,6 +990,13 @@ PRO cgSurface_Properties, event
 END ;------------------------------------------------------------------------------
 
 
+;+
+; An event handler to respond to window resizing events.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Resize, event
 
     ; The only events generated by this simple program are resize
@@ -870,6 +1030,13 @@ END
 
 
 
+;+
+; An event handler to turn the surface skirt on and off.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Skirt_OnOff, event
 
     ; This event handler turns the skirt on or off.
@@ -900,6 +1067,14 @@ PRO cgSurface_Skirt_OnOff, event
 END ;------------------------------------------------------------------------------
 
 
+;+
+; An event handler to respond to events from the Style menu, changing
+; style properties of the surface.
+; 
+; :Params:
+;    event: in, required
+;       The event structure from the graphical user interface of the program.
+;-
 PRO cgSurface_Style, event
 
      ; Event handler to select surface style.
@@ -955,6 +1130,13 @@ PRO cgSurface_Style, event
 END ;------------------------------------------------------------------------------
 
 
+;+
+; The cleanup routine for the program. Cleans everything up when the widget dies.
+; 
+; :Params:
+;    tlb: in, required
+;       The identifier of the widget that just died.
+;-
 PRO cgSurface_Cleanup, tlb
 
     ; Come here when program dies. Free all created objects.
@@ -967,6 +1149,24 @@ PRO cgSurface_Cleanup, tlb
 END ;------------------------------------------------------------------------------
 
 
+;+
+; A function for calculating the correct surface aspect ratio. A position
+; in the window with this aspect ratio is returned.
+; 
+; :Returns:
+;    A four-element POSITION array, giving the position in the window for
+;    a plot with this aspect ratio.
+; 
+; :Params:
+;    aspectRatio: in, optional, type=float, default=1.0
+;       The desired aspect ratio of the surface.
+;       
+; :Keywords:
+;    margin: in, optional, type=float, default=0.0
+;       The desired margin around the edges of the window.
+;    windowaspect: in, optional, type=float
+;       The aspect ratio of the window the graphics are to be displayed in.
+;-
 FUNCTION cgSurface_Aspect, aspectRatio, MARGIN=margin, WindowAspect=wAspectRatio
 
     ; This function calculates the correct aspect ratio for display.
@@ -1015,7 +1215,6 @@ END ;---------------------------------------------------------------------------
 
 
 ;+
-; :Description:
 ;   The purpose of cgSurface is to create a window where a surface is displayed. Surfaces
 ;   can be wire-framed, shaded surfaces, and surfaces with texture maps draped on top of
 ;   them, among other types of surfaces. LEFT mouse button rotates the surface, MIDDLE
@@ -1155,7 +1354,7 @@ END ;---------------------------------------------------------------------------
 ;            specifications. 26 Sept 2011. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2010, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2011, Fanning Software Consulting, Inc.
 ;-
 PRO cgSurface, data, x, y, $
     Axiscolor=axiscolorName, $

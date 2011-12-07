@@ -881,6 +881,7 @@ END ;---------------------------------------------------------------------------
 
 ;+
 ; This event handler method saves the graphics window as a raster image file.
+; PDF files also pass through here.
 ; 
 ; :Params:
 ;     event: in, required, type=structure
@@ -911,13 +912,21 @@ PRO FSC_CmdWindow::SaveAsRaster, event
     
     Widget_Control, event.ID, Get_UValue=buttonValue
     
-    ; Determine if this is normal raster (o) or ImageMagick raster (1).
-    IF StrMid(buttonValue, 0, 6) EQ 'RASTER' THEN BEGIN
-        fileType = StrMid(buttonValue, 7)
-        rasterType = 0 
+    ; Is this a PDF file or a raster file?
+    IF buttonValue EQ 'PDF' THEN BEGIN
+       rasterType = -1
+       filetype = 'PDF'
     ENDIF ELSE BEGIN
-        filetype = StrMid(buttonValue, 12)
-        rasterType = 1
+    
+        ; Determine if this is normal raster (o) or ImageMagick raster (1).
+        IF StrMid(buttonValue, 0, 6) EQ 'RASTER' THEN BEGIN
+            fileType = StrMid(buttonValue, 7)
+            rasterType = 0 
+        ENDIF ELSE BEGIN
+            filetype = StrMid(buttonValue, 12)
+            rasterType = 1
+        ENDELSE
+        
     ENDELSE
     
     ; Make this window the current graphics windows.
@@ -929,15 +938,47 @@ PRO FSC_CmdWindow::SaveAsRaster, event
        'BMP':  filename = FSC_Pickfile(FILE='cgwindow.bmp', /WRITE, TITLE='Select an Output File...')
        'GIF':  filename = FSC_Pickfile(FILE='cgwindow.gif', /WRITE, TITLE='Select an Output File...')
        'JPEG': filename = FSC_Pickfile(FILE='cgwindow.jpg', /WRITE, TITLE='Select an Output File...')
+       'PDF':  filename = FSC_Pickfile(FILE='cgwindow.pdf', /WRITE, TITLE='Select an Output File...')
        'PNG':  filename = FSC_Pickfile(FILE='cgwindow.png', /WRITE, TITLE='Select an Output File...')
        'TIFF': filename = FSC_Pickfile(FILE='cgwindow.tif', /WRITE, TITLE='Select an Output File...')
     ENDCASE
     IF filename EQ "" THEN RETURN
+    
+    ; Parset the name.
     root_name = FSC_Base_Filename(filename, DIRECTORY=dirName)
     outname = Filepath(ROOT_DIR=dirname, root_name)
     
     ; What kind of raster file.
     CASE rasterType OF
+    
+        ; PDF File.
+       -1: BEGIN
+       
+           thisname = outname + '.ps'
+           outname = outname + '.pdf'
+           PS_Start, $
+                DECOMPOSED=self.ps_decomposed, $
+                FILENAME=thisname, $
+                METRIC=self.ps_metric, $
+                KEYWORDS=keywords, $ ; Returned PSConfig keywords.
+                SCALE_FACTOR=self.ps_scale_factor, $
+                CHARSIZE=self.ps_charsize, $
+                FONT=self.ps_font, $
+                QUIET=self.ps_quiet, $
+                TT_FONT=self.ps_tt_font
+                           
+           ; Draw the graphics.
+           self -> ExecuteCommands
+           
+           ; Close the file and make a PDF file.
+           PS_End
+           cgPS2PDF, thisname, outname, DELETE_PS=self.ps_delete, /SILENT, SUCCESS=success
+           IF ~success THEN BEGIN
+              Print, 'Unable to create PDF file. See cgPS2PDF documentation.'
+           ENDIF ELSE BEGIN
+              Print, 'PDF output will be created here: ' + outname
+           ENDELSE
+           END
     
         ; Normal raster.
         0: BEGIN
@@ -952,7 +993,7 @@ PRO FSC_CmdWindow::SaveAsRaster, event
            PS_Start, $
                 DECOMPOSED=self.ps_decomposed, $
                 FILENAME=thisname, $
-                EUROPEAN=self.ps_metric, $
+                METRIC=self.ps_metric, $
                 KEYWORDS=keywords, $ ; Returned PSConfig keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
@@ -1388,6 +1429,7 @@ FUNCTION FSC_CmdWindow::Init, $
     fileID = Widget_Button(menuID, Value='File')
     saveID = Widget_Button(fileID, Value='Save Window As...', /MENU)
     button = Widget_Button(saveID, Value='PostScript File', UVALUE='POSTSCRIPT')
+    button = Widget_Button(saveID, Value='PDF File', UVALUE='PDF')
     raster = Widget_Button(saveID, Value='Raster Image File', /MENU)
     
     button = Widget_Button(raster, Value='BMP', UVALUE='RASTER_BMP')
@@ -2178,22 +2220,22 @@ END ;---------------------------------------------------------------------------
 ;       cgWindow, /ListCmd
 ;       cgWindow, 'cgPlot', data, COLOR='purple', /ReplaceCMD, CMDINDEX=0
 ;       
-;       Additional examples can be found here:
+;    Additional examples can be found here::
 ;       
-;          http://www.idlcoyote.com/graphics_tips/cgwindow.html
+;        http://www.idlcoyote.com/graphics_tips/cgwindow.html
 ;          
-;    Example using different keyword parameters for the display and PostScript output.
+;    Example using different keyword parameters for the display and PostScript output::
 ;    
-;    IDL> cgPlot, cgDemoData(1), /WINDOW, $
-;           THICK=1.0, XTITLE='Distance (' + Greek('mu') + 'm)', $
-;           ALTPS_KEYWORDS={THICK:4.0, XTITLE:'Distance (' + Greek('mu', /PS) + 'm)'}
+;        IDL> cgPlot, cgDemoData(1), /WINDOW, $
+;             THICK=1.0, XTITLE='Distance (' + Greek('mu') + 'm)', $
+;             ALTPS_KEYWORDS={THICK:4.0, XTITLE:'Distance (' + Greek('mu', /PS) + 'm)'}
 ;           
-;    Example using different positional parameters.
+;    Example using different positional parameters::
 ;    
-;    IDL> cgText, 0.20, 0.85, /Normal, 'Line of Text', ALIGNMENT=0.0, $
-;           ALTPS_KEYWORDS={ALIGNMENT:1.0}, ALTPS_PARAMS={P1:0.88}, /ADDCMD
+;        IDL> cgText, 0.20, 0.85, /Normal, 'Line of Text', ALIGNMENT=0.0, $
+;             ALTPS_KEYWORDS={ALIGNMENT:1.0}, ALTPS_PARAMS={P1:0.88}, /ADDCMD
 ;           
-;    Additional examples can be found here:
+;    Additional examples can be found here::
 ;    
 ;        http://www.idlcoyote.com/cg_tips/kwexpressions.php
 ;           
@@ -2235,6 +2277,7 @@ END ;---------------------------------------------------------------------------
 ;         Fixed a problem with improper filename when creating raster file vis
 ;             Imagemagick via cgControl. 10 Oct 2011. DWF.
 ;         Added WASPECT keyword to allow window aspect ratio to be set. 9 Nov 2011. DWF.   
+;         Added PDF file to the Save As menu. Requires Ghostscript to be installed. 6 Dec 2011. DWF.
 ;-
 PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.

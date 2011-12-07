@@ -53,10 +53,6 @@
 ; :Keywords:
 ;     delete_ps: in, optional, type=boolean, default=0
 ;         If this keyword is set, the PostScript file will be deleted after conversion.
-;     graphics_alias: in, optional, type=integer, default=2
-;         Sets the subsampling box size for antialiasing. Values should be 1, 2, or 4. 
-;         A value of 4 is optimal, but takes longer to render. This keyword is ignored
-;         on Windows 64-bit machines.
 ;     gs_path: in, optional, type=string
 ;         This program assumes that UNIX users can access Ghostscript with the "gs"
 ;         command. It assumes WINDOWS users have installed Ghostscript in either
@@ -78,12 +74,8 @@
 ;     success: out, optional, type=boolean
 ;          Set this keyword to a named variable that on output will contain a 1 to 
 ;          indicate successful completion of the command, or to 0 otherwise.
-;     text_alias: in, optional, type=integer, default=4
-;         Sets the subsampling box size for antialiasing. Values should be 1, 2, or 4. 
-;         A value of 4 is optimal, but takes longer to render. This keyword is ignored
-;         on Windows 64-bit machines.
 ;     version: out, optional, type=string
-;         On exit, contains the version of Ghostscipt that was used.
+;         On exit, contains the version of Ghostscipt that was used. Not available on Macs.
 ;          
 ; :Examples:
 ;    A typical sequence of commands to create a test.pdf file::
@@ -111,13 +103,11 @@
 ;-
 PRO cgPS2PDF, ps_file, pdf_file, $
    DELETE_PS=delete_ps, $
-   GRAPHICS_ALIAS=graphics_alias, $
    GS_PATH=gs_path, $
    PAGETYPE=pagetype, $
    SHOWCMD=showcmd, $
    SILENT=silent, $
    SUCCESS=success, $
-   TEXT_ALIAS=text_alias, $
    VERSION=version
 
    Compile_Opt idl2
@@ -148,9 +138,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
    ENDIF
    
    ; Set default values for keywords.
-   SetDefaultValue, graphics_alias, 2
    SetDefaultValue, pagetype, "LETTER"
-   SetDefaultValue, text_alias, 4
    
    ; Set up a Windows variable for later.
    exefile = ""
@@ -186,7 +174,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
         
            IF N_Elements(gs_path) NE 0 THEN BEGIN
                 file = File_Search(gs_path, 'gs', COUNT=count)
-                IF count GT 0 THEN gs_exe = file
+                IF count GT 0 THEN gs_exe = file[count-1]
             ENDIF ELSE gs_exe = 'gs'
             
           END

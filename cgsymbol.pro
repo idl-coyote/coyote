@@ -1,108 +1,16 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;  cgSymbol
+;   cgSymbol
 ;
 ; PURPOSE:
-;
-;   This function provides a device-independent way to ask for commonly-used
-;   symbols (e.g., less than or equal to, Angstrom, degree symbol, etc.),
-;   including all 24 Greek symbols in upper and lower case, to display with text.
-;   
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: david@idlcoyote.com
-;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CATEGORY:
-;
-;   Graphics, Utilities
-;
-; CALLING SEQUENCE:
-;
-;   symbol = cgSymbol(theSymbol)
-;
-; RETURN VALUE:
-;
-;   symbol    A string that represents the requested symbol.
-;
-; ARGUMENTS:
-;
-;  theSymbol:     The name of the symbol desired. A string. Default: 'alpha'.
-;                  Valid string names are the 24 characters of the Greek alphabet,
-;                  plus commonly used graphical symbols.
-;                     alpha        nu        leq
-;                     beta         xi        geq
-;                     gamma        omicron   neg
-;                     delta        pi        deg
-;                     epsilon      rho       equiv
-;                     zeta         sigma     prime
-;                     eta          tau       angstrom
-;                     theta        upsilon   sun
-;                     iota         phi       varphi
-;                     kappa        chi       infinity
-;                     lambda       psi       copyright
-;                     mu           omega
-;                    
-;                   Note that if the first letter of the name is capitalized, this is
-;                   the equivalent of setting the CAPITAL keyword. Only Greek characters
-;                   use this method of selecting symbols.
-;
-; KEYWORDRS:
-;
-;  CAPTIAL:        If this keyword is set, the captial Greek letter is returned rather 
-;                  than the lowercase Greek letter. An alternative way of capitalizing
-;                  the letter is to make the first letter of the name an uppercase letter.
-;                  
-;  EXAMPLE:        If this keyword is set, the names of the Greek characters and their
-;                  symbols are written out in the current graphics window.
-;                                    
-;  PS:             Normally, the PostScript version of the symbol is returned if
-;                  the current device is PostScript and !P.Font is 0 or 1. But, the 
-;                  PostScript version of the greek letter can be obtained at any time
-;                  and in any device, by setting this keyword.
-;                                    
-;  UNICODE:        If this keyword is set, the function returns the Unicode value for the symbol.
-;
-; EXAMPLE:
-;
-;  Lowercase PSI:
-;  
-;     IDL> Plot, findgen(11), XTitle='This title contains ' + $
-;           cgSymbol('psi') + ' as a Greek letter' 
-;
-;  Angstrom sign:
-;  
-;     IDL> Plot, findgen(11), XTitle='This title contains (' + $
-;           cgSymbol('Angstrom') +  ') an Angstrom sign.' 
-; NOTES:
+; This function provides a device-independent way to ask for commonly-used
+; symbols (e.g., less than or equal to, Angstrom, degree symbol, etc.),
+; including all 24 Greek symbols in upper and lower case, to display with text.
 ; 
-;  See the following articles for additional information: 
-;  
-;       http://www.idlcoyote.com/ps_tips/greeksym.html
-;       
-;  Greek symbols are simply passed along to the Greek function.
-;  
-;       http://www.idlcoyote.com/programs/greek.pro
-;       
-; RESTRICTIONS:
-; 
-;  For this program to work correctly on your graphics display, you should be using
-;  Hershey fonts (!P.Font=-1). It will work correctly in PostScript with either 
-;  hardware fonts (!P.Font=0) or True-Type fonts (!P.Font=1).
-;  
-; MODIFICATION HISTORY:
-;
-;  Written by: David W. Fanning, 2 September 2011. 
-;  Added plus-minus symbol. 2 Nov 2011. DWF.
-;-
 ;******************************************************************************************;
-;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -127,9 +35,70 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-Forward_Function cgSymbol
-
+;
+;+
+; This function provides a device-independent way to ask for commonly-used
+; symbols (e.g., less than or equal to, Angstrom, degree symbol, etc.),
+; including all 24 Greek symbols in upper and lower case, to display with text.
+;
+; For this program to work correctly on your graphics display, you should be using
+; Hershey fonts (!P.Font=-1). It will work correctly in PostScript with either 
+; hardware fonts (!P.Font=0) or True-Type fonts (!P.Font=1).
+; 
+; `Greek Symbols <http://www.idlcoyote.com/ps_tips/greeksym.html>` are created by
+; calling the Coyote Library routine `Greek <http://www.idlcoyote.com/programs/greek.pro>' 
+; from this program.
+;
+; :Categories:
+;    Graphics
+;    
+; :Returns:
+;    A string variable that represents the requested symbol and can be used
+;    in a textual context.
+;    
+; :Examples:
+;     To create a lowercase Greek psi symbol::
+;  
+;        IDL> cgPlot, findgen(11), XTitle='This title contains ' + $
+;                 cgSymbol('psi') + ' as a Greek letter' 
+;
+;     To create an Angstrom sign::
+;  
+;        IDL> cgPlot, findgen(11), XTitle='This title contains (' + $
+;                cgSymbol('Angstrom') +  ') an Angstrom sign.' 
+;       
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Written by: David W. Fanning, 2 September 2011. 
+;        Added plus-minus symbol. 2 Nov 2011. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;-
+;+
+; Displays the symbols and their names in a graphics window.
+; 
+; :Keywords:
+;    ps: in, optional, type=boolean, default=0                                
+;        Normally, the PostScript version of the symbol is returned automatically if
+;        the current device is PostScript and !P.Font is 0 or 1. But, the PostScript version 
+;        of the symbol can be obtained at any time and in any device, by setting this keyword.
+;    unicode: in, optional, type=boolean, default=0                                
+;        If this keyword is set, the function returns the Unicode value for the symbol.
+; 
+;-
 PRO cgSymbol_Example, PS=ps, UNICODE=unicode
+
+    Forward_Function cgSymbol
 
     Compile_Opt hidden
     
@@ -174,6 +143,50 @@ PRO cgSymbol_Example, PS=ps, UNICODE=unicode
     
 END ; --------------------------------------------------------------------------------------
 
+
+;+
+; This function provides a device-independent way to ask for commonly-used
+; symbols (e.g., less than or equal to, Angstrom, degree symbol, etc.),
+; including all 24 Greek symbols in upper and lower case, to display with text.
+;
+; :Params:
+;    symbol: in, required, type=string, default="alpha"
+;       The name of the symbol desired as a string. Valid string names are the 24 
+;       characters of the Greek alphabet, plus commonly used graphical symbols::
+;       
+;          alpha        nu        leq
+;          beta         xi        geq
+;          gamma        omicron   neg
+;          delta        pi        deg
+;          epsilon      rho       equiv
+;          zeta         sigma     prime
+;          eta          tau       angstrom
+;          theta        upsilon   sun
+;          iota         phi       varphi
+;          kappa        chi       infinity
+;          lambda       psi       copyright
+;          mu           omega
+;                    
+;       Note that if the first letter of the name is capitalized, this is
+;       the equivalent of setting the `Capital` keyword. Only Greek characters
+;       use this method of selecting symbols.
+;       
+; :Keywords:
+;    capital: in, optional, type=boolean, default=0
+;        If this keyword is set, the captial Greek letter is returned rather than the lowercase 
+;        Greek letter. An alternative way of capitalizing the letter is to make the first letter 
+;        of the name an uppercase letter.
+;    example: in, optional, type=boolean, default=0             
+;        If this keyword is set, the names of symbols and the symbols themselves are written 
+;        out in the current graphics window.
+;    ps: in, optional, type=boolean, default=0                                
+;        Normally, the PostScript version of the symbol is returned automatically if
+;        the current device is PostScript and !P.Font is 0 or 1. But, the PostScript version 
+;        of the symbol can be obtained at any time and in any device, by setting this keyword.
+;    unicode: in, optional, type=boolean, default=0                                
+;        If this keyword is set, the function returns the Unicode value for the symbol.
+;          
+;-
 FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unicode
 
     Compile_Opt idl2

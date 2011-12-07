@@ -1,82 +1,16 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;       cgPickfile
+;   cgPickfile
 ;
 ; PURPOSE:
-;
-;       This is a utility program for selecting data files. It is a wrapper
-;       for DIALOG_PICKFILE, with the additional functionality of being
-;       able to "remember" the name and directory of the last file 
-;       selected by the program. It basically allows you to start the
-;       next file selection from the location of the previous file selection.
-;
-; AUTHOR:
-;       FANNING SOFTWARE CONSULTING
-;       David Fanning, Ph.D.
-;       1645 Sheely Drive
-;       Fort Collins, CO 80526 USA
-;       Phone: 970-221-0438
-;       E-mail: david@idlcoyote.com
-;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-;
-; CATEGORY:
-;
-;       Utilites
-;
-; CALLING SEQUENCE:
-;
-;       filename = cgPickfile()
-;
-; RETURN VALUE:
-;
-;       filename:     The fully-qualified name of the selected file or a
-;                     null string if the CANCEL button was selected.
-;
-;  KEYWORDS:
-;
-;       DATADIR:      Set this keyword to the name of the data directory.
-;                     If not set, the program assumes the data directory is rooted 
-;                     in the directory that holds this program file, or the directory 
-;                     just above it. If it can't find a "data" directory in either 
-;                     of these two locations, the current directory is used as 
-;                     the "data" directory. The data directory is ONLY used if
-;                     there is no "current" last directory. In other words, it is
-;                     only used if cgPickfile has not been called in the current
-;                     IDL session.
-;       
-;       DEMO:         If set, starts in the !DIR/examples/data directory.
-;       
-;       JPEG:         If set, starts in the "jpeg" directory. It assumes the jpeg
-;                     directory is rooted in the "data" directory.
-;
-;       HDF:          If set, starts in the "hdf" directory. It assumes the hdf
-;                     directory is rooted in the "data" directory.
-;       
-;       LAST_FILE:    If set, the name of the last file opened is placed in the
-;                     filename widget.
-;
-;       LIDAR:        If set, starts in the "lidar" directory. It assumes the lidar
-;                     directory is rooted in the "data" directory.
-;
-;       NCDF:         If set, starts in the "ncdf" directory. It assumes the ncdf
-;                     directory is rooted in the "data" directory.
-;
-;       PNG:          If set, starts in the "png" directory. It assumes the png
-;                     directory is rooted in the "data" directory.
-;
-;       TIFF:         If set, starts in the "tiff" directory. It assumes the tiff
-;                     directory is rooted in the "data" directory.
-;       
-;       EXTRA:        Accepts any input keywords to DIALOG_PICKFILE (e.g., FILTER).
-;
-; MODIFICATION HISTORY:
-;
-;       Adapted from FSC_PICKFILE to be a Coyote Graphics routine by David W. Fanning, 4 Aug 2011.
-;-
-;
+;   This is a utility program for selecting data files. It is a wrapper for DIALOG_PICKFILE, 
+;   with the additional functionality of being able to "remember" the name and directory of 
+;   the last file selected by the program. It basically allows you to start the next file 
+;   selection from the location of the previous file selection.
 ;******************************************************************************************;
-;  Copyright (c) 2011, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -101,6 +35,70 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+;
+;+
+;   This is a utility program for selecting data files. It is a wrapper for DIALOG_PICKFILE, 
+;   with the additional functionality of being able to "remember" the name and directory of 
+;   the last file selected by the program. It basically allows you to start the next file 
+;   selection from the location of the previous file selection.
+;
+; :Categories:
+;    Utility
+;    
+; :Returns:
+;    The fully-qualified name of the selected file or a null string if the CANCEL 
+;    button was selected.
+;    
+; :Keywords:
+;     datadir: in, optional, type=string
+;         Set this keyword to the name of the data directory. If not set, the program 
+;         assumes the data directory is rooted in the directory that holds this program 
+;         file, or the directory directly above it. If it can't find a "data" directory 
+;         in either of these two locations, the current directory is used as the "data" 
+;         directory. The data directory is ONLY used if there is no "current" last 
+;         directory. In other words, it is only used if cgPickfile has not been called 
+;         in the current IDL session.
+;      demo: in, optional, type=boolean, default=0 
+;         If set, starts in the !DIR/examples/data directory.
+;      jpeg: in, optional, type=boolean, default=0  
+;         If set, starts in the "jpeg" directory. It assumes the jpeg directory is rooted 
+;         in the "data" directory.
+;      hdf: in, optional, type=boolean, default=0 
+;         If set, starts in the "hdf" directory. It assumes the hdf directory is rooted 
+;         in the "data" directory.
+;      last_file: in, optional, type=boolean, default=0  
+;         If set, the name of the last file opened is placed in the filename widget.
+;      lidar: in, optional, type=boolean, default=0 
+;         If set, starts in the "lidar" directory. It assumes the lidar directory is 
+;         rooted in the "data" directory.
+;      ncdf: in, optional, type=boolean, default=0 
+;         If set, starts in the "ncdf" directory. It assumes the ncdf directory is 
+;         rooted in the "data" directory.
+;      png: in, optional, type=boolean, default=0 
+;         If set, starts in the "png" directory. It assumes the png directory is 
+;         rooted in the "data" directory.
+;      tiff: in, optional, type=boolean, default=0 
+;         If set, starts in the "tiff" directory. It assumes the tiff directory is 
+;         rooted in the "data" directory.
+;      _ref_extra: in, optional
+;          Accepts any input keywords to DIALOG_PICKFILE (e.g., FILTER).
+;          
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Adapted from FSC_PICKFILE to be a Coyote Graphics routine by David W. Fanning, 4 Aug 2011.
+;
+; :Copyright:
+;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;-
 FUNCTION cgPickfile, $
     DATADIR=datadir, $
     DEMO=demo, $

@@ -58,7 +58,7 @@
 ; :Keywords:
 ;    addcmd: in, optional, type=boolean, default=0
 ;       Set this keyword to add the command to the resizeable graphics window cgWindow.
-;    bottom: in, optional type=integer, default-0          
+;    bottom: in, optional, type=integer, default=0          
 ;       The lowest color table index. The colors in the color table start loading here.
 ;    brewer: in, optional, type=boolean, default=0
 ;       Set this keyword if you wish to use the Brewer Colors, as implemented in the Coyote

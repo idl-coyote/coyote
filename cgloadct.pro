@@ -1,152 +1,19 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;       cgLoadCT
+;   cgLoadCT
 ;
 ; PURPOSE:
+;   This is a drop-in replacement for the IDL-supplied program LOADCT.
+;   The same keywords used with LOADCT apply. In addition, a REVERSE keyword
+;   is supplied to reverse the color table vectors, and a CLIP keyword is
+;   supplied to be able to clip the normal LOADCT color table. This is
+;   extremely useful if you wish to use a reduced number of colors. All color 
+;   table loading is handled silently. And Brewer color tables can be loaded.
 ;
-;       This is a drop-in replacement for the ITTVIS-supplied program LOADCT.
-;       The same keywords used with LOADCT apply. In addition, a REVERSE keyword
-;       is supplied to reverse the color table vectors, and a CLIP keyword is
-;       supplied to be able to clip the normal LOADCT color table. This is
-;       extremely useful if you wish to use a reduced number of colors. Also,
-;       all color table loading is handled silently. (To fix a major pet-peeve
-;       of mine.)
-;
-; AUTHOR:
-;
-;       FANNING SOFTWARE CONSULTING
-;       David Fanning, Ph.D.
-;       1645 Sheely Drive
-;       Fort Collins, CO 80526 USA
-;       Phone: 970-221-0438
-;       E-mail: david@idlcoyote.com
-;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-;
-; CATEGORY:
-
-;       Utilities
-;
-; CALLING SEQUENCE:
-;
-;       cgLoadCT, table
-;
-; AUGUMENTS:
-;
-;       table:         Optional table number to load. Integer from 0 to the number of
-;                      tables in the file, minus 1. Default value is 0.
-;
-; KEYWORDS:
-;
-;       ADDCMD:        Set this keyword to add the cgLoadCT command to the current cgWindow
-;                      command list. 
-;               
-;       BOTTOM:        The first color table index. Set to 0 by default.
-;
-;       BREWER:        Set this keyword if you wish to use the Brewer Colors, as
-;                      implemented by Mike Galloy in the file brewer.tbl, and implemented
-;                      here as fsc_brewer.tbl. See these references:
-;
-;                      Brewer Colors: http://www.personal.psu.edu/cab38/ColorBrewer/ColorBrewer_intro.html
-;                      Mike Galloy Implementation: http://michaelgalloy.com/2007/10/30/colorbrewer.html
-;
-;                      This program will look first in the $IDL_DIR/resource/colors directory for 
-;                      the color table file, and failing to find it there will look in the same 
-;                      directory that the source code of this program is located, then in the IDL path. 
-;                      Finally, if it still can't find the file, it will ask you to locate it.
-;                      If you can't find it, the program will simply return without loading a color table.
-;
-;                      NOTE: YOU WILL HAVE TO DOWNLOAD THE FSC_BREWER.TBL FILE FROM THE COYOTE LIBRARY AND
-;                      PLACE IT IN ONE OF THE THREE PLACES OUTLINED ABOVE:
-;
-;                      http://www.idlcoyote.com/programs/fsc_brewer.tbl
-;
-;       CLIP:          A one- or two-element integer array that indicates how to clip
-;                      the original color table vectors. This is useful if you are
-;                      restricting the number of colors, and do not which to have
-;                      black or white (the usual color table end members) in the
-;                      loaded color table. CLIP[0] is the lower bound. (A scalar
-;                      value of CLIP is treated as CLIP[0].) CLIP[1] is the upper
-;                      bound. For example, to load a blue-temperature color bar
-;                      with only blue colors, you might type this:
-;
-;                        IDL> cgLoadCT, 1, CLIP=[110,240]
-;                        IDL> CINDEX
-;
-;                     Or, alternatively, if you wanted to include white at the upper
-;                     end of the color table:
-;
-;                        IDL> cgLoadCT, 1, CLIP=110
-;                        IDL> CINDEX
-;
-;       RGB_TABLE:    If this keyword is set to a named variable, the color table
-;                     is returned as an [NCOLORS,3] array and no colors are loaded
-;                     in the display.
-;
-;       FILE:         The name of a color table file to open. By default colors1.tbl in
-;                     the IDL directory.
-;
-;       GET_NAMES:    If set to a named variable, the names of the color tables are returned
-;                     and no colors are loaded in the display. Note that RGB_TABLE cannot be
-;                     used concurrently with GET_NAMES. Use two separate calls if you want both.
-;
-;       NCOLORS:      The number of colors loaded. By default, !D.TABLE_SIZE.
-;       
-;       REVERSE:      If this keyword is set, the color table vectors are reversed.
-;
-;       ROW:          Set this keyword to indicate you are getting the RGB_TABLE vectors
-;                     for use in the IDL's object graphics routines. Whereas TVLCT expects color 
-;                     tablesto be 256x3 (column vectors), the object graphics routines expect them 
-;                     to be 3x256 (row vectors). Setting this keyword will transpose the vectors 
-;                     before they are returned.
-;
-;       SILENT:       This keyword is provided ONLY for compatibility with LOADCT. *All*
-;                     color table manipulations are handled silently.
-;                     
-;       WINDOW:       Set this keyword to send the colors to an cgWindow program.
-;       
-;       WINID:        The window index number of an cgWindow to receive the color vectors.
-;
-; EXAMPLES:
-;
-;       Suppose you wanted to create a color table that displayed negative values with
-;       red-temperature values and positive values with blue-temperature values, and you
-;       would like the red-temperature values to be reversed in the color table (so dark
-;       colors adjoin in the color table and indicate values near zero). You could do this:
-;
-;           cgLoadCT, 0
-;           cgLoadCT, 3, /REVERSE, CLIP=[32,240], BOTTOM=1, NCOLORS=10
-;           cgLoadCT, 1, CLIP=[64, 245], BOTTOM=11, NCOLORS=10
-;           cgColorbar, NCOLORS=20, BOTTOM=1, DIV=10, RANGE=[-10,10]
-;
-;       Here is an example that shows the difference between LOADCT and cgLoadCT:
-;
-;           ERASE, COLOR=cgCOLOR('Charcoal)
-;           LoadCT, 5, NCOLORS=8
-;           cgColorbar, NCOLORS=8, DIVISIONS=8, POSITION=[0.1, 0.65, 0.9, 0.75], XMINOR=0, XTICKLEN=1
-;           cgLoadCT, 5, NCOLORS=8, CLIP=[16, 240]
-;           cgColorbar, NCOLORS=8, DIVISIONS=8, POSITION=[0.1, 0.35, 0.9, 0.45], XMINOR=0, XTICKLEN=1
-;
-; MODIFICATION HISTORY:
-;
-;       Written by David W. Fanning, 30 October 2007.
-;       Added ability to read Brewer Color Table file, if available, with BREWER keyword. 14 May 2008. DWF.
-;       Small change in the way the program looks for the Brewer file. 8 July 2008. DWF.
-;       Changed the way the program looks for the Brewer color table file. Now use
-;          the Coyote Library routine FIND_RESOURCE_FILE to look for the file. 29 June 2010. DWF. 
-;       Renamed Colorbar procedure to cgColorbar to avoid conflict with IDL 8 Colorbar function.
-;          26 September 2010. DWF.
-;       Added ROW keyword to transpose color table vectors for new graphics functions 
-;          in IDL 8. 23 Nov 2010. DWF.
-;       Added WINDOW and WINID keywords. 26 January 2011. DWF.
-;       Added ADDCMD keyword. 29 Jan 2011. DWF.
-;       Program delevopment ended and code transferred to cgLoadCT as of 4 Feb 2011. DWF.
-;       Added missing ADDCMD keyword. 28 April 2011. DWF.
-;       Fixed a problem that occurred when the BOTTOM keyword was used in conjuntion with
-;          the WINDOW keyword, resulting in incorrect colors in cgWindow programs. 28 April 2011. DWF.
-;-
 ;******************************************************************************************;
-;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -171,13 +38,137 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+;
+;+
+;   This is a drop-in replacement for the IDL-supplied program LOADCT.
+;   The same keywords used with LOADCT apply. In addition, a REVERSE keyword
+;   is supplied to reverse the color table vectors, and a CLIP keyword is
+;   supplied to be able to clip the normal LOADCT color table. This is
+;   extremely useful if you wish to use a reduced number of colors. All color 
+;   table loading is handled silently. And Brewer color tables can be loaded.
+;
+; :Categories:
+;    Graphics
+;    
+; :Params:
+;    table: in, optional, type=integer, default=0
+;         Optional color table number to load. Integer from 0 to the number of  
+;         tables in the color table file, minus 1. 
+;       
+; :Keywords:
+;    addcmd: in, optional, type=boolean, default=0
+;       Set this keyword to add the command to the resizeable graphics window cgWindow.
+;    bottom: in, optional type=integer, default-0          
+;       The lowest color table index. The colors in the color table start loading here.
+;    brewer: in, optional, type=boolean, default=0
+;       Set this keyword if you wish to use the Brewer Colors, as implemented in the Coyote
+;       Library file, fsc_brewer.tbl. This program will look first in the $IDL_DIR/resource/colors 
+;       directory for the color table file, and failing to find it there will look in the same 
+;       directory that the source code of this program is located, then in the IDL path. 
+;       Finally, if it still can't find the file, it will ask you to locate it.
+;       If you can't find it, the program will simply return without loading a color table.
+;    clip: in, optional, type=integer
+;       A one- or two-element integer array that indicates how to clip the original color 
+;       table vectors. This is useful if you are restricting the number of colors, and do 
+;       not which to have black or white (the usual color table end members) in the
+;       loaded color table. CLIP[0] is the lower bound. (A scalar value of CLIP is treated as 
+;       CLIP[0].) CLIP[1] is the upper bound. For example, to load a blue-temperature color bar
+;       with only blue colors, you might type this::
+;
+;            IDL> cgLoadCT, 1, CLIP=[110,240]
+;            IDL> CINDEX
+;
+;        Or, alternatively, if you wanted to include white at the upper end of the color table::
+;
+;            IDL> cgLoadCT, 1, CLIP=110
+;            IDL> CINDEX
+;    rgb_table: out, optional, type=btye
+;       If this keyword is set to a named variable, the color table is returned as an 
+;       [NCOLORS,3] array and no colors are loaded in the display.
+;    filename: in, optional, type='string'
+;       The name of a color table file to open. By default colors1.tbl in the IDL 
+;       resource directory.
+;    get_names: out, optional, type='string'
+;       If set to a named variable, the names of the color tables are returned
+;       and no colors are loaded in the display. Note that RGB_TABLE cannot be
+;       used concurrently with GET_NAMES. Use two separate calls if you want both.
+;    ncolors: in, optional, type=integer, default=256
+;       The number of colors to be loaded into the color table.
+;    reverse: in, optional, type=boolean, default=0
+;       If this keyword is set, the color table vectors are reversed.
+;    row: in, optional, type=boolean, default=0
+;       Set this keyword to indicate you are getting the RGB_TABLE vectors
+;       for use in the IDL's object graphics routines. Whereas TVLCT expects color 
+;       tables to be 256x3 (column vectors), the object graphics routines expect them 
+;       to be 3x256 (row vectors). Setting this keyword will transpose the vectors 
+;       before they are returned.
+;    silent: in, optional, type=boolean, default=1
+;       This keyword is provided ONLY for compatibility with LOADCT. All color table 
+;       manipulations are handled silently.
+;    window: in, optional, type=boolean, default=0
+;       Set this keyword to add the command to an cgWindow application.
+;    winid: in, optional, type=integer                 
+;       The window index number of an cgWindow to receive the color vectors.
+;       If this parameter is absent, the color table vectors are sent to the
+;       current cgWindow.
+;
+;         
+; :Examples:
+;    Suppose you wanted to create a color table that displayed negative values with
+;    red-temperature values and positive values with blue-temperature values, and you
+;    would like the red-temperature values to be reversed in the color table (so dark
+;    colors adjoin in the color table and indicate values near zero). You could do this::
+;
+;        cgLoadCT, 0
+;        cgLoadCT, 3, /REVERSE, CLIP=[32,240], BOTTOM=1, NCOLORS=10
+;        cgLoadCT, 1, CLIP=[64, 245], BOTTOM=11, NCOLORS=10
+;        cgColorbar, NCOLORS=20, BOTTOM=1, DIV=10, RANGE=[-10,10]
+;
+;    Here is an example that shows the difference between LOADCT and cgLoadCT::
+;
+;        ERASE, COLOR=cgCOLOR('Charcoal)
+;        LoadCT, 5, NCOLORS=8
+;        cgColorbar, NCOLORS=8, DIVISIONS=8, POSITION=[0.1, 0.65, 0.9, 0.75], XMINOR=0, XTICKLEN=1
+;        cgLoadCT, 5, NCOLORS=8, CLIP=[16, 240]
+;        cgColorbar, NCOLORS=8, DIVISIONS=8, POSITION=[0.1, 0.35, 0.9, 0.45], XMINOR=0, XTICKLEN=1
+;       
+; :Author:
+;       FANNING SOFTWARE CONSULTING::
+;           David W. Fanning 
+;           1645 Sheely Drive
+;           Fort Collins, CO 80526 USA
+;           Phone: 970-221-0438
+;           E-mail: david@idlcoyote.com
+;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;    Change History::
+;       Written by David W. Fanning, 30 October 2007.
+;       Added ability to read Brewer Color Table file, if available, with BREWER keyword. 14 May 2008. DWF.
+;       Small change in the way the program looks for the Brewer file. 8 July 2008. DWF.
+;       Changed the way the program looks for the Brewer color table file. Now use
+;          the Coyote Library routine FIND_RESOURCE_FILE to look for the file. 29 June 2010. DWF. 
+;       Renamed Colorbar procedure to cgColorbar to avoid conflict with IDL 8 Colorbar function.
+;          26 September 2010. DWF.
+;       Added ROW keyword to transpose color table vectors for new graphics functions 
+;          in IDL 8. 23 Nov 2010. DWF.
+;       Added WINDOW and WINID keywords. 26 January 2011. DWF.
+;       Added ADDCMD keyword. 29 Jan 2011. DWF.
+;       Program delevopment ended and code transferred to cgLoadCT as of 4 Feb 2011. DWF.
+;       Added missing ADDCMD keyword. 28 April 2011. DWF.
+;       Fixed a problem that occurred when the BOTTOM keyword was used in conjuntion with
+;          the WINDOW keyword, resulting in incorrect colors in cgWindow programs. 28 April 2011. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2007-2011, Fanning Software Consulting, Inc.
+;-
 PRO cgLoadCT, table, $
    ADDCMD=addcmd, $
    BREWER=brewer, $
    BOTTOM=bottom, $
    CLIP = clip, $
    RGB_TABLE=color_table, $
-   FILE=file, $
+   FILENAME=file, $
    GET_NAMES=get_names, $
    NCOLORS=ncolors, $
    REVERSE=reverse, $

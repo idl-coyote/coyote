@@ -2298,7 +2298,7 @@ END ;---------------------------------------------------------------------------
 ;         Fixed a problem with improper filename when creating raster file vis
 ;             Imagemagick via cgControl. 10 Oct 2011. DWF.
 ;         Added WASPECT keyword to allow window aspect ratio to be set. 9 Nov 2011. DWF.   
-;         Added PDF file to the Save As menu. Requires Ghostscript to be installed. 6 Dec 2011. DWF.
+;         Added PDF file to the Save As menu. Requires Ghostscript to be installed on some machines. 6 Dec 2011. DWF.
 ;-
 PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.

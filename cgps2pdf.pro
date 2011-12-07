@@ -44,7 +44,7 @@
 ; an alternative UNIX command (e.g., pstopdf or epstopdf).
 ;
 ; :Categories:
-;    Utilities, Graphics
+;    Utilities, Graphics, PostScript
 ;    
 ; :Params:
 ;     ps_file: in, required, type=string

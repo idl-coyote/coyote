@@ -152,6 +152,9 @@ PRO cgPS2PDF, ps_file, pdf_file, $
    SetDefaultValue, pagetype, "LETTER"
    SetDefaultValue, text_alias, 4
    
+   ; Set up a Windows variable for later.
+   exefile = ""
+   
    ; Set the name of the Ghostscript executable.
    CASE StrUpCase(!Version.OS) OF 
    
@@ -169,7 +172,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
           END
           
       'DARWIN': BEGIN
-      
+      	 
           IF N_Elements(gs_path) EQ 0 THEN gs_path = '/usr/bin/'
           file = File_Search(gs_path, 'pstopdf', COUNT=count, /FOLD_CASE)
           IF count EQ 0 THEN BEGIN
@@ -180,7 +183,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
           END
           
        ELSE: BEGIN
-       
+        
            IF N_Elements(gs_path) NE 0 THEN BEGIN
                 file = File_Search(gs_path, 'gs', COUNT=count)
                 IF count GT 0 THEN gs_exe = file
@@ -198,7 +201,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
         Spawn, '"' + testcmd + '"', /HIDE, /LOG_OUTPUT, result, error_result
     ENDIF ELSE BEGIN
         IF StrUpCase(!Version.OS) NE 'DARWIN' THEN BEGIN
-            Spawn, '"' + testcmd + '"', result, error_result
+            Spawn, testcmd, result, error_result
         ENDIF ELSE BEGIN
            result = ""
            error_result = ""
@@ -206,7 +209,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
     ENDELSE
     
     ; If no errors, then you can continue. Otherwise, stop here.
-    IF error_result EQ "" THEN BEGIN
+    IF error_result[0] EQ "" THEN BEGIN
        version = result[0]
     ENDIF ELSE BEGIN
        Message, 'Cannot successfully SPAWN a Ghostscript command. No conversion possible.'
@@ -218,24 +221,23 @@ PRO cgPS2PDF, ps_file, pdf_file, $
             ' -sPAPERSIZE='+StrLowCase(pagetype)+' -sOutputFile="'+pdf_file+'" "'+ps_file+'"'
    ENDIF ELSE BEGIN
         IF StrUpCase(!Version.OS) EQ 'DARWIN' THEN BEGIN
-            cmd = gs_exe
-        ENDIF ELSE BEGIN
+            cmd = gs_exe + " " + ps_file[0] + " -o " + pdf_file
+         ENDIF ELSE BEGIN
             cmd = gs_exe + ' -sDEVICE=pdfwrite -q -dNOPAUSE -dBATCH'+ $
-                ' -dTextAlphaBits='+StrTrim(text_alias,2)+' -dGraphicsAlphaBits='+StrTrim(graphics_alias,2)+ $
                 ' -sPAPERSIZE='+StrLowCase(pagetype)+' -sOutputFile="'+pdf_file+'" "'+ps_file+'"'
             ENDELSE
     ENDELSE
     
-    ; Spawn the command, note the need for extra quotes here to handle spaces in directory names.
+   ; Spawn the command, note the need for extra quotes here to handle spaces in directory names.
     IF StrUpCase(!Version.OS_Family) EQ 'WINDOWS' THEN BEGIN
         Spawn, '"' + cmd + '"', /HIDE, result, error_result
     ENDIF ELSE BEGIN
-        Spawn, '"' + cmd + '"', result, error_result
+        Spawn,  cmd,  result, error_result
     ENDELSE
     
     ; If you generated an error, report it. Errors in the SPAWNed command 
     ; don't seem to cause errors on Windows machines. :-(
-    IF error_result NE "" THEN Message, error_result
+    IF error_result[0] NE "" THEN Message, error_result[0]
     
     ; If you get here, hurrah!
     IF Keyword_Set(showcmd) THEN Print, cmd

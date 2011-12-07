@@ -74,8 +74,18 @@
 ;     success: out, optional, type=boolean
 ;          Set this keyword to a named variable that on output will contain a 1 to 
 ;          indicate successful completion of the command, or to 0 otherwise.
+;     unix_convert_cmd: in, optional, type=string, default='gs'
+;          There are a number of commands on UNIX machines for converting PostScript files
+;          to PDF files. This program assumes you are using Ghostscript to do the conversion
+;          for you. The Ghostscript command on most UNIX machines is "gs", which is the default
+;          value for this keyword. However, if you would prefer to use another program to do
+;          the conversion for you, you can specify the name of the command here. For example,
+;          "pstopdf" or "epstopdf". In creating the actual command, this command will be
+;          separated by a space from the input file name. In other words, if the alternative
+;          conversion command was "pstopdf", the actual command would be "pstopdf" + " " + ps_file.
 ;     version: out, optional, type=string
-;         On exit, contains the version of Ghostscipt that was used. Not available on Macs.
+;         On exit, contains the version of Ghostscipt that was used. Not available on Macs
+;         or if an alternative UNIX command was used.
 ;          
 ; :Examples:
 ;    A typical sequence of commands to create a test.pdf file::
@@ -108,6 +118,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
    SHOWCMD=showcmd, $
    SILENT=silent, $
    SUCCESS=success, $
+   UNIX_CONVERT_CMD=unix_convert_cmd, $
    VERSION=version
 
    Compile_Opt idl2
@@ -121,7 +132,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
       RETURN
    ENDIF
 
-   ; Assume failure. 
+   ; Assume failure. Sigh...
    success = 0
 
    ; Need an input file?
@@ -139,11 +150,18 @@ PRO cgPS2PDF, ps_file, pdf_file, $
    
    ; Set default values for keywords.
    SetDefaultValue, pagetype, "LETTER"
+   delete_ps = Keyword_Set(delete_ps)
+   showcmd = Keyword_Set(showcmd)
+   silent = Keyword_Set(silent)
    
-   ; Set up a Windows variable for later.
+   ; Set up a Windows variable for later, so it doesn't cause problems
+   ; for me with Macs and UNIX machines.
    exefile = ""
    
-   ; Set the name of the Ghostscript executable.
+   ; Set the name of the Ghostscript executable or alternative conversion command.
+   ; Also set the docmdtest variable. If set to 0, the test to see if we can acutally
+   ; execute the command will be skipped. The test cannot be reliably executed on
+   ; all machines and for all conversion commands.
    CASE StrUpCase(!Version.OS) OF 
    
       'WIN32': BEGIN
@@ -156,7 +174,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
              IF ~Keyword_Set(silent) THEN Message, 'The Ghostscript executable file GSWIN32C.EXE cannot be found. Exiting without conversion.', /INFORMATIONAL
              RETURN
           ENDIF ELSE gs_exe = '"' + file[count-1] + '"'
-     
+          docmdtest = 1
           END
           
       'DARWIN': BEGIN
@@ -167,53 +185,63 @@ PRO cgPS2PDF, ps_file, pdf_file, $
              IF ~Keyword_Set(silent) THEN Message, 'The Ghostscript executable file "pstopdf" cannot be found. Exiting without conversion.', /INFORMATIONAL
              RETURN
           ENDIF ELSE gs_exe = file[count-1]
-     
+          docmdtest = 0
           END
           
-       ELSE: BEGIN
+       ELSE: BEGIN ; UNIX flavors
         
-           IF N_Elements(gs_path) NE 0 THEN BEGIN
-                file = File_Search(gs_path, 'gs', COUNT=count)
-                IF count GT 0 THEN gs_exe = file[count-1]
-            ENDIF ELSE gs_exe = 'gs'
+           ; Maybe the user provided an alternative command. If not, use the
+           ; standard "gs" command.
+           IF N_Elements(unix_convert_cmd) NE 0 THEN BEGIN
+               gs_exe = unix_convert_cmd
+               docmdtest = 0
+           ENDIF ELSE BEGIN
+               IF N_Elements(gs_path) NE 0 THEN BEGIN
+                    file = File_Search(gs_path, 'gs', COUNT=count)
+                    IF count GT 0 THEN gs_exe = file[count-1]
+               ENDIF ELSE gs_exe = 'gs'
+               docmdtest = 1
+           ENDELSE
             
           END
    ENDCASE
       
    ; Try the command to get the GhostScript version number. If it doesn't work,
-   ; we assume we can't use the command.
-   testcmd = gs_exe + ' -version'
+   ; we assume we can't use the command. This test cannot be done in all cases.
+   IF docmdtest THEN BEGIN
    
-    ; Spawn the command, note the need for extra quotes here to handle spaces in directory names.
-    IF StrUpCase(!Version.OS_Family) EQ 'WINDOWS' THEN BEGIN
-        Spawn, '"' + testcmd + '"', /HIDE, /LOG_OUTPUT, result, error_result
-    ENDIF ELSE BEGIN
-        IF StrUpCase(!Version.OS) NE 'DARWIN' THEN BEGIN
-            Spawn, testcmd, result, error_result
+       testcmd = gs_exe + ' -version'
+       result = ""
+       error_result = ""
+       
+        ; Spawn the command, note the need for extra quotes here to handle spaces in directory names.
+        IF StrUpCase(!Version.OS_Family) EQ 'WINDOWS' THEN BEGIN
+            Spawn, '"' + testcmd + '"', /HIDE, /LOG_OUTPUT, result, error_result
         ENDIF ELSE BEGIN
-           result = ""
-           error_result = ""
+            Spawn, testcmd, result, error_result
         ENDELSE
-    ENDELSE
-    
-    ; If no errors, then you can continue. Otherwise, stop here.
-    IF error_result[0] EQ "" THEN BEGIN
-       version = result[0]
-    ENDIF ELSE BEGIN
-       Message, 'Cannot successfully SPAWN a Ghostscript command. No conversion possible.'
-    ENDELSE
+        
+        ; If no errors, then you can continue. Otherwise, stop here.
+        IF error_result[0] EQ "" THEN BEGIN
+           version = result[0]
+        ENDIF ELSE BEGIN
+           Message, 'Cannot successfully SPAWN a Ghostscript command. No conversion possible.'
+        ENDELSE
+        
+   ENDIF
    
-   ; Construct the command that is to be spawned. Can't set antialiasing in 64-bit Windows versions.
-   IF exefile EQ 'gswin64c.exe' THEN BEGIN
-       cmd = gs_exe + ' -sDEVICE=pdfwrite -q -dNOPAUSE -dBATCH'+ $
-            ' -sPAPERSIZE='+StrLowCase(pagetype)+' -sOutputFile="'+pdf_file+'" "'+ps_file+'"'
+   ; Construct the command that is to be spawned. 
+   IF StrUpCase(!Version.OS) EQ 'DARWIN' THEN BEGIN
+       cmd = gs_exe + " " + ps_file[0] + " -o " + pdf_file
    ENDIF ELSE BEGIN
-        IF StrUpCase(!Version.OS) EQ 'DARWIN' THEN BEGIN
-            cmd = gs_exe + " " + ps_file[0] + " -o " + pdf_file
-         ENDIF ELSE BEGIN
-            cmd = gs_exe + ' -sDEVICE=pdfwrite -q -dNOPAUSE -dBATCH'+ $
-                ' -sPAPERSIZE='+StrLowCase(pagetype)+' -sOutputFile="'+pdf_file+'" "'+ps_file+'"'
-            ENDELSE
+   
+       IF N_Elements(unix_convert_cmd) NE 0 THEN BEGIN
+           cmd = gs_exe + " " + ps_file 
+       ENDIF ELSE BEGIN 
+           cmd = gs_exe + ' -sDEVICE=pdfwrite -q -dNOPAUSE -dBATCH'+ $
+                ' -sPAPERSIZE=' + StrLowCase(pagetype) + $
+                ' -sOutputFile="' + pdf_file + '" "' + ps_file + '"'
+       ENDELSE
     ENDELSE
     
    ; Spawn the command, note the need for extra quotes here to handle spaces in directory names.

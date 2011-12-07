@@ -141,6 +141,10 @@
 ;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
 ;         R, G, and B vectors of a color table. It is probably easier to use cgLoadCT or
 ;         XCOLORS to load color tables for the window, but this is provided as another option.
+;     pdf_path: out, optional, type=string
+;         Set this keyword to the name of the path to the Ghostscript command for converting PS to PDF.
+;     pdf_unix_convert_cmd: out, optional, type=string
+;         Set this keyword to the name of an alternative UNIX command to convert PostScript to PDF.
 ;     ps_decomposed: in, optional, type=boolean, default=0
 ;         Set this keyword to zero to set the PostScript color mode to indexed color and to
 ;         one to set the PostScript color mode to decomposed color.
@@ -235,6 +239,8 @@ PRO cgControl, selection, $
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
     IM_RASTER=im_raster, $                        ; Sets whether to generate raster files via ImageMagick.
+    PDF_UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+    PDF_PATH=pdf_path, $                          ; The path to the Ghostscript conversion command.
     PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
     PS_DECOMPOSED=ps_decomposed, $                ; Sets the PostScript color mode.
     PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM files.
@@ -365,6 +371,8 @@ PRO cgControl, selection, $
         IM_RESIZE = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
         IM_OPTIONS = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
         IM_RASTER = im_raster, $                        ; Sets whether to create raster files via ImageMagick.
+        PDF_UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $    ; Command to convert PS to PDF.
+        PDF_PATH=pdf_path, $                            ; The path to the Ghostscript conversion command.
         PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.
         PS_DECOMPOSED = ps_decomposed, $                ; Sets the PostScript color mode.
         PS_DELETE = ps_delete, $                        ; Delete the PostScript file when making IM files.

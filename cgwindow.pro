@@ -609,6 +609,8 @@ PRO FSC_CmdWindow::GetProperty, $
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
     IM_RASTER=im_raster, $                        ; Sets whether to generate raster files via ImageMagick
+    PDF_UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+    PDF_PATH=pdf_path, $                          ; The path to the Ghostscript conversion command.
     PS_DECOMPOSED=ps_decomposed, $
     PS_DELETE=ps_delete, $
     PS_ENCAPSULATED=ps_encapsulated, $
@@ -616,7 +618,7 @@ PRO FSC_CmdWindow::GetProperty, $
     PS_FONT=ps_font, $                            ; Select the font for PostScript output.
     PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
     PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
-    PS_TT_FONT=ps_tt_font, $                       ; Select the true-type font to use for PostScript output.
+    PS_TT_FONT=ps_tt_font, $                      ; Select the true-type font to use for PostScript output.
     _EXTRA=extra
     
     Compile_Opt idl2
@@ -647,6 +649,10 @@ PRO FSC_CmdWindow::GetProperty, $
     IF Arg_Present(wid) THEN wid = self.wid
     IF Arg_Present(xomargin) THEN xomargin = self.xomargin
     IF Arg_Present(yomargin) THEN yomargin = self.yomargin
+    
+     ; PDF properties.
+     pdf_unix_convert_cmd = self.pdf_unix_convert_cmd
+     pdf_path = self.pdf_path
     
      ; PostScript properties.
      ps_charsize = self.ps_charsize
@@ -972,7 +978,8 @@ PRO FSC_CmdWindow::SaveAsRaster, event
            
            ; Close the file and make a PDF file.
            PS_End
-           cgPS2PDF, thisname, outname, DELETE_PS=self.ps_delete, /SILENT, SUCCESS=success
+           cgPS2PDF, thisname, outname, DELETE_PS=self.ps_delete, /SILENT, SUCCESS=success, $
+              UNIX_CONVERT_CMD=self.pdf_unix_convert_cmd, GS_PATH=self.pdf_path
            IF ~success THEN BEGIN
               Print, 'Unable to create PDF file. See cgPS2PDF documentation.'
            ENDIF ELSE BEGIN
@@ -1210,6 +1217,8 @@ PRO FSC_CmdWindow::SetProperty, $
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
     IM_RASTER=im_raster, $                        ; Sets whether to use ImageMagick to create raster files.
+    PDF_UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+    PDF_PATH=pdf_path, $                          ; The path to the Ghostscript conversion command.
     PS_DECOMPOSED=ps_decomposed, $                ; Sets the PostScript color mode.
     PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
     PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
@@ -1266,6 +1275,8 @@ PRO FSC_CmdWindow::SetProperty, $
     IF N_Elements(im_resize) NE 0 THEN self.im_resize = im_resize
     IF N_Elements(im_options) NE 0 THEN self.im_options = im_options
     IF N_Elements(im_raster) NE 0 then self.im_raster = im_raster
+    IF N_Elements(pdf_unix_convert_cmd) NE 0 THEN self.pdf_unix_convert_cmd = pdf_unix_convert_cmd
+    IF N_Elements(pdf_path) NE 0 THEN self.pdf_path = pdf_path
     IF N_Elements(ps_decomposed) NE 0 THEN self.ps_decomposed = ps_decomposed
     IF N_Elements(ps_delete) NE 0 THEN self.ps_delete = ps_delete
     IF N_Elements(ps_metric) NE 0 THEN self.ps_metric = ps_metric
@@ -1355,6 +1366,10 @@ FUNCTION FSC_CmdWindow::Init, $
        YPos = d_ypos, $                                  ; The Y offset of the window on the display. 
        Palette = d_palette, $                            ; The color table palette to use for the window.
        
+       ; PDF properties.
+       PDF_Unix_Convert_Cmd = d_pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+       PDF_Path = d_pdf_path, $                          ; The path to the Ghostscript conversion command.
+   
        ; ImageMagick Properties.
        IM_Transparent = d_im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
        IM_Density = d_im_density, $                      ; Sets the density parameter on ImageMagick convert command.
@@ -1523,6 +1538,8 @@ FUNCTION FSC_CmdWindow::Init, $
     self.im_options = d_im_options
     self.im_raster = d_im_raster
     self.im_resize = d_im_resize
+    self.pdf_unix_convert_cmd = d_pdf_unix_convert_cmd
+    self.pdf_path = d_pdf_path
     self.ps_decomposed = d_ps_decomposed
     self.ps_delete = d_ps_delete
     self.ps_encapsulated = d_ps_encapsulated
@@ -1650,6 +1667,10 @@ PRO FSC_CmdWindow__Define, class
               ps_quiet: 0, $                ; Select the QUIET keyword for PS_Start.
               ps_scale_factor: 0, $         ; The PostScript scale factor.
               ps_tt_font: "", $             ; The name of a true-type font to use for PostScript output.
+              
+              ; PDF options.
+              pdf_unix_convert_cmd: "", $   ; The name of an alternative UNIX command to convert PS to PDF.
+              pdf_path: "", $               ; The name of the path to a Ghostscript conversion command.
 
               ; ImageMagick output parameters.
               im_transparent: 0B, $         ; Sets the "alpha" keyword on ImageMagick convert command.

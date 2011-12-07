@@ -66,6 +66,10 @@
 ;         The !P.MULTI setting for the window.
 ;     palette: out, optional, type=byte
 ;         The window color palette.
+;     pdf_path: out, optional, type=string
+;         The name of the path to the Ghostscript command for converting PS to PDF.
+;     pdf_unix_convert_cmd: out, optional, type=string
+;         The name of an alternative UNIX command to convert PostScript to PDF.
 ;     ps_decomposed: out, optional, type=boolean
 ;         The PostScript decomposed status of the window.
 ;     ps_delete: out, optional, type=boolean
@@ -111,7 +115,8 @@
 ;          cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
 ;        Added PS_DECOMPOSED keyword to allow getting/setting of PostScript decomposed 
 ;          value. 30 Aug 2011. DWF.
-;        Added ASPECT keyword to allow getting/setting of window aspect ratio.
+;        Added ASPECT keyword to allow getting/setting of window aspect ratio. 18 Nov 2011. DWF.
+;        Added PDF_UNIX_CONVERT_CMD and PDF_PATH keywords. 7 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -138,6 +143,10 @@ PRO cgWindow_GetDefs, $
    IM_Raster = im_raster, $                        ; Sets the raster via ImageMagick setting.
    IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+   
+   ; PDF properties.
+   PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+   PDF_Path = pdf_path, $                          ; The path to the Ghostscript conversion command.
    
    ; PostScript properties.
    PS_Decomposed = ps_decomposed, $                ; If set, use decomposed color in PostScript.
@@ -179,6 +188,8 @@ PRO cgWindow_GetDefs, $
    IF Arg_Present(im_raster) THEN im_raster = !FSC_WINDOW_DEFAULTS.im_raster
    IF Arg_Present(im_resize) THEN im_resize = !FSC_WINDOW_DEFAULTS.im_resize
    IF Arg_Present(im_options) THEN im_options = !FSC_WINDOW_DEFAULTS.im_options
+   IF Arg_Present(pdf_unix_convert_cmd) THEN pdf_unix_convert_cmd = !FSC_WINDOW_DEFAULTS.pdf_unix_convert_cmd
+   IF Arg_Present(pdf_path) THEN pdf_path = !FSC_WINDOW_DEFAULTS.pdf_path
    IF Arg_Present(ps_decomposed) THEN ps_decomposed = !FSC_WINDOW_DEFAULTS.ps_decomposed
    IF Arg_Present(ps_delete) THEN ps_delete = !FSC_WINDOW_DEFAULTS.ps_delete
    IF Arg_Present(ps_metric) THEN ps_metric = !FSC_WINDOW_DEFAULTS.ps_metric

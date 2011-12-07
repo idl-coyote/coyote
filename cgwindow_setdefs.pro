@@ -80,6 +80,10 @@
 ;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
 ;         R, G, and B vectors of a color table. It is probably easier to use cgLoadCT or
 ;         XCOLORS to load color tables for the window, but this is provided as another option.
+;     pdf_path: out, optional, type=string
+;         Set this keyword to the name of the path to the Ghostscript command for converting PS to PDF.
+;     pdf_unix_convert_cmd: out, optional, type=string
+;         Set this keyword to the name of an alternative UNIX command to convert PostScript to PDF.
 ;     ps_charsize: in, optional, type=float, default=0.0
 ;         Set this value to the !P.Charsize value to use when creating PostScript output. This
 ;         value is not used if !P.Charsize is set to anything other than 0.0.
@@ -137,15 +141,16 @@
 ; :History:
 ;     Change History::
 ;        Written, 29 January 2011. DWF.
+;        Small bug fixes, and addition of PS_QUIET keyword. 17 Feb 2011. DWF.
 ;        Added Raster_IM, 18 February 2011. Jeremy Bailin.
 ;        Added the ability to set and unset adjustable text size in 
 ;          cgWindow with ADJUSTSIZE keyword. 24 April 2011. DWF.
+;        Added PS_DECOMPOSED keyword to set the PostScript color mode. 30 Aug 2011. DWF.
+;        Added ASPECT keyword to allow getting/setting of window aspect ratio. 18 Nov 2011. DWF.
+;        Added PDF_UNIX_CONVERT_CMD and PDF_PATH keywords. 7 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
-;     Small bug fixes, and addition of PS_QUIET keyword. 17 Feb 2011. DWF.
-;     Added PS_DECOMPOSED keyword to set the PostScript color mode. 30 Aug 2011. DWF.
-;     Added ASPECT keyword to allow getting/setting of window aspect ratio.
 ;-
 PRO cgWindow_SetDefs, $
    Reset=reset, $                                  ; Reset to original values.
@@ -172,6 +177,10 @@ PRO cgWindow_SetDefs, $
    IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
    IM_Raster = im_raster, $                        ; Sets thee raster via ImageMagick setting.
+   
+   ; PDF properties.
+   PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+   PDF_Path = pdf_path, $                          ; The path to the Ghostscript conversion command.
    
    ; PostScript properties.
    PS_Decomposed = ps_decomposed, $                ; If set, use decomposed color in PostScript.
@@ -215,6 +224,8 @@ PRO cgWindow_SetDefs, $
             IF HasImageMagick() THEN im_raster = 1 ELSE im_raster = 0
         ENDIF
         IF N_Elements(im_transparent) EQ 0 THEN im_transparent = 0
+        IF N_Elements(pdf_unix_convert_cmd) EQ 0 THEN pdf_unix_convert_cmd = ""
+        IF N_Elements(pdf_path) EQ 0 THEN pdf_path = ""
         IF N_Elements(ps_decomposed) EQ 0 THEN ps_decomposed = 0 ; Index mode by default.
         IF N_Elements(ps_delete) EQ 0 THEN ps_delete = 1
         IF N_Elements(ps_metric) EQ 0 THEN ps_metric = 0
@@ -246,6 +257,8 @@ PRO cgWindow_SetDefs, $
            IM_Resize:im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
            IM_Options:im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
            IM_Transparent:im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+           PDF_UNIX_Convert_Cmd: pdf_unix_convert_cmd, $ ; Sets the PDF alternative conversion command.
+           PDF_Path: pdf_path, $                         ; Set the path to the PDF conversion command.
            PS_Decomposed:ps_decomposed, $                ; Sets the PostScript color mode.
            PS_Delete:ps_delete, $                        ; Delete the PostScript file when making IM files.
            PS_Metric:ps_metric, $                        ; Select metric measurements in PostScript output.
@@ -283,6 +296,8 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(im_resize) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_resize = im_resize
         IF N_Elements(im_options) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_options = im_options
         IF N_Elements(raster_im) NE 0 then !FSC_WINDOW_DEFAULTS.raster_im = raster_im
+        IF N_Elements(pdf_unix_convert_cmd) NE 0 THEN !FSC_WINDOW_DEFAULTS.pdf_unix_convert_cmd = pdf_unix_convert_cmd
+        IF N_Elements(pdf_path) NE 0 THEN !FSC_WINDOW_DEFAULTS.pdf_path = pdf_path
         IF N_Elements(ps_decomposed) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_decomposed = Keyword_Set(ps_decomposed)
         IF N_Elements(ps_delete) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_delete = Keyword_Set(ps_delete)
         IF N_Elements(ps_metric) NE 0 THEN !FSC_WINDOW_DEFAULTS.ps_metric = Keyword_Set(ps_metric)

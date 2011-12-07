@@ -37,7 +37,11 @@
 ;+
 ; Converts a PostScript file to a PDF file. This program requires
 ; the `Ghostscript <http://www.ghostscript.com/download/>` program 
-; to be installed on the user's computer.
+; to be installed on the user's computer, unless you are using a 
+; Macintosh computer or an alterntive UNIX command to do the conversion
+; for you. If you are on a Macintosh, the supplied pstopdf
+; program is used instead. Use the 'UNIX_Convert_Cmd' keyword to select
+; an alternative UNIX command (e.g., pstopdf or epstopdf).
 ;
 ; :Categories:
 ;    Utilities, Graphics
@@ -74,15 +78,17 @@
 ;     success: out, optional, type=boolean
 ;          Set this keyword to a named variable that on output will contain a 1 to 
 ;          indicate successful completion of the command, or to 0 otherwise.
-;     unix_convert_cmd: in, optional, type=string, default='gs'
+;     unix_convert_cmd: in, optional, type=string
 ;          There are a number of commands on UNIX machines for converting PostScript files
 ;          to PDF files. This program assumes you are using Ghostscript to do the conversion
-;          for you. The Ghostscript command on most UNIX machines is "gs", which is the default
-;          value for this keyword. However, if you would prefer to use another program to do
+;          for you. The Ghostscript command on most UNIX machines is "gs", which is used if
+;          this keyword is undefined. However, if you would prefer to use another program to do
 ;          the conversion for you, you can specify the name of the command here. For example,
 ;          "pstopdf" or "epstopdf". In creating the actual command, this command will be
 ;          separated by a space from the input file name. In other words, if the alternative
 ;          conversion command was "pstopdf", the actual command would be "pstopdf" + " " + ps_file.
+;          Any output filename is ignored. This command does not apply to Macintosh or Windows 
+;          computers.
 ;     version: out, optional, type=string
 ;         On exit, contains the version of Ghostscipt that was used. Not available on Macs
 ;         or if an alternative UNIX command was used.

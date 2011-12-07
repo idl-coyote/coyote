@@ -219,6 +219,7 @@ PRO cgColorbar, $
     CHARSIZE=charsize, $
     CLAMP=clamp, $
     COLOR=color, $
+    DISCRETE=discrete, $
     DIVISIONS=divisions, $
     FIT=fit, $
     FONT=font, $
@@ -274,6 +275,7 @@ PRO cgColorbar, $
             CHARSIZE=charsize, $
             CLAMP=clamp, $
             COLOR=color, $
+            DISCRETE=discrete, $
             DIVISIONS=divisions, $
             FIT=fit, $
             FONT=font, $
@@ -374,6 +376,14 @@ PRO cgColorbar, $
     SetDefaultValue, oob_factor, 1.0
     xlog = Keyword_Set(xlog)
     ylog = Keyword_Set(ylog)
+    
+    ; If the user asked for discrete colors, set some keywwords appropriately.
+    ; This really should not be used for more than 16 or colors, but I don't
+    ; want to limit it for the user.
+    IF Keyword_Set(discrete) THEN BEGIN
+       divisions = ncolors
+       ticklen = 1.0
+    ENDIF
 
     ; You can't have a format set *and* use ticknames.
     IF N_ELEMENTS(ticknames) NE 0 THEN format = ""

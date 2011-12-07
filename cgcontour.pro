@@ -121,6 +121,10 @@
 ;     noerase: in, optional, type=boolean, default=0
 ;        Set this keyword to prevent the window from erasing the contents before displaying
 ;        the contour plot.
+;     olevels: out, optional
+;         Set to a named variable to return the actual contour levels used in the program.
+;         Unfortunately, output variables cannot be returned if the cgContour command is
+;         being executed in a cgWindow.
 ;     overplot: in, optional, type=boolean
 ;        Set this keyword to overplot the contours onto a previously established
 ;        data coordinate system.
@@ -231,6 +235,7 @@
 ;        Change from 15 Sept 2011 forgot to include the possibility of pixmap windows. Algorithm
 ;            made more robust. 27 Oct 2011. DWF.
 ;        There was a problem with axes when plotting contours in 3D that has been fixed. 18 Nov 2011. DWF.
+;        Added OLEVELS keyword. 7 Dec 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -256,6 +261,7 @@ PRO cgContour, data, x, y, $
     NOCLIP=noclip, $
     NOERASE=noerase, $
     MISSINGVALUE=missingvalue, $
+    OLEVELS=olevels, $
     ONIMAGE=onImage, $
     OVERPLOT=overplot, $
     PALETTE=palette, $
@@ -326,6 +332,7 @@ PRO cgContour, data, x, y, $
                 NOCLIP=noclip, $
                 NOERASE=noerase, $
                 MISSINGVALUE=missingvalue, $
+                OLEVELS=olevels, $
                 ONIMAGE=onimage, $
                 OVERPLOT=overplot, $
                 PALETTE=palette, $
@@ -371,6 +378,7 @@ PRO cgContour, data, x, y, $
             NOCLIP=noclip, $
             NOERASE=noerase, $
             MISSINGVALUE=missingvalue, $
+            OLEVELS=olevels, $
             ONIMAGE=onimage, $
             OVERPLOT=overplot, $
             PALETTE=palette, $
@@ -794,7 +802,9 @@ PRO cgContour, data, x, y, $
                     
     ENDIF
     
-    ; This is where we actually draw the data. 
+    ; This is where we actually draw the data. The actual levels are returned in the OLEVELS
+    ; keyword.
+    olevels = levels
     Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
        LEVELS=levels, C_Labels=c_labels, C_COLORS=con_colors, XTHICK=xthick, YTHICK=ythick, $
        POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, T3D=t3d, CHARSIZE=charsize, $

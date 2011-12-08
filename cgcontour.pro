@@ -125,7 +125,12 @@
 ;         Set to a named variable to return the actual contour levels used in the program.
 ;         Unfortunately, output variables cannot be returned if the cgContour command is
 ;         being executed in a cgWindow.
-;     overplot: in, optional, type=boolean
+;     outcolor: in, optional, type=string, default='charcoal'
+;         The color of the contour lines when the `Outline` keyword is used.
+;     outline: in, optional, type=boolean, default=0
+;         This keyword applies only if the `Fill` keyword is set. It will draw the
+;         contour lines on top of the filled contour. It draws the outline in the `OutColor`.
+;     overplot: in, optional, type=boolean, default=0
 ;        Set this keyword to overplot the contours onto a previously established
 ;        data coordinate system.
 ;     palette: in, optional, type=byte
@@ -236,6 +241,7 @@
 ;            made more robust. 27 Oct 2011. DWF.
 ;        There was a problem with axes when plotting contours in 3D that has been fixed. 18 Nov 2011. DWF.
 ;        Added OLEVELS keyword. 7 Dec 2011. DWF.
+;        Added OUTLINE and OUTCOLOR keywords. 8 Dec 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -263,6 +269,8 @@ PRO cgContour, data, x, y, $
     MISSINGVALUE=missingvalue, $
     OLEVELS=olevels, $
     ONIMAGE=onImage, $
+    OUTCOLOR=outcolor, $
+    OUTLINE=outline, $
     OVERPLOT=overplot, $
     PALETTE=palette, $
     POSITION=position, $
@@ -334,6 +342,8 @@ PRO cgContour, data, x, y, $
                 MISSINGVALUE=missingvalue, $
                 OLEVELS=olevels, $
                 ONIMAGE=onimage, $
+                OUTCOLOR=outcolor, $
+                OUTLINE=outline, $
                 OVERPLOT=overplot, $
                 PALETTE=palette, $
                 POSITION=position, $
@@ -380,6 +390,8 @@ PRO cgContour, data, x, y, $
             MISSINGVALUE=missingvalue, $
             OLEVELS=olevels, $
             ONIMAGE=onimage, $
+            OUTCOLOR=outcolor, $
+            OUTLINE=outline, $
             OVERPLOT=overplot, $
             PALETTE=palette, $
             POSITION=position, $
@@ -633,10 +645,13 @@ PRO cgContour, data, x, y, $
         axiscolor = 'OPPOSITE'
     ENDIF
     
+    ; Default values for keywords.
     fill = Keyword_Set(fill)
     irregular = Keyword_Set(irregular)
-    IF N_Elements(label) EQ 0 THEN label = 1
-    IF N_Elements(resolution) EQ 0 THEN resolution=[41,41]
+    SetDefaultValue, label, 1
+    SetDefaultValue, resolution, [41,41]
+    SetDefaultValue, outcolor, 'charcoal'
+    outline = Keyword_Set(outline)
     IF N_Elements(nlevels) EQ 0 THEN BEGIN
         IF N_Elements(levels) EQ 0 THEN nlevels = 6 ELSE nlevels = N_Elements(levels)
     ENDIF    
@@ -646,8 +661,8 @@ PRO cgContour, data, x, y, $
         IF N_Elements(noclip) EQ 0 THEN noclip = 1
     ENDIF
     noclip = Keyword_Set(noclip)
-    IF N_Elements(xstyle) EQ 0 THEN xstyle=1
-    IF N_Elements(ystyle) EQ 0 THEN ystyle=1
+    SetDefaultValue, xstyle, 1
+    SetDefaultValue, ystyle, 1
     IF N_Elements(missingvalue) NE 0 THEN BEGIN
         IF  (Size(data, /TNAME) NE 'FLOAT') $
         AND (Size(data, /TNAME) NE 'DOUBLE') $
@@ -810,6 +825,16 @@ PRO cgContour, data, x, y, $
        POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, T3D=t3d, CHARSIZE=charsize, $
        FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize, XTICKLEN=xticklen, YTICKLEN=yticklen, $
        XTICKV=xtickv, XTICKS=xticks, YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip
+       
+    ; If this is a filled contour plot, and the OUTLINE keyword is set, then draw the contour
+    ; outlines over the top of the data. Use the color charcoal to do the overplotting.
+    IF fill && outline THEN BEGIN
+        Contour, contourData, xgrid, ygrid, COLOR=cgColor(outcolor), $
+           LEVELS=levels, C_Labels=c_labels, XTHICK=xthick, YTHICK=ythick, $
+           _STRICT_EXTRA=extra, T3D=t3d, CHARSIZE=charsize, $
+           FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize, XTICKLEN=xticklen, YTICKLEN=yticklen, $
+           XTICKV=xtickv, XTICKS=xticks, YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip
+    ENDIF
         
     ; If this is the first plot in PS, then we have to make it appear that we have
     ; drawn a plot, even though we haven't.

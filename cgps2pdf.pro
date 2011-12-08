@@ -40,7 +40,7 @@
 ; to be installed on the user's computer, unless you are using a 
 ; Macintosh computer or an alterntive UNIX command to do the conversion
 ; for you. If you are on a Macintosh, the supplied pstopdf
-; program is used instead. Use the 'UNIX_Convert_Cmd' keyword to select
+; program is used instead. Use the `UNIX_Convert_Cmd` keyword to select
 ; an alternative UNIX command (e.g., pstopdf or epstopdf).
 ;
 ; :Categories:
@@ -51,7 +51,7 @@
 ;         The name of the input PostScript file that is being converted to a PDF file.
 ;         If not provided, the user will be asked to select a file.
 ;     pdf_file: in, optional, type=string
-;         The name of the output PDF file. If not provide, the name is constructed from
+;         The name of the output PDF file. If not provided, the name is constructed from
 ;         the input PostScript file name.
 ;
 ; :Keywords:
@@ -62,7 +62,8 @@
 ;         command. It assumes WINDOWS users have installed Ghostscript in either
 ;         the C:\gs or C:\Program Files\gs directories. If either of these assumptions
 ;         is incorrect, you can specify the directory where the Ghostscript executable
-;         resides with this keyword. (The WINDOWS executable is named gswin32c.exe.)
+;         resides with this keyword. (The Windows 32-bit executable is named gswin32c.exe
+;         and the 64-bit executable is named gswin64c.exe.)
 ;     pagetype: in, optional, type=string, default="LETTER"
 ;         Set this keyword to the "type" of page. Possible values are::
 ;

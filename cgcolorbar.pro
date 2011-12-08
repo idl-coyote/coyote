@@ -207,6 +207,7 @@
 ;          is the default value, then default is DIVISIONS=0, else DIVISIONS=6.
 ;       Documented the TICKLEN keyword and set the default tick length to 0.25. 3 Oct 2011. DWF.
 ;       Added the OOB_FACTOR, OOB_HIGH and OOB_LOW keywords. 5 Dec 2011. DWF.
+;       Added DISCRETE keyword. 7 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008, Fanning Software Consulting, Inc.

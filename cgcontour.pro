@@ -414,7 +414,7 @@ PRO cgContour, data, x, y, $
             
          RETURN
     ENDIF
-    
+
     ; Check parameters.
     IF N_Elements(data) EQ 0 THEN BEGIN
         Print, 'USE SYNTAX: cgContour, data, x, y, NLEVELS=10'

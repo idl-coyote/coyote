@@ -384,6 +384,7 @@ PRO cgColorbar, $
     IF Keyword_Set(discrete) THEN BEGIN
        divisions = ncolors
        ticklen = 1.0
+       minor = 0
     ENDIF
 
     ; You can't have a format set *and* use ticknames.
@@ -567,15 +568,20 @@ PRO cgColorbar, $
 
           AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
              YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
-             FONT=font, YTITLE=title, _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, YLOG=ylog
+             FONT=font, YTITLE=title, _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, $
+             YLOG=ylog
 
        ENDIF ELSE BEGIN
 
           PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1,  $
-             YTICKS=divisions, YSTYLE=1, XSTYLE=1, YTITLE=title, $
+             YTICKS=divisions, YSTYLE=9, XSTYLE=1, YTITLE=title, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              XTICKFORMAT='(A1)', YTICKFORMAT=format, YMinor=minor, _STRICT_EXTRA=extra, $
              YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font, XTITLE=""
+
+          AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT='(A1)', YTICKS=divisions, $
+             YTICKLEN=0.001, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
+             FONT=font, YTITLE="", _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME="", YLOG=ylog
 
        ENDELSE
 
@@ -586,24 +592,28 @@ PRO cgColorbar, $
           PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=divisions, $
              YTICKS=1, XSTYLE=9, YSTYLE=1, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
-             YTICKFORMAT='(A1)', XTICKFORMAT='(A1)', XTICKLEN=ticklen, $
+             YTICKFORMAT='(A1)', XTICKFORMAT='(A1)', XTICKLEN=0.01, $
              XRANGE=[minrange, maxrange], FONT=font, XMINOR=minor, _STRICT_EXTRA=extra, $
              XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE=""
 
           AXIS, XTICKS=divisions, XSTYLE=1, COLOR=color, CHARSIZE=charsize, $
              XTICKFORMAT=format, XTICKLEN=ticklen, XRANGE=[minrange, maxrange], XAXIS=1, $
-             FONT=font, XTITLE=title, _STRICT_EXTRA=extra, XCHARSIZE=charsize, XMINOR=minor, $
+             FONT=font, XTITLE=title, _STRICT_EXTRA=extra, XMINOR=minor, $
              XTICKNAME=ticknames, XLOG=xlog, YTITLE=""
 
        ENDIF ELSE BEGIN
 
           PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=divisions, $
-             YTICKS=1, XSTYLE=1, YSTYLE=1, TITLE=title, $
+             YTICKS=1, XSTYLE=9, YSTYLE=1, TITLE=title, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              YTICKFORMAT='(A1)', XTICKFORMAT=format, XTICKLEN=ticklen, $
              XRANGE=[minrange, maxrange], FONT=font, XMinor=minor, _STRICT_EXTRA=extra, $
              XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE=""
 
+          AXIS, XTICKS=divisions, XSTYLE=1, COLOR=color, CHARSIZE=charsize, $
+             XTICKFORMAT='(A1)', XTICKLEN=0.001, XRANGE=[minrange, maxrange], XAXIS=1, $
+             FONT=font, XTITLE="", _STRICT_EXTRA=extra, XCHARSIZE=charsize, XMINOR=minor, $
+             XTICKNAME="", XLOG=xlog, YTITLE=""
         ENDELSE
 
     ENDELSE

@@ -94,8 +94,29 @@
 ;         by row.
 ;     noerase: in, optional, type=boolean, default=0
 ;         Set this keyword to draw the plot without erasing the display first.
+;     outfilename: in, optional, type=string
+;        If the `Output` keyword is set, the user will be asked to supply an output
+;        filename, unless this keyword is set to a non-null string. In that case, the
+;        value of this keyword will be used as the filename and there will be no dialog
+;        presented to the user.
 ;     outline: in, optional, type=boolean, default=0
 ;         Set this keyword to draw an outline around each bar in the OPLOTCOLORS.
+;     output: in, optional, type=string, default=""
+;        Set this keyword to the type of output desired. Possible values are these::
+;            
+;            'PS'   - PostScript file
+;            'EPS'  - Encapsulated PostScript file
+;            'PDF'  - PDF file
+;            'BMP'  - BMP raster file
+;            'GIF'  - GIF raster file
+;            'JPEG' - JPEG raster file
+;            'PNG'  - PNG raster file
+;            'TIFF' - TIFF raster file
+;            
+;        Note that ImageMagick and Ghostview MUST be installed for anything other than PostScript
+;        output to work. (See cgPS2PDF and PS_END for details.) And also note that you should
+;        NOT use this keyword when doing multiple plots. It is really just to be used as a
+;        convenient way to get output for a single plot command.
 ;     oplotcolors: in, optional, type=varies, default='charcoal'
 ;         A vector of color values, similar to colors for overplot outlines on the bars.
 ;         If a scalar value (e.g., "charcoal") the same value is used for all outlines.
@@ -180,6 +201,7 @@
 ;            time.
 ;         Updated the BACKGROUND color selection from lessons learned in 27 Oct 2011 cgContour 
 ;             corrections. 27 Oct 2011. DWF.
+;         Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -197,7 +219,9 @@ PRO cgBarPlot, values, $
     COLORS=scolors, $
     LAYOUT=layout, $
     NOERASE=noerase, $
+    OUTFILENAME=outfilename, $
     OUTLINE=outline, $
+    OUTPUT=output, $
     OPLOTCOLORS=oplotcolors, $
     OVERPLOT=overplot, $
     POSITION=position, $
@@ -298,6 +322,88 @@ PRO cgBarPlot, values, $
          RETURN
     ENDIF
     
+    ; Are we doing some kind of output?
+    IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
+    
+       outputSelection = StrUpCase(output)
+       typeOfOutput = ['PS','EPS','PDF','BMP','GIF','JPEG','PNG','TIFF']
+       void = Where(typeOfOutput EQ outputSelection, count)
+       IF count EQ 0 THEN Message, 'Cannot find ' + outputSelection + ' in allowed output types.'
+       
+       ; Set things up.
+       CASE outputSelection OF
+          
+          'PS': BEGIN
+              ext = '.ps'
+              delete_ps = 0
+              END
+       
+          'EPS': BEGIN
+              ext = '.eps'
+              encapsulated = 1
+              delete_ps = 0
+              END
+
+          'PDF': BEGIN
+              ext = '.pdf'
+              pdf_flag = 1
+              delete_ps = 1
+              END
+       
+          'BMP': BEGIN
+              ext = '.bmp'
+              bmp_flag = 1
+              delete_ps = 1
+              END
+       
+          'GIF': BEGIN
+              ext = '.gif'
+              gif_flag = 1
+              delete_ps = 1
+              END
+       
+          'JPEG': BEGIN
+              ext = '.jpg'
+              jpeg_flag = 1
+              delete_ps = 1
+              END
+       
+          'PNG': BEGIN
+              ext = '.png'
+              png_flag = 1
+              delete_ps = 1
+              END
+       
+          'TIFF': BEGIN
+              ext = '.tif'
+              tiff_flag = 1
+              delete_ps = 1
+              END
+       
+       
+       ENDCASE
+       
+       ; Do you need a filename?
+       IF ( (N_Elements(outfilename) EQ 0) || (outfilename EQ "") ) THEN BEGIN 
+            filename = 'cgplot' + ext
+            outfilename = cgPickfile(FILE=filename, TITLE='Select Output File Name...', $
+                FILTER=ext, /WRITE)
+            IF outfilename EQ "" THEN RETURN
+       ENDIF
+       
+       ; We need to know the root name of the file, because we have to make a PostScript
+       ; file of the same name. At least we do if the type is not PS or EPS.
+       IF (outputSelection NE 'PS') && (outputSelection NE 'EPS') THEN BEGIN
+           root_name = FSC_Base_Filename(outfilename, DIRECTORY=theDir)
+           IF theDir EQ "" THEN CD, CURRENT=theDir
+           ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
+       ENDIF ELSE ps_filename = outfilename
+       
+       ; Set up the PostScript device.
+       PS_Start, FILENAME=ps_filename, ENCAPSULATED=encapsulated, QUIET=1
+    
+    ENDIF
+   
     ; The number of bars to draw.
     nbars = N_Elements(values)
 
@@ -496,4 +602,21 @@ PRO cgBarPlot, values, $
         xticklen=0.0
     ENDELSE
 
+    ; Are we producing output? If so, we need to clean up here.
+    IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
+    
+        ; Close the PostScript file and create whatever output is needed.
+        PS_END, DELETE_PS=delete_ps, $
+             BMP=bmp_flag, $
+             GIF=gif_flag, $
+             JPEG=jpeg_flag, $
+             PDF=pdf_flag, $
+             PNG=png_flag, $
+             TIFF=tiff_flag
+         basename = File_Basename(outfilename)
+         dirname = File_Dirname(outfilename)
+         IF dirname EQ "." THEN CD, CURRENT=dirname
+         Print, 'Output File: ' + Filepath(ROOT_DIR=dirname, basename)
+    ENDIF
+    
 END

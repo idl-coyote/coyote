@@ -99,6 +99,7 @@
 ;        Add the ability to change the label character size and thickness via the normal
 ;          XCHARSIZE and XTHICK keywords you would use for a plot. 3 Dec 2010. DWF.
 ;        Fixed a couple of typos, added ADDCMD, CHARSIZE, LAYOUT and WINDOW keywords. 2 Feb 2011. DWF.
+;         Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
@@ -359,6 +360,27 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 ;    missing_data_value: in, optional
 ;       Set this keyword to a value that will be used to identify missing data.
 ;       Missing data is not used in the calculations of the box plot.
+;    outfilename: in, optional, type=string
+;       If the `Output` keyword is set, the user will be asked to supply an output
+;       filename, unless this keyword is set to a non-null string. In that case, the
+;       value of this keyword will be used as the filename and there will be no dialog
+;       presented to the user.
+;    output: in, optional, type=string, default=""
+;       Set this keyword to the type of output desired. Possible values are these::
+;            
+;            'PS'   - PostScript file
+;            'EPS'  - Encapsulated PostScript file
+;            'PDF'  - PDF file
+;            'BMP'  - BMP raster file
+;            'GIF'  - GIF raster file
+;            'JPEG' - JPEG raster file
+;            'PNG'  - PNG raster file
+;            'TIFF' - TIFF raster file
+;            
+;       Note that ImageMagick and Ghostview MUST be installed for anything other than PostScript
+;       output to work. (See cgPS2PDF and PS_END for details.) And also note that you should
+;       NOT use this keyword when doing multiple plots. It is really just to be used as a
+;       convenient way to get output for a single plot command.
 ;    overplot: in, optional, type=boolean, default=0              
 ;       If this keyword is set, the boxplots will be overdrawn on the current
 ;       set of axes. The X axis will be presumed to be scaled from 0 to 1 more
@@ -395,6 +417,8 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
         LABELS=labels, $
         LAYOUT=layout, $
         MISSING_DATA_VALUE=missing_data_value, $
+        OUTFILENAME=outfilename, $
+        OUTPUT=output, $
         OVERPLOT=overplot, $
         ROTATE=rotate, $
         STATS=stats, $
@@ -467,6 +491,88 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
          RETURN
     ENDIF
     
+    ; Are we doing some kind of output?
+    IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
+    
+       outputSelection = StrUpCase(output)
+       typeOfOutput = ['PS','EPS','PDF','BMP','GIF','JPEG','PNG','TIFF']
+       void = Where(typeOfOutput EQ outputSelection, count)
+       IF count EQ 0 THEN Message, 'Cannot find ' + outputSelection + ' in allowed output types.'
+       
+       ; Set things up.
+       CASE outputSelection OF
+          
+          'PS': BEGIN
+              ext = '.ps'
+              delete_ps = 0
+              END
+       
+          'EPS': BEGIN
+              ext = '.eps'
+              encapsulated = 1
+              delete_ps = 0
+              END
+
+          'PDF': BEGIN
+              ext = '.pdf'
+              pdf_flag = 1
+              delete_ps = 1
+              END
+       
+          'BMP': BEGIN
+              ext = '.bmp'
+              bmp_flag = 1
+              delete_ps = 1
+              END
+       
+          'GIF': BEGIN
+              ext = '.gif'
+              gif_flag = 1
+              delete_ps = 1
+              END
+       
+          'JPEG': BEGIN
+              ext = '.jpg'
+              jpeg_flag = 1
+              delete_ps = 1
+              END
+       
+          'PNG': BEGIN
+              ext = '.png'
+              png_flag = 1
+              delete_ps = 1
+              END
+       
+          'TIFF': BEGIN
+              ext = '.tif'
+              tiff_flag = 1
+              delete_ps = 1
+              END
+       
+       
+       ENDCASE
+       
+       ; Do you need a filename?
+       IF ( (N_Elements(outfilename) EQ 0) || (outfilename EQ "") ) THEN BEGIN 
+            filename = 'cgplot' + ext
+            outfilename = cgPickfile(FILE=filename, TITLE='Select Output File Name...', $
+                FILTER=ext, /WRITE)
+            IF outfilename EQ "" THEN RETURN
+       ENDIF
+       
+       ; We need to know the root name of the file, because we have to make a PostScript
+       ; file of the same name. At least we do if the type is not PS or EPS.
+       IF (outputSelection NE 'PS') && (outputSelection NE 'EPS') THEN BEGIN
+           root_name = FSC_Base_Filename(outfilename, DIRECTORY=theDir)
+           IF theDir EQ "" THEN CD, CURRENT=theDir
+           ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
+       ENDIF ELSE ps_filename = outfilename
+       
+       ; Set up the PostScript device.
+       PS_Start, FILENAME=ps_filename, ENCAPSULATED=encapsulated, QUIET=1
+    
+    ENDIF
+   
     ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
     ; done BEFORE checking the LAYOUT properties.
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
@@ -583,7 +689,25 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
              WIDTH=width, XLOCATION=j, STATS=s
           IF Arg_Present(stats) THEN stats[j-1] = s
       ENDFOR
-      
+          
       ; Clean up.
       IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
+      
+    ; Are we producing output? If so, we need to clean up here.
+    IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
+    
+        ; Close the PostScript file and create whatever output is needed.
+        PS_END, DELETE_PS=delete_ps, $
+             BMP=bmp_flag, $
+             GIF=gif_flag, $
+             JPEG=jpeg_flag, $
+             PDF=pdf_flag, $
+             PNG=png_flag, $
+             TIFF=tiff_flag
+         basename = File_Basename(outfilename)
+         dirname = File_Dirname(outfilename)
+         IF dirname EQ "." THEN CD, CURRENT=dirname
+         Print, 'Output File: ' + Filepath(ROOT_DIR=dirname, basename)
+    ENDIF
+      
    END ;-----------------------------------------------------------------------------------------------------

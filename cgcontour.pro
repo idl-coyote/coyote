@@ -127,9 +127,30 @@
 ;         being executed in a cgWindow.
 ;     outcolor: in, optional, type=string, default='charcoal'
 ;         The color of the contour lines when the `Outline` keyword is used.
+;     outfilename: in, optional, type=string
+;        If the `Output` keyword is set, the user will be asked to supply an output
+;        filename, unless this keyword is set to a non-null string. In that case, the
+;        value of this keyword will be used as the filename and there will be no dialog
+;        presented to the user.
 ;     outline: in, optional, type=boolean, default=0
 ;         This keyword applies only if the `Fill` keyword is set. It will draw the
 ;         contour lines on top of the filled contour. It draws the outline in the `OutColor`.
+;     output: in, optional, type=string, default=""
+;        Set this keyword to the type of output desired. Possible values are these::
+;            
+;            'PS'   - PostScript file
+;            'EPS'  - Encapsulated PostScript file
+;            'PDF'  - PDF file
+;            'BMP'  - BMP raster file
+;            'GIF'  - GIF raster file
+;            'JPEG' - JPEG raster file
+;            'PNG'  - PNG raster file
+;            'TIFF' - TIFF raster file
+;            
+;        Note that ImageMagick and Ghostview MUST be installed for anything other than PostScript
+;        output to work. (See cgPS2PDF and PS_END for details.) And also note that you should
+;        NOT use this keyword when doing multiple plots. It is really just to be used as a
+;        convenient way to get output for a single plot command.
 ;     overplot: in, optional, type=boolean, default=0
 ;        Set this keyword to overplot the contours onto a previously established
 ;        data coordinate system.
@@ -242,6 +263,8 @@
 ;        There was a problem with axes when plotting contours in 3D that has been fixed. 18 Nov 2011. DWF.
 ;        Added OLEVELS keyword. 7 Dec 2011. DWF.
 ;        Added OUTLINE and OUTCOLOR keywords. 8 Dec 2011. DWF.
+;        Modified the way the axes are drawn when given a negative tick length. 9 Dec 2011. DWF.
+;        Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -270,7 +293,9 @@ PRO cgContour, data, x, y, $
     OLEVELS=olevels, $
     ONIMAGE=onImage, $
     OUTCOLOR=outcolor, $
+    OUTFILENAME=outfilename, $
     OUTLINE=outline, $
+    OUTPUT=output, $
     OVERPLOT=overplot, $
     PALETTE=palette, $
     POSITION=position, $
@@ -300,6 +325,12 @@ PRO cgContour, data, x, y, $
         IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
         IF (!D.Name NE "NULL") && (N_Elements(rr) NE 0) THEN TVLCT, rr, gg, bb
         IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        RETURN
+    ENDIF
+    
+    ; Check parameters.
+    IF N_Elements(data) EQ 0 THEN BEGIN
+        Print, 'USE SYNTAX: cgContour, data, x, y, NLEVELS=10'
         RETURN
     ENDIF
     
@@ -415,12 +446,88 @@ PRO cgContour, data, x, y, $
          RETURN
     ENDIF
 
-    ; Check parameters.
-    IF N_Elements(data) EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: cgContour, data, x, y, NLEVELS=10'
-        RETURN
-    ENDIF
+    ; Are we doing some kind of output?
+    IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
+       outputSelection = StrUpCase(output)
+       typeOfOutput = ['PS','EPS','PDF','BMP','GIF','JPEG','PNG','TIFF']
+       void = Where(typeOfOutput EQ outputSelection, count)
+       IF count EQ 0 THEN Message, 'Cannot find ' + outputSelection + ' in allowed output types.'
+       
+       ; Set things up.
+       CASE outputSelection OF
+          
+          'PS': BEGIN
+              ext = '.ps'
+              delete_ps = 0
+              END
+       
+          'EPS': BEGIN
+              ext = '.eps'
+              encapsulated = 1
+              delete_ps = 0
+              END
+
+          'PDF': BEGIN
+              ext = '.pdf'
+              pdf_flag = 1
+              delete_ps = 1
+              END
+       
+          'BMP': BEGIN
+              ext = '.bmp'
+              bmp_flag = 1
+              delete_ps = 1
+              END
+       
+          'GIF': BEGIN
+              ext = '.gif'
+              gif_flag = 1
+              delete_ps = 1
+              END
+       
+          'JPEG': BEGIN
+              ext = '.jpg'
+              jpeg_flag = 1
+              delete_ps = 1
+              END
+       
+          'PNG': BEGIN
+              ext = '.png'
+              png_flag = 1
+              delete_ps = 1
+              END
+       
+          'TIFF': BEGIN
+              ext = '.tif'
+              tiff_flag = 1
+              delete_ps = 1
+              END
+       
+       
+       ENDCASE
+       
+       ; Do you need a filename?
+       IF ( (N_Elements(outfilename) EQ 0) || (outfilename EQ "") ) THEN BEGIN 
+            filename = 'cgplot' + ext
+            outfilename = cgPickfile(FILE=filename, TITLE='Select Output File Name...', $
+                FILTER=ext, /WRITE)
+            IF outfilename EQ "" THEN RETURN
+       ENDIF
+       
+       ; We need to know the root name of the file, because we have to make a PostScript
+       ; file of the same name. At least we do if the type is not PS or EPS.
+       IF (outputSelection NE 'PS') && (outputSelection NE 'EPS') THEN BEGIN
+           root_name = FSC_Base_Filename(outfilename, DIRECTORY=theDir)
+           IF theDir EQ "" THEN CD, CURRENT=theDir
+           ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
+       ENDIF ELSE ps_filename = outfilename
+       
+       ; Set up the PostScript device.
+       PS_Start, FILENAME=ps_filename, ENCAPSULATED=encapsulated, QUIET=1
+    
+    ENDIF
+   
     ; If you want to overplot on an image, set the OVERPLOT keyword.
     IF Keyword_Set(onImage) THEN overplot = 1
     
@@ -854,6 +961,23 @@ PRO cgContour, data, x, y, $
           YTICKV=ytickv, YTICKS=yticks, YTICKLEN=yticklen, T3D=t3D, ZVALUE=zvalue
        cgAxis, YAXIS=1, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)', YSTYLE=ystyle, $
           YTICKV=ytickv, YTICKS=yticks, YTICKLEN=yticklen, T3D=t3D, ZVALUE=zvalue
+    ENDIF
+    
+    ; Are we producing output? If so, we need to clean up here.
+    IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
+    
+        ; Close the PostScript file and create whatever output is needed.
+        PS_END, DELETE_PS=delete_ps, $
+             BMP=bmp_flag, $
+             GIF=gif_flag, $
+             JPEG=jpeg_flag, $
+             PDF=pdf_flag, $
+             PNG=png_flag, $
+             TIFF=tiff_flag
+         basename = File_Basename(outfilename)
+         dirname = File_Dirname(outfilename)
+         IF dirname EQ "." THEN CD, CURRENT=dirname
+         Print, 'Output File: ' + Filepath(ROOT_DIR=dirname, basename)
     ENDIF
     
     ; Restore the decomposed color state if you can.

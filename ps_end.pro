@@ -67,6 +67,9 @@
 ;        is converted to a raster format by ImageMagick. 
 ;     gif: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a GIF image. Requires ImageMagick.
+;     im_options: in, optional, type=string, default=""
+;        A string of ImageMagick "convert" options that can be passed to the ImageMagick convert 
+;        command. No error checking occurs with this string.
 ;     jpeg: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a JPEG image. Requires ImageMagick.
 ;     nofix: in, optional, type=boolean, default=0  
@@ -79,13 +82,12 @@
 ;        Set this keyword to convert the PostScript output file to a PDF file. Requires Ghostscript.
 ;     png: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a PNG image. Requires ImageMagick.
-;     im_options: in, optional, type=string, default=""
-;        A string of ImageMagick "convert" options that can be passed to the ImageMagick convert 
-;        command. No error checking occurs with this string.
 ;     resize: in, optional, type=integer, default=25
 ;        If an image is being created from the PostScript file, it is often resized by some 
 ;        amount. You can use this keyword to change the value (e.g, RESIZE=100).
 ;        The value is passed on to resize argument as a percentage in the ImageMagick call.
+;     showcmd: in, optional, type=boolean, default=0
+;        Set this command to show the command used to do any PostScript coversions.
 ;     tiff: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a TIFF image. Requires ImageMagick.
 ;          
@@ -135,6 +137,7 @@
 ;       Changes to handle inability to create raster files from PS encapsulated files in 
 ;           landscape mode. Added NOMESSAGE keyword. 26 Aug 2011. DWF.
 ;        Added PDF keyword. Requires Ghostscript to use. 6 Dec 2011. DWF.
+;        Added SHOWCMD keyword. 9 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
@@ -149,6 +152,7 @@ PRO PS_END, $
     JPEG=jpeg, $
     NOFIX=nofix, $
     NOMESSAGE=nomessage, $
+    SHOWCMD=showcmd, $
     PDF=pdf, $
     PNG=png, $
     RESIZE=resize, $
@@ -183,6 +187,7 @@ PRO PS_END, $
    ; Close the PostScript file, if this is PostScript device.
    IF !D.Name EQ 'PS' THEN Device, /CLOSE_FILE
    ps_filename = ps_struct.filename
+   showcmd = Keyword_Set(showcmd)
    
    ; If the file is in landscape mode, then fix it so that the plot
    ; is right-side up.
@@ -263,16 +268,20 @@ PRO PS_END, $
                 IF ps_struct.convert EQ 'PNG' $
                     THEN cmd = cmd + ' "' + 'PNG24:' +outfilename + '"' $
                     ELSE cmd = cmd + ' "' + outfilename + '"'
-                IF ~ps_struct.quiet THEN Print, 'ImageMagick CONVERT command: ',  cmd
+                IF ~ps_struct.quiet THEN BEGIN
+                    IF showcmd THEN Print, 'ImageMagick CONVERT command: ',  cmd
+                ENDIF
                 SPAWN, cmd, result, err_result
+                
                 IF ~ps_struct.quiet THEN BEGIN
                     IF N_Elements(result) NE 0 THEN BEGIN
                         FOR k=0,N_Elements(result)-1 DO Print, result[k]
                     ENDIF
                     IF N_Elements(err_result) NE 0 THEN BEGIN
                         FOR k=0,N_Elements(err_result)-1 DO Print, err_result[k]
-                    ENDIF
+                    ENDIF ELSE Print, 'Output file located here: + outfilename
                 ENDIF
+                
                 ; Have you been asked to delete the PostScript file?
                 IF Keyword_Set(delete_ps) THEN BEGIN
                     IF outfilename NE ps_filename THEN File_Delete, ps_filename

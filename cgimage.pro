@@ -140,6 +140,7 @@
 ;       Added the ability to stretch 2D image arrays in various ways before display. 1 Dec 2011.
 ;       Added the ability to handle missing data in 2D arrays before display. 1 Dec 2011.
 ;       Added a DISPLAY keyword to display the image in windows with the image aspect ratio. 2 Dec 2011.
+;       Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -776,6 +777,27 @@ END
 ;         keyword is set. Note that the output position is also stored in a 
 ;         FSC_$CGIMAGE common block so that other programs (e.g., cgMap, cgImageInfo, 
 ;         etc.) can take advantage of this information.
+;     outfilename: in, optional, type=string
+;        If the `Output` keyword is set, the user will be asked to supply an output
+;        filename, unless this keyword is set to a non-null string. In that case, the
+;        value of this keyword will be used as the filename and there will be no dialog
+;        presented to the user.
+;     output: in, optional, type=string, default=""
+;        Set this keyword to the type of output desired. Possible values are these::
+;            
+;            'PS'   - PostScript file
+;            'EPS'  - Encapsulated PostScript file
+;            'PDF'  - PDF file
+;            'BMP'  - BMP raster file
+;            'GIF'  - GIF raster file
+;            'JPEG' - JPEG raster file
+;            'PNG'  - PNG raster file
+;            'TIFF' - TIFF raster file
+;            
+;        Note that ImageMagick and Ghostview MUST be installed for anything other than PostScript
+;        output to work. (See cgPS2PDF and PS_END for details.) And also note that you should
+;        NOT use this keyword when doing multiple plots. It is really just to be used as a
+;        convenient way to get output for a single plot command.
 ;    overplot: in, optional, type=boolean, default=0
 ;         Setting this keyword causes the POSITION keyword to be ignored
 ;         and the image is positioned in the location established by the
@@ -903,6 +925,8 @@ PRO cgImage, image, x, y, $
    NOERASE=noerase, $
    NOINTERPOLATION=obsolete_nointerpolation, $ ; Added for compatibility with TVIMAGE.
    NORMAL=normal, $
+   OUTFILENAME=outfilename, $
+   OUTPUT=output, $
    OPOSITION=oposition, $
    OVERPLOT=overplot, $
    PALETTE=palette, $
@@ -1095,6 +1119,88 @@ PRO cgImage, image, x, y, $
              RETURN
     ENDIF
     
+    ; Are we doing some kind of output?
+    IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
+    
+       outputSelection = StrUpCase(output)
+       typeOfOutput = ['PS','EPS','PDF','BMP','GIF','JPEG','PNG','TIFF']
+       void = Where(typeOfOutput EQ outputSelection, count)
+       IF count EQ 0 THEN Message, 'Cannot find ' + outputSelection + ' in allowed output types.'
+       
+       ; Set things up.
+       CASE outputSelection OF
+          
+          'PS': BEGIN
+              ext = '.ps'
+              delete_ps = 0
+              END
+       
+          'EPS': BEGIN
+              ext = '.eps'
+              encapsulated = 1
+              delete_ps = 0
+              END
+
+          'PDF': BEGIN
+              ext = '.pdf'
+              pdf_flag = 1
+              delete_ps = 1
+              END
+       
+          'BMP': BEGIN
+              ext = '.bmp'
+              bmp_flag = 1
+              delete_ps = 1
+              END
+       
+          'GIF': BEGIN
+              ext = '.gif'
+              gif_flag = 1
+              delete_ps = 1
+              END
+       
+          'JPEG': BEGIN
+              ext = '.jpg'
+              jpeg_flag = 1
+              delete_ps = 1
+              END
+       
+          'PNG': BEGIN
+              ext = '.png'
+              png_flag = 1
+              delete_ps = 1
+              END
+       
+          'TIFF': BEGIN
+              ext = '.tif'
+              tiff_flag = 1
+              delete_ps = 1
+              END
+       
+       
+       ENDCASE
+       
+       ; Do you need a filename?
+       IF ( (N_Elements(outfilename) EQ 0) || (outfilename EQ "") ) THEN BEGIN 
+            filename = 'cgplot' + ext
+            outfilename = cgPickfile(FILE=filename, TITLE='Select Output File Name...', $
+                FILTER=ext, /WRITE)
+            IF outfilename EQ "" THEN RETURN
+       ENDIF
+       
+       ; We need to know the root name of the file, because we have to make a PostScript
+       ; file of the same name. At least we do if the type is not PS or EPS.
+       IF (outputSelection NE 'PS') && (outputSelection NE 'EPS') THEN BEGIN
+           root_name = FSC_Base_Filename(outfilename, DIRECTORY=theDir)
+           IF theDir EQ "" THEN CD, CURRENT=theDir
+           ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
+       ENDIF ELSE ps_filename = outfilename
+       
+       ; Set up the PostScript device.
+       PS_Start, FILENAME=ps_filename, ENCAPSULATED=encapsulated, QUIET=1
+    
+    ENDIF
+   
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
@@ -1840,6 +1946,23 @@ PRO cgImage, image, x, y, $
     
     ENDELSE
 
+    ; Are we producing output? If so, we need to clean up here.
+    IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
+    
+        ; Close the PostScript file and create whatever output is needed.
+        PS_END, DELETE_PS=delete_ps, $
+             BMP=bmp_flag, $
+             GIF=gif_flag, $
+             JPEG=jpeg_flag, $
+             PDF=pdf_flag, $
+             PNG=png_flag, $
+             TIFF=tiff_flag
+         basename = File_Basename(outfilename)
+         dirname = File_Dirname(outfilename)
+         IF dirname EQ "." THEN CD, CURRENT=dirname
+         Print, 'Output File: ' + Filepath(ROOT_DIR=dirname, basename)
+    ENDIF
+    
     ; Clean up after yourself.
     IF (!D.Name NE 'Z') THEN BEGIN
         TVLCT, rr, gg, bb

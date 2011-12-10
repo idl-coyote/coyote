@@ -278,6 +278,7 @@
 ;      I found in the SolarSoft version of this code. I've tried to make this compatible
 ;      with the version distributed with SolarSoft to reduce problems caused by two versions
 ;      of the software with the same name.
+;    9 December 2011. Fixed a problem with the ALL keyword on the Get_Item method. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -856,14 +857,14 @@ FUNCTION LINKEDLIST::GET_ITEM, index, $
         ; There is an unadvertised limitation in IDL's MAKE_ARRAY() function, in that it does not allow
         ; the automatic creation of structures by passing TYPE=8.  Instead, we use the VALUE= keyword
         ; keyword to MAKE_ARRAY.  This takes a scalar and not a vector.
-          dim_item      = Size(item, /DIMENSIONS) 
+          dim_item      = Size(item, /N_DIMENSIONS) 
           IF (dim_item gt 0) THEN BEGIN
-            size_item   = (Size(item))[1:dim_item]
-            type_item   = (Size(item))[dim_item+1]
+            size_item   = Size(item, /DIMENSIONS)
+            type_item   = Size(item, /TYPE)
             arr         =  Make_Array(dimension=[num,size_item], val=item[0])
         
           ENDIF ELSE BEGIN
-            type_item   = (Size(item))[1]
+            type_item   = Size(item, /TYPE)
             arr         = Make_Array(dimension=[num], val=item[0])
           ENDELSE
         
@@ -879,9 +880,8 @@ FUNCTION LINKEDLIST::GET_ITEM, index, $
           FOR i = 0L, num-1 DO BEGIN
         
                 item        =  *((*currentNode).item)
-                dim_item    = (Size(item))[0]               ; number of dimensions
-                IF (dim_item GT 0) THEN type_item   = (Size(item))[dim_item+1] $
-                  ELSE type_item    = (Size(item))[1]
+                dim_item    = Size(item, /N_DIMENSIONS)            ; number of dimensions
+                type_item    = Size(item, /TYPE)
                 IF ((type_item NE type_item_save) OR (dim_item NE dim_item_save)) THEN BEGIN
                     errorMsg = 'Inconsistent type or size for Get_Item(/ALL).  Use Get_Item(index) instead.'
                     Message, errorMsg, /CONTINUE

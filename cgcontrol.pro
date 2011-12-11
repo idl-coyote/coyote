@@ -75,6 +75,10 @@
 ;          Set this keyword to the name of a JPEG file to create automatically from the window.
 ;          Using this keyword is a way to create a JPEG file programmatically from a cgWindow application.
 ;          The raster file will be created via ImageMagick if im_raster has been set (default).
+;     create_pdf: in, optional, type='string', default='cgwindow.pdf'
+;          Set this keyword to the name of a PNG file to create automatically from the window.
+;          Using this keyword is a way to create a PDF file programmatically from a cgWindow application.
+;          The PDF file will be created via the Coyote Graphics program cgPS2PDF.
 ;     create_png: in, optional, type='string', default='cgwindow.png'
 ;          Set this keyword to the name of a PNG file to create automatically from the window.
 ;          Using this keyword is a way to create a PNG file programmatically from a cgWindow application.
@@ -200,6 +204,7 @@
 ;     Added PS_DECOMPOSED keyword to set the PostScript color mode. 30 Aug 2011. DWF.
 ;     Added SAVE_VISUALIZATION and RESTORE_VISUALIZATION keywords. 15 Sept 2011. DWF.
 ;     Added ASPECT keyword to control window aspect ratio. 9 Nov 2011. DWF.
+;     Added CREATE_PDF, PDF_UNIX_CONVERT_CMD, and PDF_PATH keywords. 11 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -213,6 +218,7 @@ PRO cgControl, selection, $
     CREATE_BMP=create_bmp, $                      ; Set this to the name of a bitmap file that is produced from the commands in the window.
     CREATE_GIF=create_gif, $                      ; Set this to the name of a GIF file that is produced from the commands in the window.
     CREATE_JPEG=create_jpeg, $                    ; Set this to the name of a JPEG file that is produced from the commands in the window.
+    CREATE_PDF=create_pdf, $                      ; Set this to the name of a PDF file that is produced from the commands in the window.
     CREATE_PNG=create_png, $                      ; Set this to the name of a PNG file that is produced from the commands in the window.
     CREATE_PS=create_ps, $                        ; Set this to the name of a PostScript file that is produced from the commands in the window.
     CREATE_TIFF=create_tiff, $                    ; Set this to the name of a TIFF file that is produced from the commands in the window.
@@ -405,6 +411,23 @@ PRO cgControl, selection, $
        ENDCASE
        
        IF Obj_Valid(objref[index]) THEN objref[index] -> AutoPostScriptFile, filename 
+   ENDIF
+
+   ; Are you creating a PDF file?
+   IF N_Elements(create_pdf) NE 0 THEN BEGIN
+   
+       typeName = Size(create_pdf, /TNAME)
+       CASE 1 OF
+          typeName EQ 'STRING': BEGIN
+            filename = create_pdf
+            END
+          (typeName EQ 'INT') && (create_pdf[0] EQ 1): BEGIN
+               filename = 'cgwindow.pdf'
+            END
+          ELSE: Message, 'Incorrect input to CREATE_PDF keyword.'
+       ENDCASE
+       
+       IF Obj_Valid(objref[index]) THEN objref[index] -> AutoRasterFile, 'PDF', filename 
    ENDIF
     
    ; Are you creating a bitmap file?

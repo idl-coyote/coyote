@@ -216,28 +216,61 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
 
     IF N_Elements(filetype) EQ 0 then filetype = 'PNG'
     IF N_Elements(filename) EQ 0 THEN filename = 'cgwindow.' + StrLowCase(filetype)
-
+    IF StrUpCase(filetype) EQ 'PDF' THEN rastertype = -1 ELSE rastertype = self.im_raster
+    
     ; Strip the extension off the filename.
     outname = FSC_Base_Filename(filename, DIRECTORY=dirName)
     
     ; Put it back together without an extension.
     outputFilename = Filepath(ROOT_DIR=dirName, outname)
     
-    ; What kind of raster file. The type will be set with cgControl, IM_RASTER=type.
-    CASE self.im_raster OF
-      ; Normal raster.
-      0: BEGIN
-         void = cgSnapshot(TYPE=filetype, FILENAME=outputFilename, /NODIALOG)
-         END
-
-      ; Raster via ImageMagick
-      1: BEGIN
-
-           ; Create a PostScript file first.
+    ; What kind of raster file.
+    CASE rasterType OF
+    
+        ; PDF File.
+       -1: BEGIN
+       
+           thisname = outname + '.ps'
+           outname = outname + '.pdf'
            PS_Start, $
                 DECOMPOSED=self.ps_decomposed, $
-                FILENAME=outputFilename + '.ps', $
-                EUROPEAN=self.ps_metric, $
+                FILENAME=thisname, $
+                METRIC=self.ps_metric, $
+                KEYWORDS=keywords, $ ; Returned PSConfig keywords.
+                SCALE_FACTOR=self.ps_scale_factor, $
+                CHARSIZE=self.ps_charsize, $
+                FONT=self.ps_font, $
+                QUIET=self.ps_quiet, $
+                TT_FONT=self.ps_tt_font
+                           
+           ; Draw the graphics.
+           self -> ExecuteCommands
+           
+           ; Close the file and make a PDF file.
+           PS_End
+           cgPS2PDF, thisname, outname, DELETE_PS=self.ps_delete, /SILENT, SUCCESS=success, $
+              UNIX_CONVERT_CMD=self.pdf_unix_convert_cmd, GS_PATH=self.pdf_path
+           IF ~success THEN BEGIN
+              Print, 'Unable to create PDF file. See cgPS2PDF documentation.'
+           ENDIF ELSE BEGIN
+              Print, 'PDF output will be created here: ' + outname
+           ENDELSE
+           END
+    
+        ; Normal raster.
+        0: BEGIN
+           void = cgSnapshot(TYPE=fileType, FILENAME=outname, /NODIALOG)
+           END
+           
+        ; Raster via ImageMagick.
+        1: BEGIN
+        
+           ; Create a PostScript file first.
+           thisname = outname + '.ps'
+           PS_Start, $
+                DECOMPOSED=self.ps_decomposed, $
+                FILENAME=thisname, $
+                METRIC=self.ps_metric, $
                 KEYWORDS=keywords, $ ; Returned PSConfig keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
@@ -252,7 +285,7 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
                 Message, 'ImageMagick cannot successfully convert an encapsulated ' + $
                          'PostScript file in landscape mode to a raster file. Returning...'
            ENDIF
-
+           
            ; Draw the graphics.
            self -> ExecuteCommands
            
@@ -279,8 +312,9 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options
            ENDCASE
-         END
-
+        
+           END
+    
     ENDCASE
 
     ; Set the window index number back.
@@ -924,7 +958,7 @@ PRO FSC_CmdWindow::SaveAsRaster, event
        filetype = 'PDF'
     ENDIF ELSE BEGIN
     
-        ; Determine if this is normal raster (o) or ImageMagick raster (1).
+        ; Determine if this is normal raster (0) or ImageMagick raster (1).
         IF StrMid(buttonValue, 0, 6) EQ 'RASTER' THEN BEGIN
             fileType = StrMid(buttonValue, 7)
             rasterType = 0 
@@ -2299,6 +2333,7 @@ END ;---------------------------------------------------------------------------
 ;             Imagemagick via cgControl. 10 Oct 2011. DWF.
 ;         Added WASPECT keyword to allow window aspect ratio to be set. 9 Nov 2011. DWF.   
 ;         Added PDF file to the Save As menu. Requires Ghostscript to be installed on some machines. 6 Dec 2011. DWF.
+;         Added modifications to allow PDF files to be programmatically created from cgControl. 11 Dec 2011. DWF.
 ;-
 PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.

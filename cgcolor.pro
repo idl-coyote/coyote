@@ -185,9 +185,9 @@ END ;---------------------------------------------------------------------------
 ;           Thistle            Tomato         Turquoise            Violet        Violet Red             Wheat
 ;           White              Yellow
 ;
-;        Here are the Brewer color names:
+;        Here are the Brewer color names::
 ;
-;            WT1       WT2       WT3       WT4       WT5       WT6       WT7       WT8
+;           WT1        WT2       WT3       WT4       WT5       WT6       WT7       WT8
 ;           TAN1      TAN2      TAN3      TAN4      TAN5      TAN6      TAN7      TAN8
 ;           BLK1      BLK2      BLK3      BLK4      BLK5      BLK6      BLK7      BLK8
 ;           GRN1      GRN2      GRN3      GRN4      GRN5      GRN6      GRN7      GRN8
@@ -198,7 +198,7 @@ END ;---------------------------------------------------------------------------
 ;           PBG1      PBG2      PBG3      PBG4      PBG5      PBG6      PBG7      PBG8
 ;           YGB1      YGB2      YGB3      YGB4      YGB5      YGB6      YGB7      YGB8
 ;           RYB1      RYB2      RYB3      RYB4      RYB5      RYB6      RYB7      RYB8
-;            TG1       TG2       TG3       TG4       TG5       TG6       TG7       TG8
+;           TG1        TG2       TG3       TG4       TG5       TG6       TG7       TG8
 ;            
 ;        The color name "OPPOSITE" is also available. It chooses a color "opposite" to the 
 ;        color of the pixel in the upper-right corner of the display, if a window is open.

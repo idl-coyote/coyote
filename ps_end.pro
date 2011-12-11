@@ -77,7 +77,9 @@
 ;        PostScript files is not called.
 ;     nomessage: in, optional, type=boolean, default=0                  
 ;        If this keyword is set, then no error messages are issued. The keyword is used primarily 
-;        to allow PS_END to reset the internal structure without a lot of ruckus.               
+;        to allow PS_END to reset the internal structure without a lot of ruckus.  
+;     outfilename: out, optional, type=string
+;        The name of the output filename created by the program.             
 ;     pdf: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a PDF file. Requires Ghostscript.
 ;     png: in, optional, type=boolean, default=0                 
@@ -138,6 +140,7 @@
 ;           landscape mode. Added NOMESSAGE keyword. 26 Aug 2011. DWF.
 ;        Added PDF keyword. Requires Ghostscript to use. 6 Dec 2011. DWF.
 ;        Added SHOWCMD keyword. 9 Dec 2011. DWF.
+;        Added OUTFILENAME keyword. 11 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
@@ -152,10 +155,11 @@ PRO PS_END, $
     JPEG=jpeg, $
     NOFIX=nofix, $
     NOMESSAGE=nomessage, $
-    SHOWCMD=showcmd, $
+    OUTFILENAME=outfilename, $
     PDF=pdf, $
     PNG=png, $
     RESIZE=resize, $
+    SHOWCMD=showcmd, $
     TIFF=tiff
             
 
@@ -187,6 +191,7 @@ PRO PS_END, $
    ; Close the PostScript file, if this is PostScript device.
    IF !D.Name EQ 'PS' THEN Device, /CLOSE_FILE
    ps_filename = ps_struct.filename
+   outfilename = ps_filename
    showcmd = Keyword_Set(showcmd)
    
    ; If the file is in landscape mode, then fix it so that the plot

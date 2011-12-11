@@ -240,7 +240,7 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
                 FONT=self.ps_font, $
-                QUIET=self.ps_quiet, $
+                QUIET=1, $
                 TT_FONT=self.ps_tt_font
                            
            ; Draw the graphics.
@@ -251,15 +251,16 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
            cgPS2PDF, thisname, outname, DELETE_PS=self.ps_delete, /SILENT, SUCCESS=success, $
               UNIX_CONVERT_CMD=self.pdf_unix_convert_cmd, GS_PATH=self.pdf_path
            IF ~success THEN BEGIN
-              Print, 'Unable to create PDF file. See cgPS2PDF documentation.'
+              Message, 'Unable to create PDF file. See cgPS2PDF documentation.'
            ENDIF ELSE BEGIN
-              Print, 'PDF output will be created here: ' + outname
+              IF ~self.ps_quiet THEN Print, 'PDF output will be created here: ' + outname
            ENDELSE
            END
     
         ; Normal raster.
         0: BEGIN
            void = cgSnapshot(TYPE=fileType, FILENAME=outname, /NODIALOG)
+           Print, 'Output file is located here: ' + outname 
            END
            
         ; Raster via ImageMagick.
@@ -275,7 +276,7 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
                 FONT=self.ps_font, $
-                QUIET=self.ps_quiet, $
+                QUIET=1, $
                 TT_FONT=self.ps_tt_font
                 
            ; Cannot successfully convert encapsulated landscape file to raster.
@@ -294,25 +295,25 @@ PRO FSC_CmdWindow::AutoRasterFile, filetype, filename
                 'BMP':  PS_END, /BMP, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
-                            IM_OPTIONS=self.im_options
+                            IM_OPTIONS=self.im_options, OUTFILENAME=outfilename
                 'GIF':  PS_END, /GIF, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
-                            IM_OPTIONS=self.im_options
+                            IM_OPTIONS=self.im_options, OUTFILENAME=outfilename
                 'JPEG': PS_END, /JPEG, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
-                            IM_OPTIONS=self.im_options
+                            IM_OPTIONS=self.im_options, OUTFILENAME=outfilename
                 'PNG':  PS_END, /PNG,  DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
-                            IM_OPTIONS=self.im_options
+                            IM_OPTIONS=self.im_options, OUTFILENAME=outfilename
                 'TIFF': PS_END, /TIFF, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
-                            IM_OPTIONS=self.im_options
+                            IM_OPTIONS=self.im_options, OUTFILENAME=outfilename
            ENDCASE
-        
+           IF ~self.ps_quiet THEN Print, 'Output file is located here: ' + outfilename
            END
     
     ENDCASE
@@ -1015,15 +1016,16 @@ PRO FSC_CmdWindow::SaveAsRaster, event
            cgPS2PDF, thisname, outname, DELETE_PS=self.ps_delete, /SILENT, SUCCESS=success, $
               UNIX_CONVERT_CMD=self.pdf_unix_convert_cmd, GS_PATH=self.pdf_path
            IF ~success THEN BEGIN
-              Print, 'Unable to create PDF file. See cgPS2PDF documentation.'
+              Message, 'Unable to create PDF file. See cgPS2PDF documentation.'
            ENDIF ELSE BEGIN
-              Print, 'PDF output will be created here: ' + outname
+              IF ~self.ps_quiet THEN Print, 'PDF output will be created here: ' + outname
            ENDELSE
            END
     
         ; Normal raster.
         0: BEGIN
            void = cgSnapshot(TYPE=fileType, FILENAME=outname, /NODIALOG)
+           IF ~self.ps_quiet THEN Print, 'Output file located here: ' + outname 
            END
            
         ; Raster via ImageMagick.
@@ -1039,7 +1041,7 @@ PRO FSC_CmdWindow::SaveAsRaster, event
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
                 FONT=self.ps_font, $
-                QUIET=self.ps_quiet, $
+                QUIET=1, $
                 TT_FONT=self.ps_tt_font
                 
            ; Cannot successfully convert encapsulated landscape file to raster.
@@ -1058,25 +1060,25 @@ PRO FSC_CmdWindow::SaveAsRaster, event
                 'BMP':  PS_END, /BMP, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
-                            IM_OPTIONS=self.im_options
+                            IM_OPTIONS=self.im_options, OUTFILENAME=outfilename
                 'GIF':  PS_END, /GIF, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
-                            IM_OPTIONS=self.im_options
+                            IM_OPTIONS=self.im_options, OUTFILENAME=outfilename
                 'JPEG': PS_END, /JPEG, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
-                            IM_OPTIONS=self.im_options
+                            IM_OPTIONS=self.im_options, OUTFILENAME=outfilename
                 'PNG':  PS_END, /PNG,  DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
-                            IM_OPTIONS=self.im_options
+                            IM_OPTIONS=self.im_options, OUTFILENAME=outfilename
                 'TIFF': PS_END, /TIFF, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
-                            IM_OPTIONS=self.im_options
+                            IM_OPTIONS=self.im_options, OUTFILENAME=outfilename
            ENDCASE
-        
+           IF ~self.ps_quiet THEN Print, 'Output will be created here: ' + outfilename
            END
     
     ENDCASE

@@ -777,13 +777,13 @@ END
 ;         keyword is set. Note that the output position is also stored in a 
 ;         FSC_$CGIMAGE common block so that other programs (e.g., cgMap, cgImageInfo, 
 ;         etc.) can take advantage of this information.
-;     outfilename: in, optional, type=string
-;        If the `Output` keyword is set, the user will be asked to supply an output
-;        filename, unless this keyword is set to a non-null string. In that case, the
-;        value of this keyword will be used as the filename and there will be no dialog
-;        presented to the user.
-;     output: in, optional, type=string, default=""
-;        Set this keyword to the type of output desired. Possible values are these::
+;    outfilename: in, optional, type=string
+;         If the `Output` keyword is set, the user will be asked to supply an output
+;         filename, unless this keyword is set to a non-null string. In that case, the
+;         value of this keyword will be used as the filename and there will be no dialog
+;         presented to the user.
+;    output: in, optional, type=string, default=""
+;         Set this keyword to the type of output desired. Possible values are these::
 ;            
 ;            'PS'   - PostScript file
 ;            'EPS'  - Encapsulated PostScript file
@@ -794,16 +794,16 @@ END
 ;            'PNG'  - PNG raster file
 ;            'TIFF' - TIFF raster file
 ;            
-;        Or, you can simply set this keyword to the name of the output file, and the type of
-;        file desired will be determined by the file extension. If you use this option, the
-;        user will not be prompted to supply the name of the output file.
+;         Or, you can simply set this keyword to the name of the output file, and the type of
+;         file desired will be determined by the file extension. If you use this option, the
+;         user will not be prompted to supply the name of the output file.
 ;            
-;        All raster file output is created through PostScript intermediate files (the
-;        PostScript files will be deleted), so ImageMagick and Ghostview MUST be installed 
-;        to produce anything other than PostScript output. (See cgPS2PDF and PS_END for 
-;        details.) And also note that you should NOT use this keyword when doing multiple 
-;        plots. The keyword is to be used as a convenient way to get PostScript or raster 
-;        output for a single graphics command.
+;         All raster file output is created through PostScript intermediate files (the
+;         PostScript files will be deleted), so ImageMagick and Ghostview MUST be installed 
+;         to produce anything other than PostScript output. (See cgPS2PDF and PS_END for 
+;         details.) And also note that you should NOT use this keyword when doing multiple 
+;         plots. The keyword is to be used as a convenient way to get PostScript or raster 
+;         output for a single graphics command.
 ;    overplot: in, optional, type=boolean, default=0
 ;         Setting this keyword causes the POSITION keyword to be ignored
 ;         and the image is positioned in the location established by the

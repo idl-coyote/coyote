@@ -127,7 +127,7 @@
 ;    orientation: in, optional, type=float, default=0.0
 ;       The orientation (rotations) of the lines used to fill the polygons if `LINE_FILL` is set.
 ;       (See POLYFILL documentation.)
-;     outfilename: in, optional, type=string
+;    outfilename: in, optional, type=string
 ;       If the `Output` keyword is set, the user will be asked to supply an output
 ;       filename, unless this keyword is set to a non-null string. In that case, the
 ;       value of this keyword will be used as the filename and there will be no dialog
@@ -135,7 +135,7 @@
 ;    outline: in, optional, type=boolean, default=0   
 ;       Set this keyword if you wish to draw only the outline of the histogram plot,
 ;       in a manner similar to setting PSYM=10 on a PLOT command.
-;     output: in, optional, type=string, default=""
+;    output: in, optional, type=string, default=""
 ;       Set this keyword to the type of output desired. Possible values are these::
 ;            
 ;            'PS'   - PostScript file

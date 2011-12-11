@@ -83,8 +83,8 @@
 ;        This keyword should always be set if displaying filled contours on map projections
 ;        or if missing data is present in the data you are contouring.
 ;     charsize: in, optional, type=float, default=cgDefCharSize()
-;         The character size for axes annotations. Uses cgDefCharSize to select default
-;         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
+;        The character size for axes annotations. Uses cgDefCharSize to select default
+;        character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
 ;     color: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the data color. By default, same as AXISCOLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -103,15 +103,15 @@
 ;        labelled. A 2 means label every 2nd contour level is labelled. A 3 means every 
 ;        3rd contour level is labelled, and so on.
 ;     layout: in, optional, type=intarr(3)
-;         This keyword specifies a grid with a graphics window and determines where the
-;         graphic should appear. The syntax of LAYOUT is three numbers: [ncolumns, nrows, location].
-;         The grid is determined by the number of columns (ncolumns) by the number of 
-;         rows (nrows). The location of the graphic is determined by the third number. The
-;         grid numbering starts in the upper left (1) and goes sequentually by column and then
-;         by row.
+;        This keyword specifies a grid with a graphics window and determines where the
+;        graphic should appear. The syntax of LAYOUT is three numbers: [ncolumns, nrows, location].
+;        The grid is determined by the number of columns (ncolumns) by the number of 
+;        rows (nrows). The location of the graphic is determined by the third number. The
+;        grid numbering starts in the upper left (1) and goes sequentually by column and then
+;        by row.
 ;     levels: in, optional, type=any
-;         A vector of data levels to contour. If used, NLEVELS is ignored. If missing, 
-;         NLEVELS is used to construct N equally-spaced contour levels.
+;        A vector of data levels to contour. If used, NLEVELS is ignored. If missing, 
+;        NLEVELS is used to construct N equally-spaced contour levels.
 ;     missingvalue: in, optional, type=any
 ;        Use this keyword to identify any missing data in the input data values.
 ;     nlevels: in, optional, type=integer, default=6
@@ -122,19 +122,19 @@
 ;        Set this keyword to prevent the window from erasing the contents before displaying
 ;        the contour plot.
 ;     olevels: out, optional
-;         Set to a named variable to return the actual contour levels used in the program.
-;         Unfortunately, output variables cannot be returned if the cgContour command is
-;         being executed in a cgWindow.
+;        Set to a named variable to return the actual contour levels used in the program.
+;        Unfortunately, output variables cannot be returned if the cgContour command is
+;        being executed in a cgWindow.
 ;     outcolor: in, optional, type=string, default='charcoal'
-;         The color of the contour lines when the `Outline` keyword is used.
+;        The color of the contour lines when the `Outline` keyword is used.
 ;     outfilename: in, optional, type=string
 ;        If the `Output` keyword is set, the user will be asked to supply an output
 ;        filename, unless this keyword is set to a non-null string. In that case, the
 ;        value of this keyword will be used as the filename and there will be no dialog
 ;        presented to the user.
 ;     outline: in, optional, type=boolean, default=0
-;         This keyword applies only if the `Fill` keyword is set. It will draw the
-;         contour lines on top of the filled contour. It draws the outline in the `OutColor`.
+;        This keyword applies only if the `Fill` keyword is set. It will draw the
+;        contour lines on top of the filled contour. It draws the outline in the `OutColor`.
 ;     output: in, optional, type=string, default=""
 ;        Set this keyword to the type of output desired. Possible values are these::
 ;            
@@ -147,10 +147,16 @@
 ;            'PNG'  - PNG raster file
 ;            'TIFF' - TIFF raster file
 ;            
-;        Note that ImageMagick and Ghostview MUST be installed for anything other than PostScript
-;        output to work. (See cgPS2PDF and PS_END for details.) And also note that you should
-;        NOT use this keyword when doing multiple plots. It is really just to be used as a
-;        convenient way to get output for a single plot command.
+;        Or, you can simply set this keyword to the name of the output file, and the type of
+;        file desired will be determined by the file extension. If you use this option, the
+;        user will not be prompted to supply the name of the output file.
+;            
+;        All raster file output is created through PostScript intermediate files (the
+;        PostScript files will be deleted), so ImageMagick and Ghostview MUST be installed 
+;        to produce anything other than PostScript output. (See cgPS2PDF and PS_END for 
+;        details.) And also note that you should NOT use this keyword when doing multiple 
+;        plots. The keyword is to be used as a convenient way to get PostScript or raster 
+;        output for a single graphics command.
 ;     overplot: in, optional, type=boolean, default=0
 ;        Set this keyword to overplot the contours onto a previously established
 ;        data coordinate system.
@@ -449,64 +455,73 @@ PRO cgContour, data, x, y, $
     ; Are we doing some kind of output?
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
-       outputSelection = StrUpCase(output)
-       typeOfOutput = ['PS','EPS','PDF','BMP','GIF','JPEG','PNG','TIFF']
+       ; If the output string has a dot character, then this must be a
+       ; filename, and we will determine the type of file from the filename extension.
+       IF StrPos(output, '.') NE -1 THEN BEGIN
+             root_name = FSC_Base_Filename(output, DIRECTORY=theDir, EXTENSION=ext)
+             IF theDir EQ "" THEN CD, CURRENT=theDir
+             outfilename = output
+             outputSelection = StrUpCase(ext)
+       ENDIF
+    
+       IF N_Elements(outputSelection) EQ 0 THEN outputSelection = StrUpCase(output)
+       typeOfOutput = ['PS','EPS','PDF','BMP','GIF','JPEG','JPG','PNG','TIFF', 'TIF']
        void = Where(typeOfOutput EQ outputSelection, count)
        IF count EQ 0 THEN Message, 'Cannot find ' + outputSelection + ' in allowed output types.'
        
        ; Set things up.
        CASE outputSelection OF
-          
           'PS': BEGIN
               ext = '.ps'
               delete_ps = 0
-              END
-       
+              END    
           'EPS': BEGIN
               ext = '.eps'
               encapsulated = 1
               delete_ps = 0
               END
-
           'PDF': BEGIN
               ext = '.pdf'
               pdf_flag = 1
               delete_ps = 1
-              END
-       
+              END     
           'BMP': BEGIN
               ext = '.bmp'
               bmp_flag = 1
               delete_ps = 1
-              END
-       
+              END      
           'GIF': BEGIN
               ext = '.gif'
               gif_flag = 1
               delete_ps = 1
               END
-       
           'JPEG': BEGIN
               ext = '.jpg'
               jpeg_flag = 1
               delete_ps = 1
+              END      
+          'JPG': BEGIN
+              ext = '.jpg'
+              jpeg_flag = 1
+              delete_ps = 1
               END
-       
           'PNG': BEGIN
               ext = '.png'
               png_flag = 1
               delete_ps = 1
-              END
-       
+              END      
           'TIFF': BEGIN
               ext = '.tif'
               tiff_flag = 1
               delete_ps = 1
               END
-       
-       
+          'TIF': BEGIN
+              ext = '.tif'
+              tiff_flag = 1
+              delete_ps = 1
+              END    
        ENDCASE
-       
+              
        ; Do you need a filename?
        IF ( (N_Elements(outfilename) EQ 0) || (outfilename EQ "") ) THEN BEGIN 
             filename = 'cgplot' + ext
@@ -963,6 +978,20 @@ PRO cgContour, data, x, y, $
           YTICKV=ytickv, YTICKS=yticks, YTICKLEN=yticklen, T3D=t3D, ZVALUE=zvalue
     ENDIF
     
+    ; Restore the decomposed color state if you can.
+    SetDecomposedState, currentState
+    
+    ; Restore the color table. Can't do this for the Z-buffer or
+    ; the snap shot will be incorrect.
+    IF (!D.Name NE 'Z') AND (!D.Name NE 'NULL') THEN BEGIN
+        TVLCT, rr, gg, bb
+        ; If you loaded a color palette, restore the before color vectors.
+        IF N_Elements(p_red) NE 0 THEN TVLCT, p_red, p_grn, p_blu
+    ENDIF
+     
+    ; Clean up if you are using a layout.
+    IF N_Elements(layout) NE 0 THEN !P.Multi = thisMulti
+
     ; Are we producing output? If so, we need to clean up here.
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
@@ -980,19 +1009,5 @@ PRO cgContour, data, x, y, $
          Print, 'Output File: ' + Filepath(ROOT_DIR=dirname, basename)
     ENDIF
     
-    ; Restore the decomposed color state if you can.
-    SetDecomposedState, currentState
-    
-    ; Restore the color table. Can't do this for the Z-buffer or
-    ; the snap shot will be incorrect.
-    IF (!D.Name NE 'Z') AND (!D.Name NE 'NULL') THEN BEGIN
-        TVLCT, rr, gg, bb
-        ; If you loaded a color palette, restore the before color vectors.
-        IF N_Elements(p_red) NE 0 THEN TVLCT, p_red, p_grn, p_blu
-    ENDIF
-     
-    ; Clean up if you are using a layout.
-    IF N_Elements(layout) NE 0 THEN !P.Multi = thisMulti
-
 END
     

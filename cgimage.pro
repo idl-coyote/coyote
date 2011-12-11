@@ -794,10 +794,16 @@ END
 ;            'PNG'  - PNG raster file
 ;            'TIFF' - TIFF raster file
 ;            
-;        Note that ImageMagick and Ghostview MUST be installed for anything other than PostScript
-;        output to work. (See cgPS2PDF and PS_END for details.) And also note that you should
-;        NOT use this keyword when doing multiple plots. It is really just to be used as a
-;        convenient way to get output for a single plot command.
+;        Or, you can simply set this keyword to the name of the output file, and the type of
+;        file desired will be determined by the file extension. If you use this option, the
+;        user will not be prompted to supply the name of the output file.
+;            
+;        All raster file output is created through PostScript intermediate files (the
+;        PostScript files will be deleted), so ImageMagick and Ghostview MUST be installed 
+;        to produce anything other than PostScript output. (See cgPS2PDF and PS_END for 
+;        details.) And also note that you should NOT use this keyword when doing multiple 
+;        plots. The keyword is to be used as a convenient way to get PostScript or raster 
+;        output for a single graphics command.
 ;    overplot: in, optional, type=boolean, default=0
 ;         Setting this keyword causes the POSITION keyword to be ignored
 ;         and the image is positioned in the location established by the
@@ -1122,64 +1128,73 @@ PRO cgImage, image, x, y, $
     ; Are we doing some kind of output?
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
-       outputSelection = StrUpCase(output)
-       typeOfOutput = ['PS','EPS','PDF','BMP','GIF','JPEG','PNG','TIFF']
+       ; If the output string has a dot character, then this must be a
+       ; filename, and we will determine the type of file from the filename extension.
+       IF StrPos(output, '.') NE -1 THEN BEGIN
+             root_name = FSC_Base_Filename(output, DIRECTORY=theDir, EXTENSION=ext)
+             IF theDir EQ "" THEN CD, CURRENT=theDir
+             outfilename = output
+             outputSelection = StrUpCase(ext)
+       ENDIF
+    
+       IF N_Elements(outputSelection) EQ 0 THEN outputSelection = StrUpCase(output)
+       typeOfOutput = ['PS','EPS','PDF','BMP','GIF','JPEG','JPG','PNG','TIFF', 'TIF']
        void = Where(typeOfOutput EQ outputSelection, count)
        IF count EQ 0 THEN Message, 'Cannot find ' + outputSelection + ' in allowed output types.'
        
        ; Set things up.
        CASE outputSelection OF
-          
           'PS': BEGIN
               ext = '.ps'
               delete_ps = 0
-              END
-       
+              END    
           'EPS': BEGIN
               ext = '.eps'
               encapsulated = 1
               delete_ps = 0
               END
-
           'PDF': BEGIN
               ext = '.pdf'
               pdf_flag = 1
               delete_ps = 1
-              END
-       
+              END     
           'BMP': BEGIN
               ext = '.bmp'
               bmp_flag = 1
               delete_ps = 1
-              END
-       
+              END      
           'GIF': BEGIN
               ext = '.gif'
               gif_flag = 1
               delete_ps = 1
               END
-       
           'JPEG': BEGIN
               ext = '.jpg'
               jpeg_flag = 1
               delete_ps = 1
+              END      
+          'JPG': BEGIN
+              ext = '.jpg'
+              jpeg_flag = 1
+              delete_ps = 1
               END
-       
           'PNG': BEGIN
               ext = '.png'
               png_flag = 1
               delete_ps = 1
-              END
-       
+              END      
           'TIFF': BEGIN
               ext = '.tif'
               tiff_flag = 1
               delete_ps = 1
               END
-       
-       
+          'TIF': BEGIN
+              ext = '.tif'
+              tiff_flag = 1
+              delete_ps = 1
+              END    
        ENDCASE
-       
+              
        ; Do you need a filename?
        IF ( (N_Elements(outfilename) EQ 0) || (outfilename EQ "") ) THEN BEGIN 
             filename = 'cgplot' + ext
@@ -1946,6 +1961,21 @@ PRO cgImage, image, x, y, $
     
     ENDELSE
 
+    ; Clean up after yourself.
+    IF (!D.Name NE 'Z') THEN BEGIN
+        TVLCT, rr, gg, bb
+        ; If you loaded a color palette, restore the before color vectors.
+        IF N_Elements(p_red) NE 0 THEN TVLCT, p_red, p_grn, p_blu
+    ENDIF
+    IF ~Keyword_Set(save) THEN BEGIN
+        !P = bangp
+        !X = bangx
+        !Y = bangy
+    ENDIF
+
+    ; Clean up if you are using a layout.
+    IF N_Elements(layout) NE 0 THEN !P.Multi = thisMulti
+
     ; Are we producing output? If so, we need to clean up here.
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
@@ -1963,19 +1993,4 @@ PRO cgImage, image, x, y, $
          Print, 'Output File: ' + Filepath(ROOT_DIR=dirname, basename)
     ENDIF
     
-    ; Clean up after yourself.
-    IF (!D.Name NE 'Z') THEN BEGIN
-        TVLCT, rr, gg, bb
-        ; If you loaded a color palette, restore the before color vectors.
-        IF N_Elements(p_red) NE 0 THEN TVLCT, p_red, p_grn, p_blu
-    ENDIF
-    IF ~Keyword_Set(save) THEN BEGIN
-        !P = bangp
-        !X = bangx
-        !Y = bangy
-    ENDIF
-
-    ; Clean up if you are using a layout.
-    IF N_Elements(layout) NE 0 THEN !P.Multi = thisMulti
-
 END

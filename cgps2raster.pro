@@ -57,6 +57,8 @@
 ;         string is automatically added to the ImageMagick call unless this keyword
 ;         is set, in which case the string is not added and the image background will
 ;         be transparent.  
+;     bmp: in, optional, type=boolean, default=0                 
+;        Set this keyword to convert the PostScript output file to a BMP image. Requires ImageMagick.
 ;     delete_ps: in, optional, type=boolean, default=0            
 ;        Setting this keyword will delete the PostScript file that is used as the intermediate
 ;        file in the conversion to other file types.

@@ -141,6 +141,7 @@
 ;        Added PDF keyword. Requires Ghostscript to use. 6 Dec 2011. DWF.
 ;        Added SHOWCMD keyword. 9 Dec 2011. DWF.
 ;        Added OUTFILENAME keyword. 11 Dec 2011. DWF.
+;        Just realized a BMP case is missing from one of the CASE statements. 12 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
@@ -218,6 +219,7 @@ PRO PS_END, $
 
         basename = FSC_Base_Filename(ps_struct.filename, DIRECTORY=theDir, EXTENSION=theExtension)
         CASE 1 OF
+            ps_struct.convert EQ 'BMP':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.bmp')
             ps_struct.convert EQ 'GIF':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.gif')
             ps_struct.convert EQ 'PDF':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.pdf')
             ps_struct.convert EQ 'PNG':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.png')
@@ -279,12 +281,9 @@ PRO PS_END, $
                 SPAWN, cmd, result, err_result
                 
                 IF ~ps_struct.quiet THEN BEGIN
-                    IF N_Elements(result) NE 0 THEN BEGIN
-                        FOR k=0,N_Elements(result)-1 DO Print, result[k]
-                    ENDIF
-                    IF N_Elements(err_result) NE 0 THEN BEGIN
+                    IF err_result[0] NE "" THEN BEGIN
                         FOR k=0,N_Elements(err_result)-1 DO Print, err_result[k]
-                    ENDIF ELSE Print, 'Output file located here: + outfilename
+                    ENDIF ELSE Print, 'Output file located here: ' + outfilename
                 ENDIF
                 
                 ; Have you been asked to delete the PostScript file?

@@ -69,6 +69,13 @@
 ;        is converted to a raster format by ImageMagick. 
 ;     gif: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a GIF image. Requires ImageMagick.
+;     gs_path: in, optional, type=string
+;        This program assumes that UNIX users can access Ghostscript with the "gs"
+;        command. It assumes WINDOWS users have installed Ghostscript in either
+;        the C:\gs or C:\Program Files\gs directories. If either of these assumptions
+;        is incorrect, you can specify the directory where the Ghostscript executable
+;        resides with this keyword. (The Windows 32-bit executable is named gswin32c.exe
+;        and the 64-bit executable is named gswin64c.exe.) Passed directly to cgPS2PDF.
 ;     im_options: in, optional, type=string, default=""
 ;        A string of ImageMagick "convert" options that can be passed to the ImageMagick convert 
 ;        command. No error checking occurs with this string.
@@ -94,6 +101,17 @@
 ;        Set this command to show the command used to do any PostScript coversions.
 ;     tiff: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a TIFF image. Requires ImageMagick.
+;     unix_convert_cmd: in, optional, type=string
+;         There are a number of commands on UNIX machines for converting PostScript files
+;         to PDF files. This program assumes you are using Ghostscript to do the conversion
+;         for you. The Ghostscript command on most UNIX machines is "gs", which is used if
+;         this keyword is undefined. However, if you would prefer to use another program to do
+;         the conversion for you, you can specify the name of the command here. For example,
+;         "pstopdf" or "epstopdf". In creating the actual command, this command will be
+;         separated by a space from the input file name. In other words, if the alternative
+;         conversion command was "pstopdf", the actual command would be "pstopdf" + " " + ps_file.
+;         Any output filename is ignored. This command does not apply to Macintosh or Windows 
+;         computers. Passed directly to cgPS2PDF.
 ;          
 ; :Examples:
 ;    To create a line plot in a PostScript file named lineplot.ps and
@@ -144,6 +162,7 @@
 ;        Added SHOWCMD keyword. 9 Dec 2011. DWF.
 ;        Added OUTFILENAME keyword. 11 Dec 2011. DWF.
 ;        Just realized a BMP case is missing from one of the CASE statements. 12 Dec 2011. DWF.
+;        Added GS_PATH and UNIX_CONVERT_CMD keywords to support PDF output. 14 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
@@ -155,6 +174,7 @@ PRO PS_END, $
     DENSITY=density, $
     IM_OPTIONS=im_options, $
     GIF=gif, $
+    GS_PATH=gs_path, $
     JPEG=jpeg, $
     NOFIX=nofix, $
     NOMESSAGE=nomessage, $
@@ -163,7 +183,8 @@ PRO PS_END, $
     PNG=png, $
     RESIZE=resize, $
     SHOWCMD=showcmd, $
-    TIFF=tiff
+    TIFF=tiff, $
+    UNIX_CONVERT_CMD=unix_convert_cmd
             
 
    COMMON _$FSC_PS_START_, ps_struct
@@ -295,7 +316,12 @@ PRO PS_END, $
             ENDIF ELSE BEGIN
                 IF ps_struct.convert EQ 'PDF' THEN BEGIN
                     cgPS2PDF, ps_struct.filename, outfilename, $
-                        DELETE_PS=delete_ps, PAGETYPE=ps_struct.pagetype, SILENT=1, SUCCESS=success
+                        DELETE_PS=delete_ps, $
+                        GS_PATH=gs_path, $
+                        PAGETYPE=ps_struct.pagetype, $
+                        SILENT=1, $
+                        SUCCESS=success, $
+                        UNIX_CONVERT_CMD=unix_convert_cmd
                     IF success THEN BEGIN
                        IF ~ps_struct.quiet THEN Print, 'PDF Output File: ' + outfilename
                     ENDIF ELSE Print, 'Encountered problem creating PDF file. Proceeding...'

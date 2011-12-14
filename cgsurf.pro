@@ -119,7 +119,7 @@
 ;        to produce anything other than PostScript output. (See cgPS2PDF and PS_END for 
 ;        details.) And also note that you should NOT use this keyword when doing multiple 
 ;        plots. The keyword is to be used as a convenient way to get PostScript or raster 
-;        output for a single graphics command.
+;        output for a single graphics command. Output parameters can be set with cgWindow_SetDefs.
 ;     palette: in, optional, type=byte
 ;         Set this keyword to a 3 x N or N x 3 byte array containing the RGB color vectors 
 ;         to be loaded before the surface is displayed. Such vectors can be obtained, for 
@@ -166,7 +166,7 @@
 ;     zstyle: in, hidden
 ;         The normal ZSTYLE keyword.
 ;     _ref_extra: in, optional, type=any
-;        Any keyword appropriate for the IDL Plot command is allowed in the program.
+;        Any keyword appropriate for the IDL Surface command is allowed in the program.
 ;
 ; :Examples:
 ;    Use as you would use the IDL SURFACE of SHADE_SURF command::
@@ -220,6 +220,7 @@
 ;        Updated the BACKGROUND color selection from lessons learned in 27 Oct 2011 cgContour 
 ;             corrections. 27 Oct 2011. DWF.
 ;        Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
+;        PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -433,8 +434,28 @@ PRO cgSurf, data, x, y, $
            ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
        ENDIF ELSE ps_filename = outfilename
        
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+         PS_Charsize = ps_charsize, $          ; The PostScript character size.
+         PS_FONT = ps_font, $                  ; Select the font for PostScript output.
+         PS_Decomposed = ps_decomposed, $      ; Sets the PostScript color mode.
+         PS_Delete = ps_delete, $              ; Delete PS file when making IM raster.
+         PS_Metric = ps_metric, $              ; Select metric measurements in PostScript output.
+         PS_Scale_factor = ps_scale_factor, $  ; Select the scale factor for PostScript output.
+         PS_TT_Font = ps_tt_font               ; Select the true-type font to use for PostScript output.   
+       
        ; Set up the PostScript device.
-       PS_Start, FILENAME=ps_filename, ENCAPSULATED=encapsulated, QUIET=1
+       PS_Start, $
+          CHARSIZE=ps_charsize, $
+          DECOMPOSED=ps_decomposed, $
+          FILENAME=ps_filename, $
+          FONT=ps_font , $
+          ENCAPSULATED=encapsulated, $
+          METRIC=ps_metric, $
+          SCALE_FACTOR=ps_scale_factor, $
+          TT_FONT=ps_tt_font, $
+          QUIET=1
+    
     
     ENDIF
    
@@ -882,14 +903,30 @@ PRO cgSurf, data, x, y, $
     ; Are we producing output? If so, we need to clean up here.
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+           IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+           IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+           IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+           IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+           PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+           PDF_Path = pdf_path                             ; The path to the Ghostscript conversion command.
+    
         ; Close the PostScript file and create whatever output is needed.
         PS_END, DELETE_PS=delete_ps, $
+             ALLOW_TRANSPARENT=im_transparent, $
              BMP=bmp_flag, $
+             DENSITY=im_density, $
              GIF=gif_flag, $
+             GS_PATH=pdf_path, $
+             IM_OPTIONS=im_options, $
              JPEG=jpeg_flag, $
              PDF=pdf_flag, $
              PNG=png_flag, $
-             TIFF=tiff_flag
+             RESIZE=im_resize, $
+             TIFF=tiff_flag, $
+             UNIX_CONVERT_CMD=pdf_unix_convert_cmd
+
          basename = File_Basename(outfilename)
          dirname = File_Dirname(outfilename)
          IF dirname EQ "." THEN CD, CURRENT=dirname

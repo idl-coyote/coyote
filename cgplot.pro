@@ -109,14 +109,14 @@
 ;            
 ;        Or, you can simply set this keyword to the name of the output file, and the type of
 ;        file desired will be determined by the file extension. If you use this option, the
-;        user will not be prompted to supply the name of the output file.
+;        user will not be prompted to supply the name of the output file.  
 ;            
 ;        All raster file output is created through PostScript intermediate files (the
 ;        PostScript files will be deleted), so ImageMagick and Ghostview MUST be installed 
 ;        to produce anything other than PostScript output. (See cgPS2PDF and PS_END for 
 ;        details.) And also note that you should NOT use this keyword when doing multiple 
 ;        plots. The keyword is to be used as a convenient way to get PostScript or raster 
-;        output for a single graphics command.
+;        output for a single graphics command. Output parameters can be set with cgWindow_SetDefs.
 ;     overplot: in, optional, type=boolean, default=0
 ;        Set this keyword if you wish to overplot data on an already exisiting set of
 ;        axes. It is like calling the IDL OPLOT command.
@@ -124,7 +124,7 @@
 ;        The usual four-element position vector for the Plot comamnd. Only monitored and
 ;        possibly set if the ASPECT keyword is used.
 ;     psym: in, optional, type=integer
-;        Any normal IDL PSYM values, plus and value supported by the Coyote Library
+;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
 ;        routine SYMCAT. An integer between 0 and 46.
 ;     symcolor: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the symbol color. By default, 'black'.
@@ -192,6 +192,7 @@
 ;         Updated the BACKGROUND color selection from lessons learned in 27 Oct 2011 cgContour 
 ;             corrections. 27 Oct 2011. DWF.
 ;         Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
+;         PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2011, Fanning Software Consulting, Inc.
@@ -405,8 +406,28 @@ PRO cgPlot, x, y, $
            ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
        ENDIF ELSE ps_filename = outfilename
        
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+         PS_Charsize = ps_charsize, $          ; The PostScript character size.
+         PS_FONT = ps_font, $                  ; Select the font for PostScript output.
+         PS_Decomposed = ps_decomposed, $      ; Sets the PostScript color mode.
+         PS_Delete = ps_delete, $              ; Delete PS file when making IM raster.
+         PS_Metric = ps_metric, $              ; Select metric measurements in PostScript output.
+         PS_Scale_factor = ps_scale_factor, $  ; Select the scale factor for PostScript output.
+         PS_TT_Font = ps_tt_font               ; Select the true-type font to use for PostScript output.   
+       
        ; Set up the PostScript device.
-       PS_Start, FILENAME=ps_filename, ENCAPSULATED=encapsulated, QUIET=1
+       PS_Start, $
+          CHARSIZE=ps_charsize, $
+          DECOMPOSED=ps_decomposed, $
+          FILENAME=ps_filename, $
+          FONT=ps_font , $
+          ENCAPSULATED=encapsulated, $
+          METRIC=ps_metric, $
+          SCALE_FACTOR=ps_scale_factor, $
+          TT_FONT=ps_tt_font, $
+          QUIET=1
+    
     
     ENDIF
    
@@ -651,14 +672,30 @@ PRO cgPlot, x, y, $
     ; Are we producing output? If so, we need to clean up here.
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+           IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+           IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+           IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+           IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+           PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+           PDF_Path = pdf_path                             ; The path to the Ghostscript conversion command.
+    
         ; Close the PostScript file and create whatever output is needed.
         PS_END, DELETE_PS=delete_ps, $
+             ALLOW_TRANSPARENT=im_transparent, $
              BMP=bmp_flag, $
+             DENSITY=im_density, $
              GIF=gif_flag, $
+             GS_PATH=pdf_path, $
+             IM_OPTIONS=im_options, $
              JPEG=jpeg_flag, $
              PDF=pdf_flag, $
              PNG=png_flag, $
-             TIFF=tiff_flag
+             RESIZE=im_resize, $
+             TIFF=tiff_flag, $
+             UNIX_CONVERT_CMD=pdf_unix_convert_cmd
+
          basename = File_Basename(outfilename)
          dirname = File_Dirname(outfilename)
          IF dirname EQ "." THEN CD, CURRENT=dirname

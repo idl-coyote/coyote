@@ -156,7 +156,7 @@
 ;       to produce anything other than PostScript output. (See cgPS2PDF and PS_END for 
 ;       details.) And also note that you should NOT use this keyword when doing multiple 
 ;       plots. The keyword is to be used as a convenient way to get PostScript or raster 
-;       output for a single graphics command.
+;       output for a single graphics command. Output parameters can be set with cgWindow_SetDefs.
 ;    pattern: in, optional
 ;       The fill pattern for the polygons if the `FILLPOLYGON` keyword is set. (See POLYFILL documentation.)
 ;    polycolor: in, optional, type=string, default="rose"
@@ -265,6 +265,7 @@
 ;       I was calculating and displaying the cumulative probability distribution function
 ;           incorrectly. Now changed to what I think is the correct result. 8 Nov 2011. DWF.
 ;       Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
+;       PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2007-2011, Fanning Software Consulting, Inc.
@@ -274,55 +275,45 @@ PRO cgHistoplot, $                  ; The program name.
    ADDCMD=addcmd, $                 ; Add this command to an cgWindow.
    AXISCOLORNAME=axisColorName, $   ; The axis color.
    BACKCOLORNAME=backcolorName, $   ; The background color.
+   BINSIZE=binsize, $               ; The histogram bin size.
    CHARSIZE=charsize, $
    DATACOLORNAME=datacolorName, $   ; The data color.
    FILENAME=file, $                 ; For specifying a color name file.
+   FILLPOLYGON=fillpolygon, $       ; Set if you want filled polygons
    FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
+   HISTDATA=histdata, $
+   L64=l64, $                       ; Input for HISTOGRAM.
    LAYOUT=layout, $                 ; Select the grid layout.
+   LINE_FILL=line_fill, $           ; Set if you want line-filled polygons.
+   LOCATIONS=locations, $
+   MAXINPUT=maxinput, $             ; The maximum value to HISTOGRAM.
    MAX_VALUE=max_value, $           ; The maximum value to plot.
    MIN_VALUE=min_value, $           ; The minimum value to plot.
-   NOERASE=noerase, $               ; Set this keyword to avoid erasing when plot is drawn.
+   MININPUT=mininput, $             ; The minimum value to HISTOGRAM.
    MISSING=missing, $               ; The value that indicates "missing" data to be excluded from the histgram.
+   NAN=nan, $                       ; Check for NAN.
+   NBINS=nbins, $                   ; The number of bins to display.
+   NOERASE=noerase, $               ; Set this keyword to avoid erasing when plot is drawn.
+   OMAX=omax, $
+   OMIN=omin, $
    OPLOT=overplot, $                ; Set if you want overplotting.
    OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
+   ORIENTATION=orientation, $       ; The orientation of the lines.
    OUTFILENAME=outfilename, $       ; The name of the output file.
    OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
    OUTPUT=output, $                 ; The type of output file desired.
+   PATTERN=pattern, $               ; The fill pattern.
+   POLYCOLOR=polycolorname, $       ; The name of the polygon draw/fill color.
+   PROBABILITY_FUNCTION=probability, $
    PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
+   REVERSE_INDICES=ri, $
    ROTATE=rotate, $                 ; Rotate plot so histogram bars are drawn left to right.
+   SPACING=spacing, $               ; The spacing of filled lines.
    THICK=thick, $                   ; Set to draw thicker lines and axes.
    WINDOW=window, $                 ; Display this in an cgWindow.
    XTITLE=xtitle, $                 ; The X title.
    YTITLE=ytitle, $                 ; The Y title.
-    _REF_EXTRA=extra, $             ; For passing extra keywords.
-   ;
-   ; POLYFILL KEYWORDS
-   ;
-   FILLPOLYGON=fillpolygon, $       ; Set if you want filled polygons
-   LINE_FILL=line_fill, $           ; Set if you want line-filled polygons.
-   ORIENTATION=orientation, $       ; The orientation of the lines.
-   PATTERN=pattern, $               ; The fill pattern.
-   POLYCOLOR=polycolorname, $       ; The name of the polygon draw/fill color.
-   SPACING=spacing, $               ; The spacing of filled lines.
-   ;
-   ; HISTOGRAM OUTPUT KEYWORDS
-   ;
-   HISTDATA=histdata, $
-   LOCATIONS=locations, $
-   OMAX=omax, $
-   OMIN=omin, $
-   PROBABILITY_FUNCTION=probability, $
-   REVERSE_INDICES=ri, $
-   ;
-   ; HISTOGRAM INPUT KEYWORDS
-   ;
-   BINSIZE=binsize, $               ; The histogram bin size.
-   L64=l64, $                       ; Input for HISTOGRAM.
-   MAXINPUT=maxinput, $             ; The maximum value to HISTOGRAM.
-   MININPUT=mininput, $             ; The minimum value to HISTOGRAM.
-   NAN=nan, $                       ; Check for NAN.
-   NBINS=nbins                      ; The number of bins to display.
-
+    _REF_EXTRA=extra               ; For passing extra keywords.
 
    ; Catch any error in the cgHistoplot program.
    Catch, theError
@@ -543,8 +534,28 @@ PRO cgHistoplot, $                  ; The program name.
            ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
        ENDIF ELSE ps_filename = outfilename
        
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+         PS_Charsize = ps_charsize, $          ; The PostScript character size.
+         PS_FONT = ps_font, $                  ; Select the font for PostScript output.
+         PS_Decomposed = ps_decomposed, $      ; Sets the PostScript color mode.
+         PS_Delete = ps_delete, $              ; Delete PS file when making IM raster.
+         PS_Metric = ps_metric, $              ; Select metric measurements in PostScript output.
+         PS_Scale_factor = ps_scale_factor, $  ; Select the scale factor for PostScript output.
+         PS_TT_Font = ps_tt_font               ; Select the true-type font to use for PostScript output.   
+       
        ; Set up the PostScript device.
-       PS_Start, FILENAME=ps_filename, ENCAPSULATED=encapsulated, QUIET=1
+       PS_Start, $
+          CHARSIZE=ps_charsize, $
+          DECOMPOSED=ps_decomposed, $
+          FILENAME=ps_filename, $
+          FONT=ps_font , $
+          ENCAPSULATED=encapsulated, $
+          METRIC=ps_metric, $
+          SCALE_FACTOR=ps_scale_factor, $
+          TT_FONT=ps_tt_font, $
+          QUIET=1
+    
     
     ENDIF
    
@@ -963,14 +974,30 @@ PRO cgHistoplot, $                  ; The program name.
     ; Are we producing output? If so, we need to clean up here.
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+           IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+           IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+           IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+           IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+           PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+           PDF_Path = pdf_path                             ; The path to the Ghostscript conversion command.
+    
         ; Close the PostScript file and create whatever output is needed.
         PS_END, DELETE_PS=delete_ps, $
+             ALLOW_TRANSPARENT=im_transparent, $
              BMP=bmp_flag, $
+             DENSITY=im_density, $
              GIF=gif_flag, $
+             GS_PATH=pdf_path, $
+             IM_OPTIONS=im_options, $
              JPEG=jpeg_flag, $
              PDF=pdf_flag, $
              PNG=png_flag, $
-             TIFF=tiff_flag
+             RESIZE=im_resize, $
+             TIFF=tiff_flag, $
+             UNIX_CONVERT_CMD=pdf_unix_convert_cmd
+              
          basename = File_Basename(outfilename)
          dirname = File_Dirname(outfilename)
          IF dirname EQ "." THEN CD, CURRENT=dirname

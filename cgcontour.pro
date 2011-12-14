@@ -75,9 +75,12 @@
 ;     c_colors: in, optional, type=integer/string vector
 ;        Set to the index values of the contour colors or to named colors. Must contain
 ;        the same number of colors as the number of requested contour levels.
-;     c_labels: in, optional, type=integer vector
+;     c_labels: in, optional, type=integer
 ;        A vector that specifies which contour levels to label. If used, the LABEL
 ;        keyword is ignored.
+;     c_charsize: in, optional, type=float
+;        The character size of the annotations used on the contour lines themselves.
+;        By default, 75% of `Charsize`.
 ;     cell_fill: in, optional, type=boolean, default=0
 ;        Set to indicate filled contours should be created using the "cell fill" method.
 ;        This keyword should always be set if displaying filled contours on map projections
@@ -114,6 +117,10 @@
 ;        NLEVELS is used to construct N equally-spaced contour levels.
 ;     missingvalue: in, optional, type=any
 ;        Use this keyword to identify any missing data in the input data values.
+;     noclip: in, optional, type=boolean, default=0
+;        Normally, the plot is clipped to the axes boundaries. Setting this keyword prevents
+;        such clipping. Normally, this keyword is only used when there is a problem displaying
+;        contour plots in 3D space.
 ;     nlevels: in, optional, type=integer, default=6
 ;        If the Contour plot LEVELS keyword is not used, this keyword will produce this
 ;        number of equally spaced contour intervals. Unlike the Contour NLEVELS keyword,
@@ -125,6 +132,10 @@
 ;        Set to a named variable to return the actual contour levels used in the program.
 ;        Unfortunately, output variables cannot be returned if the cgContour command is
 ;        being executed in a cgWindow.
+;     onimage: in, optional, type=boolean, default=0
+;        If this keyword is set, and an image has been display previously with cgImage,
+;        then the contour plot will determine the location of the image in the display
+;        window and overplot itself onto that image.
 ;     outcolor: in, optional, type=string, default='charcoal'
 ;        The color of the contour lines when the `Outline` keyword is used.
 ;     outfilename: in, optional, type=string
@@ -156,7 +167,7 @@
 ;        to produce anything other than PostScript output. (See cgPS2PDF and PS_END for 
 ;        details.) And also note that you should NOT use this keyword when doing multiple 
 ;        plots. The keyword is to be used as a convenient way to get PostScript or raster 
-;        output for a single graphics command.
+;        output for a single graphics command. Output parameters can be set with cgWindow_SetDefs.
 ;     overplot: in, optional, type=boolean, default=0
 ;        Set this keyword to overplot the contours onto a previously established
 ;        data coordinate system.
@@ -172,6 +183,8 @@
 ;        If the IRREGULAR keyword is set, this keyword specifies the X and Y resolution
 ;        in a two element integer array of the final gridded data that is sent to the 
 ;        contour plot.
+;     t3d: in, optional, type=boolean, default=0
+;        Set this keyword to use the 3D axis rotation matrix in !P.T3D.
 ;     traditional: in, optional, type=boolean, default=0
 ;         If this keyword is set, the traditional color scheme of a black background for
 ;         graphics windows on the display is used and PostScript files always use a white background.
@@ -179,8 +192,28 @@
 ;         Set this keyword if you want to display the plot in a resizable graphics window.
 ;     xstyle: in, optional, type=integer, default=1
 ;        If unused in the program, set to 1 to force exact axis scaling.
+;     xthick: in, optional, type=integer, default=1
+;        The thickness of the X axis annotations.
+;     xticklen: in, optional, type=float, default=0.025
+;        The length of the X tick marks. Set to a negative value to create outward
+;        facing tick marks.
+;     xticks: in, optional, type=integer
+;        The number of tick intervals on the X axis.
+;     xtickv: in, optional, type=string
+;        A vector of tick values to use with the tick marks. See IDL documentation for
+;        graphics keywords for additional information.
 ;     ystyle: in, optional, type=integer, default=1
 ;        If unused in the program, set to 1 to force exact axis scaling.
+;     ythick: in, optional, type=integer, default=1
+;        The thickness of the Y axis annotations.
+;     yticklen: in, optional, type=float, default=0.025
+;        The length of the Y tick marks. Set to a negative value to create outward
+;        facing tick marks.
+;     yticks: in, optional, type=integer
+;        The number of tick intervals on the Y axis.
+;     ytickv: in, optional, type=string
+;        A vector of tick values to use with the tick marks. See IDL documentation for
+;        graphics keywords for additional information.
 ;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Contour command is allowed in the program.
 ;
@@ -271,6 +304,7 @@
 ;        Added OUTLINE and OUTCOLOR keywords. 8 Dec 2011. DWF.
 ;        Modified the way the axes are drawn when given a negative tick length. 9 Dec 2011. DWF.
 ;        Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
+;       PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -538,8 +572,27 @@ PRO cgContour, data, x, y, $
            ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
        ENDIF ELSE ps_filename = outfilename
        
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+         PS_Charsize = ps_charsize, $          ; The PostScript character size.
+         PS_FONT = ps_font, $                  ; Select the font for PostScript output.
+         PS_Decomposed = ps_decomposed, $      ; Sets the PostScript color mode.
+         PS_Delete = ps_delete, $              ; Delete PS file when making IM raster.
+         PS_Metric = ps_metric, $              ; Select metric measurements in PostScript output.
+         PS_Scale_factor = ps_scale_factor, $  ; Select the scale factor for PostScript output.
+         PS_TT_Font = ps_tt_font               ; Select the true-type font to use for PostScript output.   
+       
        ; Set up the PostScript device.
-       PS_Start, FILENAME=ps_filename, ENCAPSULATED=encapsulated, QUIET=1
+       PS_Start, $
+          CHARSIZE=ps_charsize, $
+          DECOMPOSED=ps_decomposed, $
+          FILENAME=ps_filename, $
+          FONT=ps_font , $
+          ENCAPSULATED=encapsulated, $
+          METRIC=ps_metric, $
+          SCALE_FACTOR=ps_scale_factor, $
+          TT_FONT=ps_tt_font, $
+          QUIET=1
     
     ENDIF
    
@@ -995,15 +1048,31 @@ PRO cgContour, data, x, y, $
     ; Are we producing output? If so, we need to clean up here.
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+           IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+           IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+           IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+           IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+           PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+           PDF_Path = pdf_path                             ; The path to the Ghostscript conversion command.
+    
         ; Close the PostScript file and create whatever output is needed.
         PS_END, DELETE_PS=delete_ps, $
+             ALLOW_TRANSPARENT=im_transparent, $
              BMP=bmp_flag, $
+             DENSITY=im_density, $
              GIF=gif_flag, $
+             GS_PATH=pdf_path, $
+             IM_OPTIONS=im_options, $
              JPEG=jpeg_flag, $
              PDF=pdf_flag, $
              PNG=png_flag, $
-             TIFF=tiff_flag
-         basename = File_Basename(outfilename)
+             RESIZE=im_resize, $
+             TIFF=tiff_flag, $
+             UNIX_CONVERT_CMD=pdf_unix_convert_cmd
+              
+        basename = File_Basename(outfilename)
          dirname = File_Dirname(outfilename)
          IF dirname EQ "." THEN CD, CURRENT=dirname
          Print, 'Output File: ' + Filepath(ROOT_DIR=dirname, basename)

@@ -122,7 +122,7 @@
 ;        to produce anything other than PostScript output. (See cgPS2PDF and PS_END for 
 ;        details.) And also note that you should NOT use this keyword when doing multiple 
 ;        plots. The keyword is to be used as a convenient way to get PostScript or raster 
-;        output for a single graphics command.
+;        output for a single graphics command. Output parameters can be set with cgWindow_SetDefs.
 ;     oplotcolors: in, optional, type=varies, default='charcoal'
 ;         A vector of color values, similar to colors for overplot outlines on the bars.
 ;         If a scalar value (e.g., "charcoal") the same value is used for all outlines.
@@ -150,44 +150,48 @@
 ;    To create bar plots of four different bar classes. Example uses AL_Legend from
 ;    the NASA Astronomy Library. Comment out if not available.::
 ;       
-;    ; Create data.
-;    seed = -5L
-;    data1 = RandomU(seed, 5) * 10.0
-;    data2 = RandomU(seed, 5) * 7.5
-;    data3 = RandomU(seed, 5) * 7.5
-;    data4 = RandomU(seed, 5) * 10.0
+;    Create data::
 ;    
-;    ; Display as four different plots.
-;    !P.Multi=[0,2,2]
-;    cgDisplay, WID=0
-;    cgBarPlot, data1, /OUTLINE, OPLOTCOLOR='charcoal', YRANGE=[0, 12], COLORS='red', XTITLE='Class 1'
-;    cgBarPlot, data2, /OUTLINE, OPLOTCOLOR='charcoal', YRANGE=[0, 12], COLORS='blue', XTITLE='Class 2'
-;    cgBarPlot, data3, /OUTLINE, OPLOTCOLOR='charcoal', YRANGE=[0, 12], COLORS='gold', XTITLE='Class 3'
-;    cgBarPlot, data4, /OUTLINE, OPLOTCOLOR='charcoal', YRANGE=[0, 12], COLORS='dark green', XTITLE='Class 4'
-;    !P.Multi=0
+;       seed = -5L
+;       data1 = RandomU(seed, 5) * 10.0
+;       data2 = RandomU(seed, 5) * 7.5
+;       data3 = RandomU(seed, 5) * 7.5
+;       data4 = RandomU(seed, 5) * 10.0
+;    
+;    Display as four different plots::
+;    
+;       !P.Multi=[0,2,2]
+;       cgDisplay, WID=0
+;       cgBarPlot, data1, /OUTLINE, OPLOTCOLOR='charcoal', YRANGE=[0, 12], COLORS='red', XTITLE='Class 1'
+;       cgBarPlot, data2, /OUTLINE, OPLOTCOLOR='charcoal', YRANGE=[0, 12], COLORS='blue', XTITLE='Class 2'
+;       cgBarPlot, data3, /OUTLINE, OPLOTCOLOR='charcoal', YRANGE=[0, 12], COLORS='gold', XTITLE='Class 3'
+;       cgBarPlot, data4, /OUTLINE, OPLOTCOLOR='charcoal', YRANGE=[0, 12], COLORS='dark green', XTITLE='Class 4'
+;       !P.Multi=0
 ;
-;    ; Display as accumulated bar plots.
-;    cgDisplay, WID=1
-;    barnames = ['Exp 1', 'Exp 2', 'Exp 3', 'Exp 4', 'Exp 5']
-;    cgBarPlot, data1, YRANGE=[0, 35], COLORS='red', BARNAMES=barnames
-;    cgBarplot, data2, /OVERPLOT, BASELINE=data1, COLORS='blue'
-;    cgBarplot, data3, /OVERPLOT, BASELINE=data1+data2, COLORS='gold'
-;    cgBarplot, data4, /OVERPLOT, BASELINE=data1+data2+data3, COLORS='dark green'
-;    colors = ['red', 'blue', 'gold', 'dark green']
-;    items = ['Class 1', 'Class 2', 'Class 3', 'Class 4']
-;    Al_Legend, items, /FILL, PSYM=Replicate(15,4), COLORS=colors, SYMSIZE=Replicate(1.75,4), $
-;       POSITION=[0.20, 0.92], /NORMAL, CHARSIZE=cgDefCharSize()
+;    Display as accumulated bar plots::
+;    
+;       cgDisplay, WID=1
+;       barnames = ['Exp 1', 'Exp 2', 'Exp 3', 'Exp 4', 'Exp 5']
+;       cgBarPlot, data1, YRANGE=[0, 35], COLORS='red', BARNAMES=barnames
+;       cgBarplot, data2, /OVERPLOT, BASELINE=data1, COLORS='blue'
+;       cgBarplot, data3, /OVERPLOT, BASELINE=data1+data2, COLORS='gold'
+;       cgBarplot, data4, /OVERPLOT, BASELINE=data1+data2+data3, COLORS='dark green'
+;       colors = ['red', 'blue', 'gold', 'dark green']
+;       items = ['Class 1', 'Class 2', 'Class 3', 'Class 4']
+;       Al_Legend, items, /FILL, PSYM=Replicate(15,4), COLORS=colors, SYMSIZE=Replicate(1.75,4), $
+;           POSITION=[0.20, 0.92], /NORMAL, CHARSIZE=cgDefCharSize()
 ;
-;    ; Display all on same plot.
-;    cgDisplay, WID=2
-;    cgBarPlot, data1, YRANGE=[0, 12], BAROFFSET=2.5, BASERANGE=0.20, COLORS='red'
-;    cgBarplot, data2, /OVERPLOT, BAROFFSET=9.5, BASERANGE=0.20, COLORS='blue'
-;    cgBarplot, data3, /OVERPLOT, BAROFFSET=17.0, BASERANGE=0.20, COLORS='gold'
-;    cgBarplot, data4, /OVERPLOT, BAROFFSET=24.5, BASERANGE=0.20, COLORS='dark green'
-;    colors = ['red', 'blue', 'gold', 'dark green']
-;    items = ['Class 1', 'Class 2', 'Class 3', 'Class 4']
-;    Al_Legend, items, /FILL, PSYM=Replicate(15,4), COLORS=colors, SYMSIZE=Replicate(1.75,4), $
-;       POSITION=[0.45, 0.92], /NORMAL, CHARSIZE=cgDefCharSize()
+;    Display all on same plot::
+;    
+;       cgDisplay, WID=2
+;       cgBarPlot, data1, YRANGE=[0, 12], BAROFFSET=2.5, BASERANGE=0.20, COLORS='red'
+;       cgBarplot, data2, /OVERPLOT, BAROFFSET=9.5, BASERANGE=0.20, COLORS='blue'
+;       cgBarplot, data3, /OVERPLOT, BAROFFSET=17.0, BASERANGE=0.20, COLORS='gold'
+;       cgBarplot, data4, /OVERPLOT, BAROFFSET=24.5, BASERANGE=0.20, COLORS='dark green'
+;       colors = ['red', 'blue', 'gold', 'dark green']
+;       items = ['Class 1', 'Class 2', 'Class 3', 'Class 4']
+;       Al_Legend, items, /FILL, PSYM=Replicate(15,4), COLORS=colors, SYMSIZE=Replicate(1.75,4), $
+;           POSITION=[0.45, 0.92], /NORMAL, CHARSIZE=cgDefCharSize()
 
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -208,6 +212,7 @@
 ;         Updated the BACKGROUND color selection from lessons learned in 27 Oct 2011 cgContour 
 ;             corrections. 27 Oct 2011. DWF.
 ;         Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
+;         PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -414,8 +419,27 @@ PRO cgBarPlot, values, $
            ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
        ENDIF ELSE ps_filename = outfilename
        
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+         PS_Charsize = ps_charsize, $          ; The PostScript character size.
+         PS_FONT = ps_font, $                  ; Select the font for PostScript output.
+         PS_Decomposed = ps_decomposed, $      ; Sets the PostScript color mode.
+         PS_Delete = ps_delete, $              ; Delete PS file when making IM raster.
+         PS_Metric = ps_metric, $              ; Select metric measurements in PostScript output.
+         PS_Scale_factor = ps_scale_factor, $  ; Select the scale factor for PostScript output.
+         PS_TT_Font = ps_tt_font               ; Select the true-type font to use for PostScript output.   
+       
        ; Set up the PostScript device.
-       PS_Start, FILENAME=ps_filename, ENCAPSULATED=encapsulated, QUIET=1
+       PS_Start, $
+          CHARSIZE=ps_charsize, $
+          DECOMPOSED=ps_decomposed, $
+          FILENAME=ps_filename, $
+          FONT=ps_font , $
+          ENCAPSULATED=encapsulated, $
+          METRIC=ps_metric, $
+          SCALE_FACTOR=ps_scale_factor, $
+          TT_FONT=ps_tt_font, $
+          QUIET=1
     
     ENDIF
    
@@ -620,14 +644,30 @@ PRO cgBarPlot, values, $
     ; Are we producing output? If so, we need to clean up here.
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+           IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+           IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+           IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+           IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+           PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+           PDF_Path = pdf_path                             ; The path to the Ghostscript conversion command.
+    
         ; Close the PostScript file and create whatever output is needed.
         PS_END, DELETE_PS=delete_ps, $
+             ALLOW_TRANSPARENT=im_transparent, $
              BMP=bmp_flag, $
+             DENSITY=im_density, $
              GIF=gif_flag, $
+             GS_PATH=pdf_path, $
+             IM_OPTIONS=im_options, $
              JPEG=jpeg_flag, $
              PDF=pdf_flag, $
              PNG=png_flag, $
-             TIFF=tiff_flag
+             RESIZE=im_resize, $
+             TIFF=tiff_flag, $
+             UNIX_CONVERT_CMD=pdf_unix_convert_cmd
+
          basename = File_Basename(outfilename)
          dirname = File_Dirname(outfilename)
          IF dirname EQ "." THEN CD, CURRENT=dirname

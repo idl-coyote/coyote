@@ -99,7 +99,8 @@
 ;        Add the ability to change the label character size and thickness via the normal
 ;          XCHARSIZE and XTHICK keywords you would use for a plot. 3 Dec 2010. DWF.
 ;        Fixed a couple of typos, added ADDCMD, CHARSIZE, LAYOUT and WINDOW keywords. 2 Feb 2011. DWF.
-;         Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
+;        Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
+;        PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
@@ -357,6 +358,13 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 ;       A string array of the same length as the number of columns of data.
 ;       The boxplots will be labeled with these labels along the X axis.
 ;       Used only if OVERPLOT keyword is not set.
+;    layout: in, optional, type=intarr(3)
+;       This keyword specifies a grid with a graphics window and determines where the
+;       graphic should appear. The syntax of LAYOUT is three numbers: [ncolumns, nrows, location].
+;       The grid is determined by the number of columns (ncolumns) by the number of 
+;       rows (nrows). The location of the graphic is determined by the third number. The
+;       grid numbering starts in the upper left (1) and goes sequentually by column and then
+;       by row.
 ;    missing_data_value: in, optional
 ;       Set this keyword to a value that will be used to identify missing data.
 ;       Missing data is not used in the calculations of the box plot.
@@ -386,7 +394,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 ;       to produce anything other than PostScript output. (See cgPS2PDF and PS_END for 
 ;       details.) And also note that you should NOT use this keyword when doing multiple 
 ;       plots. The keyword is to be used as a convenient way to get PostScript or raster 
-;       output for a single graphics command.
+;       output for a single graphics command. Output parameters can be set with cgWindow_SetDefs.
 ;    overplot: in, optional, type=boolean, default=0              
 ;       If this keyword is set, the boxplots will be overdrawn on the current
 ;       set of axes. The X axis will be presumed to be scaled from 0 to 1 more
@@ -408,6 +416,10 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 ;       used to construct the box plot.
 ;    window: in, optional, type=boolean, default=0               
 ;       Set this keyword to display the plot in a resizeable graphics window (cgWindow).
+;    xcharsize: in, optional, type=float, default=1.0
+;       The size of the X axis labels.
+;    xthick: in, optional, type=integer, default=1
+;       The thickness of the X axis labels.
 ;    _ref_extra: in, optional
 ;         Any keyword appropriate for the cgPlot command is also accepted by keyword
 ;         inheritance.
@@ -583,8 +595,27 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
            ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
        ENDIF ELSE ps_filename = outfilename
        
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+         PS_Charsize = ps_charsize, $          ; The PostScript character size.
+         PS_FONT = ps_font, $                  ; Select the font for PostScript output.
+         PS_Decomposed = ps_decomposed, $      ; Sets the PostScript color mode.
+         PS_Delete = ps_delete, $              ; Delete PS file when making IM raster.
+         PS_Metric = ps_metric, $              ; Select metric measurements in PostScript output.
+         PS_Scale_factor = ps_scale_factor, $  ; Select the scale factor for PostScript output.
+         PS_TT_Font = ps_tt_font               ; Select the true-type font to use for PostScript output.   
+       
        ; Set up the PostScript device.
-       PS_Start, FILENAME=ps_filename, ENCAPSULATED=encapsulated, QUIET=1
+       PS_Start, $
+          CHARSIZE=ps_charsize, $
+          DECOMPOSED=ps_decomposed, $
+          FILENAME=ps_filename, $
+          FONT=ps_font , $
+          ENCAPSULATED=encapsulated, $
+          METRIC=ps_metric, $
+          SCALE_FACTOR=ps_scale_factor, $
+          TT_FONT=ps_tt_font, $
+          QUIET=1
     
     ENDIF
    
@@ -711,14 +742,30 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
     ; Are we producing output? If so, we need to clean up here.
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+           IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+           IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+           IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+           IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+           PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+           PDF_Path = pdf_path                             ; The path to the Ghostscript conversion command.
+    
         ; Close the PostScript file and create whatever output is needed.
         PS_END, DELETE_PS=delete_ps, $
+             ALLOW_TRANSPARENT=im_transparent, $
              BMP=bmp_flag, $
+             DENSITY=im_density, $
              GIF=gif_flag, $
+             GS_PATH=pdf_path, $
+             IM_OPTIONS=im_options, $
              JPEG=jpeg_flag, $
              PDF=pdf_flag, $
              PNG=png_flag, $
-             TIFF=tiff_flag
+             RESIZE=im_resize, $
+             TIFF=tiff_flag, $
+             UNIX_CONVERT_CMD=pdf_unix_convert_cmd
+              
          basename = File_Basename(outfilename)
          dirname = File_Dirname(outfilename)
          IF dirname EQ "." THEN CD, CURRENT=dirname

@@ -1277,12 +1277,25 @@ END ;---------------------------------------------------------------------------
 ;        Set this keyword if you wish to display a shaded surface. The is the same as setting STYLE=2.
 ;     skirt: in, optional, type=any
 ;         Set this keyword to a Z value where a skirt will be drawn for the surface.
+;     style: in, optional, type=integer, default=1
+;         Sets the style of the surface::
+;         
+;             0 - Dot surface
+;             1 - Wire mesh (the default)
+;             2 - Shaded surface
+;             3 - Parallel X lines
+;             4 - Parallel Y line
+;             5 - Wire mesh lego style
+;             6 - Solid lego style
+;             
 ;     texture_image: in, optional, type=byte
-;         Set this keyword to a 2d or true-color image that will be overlaid on the surface
+;         Set this keyword to a 2D or true-color image that will be overlaid on the surface
 ;         as a texture map. If a 2D image is passed, the colortable specified with CTABLE will
 ;         be used to construct a true-color image for the texture map.
 ;     tcharsize: in, optional, type=float
-;         The title character size. By default 1.25 times the CHARSIZE.
+;         The title character size. By default 1.25 times the `Charsize`.
+;     tcolor: in, optional, type=string
+;         The name of the title color. By default, the same as `AxisColor`.
 ;     title: in, optional, type=string
 ;        The title of the plot. It will be written "flat to the screen", rather than rotated.
 ;     transform: in, optional, type=4x4 double array
@@ -1291,6 +1304,8 @@ END ;---------------------------------------------------------------------------
 ;     xoffset: in, optional, type=integer, default=50
 ;         The number of pixels the surface window should be offset in the X direction
 ;         from the upper-left corner of the display.
+;     xrange: in, optional, type=float
+;         The X data range of the data. Normally, just chosen from the data itself.
 ;     xsize: in, optional, type=interger, default=640
 ;         The X size of the initial surface window. By default, 640 pixels.
 ;     xstyle: in, hidden
@@ -1300,12 +1315,16 @@ END ;---------------------------------------------------------------------------
 ;     yoffset: in, optional, type=integer, default=25
 ;         The number of pixels the surface window should be offset in the Y direction
 ;         from the upper-left corner of the display.
+;     yrange: in, optional, type=float
+;         The Y data range of the data. Normally, just chosen from the data itself.
 ;     ysize: in, optional, type=integer, default=512
 ;         The Y size of the initial surface window. By default, 640 pixels.
 ;     ystyle: in, hidden
 ;         The normal YSTYLE keyword.
 ;     ytitle: in, optional, type=string
 ;         The text for the Y axis of the surface plot.
+;     zrange: in, optional, type=float
+;         The Z data range of the data. Normally, just chosen from the data itself.
 ;     zscale: in, optional, type=float, default=1.0
 ;          A number between 0.001 and 1.0 that will "scale" the Z axis height. Default is 1.0.
 ;     zstyle: in, hidden

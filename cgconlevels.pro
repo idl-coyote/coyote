@@ -126,7 +126,7 @@
 ;           Range=[Min(levels), Max(levels)], OOB_High=10, OOB_Low='white'
 ;    
 ;    It might be better to have the data rounded in the second data place, to
-;    the nearest 0.05 value. This can be done with the FACTOR keyword::
+;    the nearest 0.05 value. This can be done with the `Factor` keyword::
 ;     
 ;        cgDisplay, WID=3
 ;        data = Scale_Vector(cgDemoData(2), 0.153, 0.986)

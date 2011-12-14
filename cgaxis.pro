@@ -68,6 +68,8 @@
 ;         Set this keyword to indicate xloc and yloc are in normalized coordinates.
 ;     save: in, optional, type=boolean
 ;         Set this keyword to save the scaling parameters set by the axis for subsequent use.
+;     title: in, optional, type=string, default=""
+;         The title or annotation that appears on the axis.
 ;     window: in, optional, type=boolean
 ;         Set this keyword to add the command to the in the current cgWindow application.
 ;     xaxis: in, optional, type=integer, default=0
@@ -75,6 +77,8 @@
 ;         to 1, the axis is drawn on top of the plot with the tick marks pointing down.
 ;     xlog: in, optional, type=boolean, default=0
 ;         Set this keyword to specify a logarithmic axis type.
+;     xtitle: in, optional, type=string
+;         An alternative way to set the `Title` keyword for X axes. Use `Title` instead.
 ;     yaxis: in, optional, type=integer, default=0
 ;         If set to 0, the axis is drawn under the plot with the tick marks pointing up; if set 
 ;         to 1, the axis is drawn on top of the plot with the tick marks pointing down.
@@ -82,10 +86,14 @@
 ;         Set this keyword to specify a logarithmic axis type.
 ;     ynozero: in, optional, type=boolean, default=0
 ;         Set this keyword to prevent the Y axis from starting at 0.
+;     ytitle: in, optional, type=string
+;         An alternative way to set the `Title` keyword for Y axes. Use `Title` instead.
 ;     zaxis: in, optional, type=integer, default=0
 ;         Set to 0-3 to position the Z axis in various locatons. See the AXIS documentation.
 ;     zlog: in, optional, type=boolean, default=0
 ;         Set this keyword to specify a logarithmic axis type.
+;     ztitle: in, optional, type=string
+;         An alternative way to set the `Title` keyword for Z axes. Use `Title` instead.
 ;     _ref_extra: in, optional
 ;          Any keywords appropriate for the XYOUTS command.
 ;     

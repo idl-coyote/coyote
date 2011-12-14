@@ -70,6 +70,10 @@
 ;    color: in, optional, type=string
 ;        The name of the color to use for color bar annotations. Ignored unless passed 
 ;        the name of a cgColor color. The default value is to use the ANNOTATECOLOR.
+;    discrete: in, optional, type=boolean, default=0
+;         Set this keyword to configure certain properties of the color bar to make
+;         discrete color blocks for the color bar. This works best if you are using
+;         a handful of colors in the color bar (e.g, 8-16).
 ;    divisions: in, optional, type=integer
 ;         The number of divisions to divide the bar into. There will
 ;         be (divisions + 1) annotations. The default is 0 if using the
@@ -160,6 +164,14 @@
 ;       Setting this keyword give a vertical color bar. The default is a horizontal color bar.
 ;    window: in, optional, type=boolean, default=0               
 ;       Set this keyword to display the plot in a resizeable graphics window (cgWindow).
+;    xlog: in, optional, type=boolean, default=0
+;       Set this keyword to use logarithmic scaling for the colorbar data range.
+;    xtitle: in, optional, type=string
+;        This keyword is ignored. Use the `Title` keyword to set a title for the color bar.
+;    ylog: in, optional, type=boolean, default=0
+;       Set this keyword to use logarithmic scaling for the colorbar data range.
+;    ytitle: in, optional, type=string
+;        This keyword is ignored. Use the `Title` keyword to set a title for the color bar.
 ;    _ref_extra: in, optional
 ;         Any keyword appropriate for the PLOT and AXIS commands is also accepted by keyword
 ;         inheritance.
@@ -172,12 +184,14 @@
 ;          C_COLORS=INDGEN(25)*4, NLEVELS=25
 ;       cgCOLORBAR, NCOLORS=100, POSITION=[0.15, 0.85, 0.95, 0.90]
 ;       
-;    Example using the CLAMP and NEUTRALINDEX keywords::
+;    Example using the `Clamp` and `NeutralIndex` keywords::
 ;       
 ;       cgLOADCT, 33, NCOLORS=254
 ;       TVLCT, cgCOLOR('gray', /TRIPLE), 255
 ;       cgCOLORBAR, NCOLORS=254, NEUTRALINDEX=255, RANGE=[0,1500], $
 ;           DIVISIONS=8, CLAMP=[400, 800]
+;           
+;    Additional examples can be found in the article `Adding a Color Bar <http://http://www.idlcoyote.com/color_tips/colorbar.html>`.
 ;
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::

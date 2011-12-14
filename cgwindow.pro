@@ -39,8 +39,8 @@
 ;******************************************************************************************;
 ;+
 ;  Creates a resizeable graphics window for IDL traditional commands (Plot, Contour, 
-;  Surface, etc. or for Coyote Graphics routines, cgPlot, cgContour, cgSurf, etc.). 
-;  In addition, the window contents can be saved as PostScript files or as raster image 
+;  Surface, etc. or for Coyote Graphics routines, `cgPlot`, `cgContour`, `cgSurf`, etc.). 
+;  In addition, the window contents can be saved as PostScript, PDF, or raster image 
 ;  files. If ImageMagick is installed on your machine, the raster image files can be 
 ;  created in very high quality from PostScript files.
 ;
@@ -48,7 +48,7 @@
 ;  that is a procedure and includes no more than three positional parameters.
 ;  Any number of keywords can be used to specify properties of the graphical
 ;  output. Any number of graphics commands can be "added" the the cgWindow.
-;  Simply use the ADDCMD keyword to add commands.
+;  Simply use the `AddCmd` keyword to add commands.
 ;  
 ;  If your program does not load its own color tables, the color tables in
 ;  effect when cgWindow is first called are used to display the graphics
@@ -59,26 +59,26 @@
 ;  device. This means there are no Window commands, WSet commands, and the like
 ;  that are not allowed in the PostScript device. Such commands are allowed in 
 ;  programs, of course, if they are "protected". Usually such protection looks 
-;  like this:
+;  like this::
 ;  
 ;     IF (!D.Flags AND 256) NE 0 THEN Window, ...
 ;     
-;   cgDisplay is a good program for opening graphics "windows", because such
-;   PostScript protection is built into the program. In a PostScript device,
-;   cgDisplay produces a "window" with the same aspect ratio as the current
-;   dislay graphics window, which is an aid in producing PostScript output that
-;   looks like the same output in the display window.
+;  The Coyote Graphics program `cgDisplay` is a good program for opening graphics 
+;  "windows", because such PostScript protection is built into the program. In a PostScript 
+;  device, cgDisplay produces a "window" with the same aspect ratio as the current
+;  display graphics window, which is an aid in producing PostScript output that
+;  looks like the same output in the display window.
 ;   
-;   Much better looking raster files can be created from the cgWindow contents,
-;   if the raster files are created by converting PostScript files to the raster 
-;   file. If the ImageMagick "convert" command can be found on your machine, you
-;   will have the option to create raster files using this method. I *highly*
-;   recommend doing so, as fonts and other plot annotation will be of much higher
-;   quality using this method.
+;  Much better looking raster files can be created from the cgWindow contents,
+;  if the raster files are created by converting PostScript files to the raster 
+;  file. If the ImageMagick "convert" command can be found on your machine, you
+;  will have the option to create raster files using this method. I *highly*
+;  recommend doing so, as fonts and other plot annotation will be of much higher
+;  quality using this method.
 ;   
-;   cgWindow has been designed to work with other Coyote Graphics routines: cgPlot,
-;   cgContour, cgSurf, and so on, although I expect it to work with any IDL
-;   traditional graphics routine, if the routine is well written.
+;  cgWindow has been designed to work with other Coyote Graphics routines: `cgPlot`,
+;  `cgContour`, `cgSurf`, and so on, although I expect it to work with any IDL
+;  traditional graphics routine, if the routine is well written.
 ;        
 ; :Categories:
 ;    Graphics
@@ -103,6 +103,11 @@
 ; :Params:
 ;     command: in, required, type=object
 ;         A command object of class IDL_WINDOW_COMMAND.
+;         
+; :Keywords:
+;     index: in, optional, type=integer
+;         The index number of where the command should be added in the command list.
+;         The command is added to the end of the command list by default.
 ;-
 PRO FSC_CmdWindow::AddCommand, command,  INDEX=index
 
@@ -625,6 +630,83 @@ END ;---------------------------------------------------------------------------
 
 ;+
 ; This method retrieves properties from the object.
+; 
+;     adjustsize: out, optional, type=boolean
+;         Set this keyword to adjust default character size to the display window size.
+;     background: out, optional, type=string
+;         The background color of the window. Only use if the ERASEIT property is also set.
+;     commands: out, optional
+;         A list of the commands stored in the window.
+;     delay: out, optional, type=float
+;         Set this keyword to the amount of "delay" you want between commands in the command list.
+;     dimensions: out, optional, type=intarr(2)
+;          Set this keyword to a two-element array giving the xsize and ysize
+;          of the draw widget.
+;     eraseit: out, optional, type=boolean
+;         If this property is set, the cgWindow erases with the background color before
+;         displaying the commands in the window's command list.
+;     im_density: out, optional, type=integer, default=300
+;         Set this keyword to the sampling density when ImageMagick creates raster image
+;         file from PostScript outout.
+;     im_options: out, optional, type=string, default=""
+;         Set this keyword to any ImageMagick options you would like to pass along to the
+;         ImageMagick convert command when creating raster image files from PostScript output.
+;     im_resize: out, optional, type=integer, default=25
+;         Set this keyword to percentage that the raster image file created my ImageMagick
+;         from PostScript output should be resized.
+;     im_raster: out, optional, type=boolean, default=1
+;         Set this keyword to zero to create raster files using the create_png etc. keywords
+;         directly, instead of via ImageMagick.
+;     im_transparent: out, optional, type=boolean, default=0
+;         Set this keyword to allow ImageMagick to create transparent backgrounds when it
+;         makes raster image files from PostScript output.
+;     multi: out, optional, type=Intarr(5)
+;         Set this keyword to the !P.MULTI setting you want to use for the window.
+;         !P.MULTI is set to this setting before command execution, and set back to
+;         it's default value when the commands are finished executing.
+;     noexecutecommands: out, optional, type=boolean, default=0
+;         Set this keyword to 1 to prevent the window from executing the commands and to
+;         0 if you want the window to execute the commands.
+;     palette: out, optional, type=byte
+;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
+;         R, G, and B vectors of a color table. It is probably easier to use cgLoadCT or
+;         XCOLORS to load color tables for the window, but this is provided as another option.
+;     pdf_path: out, optional, type=string
+;         Set this keyword to the name of the path to the Ghostscript command for converting PS to PDF.
+;     pdf_unix_convert_cmd: out, optional, type=string
+;         Set this keyword to the name of an alternative UNIX command to convert PostScript to PDF.
+;     ps_charsize: out, optional, type=float
+;         The PostScript character size.
+;     ps_decomposed: out, optional, type=boolean, default=0
+;         Set this keyword to zero to set the PostScript color mode to indexed color and to
+;         one to set the PostScript color mode to decomposed color.
+;     ps_delete: out, optional, type=boolean, default=1
+;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
+;         when making raster file output.
+;     ps_encapsulated: out, optional, type=boolean, default=0
+;          Set this keyword to configure PSCONFIG to produce encapsulated PostScript output by default.
+;     ps_font: out, optional, type=integer
+;        Set this keyword to the type of font you want to use in PostScript output. It sets the 
+;        FONT keyword on the PSConfig command. Normally, 0 (hardware fonts) or 1 (true-type fonts).
+;     ps_metric: out, optional, type=boolean, default=0
+;          Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
+;     ps_quiet: out, optional, type=boolean, default=0
+;          Set this keyword to set the QUIET keyword on PS_Start.
+;     ps_scale_factor: out, optional, type=float
+;          Set his keyword to the PostScript scale factor you wish to use in creating PostScript output.
+;     ps_tt_font: out, optional, type=string
+;        Set this keyword to the name of a true-type font to use in creating PostScript output.
+;     tlb: out, optional, type=long
+;        The widget identifier of the top-level base widget.
+;     wid: out, optional, type=integer
+;        The window index number of the draw widget.
+;     update: out, optional, type=boolean, default=1
+;         Set this keyword to zero if you do not want the updates to be done immediately
+;         after the properties are changed.
+;     xomargin: out, optional, type=intarr(2)
+;         Sets the !X.OMargin system variable when multiple plots are displayed in the window.
+;     yomargin: out, optional, type=intarr(2)
+;         Sets the !Y.OMargin system variable when multiple plots are displayed in the window.
 ;-
 PRO FSC_CmdWindow::GetProperty, $
     ADJUSTSIZE=adjustsize, $
@@ -632,28 +714,28 @@ PRO FSC_CmdWindow::GetProperty, $
     COMMANDS=commands, $
     DELAY=delay, $
     ERASEIT=eraseit, $
-    NOEXECUTECOMMANDS=noExecuteCommands, $ ; Set if you want commands to execute commands.
-    MULTI=multi, $
-    PALETTE=palette, $
-    TLB=tlb, $
-    WID=wid, $
-    XOMARGIN=xomargin, $
-    YOMARGIN=yomargin, $
-    IM_TRANSPARENT=im_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
     IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
     IM_RASTER=im_raster, $                        ; Sets whether to generate raster files via ImageMagick
-    PDF_UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+    IM_TRANSPARENT=im_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
+    NOEXECUTECOMMANDS=noExecuteCommands, $ ; Set if you want commands to execute commands.
+    MULTI=multi, $
+    PALETTE=palette, $
     PDF_PATH=pdf_path, $                          ; The path to the Ghostscript conversion command.
+    PDF_UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+    PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
     PS_DECOMPOSED=ps_decomposed, $
     PS_DELETE=ps_delete, $
     PS_ENCAPSULATED=ps_encapsulated, $
-    PS_METRIC=ps_metric, $
     PS_FONT=ps_font, $                            ; Select the font for PostScript output.
-    PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
+    PS_METRIC=ps_metric, $
     PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
     PS_TT_FONT=ps_tt_font, $                      ; Select the true-type font to use for PostScript output.
+    TLB=tlb, $
+    WID=wid, $
+    XOMARGIN=xomargin, $
+    YOMARGIN=yomargin, $
     _EXTRA=extra
     
     Compile_Opt idl2
@@ -1235,35 +1317,108 @@ END ;---------------------------------------------------------------------------
 
 ;+
 ; This method sets properties of the window object. 
+; 
+; :Keywords:
+;     adjustsize: in, optional, type=boolean
+;         Set this keyword to adjust default character size to the display window size.
+;     background: in, optional, type=string
+;         The background color of the window. Only use if the ERASEIT property is also set.
+;     delay: in, optional, type=float
+;         Set this keyword to the amount of "delay" you want between commands in the command list.
+;     dimensions: in, optional, type=intarr(2)
+;          Set this keyword to a two-element array giving the xsize and ysize
+;          of the draw widget.
+;     eraseit: in, optional, type=boolean
+;         If this property is set, the cgWindow erases with the background color before
+;         displaying the commands in the window's command list.
+;     im_density: in, optional, type=integer, default=300
+;         Set this keyword to the sampling density when ImageMagick creates raster image
+;         file from PostScript outout.
+;     im_options: in, optional, type=string, default=""
+;         Set this keyword to any ImageMagick options you would like to pass along to the
+;         ImageMagick convert command when creating raster image files from PostScript output.
+;     im_resize: in, optional, type=integer, default=25
+;         Set this keyword to percentage that the raster image file created my ImageMagick
+;         from PostScript output should be resized.
+;     im_raster: in, optional, type=boolean, default=1
+;         Set this keyword to zero to create raster files using the create_png etc. keywords
+;         directly, instead of via ImageMagick.
+;     im_transparent: in, optional, type=boolean, default=0
+;         Set this keyword to allow ImageMagick to create transparent backgrounds when it
+;         makes raster image files from PostScript output.
+;     multi: in, optional, type=Intarr(5)
+;         Set this keyword to the !P.MULTI setting you want to use for the window.
+;         !P.MULTI is set to this setting before command execution, and set back to
+;         it's default value when the commands are finished executing.
+;     noexecutecommands: in, optional, type=boolean, default=0
+;         Set this keyword to 1 to prevent the window from executing the commands and to
+;         0 if you want the window to execute the commands.
+;     palette: in, optional, type=byte
+;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
+;         R, G, and B vectors of a color table. It is probably easier to use cgLoadCT or
+;         XCOLORS to load color tables for the window, but this is provided as another option.
+;     pdf_path: out, optional, type=string
+;         Set this keyword to the name of the path to the Ghostscript command for converting PS to PDF.
+;     pdf_unix_convert_cmd: out, optional, type=string
+;         Set this keyword to the name of an alternative UNIX command to convert PostScript to PDF.
+;     ps_charsize: in, optional, type=float
+;         The PostScript character size.
+;     ps_decomposed: in, optional, type=boolean, default=0
+;         Set this keyword to zero to set the PostScript color mode to indexed color and to
+;         one to set the PostScript color mode to decomposed color.
+;     ps_delete: in, optional, type=boolean, default=1
+;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
+;         when making raster file output.
+;     ps_encapsulated: in, optional, type=boolean, default=0
+;          Set this keyword to configure PSCONFIG to produce encapsulated PostScript output by default.
+;     ps_font: in, optional, type=integer
+;        Set this keyword to the type of font you want to use in PostScript output. It sets the 
+;        FONT keyword on the PSConfig command. Normally, 0 (hardware fonts) or 1 (true-type fonts).
+;     ps_metric: in, optional, type=boolean, default=0
+;          Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
+;     ps_quiet: in, optional, type=boolean, default=0
+;          Set this keyword to set the QUIET keyword on PS_Start.
+;     ps_scale_factor: in, optional, type=float
+;          Set his keyword to the PostScript scale factor you wish to use in creating PostScript output.
+;     ps_tt_font: in, optional, type=string
+;        Set this keyword to the name of a true-type font to use in creating PostScript output.
+;     update: in, optional, type=boolean, default=1
+;         Set this keyword to zero if you do not want the updates to be done immediately
+;         after the properties are changed.
+;     xomargin: in, optional, type=intarr(2)
+;         Sets the !X.OMargin system variable when multiple plots are displayed in the window.
+;     yomargin: in, optional, type=intarr(2)
+;         Sets the !Y.OMargin system variable when multiple plots are displayed in the window.
+;          
 ;-
 PRO FSC_CmdWindow::SetProperty, $
     ADJUSTSIZE=adjustsize, $       ; Adjust the default charsize to match display size.
     BACKGROUND=background, $       ; The background color of the window.
-    DIMENSIONS=dimensions, $       ; Set the dimensions of the draw widget.
     DELAY=delay, $                 ; The delay between command execution.
+    DIMENSIONS=dimensions, $       ; Set the dimensions of the draw widget.
     ERASEIT=eraseit, $             ; Set the erase flag for the window
+    IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+    IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+    IM_RASTER=im_raster, $                        ; Sets whether to use ImageMagick to create raster files.
+    IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+    IM_TRANSPARENT=im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+    PDF_UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+    PDF_PATH=pdf_path, $                          ; The path to the Ghostscript conversion command.
     PALETTE=palette, $             ; Change window color table vectors.
-    NOEXECUTECOMMANDS=noExecuteCommands, $ ; Set if you want commands to execute commands.
+    PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
+    PS_DECOMPOSED=ps_decomposed, $                ; Sets the PostScript color mode.
+    PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
+    PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
+    PS_FONT=ps_font, $                            ; Select the font for PostScript output.
+    PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
+    PS_QUIET=ps_quiet, $                          ; Select the QUIET keyword for PS_Start.
+    PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
+    PS_TT_FONT=ps_tt_font, $                      ; Select the true-type font to use for PostScript output.
+    NOEXECUTECOMMANDS=noExecuteCommands, $ ; Set if you don't want the window to execute commands.
     MULTI=multi, $                 ; Change the !P.MULTI setting for the window.
     XOMARGIN=xomargin, $           ; Change the !X.OMargin setting for the window.
     YOMARGIN=yomargin, $           ; Change the !Y.OMargin setting for the window.
     UPDATE=update, $               ; Set if you want the commands to be updated after property change.
-    IM_TRANSPARENT=im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
-    IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
-    IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
-    IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
-    IM_RASTER=im_raster, $                        ; Sets whether to use ImageMagick to create raster files.
-    PDF_UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
-    PDF_PATH=pdf_path, $                          ; The path to the Ghostscript conversion command.
-    PS_DECOMPOSED=ps_decomposed, $                ; Sets the PostScript color mode.
-    PS_DELETE=ps_delete, $                        ; Delete the PostScript file when making IM raster files.
-    PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
-    PS_ENCAPSULATED=ps_encapsulated, $            ; Select encapusulated PostScript output.
-    PS_FONT=ps_font, $                            ; Select the font for PostScript output.
-    PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
-    PS_QUIET=ps_quiet, $                          ; Select the QUIET keyword for PS_Start.
-    PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
-    PS_TT_FONT=ps_tt_font, $                      ; Select the true-type font to use for PostScript output.
     _EXTRA=extra
     
     Compile_Opt idl2
@@ -1348,17 +1503,98 @@ END ;---------------------------------------------------------------------------
 ;+
 ; This method initializes the object that is at the heart of cgWindow.
 ; It takes most of the same arguments as cgWindow.
+; 
+; :Params:
+;    command: in, required, type=string
+;       The graphics procedure command to be executed. This parameter
+;       must be a string and the the command must be a procedure. Examples
+;       are 'Surface', 'Contour', 'Plot', 'cgPlot', cgContour, etc.
+;    p1: in, optional, type=any
+;       The first positional parameter appropriate for the graphics command.
+;    p2: in, optional, type=any
+;       The second positional parameter appropriate for the graphics command.
+;    p3: in, optional, type=any
+;       The third positional parameter appropriate for the graphics command.
+;       
+; :Keywords:
+;    addcmd: in, optional, type=boolean, default=0
+;       Set this keyword to add an additional graphics command to an cgWindow.
+;       The command is added to the last created cgWindow, unless the WinID
+;       keyword is used to select another cgWindow. Adding a command causes
+;       all the commands in the window to be immediately executed. If this is
+;       not behavior you desire, use the LOADCMD keyword instead. If CMDINDEX
+;       is used to select a command index, the new command is added before
+;       the command currently occuping that index in the command list.
+;    altps_Keywords: in, optional, type=string
+;       A structure containing alternative keyword names (as tags) and values for
+;       those keywords to be used when the current device is the PostScript device.
+;       See http://www.idlcoyote.com/cg_tips/kwexpressions.php and the examples
+;       below for details on how to use this keyword.
+;    altps_Params: in, optional, type=IntArr(3)
+;       A structure containing alternative parameter values to be used when 
+;       the current device is the PostScript device. Structure names are restricted
+;       to the names "P1", "P2" and "P3" to correspond to the equivalent positional
+;       parameter. See http://www.idlcoyote.com/cg_tips/kwexpressions.php and the 
+;       examples below for details on how to use this keyword.
+;    cmddelay: in, optional, type=float
+;       If this keyword is set to a value other than zero, there will be a 
+;       delay of this many seconds between command execution. This will permit
+;       "movies" of command sequences to be displayed.
+;    group_leader: in, optional
+;       The identifier of a widget to serve as a group leader for this program.
+;       If the group leader is destroyed, this program is also destroyed. Used
+;       when calling this program from another widget program.
+;    method: in, optional, type=boolean, default=0
+;       Set this keyword if the command is an object method call rather than a 
+;       procedure call. If this keyword is set, the first positional parameter, p1,
+;       must be present and must be a valid object reference.
+;    replacecmd: in, optional, type=boolean, default=0
+;       Set this keyword to replace a graphics command from an cgWindow.
+;       If CmdIndex is undefined, *all* commands in the window are replaced. Use 
+;       WinID to identify the cgWindow you are interested in. If WinID is 
+;       undefined, the last cgWindow created is used for the replacement.
+;    waspect: in, optional, type=float, default=normal
+;       Set this keyword to the aspect ratio you would like the window to have.
+;       The aspect ratio is calculated as (ysize/xsize). Must be a float value.
+;       If this keyword is set, the window will maintain this aspect ratio,
+;       even when it is resized.
+;    wbackground: in, optional, type=varies, default=!P.Background
+;       The background color of the window. Specifying a background color 
+;       automatically sets the WErase keyword.
+;    weraseit: in, optional, type=boolean, default=0
+;       Set this keyword to cause the window to be erased before graphics commands 
+;       are drawn. This may need to be set, for example, to display images.
+;    wmulti: in, optional, type=intarr(5)
+;        Set this keyword in exactly the same way you would set the !P.Multi keyword.
+;        It will allow you to display multi-plots in the cgWindow graphics window.
+;    woxmargin: in, optional, type=float
+;       A two-element array indicating the left and right X outside margins for the
+;       graphical display. Used only when doing multiple plots with `WMulti`.
+;    woymargin: in, optional, type=float
+;       A two-element array indicating the bottom and top Y outside margins for the
+;       graphical display. Used only when doing multiple plots with `WMulti`.
+;    wxpos: in, optional, type=integer, default=5
+;       The x offset in device coordinates of the cgWindow from the upper-left corner of the display.
+;    wypos: in, optional, type=integer, default=5
+;       The y offset in device coordinates of the cgWindow from the upper-left corner of the display.
+;    wxsize: in, optional, type=integer, default=640
+;       The x size in device coordinates of the graphics window.
+;    wysize: in, optional, type=integer, default=5
+;       The y size in device coordinates of the the graphics window.
+;    wtitle: in, optional, type=string, default='Resizeable Graphics Window'
+;       The title of the graphics window. A window index number is appended to the
+;       title so multiple cgWindow programs can be selected.
+;    _extra: in, optional
+;       The "extra" keywords for the command that is being added to the window.
 ;-
 FUNCTION FSC_CmdWindow::Init, $
    command, $                       ; The graphics "command" to execute.
    p1, p2, p3, $                    ; The three allowed positional parameters.
-   AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
-   AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. Fields 
-                                    ; should be "P1", "P2" or "P3".
-   _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
-   Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
    AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface.
+   AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
+   AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. 
    CmdDelay=cmdDelay, $             ; Set this keyword to a value to "wait" before executing the next command.
+   Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
    Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
    ReplaceCmd=replacecmd, $         ; Replace the current command and execute in the current window.
    WAspect = waspect, $             ; Set the window aspect ratio to this value.
@@ -1367,11 +1603,12 @@ FUNCTION FSC_CmdWindow::Init, $
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
    WOXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
    WOYMargin = woymargin, $         ; Set the !Y.OMargin. A two element array
+   WXPos = wxpos, $                 ; The X offset of the window on the display. The window is centered if not set.
    WXSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 400.
+   WYPos = wypos, $                 ; The Y offset of the window on the display. The window is centered if not set.
    WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 400.
    WTitle = wtitle, $               ; The window title.
-   WXPos = wxpos, $                 ; The X offset of the window on the display. The window is centered if not set.
-   WYPos = wypos                    ; The Y offset of the window on the display. The window is centered if not set.
+   _Extra = extra                   ; Any extra keywords. Usually the "command" keywords.
 
     Compile_Opt idl2
     
@@ -2073,17 +2310,19 @@ END ;---------------------------------------------------------------------------
 ;   command: in, required, type=string
 ;       The command that is being stored in the command object.
 ;   keywords: in, optional, type=structure
-;        A structure containing keyword:value pairs to be executed
-;        with the command.
-;    P1: in, optional, type=varies
-;        The first positional parameter of the command being stored
-;        in the structure.
-;    P2: in, optional, type=varies
-;        The second positional parameter of the command being stored
-;        in the structure.
-;    P3: in, optional, type=varies
-;        The third positional parameter of the command being stored
-;        in the structure.
+;       A structure containing keyword:value pairs to be executed
+;       with the command.
+;   P1: in, optional, type=varies
+;       The first positional parameter of the command being stored
+;       in the structure.
+;   P2: in, optional, type=varies
+;       The second positional parameter of the command being stored
+;       in the structure.
+;   P3: in, optional, type=varies
+;       The third positional parameter of the command being stored
+;       in the structure.
+;   type: in, optional, type=integer, default=0
+;       The type of command. 0 indicates a procedure. 1 indicates an object method.
 ;-
 FUNCTION FSC_Window_Command::INIT, $
     ALTPS_KEYWORDS=altps_keywords, $
@@ -2110,7 +2349,7 @@ FUNCTION FSC_Window_Command::INIT, $
     IF N_Elements(keywords) NE 0 THEN self.keywords = Ptr_New(keywords)
     IF N_Elements(altps_keywords) NE 0 THEN self.altps_keywords = Ptr_New(altps_keywords)
     IF N_Elements(altps_params) NE 0 THEN self.altps_params = Ptr_New(altps_params)
-    self.type = type
+    self.type = Keyword_Set(type)
     self.nparams = (N_Elements(p1) NE 0) + (N_Elements(p2) NE 0) + (N_Elements(p3) NE 0)
     RETURN, 1
     
@@ -2256,6 +2495,12 @@ END ;---------------------------------------------------------------------------
 ;    wobject: out, optional, type=object
 ;       cgWindow creates a FSC_CmdWindow object. This object reference is returned
 ;       if this keyword is present.
+;    woxmargin: in, optional, type=float
+;       A two-element array indicating the left and right X outside margins for the
+;       graphical display. Used only when doing multiple plots with `WMulti`.
+;    woymargin: in, optional, type=float
+;       A two-element array indicating the bottom and top Y outside margins for the
+;       graphical display. Used only when doing multiple plots with `WMulti`.
 ;    wxpos: in, optional, type=integer, default=5
 ;       The x offset in device coordinates of the cgWindow from the upper-left corner of the display.
 ;    wypos: in, optional, type=integer, default=5
@@ -2340,34 +2585,33 @@ END ;---------------------------------------------------------------------------
 PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.
    p1, p2, p3, $                    ; The three allowed positional parameters.
+   AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface and immediate execute commands.
    AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
    AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. Fields 
                                     ; should be "P1", "P2" or "P3".
-   _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
-   Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
-   Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
-   WAspect = waspect, $             ; Set the window aspect ratio to this value.
-   WBackground = wbackground, $     ; The background color. Set to !P.Background by default.
-   WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.
-   WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.   
-   WOXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
-   WOYMargin = woymargin, $         ; Set the !Y.OMargin. A two element array
-   WXSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 640.
-   WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 512.
-   WTitle = wtitle, $               ; The window title.
-   WXPos = wxpos, $                 ; The X offset of the window on the display. The window is tiled if not set.
-   WYPos = wypos, $                 ; The Y offset of the window on the display. The window is tiled if not set.
-   
-   AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface and immediate execute commands.
    CmdDelay=cmdDelay, $             ; Set this keyword to a value to "wait" before executing the next command.
    CmdIndex=cmdIndex, $             ; Set this keyword to identify the index of the command to manipulate.
    DeleteCmd=deletecmd, $           ; Set the keyword to delete a command.
    ExecuteCmd=executecmd, $         ; Set this keyword to execute the commands in the window.
+   Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
    ListCmd=listCmd, $               ; Set this keyword to list the commands in the window.
    LoadCmd=loadCmd, $               ; Set this keyword to load commands in the window, but not execute them.
+   Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
    ReplaceCmd=replacecmd, $         ; Set this keyword to replace a command in the window.
+   WAspect = waspect, $             ; Set the window aspect ratio to this value.
+   WBackground = wbackground, $     ; The background color. Set to !P.Background by default.
+   WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.
    WinID=winid, $                   ; Set this keyword to select an cgWindow.
-   WObject=wobject                  ; The FSC_CMDWindow object. A return value.
+   WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.   
+   WObject=wobject, $               ; The FSC_CMDWindow object. A return value.
+   WOXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
+   WOYMargin = woymargin, $         ; Set the !Y.OMargin. A two element array
+   WXPos = wxpos, $                 ; The X offset of the window on the display. The window is tiled if not set.
+   WXSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 640.
+   WYPos = wypos, $                 ; The Y offset of the window on the display. The window is tiled if not set.
+   WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 512.
+   WTitle = wtitle, $               ; The window title.
+    _Extra = extra                   ; Any extra keywords. Usually the "command" keywords.
 
     Compile_Opt idl2
     

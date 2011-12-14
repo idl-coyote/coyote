@@ -149,6 +149,8 @@
 ;         Set this keyword to the name of the path to the Ghostscript command for converting PS to PDF.
 ;     pdf_unix_convert_cmd: out, optional, type=string
 ;         Set this keyword to the name of an alternative UNIX command to convert PostScript to PDF.
+;     ps_charsize: in, optional, type=float
+;         The PostScript character size.
 ;     ps_decomposed: in, optional, type=boolean, default=0
 ;         Set this keyword to zero to set the PostScript color mode to indexed color and to
 ;         one to set the PostScript color mode to decomposed color.
@@ -157,10 +159,17 @@
 ;         when making raster file output.
 ;     ps_encapsulated: in, optional, type=boolean, default=0
 ;          Set this keyword to configure PSCONFIG to produce encapsulated PostScript output by default.
+;     ps_font: in, optional, type=integer
+;        Set this keyword to the type of font you want to use in PostScript output. It sets the 
+;        FONT keyword on the PSConfig command. Normally, 0 (hardware fonts) or 1 (true-type fonts).
 ;     ps_metric: in, optional, type=boolean, default=0
 ;          Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
 ;     ps_quiet: in, optional, type=boolean, default=0
 ;          Set this keyword to set the QUIET keyword on PS_Start.
+;     ps_scale_factor: in, optional, type=float
+;          Set his keyword to the PostScript scale factor you wish to use in creating PostScript output.
+;     ps_tt_font: in, optional, type=string
+;        Set this keyword to the name of a true-type font to use in creating PostScript output.
 ;     restore_visualization: in, optional, type=string
 ;          Set this keyword to the name of a visualization save file to restore.
 ;     save_visualization: in, optional, type=string, default='graphic.cgs'

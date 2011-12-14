@@ -201,6 +201,15 @@ END
 ;   This method allows the user to get various properties of the object. In general,
 ;   the same keywords that are used for the INIT method can be used here. Superclass
 ;   values can also be obtained.
+;   
+; :Keywords:
+;      name: out, optional, type=string
+;         Use this keyword to name the object. Names are often used to select objects in 
+;         program code. 
+;      uvalue: out, optional, type=any
+;         Returns the user value, if any.
+;      _ref_extra: out, optional
+;         Returns the value of any keyword in the superclass object.
 ;---------------------------------------------------------------------------
 PRO cgContainer::GetProperty, NAME=name, UVALUE=uvalue, _REF_EXTRA=extra
 
@@ -227,8 +236,17 @@ END
 ;   This method allows the user to set various properties of the object. In general,
 ;   the same keywords that are used for the INIT method can be used here. Superclass
 ;   values can also be set.
+;   
+; :Keywords:
+;      name: in, optional, type=string, default=selected by cgContainer.
+;         Use this keyword to name the object. Names are often used to select objects in 
+;         program code. 
+;      uvalue: in, optional, type=any, default=none
+;         A storage space for storing any kind of IDL variable of importance to the user.
+;      _ref_extra: in, optional
+;         Any superclass keyword can be set here.
 ;---------------------------------------------------------------------------
-PRO cgContainer::SetProperty, NAME=name, UVALUE=uvalue, _EXTRA=extra
+PRO cgContainer::SetProperty, NAME=name, UVALUE=uvalue, _REF_EXTRA=extra
 
    Compile_Opt idl2
     

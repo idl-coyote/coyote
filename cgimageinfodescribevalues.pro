@@ -36,15 +36,14 @@
 ;  Display information about an image at a given location
 ;
 ; :Params:
-;    image : in, required, type=image
-;       a 2D or 3D image array
-;    id : in, required, type=string
-;       prefix to display when showing information about the image.
-;     xpixel: in, required, type=int
-;       the X location on the image to fetch information from
-;
-;     ypixel: in, required, type=int
-;       the y location on the image to fetch information from
+;    image: in, required, type=image
+;       A 2D or 3D image array
+;    id: in, required, type=string
+;       Prefix to display when showing information about the image.
+;    xpixel: in, required, type=int
+;       The X location on the image to fetch information from
+;    ypixel: in, required, type=int
+;       The y location on the image to fetch information from
 ;
 ;
 pro cgDescribeThisImgValues,  image,  id, xpixel,  ypixel
@@ -86,17 +85,14 @@ end
 ;  images.
 ;
 ; :Params:
-;    iimage : in, required, type=image
-;       a 2D or 3D image array
-;
-;     xpixel: in, required, type=int
-;       the X location on the image to fetch information from
-;
-;     ypixel: in, required, type=int
-;       the y location on the image to fetch information from
-;
-;     hsh :in, optional, type=HASH
-;       if a valid HASH, it should contain key/Image (string/array) pairs that
+;    iimage: in, required, type=image
+;       A 2D or 3D image array
+;    xpixel: in, required, type=int
+;       The X location on the image to fetch information from
+;    ypixel: in, required, type=int
+;       The y location on the image to fetch information from
+;    hsh: in, optional, type=HASH
+;       If a valid HASH, it should contain key/Image (string/array) pairs that
 ;       will be described.
 ;       
 ;-

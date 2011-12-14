@@ -105,6 +105,8 @@
 ;     ps_tt_font: in, optional, type=string, default="Helvetica"
 ;          Set this keyword to the name of the PostScript true-type font to use for PostScript output.
 ;          Not used, unless !P.Font=1.
+;     reset: in, optional, type=boolean, default=0
+;         Set this keyword to reset all values to their default values.
 ;     title: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be a window title. All
 ;         matching is done in uppercase characters.
@@ -153,36 +155,20 @@
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
 PRO cgWindow_SetDefs, $
-   Reset=reset, $                                  ; Reset to original values.
-   
-   ; cgWindow properties.
    AdjustSize = adjustsize, $                      ; Adjusts text size to fit display window size.
    Aspect = aspect, $                              ; Set the aspect ratio of the window.
    Background = background, $                      ; The background color. 
    Delay = delay, $                                ; The delay between command execution.
    EraseIt = eraseit, $                            ; Set this keyword to erase the display before executing the commands.
-   Multi = multi, $                                ; Set this in the same way !P.Multi is used.   
-   XOMargin = xomargin, $                          ; Set the !X.OMargin. A two element array.
-   YOMargin = yomargin, $                          ; Set the !Y.OMargin. A two element array
-   XSize = xsize, $                                ; The X size of the cgWindow graphics window.
-   YSize = ysize, $                                ; The Y size of the cgWindow graphics window.
-   Title = title, $                                ; The window title.
-   XPos = xpos, $                                  ; The X offset of the window on the display.
-   YPos = ypos, $                                  ; The Y offset of the window on the display. 
-   Palette = palette, $                            ; The color table palette to use for the window.
-   
-   ; ImageMagick Properties.
    IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
    IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
    IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
    IM_Raster = im_raster, $                        ; Sets thee raster via ImageMagick setting.
-   
-   ; PDF properties.
+   Multi = multi, $                                ; Set this in the same way !P.Multi is used.   
+   Palette = palette, $                            ; The color table palette to use for the window.
    PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
    PDF_Path = pdf_path, $                          ; The path to the Ghostscript conversion command.
-   
-   ; PostScript properties.
    PS_Decomposed = ps_decomposed, $                ; If set, use decomposed color in PostScript.
    PS_Delete = ps_delete, $                        ; Delete the PostScript file when making IM files.
    PS_Metric = ps_metric, $                        ; Select metric measurements in PostScript output.
@@ -191,8 +177,16 @@ PRO cgWindow_SetDefs, $
    PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.
    PS_QUIET=ps_quiet, $                            ; Select the QUIET keyword for PS_START.
    PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
-   PS_TT_FONT=ps_tt_font                           ; Select the true-type font to use for PostScript output.
-   
+   PS_TT_FONT=ps_tt_font, $                           ; Select the true-type font to use for PostScript output.
+   Reset=reset, $                                  ; Reset to original values. 
+   XOMargin = xomargin, $                          ; Set the !X.OMargin. A two element array.
+   YOMargin = yomargin, $                          ; Set the !Y.OMargin. A two element array
+   XSize = xsize, $                                ; The X size of the cgWindow graphics window.
+   YSize = ysize, $                                ; The Y size of the cgWindow graphics window.
+   Title = title, $                                ; The window title.
+   XPos = xpos, $                                  ; The X offset of the window on the display.
+   YPos = ypos                                     ; The Y offset of the window on the display. 
+      
    Compile_Opt idl2
    
    ; Return to caller on error.
@@ -226,12 +220,12 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(im_transparent) EQ 0 THEN im_transparent = 0
         IF N_Elements(pdf_unix_convert_cmd) EQ 0 THEN pdf_unix_convert_cmd = ""
         IF N_Elements(pdf_path) EQ 0 THEN pdf_path = ""
+        IF N_Elements(ps_charsize) EQ 0 THEN ps_charsize = 0.0
+        IF N_Elements(ps_encapsulated) EQ 0 THEN ps_encapsulated = 0
+        IF N_Elements(ps_font) EQ 0 THEN ps_font = 0
         IF N_Elements(ps_decomposed) EQ 0 THEN ps_decomposed = 0 ; Index mode by default.
         IF N_Elements(ps_delete) EQ 0 THEN ps_delete = 1
         IF N_Elements(ps_metric) EQ 0 THEN ps_metric = 0
-        IF N_Elements(ps_encapsulated) EQ 0 THEN ps_encapsulated = 0
-        IF N_Elements(ps_charsize) EQ 0 THEN ps_charsize = 0.0
-        IF N_Elements(ps_font) EQ 0 THEN ps_font = 0
         IF N_Elements(ps_quiet) EQ 0 THEN ps_quiet = 0
         IF N_Elements(ps_scale_factor) EQ 0 THEN ps_scale_factor = 1.0
         IF N_Elements(ps_tt_font) EQ 0 THEN ps_tt_font = 'Helvetica'

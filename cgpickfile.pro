@@ -58,29 +58,29 @@
 ;         directory. The data directory is ONLY used if there is no "current" last 
 ;         directory. In other words, it is only used if cgPickfile has not been called 
 ;         in the current IDL session.
-;      demo: in, optional, type=boolean, default=0 
+;     demo: in, optional, type=boolean, default=0 
 ;         If set, starts in the !DIR/examples/data directory.
-;      jpeg: in, optional, type=boolean, default=0  
+;     jpeg: in, optional, type=boolean, default=0  
 ;         If set, starts in the "jpeg" directory. It assumes the jpeg directory is rooted 
 ;         in the "data" directory.
-;      hdf: in, optional, type=boolean, default=0 
+;     hdf: in, optional, type=boolean, default=0 
 ;         If set, starts in the "hdf" directory. It assumes the hdf directory is rooted 
 ;         in the "data" directory.
-;      last_file: in, optional, type=boolean, default=0  
+;     last_file: in, optional, type=boolean, default=0  
 ;         If set, the name of the last file opened is placed in the filename widget.
-;      lidar: in, optional, type=boolean, default=0 
+;     lidar: in, optional, type=boolean, default=0 
 ;         If set, starts in the "lidar" directory. It assumes the lidar directory is 
 ;         rooted in the "data" directory.
-;      ncdf: in, optional, type=boolean, default=0 
+;     ncdf: in, optional, type=boolean, default=0 
 ;         If set, starts in the "ncdf" directory. It assumes the ncdf directory is 
 ;         rooted in the "data" directory.
-;      png: in, optional, type=boolean, default=0 
+;     png: in, optional, type=boolean, default=0 
 ;         If set, starts in the "png" directory. It assumes the png directory is 
 ;         rooted in the "data" directory.
-;      tiff: in, optional, type=boolean, default=0 
+;     tiff: in, optional, type=boolean, default=0 
 ;         If set, starts in the "tiff" directory. It assumes the tiff directory is 
 ;         rooted in the "data" directory.
-;      _ref_extra: in, optional
+;     _ref_extra: in, optional
 ;          Accepts any input keywords to DIALOG_PICKFILE (e.g., FILTER).
 ;          
 ; :Author:

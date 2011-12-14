@@ -91,17 +91,21 @@
 ;     font: in, optional, type=integer, default=0                
 ;         Set this to the type of font you want. A -1 selects Hershey fonts, a 0 selects hardware 
 ;         fonts (Helvetica, normally), and a 1 selects a True-Type font. Set to 0 by default.
+;     encapsulated: in, optional, type=boolean, default=0
+;         Set this keyword to produce encapsulated PostScript output.
 ;     gui: in, optional, type=boolean, default=0
 ;         The default behavior is to use PSCONFIG to configure the PostScript device silently. 
 ;         If you wish to allow the user to interatively configure the PostScript device, set this
 ;         keyword.
 ;     keywords: out, optional, type=structure                
 ;         This output keyword contains the keyword structure returned from PS_Config.
+;     landscape: in, optional, type=boolean, default=0
+;         Set this keyword to produce landscape PostScript output.
 ;     nomatch: in, optional, type=boolean, default=0                
-;        Normally, PS_Start will try to "match" the aspect ratio of the PostScript file "window" 
-;        to the current display window. If this keyword is set, then this doesn't occur, giving 
-;        the user the option of specifying the size and offsets of the PostScript window directly 
-;        though appropriate keywords.
+;         Normally, PS_Start will try to "match" the aspect ratio of the PostScript file "window" 
+;         to the current display window. If this keyword is set, then this doesn't occur, giving 
+;         the user the option of specifying the size and offsets of the PostScript window directly 
+;         though appropriate keywords.
 ;     quiet: in, optional, type=boolean, default=0
 ;         If set, informational messages are not set. 
 ;     scale_factor: in, optional, type=float, default=1.0

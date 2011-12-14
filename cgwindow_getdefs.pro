@@ -70,14 +70,24 @@
 ;         The name of the path to the Ghostscript command for converting PS to PDF.
 ;     pdf_unix_convert_cmd: out, optional, type=string
 ;         The name of an alternative UNIX command to convert PostScript to PDF.
+;     ps_charsize: out, optional, type=float, default=0.0
+;         The PostScript character size.
 ;     ps_decomposed: out, optional, type=boolean
 ;         The PostScript decomposed status of the window.
 ;     ps_delete: out, optional, type=boolean
 ;         The delete PostScript file status of the window.
 ;     ps_encapsulated: out, optional, type=boolean
 ;          The PostScript encapsulated status of the window.
+;     ps_font: out, optional, type=integer
+;          The font being using for PostScript output.
 ;     ps_metric: out, optional, type=boolean
 ;          The metric status of the window.
+;     ps_quiet: out, optional, type=boolean
+;          Set to one of the QUIET keyword is set on PSConfig.
+;     ps_scale_factor: out, optional, type=float
+;          The PostScript scale factor.
+;     ps_tt_font: out, optional, type=string
+;          The name of the PostScript true-type font in current use.
 ;     title: out, optional, type=boolean
 ;         The window title. 
 ;     xomargin: out, optional, type=intarr(2)
@@ -149,12 +159,12 @@ PRO cgWindow_GetDefs, $
    PDF_Path = pdf_path, $                          ; The path to the Ghostscript conversion command.
    
    ; PostScript properties.
+   PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.
    PS_Decomposed = ps_decomposed, $                ; If set, use decomposed color in PostScript.
    PS_Delete = ps_delete, $                        ; Delete the PostScript file when making IM files.
    PS_Metric = ps_metric, $                        ; Select metric measurements in PostScript output.
    PS_Encapsulated = ps_encapsulated, $            ; Create Encapsulated PostScript output.
    PS_FONT=ps_font, $                              ; Select the font for PostScript output.
-   PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.
    PS_QUIET=ps_quiet, $                            ; The QUIET keyword to PS_Start.
    PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
    PS_TT_FONT=ps_tt_font                           ; Select the true-type font to use for PostScript output.

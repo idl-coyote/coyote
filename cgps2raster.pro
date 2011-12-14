@@ -50,6 +50,11 @@
 ; :Categories:
 ;    Utilities, Graphics
 ;    
+; :Params:
+;     ps_file: in, required, type=string
+;         The name of the input PostScript file that is being converted to a raster file.
+;         If not provided, the user will be asked to select a file.
+;         
 ; :Keywords:
 ;     allow_transparent: in, optional, type=boolean, default=0
 ;         To make the background of some image files white, rather than transparent,
@@ -72,6 +77,8 @@
 ;        command. No error checking occurs with this string.
 ;     jpeg: in, optional, type=boolean, default=0  
 ;        Set this keyword to convert the PostScript output file to a JPEG image. Requires ImageMagick.
+;     outfilename: out, optional, type=string
+;        On exit, the name of the output file that was created.
 ;     pdf: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a PDF file. Requires Ghostscript.
 ;     png: in, optional, type=boolean, default=0                 

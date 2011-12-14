@@ -72,13 +72,20 @@
 ;         This keyword applied only to graphics windows created on the computer display.
 ;    wid: in, optional, type=integer, default=0
 ;         The window index number of the IDL graphics window to create.
+;    window: in, optional, type=integer, default=0
+;         Because I want to use cgDisplay everywhere, including in resizeable graphics
+;         windows, and I don't want it opening windows then, it first checks to be sure
+;         there are no resizeable graphics windows on the display before it creates a window.
+;         Setting this keyword will overrule this check and create a normal IDL graphics window
+;         on the display. This will allow you to open a normal graphics window at the same
+;         time a resizeable graphics window exists on the display.
 ;    xsize: in, optional, type=integer, default=640
 ;         The X size of the graphics window created. By default, 640. The PXSIZE parameter 
 ;         is used in preference to the XSIZE keyword value.
 ;    ysize: in, optional, type=integer, default=512
 ;         The Y size of the graphics window created. By default, 512. The PYSIZE parameter 
 ;         is used in preference to the YSIZE keyword value.
-;     _extra: in, optional, type=any
+;    _extra: in, optional, type=any
 ;         Any keywords supported by the WINDOW command are allowed.
 ;         
 ; :Examples:
@@ -118,6 +125,7 @@ PRO cgDisplay, pxsize, pysize, $
     COLOR=scolor, $
     FREE=free, $
     WID=windowIndex, $
+    WINDOW=window, $
     XSIZE=xsize, $
     YSIZE=ysize, $
     _EXTRA=extra
@@ -167,18 +175,21 @@ PRO cgDisplay, pxsize, pysize, $
     ; If you are on a machine that supports windows, you can create a window
     ; if the current graphics window ID cannot be found in the list of cgWindow IDs.
     ; This will allow you to create a window in a program that can still run in
-    ; a resizeable graphics window.
+    ; a resizeable graphics window. If you absolutely MUST have a graphics window,
+    ; set the window keyword to force a normal IDL graphics window.
     IF (!D.Flags AND 256) NE 0 THEN BEGIN
     
         ; Assume you can create a window.
         createWindow = 1
         
-        ; Get the window ids of all cgWindows.
-        windowIDs = cgQuery(COUNT=windowCnt)
-        IF windowCnt NE 0 THEN BEGIN
-            index = Where(windowIDs EQ !D.Window, foundit)
-            IF foundit THEN createWindow = 0
-        ENDIF 
+        IF ~Keyword_Set(window) THEN BEGIN
+            ; Get the window ids of all cgWindows.
+            windowIDs = cgQuery(COUNT=windowCnt)
+            IF windowCnt NE 0 THEN BEGIN
+                index = Where(windowIDs EQ !D.Window, foundit)
+                IF foundit THEN createWindow = 0
+            ENDIF 
+        ENDIF
         
         ; If you are not running this program in a cgWindow, feel
         ; free to create a window!

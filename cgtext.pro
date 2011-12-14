@@ -80,11 +80,13 @@
 ;         of the cursor position in the window.
 ;     place: in, optional, type=boolean
 ;          Set this keyword if you wish to click the cursor in the graphics window to place
-;          the text. If this keyword is set, you do not need to specify the xloc and yloc
+;          the text. If this keyword is set, you do not need to specify the `xloc` and `yloc`
 ;          positional parameters. The first positional parameter is assumed to be the text.
-;          The clicked location will be returned in the OUTLOC variable. If the ALIGNMENT
+;          The clicked location will be returned in the `OutLoc` variable. If the `Alignment`
 ;          keyword is not set, it will be set to 0.5 to set "center" as the default placement
-;          alignment.
+;          alignment. This has been modified to allow this keyword to work in a resizeable
+;          graphics window as well. Clicking once in the window will set the parameters so 
+;          you don't have to click every time the window is resized.
 ;     tt_font: in, optional, type=string
 ;         The true-type font to use for the text. Only used if FONT=1.
 ;     width: out, optional, type=float
@@ -125,6 +127,7 @@
 ;        Added ability to return WIDTH from resizeable graphics windows and added ADDCMD 
 ;              keyword. 24 Feb 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
+;        Modified to allow the user to place the text in a resizeable graphics window. 13 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -162,6 +165,35 @@ PRO cgText, xloc, yloc, text, $
         RETURN
     ENDIF
     
+    ; Did the user want to place the text in a cgWindow?
+    IF Keyword_Set(place) && ((Keyword_Set(window) || Keyword_Set(addcmd)) $
+         AND ((!D.Flags AND 256) NE 0)) THEN BEGIN
+    
+        ; Make sure there is a graphics window.
+        wid = cgQuery(/CURRENT, COUNT=count)
+        IF count EQ 0 THEN Message, 'There is no cgWindow to place text in.'
+        WSet, wid
+            
+        ; There must be a window open.
+        IF !D.Window LT 0 THEN $
+            Message, 'There is no current graphics window open.'
+            
+        ; Print some instructions.
+        Print, ""
+        Print, 'Click in current graphics window (window index ' + $
+            StrTrim(!D.Window,2) + ') to place text.'
+    
+        ; The text string is the only positional parameter.
+        text = xloc
+        Cursor, x, y, /DOWN, DEVICE=device, NORMAL=normal, DATA=data
+        outloc = [x, y]
+        xloc = x
+        yloc = y
+        nparams = 3
+        IF N_Elements(alignment) EQ 0 THEN alignment = 0.5
+    
+     ENDIF     
+     
     ; Should this be added to a resizeable graphics window?
     IF (Keyword_Set(window) || Keyword_Set(addcmd)) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
@@ -176,7 +208,6 @@ PRO cgText, xloc, yloc, text, $
             FONT=font, $
             NORMAL=normal, $
             OUTLOC=outloc, $
-            PLACE=place, $
             TT_FONT=tt_font, $
             WIDTH=width, $
             ADDCMD=1, $
@@ -222,7 +253,8 @@ PRO cgText, xloc, yloc, text, $
     ENDIF ELSE BEGIN
     
         ; All three positional parameters are required.
-        IF N_Params() NE 3 THEN Message, 'cgText must be called with three positional parameters.'
+        IF N_Elements(nparams) EQ 0 THEN nparams = N_Params()
+        IF nparams NE 3 THEN Message, 'cgText must be called with three positional parameters.'
   
         ; If the text is specified as the first parameter, move things around.
         IF Size(xloc, /TNAME) EQ 'STRING' THEN BEGIN

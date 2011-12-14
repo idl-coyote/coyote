@@ -63,11 +63,11 @@
 ; by setting fields in the plot and axis system variables (!P, !X, !Y, and !Z).
 ; The modifications currently made by default in this program are these::
 ;
-;     !P.Thick = 2
-;     !P.CharThick = 2
-;     !X.Thick = 2
-;     !Y.Thick = 2
-;     !Z.Thick = 2
+;     !P.Thick = 3
+;     !P.CharThick = 3
+;     !X.Thick = 3
+;     !Y.Thick = 3
+;     !Z.Thick = 3
 ;     !P.Font = 0
 ;          
 ; The !P.Charsize variable is set differently on Windows computers, and depending
@@ -88,6 +88,12 @@
 ;         PS_Config. Otherwise, set to 0.
 ;     charsize: in, optional, type=float
 ;         If this keyword is set, the !P.Charsize variable is set to this value until PS_END is called.
+;     default_thickness: in, optional, type=integer, default=3
+;         Sets the following system variables to this value while creating PostScript output:
+;         !P.Thick, !P.CharThick, !X.Thick, !Y.Thick, !Z.Thick. These variables are returned to
+;         their original values by `PS_End`. A system variable is set to this value only if it 
+;         currently contains the IDL default value of 0.0. If it is set to anything else, this 
+;         default thickness value is ignored.
 ;     font: in, optional, type=integer, default=0                
 ;         Set this to the type of font you want. A -1 selects Hershey fonts, a 0 selects hardware 
 ;         fonts (Helvetica, normally), and a 1 selects a True-Type font. Set to 0 by default.
@@ -155,6 +161,8 @@
 ;           landscape mode. 26 Aug 2011. DWF.
 ;       The SCALE_FACTOR is called at the time the PostScript file is opened to avoid problems
 ;           with the bounding box not being set to the correct values. 26 October 2011. DWF.
+;       Created a DEFAULT_THICKNESS keyword to set the default thicknesses of PostScript 
+;           system variables. 14 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
@@ -162,6 +170,7 @@
 PRO PS_START, $
     CANCEL=cancelled, $
     CHARSIZE=charsize, $
+    DEFAULT_THICKNESS=default_thickness, $
     FONT=font , $
     ENCAPSULATED=encapsulated, $
     GUI=gui, $
@@ -185,6 +194,7 @@ PRO PS_START, $
    quiet = Keyword_Set(quiet)
    
    ; Handle encapsulated and landscape keywords appropriately.
+   SetDefaultValue, default_thickness, 3
    encapsulated = Keyword_Set(encapsulated)
    landscape = Keyword_Set(landscape)
    IF encapsulated THEN landscape = 0
@@ -206,8 +216,8 @@ PRO PS_START, $
    ps_struct.z = !Z
    
    ; Change any parameters you feel like changing.
-   IF ps_struct.p.thick EQ 0 THEN !P.Thick = 2
-   IF ps_struct.p.charthick EQ 0 THEN !P.Charthick = 2
+   IF ps_struct.p.thick EQ 0 THEN !P.Thick = default_thickness
+   IF ps_struct.p.charthick EQ 0 THEN !P.Charthick = default_thickness
    IF ps_struct.p.charsize EQ 0 THEN BEGIN
         IF N_Elements(charsize) EQ 0 THEN BEGIN
             !P.Charsize = cgDefCharsize(FONT=font)
@@ -215,9 +225,9 @@ PRO PS_START, $
    ENDIF ELSE BEGIN
         IF N_Elements(charsize) NE 0 THEN !P.Charsize = charsize
    ENDELSE
-   IF ps_struct.x.thick EQ 0 THEN !X.Thick = 2
-   IF ps_struct.y.thick EQ 0 THEN !Y.Thick = 2
-   IF ps_struct.z.thick EQ 0 THEN !Z.Thick = 2
+   IF ps_struct.x.thick EQ 0 THEN !X.Thick = default_thickness
+   IF ps_struct.y.thick EQ 0 THEN !Y.Thick = default_thickness
+   IF ps_struct.z.thick EQ 0 THEN !Z.Thick = default_thickness
    
    ; Set the true-type font.
    thisWindow = !D.Window

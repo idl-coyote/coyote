@@ -77,6 +77,7 @@
 ;        Misunderstood Macintosh result. Now Mac treated like UNIX. 27 Oct 2010. DWF.
 ;        No known method for Macintosh computers. Resorting to a fudge factor
 ;           of 22 pixels to account for the Macintosh dock. 27 Oct 2010. DWF.
+;        Code is total reversed for UNIX and Macintosh computers! Fixed. 16 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -119,18 +120,19 @@ FUNCTION MaxWindowSize, MONITOR_RESOLUTION=monitor_resolution
         
             IF StrPos(!Version.OS_Name, 'Mac')  GE 0 THEN BEGIN
         
-                ; Unavoidable screen flash here. Uughh!
+                 ; Macintosh computers. Have to use fudge factor. 
+                 ; No way to determine otherwise.
+                 s = Get_Screen_Size()
+                 retValue = [s[0], s[1] - macfudge]
+                
+            ENDIF ELSE BEGIN 
+                
+                ; Unavoidable screen flash here. Uughh! UNIX.
                 s = Get_Screen_Size()
                 Window, XSIZE=s[0], YSIZE=s[1], /FREE
                 retValue = [!D.X_Size, !D.Y_Size]
                 WDelete, !D.Window
             
-            ENDIF ELSE BEGIN ; Macintosh computers.
-                
-                 ; Have to use fudge factor. No way to determine otherwise.
-                 s = Get_Screen_Size()
-                 retValue = [s[0], s[1] - macfudge]
-                
             ENDELSE
                 
             END

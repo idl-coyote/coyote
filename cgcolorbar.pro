@@ -222,6 +222,7 @@
 ;       Documented the TICKLEN keyword and set the default tick length to 0.25. 3 Oct 2011. DWF.
 ;       Added the OOB_FACTOR, OOB_HIGH and OOB_LOW keywords. 5 Dec 2011. DWF.
 ;       Added DISCRETE keyword. 7 Dec 2011. DWF.
+;       Changed the way the top axis was drawn, and had a problem with EXTRA keywords. Fixed. 20 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008, Fanning Software Consulting, Inc.
@@ -626,7 +627,7 @@ PRO cgColorbar, $
 
           AXIS, XTICKS=divisions, XSTYLE=1, COLOR=color, CHARSIZE=charsize, $
              XTICKFORMAT='(A1)', XTICKLEN=0.001, XRANGE=[minrange, maxrange], XAXIS=1, $
-             FONT=font, XTITLE="", _STRICT_EXTRA=extra, XCHARSIZE=charsize, XMINOR=minor, $
+             FONT=font, XTITLE="", XCHARSIZE=charsize, XMINOR=minor, $
              XTICKNAME="", XLOG=xlog, YTITLE=""
         ENDELSE
 

@@ -176,9 +176,10 @@ PRO PrecipMap, filename
              COLOR=cgColor('gray'), MAP_STRUCTURE=mapStruct
 
    ; Add a colorbar. Non-linear scaling requires use of tick formatting function.
-   cgColorbar, NColors=14, Bottom=1, Position=[pos[0], 0.1, pos[2], 0.15], $
+   cgColorbar, NColors=13, Bottom=1, Position=[pos[0], 0.1, pos[2], 0.15], $
       Divisions=14, Title='24 Hour Precipitation (mm)', AnnotateColor='black', $
-      XTicklen=1, XMinor=1, XTickFormat='precipmap_annotate'   
+      /Discrete, OOB_High=14, XTickFormat='PrecipMap_Annotate'
+  
       
         
 END ;----------------------------------------------------------------------

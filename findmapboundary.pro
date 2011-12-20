@@ -29,7 +29,7 @@
 ;
 ; INPUTS:
 ;
-;    filename:    The name of a filename to open to see is a projected map
+;    filename:    The name of a filename to open to see if a projected map
 ;                 grid boundary can be found.
 ;                 
 ; OUTPUTS:

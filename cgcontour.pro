@@ -304,7 +304,8 @@
 ;        Added OUTLINE and OUTCOLOR keywords. 8 Dec 2011. DWF.
 ;        Modified the way the axes are drawn when given a negative tick length. 9 Dec 2011. DWF.
 ;        Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
-;       PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
+;        PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
+;        Made sure the OUTLINE keyword works with CELL_FILL, too. 16 Dec 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -1002,8 +1003,8 @@ PRO cgContour, data, x, y, $
        XTICKV=xtickv, XTICKS=xticks, YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip
        
     ; If this is a filled contour plot, and the OUTLINE keyword is set, then draw the contour
-    ; outlines over the top of the data. Use the color charcoal to do the overplotting.
-    IF fill && outline THEN BEGIN
+    ; outlines over the top of the data. 
+    IF (fill || cell_fill) && outline THEN BEGIN
         Contour, contourData, xgrid, ygrid, COLOR=cgColor(outcolor), $
            LEVELS=levels, C_Labels=c_labels, XTHICK=xthick, YTHICK=ythick, $
            _STRICT_EXTRA=extra, T3D=t3d, CHARSIZE=charsize, $

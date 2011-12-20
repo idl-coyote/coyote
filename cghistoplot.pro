@@ -266,6 +266,8 @@
 ;           incorrectly. Now changed to what I think is the correct result. 8 Nov 2011. DWF.
 ;       Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;       PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
+;       I had a problem with OVERPLOTs being slightly offset because I was calculating the xrange
+;           and yrange, rather than taking them from !X.CRange and !Y.CRange. 17 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2007-2011, Fanning Software Consulting, Inc.
@@ -755,8 +757,8 @@ PRO cgHistoplot, $                  ; The program name.
    ; Unless we are overplotting, draw the plot to establish a data coordinate system.
    ; Don't actually display anything yet, because we may have to repair damage caused
    ; by polygon filling.
-   xrange = [xmin, xmax]
-   yrange = [ymin, ymax]
+   xrange = Keyword_Set(overplot) ? !X.CRange : [xmin, xmax]
+   yrange = Keyword_Set(overplot) ? !Y.CRange : [ymin, ymax]
    IF ~Keyword_Set(overplot) THEN BEGIN
        Plot, [0,0], xrange=xrange, yrange=yrange, $             
              Background=backColor, $
@@ -802,7 +804,6 @@ PRO cgHistoplot, $                  ; The program name.
          ENDELSE
 
          endpt = start + binsize
-
          FOR j=0,N_Elements(histdata)-1 DO BEGIN
             IF Keyword_Set(rotate) THEN BEGIN
                y = [start, start, endpt, endpt, start]

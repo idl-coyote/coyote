@@ -213,6 +213,7 @@
 ;             corrections. 27 Oct 2011. DWF.
 ;         Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;         PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
+;         Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -466,68 +467,10 @@ PRO cgBarPlot, values, $
     ENDIF
 
     ; Check the keywords.
-    IF N_Elements(sbackground) EQ 0 THEN BEGIN
-        IF Keyword_Set(overplot) || Keyword_Set(noerase) THEN BEGIN
-           IF !D.Name EQ 'PS' THEN BEGIN
-                background = 'WHITE' 
-           ENDIF ELSE BEGIN
-                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-                    havewindow = 0
-                    IF (!D.Window LT 0) &&  Keyword_Set(noerase) THEN BEGIN
-                        Window
-                        IF ~Keyword_Set(traditional) THEN cgErase, 'WHITE'
-                        havewindow = 1
-                    ENDIF ELSE BEGIN
-                        IF (!D.Window GE 0) THEN BEGIN
-                           WSet, !D.Window
-                           havewindow = 1
-                        ENDIF ELSE BEGIN
-                           wid = cgQuery(/CURRENT)
-                           IF wid GE 0 THEN BEGIN
-                               WSet, wid
-                               havewindow = 1
-                           ENDIF
-                        ENDELSE
-                    ENDELSE
-                    IF havewindow THEN BEGIN
-                        pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                        IF (Total(pixel) EQ 765) THEN background = 'WHITE'
-                        IF (Total(pixel) EQ 0) THEN background = 'BLACK'
-                    ENDIF ELSE background = 'WHITE'
-                    IF N_Elements(background) EQ 0 THEN background = 'OPPOSITE'
-                ENDIF ELSE background = 'OPPOSITE'
-           ENDELSE
-        ENDIF ELSE background = 'WHITE' 
-    ENDIF ELSE background = sbackground
-    IF Size(background, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN background = Byte(background)
-    IF Size(background, /TYPE) LE 2 THEN background = StrTrim(Fix(background),2)
-    
-    ; Choose an axis color.
-    IF N_Elements(saxisColor) EQ 0 AND N_Elements(saxescolor) NE 0 THEN saxiscolor = saxescolor
-    IF N_Elements(saxiscolor) EQ 0 THEN BEGIN
-       IF (Size(background, /TNAME) EQ 'STRING') && (StrUpCase(background) EQ 'WHITE') THEN BEGIN
-            IF !P.Multi[0] EQ 0 THEN saxisColor = 'BLACK'
-       ENDIF
-       IF N_Elements(saxiscolor) EQ 0 THEN BEGIN
-           IF !D.Name EQ 'PS' THEN BEGIN
-                IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
-                saxisColor = 'BLACK' 
-           ENDIF ELSE BEGIN
-                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-                    IF !D.Window LT 0 THEN Window
-                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
-                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN saxisColor = 'BLACK'
-                    IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN saxisColor = 'WHITE'
-                    IF N_Elements(saxisColor) EQ 0 THEN saxisColor = 'OPPOSITE'
-                ENDIF ELSE saxisColor = 'OPPOSITE'
-          ENDELSE
-       ENDIF
-    ENDIF
-    IF N_Elements(saxisColor) EQ 0 THEN axisColor = !P.Color ELSE axisColor = saxisColor
-    IF Size(axisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN axisColor = Byte(axisColor)
-    IF Size(axisColor, /TYPE) LE 2 THEN axisColor = StrTrim(Fix(axisColor),2)
-    
+    background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional, MODE=currentState)
+    axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
+    color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
+        
     ; If colors are identical, do something about it.
     IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
@@ -548,9 +491,7 @@ PRO cgBarPlot, values, $
     IF N_Elements(scolors) EQ 0 THEN BEGIN
         scolors=String(Byte((256.0/nbars)*(Indgen(nbars)+0.5)), FORMAT='(i0)')
     ENDIF
-    IF Size(scolors, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN colors = Byte(sColors)
-    IF Size(scolors, /TYPE) LE 2 THEN colors = String(Fix(sColors), Format='(I0)')
-    IF N_Elements(colors) EQ 0 THEN colors = scolors
+    colors = cgDefaultColor(scolors, MODE=currentState)
     IF N_Elements(colors) EQ 1 THEN colors = Replicate(colors, nbars)
     IF N_Elements(colors) NE nbars THEN $
        Message, 'There is a mismatch between the number of bars and number of bar colors.'

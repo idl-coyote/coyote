@@ -223,6 +223,7 @@
 ;       Added the OOB_FACTOR, OOB_HIGH and OOB_LOW keywords. 5 Dec 2011. DWF.
 ;       Added DISCRETE keyword. 7 Dec 2011. DWF.
 ;       Changed the way the top axis was drawn, and had a problem with EXTRA keywords. Fixed. 20 Dec 2011. DWF.
+;       Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008, Fanning Software Consulting, Inc.
@@ -544,32 +545,13 @@ PRO cgColorbar, $
     TVLCT, rr, gg, bb, /GET
     
     ; Annotate the color bar.
-    IF (!D.Name EQ 'PS') AND N_Elements(annotateColor) EQ 0 THEN BEGIN
-        annotateColor = 'black'
-    ENDIF ELSE BEGIN
-        IF N_Elements(annotateColor) EQ 0 THEN BEGIN
-            IF (!D.Window GE 0) AND ~scalablePixels THEN BEGIN
-                pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                IF N_ELEMENTS(color) EQ 0 THEN BEGIN
-                    IF Total(pixel) EQ 765 THEN annotateColor = 'black'
-                    IF Total(pixel) EQ 0 THEN annotateColor = 'white'
-                    IF N_Elements(annotateColor) EQ 0 THEN annotateColor = 'opposite'
-                ENDIF ELSE BEGIN
-                     IF Size(color, /TNAME) EQ 'STRING' THEN annotateColor = color
-                ENDELSE
-            ENDIF ELSE IF N_ELEMENTS(annotateColor) EQ 0 THEN annotateColor = 'opposite'
-        ENDIF 
-    ENDELSE
-    IF N_Elements(annotateColor) EQ 0 THEN annotateColor = 'opposite'
+    annotateColor = cgDefaultColor(annotateColor, DEFAULT=color, MODE=currentState)
     
     ; If color is undefined, use the annotate color.
-    IF N_Elements(color) EQ 0 THEN BEGIN
-        IF Size(annotateColor, /TNAME) EQ 'STRING' THEN BEGIN
-            color = cgColor(annotateColor)
-        ENDIF ELSE BEGIN
-            color = annotateColor
-        ENDELSE
-    ENDIF 
+    color = cgDefaultColor(color, DEFAULT=annotateColor, MODE=currentState)
+    
+    IF Size(annotateColor, /TNAME) EQ 'STRING' THEN annotateColor = cgColor(annotateColor)
+    IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
     
     IF KEYWORD_SET(vertical) THEN BEGIN
 

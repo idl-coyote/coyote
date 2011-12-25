@@ -104,6 +104,7 @@
 ;           name parameter. This allows one user-defined color to be used. 4 Dec 2011. DWF.
 ;        Modified to allow byte and 16-bit integer values to be used to specify colors
 ;           in the current color table. 5 Dec 2011. DWF.
+;        Modified to allow the "opposite" pixel to be determined in the Z-graphics buffer. 24 Dec 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
@@ -367,7 +368,7 @@ FUNCTION cgColor, theColour, colorIndex, $
     
     ; Get the pixel value of the "opposite" color. This is the pixel color
     ; opposite the pixel color in the upper right corner of the display.
-    IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+    IF ((!D.Window GE 0) && ((!D.Flags AND 256) NE 0)) || (!D.Name EQ 'Z') THEN BEGIN
        opixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
        IF N_Elements(opixel) NE 3 THEN BEGIN
             IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, /Get

@@ -142,6 +142,7 @@
 ;       Added a DISPLAY keyword to display the image in windows with the image aspect ratio. 2 Dec 2011.
 ;       Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;       PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
+;       Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -1342,22 +1343,8 @@ PRO cgImage, image, x, y, $
     noerase = Keyword_Set(noerase) ; Don't change, used in PS output.
     
     ; Choose an axis color.
-    IF N_Elements(acolorname) EQ 0 THEN BEGIN
-           IF !D.Name EQ 'PS' THEN BEGIN
-                acolorname = 'OPPOSITE' 
-           ENDIF ELSE BEGIN
-                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
-                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF (Total(pixel) EQ 765) THEN acolorname = 'BLACK'
-                    IF (Total(pixel) EQ 0) THEN acolorname = 'WHITE'
-                    IF N_Elements(acolorname) EQ 0 THEN acolorname = 'OPPOSITE'
-                ENDIF ELSE acolorname = 'OPPOSITE'
-           ENDELSE
-     ENDIF
-    IF N_Elements(acolorname) EQ 0 THEN acolor = !P.Color ELSE acolor = acolorname
-    IF Size(acolor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN acolor = Byte(color)
-    IF Size(acolor, /TYPE) LE 2 THEN acolor = StrTrim(Fix(acolor),2)
- 
+    acolor = cgDefaultColor(acolorname, DEFAULT='OPPOSITE')
+    
     ; Load the color palette if you are using one.
     IF N_Elements(palette) NE 0 THEN BEGIN
         IF Size(palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'

@@ -188,7 +188,7 @@
 ; :Examples:
 ;    Some of the ways cgHistogram can be used::
 ;    
-;       cgHistoplot, Dist(256)
+;       cgHistoplot, Dist(256), BINSIZE=5.0
 ;       cgHistoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['charcoal', 'steel blue'], /FILLPOLYGON
 ;       cgHistoplot, Fix(RandomU(seed, 200)*20), POLYCOLOR=['navy', 'forest green'], /LINE_FILL, ORIENTATION=[45,-45]
 ;       
@@ -268,6 +268,7 @@
 ;       PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;       I had a problem with OVERPLOTs being slightly offset because I was calculating the xrange
 ;           and yrange, rather than taking them from !X.CRange and !Y.CRange. 17 Dec 2011. DWF.
+;       Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2007-2011, Fanning Software Consulting, Inc.
@@ -652,25 +653,7 @@ PRO cgHistoplot, $                  ; The program name.
 
    ; Choose an axis color.
    IF N_Elements(axisColorName) EQ 0 AND N_Elements(saxescolor) NE 0 THEN axisColorName = saxescolor
-   IF N_Elements(axisColorName) EQ 0 THEN BEGIN
-       IF (Size(backColorName, /TNAME) EQ 'STRING') && (StrUpCase(backColorName) EQ 'WHITE') THEN BEGIN
-            IF !P.Multi[0] EQ 0 THEN axisColorName = 'BLACK'
-       ENDIF
-       IF N_Elements(axisColorName) EQ 0 THEN BEGIN
-           IF !D.Name EQ 'PS' THEN BEGIN
-                axisColorName = 'BLACK' 
-           ENDIF ELSE BEGIN
-                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
-                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF Total(pixel) EQ 765 THEN axisColorName = 'BLACK'
-                    IF Total(pixel) EQ 0 THEN axisColorName = 'WHITE'
-                    IF N_Elements(axisColorName) EQ 0 THEN axisColorName = 'OPPOSITE'
-                ENDIF ELSE axisColorName = 'OPPOSITE'
-           ENDELSE
-       ENDIF
-   ENDIF
-   IF N_Elements(axisColorName) EQ 0 THEN axisColor = !P.Color ELSE axisColor = axisColorName
-    
+   axisColorName = cgDefaultColor(axisColorName, DEFAULT='Opposite')
    IF N_Elements(polycolorname) EQ 0 THEN polycolorname = "Rose"
    IF N_Elements(probColorname) EQ 0 THEN probColorname = "Blue"
    frequency = Keyword_Set(frequency)

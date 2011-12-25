@@ -94,6 +94,7 @@
 ;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF.   
 ;        Added WINDOW keyword. 24 Jan 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
+;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -141,9 +142,7 @@ PRO cgColorFill, x, y, z, $
     SetDecomposedState, 1, CURRENTSTATE=currentState
     
     ; Need a color?
-    IF N_Elements(color) EQ 0 THEN thisColor = 'rose' ELSE thisColor = color
-    IF Size(thisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN thisColor = Byte(thisColor)
-    IF Size(thisColor, /TYPE) LE 2 THEN thisColor = StrTrim(Fix(thisColor),2)
+    thisColor = cgDefaultColor(color, DEFAULT='rose', MODE=currentState)
 
     ; Get the current color vectors.
     TVLCT, rr, gg, bb, /Get

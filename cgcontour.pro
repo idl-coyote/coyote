@@ -231,7 +231,8 @@
 ;       cgContour, data, /ONIMAGE
 ;          
 ;       
-;       See http://www.idlcoyote.com/graphics_tips/cgcontour.html for additional examples.
+;       See `Device Independent Contour Plots <http://www.idlcoyote.com/graphics_tips/cgcontour.html>' 
+;       for additional examples.
 ;
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -306,6 +307,7 @@
 ;        Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;        PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;        Made sure the OUTLINE keyword works with CELL_FILL, too. 16 Dec 2011. DWF.
+;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -621,7 +623,7 @@ PRO cgContour, data, x, y, $
     ENDIF
 
     ; Character size has to be determined *after* the layout has been decided.
-    IF N_Elements(font) EQ 0 THEN font = !P.Font
+     IF N_Elements(font) EQ 0 THEN font = !P.Font
     IF Keyword_Set(t3d) && (!D.Name EQ 'PS') THEN font = -1
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     IF N_Elements(c_charsize) EQ 0 THEN c_charsize = charsize * 0.75
@@ -715,97 +717,11 @@ PRO cgContour, data, x, y, $
        TVLCT, rr, gg, bb, /GET
     ENDIF
     
-    ; Check the keywords.
-    IF N_Elements(sbackground) EQ 0 THEN BEGIN
-        IF Keyword_Set(overplot) || Keyword_Set(noerase) THEN BEGIN
-           IF !D.Name EQ 'PS' THEN BEGIN
-                background = 'WHITE' 
-           ENDIF ELSE BEGIN
-                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-                    havewindow = 0
-                    IF (!D.Window LT 0) &&  Keyword_Set(noerase) THEN BEGIN
-                        Window
-                        IF ~Keyword_Set(traditional) THEN cgErase, 'WHITE'
-                        havewindow = 1
-                    ENDIF ELSE BEGIN
-                        IF (!D.Window GE 0) THEN BEGIN
-                           WSet, !D.Window
-                           havewindow = 1
-                        ENDIF ELSE BEGIN
-                           wid = cgQuery(/CURRENT)
-                           IF wid GE 0 THEN BEGIN
-                               WSet, wid
-                               havewindow = 1
-                           ENDIF
-                        ENDELSE
-                    ENDELSE
-                    IF havewindow THEN BEGIN
-                        pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                        IF (Total(pixel) EQ 765) THEN background = 'WHITE'
-                        IF (Total(pixel) EQ 0) THEN background = 'BLACK'
-                    ENDIF ELSE background = 'WHITE'
-                    IF N_Elements(background) EQ 0 THEN background = 'OPPOSITE'
-                ENDIF ELSE background = 'OPPOSITE'
-           ENDELSE
-        ENDIF ELSE BEGIN
-           IF Keyword_Set(traditional) THEN BEGIN
-              IF ((!D.Flags AND 256) NE 0) THEN background = 'BLACK' ELSE background = 'WHITE'
-           ENDIF ELSE background = 'WHITE' 
-        ENDELSE
-    ENDIF ELSE background = sbackground
-    IF Size(background, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN background = Byte(background)
-    IF Size(background, /TYPE) LE 2 THEN background = StrTrim(Fix(background),2)
-
-    ; Choose an axis color.
-    IF N_Elements(saxisColor) EQ 0 AND N_Elements(saxescolor) NE 0 THEN saxiscolor = saxescolor
-    IF N_Elements(saxiscolor) EQ 0 THEN BEGIN
-       IF (Size(background, /TNAME) EQ 'STRING') && (StrUpCase(background) EQ 'WHITE') THEN BEGIN
-          IF !P.Multi[0] EQ 0 THEN saxisColor = 'BLACK'
-       ENDIF
-       IF N_Elements(saxiscolor) EQ 0 THEN BEGIN
-           IF !D.Name EQ 'PS' THEN BEGIN
-                IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
-                saxisColor = 'BLACK' 
-           ENDIF ELSE BEGIN
-                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-                    IF !D.Window LT 0 THEN Window
-                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
-                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN saxisColor = 'BLACK'
-                    IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN saxisColor = 'WHITE'
-                    IF N_Elements(saxisColor) EQ 0 THEN saxisColor = 'OPPOSITE'
-                ENDIF ELSE saxisColor = 'OPPOSITE'
-          ENDELSE
-       ENDIF
-    ENDIF
-    IF N_Elements(saxisColor) EQ 0 THEN axisColor = !P.Color ELSE axisColor = saxisColor
-    IF Size(saxisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN saxisColor = Byte(saxisColor)
-    IF Size(axisColor, /TYPE) LE 2 THEN axisColor = StrTrim(Fix(axisColor),2)
-    
-    ; Choose a color.
-    IF N_Elements(sColor) EQ 0 THEN BEGIN
-       IF (Size(background, /TNAME) EQ 'STRING') && (StrUpCase(background) EQ 'WHITE') THEN BEGIN
-            IF !P.Multi[0] EQ 0 THEN sColor = 'BLACK'
-       ENDIF
-       IF N_Elements(sColor) EQ 0 THEN BEGIN
-           IF !D.Name EQ 'PS' THEN BEGIN
-                IF StrUpCase(background) EQ 'BLACK' THEN background = 'WHITE'
-                sColor = 'BLACK' 
-           ENDIF ELSE BEGIN
-                IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-                    IF !D.Window LT 0 THEN Window
-                    IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
-                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF (Total(pixel) EQ 765) OR (StrUpCase(background) EQ 'WHITE') THEN sColor = 'BLACK'
-                    IF (Total(pixel) EQ 0) OR (StrUpCase(background) EQ 'BLACK') THEN sColor = 'WHITE'
-                    IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
-                ENDIF ELSE sColor = 'OPPOSITE'
-           ENDELSE
-       ENDIF
-    ENDIF
-    IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
-    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Byte(color)
-    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
+    ; Check the color keywords.
+    background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional, MODE=currentState)
+    IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
+    axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
+    color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
     
     ; If color is the same as background, do something.
     IF ColorsAreIdentical(background, color) THEN BEGIN
@@ -823,6 +739,7 @@ PRO cgContour, data, x, y, $
     
     ; Default values for keywords.
     fill = Keyword_Set(fill)
+    cell_fill = Keyword_Set(cell_fill)
     irregular = Keyword_Set(irregular)
     SetDefaultValue, label, 1
     SetDefaultValue, resolution, [41,41]

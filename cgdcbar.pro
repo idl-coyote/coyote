@@ -111,17 +111,17 @@
 ;       To display a 12 color horizontal color bar, labels with a three-letter
 ;       month abbreviation::
 ;       
-;          IDL> cgDisplay
-;          IDL> cgLoadCT, 5, NCOLORS=12, BOTTOM=1
-;          IDL> cgDCBar, NCOLORS=12, BOTTOM=1, LABELS=theMonths(/Abbreviation)
+;          cgDisplay
+;          cgLoadCT, 5, NCOLORS=12, BOTTOM=1
+;          cgDCBar, NCOLORS=12, BOTTOM=1, LABELS=theMonths(/Abbreviation)
 ;       
 ;       To load a 5 color vertical color bar, with the labels rotated 45 degrees::
 ;
-;          IDL> cgDisplay
-;          IDL> labels = StrArr(5) 
-;          IDL> FOR j=0,4 DO labels[j] = 'City ' + StrTrim(j+1,2)
-;          IDL> colors = ['dodger blue', 'yellow', 'forest green', 'purple', 'tan']
-;          IDL> cgDCBar, colors, LABELS=labels, ROTATE=45, /VERTICAL
+;          cgDisplay
+;          labels = StrArr(5) 
+;          FOR j=0,4 DO labels[j] = 'City ' + StrTrim(j+1,2)
+;          colors = ['dodger blue', 'yellow', 'forest green', 'purple', 'tan']
+;          cgDCBar, colors, LABELS=labels, ROTATE=45, /VERTICAL
 ;
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -145,6 +145,7 @@
 ;       Added a Right keyword and changed the title spacing a little bit for aesthetic reasons. 2 July 2011. DWF.
 ;       Fixed a problem with assigning the color with the COLOR keyword in the Z-buffer. 30 Aug 2011. DWF.
 ;       The default BOTTOM keyword value was incorrect. Fixed in this version. 5 December 2011. DWF.
+;       Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
@@ -204,21 +205,6 @@ PRO cgDCBar, colors, $
     ENDIF
 
     ; Check parameters and keywords.
-    IF (!D.Name EQ 'PS') AND N_Elements(color) EQ 0 THEN BEGIN
-        color = 'black'
-    ENDIF ELSE BEGIN
-        IF N_Elements(color) EQ 0 THEN BEGIN
-            IF (!D.Window GE 0) AND ((!D.Flags AND 1) EQ 0) THEN BEGIN
-                pixel = cgSnapshot(!D.X_Size-1, !D.Y_Size-1, 1, 1)
-                IF N_ELEMENTS(color) EQ 0 THEN BEGIN
-                    color = 'white'
-                    IF Total(pixel) EQ 765 THEN color = 'black'
-                    IF Total(pixel) EQ 0 THEN color = 'opposite'
-                ENDIF 
-            ENDIF ELSE color = 'opposite'
-        ENDIF
-    ENDELSE
-    IF N_Elements(barcolor) EQ 0 THEN barcolor = color
     IF N_Elements(bottom) EQ 0 THEN bottom = 0
     IF N_Elements(charsize) EQ 0 THEN charsize = !P.Charsize
     IF N_Elements(colors) EQ 0 THEN BEGIN
@@ -257,117 +243,15 @@ PRO cgDCBar, colors, $
     ; I would prefer to draw in 24-bit color if I can, since this way I can
     ; avoid loading colors into the color table. I'll have to see where I am to
     ; see if I can do this in 24-bit color.
-    CASE !D.Name OF
-        'X': BEGIN
-             Device, Get_Visual_Depth=theDepth
-             IF theDepth GE 24 THEN supportsTrueColor = 1 ELSE supportsTrueColor = 0
-             Device, GET_DECOMPOSED=theState, DECOMPOSED=supportsTrueColor
-             END
-        'WIN': BEGIN
-             Device, Get_Visual_Depth=theDepth
-             IF theDepth GE 24 THEN supportsTrueColor = 1 ELSE supportsTrueColor = 0
-             Device, GET_DECOMPOSED=theState, DECOMPOSED=supportsTrueColor
-             END
-        'Z': BEGIN
-             Device, Get_Pixel_Depth=theDepth
-             IF theDepth GE 24 THEN supportsTrueColor = 1 ELSE supportsTrueColor = 0
-             Device, GET_DECOMPOSED=theState, DECOMPOSED=supportsTrueColor
-             END
-        'PS': BEGIN
-             IF Float(!Version.Release) GE 7.1 THEN supportsTrueColor = 1 ELSE supportsTrueColor = 0
-             IF supportsTrueColor THEN BEGIN
-                Device, DECOMPOSED=1
-                theState = 1
-                ENDIF
-             END
-        ELSE: BEGIN
-              supportsTrueColor = 0
-             END
-    ENDCASE
+    SetDecomposedState, 1, CURRENT=currentState
     
-    ; Set up the colors for drawing. All 24-bit if it supports true color.
-    ; Otherwise load colors for 8-bit support.
-    IF supportsTrueColor THEN BEGIN
-        CASE Size(cbar_colors, /TNAME) OF
-            'STRING': BEGIN
-                cbar_colors = cgColor(cbar_colors, DECOMPOSED=1, FILE=file)
-                END
-            'INT': BEGIN
-                 TVLCT, r, g, b, /GET
-                 temp = LonArr(ncolors)
-                 FOR j=0,ncolors-1 DO BEGIN
-                    temp[j] = Color24([r[cbar_colors[j]], g[cbar_colors[j]], b[cbar_colors[j]]])
-                 ENDFOR
-                 cbar_colors = Temporary(temp)
-                 END
-            'ULONG':
-            'LONG': BEGIN 
-            
-                    ; If the state is NOT using decomposed color, these are probably
-                    ; color index numbers, rather than long integers to be decomposed.
-                    IF theState EQ 0 THEN BEGIN
-                         TVLCT, r, g, b, /GET
-                         temp = LonArr(ncolors)
-                         FOR j=0,ncolors-1 DO BEGIN
-                            temp[j] = Color24([r[cbar_colors[j]], g[cbar_colors[j]], b[cbar_colors[j]]])
-                         ENDFOR
-                         cbar_colors = Temporary(temp)
-                    ENDIF
-                    
-                    ; If the maximum value of these long integers in not over 255, then
-                    ; we can be pretty sure these are color index numbers. At least I'm
-                    ; going to treat them that way for now and see what kind of trouble I
-                    ; get in.
-                    IF Max(cbar_colors) LE 255 THEN BEGIN
-                         TVLCT, r, g, b, /GET
-                         temp = LonArr(ncolors)
-                         FOR j=0,ncolors-1 DO BEGIN
-                            temp[j] = Color24([r[cbar_colors[j]], g[cbar_colors[j]], b[cbar_colors[j]]])
-                         ENDFOR
-                         cbar_colors = Temporary(temp)
-                    ENDIF
-                    END
-            'BYTE': BEGIN
-                 TVLCT, r, g, b, /GET
-                 temp = LonArr(ncolors)
-                 FOR j=0,ncolors-1 DO BEGIN
-                    temp[j] = Color24([r[cbar_colors[j]], g[cbar_colors[j]], b[cbar_colors[j]]])
-                 ENDFOR
-                 cbar_colors = Temporary(temp)
-                 END
-            ELSE: BEGIN
-                 TVLCT, r, g, b, /GET
-                 temp = LonArr(ncolors)
-                 FOR j=0,ncolors-1 DO BEGIN
-                    temp[j] = Color24([r[cbar_colors[j]], g[cbar_colors[j]], b[cbar_colors[j]]])
-                 ENDFOR
-                 cbar_colors = Temporary(temp)
-                 END
-        ENDCASE
-    ENDIF ELSE BEGIN
+    cbar_colors = cgDefaultColor(cbar_colors, MODE=currentState)
+    color = cgDefaultColor(color, MODE=currentState, DEFAULT='opposite')
+    barcolor = cgDefaultColor(color, MODE=currentState, DEFAULT=color)
+    IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color, FILE=file)
+    IF Size(barcolor, /TNAME) EQ 'STRING' THEN barcolor = cgColor(barcolor, FILE=file)
+    IF Size(cbar_colors, /TNAME) EQ 'STRING' THEN cbar_colors = cgColor(cbar_colors, FILE=file)
     
-        CASE Size(cbar_colors, /TNAME) OF
-            'STRING': BEGIN
-                cbar_colors = cgColor(cbar_colors, DECOMPOSED=0, FILE=file)
-                END
-             'LONG': BEGIN
-
-                ; If the maximum value of these long integers in not over 255, then
-                ; we can be pretty sure these are color index numbers. At least I'm
-                ; going to treat them that way for now and see what kind of trouble I
-                ; get into.
-                IF Max(cbar_colors) GT 255 THEN BEGIN
-                    r = cbar_colors AND '0000FF'xL
-                    g = ISHFT(cbar_colors AND '00FF00'xL, -8)
-                    b = ISHFT(cbar_colors AND 'FF0000'xL, -16)
-                    TVLCT, r, g, b, bottom
-                    cbar_colors = Indgen(ncolors) + bottom
-                ENDIF
-                END
-             ELSE: 
-        ENDCASE
-    
-    ENDELSE
     
     ; Draw horizontal color bar.
     IF ~vertical THEN BEGIN
@@ -384,7 +268,7 @@ PRO cgDCBar, colors, $
             x = [x0, x1, x1, x0, x0]
             y = [y0, y0, y1, y1, y0]
             Polyfill, x, y, /NORMAL, Color=cbar_colors[j]
-            PlotS, x, y, /NORMAL, COLOR=cgColor(barcolor, FILE=file)
+            PlotS, x, y, /NORMAL, COLOR=barcolor
             x0 = x1
             x1 = x0 + step
         ENDFOR
@@ -403,12 +287,12 @@ PRO cgDCBar, colors, $
            ELSE: alignment = 0.5
         ENDCASE
         FOR j=0,N_Elements(labels)-1 DO BEGIN
-            XYOutS, x, y, /NORMAL, StrTrim(labels[j],2), COLOR=cgColor(color, FILE=file), $
+            XYOutS, x, y, /NORMAL, StrTrim(labels[j],2), COLOR=color, $
                 ORIENTATION=rotate, ALIGNMENT=alignment, CHARSIZE=charsize, FONT=font
             x = x + step
         ENDFOR
         XYOutS, (position[2]-position[0])/2.0 + position[0], y1+chardist, title, $
-            COLOR=cgColor(color, FILE=file), /NORMAL, ALIGNMENT=0.5, CHARSIZE=tcharsize, FONT=font
+            COLOR=color, /NORMAL, ALIGNMENT=0.5, CHARSIZE=tcharsize, FONT=font
             
     ENDIF ELSE BEGIN ; Draw the vertical color bar.
 
@@ -422,7 +306,7 @@ PRO cgDCBar, colors, $
             x = [x0, x1, x1, x0, x0]
             y = [y0, y0, y1, y1, y0]
             Polyfill, x, y, /NORMAL, Color=cbar_colors[j]
-            PlotS, x, y, /NORMAL, COLOR=cgColor(barcolor, FILE=file)
+            PlotS, x, y, /NORMAL, COLOR=barcolor
             y0 = y1
             y1 = y0 + step
         ENDFOR
@@ -447,7 +331,7 @@ PRO cgDCBar, colors, $
            ELSE: alignment = 0.0
         ENDCASE
         FOR j=0,N_Elements(labels)-1 DO BEGIN
-            XYOutS, x, y, /NORMAL, StrTrim(labels[j],2), COLOR=cgColor(color, FILE=file), $
+            XYOutS, x, y, /NORMAL, StrTrim(labels[j],2), COLOR=color, $
                 ORIENTATION=rotate, ALIGNMENT=alignment, CHARSIZE=charsize, FONT=font
             y = y + step
         ENDFOR
@@ -457,12 +341,12 @@ PRO cgDCBar, colors, $
            rotateFactor = Cos(Abs(rotate)*!DtoR) > 0.75
            xstart = x1 + (spacing + ( Max(StrLen(labels)) * (rotateFactor * !D.X_CH_SIZE ))/Float(!D.X_Size))
            XYOutS, xstart, (position[3]-position[1])/2.0 + position[1], $
-               title, COLOR=cgColor(color, FILE=file), /NORMAL, ALIGNMENT=0.5, $
+               title, COLOR=color, /NORMAL, ALIGNMENT=0.5, $
                ORIENTATION=(x GE 0.5) ? -90 : 90, CHARSIZE=tcharsize, FONT=font
         ENDIF ELSE BEGIN
            xstart = x0 - (chardist * ((x0 LT 0.5) ? 1.5 : 2))
            XYOutS, xstart, (position[3]-position[1])/2.0 + position[1], $
-               title, COLOR=cgColor(color, FILE=file), /NORMAL, ALIGNMENT=0.5, $
+               title, COLOR=color, /NORMAL, ALIGNMENT=0.5, $
                ORIENTATION=(x GE 0.5) ? -90 : 90, CHARSIZE=tcharsize, FONT=font        
         ENDELSE
     ENDELSE

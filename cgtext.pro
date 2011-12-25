@@ -128,6 +128,7 @@
 ;              keyword. 24 Feb 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;        Modified to allow the user to place the text in a resizeable graphics window. 13 Dec 2011. DWF.
+;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -287,24 +288,11 @@ PRO cgText, xloc, yloc, text, $
     TVLCT, rr, gg, bb, /Get
 
     ; Choose a color.
-    IF N_Elements(sColor) EQ 0 THEN BEGIN
-           IF !D.Name EQ 'PS' THEN BEGIN
-                sColor = 'OPPOSITE' 
-           ENDIF ELSE BEGIN
-                IF (!D.Window GE 0) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
-                    pixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
-                    IF (Total(pixel) EQ 765) THEN sColor = 'BLACK'
-                    IF (Total(pixel) EQ 0) THEN sColor = 'WHITE'
-                    IF N_Elements(sColor) EQ 0 THEN sColor = 'OPPOSITE'
-                ENDIF ELSE sColor = 'OPPOSITE'
-           ENDELSE
-     ENDIF
-    IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE  color = sColor
-    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Byte(color)
-    IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
-     
-    ; Draw the text.
+    color = cgDefaultColor(scolor, MODE=currentState, DEFAULT='OPPOSITE')
     IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = cgColor(color) ELSE thisColor = color
+     
+    Print, 'In cgTExt: ', color, thisColor, !D.name
+    ; Draw the text.
     XYOutS, x, y, textStr, CHARSIZE=charsize, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
         DATA=data, DEVICE=device, NORMAL=normal, WIDTH=width, _STRICT_EXTRA=extra
    SetDecomposedState, currentState

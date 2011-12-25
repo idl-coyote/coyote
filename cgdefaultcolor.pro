@@ -1,3 +1,39 @@
+; docformat = 'rst'
+;
+; NAME:
+;   cgDefaultColor
+;
+; PURPOSE:
+;   The purpose of this function is to choose a default color for Coyote Graphics routines.
+;
+;******************************************************************************************;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
+;                                                                                          ;
+;  Redistribution and use in source and binary forms, with or without                      ;
+;  modification, are permitted provided that the following conditions are met:             ;
+;                                                                                          ;
+;      * Redistributions of source code must retain the above copyright                    ;
+;        notice, this list of conditions and the following disclaimer.                     ;
+;      * Redistributions in binary form must reproduce the above copyright                 ;
+;        notice, this list of conditions and the following disclaimer in the               ;
+;        documentation and/or other materials provided with the distribution.              ;
+;      * Neither the name of Fanning Software Consulting, Inc. nor the names of its        ;
+;        contributors may be used to endorse or promote products derived from this         ;
+;        software without specific prior written permission.                               ;
+;                                                                                          ;
+;  THIS SOFTWARE IS PROVIDED BY FANNING SOFTWARE CONSULTING, INC. ''AS IS'' AND ANY        ;
+;  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES    ;
+;  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT     ;
+;  SHALL FANNING SOFTWARE CONSULTING, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,             ;
+;  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED    ;
+;  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;         ;
+;  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND             ;
+;  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
+;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
+;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
+;******************************************************************************************;
+;
 ;+
 ; The purpose of this function is to choose a default color for Coyote Graphics routines.
 ; 
@@ -22,10 +58,10 @@
 ;        If this keyword is set, the color is treated as a background color. Otherwise,
 ;        it is treated as a drawing color.
 ;     default: in, optional
-;         A color of any type allowed as the inputColor. Used if the inputColor is undefined.
+;         A color of any type allowed as the `inputColour`. Used if the `inputColour` is undefined.
 ;     mode: in, optional, type=boolean
 ;         The color mode. A 0 mean indexed color mode. A 1 means decomposed color mode.
-;         If not supplied in the call, the color mode is determined at run-time with GetDecomposedState.
+;         If not supplied in the call, the color mode is determined at run-time with `GetDecomposedState`.
 ;     traditional: in, optional, type=boolean, default=0
 ;         Set this keyword if you are using the traditional color scheme of white foreground
 ;         and black background. If this keyword is set, and the current graphics device is

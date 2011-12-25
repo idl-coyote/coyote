@@ -36,18 +36,14 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
-;   Provides a device-independent way to get the color decomposition state of the
-;   current graphics device. 
+;  Provides a device-independent way to get the color decomposition state of the
+;  current graphics device. 
 ;
 ; :Categories:
 ;    Graphics, Utilities
-;    
-; :Params:
-;    none
 ;       
 ; :Keywords:
-;     Detph: out, optional, type=integer
+;     Depth: out, optional, type=integer
 ;         The depth of the color display. Typically 8 for indexed color devices
 ;         and 24 for true-color devices.
 ;          

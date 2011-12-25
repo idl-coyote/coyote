@@ -37,7 +37,6 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
 ;   Provides a device-independent way to set the color decomposition state of the
 ;   current graphics device. Devices that do not have a DECOMPOSED keyword to the
 ;   DEVICE command are assumed to be in indexed color mode always.
@@ -80,7 +79,8 @@
 ;   
 ;   My suggestion is to put the Z-graphics configuration in your IDL startup file. Set it
 ;   up in 24-bit decomposed color mode, use Coyote Graphics to do all your graphical output,
-;   and you will find things working perfectly. :-)
+;   and you will find things working perfectly. See `Configuring the Z-Graphics Buffer for
+;   Coyote Graphics <http://www.idlcoyote.com/cg_tips/configz.php>` for additional information.
 ;
 ; :Categories:
 ;    Graphics, Utilities
@@ -90,6 +90,7 @@
 ;         Set to 1 to set the current graphics device to decomposed color. Set to 0 
 ;         to set the current graphics device to indexed color. Devices lacking a 
 ;         DECOMPOSED keyword are assumed to be perpetually in indexed color mode.
+;         The Z-graphics buffer is always unchanged after the 24 Dec 2011 update. 
 ;       
 ; :Keywords:
 ;     currentstate: out, optional, type=integer
@@ -101,15 +102,15 @@
 ;     zdepth: in, optional, type=integer
 ;         The pixel depth of the Z-graphics device. Set to 8 or 24. Applies ONLY 
 ;         when setting the Z-graphics device state to 0. If undefined, the current 
-;         depth of the Z-graphics device is unchanged from its current state.
+;         depth of the Z-graphics device is unchanged from its current state. No
+;         longer used after 24 Dec 2011 update. Code still in place, however.
 ;          
 ; :Examples:
-;       IDL> SetDecomposedState, 0, CurrentState=mode
-;       
-; : Restrictions:
-;       If you set color decomposition on in the Z-graphics buffer, the pixel depth
-;       automatically gets set to 24. It does not change back to 8 if color decomposition
-;       is turned off.
+;     To set the device in color decomposition mode, then return it, do something like this::
+;     
+;        SetDecomposedState, 1, CurrentState=mode
+;        ...
+;        SetDecomposeState, mode
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::

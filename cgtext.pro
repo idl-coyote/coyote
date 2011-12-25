@@ -291,7 +291,6 @@ PRO cgText, xloc, yloc, text, $
     color = cgDefaultColor(scolor, MODE=currentState, DEFAULT='OPPOSITE')
     IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = cgColor(color) ELSE thisColor = color
      
-    Print, 'In cgTExt: ', color, thisColor, !D.name
     ; Draw the text.
     XYOutS, x, y, textStr, CHARSIZE=charsize, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
         DATA=data, DEVICE=device, NORMAL=normal, WIDTH=width, _STRICT_EXTRA=extra

@@ -215,8 +215,10 @@ FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
     ; file from the filename extension.
     IF N_Elements(filename) NE 0 THEN BEGIN
        root_name = FSC_Base_Filename(filename, DIRECTORY=theDir, EXTENSION=ext)
-       type = StrUpCase(ext)
-       typeFromExtension = 1
+       IF ext NE "" THEN BEGIN
+           type = StrUpCase(ext)
+           typeFromExtension = 1
+       ENDIF ELSE typeFromExtension = 0
     ENDIF ELSE typeFromExtension = 0
     
     ; Do you want to write an image file instead of capturing an image?

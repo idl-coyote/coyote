@@ -233,7 +233,7 @@ PRO cgShade_Surf, data, x, y, $
         PALETTE=palette, $
         ROTX=rotx, $
         ROTZ=rotz, $
-        SHADED=shaded, $
+        SHADED=1, $
         SHADES=shades, $
         SKIRT=skirt, $
         TITLE=title, $

@@ -84,12 +84,12 @@
 ;        GIF, PICT, and PNG formats written from 24-bit displays.(See the COLOR_QUAN 
 ;        documentation for details.)
 ;    filename: in, optional, type=string
-;        The base name of the output file. (No file extensions, they will be added 
-;        automatically.) This name may be changed by the user if a selection dialog
-;        appears. No file will be written unless a file output keyword is used
-;        (e.g., JPEG, TIFF, etc.) in the call. By default the FILENAME is
-;        set to "idl". The file extension will be set automatically to match
-;        the type of file created.
+;        The name of the output file. If you specify a name with a file extension of the
+;        type of file you want to create (e.g., *.jpg, *.png, etc), then you do not have
+;        to use the file type keywords (e.g., JPEG, PNG, etc.). Otherwise, you can specify
+;        the name of the the file without an extension, use the file keywords, and a file
+;        extension will be added to the filename automatically, depending upon the type of
+;        output file selected.
 ;    gif: in, optional, type=boolean, default=0
 ;        Set this keyword to write the screen dump as a color GIF file.
 ;    jpeg: in, optional, type=boolean, default=0
@@ -135,7 +135,7 @@
 ;       
 ;    To create a PNG file, named "test.png", of the current graphics window::
 ;    
-;       IDL> void = cgSnapshot(/PNG, FILENAME='test')
+;       IDL> void = cgSnapshot(FILENAME='test.png')
 ;       
 ;    To obtain the lower quadrant of a 512-by-512 graphics window as a
 ;    band interleaved image::
@@ -154,6 +154,7 @@
 ; :History:
 ;     Change History::
 ;        Renamed TVRead to cgSnapshot and retired TVRead. 20 February 2011. DWF.
+;        Added the ability to get the file type from the file name extension. 26 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -209,6 +210,14 @@ FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
     IF N_Elements(order) EQ 0 THEN order = !Order
     IF N_Elements(true) EQ 0 THEN true = 1
     dialog = 1 - Keyword_Set(nodialog)
+    
+    ; Is the FILENAME keyword being used? If so, get the type of the
+    ; file from the filename extension.
+    IF N_Elements(filename) NE 0 THEN BEGIN
+       root_name = FSC_Base_Filename(filename, DIRECTORY=theDir, EXTENSION=ext)
+       type = StrUpCase(ext)
+       typeFromExtension = 1
+    ENDIF ELSE typeFromExtension = 0
     
     ; Do you want to write an image file instead of capturing an image?
     IF N_Elements(type) NE 0 THEN BEGIN
@@ -302,7 +311,7 @@ FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
        IF N_Elements(filename) EQ 0 THEN BEGIN
           filename = 'idl.' + StrLowCase(extension)
        ENDIF ELSE BEGIN
-          filename = filename + "." + StrLowCase(extension)
+          IF typeFromExtension EQ 0 THEN filename = filename + "." + StrLowCase(extension)
        ENDELSE
        IF dialog THEN filename = Dialog_Pickfile(/Write, File=filename, OVERWRITE_PROMPT=Keyword_Set(overwrite_prompt))
     

@@ -146,6 +146,7 @@
 ;       Fixed a problem with assigning the color with the COLOR keyword in the Z-buffer. 30 Aug 2011. DWF.
 ;       The default BOTTOM keyword value was incorrect. Fixed in this version. 5 December 2011. DWF.
 ;       Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
+;       Previous change incorrectly implimented for PS device. Fixed. 29 Dec 2011. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
@@ -355,11 +356,5 @@ PRO cgDCBar, colors, $
     TVLCT, rr, gg, bb
     
     ; Clean up.
-    CASE !D.Name OF
-        'X': Device, DECOMPOSED=theState
-        'WIN': Device, DECOMPOSED=theState
-        'Z': Device, DECOMPOSED=theState
-        'PS': IF supportsTrueColor THEN DEVICE, DECOMPOSED=0
-        ELSE: 
-    ENDCASE
+    SetDecomposedState, currentState
 END

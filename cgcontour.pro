@@ -115,6 +115,14 @@
 ;     levels: in, optional, type=any
 ;        A vector of data levels to contour. If used, NLEVELS is ignored. If missing, 
 ;        NLEVELS is used to construct N equally-spaced contour levels.
+;     map_object: in, optional, type=object
+;        If you are overplotting (OVERPLOT=1) on a map projection set up with Map_Proj_Init
+;        and using projected meter space, rather than lat/lon space, then you can use this
+;        keyword to provide a cgMap object that will allow you to convert the `x` and `y`
+;        grid parameters from longitude and latitude, respectively, to projected meter space
+;        before the contour is displayed. Note, you MUST pass the `x` and `y` grid parameters 
+;        to cgContour if you are overplotting on a map projection. There is no checking to
+;        be sure these parameters are in the correct longitude and latitude range, respectively.
 ;     missingvalue: in, optional, type=any
 ;        Use this keyword to identify any missing data in the input data values.
 ;     noclip: in, optional, type=boolean, default=0
@@ -308,6 +316,7 @@
 ;        PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;        Made sure the OUTLINE keyword works with CELL_FILL, too. 16 Dec 2011. DWF.
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
+;        Added MAP_OBJECT keyword. 28 Dec 2011. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -332,6 +341,7 @@ PRO cgContour, data, x, y, $
     NLEVELS=nlevels, $
     NOCLIP=noclip, $
     NOERASE=noerase, $
+    MAP_OBJECT=map_object, $
     MISSINGVALUE=missingvalue, $
     OLEVELS=olevels, $
     ONIMAGE=onImage, $
@@ -413,6 +423,7 @@ PRO cgContour, data, x, y, $
                 NLEVELS=nlevels, $
                 NOCLIP=noclip, $
                 NOERASE=noerase, $
+                MAP_OBJECT=map_object, $
                 MISSINGVALUE=missingvalue, $
                 OLEVELS=olevels, $
                 ONIMAGE=onimage, $
@@ -461,6 +472,7 @@ PRO cgContour, data, x, y, $
             NLEVELS=nlevels, $
             NOCLIP=noclip, $
             NOERASE=noerase, $
+            MAP_OBJECT=map_object, $
             MISSINGVALUE=missingvalue, $
             OLEVELS=olevels, $
             ONIMAGE=onimage, $
@@ -910,9 +922,45 @@ PRO cgContour, data, x, y, $
                     
     ENDIF
     
-    ; This is where we actually draw the data. The actual levels are returned in the OLEVELS
-    ; keyword.
+    ; This is where we actually draw the data. Check to see if we have a map object and need to
+    ; convert the X and Y grid parameters from longitude/latitude to projected meter space
+    ; before we do the drawing.
+    IF (Keyword_Set(overplot) && (N_Elements(map_object) NE 0)) THEN BEGIN
+    
+        ; Do we have a valid map object?
+        IF ~Obj_Isa(map_object, 'cgMap') THEN Message, 'The map object is not valid or not the correct type.'
+        
+        ; Are the X and Y grids the same size? If so, it makes things easy.
+        IF (N_Elements(xgrid) EQ N_Elements(ygrid)) THEN BEGIN
+           dims = Size(xgrid, /DIMENSIONS)
+           n_dims = Size(xgrid, /N_DIMENSIONS)
+           IF n_dims EQ 2 THEN BEGIN
+              xgrid = Reform(xgrid, dims[0]*dims[1])
+              ygrid = Reform(ygrid, dims[0]*dims[1])
+           ENDIF
+           xy = map_object -> Forward(xgrid, ygrid)
+           xgrid = xy[0,*]
+           ygrid = xy[1,*]
+           IF n_dims EQ 2 THEN BEGIN
+              xgrid = Reform(xgrid, dims[0], dims[1])
+              ygrid = Reform(ygrid, dims[0], dims[1])
+           ENDIF
+        ENDIF ELSE BEGIN
+           xsize = N_Elements(xgrid)
+           ysize = N_Elements(ygrid)
+           xgrid = Reform(Rebin(xgrid, xsize, ysize), xsize*ysize)
+           ygrid = Reform(Rebin(Reform(ygrid, 1, ysize), xsize, ysize), xsize*ysize)
+           xy = map_object -> Forward(xgrid, ygrid)
+           xgrid = Reform(xy[0,*], xsize, ysize)
+           ygrid = Reform(xy[1,*], xsize, ysize)
+        ENDELSE
+        
+    ENDIF
+
+    ; The actual levels are returned in the OLEVELS keyword.
     olevels = levels
+    
+    ; Draw the data on the axes.
     Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
        LEVELS=levels, C_Labels=c_labels, C_COLORS=con_colors, XTHICK=xthick, YTHICK=ythick, $
        POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, T3D=t3d, CHARSIZE=charsize, $
@@ -938,7 +986,7 @@ PRO cgContour, data, x, y, $
     ENDIF
         
     ; If we filled the contour plot, we need to repair the axes. 
-    IF ~Keyword_Set(overplot) AND (Keyword_Set(fill) OR Keyword_Set(cell_fill)) THEN BEGIN  
+    IF (~Keyword_Set(overplot)) && (Keyword_Set(fill) || Keyword_Set(cell_fill)) THEN BEGIN  
        cgAxis, XAXIS=0, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle, $
           XTICKV=xtickv, XTICKS=xticks, XTICKLEN=xticklen, T3D=t3D, ZVALUE=zvalue
        cgAxis, XAXIS=1, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle, $

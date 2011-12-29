@@ -819,6 +819,9 @@ ENDIF ELSE BEGIN
     yoffset = self.yoffsetSet
 ENDELSE
 
+
+filename = self -> Construct_Full_Filename()
+
    ; Create the basic structure.
 
 struct = { $
@@ -826,7 +829,7 @@ struct = { $
    cmyk: self.cmykSet, $
    color: self.colorSet, $
    encapsulated: self.encapsulationSet, $
-   filename: self.fullfilenameSet, $
+   filename: filename, $
    font_size: Fix(self.fontSizeSet), $
    inches: self.inchesSet, $
    isolatin1: self.isolatinSet, $
@@ -915,7 +918,7 @@ END ;---------------------------------------------------------------------------
 
 
 
-PRO FSC_PSConfig::GetProperty, Name=name, _Extra=extra
+PRO FSC_PSConfig::GetProperty, Name=name
 
 ; This GetProperty method is set up only to be able to obtain
 ; the name of the object. This makes the object compatible with

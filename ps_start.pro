@@ -82,6 +82,10 @@
 ; :Categories:
 ;    Utilities, Graphics
 ;    
+; :Params:
+;     filename: in, optional, type=string, default='idl.ps'
+;        The name of the PostScript file created.
+;    
 ; :Keywords:
 ;     cancel: out, optional, type=boolean, default=0
 ;         An output keyword that is set to 1 if the user cancelled from
@@ -94,6 +98,9 @@
 ;         their original values by `PS_End`. A system variable is set to this value only if it 
 ;         currently contains the IDL default value of 0.0. If it is set to anything else, this 
 ;         default thickness value is ignored.
+;     filename: in, optional, type=string, default='idl.ps'
+;         The name of the PostScript file created. An alternative, and older, way of setting
+;         the `filename` parameter.
 ;     font: in, optional, type=integer, default=0                
 ;         Set this to the type of font you want. A -1 selects Hershey fonts, a 0 selects hardware 
 ;         fonts (Helvetica, normally), and a 1 selects a True-Type font. Set to 0 by default.
@@ -167,10 +174,11 @@
 ; :Copyright:
 ;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
 ;-
-PRO PS_START, $
+PRO PS_START, filename, $
     CANCEL=cancelled, $
     CHARSIZE=charsize, $
     DEFAULT_THICKNESS=default_thickness, $
+    FILENAME=ps_filename, $
     FONT=font , $
     ENCAPSULATED=encapsulated, $
     GUI=gui, $
@@ -183,6 +191,10 @@ PRO PS_START, $
    _REF_EXTRA=extra
  
    COMMON _$FSC_PS_START_, ps_struct
+   
+   ; Handle the filename parameter and keywords.
+   IF N_Elements(filename) EQ 0 THEN filename = 'idl.ps'
+   IF N_Elements(ps_filename) EQ 0 THEN ps_filename = filename 
    
    ; PostScript hardware fonts by default.
    SetDefaultValue, font, 0
@@ -247,10 +259,10 @@ PRO PS_START, $
       sizes = PSWindow(_Extra=extra, LANDSCAPE=landscape)
       keywords = PSConfig(_Strict_Extra=extra, INCHES=sizes.inches, XSIZE=sizes.xsize, YSIZE=sizes.ysize, $
          XOFFSET=sizes.xoffset, YOFFSET=sizes.yoffset, Cancel=cancelled, NOGUI=(~gui), $
-         LANDSCAPE=sizes.landscape, ENCAPSULATED=encapsulated)
+         LANDSCAPE=sizes.landscape, ENCAPSULATED=encapsulated, FILENAME=ps_filename[0])
    ENDIF ELSE BEGIN
       keywords = PSConfig(_Strict_Extra=extra, ENCAPSULATED=encapsulated, $
-          LANDSCAPE=landscape, CANCEL=cancelled, NOGUI=(~gui))
+          LANDSCAPE=landscape, CANCEL=cancelled, NOGUI=(~gui), FILENAME=ps_filename[0])
    ENDELSE
    IF cancelled THEN BEGIN
         PS_END, /NoFix, /NoMessage

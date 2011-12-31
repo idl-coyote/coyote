@@ -269,6 +269,8 @@
 ;       I had a problem with OVERPLOTs being slightly offset because I was calculating the xrange
 ;           and yrange, rather than taking them from !X.CRange and !Y.CRange. 17 Dec 2011. DWF.
 ;       Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
+;       Incomplete implementation of new color selection scheme, fixed. 30 Dec 2011. DWF.
+;       The change of 17 Dec 2011 was incorrect, as I misunderstood the problem. Restored original. 30 Dec 2011. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2007-2011, Fanning Software Consulting, Inc.
@@ -653,7 +655,7 @@ PRO cgHistoplot, $                  ; The program name.
 
    ; Choose an axis color.
    IF N_Elements(axisColorName) EQ 0 AND N_Elements(saxescolor) NE 0 THEN axisColorName = saxescolor
-   axisColorName = cgDefaultColor(axisColorName, DEFAULT='Opposite')
+   axisColorName = cgDefaultColor(axisColorName, DEFAULT='black')
    IF N_Elements(polycolorname) EQ 0 THEN polycolorname = "Rose"
    IF N_Elements(probColorname) EQ 0 THEN probColorname = "Blue"
    frequency = Keyword_Set(frequency)
@@ -668,6 +670,9 @@ PRO cgHistoplot, $                  ; The program name.
    IF N_Elements(maxinput) EQ 0 THEN maxinput = Max(_data, NAN=nan)
    IF N_Elements(thick) EQ 0 THEN thick = 1.0
 
+   ; Do this in decomposed color, if possible.
+   SetDecomposedState, 1, CURRENT=currentState
+   
    ; Load plot colors.
    TVLCT, r, g, b, /GET
    axisColor = cgColor(axisColorName, FILE=file)
@@ -737,11 +742,12 @@ PRO cgHistoplot, $                  ; The program name.
       bangmap = !MAP
    ENDIF
    
+   
    ; Unless we are overplotting, draw the plot to establish a data coordinate system.
    ; Don't actually display anything yet, because we may have to repair damage caused
    ; by polygon filling.
-   xrange = Keyword_Set(overplot) ? !X.CRange : [xmin, xmax]
-   yrange = Keyword_Set(overplot) ? !Y.CRange : [ymin, ymax]
+   xrange = [xmin, xmax]
+   yrange = [ymin, ymax]
    IF ~Keyword_Set(overplot) THEN BEGIN
        Plot, [0,0], xrange=xrange, yrange=yrange, $             
              Background=backColor, $
@@ -988,4 +994,6 @@ PRO cgHistoplot, $                  ; The program name.
          Print, 'Output File: ' + Filepath(ROOT_DIR=dirname, basename)
     ENDIF
     
+    ; Clean up.
+    SetDecomposedState, currentState
 END

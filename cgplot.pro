@@ -192,8 +192,9 @@
 ;         Updated the BACKGROUND color selection from lessons learned in 27 Oct 2011 cgContour 
 ;             corrections. 27 Oct 2011. DWF.
 ;         Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
-;         PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
+;         PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2011. DWF.
 ;         Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
+;         Over-zealous use of _STRICT_EXTRA when overplotting resulted in errors. Now use _EXTRA. 1 Jan 2011. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2011, Fanning Software Consulting, Inc.
@@ -565,7 +566,7 @@ PRO cgPlot, x, y, $
     
     ; Draw the plot.
     IF Keyword_Set(overplot) THEN BEGIN
-       IF psym LE 0 THEN OPlot, dep, indep, COLOR=color, _STRICT_EXTRA=extra
+       IF psym LE 0 THEN OPlot, dep, indep, COLOR=color, _EXTRA=extra
     ENDIF ELSE BEGIN
       Plot, dep, indep, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
             POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, _STRICT_EXTRA=extra

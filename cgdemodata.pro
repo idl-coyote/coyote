@@ -78,9 +78,10 @@
 ;       Fixed a problem with the CANCEL button. 25 Oct 2002. DWF.
 ;       Added new JPEG, DICOM, TIFF, and PGN images. 30 Oct 2002. DWF.
 ;       Modified old program units to work with IDL strict arrays. 29 June 2003. DWF
+;       Yikes! Somehow lost the event handler for the CANCEL button! Fixed. 1 Jan 2012. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
 ;
 ; NAME:
@@ -365,6 +366,19 @@
 
     return, s
     end
+
+
+;+
+; This event handler responds to the CANCEL button.
+; 
+; :Params:
+;    event: in, required, type=structure
+;        The event structure passed by the window manager from the CANCEL button.
+;-
+PRO cgDemoData_Cancel, event
+    Widget_Control, event.top, /Destroy
+END
+
 
 
 ;+

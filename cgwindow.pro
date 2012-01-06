@@ -2763,7 +2763,7 @@ PRO cgWindow, $
                     IF Size(command, /TNAME) NE 'STRING' THEN $
                         Message, 'The first positional argument must be a command string.'
                     IF N_Params() GT 5 THEN $
-                        Message, 'The maximum number of positional command parameters allowed is three.'
+                        Message, 'The maximum number of positional command parameters allowed is four.'
                     newCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
                         AltPS_Params=altps_Params, TYPE=Keyword_Set(method))

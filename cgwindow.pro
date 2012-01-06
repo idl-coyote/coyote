@@ -1515,6 +1515,8 @@ END ;---------------------------------------------------------------------------
 ;       The second positional parameter appropriate for the graphics command.
 ;    p3: in, optional, type=any
 ;       The third positional parameter appropriate for the graphics command.
+;    p4: in, optional, type=any
+;       The fourth positional parameter appropriate for the graphics command.
 ;       
 ; :Keywords:
 ;    addcmd: in, optional, type=boolean, default=0
@@ -1533,7 +1535,7 @@ END ;---------------------------------------------------------------------------
 ;    altps_Params: in, optional, type=IntArr(3)
 ;       A structure containing alternative parameter values to be used when 
 ;       the current device is the PostScript device. Structure names are restricted
-;       to the names "P1", "P2" and "P3" to correspond to the equivalent positional
+;       to the names "P1", "P2", "P3" and "P4"to correspond to the equivalent positional
 ;       parameter. See http://www.idlcoyote.com/cg_tips/kwexpressions.php and the 
 ;       examples below for details on how to use this keyword.
 ;    cmddelay: in, optional, type=float
@@ -1589,7 +1591,7 @@ END ;---------------------------------------------------------------------------
 ;-
 FUNCTION FSC_CmdWindow::Init, $
    command, $                       ; The graphics "command" to execute.
-   p1, p2, p3, $                    ; The three allowed positional parameters.
+   p1, p2, p3, p4, $                ; The four allowed positional parameters.
    AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface.
    AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
    AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. 
@@ -1690,7 +1692,7 @@ FUNCTION FSC_CmdWindow::Init, $
     ; Add a command, if you have one. Otherwise, just make the window.
     IF (N_Elements(command) NE 0) THEN BEGIN
         thisCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
-                P1=p1, P2=p2, P3=p3, KEYWORDS=extra, TYPE=method, ALTPS_KEYWORDS=altps_Keywords, ALTPS_PARAMS=altps_Params)
+                P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, TYPE=method, ALTPS_KEYWORDS=altps_Keywords, ALTPS_PARAMS=altps_Params)
         IF Obj_Valid(thisCommand) THEN self.cmds -> Add, thisCommand ELSE Message, 'Failed to make command object.'
     ENDIF 
     
@@ -1993,6 +1995,7 @@ PRO FSC_Window_Command::CreateCommandStruct, structName, Quiet=quiet
         1: cmdStruct = Create_Struct(cmdStruct, 'p1', *self.p1)
         2: cmdStruct = Create_Struct(cmdStruct, 'p1', *self.p1, 'p2', *self.p2)
         3: cmdStruct = Create_Struct(cmdStruct, 'p1', *self.p1, 'p2', *self.p2, 'p3', *self.p3)
+        4: cmdStruct = Create_Struct(cmdStruct, 'p1', *self.p1, 'p2', *self.p2, 'p3', *self.p3, 'p4', *self.p4)
     ENDCASE
     IF Ptr_Valid(self.keywords) THEN BEGIN
         cmdStruct = Create_Struct(cmdStruct, 'keywords', *self.keywords)
@@ -2018,6 +2021,7 @@ FUNCTION FSC_Window_Command::Copy
            1: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, KEYWORDS=*self.keywords, TYPE=self.type)
            2: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, KEYWORDS=*self.keywords, TYPE=self.type)
            3: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, P3=*self.p3, KEYWORDS=*self.keywords, TYPE=self.type)
+           4: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, P3=*self.p3, P4=*self.p4, KEYWORDS=*self.keywords, TYPE=self.type)
         ENDCASE
         
     ENDIF ELSE BEGIN
@@ -2027,6 +2031,7 @@ FUNCTION FSC_Window_Command::Copy
            1: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, TYPE=self.type)
            2: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, TYPE=self.type)
            3: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, p2=*self.p2, P3=*self.p3, TYPE=self.type)
+           4: copyObj = Obj_New('FSC_Window_Command', COMMAND=self.command, P1=*self.p1, p2=*self.p2, P3=*self.p3, P4=*self.p4, TYPE=self.type)
         ENDCASE
     
     ENDELSE
@@ -2102,11 +2107,17 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
                 THEN p3 = (*self.altps_params).p3 $
                 ELSE IF Ptr_Valid(self.p3) THEN p3 = *self.p3
         ENDIF ELSE IF Ptr_Valid(self.p3) THEN p3 = *self.p3
+        IF (Where(altTags EQ 'P4') NE -1) THEN BEGIN
+            IF (!D.Name EQ 'PS') $
+                THEN p4 = (*self.altps_params).p4 $
+                ELSE IF Ptr_Valid(self.p4) THEN p4 = *self.p4
+        ENDIF ELSE IF Ptr_Valid(self.p4) THEN p4 = *self.p4
     
     ENDIF ELSE BEGIN
         IF Ptr_Valid(self.p1) THEN p1 = *self.p1
         IF Ptr_Valid(self.p2) THEN p2 = *self.p2
         IF Ptr_Valid(self.p3) THEN p3 = *self.p3
+        IF Ptr_Valid(self.p4) THEN p4 = *self.p4
     ENDELSE
 
     ; What kind of command is this?
@@ -2121,6 +2132,7 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
                      1: Call_Procedure, self.command, p1, _Extra=keywords
                      2: Call_Procedure, self.command, p1, p2, _Extra=keywords
                      3: Call_Procedure, self.command, p1, p2, p3, _Extra=keywords
+                     4: Call_Procedure, self.command, p1, p2, p3, p4, _Extra=keywords
                  ENDCASE
              ENDIF ELSE BEGIN
                  CASE self.nparams OF
@@ -2128,6 +2140,7 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
                      1: Call_Procedure, self.command, p1
                      2: Call_Procedure, self.command, p1, p2
                      3: Call_Procedure, self.command, p1, p2, p3
+                     4: Call_Procedure, self.command, p1, p2, p3, p4
                  ENDCASE
              ENDELSE
              
@@ -2142,6 +2155,7 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
                      1: Call_Method, self.command, p1, _Extra=keywords
                      2: Call_Method, self.command, p1, p2, _Extra=keywords
                      3: Call_Method, self.command, p1, p2, p3, _Extra=keywords
+                     4: Call_Method, self.command, p1, p2, p3, p4, _Extra=keywords
                  ENDCASE
              ENDIF ELSE BEGIN
                  CASE self.nparams OF
@@ -2149,6 +2163,7 @@ PRO FSC_Window_Command::Draw, SUCCESS=success, KEYWORDS=keywords
                      1: Call_Method, self.command, p1
                      2: Call_Method, self.command, p1, p2
                      3: Call_Method, self.command, p1, p2, p3
+                     4: Call_Method, self.command, p1, p2, p3, p4
                  ENDCASE
              ENDELSE
              
@@ -2271,6 +2286,7 @@ PRO FSC_Window_Command::List, prefix
         1: cmdString = cmdString + ', p1'
         2: cmdString = cmdString + ', p1, p2'
         3: cmdString = cmdString + ', p1, p2, p3'
+        4: cmdString = cmdString + ', p1, p2, p3, p4'
     ENDCASE
     IF Ptr_Valid(self.keywords) THEN BEGIN
         tags = Tag_Names(*self.keywords)
@@ -2291,6 +2307,7 @@ PRO FSC_Window_Command::Cleanup
     Ptr_Free, self.p1
     Ptr_Free, self.p2
     Ptr_Free, self.p3
+    Ptr_Free, self.p4
     Ptr_Free, self.keywords
     Ptr_Free, self.altps_keywords
     Ptr_Free, self.altps_params
@@ -2321,6 +2338,9 @@ END ;---------------------------------------------------------------------------
 ;   P3: in, optional, type=varies
 ;       The third positional parameter of the command being stored
 ;       in the structure.
+;   P4: in, optional, type=varies
+;       The fourth positional parameter of the command being stored
+;       in the structure.
 ;   type: in, optional, type=integer, default=0
 ;       The type of command. 0 indicates a procedure. 1 indicates an object method.
 ;-
@@ -2329,7 +2349,7 @@ FUNCTION FSC_Window_Command::INIT, $
     ALTPS_PARAMS=altps_params, $
     COMMAND=command, $
     KEYWORDS=keywords, $
-    P1=p1, P2=p2, P3=p3, $
+    P1=p1, P2=p2, P3=p3, P4=p4, $
     TYPE=type
     
     Compile_Opt idl2
@@ -2346,11 +2366,12 @@ FUNCTION FSC_Window_Command::INIT, $
     IF N_Elements(p1) NE 0 THEN self.p1 = Ptr_New(p1)
     IF N_Elements(p2) NE 0 THEN self.p2 = Ptr_New(p2)
     IF N_Elements(p3) NE 0 THEN self.p3 = Ptr_New(p3)
+    IF N_Elements(p4) NE 0 THEN self.p4 = Ptr_New(p4)
     IF N_Elements(keywords) NE 0 THEN self.keywords = Ptr_New(keywords)
     IF N_Elements(altps_keywords) NE 0 THEN self.altps_keywords = Ptr_New(altps_keywords)
     IF N_Elements(altps_params) NE 0 THEN self.altps_params = Ptr_New(altps_params)
     self.type = Keyword_Set(type)
-    self.nparams = (N_Elements(p1) NE 0) + (N_Elements(p2) NE 0) + (N_Elements(p3) NE 0)
+    self.nparams = (N_Elements(p1) NE 0) + (N_Elements(p2) NE 0) + (N_Elements(p3) NE 0) + (N_Elements(p4) NE 0)
     RETURN, 1
     
 END ;----------------------------------------------------------------------------------------------------------------
@@ -2366,6 +2387,7 @@ PRO FSC_Window_Command__Define
               p1: Ptr_New(), $           ; The first parameter.
               p2: Ptr_New(), $           ; The second parameter.
               p3: Ptr_New(), $           ; The third parameter.
+              p4: Ptr_New(), $           ; The fourth parameter.
               nparams: 0, $              ; The number of parameters.
               keywords: Ptr_New(), $     ; The command keywords.
               altps_keywords: Ptr_New(), $ ; Structure of keywords to evaluate at run-time.
@@ -2408,6 +2430,8 @@ END ;---------------------------------------------------------------------------
 ;       The second positional parameter appropriate for the graphics command.
 ;    p3: in, optional, type=any
 ;       The third positional parameter appropriate for the graphics command.
+;    p4: in, optional, type=any
+;       The fourth positional parameter appropriate for the graphics command.
 ;       
 ; :Keywords:
 ;    addcmd: in, optional, type=boolean, default=0
@@ -2426,7 +2450,7 @@ END ;---------------------------------------------------------------------------
 ;    altps_Params: in, optional, type=IntArr(3)
 ;       A structure containing alternative parameter values to be used when 
 ;       the current device is the PostScript device. Structure names are restricted
-;       to the names "P1", "P2" and "P3" to correspond to the equivalent positional
+;       to the names "P1", "P2", "P3" and "P4" to correspond to the equivalent positional
 ;       parameter. See http://www.idlcoyote.com/cg_tips/kwexpressions.php and the 
 ;       examples below for details on how to use this keyword.
 ;    cmddelay: in, optional, type=float
@@ -2581,14 +2605,15 @@ END ;---------------------------------------------------------------------------
 ;         Added WASPECT keyword to allow window aspect ratio to be set. 9 Nov 2011. DWF.   
 ;         Added PDF file to the Save As menu. Requires Ghostscript to be installed on some machines. 6 Dec 2011. DWF.
 ;         Added modifications to allow PDF files to be programmatically created from cgControl. 11 Dec 2011. DWF.
+;         Added the ability to specify a fourth positional parameter. 6 Jan 2012. DWF.
 ;-
 PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.
-   p1, p2, p3, $                    ; The three allowed positional parameters.
+   p1, p2, p3, p4, $                ; The four allowed positional parameters.
    AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface and immediate execute commands.
    AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
    AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. Fields 
-                                    ; should be "P1", "P2" or "P3".
+                                    ; should be "P1", "P2", "P3" or "P4".
    CmdDelay=cmdDelay, $             ; Set this keyword to a value to "wait" before executing the next command.
    CmdIndex=cmdIndex, $             ; Set this keyword to identify the index of the command to manipulate.
    DeleteCmd=deletecmd, $           ; Set the keyword to delete a command.
@@ -2740,7 +2765,7 @@ PRO cgWindow, $
                     IF N_Params() GT 4 THEN $
                         Message, 'The maximum number of positional command parameters allowed is three.'
                     newCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
-                        P1=p1, P2=p2, P3=p3, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
+                        P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
                         AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
                         
                     ; If the cmdIndex is undefined, ALL current commands in the window are replaced.
@@ -2776,7 +2801,7 @@ PRO cgWindow, $
                 thisWindowStruct = structs[winID]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     newCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
-                        P1=p1, P2=p2, P3=p3, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
+                        P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
                         AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
                     thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                 ENDIF ELSE BEGIN
@@ -2809,7 +2834,7 @@ PRO cgWindow, $
                 thisWindowStruct = structs[winID]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     newCommand = Obj_New('FSC_Window_Command', COMMAND=command, $
-                        P1=p1, P2=p2, P3=p3, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
+                        P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
                         AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
                     thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                     thisWindowStruct.windowObj -> ExecuteCommands
@@ -2825,12 +2850,12 @@ PRO cgWindow, $
    ; Otherwise, make the command object.
    wobject = Obj_New('FSC_CmdWindow', $
        command, $                       ; The graphics "command" to execute.
-       p1, p2, p3, $                    ; The three allowed positional parameters.
+       p1, p2, p3, p4, $                ; The four allowed positional parameters.
        _Extra = extra, $                ; Any extra keywords. Usually the "command" keywords.
        CmdDelay = cmdDelay, $           ; The amount of time to "wait" between commands.
        AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
        AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. Fields 
-                                        ; should be "P1", "P2" or "P3".
+                                        ; should be "P1", "P2", "P3" or "P4".
        Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
        Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
        WAspect = waspect, $             ; Set the window aspect ratio to this value.

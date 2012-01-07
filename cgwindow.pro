@@ -631,6 +631,7 @@ END ;---------------------------------------------------------------------------
 ;+
 ; This method retrieves properties from the object.
 ; 
+; :Keywords:
 ;     adjustsize: out, optional, type=boolean
 ;         Set this keyword to adjust default character size to the display window size.
 ;     background: out, optional, type=string
@@ -640,8 +641,8 @@ END ;---------------------------------------------------------------------------
 ;     delay: out, optional, type=float
 ;         Set this keyword to the amount of "delay" you want between commands in the command list.
 ;     dimensions: out, optional, type=intarr(2)
-;          Set this keyword to a two-element array giving the xsize and ysize
-;          of the draw widget.
+;         Set this keyword to a two-element array giving the xsize and ysize
+;         of the draw widget.
 ;     eraseit: out, optional, type=boolean
 ;         If this property is set, the cgWindow erases with the background color before
 ;         displaying the commands in the window's command list.
@@ -684,25 +685,22 @@ END ;---------------------------------------------------------------------------
 ;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
 ;         when making raster file output.
 ;     ps_encapsulated: out, optional, type=boolean, default=0
-;          Set this keyword to configure PSCONFIG to produce encapsulated PostScript output by default.
+;         Set this keyword to configure PSCONFIG to produce encapsulated PostScript output by default.
 ;     ps_font: out, optional, type=integer
-;        Set this keyword to the type of font you want to use in PostScript output. It sets the 
-;        FONT keyword on the PSConfig command. Normally, 0 (hardware fonts) or 1 (true-type fonts).
+;         Set this keyword to the type of font you want to use in PostScript output. It sets the 
+;         FONT keyword on the PSConfig command. Normally, 0 (hardware fonts) or 1 (true-type fonts).
 ;     ps_metric: out, optional, type=boolean, default=0
-;          Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
+;         Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
 ;     ps_quiet: out, optional, type=boolean, default=0
-;          Set this keyword to set the QUIET keyword on PS_Start.
+;         Set this keyword to set the QUIET keyword on PS_Start.
 ;     ps_scale_factor: out, optional, type=float
-;          Set his keyword to the PostScript scale factor you wish to use in creating PostScript output.
+;         Set his keyword to the PostScript scale factor you wish to use in creating PostScript output.
 ;     ps_tt_font: out, optional, type=string
-;        Set this keyword to the name of a true-type font to use in creating PostScript output.
+;         Set this keyword to the name of a true-type font to use in creating PostScript output.
 ;     tlb: out, optional, type=long
-;        The widget identifier of the top-level base widget.
+;         The widget identifier of the top-level base widget.
 ;     wid: out, optional, type=integer
-;        The window index number of the draw widget.
-;     update: out, optional, type=boolean, default=1
-;         Set this keyword to zero if you do not want the updates to be done immediately
-;         after the properties are changed.
+;         The window index number of the draw widget.
 ;     xomargin: out, optional, type=intarr(2)
 ;         Sets the !X.OMargin system variable when multiple plots are displayed in the window.
 ;     yomargin: out, optional, type=intarr(2)
@@ -713,6 +711,7 @@ PRO FSC_CmdWindow::GetProperty, $
     BACKGROUND=background, $
     COMMANDS=commands, $
     DELAY=delay, $
+    DIMENSIONS=dimensions, $
     ERASEIT=eraseit, $
     IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
@@ -731,6 +730,7 @@ PRO FSC_CmdWindow::GetProperty, $
     PS_FONT=ps_font, $                            ; Select the font for PostScript output.
     PS_METRIC=ps_metric, $
     PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
+    PS_QUIET=ps_quiet, $
     PS_TT_FONT=ps_tt_font, $                      ; Select the true-type font to use for PostScript output.
     TLB=tlb, $
     WID=wid, $
@@ -759,6 +759,12 @@ PRO FSC_CmdWindow::GetProperty, $
         palette[*,2] = *self.b
     ENDIF
     IF Arg_Present(commands) THEN commands = self.cmds
+    IF Arg_Present(dimensions) THEN BEGIN
+        thisWindow = !D.Window
+        WSet, self.wid
+        dimensions = [!D.X_Size, !D.Y_Size]
+        IF thisWindow GE 0 THEN WSet, thisWindow
+    ENDIF
     IF Arg_Present(delay) THEN delay = self.delay
     IF Arg_Present(eraseit) THEN eraseit = self.eraseit
     IF Arg_Present(multi) THEN multi = self.pmulti
@@ -778,6 +784,7 @@ PRO FSC_CmdWindow::GetProperty, $
      ps_encapsulated = self.ps_encapsulated
      ps_metric = self.ps_metric
      ps_font = self.ps_font
+     ps_quiet = self.ps_quiet
      ps_scale_factor = self.ps_scale_factor
      ps_tt_font = self.ps_tt_font
      

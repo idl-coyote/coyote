@@ -79,8 +79,9 @@
 ;   
 ;   My suggestion is to put the Z-graphics configuration in your IDL startup file. Set it
 ;   up in 24-bit decomposed color mode, use Coyote Graphics to do all your graphical output,
-;   and you will find things working perfectly. See `Configuring the Z-Graphics Buffer for
-;   Coyote Graphics <http://www.idlcoyote.com/cg_tips/configz.php>` for additional information.
+;   and you will find things working perfectly. 
+;   See `Configuring the Z-Graphics Buffer for Coyote Graphics <http://www.idlcoyote.com/cg_tips/configz.php>` 
+;   for additional information.
 ;
 ; :Categories:
 ;    Graphics, Utilities

@@ -38,8 +38,7 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
-;    Adds a directory to the beginning of the !PATH system variable.
+; Adds a directory to the beginning of the !PATH system variable.
 ;
 ; :Categories:
 ;    Utility

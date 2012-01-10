@@ -170,6 +170,7 @@
 ;           with the bounding box not being set to the correct values. 26 October 2011. DWF.
 ;       Created a DEFAULT_THICKNESS keyword to set the default thicknesses of PostScript 
 ;           system variables. 14 Dec 2011. DWF.
+;       Moved the true-type font set-up to *after* changing the graphics device to PostScript. 10 Jan 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
@@ -200,7 +201,7 @@ PRO PS_START, filename, $
    SetDefaultValue, font, 0
    
    ; Use Helvetica True-Type font by default.
-   IF font EQ 1 THEN SetDefaultValue, tt_font, 'Helvetica'
+   IF (font EQ 1) THEN SetDefaultValue, tt_font, 'Helvetica'
    
    gui = Keyword_Set(gui)
    quiet = Keyword_Set(quiet)
@@ -273,6 +274,7 @@ PRO PS_START, filename, $
    IF ~quiet THEN Print, 'PostScript output will be created here: ', keywords.filename
    
    Set_Plot, 'PS'
+   Device, Set_Font=tt_font, /TT_FONT
    Device, _EXTRA=keywords, SCALE_FACTOR=scale_factor
    
    ; Store filename and other pertinent information.

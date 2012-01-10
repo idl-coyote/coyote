@@ -105,6 +105,9 @@
 ;        Modified to allow byte and 16-bit integer values to be used to specify colors
 ;           in the current color table. 5 Dec 2011. DWF.
 ;        Modified to allow the "opposite" pixel to be determined in the Z-graphics buffer. 24 Dec 2011. DWF.
+;        Modified the code to handle long integers depending on the current color mode and the
+;            number of values passed in. 10 January 2012. DWF.
+;        Made sure the return values are BYTES not INTEGERS, in cases where this is expected. 10 Jan 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
@@ -320,6 +323,11 @@ FUNCTION cgColor, theColour, colorIndex, $
      ; array of three elements, but I am willing to live with this.
      IF Size(theColor, /TNAME) NE 'STRING' THEN BEGIN
      
+        ; Make sure this is not a 1x3 array, which we want to treat as a color triple.
+        IF (N_Elements(theColor) EQ 3) && (Size(theColor, /N_DIMENSIONS) EQ 2) THEN BEGIN
+            theColor = Reform(theColor)
+        ENDIF
+     
         ; Allow the color to be a three-element array of byte values.
         ; If it is, we will define the USERDEF color with these values.
         ; Otherwise the USERDEF color will be unused.
@@ -339,13 +347,28 @@ FUNCTION cgColor, theColour, colorIndex, $
           ; be an index into the color table.
           IF (Size(theColor, /TYPE) LE 2) THEN theColor = StrTrim(Fix(theColor),2)
           
-          ; Long integers are problematic. Can't deal with them sensibly.
+          ; Long integers are problematic. If the current color mode is INDEXED, then
+          ; we will treat long integers as color indices. If it is DECOMPOSED, then if
+          ; there is just one value, we can handle this as a color triple.
           IF (Size(theColor, /TYPE) EQ 3) THEN BEGIN
-             Message, 'Cannot specify colors with LONG data. Use BYTE or INTEGER.'
+             
+               IF GetDecomposedState() THEN BEGIN
+                   IF N_Elements(theColor) EQ 1 THEN BEGIN
+                      usercolor = [theColor MOD 2L^8, (theColor MOD 2L^16)/2L^8, theColor/2L^16]
+                      theColor = 'USERDEF'
+                   ENDIF ELSE Message, 'Do not know how to handle a vector of LONG integers!
+               ENDIF ELSE BEGIN
+                   IF N_Elements(theColor) EQ 1 THEN BEGIN
+                      IF theColor LE 255 THEN BEGIN
+                          theColor = StrTrim(Fix(theColor),2)
+                      ENDIF ELSE Message, 'Long integer ' + StrTrim(theColor,2) + ' is out of indexed color range.'
+                   ENDIF ELSE Message, 'Do not know how to handle a vector of LONG integers!
+               ENDELSE
+               
           ENDIF
           
-          ; Anything that is not an BYTE, INTEGER, or STRING causes problems.
-          IF (Size(theColor, /TYPE) GT 3) && (Size(theColor, /TNAME) NE 'STRING') THEN BEGIN
+          ; Anything that is not an BYTE, INTEGER, LONG, or STRING causes problems.
+          IF (Size(theColor, /TYPE) GT 4) && (Size(theColor, /TNAME) NE 'STRING') THEN BEGIN
              Message, 'Use BYTE, INTEGER, or STRING data to specify a color.'
           ENDIF
         ENDIF
@@ -781,9 +804,11 @@ FUNCTION cgColor, theColour, colorIndex, $
     ; Did the user want a color triple? If so, return it now.
     IF Keyword_Set(triple) THEN BEGIN
        IF Keyword_Set(allcolors) THEN BEGIN
-          IF Keyword_Set(row) THEN RETURN, Transpose([[rvalue], [gvalue], [bvalue]]) ELSE RETURN, [[rvalue], [gvalue], [bvalue]]
+          IF Keyword_Set(row) $
+             THEN RETURN, Byte(Transpose([[rvalue], [gvalue], [bvalue]])) $
+             ELSE RETURN, Byte([[rvalue], [gvalue], [bvalue]])
        ENDIF ELSE BEGIN
-          IF Keyword_Set(row) THEN RETURN, [r, g, b] ELSE RETURN, [[r], [g], [b]]
+          IF Keyword_Set(row) THEN RETURN, Byte([r, g, b]) ELSE RETURN, Byte([[r], [g], [b]])
        ENDELSE
     ENDIF
     
@@ -828,7 +853,7 @@ FUNCTION cgColor, theColour, colorIndex, $
              colorIndex = Fix(!D.Table_Size - ncolors - 2)
           ENDIF
           IF (!D.Name NE 'PRINTER') AND (!D.Name NE 'NULL') THEN TVLCT, rvalue, gvalue, bvalue, colorIndex
-          RETURN, IndGen(ncolors) + colorIndex
+          RETURN, BIndGen(ncolors) + colorIndex
        ENDIF ELSE BEGIN
     
           ; Need a color structure?
@@ -838,7 +863,7 @@ FUNCTION cgColor, theColour, colorIndex, $
     
           IF (!D.Name NE 'PRINTER') AND (!D.Name NE 'NULL') THEN $
               TVLCT, rvalue[theIndex], gvalue[theIndex], bvalue[theIndex], colorIndex
-          RETURN, Fix(colorIndex)
+          RETURN, Byte(colorIndex)
        ENDELSE
     
     

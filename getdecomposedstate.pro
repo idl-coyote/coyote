@@ -41,6 +41,9 @@
 ;
 ; :Categories:
 ;    Graphics, Utilities
+;    
+; :Returns:
+;     Returns a 1 if color decomposition is turned on and a 0 if indexed color is used.
 ;       
 ; :Keywords:
 ;     Depth: out, optional, type=integer

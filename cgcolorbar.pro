@@ -191,7 +191,7 @@
 ;       cgCOLORBAR, NCOLORS=254, NEUTRALINDEX=255, RANGE=[0,1500], $
 ;           DIVISIONS=8, CLAMP=[400, 800]
 ;           
-;    Additional examples can be found in the article `Adding a Color Bar <http://http://www.idlcoyote.com/color_tips/colorbar.html>`.
+;    Additional examples can be found in the article `Adding a Color Bar <http://www.idlcoyote.com/color_tips/colorbar.html>`.
 ;
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::

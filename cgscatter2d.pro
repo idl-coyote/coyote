@@ -179,14 +179,14 @@
 ;       data_2 = cgDemoData(1)+ RandomU(seed, 101) * 10
 ;       cgScatter2D, data_1, data_2 
 ;       
-;    Add a grid to the plot, and a fill color::
-;       cgScatter2D, data_1, data_2, FillColor='rose', /Grid
+;    Add a grid to the plot::
+;       cgScatter2D, data_1, data_2, SymColor='navy', /Grid
 ;       
 ;    Output the plot to a PNG file::
-;       cgScatter2D, data_1, data_2, FillColor='rose', /Grid, Output='scatter.png'
+;       cgScatter2D, data_1, data_2,  SymColor='navy', /Grid, Output='scatter.png'
 ;    
 ;    Display the plot in a resizeable graphics window::
-;       cgScatter2D, data_1, data_2, FillColor='rose', /Grid, /Window
+;       cgScatter2D, data_1, data_2,  SymColor='navy', /Grid, /Window
 ;    
 ;       
 ; :Author:

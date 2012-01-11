@@ -1,12 +1,11 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   cgPlot
+;   cgScatter2D
 ;
 ; PURPOSE:
-;   The purpose of cgPlot is to create a wrapper for the traditional IDL graphics
-;   command, Plot. The primary purpose of this is to create plot commands that work
-;   and look identically both on the display and in PostScript files.
+;   The purpose of cgScatter2d is to create a two-dimensional scatter plot with the 
+;   option of drawing a correlation coefficient on the plot.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -37,22 +36,18 @@
 ;******************************************************************************************;
 ;
 ;+
-;   The purpose of cgPlot is to create a wrapper for the traditional IDL graphics
-;   command, Plot. The primary purpose of this is to create plot commands that work
-;   and look identically both on the display and in PostScript files.
-;
-; :Categories:
-;    Graphics
-;    
+; The purpose of cgScatter2d is to create a two-dimensional scatter plot with the 
+; option of drawing a correlation coefficient on the plot.
+;   
 ; :Params:
-;    x: in, required, type=any
-;         If X is provided without Y, a vector representing the dependent values to be 
-;         plotted If both X and Y are provided, X is the independent parameter and 
-;         Y is the dependent parameter to be plotted.
-;    y: in, optional, type=any
-;         A vector representing the dependent values to be plotted.
-;       
+; 
+;     x: in, required
+;        The variable along the X or horizontal dimension.
+;     y: in, required
+;        The varaiable along the Y or vertical dimension.
+;        
 ; :Keywords:
+; 
 ;     addcmd: in, optional, type=boolean, default=0
 ;        Set this keyword to add the command to the resizeable graphics window cgWindow.
 ;     aspect: in, optional, type=float, default=none
@@ -60,23 +55,44 @@
 ;        (ysize/xsize) of the resulting plot. The plot position may change as a result
 ;        of setting this keyword. Note that `Aspect` cannot be used when plotting with
 ;        !P.MULTI.
-;     axiscolor: in, optional, type=string/integer, default='black'
-;        If this keyword is a string, the name of the axis color. By default, 'black'.
-;        Otherwise, the keyword is assumed to be a color index into the current color table.
-;     axescolor: in, optional, type=string/integer
+;     axiscolor: in, optional, type=string, default='black'
+;        The name of the axis color. May be specified as a color table index number, as well.
+;     axescolor: in, optional, type=string
 ;        Provisions for bad spellers.
-;     background: in, optional, type=string/integer, default='white'
-;        If this keyword is a string, the name of the background color. By default, 'white'.
-;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     background: in, optional, type=string, default='white'
+;        The name of the background color. May be specified as a color table index number, as well.
 ;     charsize: in, optional, type=float, default=cgDefCharSize()
 ;        The character size for axes annotations. Uses cgDefCharSize to select default
 ;        character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
-;     color: in, optional, type=string/integer, default='black'
-;        If this keyword is a string, the name of the data color. By default, 'black'.
-;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
-;        to be a color index into the current color table.
+;     color: in, optional, type=string, default='black'
+;        The name of the data color. May be specified as a color table index or color triple, as well.
+;     coefficient: out, optional, type=double
+;        The Pearson correlation coefficient of the two data sets. Calculated with the IDL routine CORRELATE.
+;     fcharsize: in, optional, type=float
+;        The character size of the fit parameters that are written on the plot. This keyword is only
+;        in effect if the `Fit` keyword is set. The default is the same as `Charsize`.
+;     fillcolor: in, optional, type=string
+;        If this keyword is set to the name of a fill color, the area inside the plot axes is
+;        set to this color. Unfortunately, the `FillColor` keyword can NOT be used when doing
+;        multiple plots in a graphics window.
+;     fcolor: in, optional, type=string, default='red'
+;        The name of the color for the fitting line though the data
+;     fthick: in, optional, type=integer, default=1
+;        The thickness of the fitting line.
+;     fit: in, optional, type=boolean, default=1
+;        If this keyword is set to 1 (the default), a straight line is fit through the data
+;        with the IDL routine LINFIT. If this keyword is set, the Pearson correlation coeffcient
+;        and the equation of the fitted line is displayed on the scatter plot, unless the `NoDisplay`
+;        keyword is set.
 ;     font: in, optional, type=integer, default=!P.Font
 ;        The type of font desired for axis annotation.
+;     gcolor: in, optional, type=string, default='gray'
+;        The name of the grid color. May be specified as a color table index number, as well.
+;     glinestyle: in, optional, type=integer, default=1
+;        The grid linestyle. Dotted by default. An integer from 0 to 5. See the IDL LineStyle 
+;        graphics keyword documentation.
+;     grid: in, optional, type=boolean, default=0
+;        Set this keword to 1 to draw a grid on the plot.
 ;     isotropic: in, optional, type=boolean, default=0
 ;        A short-hand way of setting the `Aspect` keyword to 1.
 ;     layout: in, optional, type=intarr(3)
@@ -86,8 +102,10 @@
 ;        rows (nrows). The location of the graphic is determined by the third number. The
 ;        grid numbering starts in the upper left (1) and goes sequentually by column and then
 ;        by row.
-;     nodata: in, optional, type=boolean, default=0
-;        Set this keyword to draw axes, but no data.
+;     nodisplay, in, optional, type=boolean default=0
+;        If this keyword is set, then the Pearson correlation coefficient and the equation
+;        of the fitting line is not displayed on the plot. This keyword is only considered if
+;        the `Fit` keyword is set.
 ;     noerase: in, optional, type=boolean, default=0
 ;        Set this keyword to draw the plot without erasing the display first.
 ;     outfilename: in, optional, type=string
@@ -120,15 +138,16 @@
 ;     overplot: in, optional, type=boolean, default=0
 ;        Set this keyword if you wish to overplot data on an already exisiting set of
 ;        axes. It is like calling the IDL OPLOT command.
+;     params: out, optional, type=double
+;        The output line fitting parameters [intercept, slope].
 ;     position: in, optional, type=vector
 ;        The usual four-element position vector for the Plot comamnd. Only monitored and
-;        possibly set if the `Aspect` keyword is used.
-;     psym: in, optional, type=integer
+;        possibly changed if the `Aspect` keyword is used.
+;     psym: in, optional, type=integer, default=2
 ;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
-;        routine SYMCAT. An integer between 0 and 46.
-;     symcolor: in, optional, type=string/integer, default='black'
-;        If this keyword is a string, the name of the symbol color. By default, 'black'.
-;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;        routine SYMCAT. An integer between 1 and 46.
+;     symcolor: in, optional, type=string, default='black'
+;        The name of the symbol color. May be specified as a color table index number, as well.
 ;     symsize: in, optional, type=float, default=1.0
 ;        The symbol size.
 ;     traditional: in, optional, type=boolean, default=0
@@ -137,15 +156,36 @@
 ;     window: in, optional, type=boolean, default=0
 ;        Set this keyword to replace all the commands in a current cgWindow or to
 ;        create a new cgWindow for displaying this command.
+;     xrange: in, optional, type=float
+;        The X range of the plot.
+;     xstyle: in, optional, type=integer, default=0
+;        The value sent to the XStyle keyword for the Plot command.
+;     xticklen: in, optional, type=float
+;        The X tick length. Will be set to 1.0 if the `Grid` keyword is set.
+;     yrange: in, optional, type=float
+;        The Y range of the plot.
+;     ystyle: in, optional, type=integer, default=0
+;        The value sent to the YStyle keyword for the Plot command.
+;     yticklen: in, optional, type=float
+;        THe Y tick length. Will be set to 1.0 if the `Grid` keyword is set.
 ;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot command is allowed in the program.
-;
+;        
 ; :Examples:
-;    Use as you would use the IDL PLOT command::
-;       cgPlot, Findgen(11)
-;       cgPlot, Findgen(11), Aspect=1.0
-;       cgPlot, Findgen(11), Color='olive', AxisColor='red', Thick=2
-;       cgPlot, Findgen(11), Color='blue', SymColor='red', PSym=-16
+;    Use to compare two data sets::
+;       data_1 = cgDemoData(1)+ RandomU(seed, 101) * 10
+;       data_2 = cgDemoData(1)+ RandomU(seed, 101) * 10
+;       cgScatter2D, data_1, data_2 
+;       
+;    Add a grid to the plot, and a fill color::
+;       cgScatter2D, data_1, data_2, FillColor='rose', /Grid
+;       
+;    Output the plot to a PNG file::
+;       cgScatter2D, data_1, data_2, FillColor='rose', /Grid, Output='scatter.png'
+;    
+;    Display the plot in a resizeable graphics window::
+;       cgScatter2D, data_1, data_2, FillColor='rose', /Grid, /Window
+;    
 ;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -158,69 +198,49 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 12 November 2010. DWF.
-;        Added SYMCOLOR keyword, and allow all 46 symbols from SYMCAT. 15 November 2010. DWF.
-;        Added NODATA keyword. 15 November 2010. DWF.
-;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
-;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
-;        Fixed a problem with overplotting with symbols. 17 November 2010. DWF.
-;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
-;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
-;        Fixed a small problem with the OVERPLOT keyword. 18 Nov 2010. DWF.
-;        Changes so that color inputs don't change type. 23 Nov 2010. DWF.
-;        Added WINDOW keyword to allow graphic to be displayed in a resizable graphics window. 8 Dec 2010. DWF
-;        Modifications to allow cgPlot to be drop-in replacement for old PLOT commands in 
-;            indexed color mode. 24 Dec 2010. DWF.
-;        Previous changes introduced problems with OVERPLOT that have now been fixed. 28 Dec 2010. DWF.
-;        Set NOERASE keyword from !P.NoErase system variable when appropriate. 28 Dec 2010. DWF.
-;        Additional problems with NOERASE discovered and solved. 29 Dec 2010. DWF.
-;        In some cases, I was turning BYTE values to strings without converting to 
-;            INTEGERS first. 30 Dec 2010. DWF.  
-;         Selecting character size now with cgDefCharSize. 11 Jan 2011. DWF.   
-;         Moved setting to decomposed color before color selection process to avoid PostScript
-;             background problems when passed 24-bit color integers. 12 Jan 2011. DWF. 
-;         Changed _EXTRA to _REF_EXTRA on procedure definition statement to be able to return
-;             plot keywords such as XGET_TICKS. 13 Jan 2011. DWF.  
-;         Added SYMSIZE keyword. 16 Jan 2011. DWF.
-;         Fixed a problem in which I assumed the background color was a string. 18 Jan 2011. DWF.  
-;         Added ADDCMD keyword. 26 Jan 2011. DWF.
-;         Added LAYOUT keyword. 28 Jan 2011. DWF.
-;         Made a modification that allows THICK and COLOR keywords apply to symbols, too. 24 Feb 2011. DWF.
-;         Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
-;         Somehow I had gotten independent and dependent data reversed in the code. Put right. 16 May 2011. DWF.
-;         Allowed ASPECT (and /ISOTROPIC) to take into account input POSITION. 15 June 2011. Jeremy Bailin.
-;         Updated the BACKGROUND color selection from lessons learned in 27 Oct 2011 cgContour 
-;             corrections. 27 Oct 2011. DWF.
-;         Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
-;         PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2011. DWF.
-;         Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
-;         Over-zealous use of _STRICT_EXTRA when overplotting resulted in errors. Now use _EXTRA. 1 Jan 2011. DWF.
+;        Written, 12 January 2012. DWF.
 ;         
 ; :Copyright:
-;     Copyright (c) 2010-2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
-PRO cgPlot, x, y, $
-    ADDCMD=addcmd, $
-    ASPECT=aspect, $
-    AXISCOLOR=saxiscolor, $
-    AXESCOLOR=saxescolor, $
-    BACKGROUND=sbackground, $
-    CHARSIZE=charsize, $
-    COLOR=scolor, $
-    FONT=font, $
-    ISOTROPIC=isotropic, $
-    LAYOUT=layout, $
-    NODATA=nodata, $
-    NOERASE=noerase, $
-    OUTFILENAME=outfilename, $
-    OUTPUT=output, $
-    OVERPLOT=overplot, $
-    POSITION=position, $
-    PSYM=psym, $
-    SYMCOLOR=ssymcolor, $
-    SYMSIZE=symsize, $
-    TRADITIONAL=traditional, $
-    WINDOW=window, $
+PRO cgScatter2D, x, y, $
+    AddCmd=addcmd, $
+    Aspect=aspect, $
+    AxisColor=saxiscolor, $
+    AxesColor=saxescolor, $
+    Background=sbackground, $
+    Charsize=charsize, $
+    Color=scolor, $
+    Coefficient=coefficient, $
+    FCharsize=fcharsize, $
+    FColor=sfcolor, $
+    FThick=fthick, $
+    FillColor=sfillcolor, $
+    Fit=fit, $
+    Font=font, $
+    GColor=sgcolor, $
+    GLinestyle=glinestyle, $
+    Grid=grid, $
+    Isotropic=isotropic, $
+    Layout=layout, $
+    NoDisplay=nodisplay, $
+    NoErase=noerase, $
+    OutFilename=outfilename, $
+    Output=output, $
+    Overplot=overplot, $
+    Params=params, $
+    Position=position, $
+    PSym=psym, $
+    SymColor=ssymcolor, $
+    SymSize=symsize, $
+    Traditional=traditional, $
+    Window=window, $
+    XRange=xrange, $
+    XStyle=xstyle, $
+    XTickLen=xticklen, $
+    YRange=yrange, $
+    YStyle=ystyle, $
+    YTicklen=yticklen, $
     _REF_EXTRA=extra
     
     Compile_Opt idl2
@@ -240,7 +260,7 @@ PRO cgPlot, x, y, $
     
     ; Check parameters.
     IF N_Params() EQ 0 THEN BEGIN
-        Print, 'USE SYNTAX: cgPlot, x, y'
+        Print, 'USE SYNTAX: cgScatter2D, x, y'
         RETURN
     ENDIF
     
@@ -250,31 +270,50 @@ PRO cgPlot, x, y, $
     
     ; Do they want this plot in a resizeable graphics window?
     IF Keyword_Set(addcmd) THEN window = 1
-    IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
+
+        IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
         ; If you are using a layout, you can't ever erase.
         IF N_Elements(layout) NE 0 THEN noerase = 1
         
         ; Special treatment for overplotting or adding a command.
         IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
-        cgWindow, 'cgPlot', x, y, $
-            ASPECT=aspect, $
-            AXISCOLOR=saxiscolor, $
-            AXESCOLOR=saxescolor, $
-            BACKGROUND=sbackground, $
-            CHARSIZE=charsize, $
-            COLOR=scolor, $
-            FONT=font, $
-            ISOTROPIC=isotropic, $
-            LAYOUT=layout, $
-            NODATA=nodata, $
-            NOERASE=noerase, $
-            OVERPLOT=overplot, $
-            POSITION=position, $
-            PSYM=psym, $
-            SYMCOLOR=ssymcolor, $
-            SYMSIZE=symsize, $
-            TRADITIONAL=traditional, $
+        cgWindow, 'cgScatter2D', x, y, $
+            Aspect=aspect, $
+            AxisColor=saxiscolor, $
+            AxesColor=saxescolor, $
+            Background=sbackground, $
+            Charsize=charsize, $
+            Color=scolor, $
+            Coefficient=coefficient, $
+            FCharsize=fcharsize, $
+            FColor=sfcolor, $
+            FThick=fthick, $
+            FillColor=sfillcolor, $
+            Fit=fit, $
+            Font=font, $
+            GColor=sgcolor, $
+            GLinestyle=glinestyle, $
+            Grid=grid, $
+            Isotropic=isotropic, $
+            Layout=layout, $
+            NoDisplay=nodisplay, $
+            NoErase=noerase, $
+            OutFilename=outfilename, $
+            Output=output, $
+            Overplot=overplot, $
+            Params=params, $
+            Position=position, $
+            PSym=psym, $
+            SymColor=ssymcolor, $
+            SymSize=symsize, $
+            Traditional=traditional, $
+            XRange=xrange, $
+            XStyle=xstyle, $
+            XTickLen=xticklen, $
+            YRange=yrange, $
+            YStyle=ystyle, $
+            YTicklen=yticklen, $
             ADDCMD=1, $
             _Extra=extra
              RETURN
@@ -283,44 +322,47 @@ PRO cgPlot, x, y, $
         ; Open a new window or replace the current commands, as required.
         currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
-        cgWindow, 'cgPlot', x, y, $
-            ASPECT=aspect, $
-            AXISCOLOR=saxiscolor, $
-            AXESCOLOR=saxescolor, $
-            BACKGROUND=sbackground, $
-            CHARSIZE=charsize, $
-            COLOR=scolor, $
-            FONT=font, $
-            ISOTROPIC=isotropic, $
-            LAYOUT=layout, $
-            NODATA=nodata, $
-            NOERASE=noerase, $
-            OVERPLOT=overplot, $
-            POSITION=position, $
-            PSYM=psym, $
-            SYMCOLOR=ssymcolor, $
-            SYMSIZE=symsize, $
-            TRADITIONAL=traditional, $
+        cgWindow, 'cgScatter2D', x, y, $
+            Aspect=aspect, $
+            AxisColor=saxiscolor, $
+            AxesColor=saxescolor, $
+            Background=sbackground, $
+            Charsize=charsize, $
+            Color=scolor, $
+            Coefficient=coefficient, $
+            FCharsize=fcharsize, $
+            FColor=sfcolor, $
+            FThick=fthick, $
+            FillColor=sfillcolor, $
+            Fit=fit, $
+            Font=font, $
+            GColor=sgcolor, $
+            GLinestyle=glinestyle, $
+            Grid=grid, $
+            Isotropic=isotropic, $
+            Layout=layout, $
+            NoDisplay=nodisplay, $
+            NoErase=noerase, $
+            OutFilename=outfilename, $
+            Output=output, $
+            Overplot=overplot, $
+            Params=params, $
+            Position=position, $
+            PSym=psym, $
+            SymColor=ssymcolor, $
+            SymSize=symsize, $
+            Traditional=traditional, $
+            XRange=xrange, $
+            XStyle=xstyle, $
+            XTickLen=xticklen, $
+            YRange=yrange, $
+            YStyle=ystyle, $
+            YTicklen=yticklen, $
             REPLACECMD=replaceCmd, $
             _Extra=extra
             
          RETURN
     ENDIF
-    
-    ; Sort out which is the dependent and which is independent data.
-    CASE N_Params() OF
-      
-       1: BEGIN
-       indep = x
-       dep = Findgen(N_Elements(indep))
-       ENDCASE
-    
-       2: BEGIN
-       indep = y
-       dep = x
-       ENDCASE
-    
-    ENDCASE
     
     ; Are we doing some kind of output?
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
@@ -432,7 +474,7 @@ PRO cgPlot, x, y, $
     
     
     ENDIF
-   
+    
     ; Get the current color table vectors.
     TVLCT, rr, gg, bb, /GET
     
@@ -458,20 +500,8 @@ PRO cgPlot, x, y, $
     IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
     axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
     color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
-    
-    ; If color is the same as background, do something.
-    IF ColorsAreIdentical(background, color) THEN BEGIN
-        IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-           IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
-        ENDIF
-        color = 'OPPOSITE'
-    ENDIF
-    IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
-        IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-           IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
-        ENDIF
-        axiscolor = 'OPPOSITE'
-    ENDIF
+    fcolor = cgDefaultColor(sfColor, DEFAULT='red', TRADITIONAL=traditional, MODE=currentState)
+    gcolor = cgDefaultColor(sgColor, DEFAULT='gray', TRADITIONAL=traditional, MODE=currentState)
     symcolor = cgDefaultColor(ssymcolor, DEFAULT=color, TRADITIONAL=traditional, MODE=currentState)
     
     ; Character size has to be determined *after* the layout has been decided.
@@ -479,9 +509,32 @@ PRO cgPlot, x, y, $
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     
     ; Other keywords.
-    IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
+    SetDefaultValue, fit, 1
+    SetDefaultValue, fcharsize, charsize
+    SetDefaultValue, fthick, 1
+    IF !D.Name EQ 'PS' THEN fthick = 3*fthick
+    SetDefaultValue, grid, 0, /Boolean
+    SetDefaultValue, glinestyle, 1
+    IF grid THEN BEGIN
+        xticklen = 1
+        yticklen = 1
+    ENDIF
+    SetDefaultValue, symsize, 1.0
     IF Keyword_Set(isotropic) THEN aspect = 1.0
-    IF N_Elements(psym) EQ 0 THEN psym = 0
+    IF N_Elements(psym) EQ 0 THEN psym = 2 ELSE psym = 1 > psym 
+    IF N_Elements(xrange) EQ 0 THEN BEGIN
+        range = Max(x) - Min(x)
+        IF Min(x) NE 0 THEN minx = Min(x)-(range*0.05) ELSE minx = 0.0
+        xrange = [minx, Max(x)+(range*0.05)]
+    ENDIF
+    IF N_Elements(yrange) EQ 0 THEN BEGIN
+        range = Max(y) - Min(y)
+        IF Min(y) NE 0 THEN miny = Min(y)-(range*0.05) ELSE miny = 0.0
+        yrange = [miny, Max(y)+(range*0.05)]
+    ENDIF
+    SetDefaultValue, xstyle, 0
+    SetDefaultValue, ystyle, 0
+    
     IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
     
         ; If position is set, then fit the plot into those bounds.
@@ -530,8 +583,8 @@ PRO cgPlot, x, y, $
                     bangp = !P
                     
                     ; Draw the plot that doesn't draw anything.
-                    Plot, dep, indep, POSITION=position, CHARSIZE=charsize, /NODATA, $
-                        FONT=font, _STRICT_EXTRA=extra  
+                    Plot, x, y, POSITION=position, CHARSIZE=charsize, /NODATA, $
+                        FONT=font, XRANGE=xrange, YRANGE=yrange, _STRICT_EXTRA=extra  
                     
                     ; Save the "after plot" system variables. Will use later. 
                     afterx = !X
@@ -558,23 +611,96 @@ PRO cgPlot, x, y, $
      ; Load the drawing colors, if needed.
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = cgColor(axiscolor)
     IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
+    IF Size(gcolor, /TNAME) EQ 'STRING' THEN gcolor = cgColor(gcolor)
+    IF Size(fcolor, /TNAME) EQ 'STRING' THEN fcolor = cgColor(fcolor)
     IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
     IF Size(symcolor, /TNAME) EQ 'STRING' THEN symcolor = cgColor(symcolor)
     
+    ; Do you need a plot fill color?
+    IF (N_Elements(sfillColor) NE 0) && (Total(!P.Multi) EQ 0) THEN BEGIN
+        ; Make sure you have a position for filling.
+        SetDefaultValue, position, [0.15, 0.125, 0.9, 0.9]
+        p = position
+        fillColor = cgColor(sfillColor)
+        cgErase, Color=background
+        PolyFill, [p[0], p[0], p[2], p[2], p[0]], /Normal, $
+                  [p[1], p[3], p[3], p[1], p[1]], Color=fillcolor
+        tempNoErase = 1
+    ENDIF ELSE BEGIN
+         IF (N_Elements(sfillColor) NE 0) && (Total(!P.Multi) NE 0) THEN BEGIN
+             Message, 'Cannot use the FillColor keyword with multiple plots.', /Informational
+         ENDIF
+    ENDELSE
     ; Draw the plot.
     IF Keyword_Set(overplot) THEN BEGIN
        IF psym LE 0 THEN OPlot, dep, indep, COLOR=color, _EXTRA=extra
     ENDIF ELSE BEGIN
-      Plot, dep, indep, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
-            POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, _STRICT_EXTRA=extra
-        IF psym LE 0 THEN BEGIN
-           IF ~Keyword_Set(nodata) THEN OPlot, dep, indep, COLOR=color, _EXTRA=extra  
-        ENDIF  
+      IF grid THEN BEGIN
+          bangxgrid = !X
+          bangygrid = !Y
+          bangpgrid = !P
+          Plot, x, y, BACKGROUND=background, COLOR=gcolor, CHARSIZE=charsize, $
+                POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, $
+                XTICKLEN=xticklen, YTICKLEN=yticklen, XRANGE=xrange, YRANGE=yrange, $
+                XGRIDSTYLE=glinestyle, YGRIDSTYLE=glinestyle, XSTYLE=4 AND xstyle, YSTYLE=4 AND ystyle, $
+                _STRICT_EXTRA=extra, XTickFormat='(A1)', YTickFormat='(A1)'
+           
+          aftergridx = !X
+          aftergridy = !Y
+          aftergridp = !P
+          !X = bangxgrid
+          !Y = bangygrid    
+          !P = bangpgrid 
+          Plot, x, y, COLOR=axiscolor, CHARSIZE=charsize, $
+                POSITION=position, /NODATA, NOERASE=(!P.Multi[0] GT 0) ? 0 : 1, FONT=font, $
+                XRANGE=xrange, YRANGE=yrange, $
+                XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra
+          IF !P.Multi[0] EQ 0 THEN BEGIN
+             !X = aftergridx
+             !Y = aftergridy
+             !P = aftergridp
+          ENDIF
+      ENDIF ELSE BEGIN
+          Plot, x, y, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
+                POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, $
+                XTICKLEN=xticklen, YTICKLEN=yticklen, XRANGE=xrange, YRANGE=yrange, $
+                XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra
+      ENDELSE
     ENDELSE
-    IF Abs(psym) GT 0 THEN BEGIN
-        IF ~Keyword_Set(nodata) THEN OPlot, dep, indep, COLOR=symcolor, $
-            PSYM=SymCat(Abs(psym), COLOR=symcolor, _Extra=extra), SYMSIZE=symsize, _EXTRA=extra
+    IF Abs(psym) GT 1 THEN BEGIN
+        OPlot, x, y, COLOR=symcolor, PSYM=SymCat(Abs(psym), COLOR=symcolor, _Extra=extra), $
+           SYMSIZE=symsize, _EXTRA=extra
     ENDIF 
+    
+    ; Calculate the Pearson correlation coefficient.
+    coefficient = Correlate(x, y, /DOUBLE)
+    
+    ; Add the fitting line, if needed.
+    IF fit THEN BEGIN
+       params = LinFit(x, y, /Double, YFIT=yfit)
+       OPlot, x, yfit, COLOR=fcolor, THICK=fthick
+       
+       IF coefficient GE 0 THEN BEGIN
+          yloc = !Y.Window[1] - 0.05
+          xloc = !X.Window[0] + 0.05
+          alignment = 0.0
+          y1loc = yloc - ( 2.0 * (!D.Y_CH_SIZE / Float(!D.Y_Size) ) )
+       ENDIF ELSE BEGIN
+          yloc = !Y.Window[1] - 0.05
+          xloc = (!X.Window[1]-!X.Window[0]) * (3.0/5.0) + !X.Window[0]
+          alignment = 0.0
+          y1loc = yloc - (2.0 * (!D.Y_CH_SIZE / Float(!D.Y_Size)))
+       ENDELSE
+       
+       ; Write the correlation coefficient and the fitting equation on the display,
+       ; if allowed to.
+       IF Keyword_Set(nodisplay) EQ 0 THEN BEGIN
+           cgText, xloc, yloc, /Normal, 'R = ' + String(coefficient, Format='(F0.3)'), $
+               Charsize=fcharsize
+           cgText, xloc, y1loc, /Normal, 'y = ' + String(params[1], Format='(F0.2)') $
+               + 'x + ' + String(params[0], Format='(F0.2)'), Charsize=fcharsize
+       ENDIF
+    ENDIF
          
     ; If this is the first plot in PS, then we have to make it appear that we have
     ; drawn a plot, even though we haven't.

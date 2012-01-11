@@ -75,6 +75,10 @@
 ;        The name of the color for the fitting line though the data
 ;     fthick: in, optional, type=integer, default=1
 ;        The thickness of the fitting line.
+;     fillcolor: in, optional, type=string
+;        If this keyword is set to the name of a color, that color will be used to "fill"
+;        the area of the plot enclosed by the axes. Unfortunately, at this time, the `FillColor`
+;        keyword can NOT be used with multiple plots, just single plots.
 ;     fit: in, optional, type=boolean, default=1
 ;        If this keyword is set to 1 (the default), a straight line is fit through the data
 ;        with the IDL routine LINFIT. If this keyword is set, the Pearson correlation coeffcient
@@ -180,13 +184,13 @@
 ;       cgScatter2D, data_1, data_2 
 ;       
 ;    Add a grid to the plot::
-;       cgScatter2D, data_1, data_2, SymColor='navy', /Grid
+;       cgScatter2D, data_1, data_2, SymColor='navy', FillColor='rose', /Grid
 ;       
 ;    Output the plot to a PNG file::
-;       cgScatter2D, data_1, data_2,  SymColor='navy', /Grid, Output='scatter.png'
+;       cgScatter2D, data_1, data_2,  SymColor='navy', /Grid, FillColor='rose', Output='scatter.png'
 ;    
 ;    Display the plot in a resizeable graphics window::
-;       cgScatter2D, data_1, data_2,  SymColor='navy', /Grid, /Window
+;       cgScatter2D, data_1, data_2,  SymColor='navy', /Grid, FillColor='rose', /Window
 ;    
 ;       
 ; :Author:
@@ -217,7 +221,7 @@ PRO cgScatter2D, x, y, $
     FCharsize=fcharsize, $
     FColor=sfcolor, $
     FThick=fthick, $
-;    FillColor=sfillcolor, $
+    FillColor=sfillcolor, $
     Fit=fit, $
     Font=font, $
     GColor=sgcolor, $
@@ -294,7 +298,7 @@ PRO cgScatter2D, x, y, $
             FCharsize=fcharsize, $
             FColor=sfcolor, $
             FThick=fthick, $
-;            FillColor=sfillcolor, $
+            FillColor=sfillcolor, $
             Fit=fit, $
             Font=font, $
             GColor=sgcolor, $
@@ -341,7 +345,7 @@ PRO cgScatter2D, x, y, $
             FCharsize=fcharsize, $
             FColor=sfcolor, $
             FThick=fthick, $
-;            FillColor=sfillcolor, $
+           FillColor=sfillcolor, $
             Fit=fit, $
             Font=font, $
             GColor=sgcolor, $
@@ -574,7 +578,10 @@ PRO cgScatter2D, x, y, $
         ENDIF ELSE position=Aspect(aspect)   ; if position isn't set, just use output of Aspect
         
     ENDIF
-           
+    
+    ; If we don't have a position yet, and we are not doing multiple plots, define a position.
+    IF (N_Elements(position) EQ 0) && (Total(!P.Multi) EQ 0) THEN position = [0.15, 0.125, 0.9, 0.9]
+    
     ; Do you need a PostScript background color? Lot's of problems here!
     ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a
     ; plot of any sort erases the background color. So, I have to draw a 
@@ -627,22 +634,20 @@ PRO cgScatter2D, x, y, $
     IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
     IF Size(symcolor, /TNAME) EQ 'STRING' THEN symcolor = cgColor(symcolor)
     
-;    ; Do you need a plot fill color?
-;    IF (N_Elements(sfillColor) NE 0) && (Total(!P.Multi) EQ 0) THEN BEGIN
-;        ; Make sure you have a position for filling.
-;        SetDefaultValue, position, [0.15, 0.125, 0.9, 0.9]
-;        p = position
-;        fillColor = cgColor(sfillColor)
-;        cgErase, Color=background
-;        PolyFill, [p[0], p[0], p[2], p[2], p[0]], /Normal, $
-;                  [p[1], p[3], p[3], p[1], p[1]], Color=fillcolor
-;        tempNoErase = 1
-;    ENDIF ELSE BEGIN
-;         IF (N_Elements(sfillColor) NE 0) && (Total(!P.Multi) NE 0) THEN BEGIN
-;             Message, 'Cannot use the FillColor keyword with multiple plots.', /Informational
-;         ENDIF
-;    ENDELSE
-;    
+    ; Do you need a plot fill color?
+    IF (N_Elements(sfillColor) NE 0) && (Total(!P.Multi) EQ 0) THEN BEGIN
+        p = position
+        fillColor = cgColor(sfillColor)
+        IF !D.Name NE 'PS' THEN cgErase, Color=background
+        PolyFill, [p[0], p[0], p[2], p[2], p[0]], /Normal, $
+                  [p[1], p[3], p[3], p[1], p[1]], Color=fillcolor
+        tempNoErase = 1
+    ENDIF ELSE BEGIN
+         IF (N_Elements(sfillColor) NE 0) && (Total(!P.Multi) NE 0) THEN BEGIN
+             Message, 'Cannot use the FillColor keyword with multiple plots.', /Informational
+         ENDIF
+    ENDELSE
+    
     ; Draw the plot.
     IF Keyword_Set(overplot) THEN BEGIN
        IF psym LE 0 THEN OPlot, dep, indep, COLOR=color, _EXTRA=extra

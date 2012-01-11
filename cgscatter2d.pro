@@ -71,10 +71,6 @@
 ;     fcharsize: in, optional, type=float
 ;        The character size of the fit parameters that are written on the plot. This keyword is only
 ;        in effect if the `Fit` keyword is set. The default is the same as `Charsize`.
-;     fillcolor: in, optional, type=string
-;        If this keyword is set to the name of a fill color, the area inside the plot axes is
-;        set to this color. Unfortunately, the `FillColor` keyword can NOT be used when doing
-;        multiple plots in a graphics window.
 ;     fcolor: in, optional, type=string, default='red'
 ;        The name of the color for the fitting line though the data
 ;     fthick: in, optional, type=integer, default=1
@@ -150,6 +146,8 @@
 ;        The name of the symbol color. May be specified as a color table index number, as well.
 ;     symsize: in, optional, type=float, default=1.0
 ;        The symbol size.
+;     title: in, optional, type=string, default=""
+;        The title of the plot.
 ;     traditional: in, optional, type=boolean, default=0
 ;        If this keyword is set, the traditional color scheme of a black background for
 ;        graphics windows on the display is used and PostScript files always use a white background.
@@ -162,12 +160,16 @@
 ;        The value sent to the XStyle keyword for the Plot command.
 ;     xticklen: in, optional, type=float
 ;        The X tick length. Will be set to 1.0 if the `Grid` keyword is set.
+;     xtitle: in, optional, type=string', default=""
+;        The X title of the plot.
 ;     yrange: in, optional, type=float
 ;        The Y range of the plot.
 ;     ystyle: in, optional, type=integer, default=0
 ;        The value sent to the YStyle keyword for the Plot command.
 ;     yticklen: in, optional, type=float
 ;        THe Y tick length. Will be set to 1.0 if the `Grid` keyword is set.
+;     ytitle: in, optional, type=string', default=""
+;        The Y title of the plot.
 ;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot command is allowed in the program.
 ;        
@@ -215,7 +217,7 @@ PRO cgScatter2D, x, y, $
     FCharsize=fcharsize, $
     FColor=sfcolor, $
     FThick=fthick, $
-    FillColor=sfillcolor, $
+;    FillColor=sfillcolor, $
     Fit=fit, $
     Font=font, $
     GColor=sgcolor, $
@@ -233,14 +235,17 @@ PRO cgScatter2D, x, y, $
     PSym=psym, $
     SymColor=ssymcolor, $
     SymSize=symsize, $
+    Title=title, $
     Traditional=traditional, $
     Window=window, $
     XRange=xrange, $
     XStyle=xstyle, $
     XTickLen=xticklen, $
+    XTitle=xtitle, $
     YRange=yrange, $
     YStyle=ystyle, $
     YTicklen=yticklen, $
+    YTitle=ytitle, $
     _REF_EXTRA=extra
     
     Compile_Opt idl2
@@ -289,7 +294,7 @@ PRO cgScatter2D, x, y, $
             FCharsize=fcharsize, $
             FColor=sfcolor, $
             FThick=fthick, $
-            FillColor=sfillcolor, $
+;            FillColor=sfillcolor, $
             Fit=fit, $
             Font=font, $
             GColor=sgcolor, $
@@ -307,13 +312,16 @@ PRO cgScatter2D, x, y, $
             PSym=psym, $
             SymColor=ssymcolor, $
             SymSize=symsize, $
+            Title=title, $
             Traditional=traditional, $
             XRange=xrange, $
             XStyle=xstyle, $
             XTickLen=xticklen, $
+            XTitle=xtitle, $
             YRange=yrange, $
             YStyle=ystyle, $
             YTicklen=yticklen, $
+            YTitle=ytitle, $
             ADDCMD=1, $
             _Extra=extra
              RETURN
@@ -333,7 +341,7 @@ PRO cgScatter2D, x, y, $
             FCharsize=fcharsize, $
             FColor=sfcolor, $
             FThick=fthick, $
-            FillColor=sfillcolor, $
+;            FillColor=sfillcolor, $
             Fit=fit, $
             Font=font, $
             GColor=sgcolor, $
@@ -351,13 +359,16 @@ PRO cgScatter2D, x, y, $
             PSym=psym, $
             SymColor=ssymcolor, $
             SymSize=symsize, $
+            Title=title, $
             Traditional=traditional, $
             XRange=xrange, $
             XStyle=xstyle, $
+            XTitle=xtitle, $
             XTickLen=xticklen, $
             YRange=yrange, $
             YStyle=ystyle, $
             YTicklen=yticklen, $
+            YTitle=ytitle, $
             REPLACECMD=replaceCmd, $
             _Extra=extra
             
@@ -616,21 +627,22 @@ PRO cgScatter2D, x, y, $
     IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
     IF Size(symcolor, /TNAME) EQ 'STRING' THEN symcolor = cgColor(symcolor)
     
-    ; Do you need a plot fill color?
-    IF (N_Elements(sfillColor) NE 0) && (Total(!P.Multi) EQ 0) THEN BEGIN
-        ; Make sure you have a position for filling.
-        SetDefaultValue, position, [0.15, 0.125, 0.9, 0.9]
-        p = position
-        fillColor = cgColor(sfillColor)
-        cgErase, Color=background
-        PolyFill, [p[0], p[0], p[2], p[2], p[0]], /Normal, $
-                  [p[1], p[3], p[3], p[1], p[1]], Color=fillcolor
-        tempNoErase = 1
-    ENDIF ELSE BEGIN
-         IF (N_Elements(sfillColor) NE 0) && (Total(!P.Multi) NE 0) THEN BEGIN
-             Message, 'Cannot use the FillColor keyword with multiple plots.', /Informational
-         ENDIF
-    ENDELSE
+;    ; Do you need a plot fill color?
+;    IF (N_Elements(sfillColor) NE 0) && (Total(!P.Multi) EQ 0) THEN BEGIN
+;        ; Make sure you have a position for filling.
+;        SetDefaultValue, position, [0.15, 0.125, 0.9, 0.9]
+;        p = position
+;        fillColor = cgColor(sfillColor)
+;        cgErase, Color=background
+;        PolyFill, [p[0], p[0], p[2], p[2], p[0]], /Normal, $
+;                  [p[1], p[3], p[3], p[1], p[1]], Color=fillcolor
+;        tempNoErase = 1
+;    ENDIF ELSE BEGIN
+;         IF (N_Elements(sfillColor) NE 0) && (Total(!P.Multi) NE 0) THEN BEGIN
+;             Message, 'Cannot use the FillColor keyword with multiple plots.', /Informational
+;         ENDIF
+;    ENDELSE
+;    
     ; Draw the plot.
     IF Keyword_Set(overplot) THEN BEGIN
        IF psym LE 0 THEN OPlot, dep, indep, COLOR=color, _EXTRA=extra
@@ -643,7 +655,8 @@ PRO cgScatter2D, x, y, $
                 POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, $
                 XTICKLEN=xticklen, YTICKLEN=yticklen, XRANGE=xrange, YRANGE=yrange, $
                 XGRIDSTYLE=glinestyle, YGRIDSTYLE=glinestyle, XSTYLE=4 AND xstyle, YSTYLE=4 AND ystyle, $
-                _STRICT_EXTRA=extra, XTickFormat='(A1)', YTickFormat='(A1)'
+                _STRICT_EXTRA=extra, XTickFormat='(A1)', YTickFormat='(A1)', $
+                XTITLE="", YTITLE="", TITLE=""
            
           aftergridx = !X
           aftergridy = !Y
@@ -654,7 +667,8 @@ PRO cgScatter2D, x, y, $
           Plot, x, y, COLOR=axiscolor, CHARSIZE=charsize, $
                 POSITION=position, /NODATA, NOERASE=(!P.Multi[0] GT 0) ? 0 : 1, FONT=font, $
                 XRANGE=xrange, YRANGE=yrange, $
-                XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra
+                XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, $
+                XTITLE=xtitle, YTITLE=ytitle, TITLE=title
           IF !P.Multi[0] EQ 0 THEN BEGIN
              !X = aftergridx
              !Y = aftergridy
@@ -664,7 +678,8 @@ PRO cgScatter2D, x, y, $
           Plot, x, y, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
                 POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, $
                 XTICKLEN=xticklen, YTICKLEN=yticklen, XRANGE=xrange, YRANGE=yrange, $
-                XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra
+                XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, $
+                XTITLE=xtitle, YTITLE=ytitle, TITLE=title
       ENDELSE
     ENDELSE
     IF Abs(psym) GT 1 THEN BEGIN

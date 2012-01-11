@@ -65,7 +65,7 @@
 ;        The character size for axes annotations. Uses cgDefCharSize to select default
 ;        character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
 ;     color: in, optional, type=string, default='black'
-;        The name of the data color. May be specified as a color table index or color triple, as well.
+;        The name of the data or symbol color. May be specified as a color table index or color triple, as well.
 ;     coefficient: out, optional, type=double
 ;        The Pearson correlation coefficient of the two data sets. Calculated with the IDL routine CORRELATE.
 ;     fcharsize: in, optional, type=float
@@ -146,8 +146,6 @@
 ;     psym: in, optional, type=integer, default=2
 ;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
 ;        routine SYMCAT. An integer between 1 and 46.
-;     symcolor: in, optional, type=string, default='black'
-;        The name of the symbol color. May be specified as a color table index number, as well.
 ;     symsize: in, optional, type=float, default=1.0
 ;        The symbol size.
 ;     title: in, optional, type=string, default=""
@@ -237,7 +235,6 @@ PRO cgScatter2D, x, y, $
     Params=params, $
     Position=position, $
     PSym=psym, $
-    SymColor=ssymcolor, $
     SymSize=symsize, $
     Title=title, $
     Traditional=traditional, $
@@ -314,7 +311,6 @@ PRO cgScatter2D, x, y, $
             Params=params, $
             Position=position, $
             PSym=psym, $
-            SymColor=ssymcolor, $
             SymSize=symsize, $
             Title=title, $
             Traditional=traditional, $
@@ -361,7 +357,6 @@ PRO cgScatter2D, x, y, $
             Params=params, $
             Position=position, $
             PSym=psym, $
-            SymColor=ssymcolor, $
             SymSize=symsize, $
             Title=title, $
             Traditional=traditional, $
@@ -517,7 +512,6 @@ PRO cgScatter2D, x, y, $
     color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
     fcolor = cgDefaultColor(sfColor, DEFAULT='red', TRADITIONAL=traditional, MODE=currentState)
     gcolor = cgDefaultColor(sgColor, DEFAULT='gray', TRADITIONAL=traditional, MODE=currentState)
-    symcolor = cgDefaultColor(ssymcolor, DEFAULT=color, TRADITIONAL=traditional, MODE=currentState)
     
     ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font
@@ -632,7 +626,6 @@ PRO cgScatter2D, x, y, $
     IF Size(gcolor, /TNAME) EQ 'STRING' THEN gcolor = cgColor(gcolor)
     IF Size(fcolor, /TNAME) EQ 'STRING' THEN fcolor = cgColor(fcolor)
     IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
-    IF Size(symcolor, /TNAME) EQ 'STRING' THEN symcolor = cgColor(symcolor)
     
     ; Do you need a plot fill color?
     IF (N_Elements(sfillColor) NE 0) && (Total(!P.Multi) EQ 0) THEN BEGIN
@@ -688,7 +681,7 @@ PRO cgScatter2D, x, y, $
       ENDELSE
     ENDELSE
     IF Abs(psym) GT 1 THEN BEGIN
-        OPlot, x, y, COLOR=symcolor, PSYM=SymCat(Abs(psym), COLOR=symcolor, _Extra=extra), $
+        OPlot, x, y, COLOR=color, PSYM=SymCat(Abs(psym), COLOR=color, _Extra=extra), $
            SYMSIZE=symsize, _EXTRA=extra
     ENDIF 
     

@@ -35,7 +35,10 @@
 ;******************************************************************************************;
 ;
 ;+
-;   This program is used to draw a histogram plot in an IDL direct graphics window..
+; This program is used to draw a histogram plot in an IDL direct graphics window..
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

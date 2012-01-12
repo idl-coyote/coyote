@@ -39,11 +39,14 @@
 ;******************************************************************************************;
 ;
 ;+
-;   The purpose of cgContour is to create a wrapper for the traditional IDL graphics
-;   command, Contour. The Contour command has a number of deficiencies that make it
-;   difficult to use in a modern computing environment. cgContour corrects these
-;   deficiencies and allows the user to produce traditional contour plots in a device
-;   and machine independent manner.
+; The purpose of cgContour is to create a wrapper for the traditional IDL graphics
+; command, Contour. The Contour command has a number of deficiencies that make it
+; difficult to use in a modern computing environment. cgContour corrects these
+; deficiencies and allows the user to produce traditional contour plots in a device
+; and machine independent manner.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

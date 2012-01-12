@@ -47,6 +47,9 @@
 ; wish to do the conversion properly, make sure encapsulated landscape plots are
 ; in portrait mode.
 ; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
+; 
 ; :Categories:
 ;    Utilities, Graphics
 ;    

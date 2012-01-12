@@ -36,8 +36,11 @@
 ;******************************************************************************************;
 ;
 ;+
-;   Provides a device-independent and color-model-independent way to fill a polygon
-;   with a particular color. This is a wrapper to the PolyFill command in IDL.
+; Provides a device-independent and color-model-independent way to fill a polygon
+; with a particular color. This is a wrapper to the PolyFill command in IDL.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

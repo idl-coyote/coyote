@@ -38,6 +38,9 @@
 ;+
 ; The purpose of cgScatter2d is to create a two-dimensional scatter plot with the 
 ; option of drawing a correlation coefficient on the plot.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;   
 ; :Params:
 ; 

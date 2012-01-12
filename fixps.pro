@@ -1,77 +1,16 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;       FIXPS
+;   FixPS
 ;
 ; PURPOSE:
-;
-;       Modifies an IDL-produced PostScript landscape mode file so that the output
-;       is right side up rather than upside down.
-;       
-; AUTHOR:
-;       FANNING SOFTWARE CONSULTING:
-;       David Fanning, Ph.D.
-;       1645 Sheely Drive
-;       Fort Collins, CO 80526 USA
-;       Phone: 970-221-0438
-;       E-mail: david@idlcoyote.com
-;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-;
-; CATEGORY:
-;
-;       Graphics
-;
-; CALLING SEQUENCE:
-;
-;       FixPS, inputFile, outputFile
-; 
-; Auguments:
-;
-;      inputFile:    A IDL-produced PostScript file in Landscape mode.
-;      
-;      outputFile:   The name of the fixed output PostScript file. If not provided, the input
-;                    file is overwritten. Assumes proper read/write permission in TEMP directory
-;                    and in the directory where the input file is located.
-;
-;  KEYWORDS:
-;
-;      A4:           Set this keyword if the PostScript file is using a A4 Europeran sized page.
-;      LEDGER:       Set this keyword if the PostScript file is using a US ledger size (11 x 17 inch) page.
-;      LEGAL:        Set this keyword if the PostScript file is using a US legal size (8.5 x 14 inch) page.
-;      LETTER:       Set this keyword if the PostScript file is using a US letter size (8.5 x 11 inch) page.
-;      PAGETYPE:     A generic way to set the page size. A string of "LETTER", "LEDGER", "LEGAL", or "A4".
-;                    By default, set to "LETTER".
-;      QUIET:        Set this keyword to suppress error messages from the program.
-;      SUCCESS:      If this keyword is set to a named variable, then on output the variable will
-;                    return a 1 if the operation was successful, and a 0 otherwise. Using this
-;                    keyword also supresses the program's ability to "throw" an error. Informational
-;                    messages are issued about program developments, but this program will allow the
-;                    program caller to decide what to do with unsuccessful program completion.
-;
-; SIDE EFFECTS and RESTRICTIONS:
-;
-;       Files that are not currently in Landscape mode will be ignored. Tested with single and
-;       multiple page PostScript output from IDL 7.0.1 and 7.1.
-;
-; MODIFICATION HISTORY:
-; 
-;       Written by: David W. Fanning, 6 August 2009.
-;       Change to overwrite input file if output filename is not provided. 6 August 2009. DWF.
-;       Incorporated checks for non-landscape mode files and files that have already been fixed. 6 August 2009. DWF.
-;       Modified to fix multiple-page PostScript files and to work seamlessly with PS_START output. 8 August 2009. DWF.
-;       Ran into a problem in which the PostScript file is stored in the directory pointed
-;          to by the IDL_TMPDIR environment variable. Now check to see if the input filename
-;          is the same as the output filename and make a change, if necessary. 22 July 2010. DWF.
-;        Retreated to standard error handling with ERROR_MESSAGE as there are inevitable errors. 2 August 2010. DWF.
-;        Output file was created, even if not used. Now deleting file and issuing messages to
-;           explain why output file was not created. 1 November 2010. DWF.
-;        Added SUCCESS and QUIET keywords. 15 Novemember 2010. DWF.
-;        PostScript file structure changed in IDL 8. Made adjustment to find the 
-;            PageBoundingBox line. 19 Dec 2010. DWF.
-;-
+;   This program modifies an IDL-produced PostScript landscape mode file so that the output
+;   is right side up rather than upside down. In other words, it turns a so-called seascape
+;   file into an actual landscape file.
 ;
 ;******************************************************************************************;
-;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -96,6 +35,75 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+;
+;+
+; This program modifies an IDL-produced PostScript landscape mode file so that the output
+; is right side up rather than upside down. In other words, it turns a so-called seascape
+; file into an actual landscape file. Files that are not currently in landscape mode will 
+; be ignored. Tested with single and multiple page PostScript output from IDL 7.0.1 and 7.1.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
+;
+; :Categories:
+;    Graphics, Utilities
+;    
+; :Params:
+;     in_filename: in, required, type=string
+;        The name of an IDL-produced PostScript file in landscape mode.
+;     out_filename: in, optional, type=string
+;        The name of the fixed output PostScript file. If not provided, the input
+;        file is overwritten. Overwritting assumes proper read/write permission in 
+;        TEMP directory and in the directory where the input file is located.
+;
+; :Keywords:
+;     a4: in, optional, type=boolean, default=0
+;        Set this keyword if the PostScript file is using a A4 Europeran sized page.
+;     ledger: in, optional, type=boolean, default=0
+;        Set this keyword if the PostScript file is using a US ledger size (11 x 17 inch) page.
+;     legal: in, optional, type=boolean, default=0
+;        Set this keyword if the PostScript file is using a US legal size (8.5 x 14 inch) page.
+;     letter: in, optional, type=boolean, default=0
+;        Set this keyword if the PostScript file is using a US letter size (8.5 x 11 inch) page.
+;     pagetype: in, optional, type=string, default="Letter"
+;        A generic way to set the page size. A string of "LETTER", "LEDGER", "LEGAL", or "A4".
+;     quiet: in, optional, type=boolean, default=0
+;        Set this keyword to suppress error messages from the program.
+;     success: out, optional, type=boolean
+;        If this keyword is set to a named variable, then on output the variable will
+;        return a 1 if the operation was successful, and a 0 otherwise. Using this
+;        keyword also supresses the program's ability to "throw" an error. Informational
+;        messages are issued about program developments, but this program will allow the
+;        program caller to decide what to do with unsuccessful program completion.
+;
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning 
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;       Written by: David W. Fanning, 6 August 2009.
+;       Change to overwrite input file if output filename is not provided. 6 August 2009. DWF.
+;       Incorporated checks for non-landscape mode files and files that have already been fixed. 6 August 2009. DWF.
+;       Modified to fix multiple-page PostScript files and to work seamlessly with PS_START output. 8 August 2009. DWF.
+;       Ran into a problem in which the PostScript file is stored in the directory pointed
+;          to by the IDL_TMPDIR environment variable. Now check to see if the input filename
+;          is the same as the output filename and make a change, if necessary. 22 July 2010. DWF.
+;        Retreated to standard error handling with ERROR_MESSAGE as there are inevitable errors. 2 August 2010. DWF.
+;        Output file was created, even if not used. Now deleting file and issuing messages to
+;           explain why output file was not created. 1 November 2010. DWF.
+;        Added SUCCESS and QUIET keywords. 15 Novemember 2010. DWF.
+;        PostScript file structure changed in IDL 8. Made adjustment to find the 
+;            PageBoundingBox line. 19 Dec 2010. DWF.
+;            
+; :Copyright:
+;     Copyright (c) 2009-2012, Fanning Software Consulting, Inc.
+;-
 PRO FIXPS, in_filename, out_filename, $
     A4=A4, $
     LEDGER=ledger, $

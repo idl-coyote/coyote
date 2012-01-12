@@ -36,8 +36,11 @@
 ;******************************************************************************************;
 ;
 ;+
-;   Provides a device-independent and color-model-independent way to draw an axis into
-;   a graphics window. It is a wrapper to the AXIS command.
+; Provides a device-independent and color-model-independent way to draw an axis into
+; a graphics window. It is a wrapper to the AXIS command.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

@@ -44,6 +44,9 @@
 ; range (IQR), defined at IQR75-IQR25. The whiskers extend out to the maximum
 ; or minimum value of the data, or to the 1.5 times either the IQR75 or IQR25,
 ; if there is data beyond this range. Outliers are identified with small circles.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

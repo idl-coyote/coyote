@@ -37,9 +37,12 @@
 ;******************************************************************************************;
 ;
 ;+
-;  The purpose of this routine is to add a discrete color bar to
-;  a graphics plot. A "discrete" color bar is one with a handful
-;  of colors. Labels are centered beneath or beside the color fields.
+; The purpose of this routine is to add a discrete color bar to
+; a graphics plot. A "discrete" color bar is one with a handful
+; of colors. Labels are centered beneath or beside the color fields.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

@@ -37,9 +37,12 @@
 ;******************************************************************************************;
 ;
 ;+
-;   The purpose of cgPlotS is to create a wrapper for the traditional IDL graphics
-;   command, PlotS. The primary purpose of this is to create plot commands that work
-;   and look identically both on the display and in PostScript files.
+; The purpose of cgPlotS is to create a wrapper for the traditional IDL graphics
+; command, PlotS. The primary purpose of this is to create plot commands that work
+; and look identically both on the display and in PostScript files.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

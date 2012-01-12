@@ -35,7 +35,10 @@
 ;******************************************************************************************;
 ;
 ;+
-;   This alpha blends two 24-bit images and displays them with the cgImage command.
+; This alpha blends two 24-bit images and displays them with the cgImage command.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

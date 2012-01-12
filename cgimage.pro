@@ -51,6 +51,9 @@
 ;       _cgimage_position, $ ; The final position of the image in the window.
 ;       _cgimage_winID, $    ; The window index number of the window displaying the image.
 ;       _cgimage_current     ; Set to 1 if a call to cgImage is made.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

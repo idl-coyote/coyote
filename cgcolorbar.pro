@@ -36,6 +36,9 @@
 ;
 ;+
 ; The purpose of this routine is to add a color bar to the current graphics window.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

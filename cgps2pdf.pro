@@ -42,6 +42,9 @@
 ; for you. If you are on a Macintosh, the supplied pstopdf
 ; program is used instead. Use the `UNIX_Convert_Cmd` keyword to select
 ; an alternative UNIX command (e.g., pstopdf or epstopdf).
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Utilities, Graphics

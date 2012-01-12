@@ -36,8 +36,11 @@
 ;******************************************************************************************;
 ;
 ;+
-;   Provides a device-independent and color-model-independent way to create a bar
-;   plot or to overplot on an existing bar plot.
+; Provides a device-independent and color-model-independent way to create a bar
+; plot or to overplot on an existing bar plot.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

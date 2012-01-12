@@ -36,8 +36,11 @@
 ;******************************************************************************************;
 ;
 ;+
-;   Provides a device-independent and color-model-independent way of drawing an arrow
-;   in a specified color.
+; Provides a device-independent and color-model-independent way of drawing an arrow
+; in a specified color.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

@@ -49,11 +49,14 @@
 ; The color names and values may be read in as a file, or 192 color
 ; names and values are supplied with the program. These colors were
 ; obtained from the file rgb.txt, found on most X-Window distributions,
-; and from colors in the Brewer color tables (http://colorbrewer2.org/).
+; and from colors in the `Brewer color tables <http://colorbrewer2.org/>`.
 ; Representative colors were chosen from across the color spectrum. 
 ; If the color names '0', '1', '2', ..., '255' are used, they will
 ; correspond to the colors in the current color table in effect at
-; the time the cgColor program is called.
+; the time the `cgColor` program is called.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics

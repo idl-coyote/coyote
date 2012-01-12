@@ -47,6 +47,9 @@
 ; 
 ; There is no claim that this program always produces the best results. It is more
 ; of a tool that can produce decent result in many situations.
+; 
+; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
+; to be installed on your machine.
 ;
 ; :Categories:
 ;    Graphics, Utilities

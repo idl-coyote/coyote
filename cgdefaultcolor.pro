@@ -62,6 +62,8 @@
 ;     mode: in, optional, type=boolean
 ;         The color mode. A 0 mean indexed color mode. A 1 means decomposed color mode.
 ;         If not supplied in the call, the color mode is determined at run-time with `GetDecomposedState`.
+;         The color mode is *always* determined at run time if the current graphics device 
+;         is the PostScript device.
 ;     traditional: in, optional, type=boolean, default=0
 ;         Set this keyword if you are using the traditional color scheme of white foreground
 ;         and black background. If this keyword is set, and the current graphics device is
@@ -88,6 +90,7 @@
 ;     Change History::
 ;        Written, 24 December 2011. David W. Fanning.
 ;        Modified to make sure a LONG integer in indexed color mode is in the range 0-255. 10 Jan 2012. DWF.
+;        Modified to make sure MODE is always determined at run-time for PostScript device. 14 Jan 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -104,7 +107,9 @@ FUNCTION cgDefaultColor, inputColour, $
     ; Default values and variables needed for the program.
     background = Keyword_Set(background)
     IF N_Elements(inputColour) NE 0 THEN inputColor = inputColour
-    IF N_Elements(mode) EQ 0 THEN mode = GetDecomposedState() ELSE mode = Keyword_Set(mode)
+    IF (N_Elements(mode) EQ 0) || (!D.Name EQ 'PS') THEN BEGIN
+       mode = GetDecomposedState() 
+    ENDIF ELSE mode = Keyword_Set(mode)
     traditional = Keyword_Set(traditional)
     thisDevice = !D.Name
     
@@ -176,7 +181,10 @@ FUNCTION cgDefaultColor, inputColour, $
                 IF (mode EQ 0) && ( (thisColor GE 0) && (thisColor LT 256) ) THEN BEGIN
                     theColors[j] = StrTrim(thisColor, 2)
                 ENDIF ELSE BEGIN
-                   IF (mode EQ 0) && ( (thisColor LT 0) || (thisColor GT 255) ) THEN BEGIN
+                   IF (mode EQ 0) $
+                     && ( (thisColor LT 0) || (thisColor GT 255) ) $
+                     ;&& ( (!D.NAME NE 'PS') ) $
+                   THEN BEGIN
                        Message, 'Value of LONG integer ' + StrTrim(thisColor,2) + ' is out of indexed color range.'
                    ENDIF ELSE BEGIN
                       theColors[j] = thisColor

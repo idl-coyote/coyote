@@ -135,7 +135,6 @@ FUNCTION cgQuery, $
         objectRef[j] = thisItem.windowobj
         title[j] = thisItem.title
         windowIndex[j] = thisItem.wid
-        WSet, windowIndex[j]
         dimensions[*,j] = [!D.X_Size, !D.Y_Size]
     ENDFOR
     IF (thisWindow GE 0) && WindowAvailable(thisWindow) THEN WSet, thisWindow ELSE WSet, -1

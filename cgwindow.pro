@@ -97,12 +97,12 @@
 ;-
 
 ;+
-; Adds a command object of class IDL_WINDOW_COMMAND to the command list 
+; Adds a command object of class FSC_WINDOW_COMMAND to the command list 
 ; maintained by the window.
 ;
 ; :Params:
 ;     command: in, required, type=object
-;         A command object of class IDL_WINDOW_COMMAND.
+;         A command object of class FSC_WINDOW_COMMAND.
 ;         
 ; :Keywords:
 ;     index: in, optional, type=integer
@@ -1065,12 +1065,12 @@ PRO FSC_CmdWindow::SaveAsRaster, event
 
     ; Get a filename from the user.
     CASE filetype OF
-       'BMP':  filename = FSC_Pickfile(FILE='cgwindow.bmp', /WRITE, TITLE='Select an Output File...')
-       'GIF':  filename = FSC_Pickfile(FILE='cgwindow.gif', /WRITE, TITLE='Select an Output File...')
-       'JPEG': filename = FSC_Pickfile(FILE='cgwindow.jpg', /WRITE, TITLE='Select an Output File...')
-       'PDF':  filename = FSC_Pickfile(FILE='cgwindow.pdf', /WRITE, TITLE='Select an Output File...')
-       'PNG':  filename = FSC_Pickfile(FILE='cgwindow.png', /WRITE, TITLE='Select an Output File...')
-       'TIFF': filename = FSC_Pickfile(FILE='cgwindow.tif', /WRITE, TITLE='Select an Output File...')
+       'BMP':  filename = cgPickfile(FILE='cgwindow.bmp', /WRITE, TITLE='Select an Output File...')
+       'GIF':  filename = cgPickfile(FILE='cgwindow.gif', /WRITE, TITLE='Select an Output File...')
+       'JPEG': filename = cgPickfile(FILE='cgwindow.jpg', /WRITE, TITLE='Select an Output File...')
+       'PDF':  filename = cgPickfile(FILE='cgwindow.pdf', /WRITE, TITLE='Select an Output File...')
+       'PNG':  filename = cgPickfile(FILE='cgwindow.png', /WRITE, TITLE='Select an Output File...')
+       'TIFF': filename = cgPickfile(FILE='cgwindow.tif', /WRITE, TITLE='Select an Output File...')
     ENDCASE
     IF filename EQ "" THEN RETURN
     
@@ -1199,7 +1199,7 @@ PRO FSC_CmdWindow::RestoreCommands, filename
 
     ; Need a file name?
     IF N_Elements(filename) EQ 0 THEN BEGIN
-        filename = FSC_Pickfile(Title='Restore Coyote Graphics Commands...', $
+        filename = cgPickfile(Title='Restore Coyote Graphics Commands...', $
             FILTER='*.cgs')
         IF filename EQ "" THEN RETURN
     ENDIF
@@ -1307,7 +1307,7 @@ PRO FSC_CmdWindow::SaveCommands, filename
     
     ; Need a file name.
     IF N_Elements(filename) EQ 0 THEN BEGIN
-       filename = FSC_Pickfile(FILE='commands.cgs', $
+       filename = cgPickfile(FILE='commands.cgs', $
             TITLE='Save Coyote Graphics Commands...', /Write)
        IF filename EQ "" THEN RETURN
     ENDIF
@@ -1526,14 +1526,6 @@ END ;---------------------------------------------------------------------------
 ;       The fourth positional parameter appropriate for the graphics command.
 ;       
 ; :Keywords:
-;    addcmd: in, optional, type=boolean, default=0
-;       Set this keyword to add an additional graphics command to an cgWindow.
-;       The command is added to the last created cgWindow, unless the WinID
-;       keyword is used to select another cgWindow. Adding a command causes
-;       all the commands in the window to be immediately executed. If this is
-;       not behavior you desire, use the LOADCMD keyword instead. If CMDINDEX
-;       is used to select a command index, the new command is added before
-;       the command currently occuping that index in the command list.
 ;    altps_Keywords: in, optional, type=string
 ;       A structure containing alternative keyword names (as tags) and values for
 ;       those keywords to be used when the current device is the PostScript device.
@@ -1588,7 +1580,7 @@ END ;---------------------------------------------------------------------------
 ;       The y offset in device coordinates of the cgWindow from the upper-left corner of the display.
 ;    wxsize: in, optional, type=integer, default=640
 ;       The x size in device coordinates of the graphics window.
-;    wysize: in, optional, type=integer, default=5
+;    wysize: in, optional, type=integer, default=512
 ;       The y size in device coordinates of the the graphics window.
 ;    wtitle: in, optional, type=string, default='Resizeable Graphics Window'
 ;       The title of the graphics window. A window index number is appended to the
@@ -1599,7 +1591,6 @@ END ;---------------------------------------------------------------------------
 FUNCTION FSC_CmdWindow::Init, $
    command, $                       ; The graphics "command" to execute.
    p1, p2, p3, p4, $                ; The four allowed positional parameters.
-   AddCmd=addcmd, $                 ; Set this keyword to add a command to the interface.
    AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
    AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. 
    CmdDelay=cmdDelay, $             ; Set this keyword to a value to "wait" before executing the next command.
@@ -2478,6 +2469,10 @@ END ;---------------------------------------------------------------------------
 ;    executecmd: in, optional, type=boolean, default=0
 ;       Set this keyword to immediate execute all the commands in an cgWindow.
 ;       Normally, this is used after commands have been loaded with LOADCMD.
+;    group_leader: in, optional
+;       The identifier of a widget to serve as a group leader for this program.
+;       If the group leader is destroyed, this program is also destroyed. Used
+;       when calling this program from another widget program.
 ;    listcmd: in, optional, type=boolean, default=0
 ;       If this keyword is set, the commands currently in the cgWindow are
 ;       listed. Use WinID to identify the cgWindow you are interested in.
@@ -2490,19 +2485,15 @@ END ;---------------------------------------------------------------------------
 ;       to execute the loaded commands. If CMDINDEX is used to select a command 
 ;       index, the new command is loaded before the command currently occuping 
 ;       that index in the command list.
+;    method: in, optional, type=boolean, default=0
+;       Set this keyword if the command is an object method call rather than a 
+;       procedure call. If this keyword is set, the first positional parameter, p1,
+;       must be present and must be a valid object reference.
 ;    replacecmd: in, optional, type=boolean, default=0
 ;       Set this keyword to replace a graphics command from an cgWindow.
 ;       If CmdIndex is undefined, *all* commands in the window are replaced. Use 
 ;       WinID to identify the cgWindow you are interested in. If WinID is 
 ;       undefined, the last cgWindow created is used for the replacement.
-;    group_leader: in, optional
-;       The identifier of a widget to serve as a group leader for this program.
-;       If the group leader is destroyed, this program is also destroyed. Used
-;       when calling this program from another widget program.
-;    method: in, optional, type=boolean, default=0
-;       Set this keyword if the command is an object method call rather than a 
-;       procedure call. If this keyword is set, the first positional parameter, p1,
-;       must be present and must be a valid object reference.
 ;    waspect: in, optional, type=float, default=normal
 ;       Set this keyword to the aspect ratio you would like the window to have.
 ;       The aspect ratio is calculated as (ysize/xsize). Must be a float value.
@@ -2613,6 +2604,7 @@ END ;---------------------------------------------------------------------------
 ;         Added PDF file to the Save As menu. Requires Ghostscript to be installed on some machines. 6 Dec 2011. DWF.
 ;         Added modifications to allow PDF files to be programmatically created from cgControl. 11 Dec 2011. DWF.
 ;         Added the ability to specify a fourth positional parameter. 6 Jan 2012. DWF.
+;         Changed all FSC_Pickfile calls to cgPickfile instead. 18 January 2012. DWF.
 ;-
 PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.

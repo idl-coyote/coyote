@@ -12,7 +12,7 @@ Pro cgWindowTest_Events, event
         index = Value_Locate(Indgen(N_Elements(data)),d[0])
         value = data[index]
         text = 'Location: (' + Strtrim(Round(d[0]),2) + ',' + $
-            Strtrim(Round(d[1]),2) + ')   Closest Data Value: ' + StrTrim(value,2)
+            Strtrim(Round(d[1]),2) + ')   Data Value at X Location: ' + StrTrim(value,2)
         Widget_Control, info.label, Set_Value=text
         
         cgPlotS, index, value, PSYM=2, color='olive', symsize=1.5

@@ -190,24 +190,24 @@
 ;       Defined here for convenience. Same as `Storage` keyword for the SetProperty method.
 ;    tracking_events: in, optional, type=boolean
 ;       Set this keyword to turn tracking events on for the draw widget.
-;    title: in, optional, type=string, default='Resizeable Graphics Window'
+;    wheel_events: in, optional, type=boolean
+;       Set this keyword to turn wheel events on for the draw widget.
+;    wtitle: in, optional, type=string, default='Resizeable Graphics Window'
 ;       The title of the graphics window if the program creates its own top-level
 ;       base widget. A window index number is appended to the title so multiple cgWindow 
 ;       programs can be selected. Also used to register the widget program and as the
 ;       title of the object when it is stored.
-;    wheel_events: in, optional, type=boolean
-;       Set this keyword to turn wheel events on for the draw widget.
-;    xpos: in, optional, type=integer, default=5
+;    wxpos: in, optional, type=integer, default=5
 ;       The x offset in device coordinates of the window from the upper-left corner of 
 ;       the display, if the program creates its own top-level base. Otherwise, this keyword
 ;       is ignored.
-;    ypos: in, optional, type=integer, default=5
+;    wypos: in, optional, type=integer, default=5
 ;       The y offset in device coordinates of the window from the upper-left corner of 
 ;       the display, if the program creates its own top-level base. Otherwise, this keyword
 ;       is ignored.
-;    xsize: in, optional, type=integer, default=640
+;    wxsize: in, optional, type=integer, default=640
 ;       The x size in device coordinates of the graphics window.
-;    ysize: in, optional, type=integer, default=512
+;    wysize: in, optional, type=integer, default=512
 ;       The y size in device coordinates of the the graphics window.
 ;    _extra: in, optional
 ;       The "extra" keywords for the command that is being added to the window.
@@ -236,13 +236,13 @@ FUNCTION cgCmdWindow::Init, parent, $
    P4=p4, $                         ; The fourth postitional parameter in a graphics command loaded for display. 
    ReplaceCmd=replacecmd, $         ; Replace the current command and execute in the current window.
    Storage=storage, $               ; A storage pointer location. Used like a user value in a widget.
-   Title = title, $                 ; The window title.
    Tracking_Events=tracking_events, $ ; Set this keyword to allow tracking events in the draw widget.
    Wheel_Events=wheel_events, $     ; Set this keyword to allow wheel events in the draw widget.
-   XPos = xpos, $                   ; The X offset of the window on the display. The window is centered if not set.
-   XSize = xsize, $                 ; The X size of the cgWindow graphics window in pixels. By default: 400.
-   YPos = ypos, $                   ; The Y offset of the window on the display. The window is centered if not set.
-   YSize = ysize, $                 ; The Y size of the cgWindow graphics window in pixels. By default: 400.
+   WTitle = title, $                ; The window title.
+   WXPos = xpos, $                  ; The X offset of the window on the display. The window is centered if not set.
+   WXSize = xsize, $                ; The X size of the cgWindow graphics window in pixels. By default: 400.
+   WYPos = ypos, $                  ; The Y offset of the window on the display. The window is centered if not set.
+   WYSize = ysize, $                ; The Y size of the cgWindow graphics window in pixels. By default: 400.
    _Extra = extra                   ; Any extra keywords. Usually the "command" keywords.
 
     Compile_Opt idl2
@@ -2056,6 +2056,11 @@ END ;---------------------------------------------------------------------------
 ;       Set this keyword if the command is an object method call rather than a 
 ;       procedure call. If this keyword is set, the first positional parameter, p1,
 ;       must be present and must be a valid object reference.
+;    multi: in, optional, type=intarr(5)
+;       A replacement value to assign to the self.pmulti value. It is
+;       a way to reset multiple command plotting to single command plotting
+;       for a new single command. Like calling: object -> SetPropery, MULTI=multi. Used only if
+;       `ReplaceCmd` is set.
 ;    replacecmd: in, optional, type=boolean, default=0
 ;       Set this keyword to replace a graphics command with this packaged command on the command list
 ;       If `CmdIndex` is undefined, *all* the commands on the command list are replaced. 
@@ -2069,7 +2074,8 @@ FUNCTION cgCmdWindow::PackageCommand, command, p1, p2, p3, p4, $
    CmdIndex=cmdIndex, $             ; The location of the command in the command list.
    Execute=execute, $               ; Execute the commands in the window, if this keyword set.
    Method=method, $                 ; A flag that indicates a method call.
-   ReplaceCmd=replaceCmd            ; Replace a command with this command.
+   Multi=multi, $                   ; If you are replacing all commands, you may want to change the way they are displayed.
+   ReplaceCmd=replaceCmd            ; Set this keyword to replace one or all commands in the command list.
     _Extra=extra                    ; Extra keywords to the command.
     
     Compile_Opt idl2
@@ -2087,7 +2093,7 @@ FUNCTION cgCmdWindow::PackageCommand, command, p1, p2, p3, p4, $
       AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
                         
     ; Replace command? If the cmdIndex is undefined, ALL commands are replaced.
-    IF Keyword_Set(replaceCmd) THEN self -> ReplaceCommand, newCommand, cmdIndex
+    IF Keyword_Set(replaceCmd) THEN self -> ReplaceCommand, newCommand, cmdIndex, Multi=multi
       
     ; Need to add a command?
     IF Keyword_Set(addCmd) THEN self -> AddCommand, newCommand, INDEX=cmdIndex

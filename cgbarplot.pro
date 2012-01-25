@@ -47,18 +47,20 @@
 ;    
 ; :Params:
 ;    values: in, required
-;         A vector containing the values to be represented by bars. Each element in
-;         the vector will be represented by a bar. 
+;        A vector containing the values to be represented by bars. Each element in
+;        the vector will be represented by a bar. 
 ;       
 ; :Keywords:
 ;     addcmd: in, optional, type=boolean, default=0
-;         Set this keyword to add the command to a cgWindow resizeable graphics window.
+;        Set this keyword to add the command to a cgWindow resizeable graphics window.
 ;     axiscolor: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the axis color. By default, 'black'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     background: in, optional, type=string/integer, default='white'
 ;        If this keyword is a string, the name of the background color. By default, 'white'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     barcoords: out, optional, type=float
+;        A vector of values for the center point of the bars.
 ;     barnames: in, optional, type=string, default=""
 ;        A string array, containing one string label per bar. If the bars are vertical, 
 ;        the labels are placed beneath them.  If horizontal (rotated) bars are specified, 
@@ -142,8 +144,12 @@
 ;         The title of the plot, if supplied.
 ;     window: in, optional, type=boolean, default=0
 ;         Set this keyword if you want to display the plot in a resizable graphics window.
+;     xstyle: in, optional, type=boolean, default=1
+;         The normal XSTYLE keyword. See "Graphics Keywords" in on-line help.
 ;     xtitle: in, optional, type=string, default=""
 ;         The X title of the plot, if supplied.
+;     ystyle: in, optional, type=boolean, default=1
+;         The normal YSTYLE keyword. See "Graphics Keywords" in on-line help.
 ;     ytitle: in, optional, type=string, default=""
 ;         The Y title of the plot, if supplied.
 ;     _ref_extra: in, optional, type=any
@@ -217,6 +223,8 @@
 ;         Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;         PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;         Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
+;         Fixed a problem with keyword inheritance. Added XStyle and YStyle keywords. 25 Jan 2012. DWF.
+;         Added BARCOORDS keyword to return bar plot locations. 25 Jan 2012.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -225,6 +233,7 @@ PRO cgBarPlot, values, $
     ADDCMD=addcmd, $
     AXISCOLOR=saxiscolor, $
     BACKGROUND=sbackground, $
+    BARCOORDS=barcoords, $
     BARNAMES=barnamesIn, $
     BAROFFSET=baroffsetIn, $
     BARSPACE=barspaceIn, $
@@ -244,7 +253,9 @@ PRO cgBarPlot, values, $
     ROTATE=rotate,  $
     TITLE=title,  $
     WINDOW=window, $
+    XSTYLE=xstyle, $
     XTITLE=xtitle, $
+    YSTYLE=ystyle, $
     YTITLE=ytitle, $
     _REF_EXTRA=extra
     
@@ -285,6 +296,7 @@ PRO cgBarPlot, values, $
                 ADDCMD=1, $
                 AXISCOLOR=saxiscolor, $
                 BACKGROUND=sbackground, $
+                BARCOORDS=barcoords, $
                 BARNAMES=barnamesIn, $
                 BAROFFSET=baroffsetIn, $
                 BARSPACE=barspaceIn, $
@@ -300,10 +312,11 @@ PRO cgBarPlot, values, $
                 POSITION=position, $
                 RANGE=range, $
                 ROTATE=rotate,  $
-                TITLE=title,  $
+                XSTYLE=xstyle, $
                 XTITLE=xtitle, $
+                YSTYLE=ystyle, $
                 YTITLE=ytitle, $
-                _REF_EXTRA=extra
+               _EXTRA=extra
              RETURN
        ENDIF
         
@@ -313,6 +326,7 @@ PRO cgBarPlot, values, $
             cgWindow, 'cgBarPlot', values, $
                 AXISCOLOR=saxiscolor, $
                 BACKGROUND=sbackground, $
+                BARCOORDS=barcoords, $
                 BARNAMES=barnamesIn, $
                 BAROFFSET=baroffsetIn, $
                 BARSPACE=barspaceIn, $
@@ -330,9 +344,11 @@ PRO cgBarPlot, values, $
                 ROTATE=rotate,  $
                 REPLACECMD=replaceCmd, $
                 TITLE=title,  $
+                XSTYLE=xstyle, $
                 XTITLE=xtitle, $
+                YSTYLE=ystyle, $
                 YTITLE=ytitle, $
-                _REF_EXTRA=extra
+                _EXTRA=extra
             
          RETURN
     ENDIF
@@ -446,8 +462,8 @@ PRO cgBarPlot, values, $
           QUIET=1
     
     ENDIF
-   
-    ; The number of bars to draw.
+    
+  ; The number of bars to draw.
     nbars = N_Elements(values)
 
     ; Get the current color table vectors.
@@ -507,6 +523,8 @@ PRO cgBarPlot, values, $
     noerase = Keyword_set(noerase)
     rotate = Keyword_Set(rotate)
     IF N_Elements(title) EQ 0 THEN title = ""
+    IF N_Elements(xstyle) EQ 0 THEN xstyle = 1 ELSE xstyle = 1 XOR xstyle
+    IF N_Elements(ystyle) EQ 0 THEN ystyle = 1 ELSE ystyle = 1 XOR ystyle
     window = Keyword_Set(window)
     IF N_Elements(xtitle) EQ 0 THEN xtitle = ""
     IF N_Elements(ytitle) EQ 0 THEN ytitle = ""
@@ -537,7 +555,7 @@ PRO cgBarPlot, values, $
         cgPlot,[values],/nodata,title=title,xtitle=xtitle,ytitle=ytitle, $
            noerase=overplot,xrange=xrange,yrange=yrange,xticks=xticks, $
            xtickname=xtickname,yticks=yticks,ytickname=ytickname, $
-           xstyle=1,ystyle=1,/data,background=background, position=position, $
+           xstyle=xstyle,ystyle=ystyle,/data,background=background, position=position, $
            axiscolor=axiscolor,_strict_extra=extra
     ENDIF
     IF (rotate) THEN BEGIN               ; Horizontal bars
@@ -577,12 +595,13 @@ PRO cgBarPlot, values, $
     ENDFOR
     
     tickv = (tickv-tick_scal_fact[0])/tick_scal_fact[1]  ; Locations of the ticks
+    barcoords = tickv    
     IF (rotate) THEN BEGIN                 ; Label the bars (Y-axis)
-      cgAxis,yaxis=0,ystyle=1,yticks=(nbars-1),ytickv=tickv,ytickname=barnames, $
-        yticklen=0.0
+      cgAxis,yaxis=0,ystyle=ystyle,yticks=(nbars-1),ytickv=tickv,ytickname=barnames, $
+        yticklen=0.0, _extra=extra
     ENDIF ELSE BEGIN                       ; Label the bars (X-axis)
-      cgAxis,xaxis=0,xstyle=1,xticks=(nbars-1),xtickv=tickv,xtickname=barnames, $
-        xticklen=0.0
+      cgAxis,xaxis=0,xstyle=ystyle,xticks=(nbars-1),xtickv=tickv,xtickname=barnames, $
+        xticklen=0.0, _extra=extra
     ENDELSE
 
     ; Are we producing output? If so, we need to clean up here.

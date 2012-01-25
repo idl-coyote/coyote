@@ -359,7 +359,7 @@ PRO cgWindow, $
                 ENDELSE
                 RETURN
            ENDIF ELSE Message, 'A valid cgWindow does not exist to execute commands in.'
-       ENDIF ELSE Message, 'An cgWindow object not exist to execute commands in.'
+       ENDIF ELSE Message, 'A cgWindow object not exist to execute commands in.'
     ENDIF
     
     ; Did the user want to list the commands in a cgWindow?
@@ -388,7 +388,7 @@ PRO cgWindow, $
                 ENDELSE
                 RETURN
            ENDIF ELSE Message, 'A valid cgWindow does not exist to list commands from.'
-       ENDIF ELSE Message, 'An cgWindow object not exist to list commands from.'
+       ENDIF ELSE Message, 'A cgWindow object not exist to list commands from.'
     ENDIF
     
     ; Did the user want to delete a command in the window?
@@ -418,7 +418,7 @@ PRO cgWindow, $
                 ENDELSE
                 RETURN
            ENDIF ELSE Message, 'The cgWindow object is not a valid window object.'
-       ENDIF ELSE Message, 'An cgWindow object not exist to add a command to.'
+       ENDIF ELSE Message, 'A cgWindow object not exist to add a command to.'
    ENDIF
 
    ; Did the user want to replace a command or commands in the window?
@@ -462,7 +462,7 @@ PRO cgWindow, $
                 ENDELSE
                 RETURN
            ENDIF ELSE Message, 'A valid cgWindow does not exist to replace commands with.'
-       ENDIF ELSE Message, 'An cgWindow does not exist to replace commands with.'
+       ENDIF ELSE Message, 'A cgWindow does not exist to replace commands with.'
     
     ENDIF 
    
@@ -495,7 +495,7 @@ PRO cgWindow, $
                 ENDELSE
                 RETURN
            ENDIF ELSE Message, 'A valid cgWindow does not exist to add a command to.'
-       ENDIF ELSE Message, 'An cgWindow does not exist to add a command to.'
+       ENDIF ELSE Message, 'A cgWindow does not exist to add a command to.'
     
     ENDIF 
    
@@ -529,7 +529,7 @@ PRO cgWindow, $
                 ENDELSE
                 RETURN
            ENDIF ELSE Message, 'A valid cgWindow does not exist to add a command to.'
-       ENDIF ELSE Message, 'An cgWindow does not exist to add a command to.'
+       ENDIF ELSE Message, 'A cgWindow does not exist to add a command to.'
     
     ENDIF 
    
@@ -548,10 +548,10 @@ PRO cgWindow, $
        Background = wbackground, $      ; The background color. Not used unless set.
        Multi = wmulti, $                ; Set this in the same way !P.Multi is used.
        Erase = weraseit, $              ; Set this keyword to erase the display before executing the command.
-       XSize = wxsize, $                ; The X size of the cgWindow graphics window in pixels. By default: 400.
-       YSize = wysize, $                ; The Y size of the cgWindow graphics window in pixels. By default: 400.
-       Title = wtitle, $                ; The window title.
-       XPos = wxpos, $                  ; The X offset of the window on the display. The window is centered if not set.
-       YPos = wypos )                   ; The Y offset of the window on the display. The window is centered if not set.
+       WXSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 400.
+       WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 400.
+       WTitle = wtitle, $               ; The window title.
+       WXPos = wxpos, $                 ; The X offset of the window on the display. The window is centered if not set.
+       WYPos = wypos )                  ; The Y offset of the window on the display. The window is centered if not set.
         
 END

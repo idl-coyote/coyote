@@ -129,6 +129,7 @@
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;        Modified to allow the user to place the text in a resizeable graphics window. 13 Dec 2011. DWF.
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
+;        Modifications to the way I obtain the WIDTH when adding the command to a cgWindow. 26 Jan 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -210,18 +211,24 @@ PRO cgText, xloc, yloc, text, $
             NORMAL=normal, $
             OUTLOC=outloc, $
             TT_FONT=tt_font, $
-            WIDTH=width, $
+;            WIDTH=width, $
             ADDCMD=1, $
             _EXTRA=extra
             
-         ; You might want to get the width of the window back.
+         ; You might want to get the width of the window back. Doing this in
+         ; a pixmap puts a small circle in the center of any open IDL graphics
+         ; window. I don't know why! But, for the moment, I am just going to
+         ; try making the current graphics window the cgWindow. This seems to
+         ; work without bad effects
          IF Arg_Present(width) THEN BEGIN
-            void = cgQuery(DIMENSIONS=dims, /CURRENT)
-            Window, /PIXMAP, XSIZE=dims[0], YSIZE=dims[1], /FREE
+            wid = cgQuery(DIMENSIONS=dims, /CURRENT, OBJECTREF=thisObject)
+            WSet, wid
+            thisObject -> GetProperty, Background=bcolor
+;            Window, /PIXMAP, XSIZE=dims[0], YSIZE=dims[1], /FREE
             IF N_Elements(font) EQ 0 THEN font = !P.FONT
             IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
-            XYOUTS, 0.5, 0.5, text, /NORMAL, WIDTH=width, CHARSIZE=charsize
-            WDelete, !D.Window
+            XYOUTS, xloc, yloc, text, /NORMAL, WIDTH=width, CHARSIZE=charsize, COLOR=cgColor(bcolor)
+;            WDelete, !D.Window
          ENDIF
             
          RETURN

@@ -463,7 +463,7 @@ FUNCTION cgCmdWindow::Init, parent, $
     
 
     ; Load object properties.
-    self.background = Ptr_New(wbackground)
+    self.background = Ptr_New(background)
     IF N_Elements(cmdDelay) NE 0 THEN self.delay = cmdDelay ELSE self.delay = d_delay
     self.eraseIt = eraseIt
     IF N_Elements(wmulti) NE 0 THEN BEGIN

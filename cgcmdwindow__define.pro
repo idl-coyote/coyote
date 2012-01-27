@@ -2236,7 +2236,7 @@ PRO cgCmdWindow::SaveAsRaster, event
     ; Only going in here for down event.
     IF event.select NE 1 THEN RETURN
     
-    Widget_Control, event.ID, Get_UValue=buttonValue
+    buttonValue = Widget_Info(event.id, /UNAME)
     
     ; Is this a PDF file or a raster file?
     IF buttonValue EQ 'PDF' THEN BEGIN

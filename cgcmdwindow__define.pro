@@ -96,7 +96,13 @@
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
-;-
+;     
+; :History:
+;     Change History::
+;        Separated from old cgWindow program 22 Jan 2012, by David W. Fanning.
+;        Fixed a typo in PackageCommand method that prevented extra keywords from
+;           being collectd. 26 Jan 2012. DWF.
+;;-
 
 
 ;+
@@ -2075,7 +2081,7 @@ FUNCTION cgCmdWindow::PackageCommand, command, p1, p2, p3, p4, $
    Execute=execute, $               ; Execute the commands in the window, if this keyword set.
    Method=method, $                 ; A flag that indicates a method call.
    Multi=multi, $                   ; If you are replacing all commands, you may want to change the way they are displayed.
-   ReplaceCmd=replaceCmd            ; Set this keyword to replace one or all commands in the command list.
+   ReplaceCmd=replaceCmd, $         ; Set this keyword to replace one or all commands in the command list.
     _Extra=extra                    ; Extra keywords to the command.
     
     Compile_Opt idl2
@@ -2615,6 +2621,9 @@ END
 ;     update: in, optional, type=boolean, default=1
 ;        Set this keyword to zero if you do not want the updates to be done immediately
 ;        after the properties are changed.
+;     wid: in, optional, type=integer
+;        The draw window index number. Not to be used by the user. Used by the draw widget
+;        Notify_Realize callback routine when the draw widget is realized.
 ;     xomargin: in, optional, type=intarr(2)
 ;        Sets the !X.OMargin system variable when multiple plots are displayed in the window.
 ;     yomargin: in, optional, type=intarr(2)
@@ -2757,6 +2766,10 @@ END
 
 ;+
 ; The definition module for the cgCmdWindow object
+; 
+; :Params:
+;    class: out, optional, type=struct
+;        The object class structure definition. Occasionally useful.
 ;-
 PRO cgCmdWindow__Define, class
 

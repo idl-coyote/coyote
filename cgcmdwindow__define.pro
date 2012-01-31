@@ -102,6 +102,7 @@
 ;        Separated from old cgWindow program 22 Jan 2012, by David W. Fanning.
 ;        Fixed a typo in PackageCommand method that prevented extra keywords from
 ;           being collectd. 26 Jan 2012. DWF.
+;        Fixed a problem with MULTI keyword. 31 Jan 2012. DWF.
 ;;-
 
 
@@ -472,8 +473,8 @@ FUNCTION cgCmdWindow::Init, parent, $
     self.background = Ptr_New(background)
     IF N_Elements(cmdDelay) NE 0 THEN self.delay = cmdDelay ELSE self.delay = d_delay
     self.eraseIt = eraseIt
-    IF N_Elements(wmulti) NE 0 THEN BEGIN
-       FOR j=0,N_Elements(wmulti)-1 DO self.pmulti[j] = wmulti[j]
+    IF N_Elements(multi) NE 0 THEN BEGIN
+       FOR j=0,N_Elements(multi)-1 DO self.pmulti[j] = multi[j]
     ENDIF ELSE self.pmulti = d_multi
     IF N_Elements(wxomargin) NE 0 THEN self.xomargin = xomargin ELSE self.xomargin = d_xomargin
     IF N_Elements(wyomargin) NE 0 THEN self.yomargin = yomargin ELSE self.yomargin = d_yomargin

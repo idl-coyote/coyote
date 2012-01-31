@@ -551,7 +551,9 @@ PRO cgBarPlot, values, $
        yticks = 0
        ytickname = strarr(1)+''
     ENDELSE
-  IF (overplot EQ 0) THEN BEGIN              ;Create new plot, no data
+    
+    ; If you are creating your own plot, do it here without data.
+    IF (overplot EQ 0) THEN BEGIN              ;Create new plot, no data
         cgPlot,[values],/nodata,title=title,xtitle=xtitle,ytitle=ytitle, $
            noerase=overplot,xrange=xrange,yrange=yrange,xticks=xticks, $
            xtickname=xtickname,yticks=yticks,ytickname=ytickname, $
@@ -595,13 +597,14 @@ PRO cgBarPlot, values, $
     ENDFOR
     
     tickv = (tickv-tick_scal_fact[0])/tick_scal_fact[1]  ; Locations of the ticks
-    barcoords = tickv    
-    IF (rotate) THEN BEGIN                 ; Label the bars (Y-axis)
-      cgAxis,yaxis=0,ystyle=ystyle,yticks=(nbars-1),ytickv=tickv,ytickname=barnames, $
-        yticklen=0.0, _extra=extra
-    ENDIF ELSE BEGIN                       ; Label the bars (X-axis)
-      cgAxis,xaxis=0,xstyle=ystyle,xticks=(nbars-1),xtickv=tickv,xtickname=barnames, $
-        xticklen=0.0, _extra=extra
+    barcoords = tickv
+        
+    IF (rotate) THEN BEGIN ; Label the bars (Y-axis)
+       cgAxis,yaxis=0,ystyle=ystyle,yticks=(nbars-1),ytickv=tickv,ytickname=barnames, $
+          yticklen=0.0, _extra=extra
+    ENDIF ELSE BEGIN       ; Label the bars (X-axis)
+       cgAxis,xaxis=0,xstyle=ystyle,xticks=(nbars-1),xtickv=tickv,xtickname=barnames, $
+          xticklen=0.0, _extra=extra
     ENDELSE
 
     ; Are we producing output? If so, we need to clean up here.

@@ -111,9 +111,10 @@
 ;        Modified the code to handle long integers depending on the current color mode and the
 ;            number of values passed in. 10 January 2012. DWF.
 ;        Made sure the return values are BYTES not INTEGERS, in cases where this is expected. 10 Jan 2012. DWF.
+;        Added "Background" as a color name. The opposite of "Opposite". 1 Feb 2012. DWF.
 ;        
 ; :Copyright:
-;     Copyright (c) 2009, Fanning Software Consulting, Inc.
+;     Copyright (c) 2009-2012, Fanning Software Consulting, Inc.
 ;-
 ;
 ;+
@@ -210,7 +211,10 @@ END ;---------------------------------------------------------------------------
 ;        The color name "OPPOSITE" is also available. It chooses a color "opposite" to the 
 ;        color of the pixel in the upper-right corner of the display, if a window is open.
 ;        Otherwise, this color is "black" in PostScript and "white" everywhere else.
-;        The color OPPOSITE is used if this parameter is absent or a color name is mis-spelled. 
+;        The color OPPOSITE is used if this parameter is absent or a color name is mis-spelled.
+;        
+;         The color name "BACKGROUND" can similarly be used to select the color of the pixel
+;         in the upper-right corner of the display, if a window is open.
 ;           
 ;    colorindex: in, optional, type=byte
 ;        The color table index where the color should be loaded. Colors are
@@ -404,6 +408,7 @@ FUNCTION cgColor, theColour, colorIndex, $
        IF (!D.Name EQ 'PS') THEN opixel = [255,255,255] ELSE opixel = [255,255,255]
     ENDELSE
     IF N_Elements(opixel) EQ 0 THEN opixel = [0,0,0]
+    bgcolor = opixel
     opixel = 255 - opixel
     
     ; Read the first color as bytes. If none of the bytes are less than 48
@@ -635,11 +640,15 @@ FUNCTION cgColor, theColour, colorIndex, $
            rvalue = [ rvalue,   201,    245,    253,    251,    228,    193,    114,     59 ]
            gvalue = [ gvalue,    35,    121,    206,    253,    244,    228,    171,     85 ]
            bvalue = [ bvalue,    38,    72,     127,    197,    239,    239,    207,    164 ]
-           colors = [ colors, 'TG1', 'TG2', 'TG3', 'TG4', 'TG5', 'TG6', 'TG7', 'TG8', 'OPPOSITE']
-           rvalue = [ rvalue,  84,    163,   197,   220,   105,    51,    13,     0,   opixel[0]]
-           gvalue = [ gvalue,  48,    103,   141,   188,   188,   149,   113,    81,   opixel[1]]
-           bvalue = [ bvalue,   5,     26,    60,   118,   177,   141,   105,    71,   opixel[2]]
-       ENDELSE
+           colors = [ colors, 'TG1', 'TG2', 'TG3', 'TG4', 'TG5', 'TG6', 'TG7', 'TG8']
+           rvalue = [ rvalue,  84,    163,   197,   220,   105,    51,    13,     0 ]
+           gvalue = [ gvalue,  48,    103,   141,   188,   188,   149,   113,    81 ]
+           bvalue = [ bvalue,   5,     26,    60,   118,   177,   141,   105,    71 ]
+           colors = [ colors, 'OPPOSITE', 'BACKGROUND']
+           rvalue = [ rvalue,  opixel[0],  bgcolor[0]]
+           gvalue = [ gvalue,  opixel[1],  bgcolor[1]]
+           bvalue = [ bvalue,  opixel[2],  bgcolor[2]]
+         ENDELSE
    ENDELSE
    
     ; If you have a USERDEF color (from a color triple) then load it here.

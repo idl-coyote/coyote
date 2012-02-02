@@ -75,10 +75,13 @@ FUNCTION CoyoteGraphic, routine
       'FSC_COLOR', $
       'CGCOLORBAR', $
       'FSC_COLORBAR', $
+      'CGBARPLOT', $
+      'CGBOXPLOT', $
       'CGCOLORFILL', $
       'CGCONTOUR', $
       'CGDISPLAY', $
       'CGERASE', $
+      'CGHISTOPLOT', $
       'CGIMAGE', $
       'CGPLOT', $
       'CGPLOTS', $

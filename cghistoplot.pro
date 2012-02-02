@@ -50,9 +50,9 @@
 ; :Keywords:
 ;    addcmd: in, optional, type=boolean, default=0
 ;       Set this keyword to add the command to the resizeable graphics window cgWindow.
-;    axiscolorname: in, optional, type=string, default='black'                     
+;    axiscolorname: in, optional, type=string, default='opposite'                     
 ;       The name of the axis color. All color names are derived from cgColor.
-;    backcolorname: in, optional, type=string, default='white'
+;    backcolorname: in, optional, type=string, default='background'
 ;       The name of the background color. All color names are derived from cgColor.
 ;    binsize: in, optional
 ;       The binsize of the histogram. By default, Scott's Choice of bin size for histograms is used::
@@ -274,7 +274,8 @@
 ;       Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;       Incomplete implementation of new color selection scheme, fixed. 30 Dec 2011. DWF.
 ;       The change of 17 Dec 2011 was incorrect, as I misunderstood the problem. Restored original. 30 Dec 2011. DWF.
-;
+;       Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
+;;
 ; :Copyright:
 ;     Copyright (c) 2007-2011, Fanning Software Consulting, Inc.
 ;-
@@ -640,7 +641,7 @@ PRO cgHistoplot, $                  ; The program name.
    ENDELSE
 
    ; Check for keywords.
-   IF N_Elements(backColorName) EQ 0 THEN backColorName = "White"
+   IF N_Elements(backColorName) EQ 0 THEN backColorName = "background"
    IF N_Elements(dataColorName) EQ 0 THEN dataColorName = "Indian Red"
    
     ; Set up the layout, if necessary.
@@ -658,7 +659,7 @@ PRO cgHistoplot, $                  ; The program name.
 
    ; Choose an axis color.
    IF N_Elements(axisColorName) EQ 0 AND N_Elements(saxescolor) NE 0 THEN axisColorName = saxescolor
-   axisColorName = cgDefaultColor(axisColorName, DEFAULT='black')
+   axisColorName = cgDefaultColor(axisColorName, DEFAULT='opposite')
    IF N_Elements(polycolorname) EQ 0 THEN polycolorname = "Rose"
    IF N_Elements(probColorname) EQ 0 THEN probColorname = "Blue"
    frequency = Keyword_Set(frequency)

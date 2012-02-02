@@ -225,9 +225,10 @@
 ;         Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;         Fixed a problem with keyword inheritance. Added XStyle and YStyle keywords. 25 Jan 2012. DWF.
 ;         Added BARCOORDS keyword to return bar plot locations. 25 Jan 2012.
+;         Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgBarPlot, values, $
     ADDCMD=addcmd, $
@@ -554,12 +555,14 @@ PRO cgBarPlot, values, $
     
     ; If you are creating your own plot, do it here without data.
     IF (overplot EQ 0) THEN BEGIN              ;Create new plot, no data
-        cgPlot,[values],/nodata,title=title,xtitle=xtitle,ytitle=ytitle, $
+         ; Open a window if one is needed.
+         IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
+         cgPlot,[values],/nodata,title=title,xtitle=xtitle,ytitle=ytitle, $
            noerase=overplot,xrange=xrange,yrange=yrange,xticks=xticks, $
            xtickname=xtickname,yticks=yticks,ytickname=ytickname, $
-           xstyle=xstyle,ystyle=ystyle,/data,background=background, position=position, $
-           axiscolor=axiscolor,_strict_extra=extra
-    ENDIF
+           xstyle=xstyle,ystyle=ystyle,/data,position=position, $
+           background=background, axiscolor=axiscolor,_strict_extra=extra
+   ENDIF
     IF (rotate) THEN BEGIN               ; Horizontal bars
        base_win = !y.window              ; Window range in Y
        scal_fact = !x.s                  ; Scaling factors

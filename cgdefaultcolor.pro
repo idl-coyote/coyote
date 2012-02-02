@@ -126,13 +126,13 @@ FUNCTION cgDefaultColor, inputColour, $
              CASE thisDevice OF
                  'PS': inputColor = 'WHITE'
                  'Z': inputColor = 'BLACK'
-                 ELSE: inputColor = 'BLACK'
+                 ELSE: inputColor = 'BACKGROUND'
              ENDCASE
           ENDIF ELSE BEGIN
               CASE thisDevice OF
                  'PS': inputColor = 'WHITE'
                  'Z': inputColor = 'WHITE'
-                 ELSE: inputColor = 'WHITE'
+                 ELSE: inputColor = 'BACKGROUND'
              ENDCASE
           ENDELSE
        
@@ -142,13 +142,13 @@ FUNCTION cgDefaultColor, inputColour, $
               CASE thisDevice OF
                  'PS': inputColor = 'BLACK'
                  'Z': inputColor = 'WHITE'
-                 ELSE: inputColor = 'WHITE'
+                 ELSE: inputColor = 'OPPOSITE'
              ENDCASE
           ENDIF ELSE BEGIN
               CASE thisDevice OF
                  'PS': inputColor = 'BLACK'
                  'Z': inputColor = 'BLACK'
-                 ELSE: inputColor = 'BLACK'
+                 ELSE: inputColor = 'OPPOSITE'
              ENDCASE
           ENDELSE
 

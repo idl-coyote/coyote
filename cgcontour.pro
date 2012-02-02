@@ -67,13 +67,13 @@
 ;        Set this keyword to add the command to an cgWindow. Setting this keyword
 ;        automatically sets the WINDOW keyword, but the command does not erase the
 ;        graphics window as it would normally.
-;     axiscolor: in, optional, type=string/integer, default='black'
-;        If this keyword is a string, the name of the axis color. By default, 'black'.
+;     axiscolor: in, optional, type=string/integer, default='opposite'
+;        If this keyword is a string, the name of the axis color. 
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     axescolor: in, optional, type=string/integer
 ;        Provisions for bad spellers.
-;     background: in, optional, type=string/integer, default='white'
-;        If this keyword is a string, the name of the background color. By default, 'white'.
+;     background: in, optional, type=string/integer, default='background'
+;        If this keyword is a string, the name of the background color. 
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     c_colors: in, optional, type=integer/string vector
 ;        Set to the index values of the contour colors or to named colors. Must contain
@@ -320,7 +320,8 @@
 ;        Made sure the OUTLINE keyword works with CELL_FILL, too. 16 Dec 2011. DWF.
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;        Added MAP_OBJECT keyword. 28 Dec 2011. DWF.
-;        
+;        Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
+;;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -737,7 +738,8 @@ PRO cgContour, data, x, y, $
     IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
     axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
     color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
-    
+    print, background
+    print, color
     ; If color is the same as background, do something.
     IF ColorsAreIdentical(background, color) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN

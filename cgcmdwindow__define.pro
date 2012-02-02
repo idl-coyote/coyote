@@ -331,7 +331,7 @@ FUNCTION cgCmdWindow::Init, parent, $
         eraseit = 1
     ENDELSE
     IF N_Elements(eraseIt) EQ 0 THEN eraseIt = d_eraseit ELSE eraseIt = Keyword_Set(eraseIt)
-    
+
     ; The commands will be placed in a linked list for execution.
     self.cmds = Obj_New('LinkedList')
     IF Obj_Valid(self.cmds) EQ 0 THEN Message, 'Failed to make the LinkedList for the commands.'

@@ -146,6 +146,7 @@
 ;       Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;       PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;       Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
+;       Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -1337,10 +1338,13 @@ PRO cgImage, image, x, y, $
     IF N_Elements(minusOne) EQ 0 THEN minusOne = 0
     minusOne = Keyword_Set(minusOne)
         
-    IF N_Elements(background) EQ 0 THEN background = 'white'
+    IF N_Elements(background) EQ 0 THEN background = 'background'
     IF Size(background, /TNAME) EQ 'STRING' THEN BEGIN
+        IF StrUpCase(background) EQ 'BACKGROUND' THEN BEGIN
+           IF N_Elements(acolorname) EQ 0 THEN acolorname = 'opposite'
+        ENDIF 
         IF StrUpCase(background) EQ 'WHITE' THEN BEGIN
-           IF N_Elements(acolorname) EQ 0 THEN acolorname = 'black 
+           IF N_Elements(acolorname) EQ 0 THEN acolorname = 'black' 
         ENDIF 
     ENDIF
     noerase = Keyword_Set(noerase) ; Don't change, used in PS output.

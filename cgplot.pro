@@ -41,6 +41,9 @@
 ; command, Plot. The primary purpose of this is to create plot commands that work
 ; and look identically both on the display and in PostScript files.
 ; 
+; Program default colors will depend on the IDL graphics window. If no windows are currently
+; open when the program is called, cgDisplay is used to create a window.
+; 
 ; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
 ; to be installed on your machine.
 ;
@@ -63,13 +66,13 @@
 ;        (ysize/xsize) of the resulting plot. The plot position may change as a result
 ;        of setting this keyword. Note that `Aspect` cannot be used when plotting with
 ;        !P.MULTI.
-;     axiscolor: in, optional, type=string/integer, default='black'
-;        If this keyword is a string, the name of the axis color. By default, 'black'.
+;     axiscolor: in, optional, type=string/integer, default='opposite'
+;        If this keyword is a string, the name of the axis color. 
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     axescolor: in, optional, type=string/integer
 ;        Provisions for bad spellers.
-;     background: in, optional, type=string/integer, default='white'
-;        If this keyword is a string, the name of the background color. By default, 'white'.
+;     background: in, optional, type=string/integer, default='background'
+;        If this keyword is a string, the name of the background color. 
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     charsize: in, optional, type=float, default=cgDefCharSize()
 ;        The character size for axes annotations. Uses cgDefCharSize to select default
@@ -197,10 +200,11 @@
 ;         Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;         PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2011. DWF.
 ;         Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
-;         Over-zealous use of _STRICT_EXTRA when overplotting resulted in errors. Now use _EXTRA. 1 Jan 2011. DWF.
+;         Over-zealous use of _STRICT_EXTRA when overplotting resulted in errors. Now use _EXTRA. 1 Jan 2012. DWF.
+;         Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
 ;         
 ; :Copyright:
-;     Copyright (c) 2010-2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgPlot, x, y, $
     ADDCMD=addcmd, $
@@ -568,6 +572,8 @@ PRO cgPlot, x, y, $
     IF Keyword_Set(overplot) THEN BEGIN
        IF psym LE 0 THEN OPlot, dep, indep, COLOR=color, _EXTRA=extra
     ENDIF ELSE BEGIN
+      ; Open a window if one is needed.
+      IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
       Plot, dep, indep, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
             POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, _STRICT_EXTRA=extra
         IF psym LE 0 THEN BEGIN

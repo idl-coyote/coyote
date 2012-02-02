@@ -1493,7 +1493,7 @@ PRO cgImage, image, x, y, $
     
     ; If a window is not open, open one, otherwise in X devices you get incorrect
     ; window size information the first time you call cgImage.
-    IF (!D.FLAGS AND 256) NE 0 THEN IF (!D.Window EQ -1) THEN cgDisplay
+    IF ((!D.FLAGS AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
     
     ; Check for position and overplot keywords.
     IF N_Elements(position) EQ 0 THEN BEGIN

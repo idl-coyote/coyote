@@ -58,11 +58,11 @@
 ;        (ysize/xsize) of the resulting plot. The plot position may change as a result
 ;        of setting this keyword. Note that `Aspect` cannot be used when plotting with
 ;        !P.MULTI.
-;     axiscolor: in, optional, type=string, default='black'
+;     axiscolor: in, optional, type=string, default='opposite'
 ;        The name of the axis color. May be specified as a color table index number, as well.
 ;     axescolor: in, optional, type=string
 ;        Provisions for bad spellers.
-;     background: in, optional, type=string, default='white'
+;     background: in, optional, type=string, default='background'
 ;        The name of the background color. May be specified as a color table index number, as well.
 ;     charsize: in, optional, type=float, default=cgDefCharSize()
 ;        The character size for axes annotations. Uses cgDefCharSize to select default
@@ -623,7 +623,9 @@ PRO cgScatter2D, x, y, $
      ENDIF ELSE tempNoErase = noerase
  
     
-     ; Load the drawing colors, if needed.
+    ; Load the drawing colors. If needed create a window first, so the drawing
+    ; colors are correct for the window you want to draw into.
+    IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = cgColor(axiscolor)
     IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
     IF Size(gcolor, /TNAME) EQ 'STRING' THEN gcolor = cgColor(gcolor)

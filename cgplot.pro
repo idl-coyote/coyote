@@ -562,7 +562,9 @@ PRO cgPlot, x, y, $
      ENDIF ELSE tempNoErase = noerase
  
     
-     ; Load the drawing colors, if needed.
+    ; Load the drawing colors. If needed create a window first, so the drawing
+    ; colors are correct for the window you want to draw into.
+    IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = cgColor(axiscolor)
     IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
     IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
@@ -572,8 +574,6 @@ PRO cgPlot, x, y, $
     IF Keyword_Set(overplot) THEN BEGIN
        IF psym LE 0 THEN OPlot, dep, indep, COLOR=color, _EXTRA=extra
     ENDIF ELSE BEGIN
-      ; Open a window if one is needed.
-      IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
       Plot, dep, indep, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
             POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, _STRICT_EXTRA=extra
         IF psym LE 0 THEN BEGIN

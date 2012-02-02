@@ -62,8 +62,8 @@
 ; :Keywords:
 ;     addcmd: in, optional, type=boolean, default=0
 ;        Set this keyword to add the command to an cgWindow display.
-;     color: in, optional, type=string/integer, default='black'
-;        If this keyword is a string, the name of the data color. By default, 'black'.
+;     color: in, optional, type=string/integer, default='opposite'
+;        If this keyword is a string, the name of the data color. 
 ;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table. May be a vector of the same
 ;        length as X.

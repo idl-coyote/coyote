@@ -738,9 +738,8 @@ PRO cgContour, data, x, y, $
     IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
     axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
     color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
-    print, background
-    print, color
-    ; If color is the same as background, do something.
+
+   ; If color is the same as background, do something.
     IF ColorsAreIdentical(background, color) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
             IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
@@ -849,7 +848,9 @@ PRO cgContour, data, x, y, $
         ENDIF ELSE c_labels = Reverse((indices MOD label) EQ 0)
     ENDIF
 
-    ; Load the drawing colors, if needed.
+    ; Load the drawing colors. If needed create a window first, so the drawing
+    ; colors are correct for the window you want to draw into.
+    IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = cgColor(axiscolor)
     IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
     IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)

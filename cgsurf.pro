@@ -59,13 +59,13 @@
 ;        Set this keyword to add the command to an cgWindow. Setting this keyword
 ;        automatically sets the WINDOW keyword, but the command does not erase the
 ;        graphics window as it would normally.
-;     axiscolor: in, optional, type=string/integer, default='black'
-;        If this keyword is a string, the name of the axis color. By default, 'black'.
+;     axiscolor: in, optional, type=string/integer, default='opposite'
+;        If this keyword is a string, the name of the axis color.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     axescolor: in, hidden, type=string/integer
 ;        Provisions for bad spellers.
-;     background: in, optional, type=string/integer, default='white'
-;        If this keyword is a string, the name of the background color. By default, 'white'.
+;     background: in, optional, type=string/integer, default='background'
+;        If this keyword is a string, the name of the background color. 
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     bottom: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the bottom color. By default, same as COLOR.
@@ -538,6 +538,10 @@ PRO cgSurf, data, x, y, $
     IF N_Elements(ystyle) EQ 0 THEN ystyle = 0
     IF N_Elements(zstyle) EQ 0 THEN zstyle = 0
             
+    ; Load the drawing colors. If needed create a window first, so the drawing
+    ; colors are correct for the window you want to draw into.
+    IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
+
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN BEGIN
         axiscolor = cgColor(axiscolor)
     ENDIF ELSE BEGIN

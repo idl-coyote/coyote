@@ -405,7 +405,7 @@ FUNCTION cgColor, theColour, colorIndex, $
             opixel = [rrr[opixel], ggg[opixel], bbb[opixel]]
        ENDIF
     ENDIF ELSE BEGIN
-       IF (!D.Name EQ 'PS') THEN opixel = [255,255,255] ELSE opixel = [255,255,255]
+       IF (!D.Name EQ 'PS') THEN opixel = [255,255,255] ELSE opixel = [0,0,0]
     ENDELSE
     IF N_Elements(opixel) EQ 0 THEN opixel = [0,0,0]
     bgcolor = opixel

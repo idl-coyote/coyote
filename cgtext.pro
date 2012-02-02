@@ -63,9 +63,8 @@
 ;     charsize: in, optional, type=float, default=cgDefCharSize()
 ;         The character size for axes annotations. Uses cgDefCharSize to select default
 ;         character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
-;     color: in, optional, type=string/integer/long
-;         The color of the text. Color names are those used with cgColor. By default,
-;         "black", unless the upper-right hand pixel in the display is black, then "white".
+;     color: in, optional, type=string/integer/long, default="opposite"
+;         The color of the text. Color names are those used with cgColor. 
 ;     data: in, optional, type=boolean
 ;         Set this keyword to indicate xloc and yloc are in data coordinates. Data coordinates
 ;         are the default, unless DEVICE or NORMAL is set.
@@ -293,6 +292,10 @@ PRO cgText, xloc, yloc, text, $
 
     ; Get the input color table.
     TVLCT, rr, gg, bb, /Get
+
+    ; If needed create a window first, so the drawing
+    ; colors are correct for the window you want to draw into.
+    IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
 
     ; Choose a color.
     color = cgDefaultColor(scolor, MODE=currentState, DEFAULT='OPPOSITE')

@@ -491,6 +491,10 @@ PRO cgBarPlot, values, $
     axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
     color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
         
+    ; Load the drawing colors. If needed create a window first, so the drawing
+    ; colors are correct for the window you want to draw into.
+    IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
+
     ; If colors are identical, do something about it.
     IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
@@ -555,9 +559,7 @@ PRO cgBarPlot, values, $
     
     ; If you are creating your own plot, do it here without data.
     IF (overplot EQ 0) THEN BEGIN              ;Create new plot, no data
-         ; Open a window if one is needed.
-         IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
-         cgPlot,[values],/nodata,title=title,xtitle=xtitle,ytitle=ytitle, $
+        cgPlot,[values],/nodata,title=title,xtitle=xtitle,ytitle=ytitle, $
            noerase=overplot,xrange=xrange,yrange=yrange,xticks=xticks, $
            xtickname=xtickname,yticks=yticks,ytickname=ytickname, $
            xstyle=xstyle,ystyle=ystyle,/data,position=position, $

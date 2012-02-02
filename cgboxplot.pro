@@ -344,15 +344,15 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 ;       A string color name, as appropriate for the cgCOLOR program.
 ;       By default, the same as the COLOR keyword. Used only if OVERPLOT 
 ;       keyword is not set.
-;    background_color: in, optional, type=string, default='white'     
-;       A string color name, as appropriate for the FSC_COLOR program.
+;    background_color: in, optional, type=string, default='background'     
+;       A string color name, as appropriate for the cgColor program.
 ;       Used only if OVERPLOT keyword is not set.
 ;    boxcolor: in, optional, type='string', default='rose'
 ;       If FILLBOXES is set, the IQR box is filled with this color. 
 ;    charsize: in, optional, type=float
 ;       Set this to the character size to use on the plot. If undefined, uses
 ;       the value of cgDefCharsize().
-;    color: in, optional, type=string, default='charcoal'              
+;    color: in, optional, type=string, default='opposite'              
 ;       A string color name, as appropriate for the cgColor program. The boxplot 
 ;       will be drawn in this color.
 ;    fillboxes: in, optional, type=boolean, default=0
@@ -640,9 +640,9 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
     ENDIF
 
       ; Arguments and keywords.
-      IF N_Elements(color) EQ 0 THEN color = 'Charcoal'
+      IF N_Elements(color) EQ 0 THEN color = 'opposite'
       IF N_Elements(axes_color) EQ 0 THEN axes_color = color
-      IF N_Elements(background_color) EQ 0 THEN background_color = 'white'
+      IF N_Elements(background_color) EQ 0 THEN background_color = 'background'
       IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharsize()
       IF N_Elements(xcharsize) EQ 0 THEN xcharsize = charsize * 0.75
       IF N_Elements(boxcolor) EQ 0 THEN boxcolor = 'rose'
@@ -697,6 +697,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
             Device, Get_Visual_Depth=theDepth
             IF theDepth GE 24 THEN Device, Decomposed=1, Get_Decomposed=theState
          ENDIF
+         IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
          Plot, xrange, yrange, /NODATA, _STRICT_EXTRA=extra, $
             XMINOR=1, XTICKS=numbox+1, YSTYLE=1, BACKGROUND=cgColor(background_color), $
             COLOR=cgColor(axes_color), XTICK_GET=xloc, XTICKFORMAT='(A1)', $

@@ -241,6 +241,10 @@ PRO cgDCBar, colors, $
         ENDELSE
     ENDIF
     
+    ; If needed create a window first, so the drawing
+    ; colors are correct for the window you want to draw into.
+    IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
+ 
     ; Save the orginal color table so it can be restored later.
     TVLCT, rr, gg, bb, /Get
     

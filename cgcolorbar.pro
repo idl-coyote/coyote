@@ -397,6 +397,10 @@ PRO cgColorbar, $
     xlog = Keyword_Set(xlog)
     ylog = Keyword_Set(ylog)
     
+    ; If needed create a window first, so the drawing
+    ; colors are correct for the window you want to draw into.
+    IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
+    
     ; If the user asked for discrete colors, set some keywwords appropriately.
     ; This really should not be used for more than 16 or colors, but I don't
     ; want to limit it for the user.

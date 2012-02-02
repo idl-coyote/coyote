@@ -679,6 +679,10 @@ PRO cgHistoplot, $                  ; The program name.
    
    ; Load plot colors.
    TVLCT, r, g, b, /GET
+   
+   ; If needed create a window first, so the drawing
+   ; colors are correct for the window you want to draw into.
+   IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
    axisColor = cgColor(axisColorName, FILE=file)
    dataColor = cgColor(datacolorName, FILE=file)
    backColor = cgColor(backColorName, FILE=file)

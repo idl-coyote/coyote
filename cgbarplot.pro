@@ -226,6 +226,7 @@
 ;         Fixed a problem with keyword inheritance. Added XStyle and YStyle keywords. 25 Jan 2012. DWF.
 ;         Added BARCOORDS keyword to return bar plot locations. 25 Jan 2012.
 ;         Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
+;         Small problem with setting range keywords and with extraneous marks on the bar plot axis fixed. 6 Feb 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -528,8 +529,11 @@ PRO cgBarPlot, values, $
     noerase = Keyword_set(noerase)
     rotate = Keyword_Set(rotate)
     IF N_Elements(title) EQ 0 THEN title = ""
-    IF N_Elements(xstyle) EQ 0 THEN xstyle = 1 ELSE xstyle = 1 XOR xstyle
-    IF N_Elements(ystyle) EQ 0 THEN ystyle = 1 ELSE ystyle = 1 XOR ystyle
+    IF rotate THEN BEGIN
+        IF N_Elements(ystyle) EQ 0 THEN ystyle = 1 ELSE ystyle = 1 XOR ystyle
+    ENDIF ELSE BEGIN
+        IF N_Elements(xstyle) EQ 0 THEN xstyle = 1 ELSE xstyle = 1 XOR xstyle    
+    ENDELSE
     window = Keyword_Set(window)
     IF N_Elements(xtitle) EQ 0 THEN xtitle = ""
     IF N_Elements(ytitle) EQ 0 THEN ytitle = ""
@@ -545,6 +549,7 @@ PRO cgBarPlot, values, $
        xrange = range             ;Or, use range specIFied
        yrange = [0, N_Elements(values)]        ;Axis perpend. to bars
        yticks = 1                    ;Suppress ticks in plot
+       yticklen = 0.001
        ytickname = strarr(2)+' '
        xticks = 0
        xtickname = strarr(1)+''
@@ -552,18 +557,20 @@ PRO cgBarPlot, values, $
        yrange = range 
        xrange = [0, N_Elements(values)]                 ;Axis perpend. to bars
        xticks = 1                    ;Suppress ticks in plot
+       xticklen=0.001
        xtickname = strarr(2)+' '
        yticks = 0
        ytickname = strarr(1)+''
     ENDELSE
-    
-    ; If you are creating your own plot, do it here without data.
+
+   ; If you are creating your own plot, do it here without data.
     IF (overplot EQ 0) THEN BEGIN              ;Create new plot, no data
         cgPlot,[values],/nodata,title=title,xtitle=xtitle,ytitle=ytitle, $
            noerase=overplot,xrange=xrange,yrange=yrange,xticks=xticks, $
            xtickname=xtickname,yticks=yticks,ytickname=ytickname, $
            xstyle=xstyle,ystyle=ystyle,/data,position=position, $
-           background=background, axiscolor=axiscolor,_strict_extra=extra
+           background=background, axiscolor=axiscolor,_strict_extra=extra, $
+           xticklen=xticklen, yticklen=yticklen
    ENDIF
     IF (rotate) THEN BEGIN               ; Horizontal bars
        base_win = !y.window              ; Window range in Y

@@ -116,9 +116,11 @@
 ;           will be run in cgWindow. 17 Nov 2011. DWF.
 ;        Added ASPECT keyword. 18 Nov 2011. DWF.
 ;        Allowed the window ASPECT to be set with an image argument. 25 Nov 2011. DWF.
+;        Now use Scope_Level to always create a display when cgDisplay is called from
+;           the main IDL level. 7 Feb 2012. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2010, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgDisplay, pxsize, pysize, $
     ASPECT=aspect, $
@@ -187,7 +189,7 @@ PRO cgDisplay, pxsize, pysize, $
             windowIDs = cgQuery(COUNT=windowCnt)
             IF windowCnt NE 0 THEN BEGIN
                 index = Where(windowIDs EQ !D.Window, foundit)
-                IF foundit THEN createWindow = 0
+                IF foundit && (Scope_Level() NE 2) THEN createWindow = 0
             ENDIF 
         ENDIF
         

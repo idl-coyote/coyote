@@ -86,7 +86,7 @@
 ;     silent: in, optional, type=boolean, default=0
 ;         Set this keyword if you want the program to remain "silent" in the face of 
 ;         errors. If this keyword is set, the user should rely on the `Success` keyword
-;         to access whether the program completed its work.
+;         to determine whether the program completed its work.
 ;     step: out, optional
 ;         The step size actually used in the program to calculate the levels.
 ;     success: out, optional, type=boolen

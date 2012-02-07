@@ -2083,6 +2083,51 @@ END ;---------------------------------------------------------------------------
 
 
 ;+
+; This method creates PostScript, PDF, BMP, GIF, JPEG, PNG, and TIFF file output
+; from the pixmap window contents. The method assumes ImageMagick and Ghostscript
+; are installed correctly.
+;
+; :Params:
+;    filename: in, optional, type=string, default='idl.ps'
+;        The name of the output file. The type of file is determined from the
+;        file name extension.
+;-
+PRO cgCmdWindow::Output, filename
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+    ENDIF
+    
+    ; Need a filename?
+    IF N_Elements(filename) EQ 0 THEN filename = 'idl.ps'
+    
+    ; The type of file is determined by the filename extension.
+    rootname = FSC_Base_Filename(filename, DIRECTORY=dir, EXTENSION=ext)
+    CASE StrUpCase(ext) OF
+       'PS':   self -> AutoPostScriptFile, filename
+       'EPS':  self -> AutoPostScriptFile, filename
+       'PDF':  self -> AutoRasterFile, 'PDF', filename
+       'BMP':  self -> AutoRasterFile, 'BMP', filename
+       'GIF':  self -> AutoRasterFile, 'GIF', filename
+       'JPG':  self -> AutoRasterFile, 'JPEG', filename
+       'JPEG': self -> AutoRasterFile, 'JPEG', filename
+       'PNG':  self -> AutoRasterFile, 'PNG', filename
+       'TIF':  self -> AutoRasterFile, 'TIFF', filename
+       'TIFF': self -> AutoRasterFile, 'TIFF', filename
+       ELSE: Message, 'Unknown file type: ' + StrUpCase(ext) + '.'
+    ENDCASE
+    
+ END
+
+
+
+;+
 ; Packages the command up into a command object that can be added to the window
 ; or used to replace commands that are already in the window.
 ; 

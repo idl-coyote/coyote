@@ -103,7 +103,8 @@
 ;        Fixed a typo in PackageCommand method that prevented extra keywords from
 ;           being collectd. 26 Jan 2012. DWF.
 ;        Fixed a problem with MULTI keyword. 31 Jan 2012. DWF.
-;;-
+;        Added a COPY method. 7 Feb 2012. DWF.
+;-
 
 
 ;+
@@ -1308,6 +1309,71 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
     ; Set the window index number back.
     IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
 END ;----------------------------------------------------------------------------------------------------------------
+
+
+;+
+; This method copies the contents of the draw widget to the current graphics window using
+; the DEVICE COPY method. The DEVICE COPY command looks like this::
+;
+;    DEVICE, COPY=[origin[0], origin[1], extent[0], extent[1], destination[0], destination[1], self.wid]
+;
+; If the IMAGE keyword is used, the window contents are stored in a band-interleaved image variable
+; and the window contents are not copied into the current graphics window.
+;
+; :Keywords:
+;    destination: in, optional, type=intarr(2), default=[0,0]
+;        A two-element array specifying the device coordinates of the lower-left
+;        corner of the copied region in the destination window. 
+;    extent: in, optional, type=intarr(2), default=[!D.X_Size, !D.Y_Size]
+;       A two-element array specifying the number of columns and rows to copy.
+;       If missing, the entire draw widget window is copied.
+;    image: out, optional, type=bytarr
+;       Set this keyword to a named IDL variable that returns a copy of the draw
+;       widget contents as a band interleaved (MxNx3) image. If this keyword is set
+;       nothing is copied from the window.
+;    origin: in, optional, type=intarr(2), default=[0,0]
+;       A two-element array specifying the device coordinates of the lower-left
+;       corner of region in the draw widget window to be copied.
+;-
+;*****************************************************************************************************
+PRO cgCmdWindow::Copy, $
+   DESTINATION=dest, $
+   EXTENT=extent,             $
+   IMAGE=image,               $
+   ORIGIN=origin
+
+   Compile_Opt idl2
+    
+   ; Error handling.
+   Catch, theError
+   IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        RETURN
+   ENDIF
+    
+   ; Get the window ID of the window we are copying to.
+   destination = !D.Window
+   
+   ; Make the draw widget the current graphics window.
+   WSet, self.wid
+
+   ; Check the input parameters
+   IF (N_Elements(origin) NE 2) THEN origin = [0, 0]
+   IF (N_Elements(extent) NE 2) THEN extent = [!D.X_Size, !D.Y_Size]
+   IF (N_Elements(dest  ) NE 2) THEN dest   = [0, 0]
+
+   ; If we're using an output variable, capture the current window
+   IF Arg_Present(image) THEN BEGIN
+      image = cgSnapshot(origin[0], origin[1], extent[0], extent[1], TRUE=3)
+      IF (destination NE -1) THEN WSet, destination
+   ENDIF ELSE BEGIN
+      IF (destination NE -1) THEN WSet, destination ELSE Message, 'No current window to copy into.'
+      DEVICE, COPY=[origin[0], origin[1], extent[0], extent[1], dest[0], dest[1], self.wid]
+   ENDELSE
+   
+   
+END
 
 
 ;+

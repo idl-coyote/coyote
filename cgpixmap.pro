@@ -133,9 +133,7 @@
 ;       parameter. See http://www.idlcoyote.com/cg_tips/kwexpressions.php and the 
 ;       examples below for details on how to use this keyword.
 ;    cmddelay: in, optional, type=float
-;       If this keyword is set to a value other than zero, there will be a 
-;       delay of this many seconds between command execution. This will permit
-;       "movies" of command sequences to be displayed.
+;       Ignored. Used only for compatibility with cgWindow.
 ;    cmdindex: in, optional, type=integer
 ;       This keyword is used to select which command in an cgWindow to act on
 ;       when the AllCmd, DeleteCmd, LoadCmd and ReplaceCmd keywords are used. 
@@ -205,36 +203,42 @@
 ;       A two-element array indicating the bottom and top Y outside margins for the
 ;       graphical display. Used only when doing multiple plots with `WMulti`.
 ;    wxpos: in, optional, type=integer, default=5
-;       The x offset in device coordinates of the cgWindow from the upper-left corner of the display.
+;       Ignored. Used only for compatibility with cgWindow.
 ;    wypos: in, optional, type=integer, default=5
-;       The y offset in device coordinates of the cgWindow from the upper-left corner of the display.
+;       Ignored. Used only for compatibility with cgWindow.
 ;    wxsize: in, optional, type=integer, default=640
 ;       The x size in device coordinates of the graphics window.
 ;    wysize: in, optional, type=integer, default=5
 ;       The y size in device coordinates of the the graphics window.
 ;    wtitle: in, optional, type=string, default='Resizeable Graphics Window'
-;       The title of the graphics window. A window index number is appended to the
-;       title so multiple cgWindow programs can be selected.
+;       Ignored. Used only for compatibility with cgWindow.
 ;          
 ; :Examples:
 ;    Test code::
 ;       data = cgDemoData(17)
-;       pixmap = cgPixmap('cgPlot', data, COLOR='red')
-;       pixmap = cgPixmap('cgPlot', data, PSYM=2, /Overplot, COLOR='dodger blue', /AddCmd)
-;       pixmap = cgPixmap('cgPlot', cgDemoData(17), color='olive', linestyle = 2, /Overplot, /AddCmd)
+;       pixmap = cgPixmap()
+;       cgPlot, data, COLOR='red', /Window
+;       cgPlot, data, PSYM=2, /Overplot, COLOR='dodger blue', /AddCmd
+;       cgPlot, cgDemoData(17), color='olive', linestyle = 2, /Overplot, /AddCmd
 ;       pixmap = cgPixmap(/ListCmd)
 ;       pixmap = cgPixmap('cgPlot', data, COLOR='purple', /ReplaceCMD, CMDINDEX=0)
+;       pixmap -> Output, 'myplot.png'
 ;       
 ;    Example using different keyword parameters for the display and PostScript output::
 ;    
-;        IDL> pixmap = cgPixmap(cgPlot, cgDemoData(1), $
+;       pixmap = cgPixmap('cgPlot', cgDemoData(1), $
 ;             THICK=1.0, XTITLE='Distance (' + Greek('mu') + 'm)', $
 ;             ALTPS_KEYWORDS={THICK:4.0, XTITLE:'Distance (' + Greek('mu', /PS) + 'm)'})
 ;           
 ;    Example using different positional parameters::
 ;    
-;        IDL> pixmap = cgPixmap(cgText, 0.20, 0.85, /Normal, 'Line of Text', ALIGNMENT=0.0, $
+;       pixmap = cgPixmap('cgText', 0.20, 0.85, /Normal, 'Line of Text', ALIGNMENT=0.0, $
 ;             ALTPS_KEYWORDS={ALIGNMENT:1.0}, ALTPS_PARAMS={P1:0.88})
+;             
+;    Example copying pixmap contents to a normal IDL graphics window::
+;    
+;       Window
+;       pixmap -> Copy
 ;           
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.

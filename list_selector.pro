@@ -62,10 +62,12 @@
 ;   Added LIST_COUNTER keyword. 25 May 2009. DWF.
 ;   Well, basically a RE-DO of yesterday's work, although done correctly today. 26 May 2009. DWF.
 ;   Fixed a problem when the user double-clicks an item in the list. 8 August 2009. DWF.
+;   Double clicks are a problem with UNIX machines because <CR> sets event.clicks = 2
+;      prematurely. Removed double-click functionality from all but Windows machines. 9 Feb 2012. DWF.
 ;
 ;-
 ;******************************************************************************************;
-;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
+;  Copyright (c) 2009-2012, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -133,7 +135,10 @@ END ;---------------------------------------------------------------------------
 PRO List_Selector_Click_Events, event
 
     ; Events coming here do nothing whatsoever unless event.clicks EQ 2.
-    IF event.clicks NE 2 THEN RETURN
+    ; UNIX machines set event.clicks = 2 whenever the Carriage Return is selected,
+    ; which precludes me from using this functionality in anything other than 
+    ; Windows machines.
+    IF (event.clicks NE 2) || (StrUpCase(!Version.OS_Family) NE 'WINDOWS') THEN RETURN
 
     ; Act as if you had selected this item.
     Widget_Control, event.top, GET_UVALUE=info

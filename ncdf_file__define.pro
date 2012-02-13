@@ -162,6 +162,7 @@
 ;       I changed "missingValue" to "fillValue" some time ago, but I missed one in
 ;           the GetVarData method. Fixed. 7 June 2010. DWF.
 ;       Used the undefine procedure OBJ_DELETE, rather than OBJ_DESTROY. Sheesh! 18 June 2010. DWF.
+;       Added NETCDF4_FORMAT keyword. 13 Feb 2012. DWF.
 ;       
 ;-
 ;******************************************************************************************;
@@ -2950,6 +2951,12 @@ END
 ;       MODIFY:    Set this keyword if you wish to modify (write to) a file you are opening.
 ;                  If not set, the file will be opened as "read-only".
 ;                  
+;       NCDF4_FORMAT: Set this keyowrd to create a new NetCDF 4 file. In NetCDF 4 files, data 
+;                  is created and accessed with the HDF5 library. NetCDF 4 files are valid HDF5 files, 
+;                  and may be read with HDF5 routines. Note that if a NetCDF 4 file is modified using 
+;                  the HDF5 routines, rather than with the NetCDF 4 routines, the file is no longer a 
+;                  valid NetCDF 4 file, and may no longer be readable with the NetCDF routines.
+;                  
 ;       NOCLUTTER: Set the keyword to set the ErrorLogger NOCLUTTER keyword.
 ;
 ;       TIMESTAMP: Set this keyword is you want the ErrorLogger filename to have a time stamp
@@ -2964,6 +2971,7 @@ FUNCTION NCDF_FILE::INIT, filename, $
     DELETE_ON_DESTROY=delete_on_destroy, $
     ERRORLOGGERNAME=errorLoggerName, $
     MODIFY=modify, $
+    NCDF4_FORMAT=ncdf4_format, $
     NOCLUTTER=noclutter, $
     TIMESTAMP=timestamp
 
@@ -3003,12 +3011,13 @@ FUNCTION NCDF_FILE::INIT, filename, $
     ENDIF
     
     ; Set default values, if keywords are not already set.
-    SetDefaultValue, alert, 1
-    SetDefaultValue, create, 0
-    SetDefaultValue, clobber, 0
-    SetDefaultValue, modify, 0
-    SetDefaultValue, delete_on_destroy, 1
-    SetDefaultValue, noclutter, 0
+    SetDefaultValue, alert, 1, /Boolean
+    SetDefaultValue, create, 0, /Boolean
+    SetDefaultValue, clobber, 0, /Boolean
+    SetDefaultValue, modify, 0, /Boolean
+    SetDefaultValue, delete_on_destroy, 1, /Boolean
+    SetDefaultValue, noclutter, 0, /Boolean
+    SetDefaultValue, netcdf4_format, 0, /Boolean
     self.errorLogger -> SetProperty, ALERT=alert, DELETE_ON_DESTROY=delete_on_destroy, NOCLUTTER=noclutter
     
     ; If you are not going to create the file, you are going to open it.
@@ -3048,7 +3057,7 @@ FUNCTION NCDF_FILE::INIT, filename, $
                self.define = 0
                END
         'CREATE': BEGIN
-               self.fileID = NCDF_Create(self.filename, CLOBBER=clobber)
+               self.fileID = NCDF_Create(self.filename, CLOBBER=clobber, NETCDF4_FORMAT=netcdf4_format)
                self.define = 1
                END
     ENDCASE

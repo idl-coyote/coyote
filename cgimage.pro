@@ -147,6 +147,7 @@
 ;       PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;       Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;       Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
+;       I was passing the wrong MINVALUE and MAXVALUE values to the scaling function. 12 Feb 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -1776,10 +1777,10 @@ PRO cgImage, image, x, y, $
                        EXPONENT=exponent, $
                        GAMMA=gamma, $
                        INTERPOLATE=interpolate, $
-                       MAXVALUE=maxvalue, $
+                       MAXVALUE=max, $
                        MEAN=mean, $
                        MINUS_ONE=minus_one, $
-                       MINVALUE=minvalue, $
+                       MINVALUE=min, $
                        MISSING_INDEX=missing_index, $
                        MISSING_VALUE=missing_value, $
                        NEGATIVE=negative, $
@@ -1800,10 +1801,10 @@ PRO cgImage, image, x, y, $
                        EXPONENT=exponent, $
                        GAMMA=gamma, $
                        INTERPOLATE=interpolate, $
-                       MAXVALUE=maxvalue, $
+                       MAXVALUE=max, $
                        MEAN=mean, $
                        MINUS_ONE=minus_one, $
-                       MINVALUE=minvalue, $
+                       MINVALUE=min, $
                        MISSING_INDEX=missing_index, $
                        MISSING_VALUE=missing_value, $
                        NEGATIVE=negative, $

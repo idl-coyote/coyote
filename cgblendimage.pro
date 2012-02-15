@@ -55,6 +55,12 @@
 ;         to alpha-blend into the background image. For example, ALPHA=0.2 will give
 ;         a weigth of 20% to the foreground image pixels and 80% to the background image
 ;         pixels. 
+;   window: in, optional, type=intarr
+;         Set this keyword to a two-element array containing window index numbers,
+;         and the foreground and background images will selected from those windows
+;         and placed into the current graphics window, if possible. If window is a scalar
+;         value, the image in that window will be used as the foreground image, and the
+;         current window will be used as the background image.
 ;    _ref_extra: in, optional
 ;         Any keyword appropriate for the cgImage command is also accepted by keyword
 ;         inheritance.
@@ -75,7 +81,10 @@
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
 ;-
-PRO cgBlendImage, foreGroundImage, backGroundImage, ALPHA=alpha, _REF_EXTRA=extra
+PRO cgBlendImage, foreGroundImage, backGroundImage, $
+   ALPHA=alpha, $
+   WINDOW=window, $
+   _REF_EXTRA=extra
 
     ; Error handling.
     Catch, theError
@@ -84,8 +93,35 @@ PRO cgBlendImage, foreGroundImage, backGroundImage, ALPHA=alpha, _REF_EXTRA=extr
         RETURN
     ENDIF
     
+    ; Handle the window keyword
+    IF N_Elements(window) NE 0 THEN BEGIN
+    
+       thisWindow = !D.Window
+       CASE N_Elements(window) OF
+           1: BEGIN
+              backGroundImage = cgSnapshot()
+              WSet, window[0]
+              foreGroundImage = cgSnapshot()
+              WSet, thisWindow
+              END
+           2: BEGIN
+              WSet, window[0]
+              foreGroundImage = cgSnapshot()
+              WSet, window[1]
+              backGroundImage = cgSnapshot()
+              WSet, thisWindow
+              IF thisWindow EQ window[1] THEN BEGIN
+                  cgDisplay, /FREE, !D.X_Size, !D.Y_Size
+              ENDIF
+              END
+            ELSE: Message, 'WINDOW keyword must contain one or two elements.'
+       ENDCASE
+    
+    ENDIF
+    
     ; Need a foreground and a background image.
-    IF N_Params() NE 2 THEN Message, 'Usage:  "BlendedImage, foreGroundImage, backGroundImage"'
+    IF (N_Elements(foregroundImage) EQ 0) || (N_Elements(backgroundImage) EQ 0) $
+        THEN Message, 'Usage:  "BlendedImage, foreGroundImage, backGroundImage"'
     
     ; Condition alpha blending value.
     IF N_Elements(alpha) EQ 0 THEN alpha = 0.5

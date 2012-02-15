@@ -2951,7 +2951,7 @@ END
 ;       MODIFY:    Set this keyword if you wish to modify (write to) a file you are opening.
 ;                  If not set, the file will be opened as "read-only".
 ;                  
-;       NCDF4_FORMAT: Set this keyowrd to create a new NetCDF 4 file. In NetCDF 4 files, data 
+;       NETCDF4_FORMAT: Set this keyowrd to create a new NetCDF 4 file. In NetCDF 4 files, data 
 ;                  is created and accessed with the HDF5 library. NetCDF 4 files are valid HDF5 files, 
 ;                  and may be read with HDF5 routines. Note that if a NetCDF 4 file is modified using 
 ;                  the HDF5 routines, rather than with the NetCDF 4 routines, the file is no longer a 
@@ -2971,7 +2971,7 @@ FUNCTION NCDF_FILE::INIT, filename, $
     DELETE_ON_DESTROY=delete_on_destroy, $
     ERRORLOGGERNAME=errorLoggerName, $
     MODIFY=modify, $
-    NCDF4_FORMAT=ncdf4_format, $
+    NETCDF4_FORMAT=netcdf4_format, $
     NOCLUTTER=noclutter, $
     TIMESTAMP=timestamp
 

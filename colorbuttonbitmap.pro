@@ -99,8 +99,8 @@ FUNCTION ColorButtonBitmap, theText, BGColor=bgcolor, FGColor=fgcolor
 
     ;; Check parameters, define default colors.
     IF N_Elements(theText) EQ 0 THEN theText = 'Button'
-    IF N_Elements(bgcolor) EQ 0 THEN bgcolor = 'FACE'
-    IF N_Elements(fgcolor) EQ 0 THEN fgcolor = 'TEXT'
+    IF N_Elements(bgcolor) EQ 0 THEN bgcolor = 'background'
+    IF N_Elements(fgcolor) EQ 0 THEN fgcolor = 'opposite'
 
     ;; Get the current hardware font.
     wTLB = Widget_Base()

@@ -56,11 +56,13 @@
 ;         a weigth of 20% to the foreground image pixels and 80% to the background image
 ;         pixels. 
 ;   window: in, optional, type=intarr
-;         Set this keyword to a two-element array containing window index numbers,
-;         and the foreground and background images will selected from those windows
-;         and placed into the current graphics window, if possible. If window is a scalar
-;         value, the image in that window will be used as the foreground image, and the
-;         current window will be used as the background image.
+;         A one-, two-, or three-element array giving the window index numbers for
+;         the foreground, background, and display windows, repectively. If one-element,
+;         the foreground image is retrieved from that window and displayed in the current
+;         window. If two elements, the foreground and background images are obtained from
+;         the first two elements, respectively, and a new third display window is opened.
+;         This is the same for three elements, except the third element is used to specify
+;         the display window.
 ;    _ref_extra: in, optional
 ;         Any keyword appropriate for the cgImage command is also accepted by keyword
 ;         inheritance.
@@ -77,9 +79,10 @@
 ; :History:
 ;     Change History::
 ;        Written by: David W. Fanning, 26 May 2009.
+;        Added the WINDOW keyword. 16 February 2012. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2009, Fanning Software Consulting, Inc.
+;     Copyright (c) 2009-2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgBlendImage, foreGroundImage, backGroundImage, $
    ALPHA=alpha, $
@@ -95,26 +98,45 @@ PRO cgBlendImage, foreGroundImage, backGroundImage, $
     
     ; Handle the window keyword
     IF N_Elements(window) NE 0 THEN BEGIN
-    
+       
+       ; Save the current graphics window. Be aware that this may be -1.
        thisWindow = !D.Window
+       
+       ; How many elements are in the WINDOW keyword?
        CASE N_Elements(window) OF
+       
            1: BEGIN
-              backGroundImage = cgSnapshot()
               WSet, window[0]
               foreGroundImage = cgSnapshot()
-              WSet, thisWindow
+              IF thisWindow GE 0 THEN BEGIN
+                  WSet, thisWindow 
+              ENDIF ELSE BEGIN
+                  cgDisplay, /Force, /Match, /Free
+              ENDELSE
+              backGroundImage = cgSnapshot()
               END
+              
            2: BEGIN
               WSet, window[0]
               foreGroundImage = cgSnapshot()
               WSet, window[1]
               backGroundImage = cgSnapshot()
-              WSet, thisWindow
-              IF thisWindow EQ window[1] THEN BEGIN
-                  cgDisplay, /FREE, !D.X_Size, !D.Y_Size
-              ENDIF
+              cgDisplay, /Force, /Match, /Free
               END
-            ELSE: Message, 'WINDOW keyword must contain one or two elements.'
+              
+           3: BEGIN
+              WSet, window[0]
+              foreGroundImage = cgSnapshot()
+              WSet, window[1]
+              backGroundImage = cgSnapshot()
+              IF WindowAvailable(window[2]) THEN BEGIN
+                  WSet, window[2] 
+              ENDIF ELSE BEGIN
+                  cgDisplay, /Force, /Match, /Free
+              ENDELSE
+              END
+
+            ELSE: Message, 'WINDOW keyword must contain no more than three elements.'
        ENDCASE
     
     ENDIF
@@ -133,5 +155,5 @@ PRO cgBlendImage, foreGroundImage, backGroundImage, $
         
     ; Output the blended image.
     cgImage,  (foreGroundImage * alpha) + (1 - alpha) * backGroundImage, _STRICT_EXTRA=extra
-        
+            
 END

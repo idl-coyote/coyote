@@ -67,9 +67,17 @@
 ;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table. The color is not used if
 ;        the "window" is opened in PostScript on the Z-graphics buffer.
+;    force: in, optional, type=boolean, default=0
+;         Because of the way cgDisplay is designed to work in many devices and in resizeable
+;         graphics windows, it is sometimes the case that it won't create a window for you.
+;         If you set this keyword, a graphics window will be created while in any device that 
+;         supports graphics windows.
 ;    free: in, optional, type=boolean, default=0
 ;         Set this keyword to open a window with a free or unused window index number.
 ;         This keyword applied only to graphics windows created on the computer display.
+;    match: in, optional, type=boolean, default=0
+;         If this keyword is set, the new display window will match the size of the current
+;         display window, if there is one.
 ;    wid: in, optional, type=integer, default=0
 ;         The window index number of the IDL graphics window to create.
 ;    window: in, optional, type=integer, default=0
@@ -118,6 +126,7 @@
 ;        Allowed the window ASPECT to be set with an image argument. 25 Nov 2011. DWF.
 ;        Now use Scope_Level to always create a display when cgDisplay is called from
 ;           the main IDL level. 7 Feb 2012. DWF.
+;        Added FORCE and MATCH keywords. 16 Feb 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -126,6 +135,8 @@ PRO cgDisplay, pxsize, pysize, $
     ASPECT=aspect, $
     COLOR=scolor, $
     FREE=free, $
+    FORCE=force, $
+    MATCH=match, $
     WID=windowIndex, $
     WINDOW=window, $
     XSIZE=xsize, $
@@ -147,6 +158,12 @@ PRO cgDisplay, pxsize, pysize, $
     
     ; Check parameters and keywords.
     free = Keyword_Set(free)
+    IF Keyword_Set(match) THEN BEGIN
+       IF !D.Window GE 0 THEN BEGIN
+          xsize = !D.X_Size
+          ysize = !D.Y_Size
+       ENDIF
+    ENDIF
     IF N_Elements(scolor) EQ 0 THEN color = 'white' ELSE color = scolor
     IF N_Elements(windowIndex) EQ 0 THEN windowIndex = 0
     IF N_Elements(xsize) EQ 0 THEN xsize = 640
@@ -154,8 +171,9 @@ PRO cgDisplay, pxsize, pysize, $
     IF N_Elements(pxsize) EQ 0 THEN pxsize = xsize
     IF N_Elements(pysize) EQ 0 THEN pysize = ysize
     
-    ; Do you need a window with a particular aspect ratio?
-    IF N_Elements(aspect) NE 0 THEN BEGIN
+    ; Do you need a window with a particular aspect ratio? Can't do this
+    ; if you are matching a window.
+    IF (N_Elements(aspect) NE 0) && (Keyword_Set(match) EQ 0) THEN BEGIN
     
        ; If aspect is not a scalar, but an image. Use the aspect
        ; ratio of the image to determine the aspect ratio of the
@@ -193,6 +211,9 @@ PRO cgDisplay, pxsize, pysize, $
             ENDIF 
         ENDIF
         
+        ; If you are forcing it, then always create a window.
+        IF Keyword_Set(force) THEN createWindow = 1
+        
         ; If you are not running this program in a cgWindow, feel
         ; free to create a window!
         IF createWindow THEN BEGIN
@@ -200,8 +221,10 @@ PRO cgDisplay, pxsize, pysize, $
                  FREE=free, _STRICT_EXTRA=extra
             
             ; cgErase will take care of sorting out what kind of 
-            ; "color" indicator we are using. No need to do it here.
+            ; "color" indicator we are using (string, long, etc.)
+            ; so we don't have to worry about that here.
             cgErase, color   
+            
         ENDIF
     ENDIF ELSE BEGIN
         CASE !D.Name OF

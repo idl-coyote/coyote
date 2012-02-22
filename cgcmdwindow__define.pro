@@ -104,6 +104,7 @@
 ;           being collectd. 26 Jan 2012. DWF.
 ;        Fixed a problem with MULTI keyword. 31 Jan 2012. DWF.
 ;        Added a COPY method. 7 Feb 2012. DWF.
+;        Fixed a problem with input filenames in the AutoRasterFile method. 22 Feb 2012. DWF.
 ;-
 
 
@@ -1247,15 +1248,15 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
     
         ; Normal raster.
         0: BEGIN
-           void = cgSnapshot(TYPE=fileType, FILENAME=outname, /NODIALOG)
-           Print, 'Output file is located here: ' + outname 
+           void = cgSnapshot(TYPE=fileType, FILENAME=outputFilename, /NODIALOG)
+           Print, 'Output file is located here: ' + outputFilename 
            END
            
         ; Raster via ImageMagick.
         1: BEGIN
         
            ; Create a PostScript file first.
-           thisname = outname + '.ps'
+           thisname = outputFilename + '.ps'
            PS_Start, $
                 DECOMPOSED=self.ps_decomposed, $
                 FILENAME=thisname, $

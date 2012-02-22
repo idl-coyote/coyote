@@ -163,6 +163,9 @@
 ;           the GetVarData method. Fixed. 7 June 2010. DWF.
 ;       Used the undefine procedure OBJ_DELETE, rather than OBJ_DESTROY. Sheesh! 18 June 2010. DWF.
 ;       Added NETCDF4_FORMAT keyword. 13 Feb 2012. DWF.
+;       Added a bunch of new IDL 8.0 and 8.1 keyword to the WriteVarDef method to allow
+;           access to these keywords in NCDF_VarDef. Also modified the NETCDF4_FORMAT keyword
+;           to apply only in IDL versions 8.0 and higher. 21 Feb 2012. DWF.
 ;       
 ;-
 ;******************************************************************************************;
@@ -2496,16 +2499,50 @@ END
 ;                file and that are associated with this variable. A string array.       
 ;                If dimNames is missing, then the variable is assumed to be a scalar.   
 ;                                                                           
-; Keywords:                                                                 
-;                                                                           
+; Keywords:        
+; 
+;    CHUNK_DIMENSIONS: Set this keyword equal to a vector containing the chunk dimensions for the variable.
+;                A new NetCDF variable is chunked by default, using a default chunk value that is 
+;                the full dimension size for limited dimensions, and 1 for unlimited dimensions.
+;                CHUNK_DIMENSIONS must have the same number of elements as the number of dimensions 
+;                specified by Dim. If the CONTIGUOUS keyword is set, the value of the 
+;                CHUNK_DIMENSIONS keyword is ignored. Available only in IDL 8.0 and higher.
+;    CONTINUOUS:  Set this keyword to store a NetCDF variable as a single array in a file. 
+;                Contiguous storage works well for smaller variables such as coordinate variables.
+;                Contiguous storage works only for fixed-sized datasets (those without any unlimited 
+;                dimensions). You can’t use compression or other filters with contiguous data.
+;                If the CONTIGUOUS keyword is set, the value of the CHUNK_DIMENSIONS keyword is ignored.
+;                The CONTIGUOUS keyword is ignored if the GZIP keyword is set. Available only in 
+;                IDL 8.0 and higher.
 ;    DATATYPE:   The netCDF data type of the variable. This is REQUIRED. The appropriate
 ;                netCDF data types are: "BYTE", "CHAR", "SHORT", "LONG" "FLOAT", or     
-;                "DOUBLE".                                                  
+;                "DOUBLE". In IDL 8.1, the data types "STRING", "UBYTE", UINT64",
+;                "ULONG" and "USHORT" were added.      
+;    GZIP:       Set this keyword to an integer between zero and nine to specify the level 
+;                of GZIP compression applied to the variable. Lower compression values result 
+;                in faster but less efficient compression. This keyword is ignored if the 
+;                CHUNK_DIMENSIONS keyword is not set. This keyword is ignored if the CONTIGUOUS 
+;                keyword is set. If the GZIP keyword is set, the CONTIGUOUS keyword is ignored.
+;                You can only use GZIP compression with NCDF 4 files. Available only in 
+;                IDL 8.0 and higher.
+;                
 ;    OBJECT:     If a variable is successfully defined, this keyword will return the    
-;                object reference to that variable.                           
+;                object reference to that variable.         
+;    SHUFFLE:    Set this keyword to apply the shuffle filter to the variable. If the GZIP 
+;                keyword is not set, this keyword is ignored. The shuffle filter de-interlaces blocks 
+;                of data by reordering individual bytes. Byte shuffling can sometimes 
+;                increase compression density because bytes in the same block positions 
+;                often have similar values, and grouping similar values together often 
+;                leads to more efficient compression. Available only in IDL 8.0 and higher.             
 ;                                                                           
 ;------------------------------------------------------------------------------------------;
-PRO NCDF_File::WriteVarDef, varName, dimNames, DATATYPE=datatype, OBJECT=object
+PRO NCDF_File::WriteVarDef, varName, dimNames, $
+    CHUNK_DIMENSIONS=chunk_dimensions, $
+    CONTINUOUS=continuous, $
+    DATATYPE=datatype, $
+    GZIP=gzip, $
+    OBJECT=object, $
+    SHUFFLE=shuffle
 
     ; Compiler options.
     Compile_Opt DEFINT32
@@ -2540,8 +2577,11 @@ PRO NCDF_File::WriteVarDef, varName, dimNames, DATATYPE=datatype, OBJECT=object
         'SHORT': tshort = 1
         'INT': tshort = 1
         'STRING': tchar = 1
-        'ULONG': tlong = 1
-        'UINT': tlong = 1
+        'UBYTE': tubtye = 1
+        'ULONG': tulong = 1
+        'UINT64': tuint64 = 1
+        'UINT': tuint = 1
+        'USHORT': tushort = 1
         ELSE: Message, 'Unknown DATATYPE for netCDF files: ' + datatype
     ENDCASE
     
@@ -2571,22 +2611,102 @@ PRO NCDF_File::WriteVarDef, varName, dimNames, DATATYPE=datatype, OBJECT=object
     
     ; Define the variable.
     IF N_Elements(dimIDs) EQ 0 THEN BEGIN
-        varID = NCDF_VarDef(self.fileID, varName, $
-            BYTE=tbyte, $
-            CHAR=tchar, $
-            DOUBLE=tdouble, $
-            FLOAT=tfloat, $
-            LONG=tlong, $
-            SHORT=tshort)
+    
+        release = Float(!Version.Release)
+        CASE 1 OF
+        
+            (release LT 8.0) && (!Version.Release NE '7.1.1'): BEGIN
+                varID = NCDF_VarDef(self.fileID, varName, $
+                    BYTE=tbyte, $
+                    CHAR=tchar, $
+                    DOUBLE=tdouble, $
+                    FLOAT=tfloat, $
+                    LONG=tlong, $
+                    SHORT=tshort)
+                 END
+                 
+            (!Version.Release EQ '7.1.1') || ((release GE 7.2) && (release LT 8.1)): BEGIN
+                varID = NCDF_VarDef(self.fileID, varName, $
+                    BYTE=tbyte, $
+                    CHAR=tchar, $
+                    CHUNK_DIMENSIONS=chunk_dimensions, $
+                    CONTIGUOUS=contiguous, $
+                    DOUBLE=tdouble, $
+                    FLOAT=tfloat, $
+                    GZIP=gzip, $
+                    LONG=tlong, $
+                    SHORT=tshort, $
+                    SHUFFLE=shuffle)
+                 END
+                 
+            release GE 8.1: BEGIN
+                varID = NCDF_VarDef(self.fileID, varName, $
+                    BYTE=tbyte, $
+                    CHAR=tchar, $
+                    CHUNK_DIMENSIONS=chunk_dimensions, $
+                    CONTIGUOUS=contiguous, $
+                    DOUBLE=tdouble, $
+                    FLOAT=tfloat, $
+                    GZIP=gzip, $
+                    LONG=tlong, $
+                    SHORT=tshort, $
+                    SHUFFLE=shuffle, $
+                    STRING=tchar, $
+                    UBYTE=tubyte, $
+                    UINT64=tuint64, $
+                    ULONG=tulong, $
+                    USHORT=tushort)
+                 END
+        ENDCASE
+        
     ENDIF ELSE BEGIN
     
-        varID = NCDF_VarDef(self.fileID, varName, dimIDs, $
-            BYTE=tbyte, $
-            CHAR=tchar, $
-            DOUBLE=tdouble, $
-            FLOAT=tfloat, $
-            LONG=tlong, $
-            SHORT=tshort)    
+        release = Float(!Version.Release)
+        CASE 1 OF
+        
+            (release LT 8.0) && (!Version.Release NE '7.1.1'): BEGIN
+                varID = NCDF_VarDef(self.fileID, varName, dimIDs, $
+                    BYTE=tbyte, $
+                    CHAR=tchar, $
+                    DOUBLE=tdouble, $
+                    FLOAT=tfloat, $
+                    LONG=tlong, $
+                    SHORT=tshort)
+                 END
+                 
+            (!Version.Release EQ '7.1.1') || ((release GE 7.2) && (release LT 8.1)): BEGIN
+                varID = NCDF_VarDef(self.fileID, varName, dimIDs, $
+                    BYTE=tbyte, $
+                    CHAR=tchar, $
+                    CHUNK_DIMENSIONS=chunk_dimensions, $
+                    CONTIGUOUS=contiguous, $
+                    DOUBLE=tdouble, $
+                    FLOAT=tfloat, $
+                    GZIP=gzip, $
+                    LONG=tlong, $
+                    SHORT=tshort, $
+                    SHUFFLE=shuffle)
+                 END
+                 
+            release GE 8.1: BEGIN
+                varID = NCDF_VarDef(self.fileID, varName, dimIDs, $
+                    BYTE=tbyte, $
+                    CHAR=tchar, $
+                    CHUNK_DIMENSIONS=chunk_dimensions, $
+                    CONTIGUOUS=contiguous, $
+                    DOUBLE=tdouble, $
+                    FLOAT=tfloat, $
+                    GZIP=gzip, $
+                    LONG=tlong, $
+                    SHORT=tshort, $
+                    SHUFFLE=shuffle, $
+                    STRING=tchar, $
+                    UBYTE=tubyte, $
+                    UINT64=tuint64, $
+                    ULONG=tulong, $
+                    USHORT=tushort)
+                 END
+         ENDCASE
     ENDELSE
     
     ; Create a variable object and add it to the variable list.
@@ -2956,6 +3076,7 @@ END
 ;                  and may be read with HDF5 routines. Note that if a NetCDF 4 file is modified using 
 ;                  the HDF5 routines, rather than with the NetCDF 4 routines, the file is no longer a 
 ;                  valid NetCDF 4 file, and may no longer be readable with the NetCDF routines.
+;                  You need IDL 8.0 to use this keyword.
 ;                  
 ;       NOCLUTTER: Set the keyword to set the ErrorLogger NOCLUTTER keyword.
 ;
@@ -3057,7 +3178,11 @@ FUNCTION NCDF_FILE::INIT, filename, $
                self.define = 0
                END
         'CREATE': BEGIN
-               self.fileID = NCDF_Create(self.filename, CLOBBER=clobber, NETCDF4_FORMAT=netcdf4_format)
+               IF (!Version.Release EQ '7.1.1') || (Float(!Version.Release) GE 7.2) THEN BEGIN
+                   self.fileID = NCDF_Create(self.filename, CLOBBER=clobber, NETCDF4_FORMAT=netcdf4_format)
+               ENDIF ELSE BEGIN
+                   self.fileID = NCDF_Create(self.filename, CLOBBER=clobber)
+               ENDELSE
                self.define = 1
                END
     ENDCASE

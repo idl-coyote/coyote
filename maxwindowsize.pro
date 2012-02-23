@@ -78,6 +78,7 @@
 ;        No known method for Macintosh computers. Resorting to a fudge factor
 ;           of 22 pixels to account for the Macintosh dock. 27 Oct 2010. DWF.
 ;        Code is total reversed for UNIX and Macintosh computers! Fixed. 16 Dec 2011. DWF.
+;        Modified to only use IDLsysMonitorInfo for IDL 6.3 and higher. 23 Feb 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -108,11 +109,15 @@ FUNCTION MaxWindowSize, MONITOR_RESOLUTION=monitor_resolution
     
         'WINDOWS': BEGIN 
         
-            oMonInfo = Obj_New('IDLsysMonitorInfo')
-            rects = oMonInfo -> GetRectangles(Exclude_Taskbar=1)
-            primaryIndex = oMonInfo -> GetPrimaryMonitorIndex()
-            Obj_Destroy, oMonInfo
-            retValue = rects[[2, 3], primaryIndex]
+            IF Float(!Version.Release GE 6.3) THEN BEGIN
+                oMonInfo = Obj_New('IDLsysMonitorInfo')
+                rects = oMonInfo -> GetRectangles(Exclude_Taskbar=1)
+                primaryIndex = oMonInfo -> GetPrimaryMonitorIndex()
+                Obj_Destroy, oMonInfo
+                retValue = rects[[2, 3], primaryIndex]
+            ENDIF ELSE BEGIN
+                retvalue = Get_Screen_Size()
+            ENDELSE
             
             END
             

@@ -105,6 +105,8 @@
 ;        Fixed a problem with MULTI keyword. 31 Jan 2012. DWF.
 ;        Added a COPY method. 7 Feb 2012. DWF.
 ;        Fixed a problem with input filenames in the AutoRasterFile method. 22 Feb 2012. DWF.
+;        Modified Draw_Widget creation routine to account for events that were added in 
+;           different versions of IDL. 23 Feb 2012.
 ;-
 
 
@@ -427,8 +429,17 @@ FUNCTION cgCmdWindow::Init, parent, $
     self.drawID = Widget_Draw(self.tlb, XSIZE=xsize, YSize=ysize, RETAIN=retain, $
        UVALUE=self, Notify_Realize=notify_realize, $
        UNAME='DRAW_WIDGET', Kill_Notify=kill_notify, $
-       BUTTON_EVENTS=button_events, DROP_EVENTS=drop_events, KEYBOARD_EVENTS=keyboard_events, $
-       MOTION_EVENTS=motion_events, TRACKING_EVENTS=tracking_events, WHEEL_EVENTS=wheel_events) 
+       BUTTON_EVENTS=button_events, $
+       KEYBOARD_EVENTS=keyboard_events, $
+       MOTION_EVENTS=motion_events, $
+       TRACKING_EVENTS=tracking_events) 
+    release = Float(!Version.Release) 
+    IF (N_Elements(wheel_events) NE 0) && (release GE 6.2) THEN $
+       Widget_Control, self.drawID, DRAW_WHEEL_EVENTS=wheel_events
+    IF (N_Elements(drop_events) NE 0) && (release GE 6.3) THEN $
+       Widget_Control, self.drawID, SET_DROP_EVENTS=drop_events
+       
+    
     !P.Background = Temporary(tempBackground)
     !P.Color = Temporary(tempColor)
     

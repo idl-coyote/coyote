@@ -57,16 +57,19 @@
 ; :History:
 ;     Change History::
 ;        Written, 8 March 2011. DJ
+;        Modified to only use IDLsysMonitorInfo for IDL 6.3 and higher. 23 Feb 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
 FUNCTION GetPrimaryScreenSize, Exclude_Taskbar=exclude_Taskbar
 
-    oMonInfo = Obj_New('IDLsysMonitorInfo')
-    rects = oMonInfo -> GetRectangles(Exclude_Taskbar=exclude_Taskbar)
-    pmi = oMonInfo -> GetPrimaryMonitorIndex()
-    Obj_Destroy, oMonInfo
-    RETURN, rects[[2, 3], pmi]              ; w & h of primary monitor avbl. space
+    IF Float(!Version.Release) GE 6.3 THEN BEGIN
+        oMonInfo = Obj_New('IDLsysMonitorInfo')
+        rects = oMonInfo -> GetRectangles(Exclude_Taskbar=exclude_Taskbar)
+        pmi = oMonInfo -> GetPrimaryMonitorIndex()
+        Obj_Destroy, oMonInfo
+        RETURN, rects[[2, 3], pmi]     ; w & h of primary monitor avbl. space
+    ENDIF ELSE RETURN, Get_Screen_Size()        
 
 END

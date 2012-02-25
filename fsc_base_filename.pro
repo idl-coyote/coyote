@@ -72,9 +72,10 @@
 ;    Added PATH_SEPARATOR keyword. 25 July 2005. DWF.
 ;    Added ability to recongnize directory by path separator in last character. 19 Sept 2005. DWF.
 ;    If directory is blank (because a relative filename was passed), set to current directory. 6 Aug 2009. DWF.
+;    There were a couple of instances where the directory did NOT end in a path separator. Fixed. 24 Feb 2012. DWF.
 ;-
 ;******************************************************************************************;
-;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
+;  Copyright (c) 2008-2012, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -192,6 +193,12 @@ FUNCTION FSC_Base_Filename, filename, $
    
    ; If the directory is a null string. Make it the current directory.
    IF directory EQ "" THEN CD, CURRENT=directory
+   
+   ; Does the directory need a final path separator.
+   IF (directory NE "") THEN BEGIN
+      lastChar = StrMid(directory, 0, 1, /REVERSE_OFFSET)
+      IF lastChar NE pathsep THEN directory = directory + pathsep
+   ENDIF
 
    RETURN, file
 

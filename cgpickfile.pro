@@ -80,6 +80,11 @@
 ;     tiff: in, optional, type=boolean, default=0 
 ;         If set, starts in the "tiff" directory. It assumes the tiff directory is 
 ;         rooted in the "data" directory.
+;     title: in, optional, type=string, default="Please Select a File"
+;         The title for the selection dialog window. If the `Write` keyword is set,
+;         the default title becomes "Please Select a File for Writing".
+;    write: in, optional, type=boolean, default=0
+;         Set this keyword to change the default title to "Please Select a File for Writing".
 ;     _ref_extra: in, optional
 ;          Accepts any input keywords to DIALOG_PICKFILE (e.g., FILTER).
 ;          
@@ -95,6 +100,8 @@
 ; :History:
 ;     Change History::
 ;        Adapted from FSC_PICKFILE to be a Coyote Graphics routine by David W. Fanning, 4 Aug 2011.
+;        Added keywords TITLE and WRITE to work around a bug in Dialog_Pickfile that clips the
+;           input filenames. 25 Feb 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -109,6 +116,8 @@ FUNCTION cgPickfile, $
     NCDF=ncdf, $
     PNG=png, $
     TIFF=tiff, $
+    TITLE=title, $
+    WRITE=write, $
     _REF_EXTRA=extra
 
     On_Error, 2 ; Return to caller.
@@ -124,6 +133,16 @@ FUNCTION cgPickfile, $
     png =   Keyword_Set(png)
     tiff =  Keyword_Set(tiff)
     keywordsAreSet = Total(demo+jpeg+hdf+lidar+ncdf+png+tiff) GT 0
+    
+    ; There is a bug in Windows that causes Dialog_Pickfile to clip the
+    ; input filename unless the WRITE keyword is set. So, in this program
+    ; the WRITE keyword is *always* set. But this means we have to pay attention
+    ; to the TITLE, too. This is where we do all of that.
+    IF N_Elements(title) EQ 0 THEN BEGIN
+        IF Keyword_Set(write) $
+            THEN title = "Please Select a File for Writing" $
+            ELSE title = "Please Select a File"
+    ENDIF
     
     ; Find the "data" subdirectory. If it can't be found, then the
     ; current directory is the data directory.
@@ -188,7 +207,7 @@ FUNCTION cgPickfile, $
     ; Has the fileDir been defined. If not, use the dataDir.
     IF N_Elements(fileDir) EQ 0 THEN fileDir = dataDir
     file = Dialog_Pickfile(PATH=fileDir, GET_PATH=selectedDir, $
-        FILE=lastFile, _STRICT_EXTRA=extra)
+        FILE=lastFile, _STRICT_EXTRA=extra, /WRITE, TITLE=title)
     
     ; Save the last directory and filename. Make sure you are working
     ; with a scalar.

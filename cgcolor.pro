@@ -112,6 +112,8 @@
 ;            number of values passed in. 10 January 2012. DWF.
 ;        Made sure the return values are BYTES not INTEGERS, in cases where this is expected. 10 Jan 2012. DWF.
 ;        Added "Background" as a color name. The opposite of "Opposite". 1 Feb 2012. DWF.
+;        When returning a vector of color values, now making sure to return a byte array if 
+;             in indexed color mode. 27 Feb 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2009-2012, Fanning Software Consulting, Inc.
@@ -778,15 +780,15 @@ FUNCTION cgColor, theColour, colorIndex, $
                 ; Did the user want color triples?
     
              IF Keyword_Set(triple) THEN BEGIN
-                colors = LonArr(ncolors, 3)
+                colors = BytArr(ncolors, 3)
                 FOR j=0,ncolors-1 DO colors[j,*] = cgColor(theColor[j], colorIndex[j], Filename=filename, $
                    Decomposed=decomposedState, /Triple, BREWER=brewer)
-                RETURN, colors
+                RETURN, Byte(colors)
              ENDIF ELSE BEGIN
                 colors = LonArr(ncolors)
                 FOR j=0,ncolors-1 DO colors[j] = cgColor(theColor[j], colorIndex[j], Filename=filename, $
                    Decomposed=decomposedState, BREWER=brewer)
-                RETURN, colors
+                IF decomposedState THEN RETURN, colors ELSE RETURN, Byte(colors)
             ENDELSE
           END
     ENDCASE

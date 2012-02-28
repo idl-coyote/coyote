@@ -148,6 +148,8 @@
 ;       Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;       Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
 ;       I was passing the wrong MINVALUE and MAXVALUE values to the scaling function. 12 Feb 2012. DWF.
+;       I made cgImage aware of a "feature" of MAP_SET that sets !P.MULTI[0]=-1, which was screwing
+;          up the algorithm to cause cgImage to erase the display window. 28 Feb 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -1391,7 +1393,7 @@ PRO cgImage, image, x, y, $
     ENDIF
     
     ; Do you need to erase the window before image display?
-    IF ~Keyword_Set(noerase) && (!P.MULTI[0] EQ 0) && (N_Elements(layout) EQ 0) THEN BEGIN
+    IF ~Keyword_Set(noerase) && (!P.MULTI[0] LE 0) && (N_Elements(layout) EQ 0) THEN BEGIN
          IF (!D.Flags AND 256) NE 0 THEN BEGIN
             cgErase, background
          ENDIF ELSE BEGIN

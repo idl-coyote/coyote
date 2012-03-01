@@ -71,6 +71,8 @@
 ;         Set this keyword to indicate xloc and yloc are in normalized coordinates.
 ;     save: in, optional, type=boolean
 ;         Set this keyword to save the scaling parameters set by the axis for subsequent use.
+;     t3d: in, optional, type=boolean, default=0
+;         Set this keyword to rotate the axis is the 3D data space set up with !P.T.
 ;     title: in, optional, type=string, default=""
 ;         The title or annotation that appears on the axis.
 ;     window: in, optional, type=boolean
@@ -121,6 +123,7 @@
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;        Modifed the way I am handling brain dead AXIS command. 30 May 2011. DWF.
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
+;        Added T3D keyword. 1 March 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -133,6 +136,7 @@ PRO cgAxis, xloc, yloc, zloc, $
             FONT=font, $
             NORMAL=normal, $
             SAVE=save, $
+            T3D=t3d, $
             TITLE=title, $
             XAXIS=xaxis, $
             XLOG=xlog, $
@@ -156,7 +160,14 @@ PRO cgAxis, xloc, yloc, zloc, $
         IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         RETURN
     ENDIF
-        
+    
+    ; If doing this in 3D space, FONT should be set to 1 in PostScript
+    ; if you are doing this in hardware fonts. Otherwise, the font won't
+    ; rotate properly.
+    IF Keyword_Set(t3d) && (!D.Name EQ 'PS') THEN BEGIN
+        IF (N_Elements(font) EQ 0) && (!P.Font EQ 0) THEN font = 1.0
+    ENDIF
+    
     ; Should this be added to a resizeable graphics window?
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
@@ -170,6 +181,7 @@ PRO cgAxis, xloc, yloc, zloc, $
             FONT=font, $
             NORMAL=normal, $
             SAVE=save, $
+            T3D=t3d, $
             TITLE=title, $
             XAXIS=xaxis, $
             XLOG=xlog, $
@@ -228,6 +240,7 @@ PRO cgAxis, xloc, yloc, zloc, $
             FONT=font, $
             NORMAL=normal, $
             SAVE=save, $
+            T3D=t3d, $
             XAXIS=xaxis, $
             XLOG=xlog, $
             XTITLE=xtitle, $
@@ -247,6 +260,7 @@ PRO cgAxis, xloc, yloc, zloc, $
             FONT=font, $
             NORMAL=normal, $
             SAVE=save, $
+            T3D=t3d, $
             XAXIS=xaxis, $
             XLOG=xlog, $
             XTITLE=xtitle, $
@@ -266,6 +280,7 @@ PRO cgAxis, xloc, yloc, zloc, $
             FONT=font, $
             NORMAL=normal, $
             SAVE=save, $
+            T3D=t3d, $
             XAXIS=xaxis, $
             XLOG=xlog, $
             XTITLE=xtitle, $
@@ -285,6 +300,7 @@ PRO cgAxis, xloc, yloc, zloc, $
             FONT=font, $
             NORMAL=normal, $
             SAVE=save, $
+            T3D=t3d, $
             XAXIS=xaxis, $
             XLOG=xlog, $
             XTITLE=xtitle, $

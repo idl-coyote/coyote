@@ -85,8 +85,9 @@
 ;     xtitle: in, optional, type=string
 ;         An alternative way to set the `Title` keyword for X axes. Use `Title` instead.
 ;     yaxis: in, optional, type=integer, default=0
-;         If set to 0, the axis is drawn under the plot with the tick marks pointing up; if set 
-;         to 1, the axis is drawn on top of the plot with the tick marks pointing down.
+;         If set to 0, the axis is drawn on the left of the plot with the tick marks pointing 
+;         to the right. If set to 1, the axis is drawn on the right of the plot with the tick 
+;         marks pointing to the left.
 ;     ylog: in, optional, type=boolean, default=0
 ;         Set this keyword to specify a logarithmic axis type.
 ;     ynozero: in, optional, type=boolean, default=0
@@ -100,7 +101,7 @@
 ;     ztitle: in, optional, type=string
 ;         An alternative way to set the `Title` keyword for Z axes. Use `Title` instead.
 ;     _ref_extra: in, optional
-;          Any keywords appropriate for the XYOUTS command.
+;          Any keywords appropriate for the AXIS command.
 ;     
 ;          
 ; :Examples:

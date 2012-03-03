@@ -2864,7 +2864,7 @@ END ;---------------------------------------------------------------------------
 
 
 ;+
-;
+; This method saves the window object reference in a linked-list system variable.
 ;-
 PRO cgCmdWindow::StoreObjectReference
 

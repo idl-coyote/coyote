@@ -45,13 +45,18 @@
 ;    Graphics
 ;    
 ; :Params:
-;    selection: in, required, type=varies
+;    selection: in, optional, type=varies
 ;       Normally, a window index number of an cgWindow application. But, the selection
 ;       can be a widget identifier, an object reference, or a window title, depending on
 ;       which keywords are set. The cgWindow matching the selection is made the "current"
 ;       cgWindow and the application is moved forward on the display.
 ;       
 ; :Keywords:
+;     display: in, optional, type=boolean, default=0
+;         If this keyword is set, the selection is made the "current" application,
+;         and then the graphics window of the application is made the current graphics
+;         window. If there is no selection, then the current cgWindow graphics window
+;         is made the current graphics window.
 ;     object: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be an object reference.
 ;     title: in, optional, type=boolean
@@ -86,7 +91,7 @@
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-PRO cgSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
+PRO cgSet, selection, DISPLAY=display, OBJECT=object, WIDGETID=widgetID, TITLE=title
 
    Compile_Opt idl2
     
@@ -102,6 +107,7 @@ PRO cgSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
    ; forward on the display.
    IF N_Elements(selection) EQ 0 THEN BEGIN
       cgShow
+      IF Keyword_Set(display) THEN WSet, cgQuery(/CURRENT)
       RETURN
    ENDIF
    
@@ -152,5 +158,8 @@ PRO cgSet, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
    
    ; Move the matched node to the end of the list.
    list -> Move_Node, index
+   
+   ; Make this window the current graphics window?
+   IF Keyword_Set(display) THEN WSet, cgQuery(/CURRENT)
    
 END

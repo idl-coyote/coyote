@@ -91,6 +91,8 @@
 ;        Written, 24 December 2011. David W. Fanning.
 ;        Modified to make sure a LONG integer in indexed color mode is in the range 0-255. 10 Jan 2012. DWF.
 ;        Modified to make sure MODE is always determined at run-time for PostScript device. 14 Jan 2012. DWF.
+;        Allow other data types to be treated as color table index numbers, as long as they are in the
+;           range 0 to 255, and the MODE indicates indexed color. 7 March 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -181,18 +183,22 @@ FUNCTION cgDefaultColor, inputColour, $
                 IF (mode EQ 0) && ( (thisColor GE 0) && (thisColor LT 256) ) THEN BEGIN
                     theColors[j] = StrTrim(thisColor, 2)
                 ENDIF ELSE BEGIN
-                   IF (mode EQ 0) $
-                     && ( (thisColor LT 0) || (thisColor GT 255) ) $
-                     ;&& ( (!D.NAME NE 'PS') ) $
-                   THEN BEGIN
+                   IF (mode EQ 0) && ( (thisColor LT 0) || (thisColor GT 255) ) THEN BEGIN
                        Message, 'Value of LONG integer ' + StrTrim(thisColor,2) + ' is out of indexed color range.'
                    ENDIF ELSE BEGIN
                       theColors[j] = thisColor
                    ENDELSE
                 ENDELSE
                 END
-            ELSE: Message, 'Cannot determine a color from a value of type ' + thisType + '.'
-        
+            ELSE: BEGIN
+              ; I feel like an enabler of bad programming practices. Sigh...
+              IF (thisColor GE 0) && (thisColor LE 255) && (mode EQ 0) THEN BEGIN
+                  theColors[j] = StrTrim(Fix(thisColor),2)
+              ENDIF ELSE BEGIN
+                  Message, 'Cannot determine a color from a value of ' + $
+                            StrTrim(thisColor,2) + ' of data type ' + thisType + '.'
+              ENDELSE
+              END
         ENDCASE
         
     ENDFOR

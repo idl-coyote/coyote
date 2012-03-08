@@ -93,6 +93,7 @@
 ;        Modified to make sure MODE is always determined at run-time for PostScript device. 14 Jan 2012. DWF.
 ;        Allow other data types to be treated as color table index numbers, as long as they are in the
 ;           range 0 to 255, and the MODE indicates indexed color. 7 March 2012. DWF.
+;        Modified so that the variable MODE will not change in the calling program program. 8 March 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -110,8 +111,8 @@ FUNCTION cgDefaultColor, inputColour, $
     background = Keyword_Set(background)
     IF N_Elements(inputColour) NE 0 THEN inputColor = inputColour
     IF (N_Elements(mode) EQ 0) || (!D.Name EQ 'PS') THEN BEGIN
-       mode = GetDecomposedState() 
-    ENDIF ELSE mode = Keyword_Set(mode)
+       thisMode = GetDecomposedState() 
+    ENDIF ELSE thisMode = Keyword_Set(mode)
     traditional = Keyword_Set(traditional)
     thisDevice = !D.Name
     
@@ -165,7 +166,7 @@ FUNCTION cgDefaultColor, inputColour, $
     ; integer if the MODE is 0, or indexed color, and the value is 
     ; between 0 and 255. If it is a string, we can return it directly.
     thisType = Size(inputcolor, /TNAME)
-    IF thisType EQ 'LONG' && mode THEN BEGIN
+    IF thisType EQ 'LONG' && thisMode THEN BEGIN
         theColors = LonArr(N_Elements(inputColor))    
     ENDIF ELSE BEGIN
         theColors = StrArr(N_Elements(inputColor))
@@ -180,10 +181,10 @@ FUNCTION cgDefaultColor, inputColour, $
             'BYTE': theColors[j] = StrTrim(Fix(thisColor), 2)
             'INT': theColors[j] = StrTrim(thisColor, 2)
             'LONG': BEGIN
-                IF (mode EQ 0) && ( (thisColor GE 0) && (thisColor LT 256) ) THEN BEGIN
+                IF (thisMode EQ 0) && ( (thisColor GE 0) && (thisColor LT 256) ) THEN BEGIN
                     theColors[j] = StrTrim(thisColor, 2)
                 ENDIF ELSE BEGIN
-                   IF (mode EQ 0) && ( (thisColor LT 0) || (thisColor GT 255) ) THEN BEGIN
+                   IF (thisMode EQ 0) && ( (thisColor LT 0) || (thisColor GT 255) ) THEN BEGIN
                        Message, 'Value of LONG integer ' + StrTrim(thisColor,2) + ' is out of indexed color range.'
                    ENDIF ELSE BEGIN
                       theColors[j] = thisColor
@@ -192,7 +193,7 @@ FUNCTION cgDefaultColor, inputColour, $
                 END
             ELSE: BEGIN
               ; I feel like an enabler of bad programming practices. Sigh...
-              IF (thisColor GE 0) && (thisColor LE 255) && (mode EQ 0) THEN BEGIN
+              IF (thisColor GE 0) && (thisColor LE 255) && (thisMode EQ 0) THEN BEGIN
                   theColors[j] = StrTrim(Fix(thisColor),2)
               ENDIF ELSE BEGIN
                   Message, 'Cannot determine a color from a value of ' + $

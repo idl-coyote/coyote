@@ -321,7 +321,9 @@
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;        Added MAP_OBJECT keyword. 28 Dec 2011. DWF.
 ;        Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
-;;        
+;        Axis repair for filled contour plots (done with AXIS) results in incorrect tick labeling with
+;            date/time axes. Replaced repair code with actual Contour command. 9 March 2012. DWF.
+;                   
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
@@ -993,14 +995,12 @@ PRO cgContour, data, x, y, $
         
     ; If we filled the contour plot, we need to repair the axes. 
     IF (~Keyword_Set(overplot)) && (Keyword_Set(fill) || Keyword_Set(cell_fill)) THEN BEGIN  
-       cgAxis, XAXIS=0, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle, $
-          XTICKV=xtickv, XTICKS=xticks, XTICKLEN=xticklen, T3D=t3D, ZVALUE=zvalue
-       cgAxis, XAXIS=1, COLOR=axiscolor, XTHICK=xthick, XTICKFORMAT='(A1)', XSTYLE=xstyle, $
-          XTICKV=xtickv, XTICKS=xticks, XTICKLEN=xticklen, T3D=t3D, ZVALUE=zvalue
-       cgAxis, YAXIS=0, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)', YSTYLE=ystyle, $
-          YTICKV=ytickv, YTICKS=yticks, YTICKLEN=yticklen, T3D=t3D, ZVALUE=zvalue
-       cgAxis, YAXIS=1, COLOR=axiscolor, YTHICK=ythick, YTICKFORMAT='(A1)', YSTYLE=ystyle, $
-          YTICKV=ytickv, YTICKS=yticks, YTICKLEN=yticklen, T3D=t3D, ZVALUE=zvalue
+        Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
+            BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
+            POSITION=position, _STRICT_EXTRA=extra, T3D=t3d, /NODATA, $
+            XTHICK=xthick, YTHICK=ythick, FONT=font, C_CHARSIZE=c_charsize, $
+            XTICKLEN=xticklen, YTICKLEN=yticklen, XTICKV=xtickv, XTICKS=xticks, $
+            YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip, /NOERASE
     ENDIF
     
     ; Restore the decomposed color state if you can.

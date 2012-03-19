@@ -202,6 +202,7 @@
 ;         Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;         Over-zealous use of _STRICT_EXTRA when overplotting resulted in errors. Now use _EXTRA. 1 Jan 2012. DWF.
 ;         Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
+;         Now allowing the user to draw in the "background" color, if the COLOR or AXISCOLOR is "BACKGROUND". 19 March 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -466,18 +467,24 @@ PRO cgPlot, x, y, $
     axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
     color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
     
-    ; If color is the same as background, do something.
+    ; If color is the same as background, do something. Since this precludes drawing the the
+    ; background color (perhaps you want to "erase" something), I offer an exception. If the
+    ; COLOR is "Background", I am going to assume you know what you are doing!
     IF ColorsAreIdentical(background, color) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
         ENDIF
-        color = 'OPPOSITE'
+        IF (Size(color, /TNAME) EQ 'STRING') THEN BEGIN
+            IF (StrUpCase(color) NE 'BACKGROUND') THEN color = 'OPPOSITE'
+        ENDIF ELSE color = 'OPPOSITE'
     ENDIF
     IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
         ENDIF
-        axiscolor = 'OPPOSITE'
+        IF (Size(axiscolor, /TNAME) EQ 'STRING') THEN BEGIN
+           IF (StrUpCase(axiscolor) NE 'BACKGROUND') THEN axiscolor = 'OPPOSITE'
+        ENDIF ELSE axiscolor = 'OPPOSITE'
     ENDIF
     symcolor = cgDefaultColor(ssymcolor, DEFAULT=color, TRADITIONAL=traditional, MODE=currentState)
     

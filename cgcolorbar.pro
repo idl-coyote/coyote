@@ -227,6 +227,9 @@
 ;       Added DISCRETE keyword. 7 Dec 2011. DWF.
 ;       Changed the way the top axis was drawn, and had a problem with EXTRA keywords. Fixed. 20 Dec 2011. DWF.
 ;       Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
+;       Fixed a problem with color palettes by defining NCOLORS according to the number of colors
+;          in the palette. 19 March 2012. DWF.
+;       Set the maximum number of divisions at 59 to recognize the IDL plot limit for tick marks. 19 March 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008, Fanning Software Consulting, Inc.
@@ -347,7 +350,13 @@ PRO cgColorbar, $
         dims = Size(palette, /DIMENSIONS)
         threeIndex = Where(dims EQ 3)
         IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
-        IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
+        IF threeIndex[0] EQ 0 THEN BEGIN
+            palette = Transpose(palette)
+            npalColors = dims[1]
+        ENDIF ELSE npalColors = dims[0]
+        IF N_Elements(ncolors) EQ 0 THEN ncolors = npalColors
+        IF ncolors NE npalColors THEN $
+           Message, 'The number of colors in the color palette does not match NCOLORS.'
         TVLCT, palette
         TVLCT, rr, gg, bb, /Get
     ENDIF
@@ -371,12 +380,6 @@ PRO cgColorbar, $
     ; Check and define keywords.
     SetDefaultValue, ncolors, 256
     SetDefaultValue, bottom, 0B
-    IF N_Elements(palette) NE 0 THEN BEGIN
-       rrr = Congrid(rr, ncolors)
-       ggg = Congrid(gg, ncolors)
-       bbb = Congrid(bb, ncolors)
-       TVLCT, rrr, ggg, bbb, bottom
-    ENDIF
     SetDefaultValue, charsize, cgDefCharsize() * charPercent
     SetDefaultValue, format, ""
     IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
@@ -391,6 +394,7 @@ PRO cgColorbar, $
     IF N_ELEMENTS(divisions) EQ 0 THEN BEGIN
       IF format EQ "" THEN divisions = 0 ELSE divisions = 6
     ENDIF
+    divsions = divisions < 59 ; IDL limit to the plot command.
     SetDefaultValue, font, !P.Font
     SetDefaultValue, title, ""
     SetDefaultValue, oob_factor, 1.0
@@ -403,9 +407,9 @@ PRO cgColorbar, $
     
     ; If the user asked for discrete colors, set some keywwords appropriately.
     ; This really should not be used for more than 16 or colors, but I don't
-    ; want to limit it for the user.
+    ; want to limit it for the user. The maximum value is 59.
     IF Keyword_Set(discrete) THEN BEGIN
-       divisions = ncolors
+       divisions = ncolors < 59
        ticklen = 1.0
        minor = 0
     ENDIF

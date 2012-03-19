@@ -323,6 +323,9 @@
 ;        Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
 ;        Axis repair for filled contour plots (done with AXIS) results in incorrect tick labeling with
 ;            date/time axes. Replaced repair code with actual Contour command. 9 March 2012. DWF.
+;        Fixed a problem with color palettes by defining NLEVELS according to the number of colors
+;            in the palette. 19 March 2012. DWF.
+;        Now allowing the user to draw in the "background" color, if the COLOR or AXISCOLOR is "BACKGROUND". 19 March 2012. DWF.
 ;                   
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -641,7 +644,7 @@ PRO cgContour, data, x, y, $
     ENDIF
 
     ; Character size has to be determined *after* the layout has been decided.
-     IF N_Elements(font) EQ 0 THEN font = !P.Font
+    IF N_Elements(font) EQ 0 THEN font = !P.Font
     IF Keyword_Set(t3d) && (!D.Name EQ 'PS') THEN font = -1
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     IF N_Elements(c_charsize) EQ 0 THEN c_charsize = charsize * 0.75
@@ -728,6 +731,13 @@ PRO cgContour, data, x, y, $
                 con_colors = Color24(palette)
             ENDIF
             
+            ; If the number of contour colors is less than 256, and LEVELS and NLEVELS are
+            ; both undefined, then let's define NLEVELS to be equal to the number of contour
+            ; colors in the color palette.
+            dims = Size(palette, /DIMENSIONS) ; First dimension is now the number of colors.
+            IF (dims[0] LT 256) && (N_Elements(levels) EQ 0) && (N_Elements(nlevels) EQ 0) THEN BEGIN
+               nlevels = dims[0]
+            ENDIF
         ENDIF
 
        ; Get the color table vectors. Must do AFTER loading the palette, or
@@ -741,18 +751,24 @@ PRO cgContour, data, x, y, $
     axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
     color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
 
-   ; If color is the same as background, do something.
+    ; If color is the same as background, do something. Since this precludes drawing the the
+    ; background color (perhaps you want to "erase" something), I offer an exception. If the
+    ; COLOR is "Background", I am going to assume you know what you are doing!
     IF ColorsAreIdentical(background, color) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
+           IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
         ENDIF
-        color = 'OPPOSITE'
+        IF (Size(color, /TNAME) EQ 'STRING') THEN BEGIN
+            IF (StrUpCase(color) NE 'BACKGROUND') THEN color = 'OPPOSITE'
+        ENDIF ELSE color = 'OPPOSITE'
     ENDIF
     IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
-            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
+           IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
         ENDIF
-        axiscolor = 'OPPOSITE'
+        IF (Size(axiscolor, /TNAME) EQ 'STRING') THEN BEGIN
+           IF (StrUpCase(axiscolor) NE 'BACKGROUND') THEN axiscolor = 'OPPOSITE'
+        ENDIF ELSE axiscolor = 'OPPOSITE'
     ENDIF
     
     ; Default values for keywords.

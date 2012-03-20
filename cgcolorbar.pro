@@ -394,7 +394,7 @@ PRO cgColorbar, $
     IF N_ELEMENTS(divisions) EQ 0 THEN BEGIN
       IF format EQ "" THEN divisions = 0 ELSE divisions = 6
     ENDIF
-    divsions = divisions < 59 ; IDL limit to the plot command.
+    divisions = divisions < 59 ; IDL limit to the plot command.
     SetDefaultValue, font, !P.Font
     SetDefaultValue, title, ""
     SetDefaultValue, oob_factor, 1.0

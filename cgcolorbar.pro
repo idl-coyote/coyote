@@ -86,10 +86,12 @@
 ;         is six.
 ;    fit: in, optional, type=boolean, default=0
 ;       If this keyword is set, the colorbar "fits" itself to the normalized
-;       coordinates of the last plot command executed. In other words, for
+;       coordinates of the last graphics command executed. In other words, for
 ;       a horizontal color bar, postition[[0,2]] = !X.Window, and for a vertical
 ;       color bar, position[[1,3]] = !Y.Window. Other positions are adjusted
-;       to put the colorbar "reasonably" close to the plot.
+;       to put the colorbar "reasonably" close to the plot. The fit many not always
+;       be accurate. If you are fitting to an image, be sure to set the SAVE keyword
+;       on cgImage to establish a data coordinate system.
 ;    font: in, optional, type=integer, default=!P.Font
 ;       Sets the font of the annotation. Hershey: -1, Hardware:0, True-Type: 1.
 ;    format: in, optional, type=string, default=""
@@ -230,9 +232,11 @@
 ;       Fixed a problem with color palettes by defining NCOLORS according to the number of colors
 ;          in the palette. 19 March 2012. DWF.
 ;       Set the maximum number of divisions at 59 to recognize the IDL plot limit for tick marks. 19 March 2012. DWF.
-;
+;       Modifications to the FIT algorithm to make sure the color bar is completely inside
+;           the graphics window. Also fixed mis-spelled variable name. 20 March 2012. DWF.
+;           
 ; :Copyright:
-;     Copyright (c) 2008, Fanning Software Consulting, Inc.
+;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgColorbar, $
     ADDCMD=addcmd, $
@@ -450,7 +454,7 @@ PRO cgColorbar, $
           IF position[0] GE position[2] THEN Message, "Position coordinates can't be reconciled."
           IF position[1] GE position[3] THEN Message, "Position coordinates can't be reconciled."
        ENDELSE
-      IF Keyword_Set(fit) THEN BEGIN
+       IF Keyword_Set(fit) THEN BEGIN
             position[[1,3]] = !Y.Window
             distance = position[2] - position[0]
             IF Keyword_Set(right) THEN BEGIN
@@ -459,6 +463,11 @@ PRO cgColorbar, $
                 position[0] = !X.Window[1] + ((10*!D.X_CH_SIZE*charsize) / !D.X_Size)
             ENDELSE
             position[2] = position[0] + distance
+            IF position[2] GT 1.0 THEN BEGIN
+              diff = position[2]-1.0
+              position[2] = 1.0 - 0.015
+              IF (position[2] - position[0]) LT 0.015 THEN position[0] = (position[2] < position[0])-0.015
+            ENDIF
        ENDIF
     ENDIF ELSE BEGIN
        bar = BINDGEN(ncolors) # REPLICATE(1B, 20)
@@ -477,6 +486,11 @@ PRO cgColorbar, $
             distance = (position[3] - position[1])
             position[1] = !Y.Window[1] + ((4*!D.Y_CH_SIZE*charsize) / !D.Y_Size)
             position[3] = position[1] + distance
+            IF position[3] GT 1.0 THEN BEGIN
+              diff = position[3]-1.0
+              position[3] = 1.0 - 0.015
+              IF (position[3] - position[1]) LT 0.015 THEN position[1] = (position[3] < position[1])-0.015
+            ENDIF
        ENDIF
      ENDELSE
      

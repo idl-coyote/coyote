@@ -534,7 +534,7 @@ FOR j=0, NCOLORS-1 DO BEGIN
    wids[j] = thisWID
    WSet, thisWID
    ;PolyFill, [0,0,1,1,0], [0,1,1,0,0], /Normal, Color=startIndex + j
-   Erase, Color=startIndex + j
+   Erase, startIndex + j
    outlineName = Keyword_Set(brewer) ? 'BLK8' : 'BLACK
    black = Where(StrUpCase(colornames) EQ outlineName)
    black = black[0]
@@ -548,7 +548,7 @@ WSet, currentWID
 IF N_Elements(currentcolor) NE 0 THEN $
    TVLCT, Reform(currentcolor, 1, 3), currentColorIndex ELSE $
    TVLCT, r[currentColorIndex], g[currentColorIndex], b[currentColorIndex], currentColorIndex
-Erase, Color=currentColorIndex
+Erase, currentColorIndex
    outlineName = Keyword_Set(brewer) ? 'BLK8' : 'BLACK
    black = Where(StrUpCase(colornames) EQ outlineName)
 black = black[0]

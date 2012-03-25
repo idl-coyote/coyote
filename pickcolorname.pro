@@ -288,11 +288,11 @@ theIndex = theIndex[0]
 info.nameIndex = theIndex
 
 IF info.theDepth GT 8 THEN BEGIN
-   Erase, Color=info.colors24[theIndex]
+   Erase, info.colors24[theIndex]
    PlotS, [0,0,59,59,0], [0,14,14,0,0], /Device, Color=info.black
 ENDIF ELSE BEGIN
    TVLCT, info.red[theIndex], info.green[theIndex], info.blue[theIndex], info.mixcolorIndex
-   Erase, Color=info.mixcolorIndex
+   Erase,info.mixcolorIndex
    PlotS, [0,0,59,59,0], [0,14,14,0,0], /Device, Color=info.black
 ENDELSE
 
@@ -787,7 +787,7 @@ ENDELSE
 Widget_Control, mixColorID, Get_Value=mixWID
 WSet, mixWID
 IF theDepth GT 8 THEN BEGIN
-   Erase, Color=colors24[nameIndex]
+   Erase, colors24[nameIndex]
    eraseColor = Keyword_Set(brewer) ? 'BLK8' : 'BLACK
    black = Where(colornames EQ eraseColor)
    black = black[0]
@@ -795,7 +795,7 @@ IF theDepth GT 8 THEN BEGIN
 ENDIF ELSE BEGIN
    eraseColor = Keyword_Set(brewer) ? 'BLK8' : 'BLACK
    black = Where(colornames EQ eraseColor)
-   Erase, Color=mixcolorIndex
+   Erase, mixcolorIndex
    PlotS, [0,0,59,59,0], [0,14,14,0,0], /Device, Color=black
 ENDELSE
 

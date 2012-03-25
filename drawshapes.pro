@@ -105,7 +105,7 @@
 ;       Window, XSize=700, YSize=800
 ;       Map_Set, 37.5, -117.5, /Albers, /IsoTropic, Limit=[30, -125, 45, -108], $
 ;           Position=[0.05, 0.05, 0.95, 0.95]
-;       Erase, Color=cgColor('ivory')
+;       Erase, cgColor('ivory')
 ;       DrawShapes, AttrName='STATE_ABBR', $
 ;           AttrValues=['CA', 'OR', 'WA', 'AZ', 'UT', 'ID', 'NV'], Thick=1, $
 ;           FColors=['firebrick', 'grn4', 'pur4', 'tan4', 'steel blue', 'org4', 'yellow'], $
@@ -118,7 +118,7 @@
 ;       mapCoord = Obj_New('MapCoord', 'Albers Equal Area', LIMIT=[30, -125, 45, -108], $
 ;                  Position=[0.05, 0.05, 0.95, 0.95], CENTER_LATITUDE=37.5, $
 ;                  CENTER_LONGITUDE=-117, STANDARD_PAR1=40, STANDARD_PAR2=-39)
-;       Erase, Color=cgColor('ivory')
+;       Erase, cgColor('ivory')
 ;       DrawShapes, AttrName='STATE_ABBR', $
 ;           AttrValues=['CA', 'OR', 'WA', 'AZ', 'UT', 'ID', 'NV'], Thick=1, $
 ;           FColors=['firebrick', 'grn4', 'pur4', 'tan4', 'steel blue', 'org4', 'yellow'], $

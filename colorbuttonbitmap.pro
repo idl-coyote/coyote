@@ -129,7 +129,7 @@ FUNCTION ColorButtonBitmap, theText, BGColor=bgcolor, FGColor=fgcolor
 
     ;;    Make window, draw text, read back
     Window, XSize=xSize, YSize=ySize, /Pixmap, /Free, Retain=2
-    Erase, Color=cgColor(bgcolor)
+    Erase, cgColor(bgcolor)
     blankRGB = TVRD(True=3)
     XYOutS, x0, y0, theText, /Device, Font=0, $
             Color=cgColor(fgcolor)

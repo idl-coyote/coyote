@@ -161,7 +161,7 @@ PRO cgErase, background_color, COLOR=color, LAYOUT=layout, WINDOW=window
                  [y[0], y[1], y[1], y[0]], /FIll, $
                  Color=thisColor, /Normal
        !P.Multi = thisMulti
-    ENDIF ELSE Erase, Color=thisColor
+    ENDIF ELSE Erase, thisColor
 
     
     ; Clean up.

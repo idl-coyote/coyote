@@ -709,7 +709,7 @@ PRO PROGRESSBAR::Start, initialPercent
 
    Widget_Control, self.drawID, Get_Value=wid
    self.wid = wid
-   Erase, Color=cgColor(self.background, !P.Background)
+   Erase, cgColor(self.background, !P.Background)
 
       ; Back to the open display window.
 

@@ -51,7 +51,7 @@
 ;   lat = Randomu(seed, 20) * 180 - 90
 ;   speed = Randomu(seed, 20) * 100
 ;   direction = Randomu(seed, 20) * 180 + 90
-;   Erase, Color=cgColor('Ivory', !P.Background)
+;   Erase, cgColor('Ivory', !P.Background)
 ;   Map_Set, /Cylindrical,Position=[0.1, 0.1, 0.9, 0.9], Color=cgColor('Steel Blue'), /NoErase
 ;   Map_Grid, Color=cgColor('Charcoal', !D.Table_Size-2)
 ;   Map_Continents, Color=cgColor('Sea Green', !D.Table_Size-3)

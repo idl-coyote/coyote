@@ -1333,21 +1333,20 @@ END ;---------------------------------------------------------------------------
 ; and the window contents are not copied into the current graphics window.
 ;
 ; :Keywords:
-;    destination: in, optional, type=intarr(2), default=[0,0]
+;    destination: in, optional, type=intarr(2)
 ;        A two-element array specifying the device coordinates of the lower-left
-;        corner of the copied region in the destination window. 
-;    extent: in, optional, type=intarr(2), default=[!D.X_Size, !D.Y_Size]
+;        corner of the copied region in the destination window. By default, [0,0].
+;    extent: in, optional, type=intarr(2)
 ;       A two-element array specifying the number of columns and rows to copy.
-;       If missing, the entire draw widget window is copied.
-;    image: out, optional, type=bytarr
+;       If missing, the entire draw widget window is copied. By default, [!D.X_Size, !D.Y_Size].
+;    image: out, optional, type=byte
 ;       Set this keyword to a named IDL variable that returns a copy of the draw
 ;       widget contents as a band interleaved (MxNx3) image. If this keyword is set
 ;       nothing is copied from the window.
-;    origin: in, optional, type=intarr(2), default=[0,0]
+;    origin: in, optional, type=intarr(2)
 ;       A two-element array specifying the device coordinates of the lower-left
-;       corner of region in the draw widget window to be copied.
+;       corner of region in the draw widget window to be copied. By default, [0,0].
 ;-
-;*****************************************************************************************************
 PRO cgCmdWindow::Copy, $
    DESTINATION=dest, $
    EXTENT=extent,             $

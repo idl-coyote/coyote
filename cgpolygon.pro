@@ -163,7 +163,7 @@ PRO cgPolygon, x, y, z, $
     ; Do you need a window?
     IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
     
-    ; Are the colors strings?
+    ; Are the colors strings? 
     IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = cgColor(thisColor)
     IF Size(fillColor, /TNAME) EQ 'STRING' THEN fillColor = cgColor(fillColor)
     

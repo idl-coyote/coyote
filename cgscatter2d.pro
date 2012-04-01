@@ -69,6 +69,7 @@
 ;        character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
 ;     color: in, optional, type=string, default='black'
 ;        The name of the data or symbol color. May be specified as a color table index or color triple, as well.
+;        May be a vector of the same length as the input data vectors.
 ;     coefficient: out, optional, type=double
 ;        The Pearson correlation coefficient of the two data sets. Calculated with the IDL routine CORRELATE.
 ;     fcharsize: in, optional, type=float
@@ -206,6 +207,8 @@
 ; :History:
 ;     Change History::
 ;        Written, 12 January 2012. DWF.
+;        Removed an extra COLOR keyword and changed an OPLOT command to a PLOTS command
+;           to allow a vector of colors to be used for the scatter points.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -344,7 +347,7 @@ PRO cgScatter2D, x, y, $
             FCharsize=fcharsize, $
             FColor=sfcolor, $
             FThick=fthick, $
-           FillColor=sfillcolor, $
+            FillColor=sfillcolor, $
             Fit=fit, $
             Font=font, $
             GColor=sgcolor, $
@@ -686,7 +689,7 @@ PRO cgScatter2D, x, y, $
       ENDELSE
     ENDELSE
     IF Abs(psym) GT 1 THEN BEGIN
-        OPlot, x, y, COLOR=color, PSYM=SymCat(Abs(psym), COLOR=color, _Extra=extra), $
+        PlotS, x, y, COLOR=color, PSYM=SymCat(Abs(psym), _Extra=extra), $
            SYMSIZE=symsize, _EXTRA=extra
     ENDIF 
     

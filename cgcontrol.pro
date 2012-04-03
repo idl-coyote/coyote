@@ -145,6 +145,10 @@
 ;         it's default value when the commands are finished executing.
 ;     object: in, optional, type=boolean
 ;         If this keyword is set, the selection is assumed to be an object reference.
+;     output: in, optional, type=string
+;         This keyword should be set to the name of an output file. It is a short-hand way of
+;         specifying the CREATE_*** keywords. The type of file is taken from the file name
+;         extension.
 ;     palette: in, optional, type=byte
 ;         Use this keyword to pass in an N-by-3 (or 3-by-N) byte array containing the
 ;         R, G, and B vectors of a color table. It is probably easier to use cgLoadCT or
@@ -219,6 +223,7 @@
 ;     Added ASPECT keyword to control window aspect ratio. 9 Nov 2011. DWF.
 ;     Added CREATE_PDF, PDF_UNIX_CONVERT_CMD, and PDF_PATH keywords. 11 Dec 2011. DWF.
 ;     Added IM_WIDTH keyword. 3 April 2012. DWF.
+;     Added the OUTPUT keyword. 3 April 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -249,6 +254,7 @@ PRO cgControl, selection, $
     LISTCMD=listCmd, $                            ; List a command or ALL commands.
     MULTI=multi, $                                ; Set the multiple property of the window. Identical to !P.Multi.
     OBJECT=object, $                              ; If this keyword is set, the selection is an object reference.
+    OUTPUT=output, $                              ; The name of the output file.
     TITLE=title, $                                ; If this keyword is set, the selection is the title.
     UPDATE=update, $                              ; If this keyword is set, the commands are immediately executed after properties are set.
     WIDGETID=widgetID, $                          ; If this keyword is set, the selection is a widget ID.
@@ -287,6 +293,42 @@ PRO cgControl, selection, $
    ; Make sure there is something here to control.
    void = cgQuery(COUNT=count)
    IF count EQ 0 THEN RETURN
+   
+   ; Handle the OUTPUT keyword first, since it sets other keywords.
+   IF N_Elements(output) NE 0 THEN BEGIN
+   
+        ; Start with a fresh slate.
+        Undefine, create_bmp
+        Undefine, create_gif
+        Undefine, create_jpeg
+        Undefine, create_pdf
+        Undefine, create_png
+        Undefine, create_ps
+        Undefine, create_tiff
+        
+        ; Parse the filename to find a file extension.
+        rootName = FSC_Base_Filename(output, DIRECTORY=thisDir, EXTENSION=ext)
+        extension = StrUpCase(ext)
+
+        typeOfOutput = ['BMP','EPS', 'GIF','JPEG','JPG','PDF', 'PNG','PS', 'TIFF', 'TIF']
+        void = Where(typeOfOutput EQ extension, count)
+        IF count EQ 0 THEN Message, 'Cannot output to a file with a "' + ext + '" extension.'
+       
+        ; Set things up.
+        CASE extension OF
+          'BMP':  create_bmp = output
+          'EPS':  create_ps = output
+          'GIF':  create_gif = output
+          'JPEG': create_jpeg = output
+          'JPG':  create_jpeg = output
+          'PDF':  create_pdf = output
+          'PNG':  create_png = output
+          'PS':   create_ps = output
+          'TIFF': create_tiff = output
+          'TIF':  create_tiff = output
+        ENDCASE
+    
+   ENDIF
    
    ; Always update, unless told otherwise.
    IF N_Elements(update) EQ 0 THEN update = 1

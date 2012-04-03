@@ -53,7 +53,8 @@
 ;         The Erase status of the window.
 ;     im_density: out, optional, type=integer
 ;         The sampling density.
-;         file from PostScript outout.
+;     im_png8: out, optional, type=boolean
+;         If set, ImageMagick will create 8-bit PNG files, rather than 24-bit.
 ;     im_options: out, optional, type=string
 ;         Current ImageMagick convert options.
 ;     im_raster: out, optional, type=boolean
@@ -130,6 +131,7 @@
 ;        Added ASPECT keyword to allow getting/setting of window aspect ratio. 18 Nov 2011. DWF.
 ;        Added PDF_UNIX_CONVERT_CMD and PDF_PATH keywords. 7 Dec 2011. DWF.
 ;        Added IM_WIDTH keyword. 3 April 2012. DWF.
+;        Added IM_PNG8 keyword. 3 April 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -152,6 +154,7 @@ PRO cgWindow_GetDefs, $
    
    ; ImageMagick Properties.
    IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+   IM_PNG8 = im_png8, $                            ; Sets the flag for 8-bit PNG files to be created.
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
    IM_Raster = im_raster, $                        ; Sets the raster via ImageMagick setting.
    IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
@@ -198,6 +201,7 @@ PRO cgWindow_GetDefs, $
    IF Arg_Present(ypos) THEN ypos = !FSC_WINDOW_DEFAULTS.ypos
    IF Arg_Present(palette) THEN palette = !FSC_WINDOW_DEFAULTS.palette
    IF Arg_Present(im_density) THEN im_density = !FSC_WINDOW_DEFAULTS.im_density
+   IF Arg_Present(im_png8) THEN im_png8 = !FSC_WINDOW_DEFAULTS.im_png8
    IF Arg_Present(im_options) THEN im_options = !FSC_WINDOW_DEFAULTS.im_options
    IF Arg_Present(im_raster) THEN im_raster = !FSC_WINDOW_DEFAULTS.im_raster
    IF Arg_Present(im_resize) THEN im_resize = !FSC_WINDOW_DEFAULTS.im_resize

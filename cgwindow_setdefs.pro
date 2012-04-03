@@ -155,6 +155,7 @@
 ;        Added ASPECT keyword to allow getting/setting of window aspect ratio. 18 Nov 2011. DWF.
 ;        Added PDF_UNIX_CONVERT_CMD and PDF_PATH keywords. 7 Dec 2011. DWF.
 ;        Added IM_WIDTH keyword. 3 April 2012. DWF.
+;        Added IM_PNG8 keyword. 3 April 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -166,9 +167,10 @@ PRO cgWindow_SetDefs, $
    Delay = delay, $                                ; The delay between command execution.
    EraseIt = eraseit, $                            ; Set this keyword to erase the display before executing the commands.
    IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
-   IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+   IM_PNG8 = im_png8, $                            ; Set this keyword to create an 8-bit PNG file, rather than 24-bit.
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
    IM_Raster = im_raster, $                        ; Sets thee raster via ImageMagick setting.
+   IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
    IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
    IM_Width=im_width, $                            ; Set the width of raster file output from PostScript files.
    Multi = multi, $                                ; Set this in the same way !P.Multi is used.   
@@ -218,11 +220,12 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(ypos) EQ 0 THEN ypos = -1
         IF N_Elements(palette) EQ 0 THEN palette = BytArr(256,3)
         IF N_Elements(im_density) EQ 0 THEN im_density = 300
-        IF N_Elements(im_resize) EQ 0 THEN im_resize = 25
+        im_png8 = Keyword_Set(im_png8)
         IF N_Elements(im_options) EQ 0 THEN im_options = ""
         IF N_Elements(im_raster) EQ 0 THEN BEGIN
             IF HasImageMagick() THEN im_raster = 1 ELSE im_raster = 0
         ENDIF
+        IF N_Elements(im_resize) EQ 0 THEN im_resize = 25
         IF N_Elements(im_transparent) EQ 0 THEN im_transparent = 0
         IF N_Elements(im_width) EQ 0 THEN im_width = 0
         IF N_Elements(pdf_unix_convert_cmd) EQ 0 THEN pdf_unix_convert_cmd = ""
@@ -254,9 +257,10 @@ PRO cgWindow_SetDefs, $
            YPos:ypos, $                                  ; The Y offset of the window on the display. 
            Palette:palette, $                            ; The color table palette to use for the window.
            IM_Density:im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+           IM_PNG8:im_png8, $                            ; If set create 8-bit rather than 24-bit PNG files.
+           IM_Options:im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
            IM_Raster:im_raster, $                        ; Sets the raster via ImageMagick setting.
            IM_Resize:im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
-           IM_Options:im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
            IM_Transparent:im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
            IM_Width:im_width, $                          ; Sets the width of raster output on raster files created with ImageMagick.
            PDF_UNIX_Convert_Cmd: pdf_unix_convert_cmd, $ ; Sets the PDF alternative conversion command.
@@ -293,9 +297,10 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(ypos) NE 0 THEN !FSC_WINDOW_DEFAULTS.ypos = ypos
         IF N_Elements(palette) NE 0 THEN !FSC_WINDOW_DEFAULTS.palette = palette
         IF N_Elements(im_density) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_density = im_density
+        IF N_Elements(im_png8) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_png8 = im_png8
+        IF N_Elements(im_options) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_options = im_options
         IF N_Elements(im_raster) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_raster = im_raster
         IF N_Elements(im_resize) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_resize = im_resize
-        IF N_Elements(im_options) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_options = im_options
         IF N_Elements(im_transparent) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_transparent = Keyword_Set(im_transparent)
         IF N_Elements(im_width) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_width = im_width
         IF N_Elements(raster_im) NE 0 then !FSC_WINDOW_DEFAULTS.raster_im = raster_im

@@ -93,6 +93,8 @@
 ;        Set this keyword to convert the PostScript output file to a PDF file. Requires Ghostscript.
 ;     png: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a PNG image. Requires ImageMagick.
+;        Normally, 24-bit PNG files are created. However, if the IM_PNG8 keyword is set with
+;        cgWindow_SetDefs, then PS_End will create an 8-bit PNG file instead.
 ;     resize: in, optional, type=integer, default=25
 ;        If an image is being created from the PostScript file, it is often resized by some 
 ;        amount. You can use this keyword to change the value (e.g, RESIZE=100).
@@ -168,6 +170,8 @@
 ;        Just realized a BMP case is missing from one of the CASE statements. 12 Dec 2011. DWF.
 ;        Added GS_PATH and UNIX_CONVERT_CMD keywords to support PDF output. 14 Dec 2011. DWF.
 ;        Add the WIDTH keyword. 3 April 2012. DWF.
+;        Added a check for IM_PNG8 keyword, using cgWindow_GetDefs to see if an 8-bit or 24-bit
+;           PNG file should be created. 3 April 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -300,10 +304,17 @@ PRO PS_END, $
                 ; resulting file to be in landscape mode.
                 IF ps_struct.landscape THEN cmd = cmd + ' -rotate 90'
             
-                ; Add the output filename. Make sure PNG files are 24-bit images.
-                IF ps_struct.convert EQ 'PNG' $
-                    THEN cmd = cmd + ' "' + 'PNG24:' +outfilename + '"' $
-                    ELSE cmd = cmd + ' "' + outfilename + '"'
+                ; Add the output filename and check for PNG output.
+                IF ps_struct.convert EQ 'PNG' THEN BEGIN
+                
+                    ; Check to see whether 8-bit or 24-bit PNG files should be created.
+                    cgWindow_GetDefs, IM_PNG8=png8
+                    IF png8 THEN BEGIN
+                       cmd = cmd + ' "' + 'PNG8:' +outfilename + '"' 
+                    ENDIF ELSE BEGIN
+                       cmd = cmd + ' "' + 'PNG24:' +outfilename + '"' 
+                    ENDELSE
+                ENDIF ELSE cmd = cmd + ' "' + outfilename + '"'
                 IF ~ps_struct.quiet THEN BEGIN
                     IF showcmd THEN Print, 'ImageMagick CONVERT command: ',  cmd
                 ENDIF

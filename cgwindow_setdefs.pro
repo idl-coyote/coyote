@@ -297,7 +297,7 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(im_resize) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_resize = im_resize
         IF N_Elements(im_options) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_options = im_options
         IF N_Elements(im_transparent) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_transparent = Keyword_Set(im_transparent)
-        IF N_Elements(im_width) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_width = Keyword_Set(im_width)
+        IF N_Elements(im_width) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_width = im_width
         IF N_Elements(raster_im) NE 0 then !FSC_WINDOW_DEFAULTS.raster_im = raster_im
         IF N_Elements(pdf_unix_convert_cmd) NE 0 THEN !FSC_WINDOW_DEFAULTS.pdf_unix_convert_cmd = pdf_unix_convert_cmd
         IF N_Elements(pdf_path) NE 0 THEN !FSC_WINDOW_DEFAULTS.pdf_path = pdf_path

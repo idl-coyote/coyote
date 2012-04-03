@@ -1038,10 +1038,11 @@ PRO cgContour, data, x, y, $
     
        ; Get the output default values.
        cgWindow_GetDefs, $
-           IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
            IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
-           IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
            IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+           IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+           IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+           IM_Width = im_width, $                          ; Sets the width of raster file output created with ImageMagick.
            PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
            PDF_Path = pdf_path                             ; The path to the Ghostscript conversion command.
     
@@ -1058,9 +1059,10 @@ PRO cgContour, data, x, y, $
              PNG=png_flag, $
              RESIZE=im_resize, $
              TIFF=tiff_flag, $
-             UNIX_CONVERT_CMD=pdf_unix_convert_cmd
+             UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $
+             WIDTH=im_width
               
-        basename = File_Basename(outfilename)
+         basename = File_Basename(outfilename)
          dirname = File_Dirname(outfilename)
          IF dirname EQ "." THEN CD, CURRENT=dirname
          Print, 'Output File: ' + Filepath(ROOT_DIR=dirname, basename)

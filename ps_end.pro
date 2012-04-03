@@ -112,6 +112,10 @@
 ;         conversion command was "pstopdf", the actual command would be "pstopdf" + " " + ps_file.
 ;         Any output filename is ignored. This command does not apply to Macintosh or Windows 
 ;         computers. Passed directly to cgPS2PDF.
+;     width: in, optional, type=integer
+;         Set the keyword to the final pixel width of the output raster image. Applies
+;         only to raster image file output (e.g., JPEG, PNG, TIFF, etc.). The height of
+;         the image is chosen to preserve the image aspect ratio.
 ;          
 ; :Examples:
 ;    To create a line plot in a PostScript file named lineplot.ps and
@@ -163,9 +167,10 @@
 ;        Added OUTFILENAME keyword. 11 Dec 2011. DWF.
 ;        Just realized a BMP case is missing from one of the CASE statements. 12 Dec 2011. DWF.
 ;        Added GS_PATH and UNIX_CONVERT_CMD keywords to support PDF output. 14 Dec 2011. DWF.
+;        Add the WIDTH keyword. 3 April 2012. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
 ;-
 PRO PS_END, $
     ALLOW_TRANSPARENT=allow_transparent, $
@@ -184,7 +189,8 @@ PRO PS_END, $
     RESIZE=resize, $
     SHOWCMD=showcmd, $
     TIFF=tiff, $
-    UNIX_CONVERT_CMD=unix_convert_cmd
+    UNIX_CONVERT_CMD=unix_convert_cmd, $
+    WIDTH=width
             
 
    COMMON _$FSC_PS_START_, ps_struct
@@ -271,7 +277,7 @@ PRO PS_END, $
                 ; Set up for various ImageMagick convert options.
                 IF allowAlphaCmd THEN alpha_cmd =  allow_transparent ? '' : ' -alpha off' 
                 density_cmd = ' -density ' + StrTrim(density,2)
-                resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
+                IF N_Elements(width) NE 0 THEN resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
                 
                 ; Start ImageMagick convert command.
                 cmd = 'convert'
@@ -293,7 +299,7 @@ PRO PS_END, $
                 ; If the landscape mode is set, rotate by 90 to allow the 
                 ; resulting file to be in landscape mode.
                 IF ps_struct.landscape THEN cmd = cmd + ' -rotate 90'
-                
+            
                 ; Add the output filename. Make sure PNG files are 24-bit images.
                 IF ps_struct.convert EQ 'PNG' $
                     THEN cmd = cmd + ' "' + 'PNG24:' +outfilename + '"' $
@@ -302,6 +308,13 @@ PRO PS_END, $
                     IF showcmd THEN Print, 'ImageMagick CONVERT command: ',  cmd
                 ENDIF
                 SPAWN, cmd, result, err_result
+                
+                ; Resize the output image to a particular width, if needed.
+                IF (N_Elements(width) NE 0) && (width GT 0) THEN BEGIN
+                    cmd = 'convert ' + outfilename + ' -resize ' + StrTrim(width,2) + ' ' + outfilename
+                    IF showcmd && (~ps_struct.quiet) THEN Print, cmd
+                    SPAWN, cmd, result, err_result
+                ENDIF
                 
                 IF ~ps_struct.quiet THEN BEGIN
                     IF err_result[0] NE "" THEN BEGIN

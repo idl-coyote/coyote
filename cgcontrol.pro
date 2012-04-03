@@ -135,6 +135,10 @@
 ;     im_raster: in, optional, type=boolean, default=1
 ;         Set this keyword to zero to create raster files using the create_png etc. keywords
 ;         directly, instead of via ImageMagick.
+;     im_width: in, optional, type=integer
+;        Set this keyword to the width of the output raster file in pixel units. The height of the raster
+;        file is set to preserve the aspect ratio of the output image. Applies only to raster images (eg
+;        PNG, JPEG, TIFF, etc.) created from PostScript files with ImageMagick.
 ;     multi: in, optional, type=Intarr(5)
 ;         Set this keyword to the !P.MULTI setting you want to use for the window.
 ;         !P.MULTI is set to this setting before command execution, and set back to
@@ -214,9 +218,10 @@
 ;     Added SAVE_VISUALIZATION and RESTORE_VISUALIZATION keywords. 15 Sept 2011. DWF.
 ;     Added ASPECT keyword to control window aspect ratio. 9 Nov 2011. DWF.
 ;     Added CREATE_PDF, PDF_UNIX_CONVERT_CMD, and PDF_PATH keywords. 11 Dec 2011. DWF.
+;     Added IM_WIDTH keyword. 3 April 2012. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgControl, selection, $
     ADJUSTSIZE=adjustsize, $                      ; Adjusts text size to fit display window size.
@@ -249,11 +254,12 @@ PRO cgControl, selection, $
     WIDGETID=widgetID, $                          ; If this keyword is set, the selection is a widget ID.
     XOMARGIN=xomargin, $                          ; Change the !X.OMargin setting for the winow.
     YOMARGIN=yomargin, $                          ; Change the !Y.OMargin setting for the window.
-    IM_TRANSPARENT=im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
     IM_DENSITY=im_density, $                      ; Sets the density parameter on ImageMagick convert command.
     IM_RESIZE=im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
     IM_OPTIONS=im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
     IM_RASTER=im_raster, $                        ; Sets whether to generate raster files via ImageMagick.
+    IM_TRANSPARENT=im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+    IM_WIDTH=im_width, $                          ; Set the width of raster file output from PostScript files.
     PDF_UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
     PDF_PATH=pdf_path, $                          ; The path to the Ghostscript conversion command.
     PS_CHARSIZE=ps_charsize, $                    ; Select the character size for PostScript output.
@@ -265,7 +271,7 @@ PRO cgControl, selection, $
     PS_QUIET=ps_quiet, $                          ; Select the QUIET keyword on PS_Start.
     PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
     PS_TT_FONT=ps_tt_font, $                      ; Select the true-type font to use for PostScript output.
-    RESTORE_VISUALIZATION=restore_visualization, $; Set this keyword to the name of a file containing a visualization to restore.
+   RESTORE_VISUALIZATION=restore_visualization, $; Set this keyword to the name of a file containing a visualization to restore.
     SAVE_VISUALIZATION=save_visualization         ; Set this keyword to the name of a file where the visualization is to be saved.
     
    Compile_Opt idl2
@@ -386,6 +392,7 @@ PRO cgControl, selection, $
         IM_RESIZE = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
         IM_OPTIONS = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
         IM_RASTER = im_raster, $                        ; Sets whether to create raster files via ImageMagick.
+        IM_WIDTH = im_width, $                          ; Sets the final width of the raster files create with ImageMagick.
         PDF_UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $    ; Command to convert PS to PDF.
         PDF_PATH=pdf_path, $                            ; The path to the Ghostscript conversion command.
         PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.

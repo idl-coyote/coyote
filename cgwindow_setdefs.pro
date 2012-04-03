@@ -55,9 +55,6 @@
 ;     eraseit: in, optional, type=boolean
 ;         If this property is set, the cgWindow erases with the background color before
 ;         displaying the commands in the window's command list.
-;     im_transparent: in, optional, type=boolean, default=0
-;         Set this keyword to allow ImageMagick to create transparent backgrounds when it
-;         makes raster image files from PostScript output.
 ;     im_density: in, optional, type=integer, default=300
 ;         Set this keyword to the sampling density when ImageMagick creates raster image
 ;         file from PostScript outout.
@@ -72,6 +69,13 @@
 ;     im_resize: in, optional, type=integer, default=25
 ;         Set this keyword to percentage that the raster image file created my ImageMagick
 ;         from PostScript output should be resized.
+;     im_transparent: in, optional, type=boolean, default=0
+;         Set this keyword to allow ImageMagick to create transparent backgrounds when it
+;         makes raster image files from PostScript output.
+;     im_width: in, optional, type=integer
+;        Set this keyword to the width of the output raster file in pixel units. The height of the raster
+;        file is set to preserve the aspect ratio of the output image. Applies only to raster images (eg
+;        PNG, JPEG, TIFF, etc.) created from PostScript files with ImageMagick.
 ;     multi: in, optional, type=Intarr(5)
 ;         Set this keyword to the !P.MULTI setting you want to use for the window.
 ;         !P.MULTI is set to this setting before command execution, and set back to
@@ -150,6 +154,7 @@
 ;        Added PS_DECOMPOSED keyword to set the PostScript color mode. 30 Aug 2011. DWF.
 ;        Added ASPECT keyword to allow getting/setting of window aspect ratio. 18 Nov 2011. DWF.
 ;        Added PDF_UNIX_CONVERT_CMD and PDF_PATH keywords. 7 Dec 2011. DWF.
+;        Added IM_WIDTH keyword. 3 April 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -160,11 +165,12 @@ PRO cgWindow_SetDefs, $
    Background = background, $                      ; The background color. 
    Delay = delay, $                                ; The delay between command execution.
    EraseIt = eraseit, $                            ; Set this keyword to erase the display before executing the commands.
-   IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
    IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
    IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
    IM_Raster = im_raster, $                        ; Sets thee raster via ImageMagick setting.
+   IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+   IM_Width=im_width, $                            ; Set the width of raster file output from PostScript files.
    Multi = multi, $                                ; Set this in the same way !P.Multi is used.   
    Palette = palette, $                            ; The color table palette to use for the window.
    PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
@@ -218,6 +224,7 @@ PRO cgWindow_SetDefs, $
             IF HasImageMagick() THEN im_raster = 1 ELSE im_raster = 0
         ENDIF
         IF N_Elements(im_transparent) EQ 0 THEN im_transparent = 0
+        IF N_Elements(im_width) EQ 0 THEN im_width = 0
         IF N_Elements(pdf_unix_convert_cmd) EQ 0 THEN pdf_unix_convert_cmd = ""
         IF N_Elements(pdf_path) EQ 0 THEN pdf_path = ""
         IF N_Elements(ps_charsize) EQ 0 THEN ps_charsize = 0.0
@@ -251,6 +258,7 @@ PRO cgWindow_SetDefs, $
            IM_Resize:im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
            IM_Options:im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
            IM_Transparent:im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+           IM_Width:im_width, $                          ; Sets the width of raster output on raster files created with ImageMagick.
            PDF_UNIX_Convert_Cmd: pdf_unix_convert_cmd, $ ; Sets the PDF alternative conversion command.
            PDF_Path: pdf_path, $                         ; Set the path to the PDF conversion command.
            PS_Decomposed:ps_decomposed, $                ; Sets the PostScript color mode.
@@ -284,11 +292,12 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(xpos) NE 0 THEN !FSC_WINDOW_DEFAULTS.xpos = xpos
         IF N_Elements(ypos) NE 0 THEN !FSC_WINDOW_DEFAULTS.ypos = ypos
         IF N_Elements(palette) NE 0 THEN !FSC_WINDOW_DEFAULTS.palette = palette
-        IF N_Elements(im_transparent) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_transparent = Keyword_Set(im_transparent)
         IF N_Elements(im_density) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_density = im_density
         IF N_Elements(im_raster) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_raster = im_raster
         IF N_Elements(im_resize) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_resize = im_resize
         IF N_Elements(im_options) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_options = im_options
+        IF N_Elements(im_transparent) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_transparent = Keyword_Set(im_transparent)
+        IF N_Elements(im_width) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_width = Keyword_Set(im_width)
         IF N_Elements(raster_im) NE 0 then !FSC_WINDOW_DEFAULTS.raster_im = raster_im
         IF N_Elements(pdf_unix_convert_cmd) NE 0 THEN !FSC_WINDOW_DEFAULTS.pdf_unix_convert_cmd = pdf_unix_convert_cmd
         IF N_Elements(pdf_path) NE 0 THEN !FSC_WINDOW_DEFAULTS.pdf_path = pdf_path

@@ -62,6 +62,8 @@
 ;         The amount PostScript output is resized.
 ;     im_transparent: out, optional, type=boolean
 ;         The transparent background setting.
+;     im_width: out, optional, type=integer
+;         The final width of ImageMagick raster file output.
 ;     multi: out, optional, type=Intarr(5)
 ;         The !P.MULTI setting for the window.
 ;     palette: out, optional, type=byte
@@ -127,9 +129,10 @@
 ;          value. 30 Aug 2011. DWF.
 ;        Added ASPECT keyword to allow getting/setting of window aspect ratio. 18 Nov 2011. DWF.
 ;        Added PDF_UNIX_CONVERT_CMD and PDF_PATH keywords. 7 Dec 2011. DWF.
+;        Added IM_WIDTH keyword. 3 April 2012. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgWindow_GetDefs, $
    AdjustSize = adjustsize, $                      ; Adjusts text size to fit display window size.
@@ -148,11 +151,12 @@ PRO cgWindow_GetDefs, $
    Palette = palette, $                            ; The color table palette to use for the window.
    
    ; ImageMagick Properties.
-   IM_Transparent = im_transparent, $  ; Sets the "alpha" keyword on ImageMagick convert command.
    IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+   IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
    IM_Raster = im_raster, $                        ; Sets the raster via ImageMagick setting.
    IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
-   IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+   IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+   IM_Width = im_width, $                          ; Sets the final width of ImageMagick raster output.
    
    ; PDF properties.
    PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
@@ -193,11 +197,12 @@ PRO cgWindow_GetDefs, $
    IF Arg_Present(xpos) THEN xpos = !FSC_WINDOW_DEFAULTS.xpos
    IF Arg_Present(ypos) THEN ypos = !FSC_WINDOW_DEFAULTS.ypos
    IF Arg_Present(palette) THEN palette = !FSC_WINDOW_DEFAULTS.palette
-   IF Arg_Present(im_transparent) THEN im_transparent = !FSC_WINDOW_DEFAULTS.im_transparent
    IF Arg_Present(im_density) THEN im_density = !FSC_WINDOW_DEFAULTS.im_density
+   IF Arg_Present(im_options) THEN im_options = !FSC_WINDOW_DEFAULTS.im_options
    IF Arg_Present(im_raster) THEN im_raster = !FSC_WINDOW_DEFAULTS.im_raster
    IF Arg_Present(im_resize) THEN im_resize = !FSC_WINDOW_DEFAULTS.im_resize
-   IF Arg_Present(im_options) THEN im_options = !FSC_WINDOW_DEFAULTS.im_options
+   IF Arg_Present(im_transparent) THEN im_transparent = !FSC_WINDOW_DEFAULTS.im_transparent
+   IF Arg_Present(im_width) THEN im_width = !FSC_WINDOW_DEFAULTS.im_width
    IF Arg_Present(pdf_unix_convert_cmd) THEN pdf_unix_convert_cmd = !FSC_WINDOW_DEFAULTS.pdf_unix_convert_cmd
    IF Arg_Present(pdf_path) THEN pdf_path = !FSC_WINDOW_DEFAULTS.pdf_path
    IF Arg_Present(ps_decomposed) THEN ps_decomposed = !FSC_WINDOW_DEFAULTS.ps_decomposed

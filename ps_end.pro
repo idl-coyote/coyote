@@ -172,6 +172,8 @@
 ;        Add the WIDTH keyword. 3 April 2012. DWF.
 ;        Added a check for IM_PNG8 keyword, using cgWindow_GetDefs to see if an 8-bit or 24-bit
 ;           PNG file should be created. 3 April 2012. DWF.
+;        Modified the ImageMagick commands that resizes the image to a particular width. Necessary
+;           to accommodate PNG8 file output. Using ImageMagick 6.7.2-9. 4 April 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -224,6 +226,8 @@ PRO PS_END, $
    
    ; Close the PostScript file, if this is PostScript device.
    IF !D.Name EQ 'PS' THEN Device, /CLOSE_FILE
+   xsize = !D.X_Size
+   ysize = !D.Y_Size
    ps_filename = ps_struct.filename
    outfilename = ps_filename
    showcmd = Keyword_Set(showcmd)
@@ -281,7 +285,24 @@ PRO PS_END, $
                 ; Set up for various ImageMagick convert options.
                 IF allowAlphaCmd THEN alpha_cmd =  allow_transparent ? '' : ' -alpha off' 
                 density_cmd = ' -density ' + StrTrim(density,2)
-                IF (N_Elements(width) EQ 0) || (width LE 0) THEN resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
+                
+                ; Normally, we just resize by a precentage, unless a specific width
+                ; has been specified.
+                IF (N_Elements(width) EQ 0) || (width LE 0) THEN BEGIN
+                     resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
+                ENDIF ELSE BEGIN
+                
+                     ; Getting the width correct has to be done in an extremely non-intuitive way.
+                     ; I wonder if this will be changed in different versions of ImageMagick?
+                     ; In fact, it does NOT correspond to the documentation for how this is suppose
+                     ; to work.
+                     height = Ceil(width*ysize/Float(xsize))
+                     IF ps_struct.landscape THEN BEGIN
+                        resize_cmd = ' -resize ' + StrCompress(height, /REMOVE_ALL) + 'x' + StrCompress(width, /REMOVE_ALL)                   
+                     ENDIF ELSE BEGIN
+                        resize_cmd = ' -resize ' + StrCompress(width, /REMOVE_ALL) + 'x' + StrCompress(height, /REMOVE_ALL)
+                     ENDELSE
+                ENDELSE
                 
                 ; Start ImageMagick convert command.
                 cmd = 'convert'
@@ -295,6 +316,7 @@ PRO PS_END, $
                 
                 IF N_Elements(resize_cmd) NE 0 THEN cmd = cmd + resize_cmd
                 cmd = cmd +  ' -flatten '
+                
                 IF N_Elements(im_options) NE 0 THEN BEGIN
                     IF StrMid(im_options, 0, 1) NE " " THEN im_options = " " + im_options
                     cmd = cmd + im_options
@@ -303,7 +325,7 @@ PRO PS_END, $
                 ; If the landscape mode is set, rotate by 90 to allow the 
                 ; resulting file to be in landscape mode.
                 IF ps_struct.landscape THEN cmd = cmd + ' -rotate 90'
-            
+
                 ; Add the output filename and check for PNG output.
                 IF ps_struct.convert EQ 'PNG' THEN BEGIN
                 
@@ -319,14 +341,7 @@ PRO PS_END, $
                     IF showcmd THEN Print, 'ImageMagick CONVERT command: ',  cmd
                 ENDIF
                 SPAWN, cmd, result, err_result
-                
-                ; Resize the output image to a particular width, if needed.
-                IF (N_Elements(width) NE 0) && (width GT 0) THEN BEGIN
-                    cmd = 'convert ' + outfilename + ' -resize ' + StrTrim(width,2) + ' ' + outfilename
-                    IF showcmd && (~ps_struct.quiet) THEN Print, cmd
-                    SPAWN, cmd, result, err_result
-                ENDIF
-                
+
                 IF ~ps_struct.quiet THEN BEGIN
                     IF err_result[0] NE "" THEN BEGIN
                         FOR k=0,N_Elements(err_result)-1 DO Print, err_result[k]

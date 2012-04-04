@@ -128,9 +128,11 @@
 ;     Change History::
 ;       Written by: David W. Fanning, 12 December 2011
 ;       Added the ability to check to see if 8-bit or 24-bit PNG files should be created. 3 April 2012. DWF.
+;       Modified the ImageMagick commands that resizes the image to a particular width. Necessary
+;          to accommodate PNG8 file output. Using ImageMagick 6.7.2-9. 4 April 2012. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
 PRO cgPS2Raster, ps_file, $
     ALLOW_TRANSPARENT=allow_transparent, $
@@ -185,7 +187,13 @@ PRO cgPS2Raster, ps_file, $
    SetDefaultValue, showcmd, 0, /BOOLEAN
    SetDefaultValue, silent, 0, /BOOLEAN
    SetDefaultValue, width, 0
-  
+   IF portrait THEN BEGIN
+      xsize = 11
+      ysize = 8.5
+   ENDIF ELSE BEGIN
+      xsize = 8.5
+      ysize = 11
+   ENDELSE
    ; Construct an output filename, if needed.
    basename = FSC_Base_Filename(ps_file, DIRECTORY=theDir, EXTENSION=theExtension)
    IF theDir EQ "" THEN CD, CURRENT=theDir
@@ -213,7 +221,22 @@ PRO cgPS2Raster, ps_file, $
           ; Set up for various ImageMagick convert options.
           IF allowAlphaCmd THEN alpha_cmd =  allow_transparent ? '' : ' -alpha off' 
           density_cmd = ' -density ' + StrTrim(density,2)
-          IF (N_Elements(width) EQ 0) || (width LE 0) THEN resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
+          
+          ; Normally, we just resize by a precentage, unless a specific width
+          ; has been specified.
+          IF (N_Elements(width) EQ 0) || (width LE 0) THEN BEGIN
+               resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
+           ENDIF ELSE BEGIN
+                
+           ; Getting the width correct has to be done in an extremely non-intuitive way.
+           ; I wonder if this will be changed in different versions of ImageMagick?
+           height = Ceil(width*ysize/Float(xsize))
+           IF ~portrait THEN BEGIN
+                resize_cmd = ' -resize ' + StrCompress(height, /REMOVE_ALL) + 'x' + StrCompress(width, /REMOVE_ALL)                   
+           ENDIF ELSE BEGIN
+                resize_cmd = ' -resize ' + StrCompress(width, /REMOVE_ALL) + 'x' + StrCompress(height, /REMOVE_ALL)
+                     ENDELSE
+           ENDELSE
                 
           ; Start ImageMagick convert command.
           cmd = 'convert'
@@ -237,7 +260,7 @@ PRO cgPS2Raster, ps_file, $
           IF (1-portrait) THEN cmd = cmd + ' -rotate 90'
                 
                 ; Add the output filename and check for PNG output.
-                IF ps_struct.convert EQ 'PNG' THEN BEGIN
+                IF Keyword_Set(png) THEN BEGIN
                 
                     ; Check to see whether 8-bit or 24-bit PNG files should be created.
                     cgWindow_GetDefs, IM_PNG8=png8
@@ -252,13 +275,6 @@ PRO cgPS2Raster, ps_file, $
           ENDIF
           SPAWN, cmd, result, err_result
                 
-          ; Resize the output image to a particular width, if needed.
-          IF (N_Elements(width) NE 0) && (width GT 0) THEN BEGIN
-               cmd = 'convert ' + outfilename + ' -resize ' + StrTrim(width,2) + ' ' + outfilename
-               IF showcmd && (~ps_struct.quiet) THEN Print, cmd
-               SPAWN, cmd, result, err_result
-          ENDIF
-
           IF ~silent THEN BEGIN
               IF err_result[0] NE "" THEN BEGIN
                   FOR k=0,N_Elements(err_result)-1 DO Print, err_result[k]

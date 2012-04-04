@@ -281,7 +281,7 @@ PRO PS_END, $
                 ; Set up for various ImageMagick convert options.
                 IF allowAlphaCmd THEN alpha_cmd =  allow_transparent ? '' : ' -alpha off' 
                 density_cmd = ' -density ' + StrTrim(density,2)
-                IF N_Elements(width) NE 0 THEN resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
+                IF (N_Elements(width) EQ 0) || (width LE 0) THEN resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
                 
                 ; Start ImageMagick convert command.
                 cmd = 'convert'

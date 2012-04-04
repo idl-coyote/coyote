@@ -127,6 +127,7 @@
 ; :History:
 ;     Change History::
 ;       Written by: David W. Fanning, 12 December 2011
+;       Added the ability to check to see if 8-bit or 24-bit PNG files should be created. 3 April 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
@@ -147,7 +148,8 @@ PRO cgPS2Raster, ps_file, $
     SHOWCMD=showcmd, $
     SILENT=silent, $
     SUCCESS=success, $
-    TIFF=tiff
+    TIFF=tiff, $
+    WIDTH=width
 
    Compile_Opt idl2
    
@@ -182,6 +184,7 @@ PRO cgPS2Raster, ps_file, $
    SetDefaultValue, resize, 25
    SetDefaultValue, showcmd, 0, /BOOLEAN
    SetDefaultValue, silent, 0, /BOOLEAN
+   SetDefaultValue, width, 0
   
    ; Construct an output filename, if needed.
    basename = FSC_Base_Filename(ps_file, DIRECTORY=theDir, EXTENSION=theExtension)
@@ -210,7 +213,7 @@ PRO cgPS2Raster, ps_file, $
           ; Set up for various ImageMagick convert options.
           IF allowAlphaCmd THEN alpha_cmd =  allow_transparent ? '' : ' -alpha off' 
           density_cmd = ' -density ' + StrTrim(density,2)
-          resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
+          IF (N_Elements(width) EQ 0) || (width LE 0) THEN resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
                 
           ; Start ImageMagick convert command.
           cmd = 'convert'
@@ -233,15 +236,29 @@ PRO cgPS2Raster, ps_file, $
           ; resulting file to be in landscape mode.
           IF (1-portrait) THEN cmd = cmd + ' -rotate 90'
                 
-          ; Add the output filename. Make sure PNG files are 24-bit images.
-          IF filetype EQ 'PNG' $
-              THEN cmd = cmd + ' "' + 'PNG24:' +outfilename + '"' $
-              ELSE cmd = cmd + ' "' + outfilename + '"'
+                ; Add the output filename and check for PNG output.
+                IF ps_struct.convert EQ 'PNG' THEN BEGIN
+                
+                    ; Check to see whether 8-bit or 24-bit PNG files should be created.
+                    cgWindow_GetDefs, IM_PNG8=png8
+                    IF png8 THEN BEGIN
+                       cmd = cmd + ' "' + 'PNG8:' +outfilename + '"' 
+                    ENDIF ELSE BEGIN
+                       cmd = cmd + ' "' + 'PNG24:' +outfilename + '"' 
+                    ENDELSE
+                ENDIF ELSE cmd = cmd + ' "' + outfilename + '"'
           IF ~silent THEN BEGIN
               IF showcmd THEN Print, 'ImageMagick CONVERT command: ',  cmd
           ENDIF
           SPAWN, cmd, result, err_result
                 
+          ; Resize the output image to a particular width, if needed.
+          IF (N_Elements(width) NE 0) && (width GT 0) THEN BEGIN
+               cmd = 'convert ' + outfilename + ' -resize ' + StrTrim(width,2) + ' ' + outfilename
+               IF showcmd && (~ps_struct.quiet) THEN Print, cmd
+               SPAWN, cmd, result, err_result
+          ENDIF
+
           IF ~silent THEN BEGIN
               IF err_result[0] NE "" THEN BEGIN
                   FOR k=0,N_Elements(err_result)-1 DO Print, err_result[k]

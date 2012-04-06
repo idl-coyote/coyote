@@ -203,6 +203,7 @@
 ;         Over-zealous use of _STRICT_EXTRA when overplotting resulted in errors. Now use _EXTRA. 1 Jan 2012. DWF.
 ;         Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
 ;         Now allowing the user to draw in the "background" color, if the COLOR or AXISCOLOR is "BACKGROUND". 19 March 2012. DWF.
+;         Scalar input parameters are changed to 1-element vectors to avoid annoying error messages from PLOT. 6 April 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -329,6 +330,11 @@ PRO cgPlot, x, y, $
        ENDCASE
     
     ENDCASE
+    
+    ; If either of these input vectors are scalars, make them vectors.
+    IF N_Elements(dep) EQ 1 THEN dep = [dep]
+    IF N_Elements(indep) EQ 1 THEN indep = [indep]
+    
     
     ; Are we doing some kind of output?
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN

@@ -63,6 +63,9 @@
 ;        after conversion to a string. 3 January 2007. DWF.
 ;     Small changes to do all calculations in DOUBLE and LONG64. 22 February 2007. DWF.
 ;     Made it possible to pass a vector of numbers to the program. 18 August 2007. DWF.
+;     Fixed a problem exposed by using 10 or more digits in a double number in which
+;        I was having number overflow problems. Changed 10L^decimals to 10LL^decimals. 
+;        9 Apr 2012. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -137,7 +140,7 @@ FUNCTION Number_Formatter, number, DECIMALS=decimals
                -1: BEGIN ; No exponent.
 
                    ; Round to the number of decimals you want.
-                   fracpart = StrTrim(Round(Double('1.' + parts[1]) * (10L^decimals), /L64), 2)
+                   fracpart = StrTrim(Round(Double('1.' + parts[1]) * (10LL^decimals), /L64), 2)
                    IF StrMid(fracpart,0,1) EQ '2' THEN BEGIN
                      parts[0] = StrTrim(Long64(parts[0]) + 1, 2)
                    ENDIF
@@ -153,7 +156,7 @@ FUNCTION Number_Formatter, number, DECIMALS=decimals
                    p = StrSplit(parts[1], '[DdEe]', /RegEx, /Extract)
 
                    ; Round to the number of decimals you want.
-                   fracpart = StrTrim(Round(Double('1.' + p[0]) * (10L^decimals), /L64), 2)
+                   fracpart = StrTrim(Round(Double('1.' + p[0]) * (10LL^decimals), /L64), 2)
                    IF StrMid(fracpart,0,1) EQ '2' THEN BEGIN
                      parts[0] = StrTrim(Long64(parts[0]) + 1, 2)
                    ENDIF
@@ -194,7 +197,7 @@ FUNCTION Number_Formatter, number, DECIMALS=decimals
                -1: BEGIN ; No exponent.
 
                    ; Round to the number of decimals you want.
-                   fracpart = StrTrim(Round(Double('1.' + parts[1]) * (10L^decimals), /L64), 2)
+                   fracpart = StrTrim(Round(Double('1.' + parts[1]) * (10LL^decimals), /L64), 2)
                    IF StrMid(fracpart,0,1) EQ '2' THEN BEGIN
                      parts[0] = StrTrim(Long64(parts[0]) + 1, 2)
                    ENDIF
@@ -210,7 +213,7 @@ FUNCTION Number_Formatter, number, DECIMALS=decimals
                    p = StrSplit(parts[1], '[DdEe]', /RegEx, /Extract)
 
                    ; Round to the number of decimals you want.
-                   fracpart = StrTrim(Round(Double('1.' + p[0]) * (10L^decimals), /L64), 2)
+                   fracpart = StrTrim(Round(Double('1.' + p[0]) * (10LL^decimals), /L64), 2)
                    IF StrMid(fracpart,0,1) EQ '2' THEN BEGIN
                      parts[0] = StrTrim(Long64(parts[0]) + 1, 2)
                    ENDIF

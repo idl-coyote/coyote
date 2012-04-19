@@ -241,8 +241,8 @@ FUNCTION cgCmdWindow::Init, parent, $
    Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
    Motion_Events=motion_events, $   ; Set this keyword to allow motion events in the draw widget.
    Multi = multi, $                 ; Set this in the same way !P.Multi is used.
-   OXMargin = oxmargin, $           ; Set the !X.OMargin. A two element array.
-   OYMargin = oymargin, $           ; Set the !Y.OMargin. A two element array
+   OXMargin = xomargin, $           ; Set the !X.OMargin. A two element array.
+   OYMargin = yomargin, $           ; Set the !Y.OMargin. A two element array
    P1=p1, $                         ; The first postitional parameter in a graphics command loaded for display.
    P2=p2, $                         ; The sedond postitional parameter in a graphics command loaded for display.
    P3=p3, $                         ; The third postitional parameter in a graphics command loaded for display.
@@ -491,8 +491,8 @@ FUNCTION cgCmdWindow::Init, parent, $
     IF N_Elements(multi) NE 0 THEN BEGIN
        FOR j=0,N_Elements(multi)-1 DO self.pmulti[j] = multi[j]
     ENDIF ELSE self.pmulti = d_multi
-    IF N_Elements(wxomargin) NE 0 THEN self.xomargin = xomargin ELSE self.xomargin = d_xomargin
-    IF N_Elements(wyomargin) NE 0 THEN self.yomargin = yomargin ELSE self.yomargin = d_yomargin
+    IF N_Elements(xomargin) NE 0 THEN self.xomargin = xomargin ELSE self.xomargin = d_xomargin
+    IF N_Elements(yomargin) NE 0 THEN self.yomargin = yomargin ELSE self.yomargin = d_yomargin
     self.adjustsize = d_adjustsize
     self.aspect = aspect
     self.createParent = createParent

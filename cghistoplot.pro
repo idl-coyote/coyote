@@ -86,6 +86,8 @@
 ;    l64: in, optional, type=boolean, default=0                       
 ;       If set, the return value of HISTOGRAM are 64-bit integers, rather than
 ;       the default 32-bit integers.
+;    log: in, optional, type=boolean, default=0
+;       Set this keyword if you wish the histogram count to be represented on a logarithmic scale.
 ;    layout: in, optional, type=integer
 ;       This keyword specifies a grid with a graphics window and determines 
 ;       where the graphic should appear. The syntax of LAYOUT is a 3-element 
@@ -295,6 +297,7 @@ PRO cgHistoplot, $                  ; The program name.
    LAYOUT=layout, $                 ; Select the grid layout.
    LINE_FILL=line_fill, $           ; Set if you want line-filled polygons.
    LOCATIONS=locations, $
+   LOG=log, $
    MAXINPUT=maxinput, $             ; The maximum value to HISTOGRAM.
    MAX_VALUE=max_value, $           ; The maximum value to plot.
    MIN_VALUE=min_value, $           ; The minimum value to plot.
@@ -359,6 +362,7 @@ PRO cgHistoplot, $                  ; The program name.
                FILENAME=file, $                 ; For specifying a color name file.
                FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
                LAYOUT=layout, $
+               LOG=log, $
                MAX_VALUE=max_value, $           ; The maximum value to plot.
                MIN_VALUE=min_value, $           ; The minimum value to plot.
                MISSING=missing, $               ; The value that indicates "missing" data to be excluded from the histgram.
@@ -414,6 +418,7 @@ PRO cgHistoplot, $                  ; The program name.
                FILENAME=file, $                 ; For specifying a color name file.
                FREQUENCY=frequency, $           ; Plot relative frequency, rather than density.
                LAYOUT=layout, $
+               LOG=log, $
                MAX_VALUE=max_value, $           ; The maximum value to plot.
                MIN_VALUE=min_value, $           ; The minimum value to plot.
                MISSING=missing, $               ; The value that indicates "missing" data to be excluded from the histgram.
@@ -665,6 +670,7 @@ PRO cgHistoplot, $                  ; The program name.
    frequency = Keyword_Set(frequency)
    line_fill = Keyword_Set(line_fill)
    IF line_fill THEN fillpolygon = 1
+   log = Keyword_Set(log)
    fillpolygon = Keyword_Set(fillpolygon)
    IF fillpolygon THEN BEGIN
       IF N_Elements(orientation) EQ 0 THEN orientation = 0
@@ -728,8 +734,14 @@ PRO cgHistoplot, $                  ; The program name.
    ENDIF
 
    ; Calculate the range of the plot output.
-   IF N_Elements(min_value) EQ 0 THEN min_value = 0
-   IF N_Elements(max_value) EQ 0 THEN max_value = Max(histData) * 1.05
+   IF N_Elements(min_value) EQ 0 THEN BEGIN
+      IF Keyword_Set(log) THEN min_value = 1 ELSE min_value = 0
+   ENDIF
+   IF N_Elements(max_value) EQ 0 THEN BEGIN
+      IF Keyword_Set(log) $
+        THEN max_value = Max(histData) * 1.25 $
+        ELSE max_value = Max(histData) * 1.05
+   ENDIF
    IF Keyword_Set(rotate) THEN BEGIN
        xmin = min_value
        xmax = max_value
@@ -757,10 +769,12 @@ PRO cgHistoplot, $                  ; The program name.
    xrange = [xmin, xmax]
    yrange = [ymin, ymax]
    IF ~Keyword_Set(overplot) THEN BEGIN
-       Plot, [0,0], xrange=xrange, yrange=yrange, $             
+       IF Keyword_Set(rotate) THEN BEGIN
+          Plot, [0,0], xrange=xrange, yrange=yrange, $             
              Background=backColor, $
              Color=axisColor, $                       ; The color of the axes.
              Charsize=charsize, $
+             XLOG=log, $
              NoData=1, $                              ; Draw the axes only. No data.
              NOERASE=noerase, $
              XTHICK=thick, $                          ; Axes thicker, if needed.
@@ -771,6 +785,23 @@ PRO cgHistoplot, $                  ; The program name.
              XTickformat='(A1)', $                    ; No format. Nothing drawn
              YTickformat='(A1)', $                    ; No format. Nothing drawn
              _Strict_Extra=extra                      ; Pass any extra PLOT keywords.
+       ENDIF ELSE BEGIN
+          Plot, [0,0], xrange=xrange, yrange=yrange, $             
+             Background=backColor, $
+             Color=axisColor, $                       ; The color of the axes.
+             Charsize=charsize, $
+             YLOG=log, $
+             NoData=1, $                              ; Draw the axes only. No data.
+             NOERASE=noerase, $
+             XTHICK=thick, $                          ; Axes thicker, if needed.
+             YTHICK=thick, $
+             XStyle=5, $                              ; Exact axis scaling. No autoscaled axes.
+             YMinor=0, $                              ; No minor tick mark on X axis.
+             YStyle=5, $                              ; Exact axis scaling. No autoscaled axes.
+             XTickformat='(A1)', $                    ; No format. Nothing drawn
+             YTickformat='(A1)', $                    ; No format. Nothing drawn
+             _Strict_Extra=extra                      ; Pass any extra PLOT keywords.
+        ENDELSE
    ENDIF
 
    ; Save the after-plot system variables, if doing multiple plots.
@@ -804,10 +835,18 @@ PRO cgHistoplot, $                  ; The program name.
          FOR j=0,N_Elements(histdata)-1 DO BEGIN
             IF Keyword_Set(rotate) THEN BEGIN
                y = [start, start, endpt, endpt, start]
-               x = [0, histdata[j], histdata[j], 0, 0]
+               IF log THEN BEGIN
+                  x = [1, histdata[j], histdata[j], 1, 1]
+               ENDIF ELSE BEGIN
+                  x = [0, histdata[j], histdata[j], 0, 0]
+               ENDELSE
             ENDIF ELSE BEGIN
                x = [start, start, endpt, endpt, start]
-               y = [0, histdata[j], histdata[j], 0, 0]
+               IF log THEN BEGIN
+                  y = [1, histdata[j], histdata[j], 1, 1]
+               ENDIF ELSE BEGIN
+                  y = [0, histdata[j], histdata[j], 0, 0]
+               ENDELSE
             ENDELSE
             fillcolor = polycolor[j MOD ncolors]
             orient = orientation[j MOD norient]
@@ -830,10 +869,18 @@ PRO cgHistoplot, $                  ; The program name.
          FOR j=0,N_Elements(histdata)-1 DO BEGIN
             IF Keyword_Set(rotate) THEN BEGIN
                y = [start, start, endpt, endpt, start]
-               x = [0, histdata[j], histdata[j], 0, 0]
+               IF log THEN BEGIN
+                   x = [1, histdata[j], histdata[j], 1, 1]
+               ENDIF ELSE BEGIN
+                   x = [0, histdata[j], histdata[j], 0, 0]
+               ENDELSE
             ENDIF ELSE BEGIN
                x = [start, start, endpt, endpt, start]
-               y = [0, histdata[j], histdata[j], 0, 0]
+               IF log THEN BEGIN
+                  y = [1, histdata[j], histdata[j], 1, 1]
+               ENDIF ELSE BEGIN
+                  y = [0, histdata[j], histdata[j], 0, 0]
+               ENDELSE
             ENDELSE
             fillcolor = polycolor[j MOD ncolors]
             PolyFill, x, y, COLOR=fillColor, NOCLIP=0
@@ -860,6 +907,7 @@ PRO cgHistoplot, $                  ; The program name.
              Background=backColor, $
              Charsize=charsize, $
              Color=axisColor, $                       ; The color of the axes.
+             XLOG=log, $
              NoData=1, $                              ; Draw the axes only. No data.
              XThick=thick, $  
              YThick=thick, $
@@ -868,6 +916,8 @@ PRO cgHistoplot, $                  ; The program name.
              XStyle=1, $                              ; Exact axis scaling. No autoscaled axes.
              XTickformat=xtickformat, $               ; Y Tickformat
              YTickformat=ytickformat, $
+             XTickV=tickV, $
+             XTicks = ticks, $
              XTitle=xtitle, $                         ; Y Title
              YTitle=ytitle, $
              NoErase=1, $
@@ -878,6 +928,7 @@ PRO cgHistoplot, $                  ; The program name.
              Background=backColor, $
              Charsize=charsize, $
              Color=axisColor, $                       ; The color of the axes.
+             YLOG=log, $
              NoData=1, $                              ; Draw the axes only. No data.
              XThick=thick, $  
              YThick=thick, $
@@ -886,6 +937,8 @@ PRO cgHistoplot, $                  ; The program name.
              YStyle=1, $                              ; Exact axis scaling. No autoscaled axes.
              XTickformat=xtickformat, $               ; Y Tickformat
              YTickformat=ytickformat, $
+             YTickV=tickv, $
+             YTicks = ticks, $
              XTitle=xtitle, $                         ; Y Title
              YTitle=ytitle, $
              NoErase=1, $
@@ -894,11 +947,21 @@ PRO cgHistoplot, $                  ; The program name.
         ENDELSE
              
         IF Keyword_Set(rotate) THEN BEGIN
-            Axis, !X.CRange[1], !Y.CRange[0], YAXIS=1, YTickformat='(A1)', YMINOR=1, $
-                COLOR=axisColor, YSTYLE=1, YTHICK=thick, CHARSIZE=charsize
+            IF log THEN BEGIN
+                Axis, 10^!X.CRange[1], 10^!Y.CRange[0], YAXIS=1, YTickformat='(A1)', YMINOR=1, $
+                    COLOR=axisColor, YSTYLE=1, YTHICK=thick, CHARSIZE=charsize, XLOG=1
+            ENDIF ELSE BEGIN
+                Axis, !X.CRange[1], !Y.CRange[0], YAXIS=1, YTickformat='(A1)', YMINOR=1, $
+                    COLOR=axisColor, YSTYLE=1, YTHICK=thick, CHARSIZE=charsize
+            ENDELSE
         ENDIF ELSE BEGIN
+            IF log THEN BEGIN
+            Axis, 10^!X.CRange[0], 10^!Y.CRange[1], XAXIS=1, XTickformat='(A1)', XMINOR=1, $
+                COLOR=axisColor, XSTYLE=1, XTHICK=thick, CHARSIZE=charsize, /YLOG
+            ENDIF ELSE BEGIN
             Axis, !X.CRange[0], !Y.CRange[1], XAXIS=1, XTickformat='(A1)', XMINOR=1, $
                 COLOR=axisColor, XSTYLE=1, XTHICK=thick, CHARSIZE=charsize
+            ENDELSE
         ENDELSE
     ENDIF
     
@@ -909,7 +972,7 @@ PRO cgHistoplot, $                  ; The program name.
         start = xrange[0] + binsize
     ENDELSE
     endpt = start + binsize
-    ystart = 0
+    If log THEN ystart = 1 ELSE ystart = 0
     jend = N_Elements(histdata)-1
     FOR j=0,jend DO BEGIN
         IF Keyword_Set(outline) THEN BEGIN
@@ -917,19 +980,19 @@ PRO cgHistoplot, $                  ; The program name.
                PLOTS, [ystart, histdata[j]], [start, start], COLOR=dataColor, THICK=thick, NOCLIP=0
                PLOTS, [histdata[j], histdata[j]], [start, endpt], COLOR=dataColor, THICK=thick, NOCLIP=0
                IF j EQ jend THEN $
-                  Plots, [histdata[j], 0], [endpt, endpt], COLOR=dataColor, THICK=thick, NOCLIP=0
+                  Plots, [histdata[j], ystart], [endpt, endpt], COLOR=dataColor, THICK=thick, NOCLIP=0
            ENDIF ELSE BEGIN
                PLOTS, [start, start], [ystart, histdata[j]], COLOR=dataColor, THICK=thick, NOCLIP=0
                PLOTS, [start, endpt], [histdata[j], histdata[j]], COLOR=dataColor, THICK=thick, NOCLIP=0
                IF j EQ jend THEN $
-                  Plots, [endpt, endpt], [histdata[j], 0], COLOR=dataColor, THICK=thick, NOCLIP=0
+                  Plots, [endpt, endpt], [histdata[j], ystart], COLOR=dataColor, THICK=thick, NOCLIP=0
            ENDELSE
            start = start + binsize
            endpt = start + binsize
            ystart = histdata[j]
         ENDIF ELSE BEGIN
            x = [start, start, endpt, endpt, start]
-           y = [0, histdata[j], histdata[j], 0, 0]
+           y = [ystart, histdata[j], histdata[j], ystart, ystart]
            IF Keyword_Set(rotate) THEN BEGIN
               PLOTS, y, x, COLOR=dataColor, NOCLIP=0, THICK=thick
            ENDIF ELSE BEGIN

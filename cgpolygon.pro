@@ -74,6 +74,10 @@
 ;         Set this keyword to draw a filled polygon, rather than an open polygon.
 ;     normal: in, optional, type=boolean, default=0
 ;         Set to indicate the polygon vertices are in normalized coordinates.
+;     position: in, optional, type=fltarr(4)
+;         Set this keyword to a four-element position array of normalized coordinates
+;         to fill a rectangular area on the graphics display. The normal input parameters
+;         are ignored if this keyword is set.
 ;     window: in, optional, type=boolean, default=0
 ;         Set this keyword to add the command to the current cgWindow application.
 ;     _ref_extra: in, optional, type=appropriate
@@ -99,6 +103,8 @@
 ; :History:
 ;     Change History::
 ;        Written, 26 March 2012. David Fanning.
+;        Added Position keyword to allow a fill of a particular portion of the graphics 
+;            window. 20 Apr 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -109,6 +115,7 @@ PRO cgPolygon, x, y, z, $
     FILL=fill, $
     NORMAL=normal, $
     DEVICE=device, $
+    POSITION=position, $
     WINDOW=window, $
      _REF_EXTRA=extra
 
@@ -123,7 +130,7 @@ PRO cgPolygon, x, y, z, $
     ENDIF
 
     ; Did user pass parameters?
-    IF N_Params() EQ 0 THEN BEGIN
+    IF (N_Params() EQ 0) AND (N_Elements(position) EQ 0) THEN BEGIN
         Print, 'USE SYNTAX: cgColorFill, x, y, [z]'
         RETURN
     ENDIF
@@ -137,6 +144,7 @@ PRO cgPolygon, x, y, z, $
             FILL=fill, $
             NORMAL=normal, $
             DEVICE=device, $
+            POSITION=position, $
             ADDCMD=1, $
             _EXTRA=extra
             
@@ -166,6 +174,15 @@ PRO cgPolygon, x, y, z, $
     ; Are the colors strings? 
     IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = cgColor(thisColor)
     IF Size(fillColor, /TNAME) EQ 'STRING' THEN fillColor = cgColor(fillColor)
+    
+    ; Are we filling a POSITION in the window?
+    IF N_Elements(position) NE 0 THEN BEGIN
+       p = position
+       x = [p[0], p[0], p[2], p[2], p[0]]
+       y = [p[1], p[3], p[3], p[1], p[1]]
+       normal = 1
+       device = 0
+    ENDIF
     
     ; Fill the polygon.
     CASE N_Elements(z) OF

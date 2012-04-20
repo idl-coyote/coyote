@@ -326,6 +326,8 @@
 ;        Fixed a problem with color palettes by defining NLEVELS according to the number of colors
 ;            in the palette. 19 March 2012. DWF.
 ;        Now allowing the user to draw in the "background" color, if the COLOR or AXISCOLOR is "BACKGROUND". 19 March 2012. DWF.
+;        The axis repair change on 9 March was not working in multi plots because the plot was already
+;            advanced. Added a fix to make sure the repair is to the correct multi plot. 20 April 2012. DWF.           
 ;                   
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -1009,15 +1011,30 @@ PRO cgContour, data, x, y, $
         !P = afterP
     ENDIF
         
-    ; If we filled the contour plot, we need to repair the axes. 
-    IF (~Keyword_Set(overplot)) && (Keyword_Set(fill) || Keyword_Set(cell_fill)) THEN BEGIN  
+    ; If we filled the contour plot, we need to repair the axes. But, in multiple plot we
+    ; have already advanced to the next position. We need to restore the position, do our
+    ; repair work, and then advance to the next position again.
+    IF (~Keyword_Set(overplot)) && (Keyword_Set(fill) || Keyword_Set(cell_fill)) THEN BEGIN 
+        IF Total(!P.Multi) NE 0 THEN BEGIN
+           fillx = !X
+           filly = !Y
+           fillp = !P
+           !X = bangx
+           !Y = bangy
+           !P = bangP
+        ENDIF
         Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
             BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
             POSITION=position, _STRICT_EXTRA=extra, T3D=t3d, /NODATA, $
             XTHICK=xthick, YTHICK=ythick, FONT=font, C_CHARSIZE=c_charsize, $
             XTICKLEN=xticklen, YTICKLEN=yticklen, XTICKV=xtickv, XTICKS=xticks, $
             YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip, /NOERASE
-    ENDIF
+        IF Total(!P.Multi) NE 0 THEN BEGIN
+           !X = fillx
+           !Y = filly
+           !P = fillp
+        ENDIF
+     ENDIF
     
     ; Restore the decomposed color state if you can.
     SetDecomposedState, currentState

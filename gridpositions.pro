@@ -48,6 +48,14 @@
 ;
 ;     ORDER:            If this keyword is set to 0, the positions are calculated in row order. If
 ;                       set to 1, the positions are calculated in column order.
+;                       
+;     PS_KEYWORDS:      Rather than specifying individual PostScript keywords (e.g., XSIZE, YSIZE,
+;                       LANDSCAPE, etc), it is much easier to pass a structure of PostScript keywords
+;                       as collected by PSConfig or PS_Start. This keyword allows you to pass such
+;                       a structure of PostScript keywords. For example, like this:
+;                       
+;                           PS_Start, 'myfile.ps', Keywords=keywordStruct
+;                           positions = GridPositions(PS_Keywords=keywordStruct)
 ;
 ;     XEXTENT:          A one or two element array, with values from 0 to 1, giving the extent of
 ;                       the grid in the X direction. For example XEXTENT=[.2, .8] will position
@@ -111,6 +119,19 @@
 ;           cgImage, BytScl(Hist_Equal(image)), POSITION=positions[*,2], /NoErase
 ;           cgImage, BytScl(Median(image,7)), POSITION=positions[*,3], /NoErase
 ;
+;       To do the same thing in a PostScript file:
+;       
+;           PS_Start, 'test.ps', Keywords=psStruct
+;           positions = GridPositions(2, 2, YEXTENT=[0.15,0.85], $
+;              XEXTENT=[0.2,0.8], PS_KEYWORDS=psStruct)
+;           image = cgDemoData(11)
+;           cgErase, 'rose'
+;           cgLoadCt, 25, /Brewer
+;           cgImage, image, POSITION=positions[*,0]
+;           cgImage, BytScl(Sobel(image)), POSITION=positions[*,1], /NoErase
+;           cgImage, BytScl(Hist_Equal(image)), POSITION=positions[*,2], /NoErase
+;           cgImage, BytScl(Median(image,7)), POSITION=positions[*,3], /NoErase
+;           PS_End ; /PNG, WIDTH=600
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -123,6 +144,7 @@
 ;          PostScript device through the GridPositions interface. This is strictly a 
 ;          convenience, and not the way I would recommend using the program, to be truthful. 
 ;          29 Aug 2011. DWF
+;       Added PS_Keywords keyword to allow use of PSConfig and PS_Start with the program. 24 Apr 2012. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -155,6 +177,7 @@ Function GridPositions, columns, rows, $
     INCHES=inches, $
     LANDSCAPE=landscape, $
     ORDER=order, $
+    PS_Keywords=ps_keywords, $
     XEXTENT=xextent, $
     XMARGIN=xmargin, $
     XSIZE=xsize, $
@@ -222,7 +245,7 @@ Function GridPositions, columns, rows, $
         'PS': BEGIN
              Print, 'Resolution: ', [xs,ys]
               Device, XSIZE=xs, YSIZE=ys, INCHES=inches, PORTRAIT=1-landscape, $
-                 LANDSCAPE=landscape, _STRICT_EXTRA=extra
+                 LANDSCAPE=landscape, _Extra=ps_keywords
               END
               
         'Z':  BEGIN
@@ -248,8 +271,7 @@ Function GridPositions, columns, rows, $
     
     ; Clean up
     CASE !D.NAME OF
-        'PS': Device, XSIZE=xsize, YSIZE=ysize, INCHES=inches, PORTRAIT=1-landscape, $
-                 LANDSCAPE=landscape, _STRICT_EXTRA=extra
+        'PS': 
         'Z':       
         ELSE: BEGIN
               WDelete, !D.Window

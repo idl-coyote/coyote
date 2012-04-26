@@ -176,6 +176,10 @@
 ;    rotate: in, optional, type=boolean, default=0                     
 ;       Set this keyword to cause the histogram bins to be drawn from left to right, rather 
 ;       than from bottom to top.
+;    smooth: in, optional, type=integer, default=0
+;        Set this keyword to an odd positive integer to smooth the histogram output before plotting.
+;        The integer will set the width of a smoothing box to be applied to the histogram data with
+;        the Smooth function.
 ;    spacing: in, optional
 ;       The spacing of fill line if the 'LINE_FILL` keyword is set. (See POLYFILL documentation.)
 ;    thick: in, optional, type=integer, default=1   
@@ -277,9 +281,12 @@
 ;       Incomplete implementation of new color selection scheme, fixed. 30 Dec 2011. DWF.
 ;       The change of 17 Dec 2011 was incorrect, as I misunderstood the problem. Restored original. 30 Dec 2011. DWF.
 ;       Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
-;;
+;       Added a SMOOTH keyword. 26 April 2012. DWF.
+;       Small fix (CR missing!) to allow overplotting in cgWindow. 26 April 2012. DWF.
+;       The Outline keyword was incorrectly drawing the last histogram bin outline. Fixed. 26 April 2012. DWF.
+;       
 ; :Copyright:
-;     Copyright (c) 2007-2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgHistoplot, $                  ; The program name.
    data, $                          ; The data to draw a histogram of.
@@ -320,6 +327,7 @@ PRO cgHistoplot, $                  ; The program name.
    PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
    REVERSE_INDICES=ri, $
    ROTATE=rotate, $                 ; Rotate plot so histogram bars are drawn left to right.
+   SMOOTH=smooth, $                 ; Run a smoothing filter of this width over the histogram data before plotting.
    SPACING=spacing, $               ; The spacing of filled lines.
    THICK=thick, $                   ; Set to draw thicker lines and axes.
    WINDOW=window, $                 ; Display this in an cgWindow.
@@ -366,11 +374,13 @@ PRO cgHistoplot, $                  ; The program name.
                MAX_VALUE=max_value, $           ; The maximum value to plot.
                MIN_VALUE=min_value, $           ; The minimum value to plot.
                MISSING=missing, $               ; The value that indicates "missing" data to be excluded from the histgram.
-               NOERASE=noerase, $               ; Set this keyword to avoid erasing when plot is drawn.               OPLOT=overplot, $                ; Set if you want overplotting.
+               NOERASE=noerase, $               ; Set this keyword to avoid erasing when plot is drawn. 
+               OPLOT=overplot, $
                OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
                OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
                PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
                ROTATE=rotate, $
+               SMOOTH=smooth, $
                THICK=thick, $                   ; Set to draw thicker lines and axes.
                XTITLE=xtitle, $
                YTITLE=ytitle, $                 ; The Y title.
@@ -428,6 +438,7 @@ PRO cgHistoplot, $                  ; The program name.
                OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
                PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
                ROTATE=rotate, $
+               SMOOTH=smooth, $
                THICK=thick, $                   ; Set to draw thicker lines and axes.
                XTITLE=xtitle, $
                YTITLE=ytitle, $                 ; The Y title.
@@ -461,7 +472,7 @@ PRO cgHistoplot, $                  ; The program name.
                REPLACECMD=replaceCmd
             RETURN
     ENDIF
-    
+
     ; Are we doing some kind of output?
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
@@ -576,9 +587,12 @@ PRO cgHistoplot, $                  ; The program name.
    ; Set up PostScript device for working with colors.
    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
-   ; Check for positional parameter.
+   ; Check for parameters.
    IF N_Elements(data) EQ 0 THEN Message, 'Must pass data to histogram.'
    IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize()
+   IF N_Elements(smooth) NE 0 THEN BEGIN
+     IF (smooth MOD 2) NE 0 THEN smooth = smooth + 1
+   ENDIF
    
    ; What kind of data are we doing a HISTOGRAM on?
    dataType = Size(data, /TYPE)
@@ -688,7 +702,7 @@ PRO cgHistoplot, $                  ; The program name.
    
    ; If needed create a window first, so the drawing
    ; colors are correct for the window you want to draw into.
-   IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
+   IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) && ~Keyword_Set(overplot) THEN cgDisplay
    axisColor = cgColor(axisColorName, FILE=file)
    dataColor = cgColor(datacolorName, FILE=file)
    backColor = cgColor(backColorName, FILE=file)
@@ -725,6 +739,11 @@ PRO cgHistoplot, $                  ; The program name.
       OMAX=omax, $
       OMIN=omin, $
       REVERSE_INDICES=ri)
+
+   ; Do you need to smooth the data?
+   IF N_Elements(smooth) NE 0 THEN histdata = Smooth(histdata, smooth)
+   
+   ; Are you plotting the frequency rather than the count?
    IF frequency THEN histdata = Float(histdata)/N_Elements(_data)
    
    ; Need a probability distribution?
@@ -977,15 +996,17 @@ PRO cgHistoplot, $                  ; The program name.
     FOR j=0,jend DO BEGIN
         IF Keyword_Set(outline) THEN BEGIN
            IF Keyword_Set(rotate) THEN BEGIN
-               PLOTS, [ystart, histdata[j]], [start, start], COLOR=dataColor, THICK=thick, NOCLIP=0
-               PLOTS, [histdata[j], histdata[j]], [start, endpt], COLOR=dataColor, THICK=thick, NOCLIP=0
-               IF j EQ jend THEN $
-                  Plots, [histdata[j], ystart], [endpt, endpt], COLOR=dataColor, THICK=thick, NOCLIP=0
+               Plots, [ystart, histdata[j]], [start, start], COLOR=dataColor, THICK=thick, NOCLIP=0
+               Plots, [histdata[j], histdata[j]], [start, endpt], COLOR=dataColor, THICK=thick, NOCLIP=0
+               IF j EQ jend THEN BEGIN
+                  Plots, [histdata[j], xrange[0]], [endpt, endpt], COLOR=dataColor, THICK=thick, NOCLIP=0
+               ENDIF
            ENDIF ELSE BEGIN
-               PLOTS, [start, start], [ystart, histdata[j]], COLOR=dataColor, THICK=thick, NOCLIP=0
-               PLOTS, [start, endpt], [histdata[j], histdata[j]], COLOR=dataColor, THICK=thick, NOCLIP=0
-               IF j EQ jend THEN $
-                  Plots, [endpt, endpt], [histdata[j], ystart], COLOR=dataColor, THICK=thick, NOCLIP=0
+               Plots, [start, start], [ystart, histdata[j]], COLOR=dataColor, THICK=thick, NOCLIP=0
+               Plots, [start, endpt], [histdata[j], histdata[j]], COLOR=dataColor, THICK=thick, NOCLIP=0
+               IF j EQ jend THEN BEGIN
+                  Plots, [endpt, endpt], [yrange[0], histdata[j]], COLOR=dataColor, THICK=thick, NOCLIP=0
+               ENDIF
            ENDELSE
            start = start + binsize
            endpt = start + binsize

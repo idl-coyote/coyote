@@ -437,7 +437,7 @@ PRO FSC_ZPlot, x, y, $
     xlog = Keyword_Set(xlog)
     ylog = Keyword_Set(ylog)
 
-    ; Create a top-level base for this program. No resizing of this base.
+    ; Create a top-level base for this program.
     tlb = Widget_Base(Title='ZPlot Window', TLB_Size_Events=1)
 
     ; The only thing in the top-level base is a draw widget.

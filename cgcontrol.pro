@@ -67,18 +67,22 @@
 ;          Set this keyword to the name of a bitmap file to create automatically from the window.
 ;          Using this keyword is a way to create a bitmap file programmatically from a cgWindow application.
 ;          The raster file will be created via ImageMagick if im_raster has been set (default).
+;          Depreciated now in favor of the `Output` keyword.
 ;     create_gif: in, optional, type='string', default='cgwindow.gif'
 ;          Set this keyword to the name of a GIF file to create automatically from the window.
 ;          Using this keyword is a way to create a GIF file programmatically from a cgWindow application.
 ;          The raster file will be created via ImageMagick if im_raster has been set (default).
+;          Depreciated now in favor of the `Output` keyword.
 ;     create_jpeg: in, optional, type='string', default='cgwindow.jpeg'
 ;          Set this keyword to the name of a JPEG file to create automatically from the window.
 ;          Using this keyword is a way to create a JPEG file programmatically from a cgWindow application.
 ;          The raster file will be created via ImageMagick if im_raster has been set (default).
+;          Depreciated now in favor of the `Output` keyword.
 ;     create_pdf: in, optional, type='string', default='cgwindow.pdf'
 ;          Set this keyword to the name of a PNG file to create automatically from the window.
 ;          Using this keyword is a way to create a PDF file programmatically from a cgWindow application.
 ;          The PDF file will be created via the Coyote Graphics program cgPS2PDF.
+;          Depreciated now in favor of the `Output` keyword.
 ;     create_png: in, optional, type='string', default='cgwindow.png'
 ;          Set this keyword to the name of a PNG file to create automatically from the window.
 ;          Using this keyword is a way to create a PNG file programmatically from a cgWindow application.
@@ -86,10 +90,12 @@
 ;     create_ps: in, optional, type='string', default='cgwindow.ps'
 ;          Set this keyword to the name of a PostScript file to create automatically from the window.
 ;          Using this keyword is a way to create a PostScript file programmatically from a cgWindow application.
+;          Depreciated now in favor of the `Output` keyword.
 ;     create_tiff: in, optional, type='string', default='cgwindow.tiff'
 ;          Set this keyword to the name of a TIFF file to create automatically from the window.
 ;          Using this keyword is a way to create a TIFF file programmatically from a cgWindow application.
 ;          The raster file will be created via ImageMagick if im_raster has been set (default).
+;          Depreciated now in favor of the `Output` keyword.
 ;     delay: in, optional, type=float
 ;         Set this keyword to the amount of "delay" you want between commands in the command list.
 ;     deletecmd: in, optional, type=boolean

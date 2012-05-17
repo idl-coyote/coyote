@@ -153,7 +153,7 @@ FUNCTION cgZPlot::INIT, x, y, $
     ENDIF
     
     ; Set parameters and arguments.
-    IF N_Elements(zoomfactor) EQ 0 THEN zoomfactor = 0.01 > 0.05 < 0.25
+    IF N_Elements(zoomfactor) EQ 0 THEN zoomfactor = 0.05 ELSE zoomfactor = 0.01 > zoomfactor < 0.25
     
     ; Call the superclass object INIT method.
     IF ~self -> cgGraphicsKeywords::INIT(_STRICT_EXTRA=extra) THEN RETURN, 0   
@@ -187,6 +187,7 @@ FUNCTION cgZPlot::INIT, x, y, $
     self.xlog = Ptr_New(/Allocate_Heap)
     self.ylog = Ptr_New(/Allocate_Heap)
     self.ynozero = Ptr_New(/Allocate_Heap)
+    self.undoList = Obj_New('LinkedList')
     
     self -> SetProperty, $
         INDEP=indep, $
@@ -229,11 +230,14 @@ FUNCTION cgZPlot::INIT, x, y, $
     Widget_Control, self.drawID, Get_Value=wid
     self.wid = wid
      
-    self -> Draw
-    
+    ; Set object properties.
+    self.drag = 0
     self.orig_xrange = !X.CRange
     self.orig_yrange = !Y.CRange
     self.zoomfactor = zoomfactor
+    
+    ; Draw the plot.
+    self -> Draw
     
     XManager, 'cgzplot', self.tlb, /No_Block, Event_Handler='cgZPlot_Events', $
        Cleanup='cgZPlot_Cleanup'
@@ -265,6 +269,7 @@ PRO cgZPlot::CLEANUP
     Ptr_Free, self.xlog
     Ptr_Free, self.ylog
     Ptr_Free, self.ynozero
+    Obj_Destroy, self.undoList
     
     ; Call the superclass CLEANUP method.
     self -> cgGraphicsKeywords::CLEANUP
@@ -371,6 +376,7 @@ PRO cgZPlot::Button_Events, event
           END
        1: BEGIN ; Panning
           Widget_Control, self.drawID, Set_UValue={method:'Pan_Events', object:self}
+          self. drag = 1
           END
    ENDCASE
    
@@ -406,6 +412,7 @@ PRO cgZPlot::Draw
    
     WSet, self.pixmapID
     cgErase
+    
    
     ; Draw the plot itself.
     self -> DrawPlot
@@ -422,6 +429,9 @@ PRO cgZPlot::Draw
     ; We need to save the current position of the plot in the window,
     ; so we can determine if clicks are inside or outside this position.
     self.current_position = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
+    
+    ; Save the current configuration on the undoList.
+    IF self.drag EQ 0 THEN self -> UndoList
     
 END
 
@@ -779,7 +789,7 @@ PRO cgZPlot::Pan_Events, event
       Widget_Control, self.drawID, Draw_Motion_Events=0
       Widget_Control, self.drawID, /Clear_Events
       Widget_Control, self.drawID, Set_UValue={method:'Button_Events', object:self}
-      
+      self.drag = 0
     ENDIF
     
     ; Determine the end points of the pan and draw the plot. We are panning only in
@@ -952,6 +962,72 @@ END
 
 
 ;+
+; This method performs the UNDO action and restores the plot to
+; it's previous condition.
+;-
+PRO cgZPlot::Undo
+
+   ; Standard error handling.
+   Catch, theError
+   IF theError NE 0 THEN BEGIN
+      Catch, /Cancel
+      void = Error_Message()
+      RETURN
+   ENDIF
+   
+   ; Get the list count. Return if there is nothing in the list
+   listCnt = self.undoList -> Get_Count()
+   IF listCnt EQ 0 THEN RETURN
+   
+   ; Remove the last item from the list.
+   IF listCnt GT 1 THEN self.undoList -> Delete
+   
+   ; Get the last item on the list.
+   item = self.undoList -> Get_Item()
+   
+   ; Now remove this item from the list, too, if it is not the last one
+   IF listCnt GT 1 THEN self.undoList -> Delete
+   
+   ; Set the ranges and redraw the plot.
+   IF listCnt GE 1 THEN BEGIN
+     *self.xrange = item.xrange
+     *self.yrange = item.yrange
+     self -> Draw
+   ENDIF
+   
+END
+
+
+;+
+; This method maintains the UNDO list. The list has a maximum undo capacity of 50.
+;-
+PRO cgZPlot::UndoList
+
+   ; Standard error handling.
+   Catch, theError
+   IF theError NE 0 THEN BEGIN
+      Catch, /Cancel
+      void = Error_Message()
+      RETURN
+   ENDIF
+   
+   ; Prepare the structure that will be stored on the list.
+   IF N_Elements(*self.xrange) EQ 0 THEN *self.xrange = self.orig_xrange
+   IF N_Elements(*self.yrange) EQ 0 THEN *self.yrange = self.orig_yrange
+   undoStruct = {xrange:*self.xrange, yrange:*self.yrange}
+   
+   ; How many items are on the list already? If 50, delete the first
+   ; item on the list.
+   listCnt = self.undoList -> Get_Count()
+   IF listCnt GE 50 THEN self.undoList -> Delete, 0
+   
+   ; Add the item to the list.
+   self.undoList -> Add, undoStruct
+
+END
+
+
+;+
 ; This event handler method allows the user to create a rubber-band box for zooming
 ; into the line plot.
 ; 
@@ -1101,6 +1177,8 @@ PRO cgZPlot__Define, class
              orig_yrange: DblArr(2), $
              current_position: DblArr(4), $
              zoomFactor: 0.0, $
+             undoList: Obj_New(), $
+             drag: 0B, $               ; A flag that tells me if I am panning or not. Necessary for UNDO.
              
              indep: Ptr_New(), $
              dep: Ptr_New(), $

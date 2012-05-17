@@ -90,6 +90,7 @@
 ; :History:
 ;     Change History::
 ;        Written 16 May 2012, by David W. Fanning.
+;        Added UNDO capability arbitrarily set to 50 items. 17 May 2012. DWF.
 ;-
 
 ;+
@@ -218,7 +219,10 @@ FUNCTION cgZPlot::INIT, x, y, $
     button = Widget_Button(output, Value='PNG File', UVALUE={method:'FileOutput', object:self})
     button = Widget_Button(output, Value='TIFF File', UVALUE={method:'FileOutput', object:self})
     
-    button =  Widget_Button(fileID, Value='Quit', UVALUE={method:'Quit', object:self})
+    button =  Widget_Button(fileID, Value='Undo', ACCELERATOR="Ctrl+U", $
+        UVALUE={method:'Undo', object:self}, /Separator)
+    
+    button =  Widget_Button(fileID, Value='Quit', UVALUE={method:'Quit', object:self}, /Separator)
     
     retain = (StrUpCase(!Version.OS_Family) EQ 'UNIX') ? 2 : 1
     self.drawID = Widget_Draw(self.tlb, XSize=self.xsize, YSize=self.ysize, $
@@ -672,6 +676,8 @@ END
 ;         The minimum value to plot. 
 ;     polar: out, optional, type=boolean
 ;         Set if a polar plot is to be drawn.
+;     undolist: out, optional, type=objref
+;         The LinkedList object that maintains the undo list.
 ;     xlog: out, optional, type=boolean
 ;         Set if a logarithmic X axis is used in the plot.
 ;     ylog: out, optional, type=boolean
@@ -691,6 +697,7 @@ PRO cgZPlot::GetProperty, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
         POLAR=polar, $
+        UNDOLIST=undolist, $
         XLOG=xlog, $
         YLOG=ylog, $
         YNOZERO=ynozero, $
@@ -964,8 +971,12 @@ END
 ;+
 ; This method performs the UNDO action and restores the plot to
 ; it's previous condition.
+; 
+; :Params:
+;    event: in, optional, type=structure
+;        The event structure passed by the window manager. Not used in this method.
 ;-
-PRO cgZPlot::Undo
+PRO cgZPlot::Undo, event
 
    ; Standard error handling.
    Catch, theError

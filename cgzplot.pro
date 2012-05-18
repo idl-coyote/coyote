@@ -1091,15 +1091,17 @@ PRO cgZPlot::Zoom_Events, event
            yd = Reform(xy[1,*])
            
            ; The range depends on whether you are using log axes or not.
-           IF self.xlog THEN BEGIN
-              x = 10^!X.CRange(0) > xd < 10^!X.CRange(1)
+           IF N_Elements(*self.xlog) EQ 0 THEN xlog = 0 ELSE xlog = *self.xlog
+           IF N_Elements(*self.ylog) EQ 0 THEN ylog = 0 ELSE ylog = *self.ylog
+           IF xlog THEN BEGIN
+              x = 10^!X.CRange[0] > xd < 10^!X.CRange[1]
            ENDIF ELSE BEGIN
-              x = !X.CRange(0) > xd < !X.CRange(1)
+              x = !X.CRange[0] > xd < !X.CRange[1]
            ENDELSE
-           IF self.ylog THEN BEGIN
-              y = 10^!Y.CRange(0) > yd < 10^!Y.CRange(1)
+           IF ylog THEN BEGIN
+              y = 10^!Y.CRange[0] > yd < 10^!Y.CRange[1]
            ENDIF ELSE BEGIN
-              y = !Y.CRange(0) > yd < !Y.CRange(1)
+              y = !Y.CRange[0] > yd < !Y.CRange[1]
            ENDELSE
            *self.xrange = x
            *self.yrange = y

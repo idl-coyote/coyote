@@ -75,6 +75,12 @@
 ; :Examples:
 ;    Plot examples::
 ;       cgZPlot, cgDemodata(1), PSYM=2, Color='dodger blue'
+;       
+;    To put this in your own widget program::
+;        tlb = Widget_Base(Title='My Program')
+;        cgZPlot, cgDemodata(1), PSYM=2, Color='dodger blue', Parent=tlb
+;        Widget_Control, tlb, /Realize
+;        Widget_Control, 'myprogram', tlb, /NoBlock
 ;    
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -95,6 +101,9 @@
 ;        Added a REDO capability and the ability to adjust the Y range (via a button) so that 
 ;           you can see the actual data Y range of all the data in the X range of a particular
 ;           view of the data. 21 May 2012. DWF.
+;        Added a PARENT keyword and changed the algorithm slightly so that this
+;           interactive widget functionality can be incorporated into your own
+;           widget programs. 21 may 2012. DWF.
 ;-
 
 ;+
@@ -121,14 +130,21 @@
 ;     min_value: in, optional, type=float
 ;         Set this keyword to the minimu value to plot. Any values smaller than this 
 ;         value are treated as missing.
+;     parent: in, optional, type=long
+;         The identifer of the parent widget for this program's draw widget. If not
+;         provided, the program will create it's own top-level base widget as a parent.
 ;     polar: in, optional, type=boolean, default=0
 ;         Set this keyword to draw a polar plot.
 ;     xlog: in, optional, type=boolean, default=0
 ;         Set this keyword to use a logarithmic X axis
+;     xsize: in, optional, type=int, default=640
+;         The X size of the program's draw widget.
 ;     ylog: in, optional, type=boolean, default=0
 ;         Set this keyword to use a logarithmic Y axis
 ;     ynozero: in, optional, type=boolean, default=0
 ;         Set this keyword to use allow the Y axis to start at a value other than zero.
+;     ysize: in, optional, type=int, default=512
+;         The Y size of the program's draw widget.
 ;     zoomfactor: in, optional, type=float
 ;         Set this keyword to a number between 0.01 and 0.25. This affects the amount
 ;         of zooming when the X axis and Y axis are zoomed with the LEFT mouse button.
@@ -143,10 +159,13 @@ FUNCTION cgZPlot::INIT, x, y, $
     DRAWID=drawid, $
     MAX_VALUE=max_value, $
     MIN_VALUE=min_value, $
+    PARENT=parent, $
     POLAR=polar, $
     XLOG=xlog, $
+    XSIZE=xsize, $
     YLOG=ylog, $
     YNOZERO=ynozero, $
+    YSIZE=ysize, $
     ZOOMFACTOR=zoomfactor, $
     _REF_EXTRA=extra
     
@@ -206,44 +225,49 @@ FUNCTION cgZPlot::INIT, x, y, $
         YLOG=ylog, $
         YNOZERO=ynozero
         
-    ; Create the widgets.
-    self.xsize = 640
-    self.ysize = 512
-    self.tlb = Widget_Base(Title='Zoom/Pan Plot', TLB_SIZE_EVENTS=1, $
-       UVALUE={method:'TLB_RESIZE_EVENTS', object:self}, MBar=menuID)
-       
-    ; Menu items.
-    fileID = Widget_Button(menuID, Value='File')
-    output = Widget_Button(fileID, Value='Save As...', /Menu)
-    button = Widget_Button(output, Value='BMP File', UVALUE={method:'FileOutput', object:self})
-    button = Widget_Button(output, Value='EPS File', UVALUE={method:'FileOutput', object:self})
-    button = Widget_Button(output, Value='GIF File', UVALUE={method:'FileOutput', object:self})
-    button = Widget_Button(output, Value='JPEG File', UVALUE={method:'FileOutput', object:self})
-    button = Widget_Button(output, Value='PDF File', UVALUE={method:'FileOutput', object:self})
-    button = Widget_Button(output, Value='PS File', UVALUE={method:'FileOutput', object:self})
-    button = Widget_Button(output, Value='PNG File', UVALUE={method:'FileOutput', object:self})
-    button = Widget_Button(output, Value='TIFF File', UVALUE={method:'FileOutput', object:self})
+    ; Set the draw widget size.
+    IF N_Elements(xsize) EQ 0 THEN self.xsize = 640 ELSE self.xsize = xsize
+    IF N_Elements(ysize) EQ 0 THEN self.ysize = 512 ELSE self.ysize = ysize
     
-    button =  Widget_Button(fileID, Value='Undo', ACCELERATOR="Ctrl+U", $
-        UVALUE={method:'Undo', object:self}, /Separator)
-    button =  Widget_Button(fileID, Value='Undo', ACCELERATOR="Ctrl+R", $
-        UVALUE={method:'Redo', object:self})
+    ; Do you need to create your own TLB, or will you be using someone else's?
+    IF N_Elements(parent) EQ 0 THEN BEGIN
+        self.tlb = Widget_Base(Title='Zoom/Pan Plot', TLB_SIZE_EVENTS=1, $
+           UVALUE={method:'TLB_RESIZE_EVENTS', object:self}, MBar=menuID)
+           
+        ; Menu items.
+        fileID = Widget_Button(menuID, Value='File')
+        output = Widget_Button(fileID, Value='Save As...', /Menu)
+        button = Widget_Button(output, Value='BMP File', UVALUE={method:'FileOutput', object:self})
+        button = Widget_Button(output, Value='EPS File', UVALUE={method:'FileOutput', object:self})
+        button = Widget_Button(output, Value='GIF File', UVALUE={method:'FileOutput', object:self})
+        button = Widget_Button(output, Value='JPEG File', UVALUE={method:'FileOutput', object:self})
+        button = Widget_Button(output, Value='PDF File', UVALUE={method:'FileOutput', object:self})
+        button = Widget_Button(output, Value='PS File', UVALUE={method:'FileOutput', object:self})
+        button = Widget_Button(output, Value='PNG File', UVALUE={method:'FileOutput', object:self})
+        button = Widget_Button(output, Value='TIFF File', UVALUE={method:'FileOutput', object:self})
         
-    button = Widget_Button(fileID, Value='Adjust Range to Data Viewed', ACCELERATOR="Ctrl+A", $
-        UVALUE={method:'AdjustRange', object:self}, /Separator)
+        button =  Widget_Button(fileID, Value='Undo', ACCELERATOR="Ctrl+U", $
+            UVALUE={method:'Undo', object:self}, /Separator)
+        button =  Widget_Button(fileID, Value='Undo', ACCELERATOR="Ctrl+R", $
+            UVALUE={method:'Redo', object:self})
+            
+        button = Widget_Button(fileID, Value='Adjust Range to Data Viewed', ACCELERATOR="Ctrl+A", $
+            UVALUE={method:'AdjustRange', object:self}, /Separator)
+        
+        button =  Widget_Button(fileID, Value='Quit', UVALUE={method:'Quit', object:self}, /Separator)
+    ENDIF ELSE self.tlb = parent
     
-    button =  Widget_Button(fileID, Value='Quit', UVALUE={method:'Quit', object:self}, /Separator)
-    
+    ; Create the draw widget and pixmap. These are the essential elements of this object
+    ; and should work in any parent widget.
     retain = (StrUpCase(!Version.OS_Family) EQ 'UNIX') ? 2 : 1
     self.drawID = Widget_Draw(self.tlb, XSize=self.xsize, YSize=self.ysize, $
        UVALUE={method:'BUTTON_EVENTS', object:self}, $
-       RETAIN=retain, Button_Events=1)
+       RETAIN=retain, Button_Events=1, $
+       NOTIFY_REALIZE='cgzplot_notify_realize', $
+       EVENT_PRO='cgZplot_Events')
     Window, /Pixmap, /Free, XSize=self.xsize, YSize=self.ysize
     self.pixmapID = !D.Window
-    Widget_Control, self.tlb, /Realize
-    Widget_Control, self.drawID, Get_Value=wid
-    self.wid = wid
-     
+    
     ; Set object properties.
     self.drag = 0
     self.orig_xrange = !X.CRange
@@ -256,11 +280,12 @@ FUNCTION cgZPlot::INIT, x, y, $
     IF N_Elements(*self.xstyle) NE 0 THEN *self.xstyle = *self.xstyle && 1 ELSE *self.xstyle = 1
     IF N_Elements(*self.ystyle) NE 0 THEN *self.ystyle = *self.ystyle && 1 ELSE *self.ystyle = 1
     
-    ; Draw the plot.
-    self -> Draw
-    
-    XManager, 'cgzplot', self.tlb, /No_Block, Event_Handler='cgZPlot_Events', $
-       Cleanup='cgZPlot_Cleanup'
+    ; Realize the widget and get it going, if you created the TLB.
+    IF N_Elements(parent) EQ 0 THEN BEGIN
+        Widget_Control, self.tlb, /Realize
+        XManager, 'cgzplot', self.tlb, /No_Block, Event_Handler='cgZPlot_Events', $
+           Cleanup='cgZPlot_Cleanup'
+    ENDIF
     
     RETURN, 1
 END
@@ -305,8 +330,8 @@ END
 ; 
 ; :Params:
 ; 
-;    event: in, required, type=structure
-;        The event structure passed by the window manager.
+;    event: in, optional, type=structure
+;        The event structure passed by the window manager. Not used in this event handler.
 ;-
 PRO cgZPlot::AdjustRange, event
 
@@ -829,6 +854,29 @@ END
 
 
 ;+
+; The purpose of this method is to draw the initial line plot in the draw widget.
+; 
+;-
+PRO cgZPlot::Notify_Realize
+
+   ; Standard error handling.
+   Catch, theError
+   IF theError NE 0 THEN BEGIN
+      Catch, /Cancel
+      void = Error_Message()
+      RETURN
+   ENDIF
+
+    Widget_Control, self.drawID, Get_Value=wid
+    self.wid = wid
+    
+     ; Draw the initial plot.
+    self -> Draw
+    
+END
+
+
+;+
 ; This event handler method responds to panning events until it gets a button UP event.
 ; 
 ; :Params:
@@ -1250,13 +1298,27 @@ END
 ;    tlb: in, required, type=int
 ;        The widget identifier of the top-level base widget that just died.
 ;-
-PRO cgZplot_Cleanup, tlb
+PRO cgZPlot_Cleanup, tlb
 
    Widget_Control, tlb, Get_UValue=instr
    Obj_Destroy, instr.object
    
 END
 
+;+
+; This is the realize notify routine for the widget. Its function call the
+; Realize_Notify method to draw the initial plot in the display window.
+; 
+; :Params:
+;    id: in, required, type=int
+;        The widget identifier of the widget that has been realized.
+;-
+PRO cgZPlot_Notify_Realize, id
+
+   Widget_Control, id, Get_UValue=instructions
+   Call_Method, 'Notify_Realize', instructions.object
+   
+END
 ;+
 ; The object class definition.
 ; 
@@ -1322,6 +1384,13 @@ END
 ; :Keywords:
 ;    object: out, optional, type=objref
 ;         The object reference to the underlying object.
+;     parent: in, optional, type=long
+;         The identifer of the parent widget for this program's draw widget. If not
+;         provided, the program will create it's own top-level base widget as the parent widget.
+;     xsize: in, optional, type=int, default=640
+;         The X size of the program's draw widget.
+;     ysize: in, optional, type=int, default=512
+;         The Y size of the program's draw widget.
 ;     zoomfactor: in, optional, type=float
 ;         Set this keyword to a number between 0.01 and 0.25. This affects the amount
 ;         of zooming when the X axis and Y axis are zoomed with the LEFT mouse button.
@@ -1331,7 +1400,13 @@ END
 ;        Any keyword appropriate for the IDL Plot or Coyote Graphic cgPlot command is 
 ;        allowed in the program.
 ;-
-PRO cgZPlot, x, y, _REF_EXTRA=extra, OBJECT=thisObject, ZOOMFACTOR=zoomfactor
+PRO cgZPlot, x, y, $
+    OBJECT=thisObject, $
+    PARENT=parent, $
+    XSIZE=xsize, $
+    YSIZE=ysize, $
+    ZOOMFACTOR=zoomfactor, $
+    _REF_EXTRA=extra
 
     ; Sort out which is the dependent and which is independent data.
     CASE N_Params() OF
@@ -1353,6 +1428,11 @@ PRO cgZPlot, x, y, _REF_EXTRA=extra, OBJECT=thisObject, ZOOMFACTOR=zoomfactor
     
     ENDCASE
 
-    thisObject = Obj_New('cgZPlot', indep, dep, ZOOMFACTOR=zoomfactor, _EXTRA=extra)
+    thisObject = Obj_New('cgZPlot', indep, dep, $
+       PARENT=parent, $
+       XSIZE=xsize, $
+       YSIZE=ysize, $
+       ZOOMFACTOR=zoomfactor, $
+       _EXTRA=extra)
     
 END

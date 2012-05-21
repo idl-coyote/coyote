@@ -63,7 +63,8 @@
 ;  the RIGHT mouse button. Hold and drag the RIGHT mouse button inside the plot axes. The
 ;  entire plot will pan in both the X and Y directions.
 ;  
-;  File output requires that ImageMagick and GhostScript be installed on your machine.
+;  File output requires that ImageMagick and GhostScript be installed on your machine. Note
+;  that exact axis scaling is always in effect.
 ;
 ;  The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
 ;  to be installed on your machine.
@@ -91,6 +92,9 @@
 ;     Change History::
 ;        Written 16 May 2012, by David W. Fanning.
 ;        Added UNDO capability arbitrarily set to 50 items. 17 May 2012. DWF.
+;        Added a REDO capability and the ability to adjust the Y range (via a button) so that 
+;           you can see the actual data Y range of all the data in the X range of a particular
+;           view of the data. 21 May 2012. DWF.
 ;-
 
 ;+
@@ -189,6 +193,7 @@ FUNCTION cgZPlot::INIT, x, y, $
     self.ylog = Ptr_New(/Allocate_Heap)
     self.ynozero = Ptr_New(/Allocate_Heap)
     self.undoList = Obj_New('LinkedList')
+    self.redoList = Obj_New('LinkedList')
     
     self -> SetProperty, $
         INDEP=indep, $
@@ -221,6 +226,11 @@ FUNCTION cgZPlot::INIT, x, y, $
     
     button =  Widget_Button(fileID, Value='Undo', ACCELERATOR="Ctrl+U", $
         UVALUE={method:'Undo', object:self}, /Separator)
+    button =  Widget_Button(fileID, Value='Undo', ACCELERATOR="Ctrl+R", $
+        UVALUE={method:'Redo', object:self})
+        
+    button = Widget_Button(fileID, Value='Adjust Range to Data Viewed', ACCELERATOR="Ctrl+A", $
+        UVALUE={method:'AdjustRange', object:self}, /Separator)
     
     button =  Widget_Button(fileID, Value='Quit', UVALUE={method:'Quit', object:self}, /Separator)
     
@@ -239,6 +249,12 @@ FUNCTION cgZPlot::INIT, x, y, $
     self.orig_xrange = !X.CRange
     self.orig_yrange = !Y.CRange
     self.zoomfactor = zoomfactor
+    *self.xlog = Keyword_Set(xlog)
+    *self.ylog = Keyword_Set(ylog)
+    
+    ; Must do exact axis scaling for smooth operation.
+    IF N_Elements(*self.xstyle) NE 0 THEN *self.xstyle = *self.xstyle && 1 ELSE *self.xstyle = 1
+    IF N_Elements(*self.ystyle) NE 0 THEN *self.ystyle = *self.ystyle && 1 ELSE *self.ystyle = 1
     
     ; Draw the plot.
     self -> Draw
@@ -274,11 +290,54 @@ PRO cgZPlot::CLEANUP
     Ptr_Free, self.ylog
     Ptr_Free, self.ynozero
     Obj_Destroy, self.undoList
+    Obj_Destroy, self.redoList
     
     ; Call the superclass CLEANUP method.
     self -> cgGraphicsKeywords::CLEANUP
 
 END
+
+
+;+
+; This event handler will adjust the data Y range of the line plot to include all
+; of the data in the current data X range, even if that data is currently not being
+; displayed. 
+; 
+; :Params:
+; 
+;    event: in, required, type=structure
+;        The event structure passed by the window manager.
+;-
+PRO cgZPlot::AdjustRange, event
+
+   ; Standard error handling.
+   Catch, theError
+   IF theError NE 0 THEN BEGIN
+      Catch, /Cancel
+      void = Error_Message()
+      RETURN
+   ENDIF
+   
+   ; Only interested in selection events.
+   IF event.select NE 1 THEN RETURN
+   
+   ; Get the current X range of the data display.
+   xrange = *self.xrange
+   
+   ; Locate the end points of that data range in the original data vector.
+   endpoints = 0 > Value_Locate(*self.indep, xrange) < (N_Elements(*self.indep)-1)
+   
+   ; Find the corresponding points in the dependent data vector, and calculate the
+   ; Y range from those.
+   points = (*self.dep)[endpoints[0]:endpoints[1]]
+   minrange = Min(points, Max=maxrange)
+   fudge = Abs(maxrange-minrange) * 0.05
+   *self.yrange = [minrange-fudge, maxrange+fudge]
+   
+   ; Redraw the plot.
+   self -> Draw
+END
+
 
 ;+
 ; Button down events are processed in this event handler method. Depending
@@ -813,32 +872,20 @@ PRO cgZPlot::Pan_Events, event
     xd = Convert_Coord(xpts, ypts, /Device, /To_Data)
     xdistance = (xd[0,0] - xd[0,1])
     ydistance = (xd[1,0] - xd[1,1])
-    IF self.xlog THEN BEGIN
+    IF *self.xlog THEN BEGIN
         *self.xrange = (*self.xrange + xdistance) > 1e-6
     ENDIF ELSE BEGIN
         *self.xrange = (*self.xrange + xdistance)
     ENDELSE
-    IF self.ylog THEN BEGIN
+    IF *self.ylog THEN BEGIN
         *self.yrange = (*self.yrange + ydistance) > 1e-6
     ENDIF ELSE BEGIN
         *self.yrange = (*self.yrange + ydistance)
     ENDELSE
     
-    ; Must do exact axis scaling for smooth operation.
-    IF N_Elements(*self.xstyle) NE 0 THEN *self.xstyle = *self.xstyle && 1 ELSE *self.xstyle = 1
-    IF N_Elements(*self.ystyle) NE 0 THEN *self.ystyle = *self.ystyle && 1 ELSE *self.ystyle = 1
-    
     ; Update the static pan location.
     self.x0 = event.x
     self.y0 = event.y
-    
-;    ; Find the range of the data in this location, and set the Y axis accordingly.
-;    print, 'X Range: ', *self.xrange
-;    locs = Value_Locate(*self.indep, *self.xrange)
-;    locs = 0 > locs < (N_Elements(*self.indep)-1)
-;    print, locs
-;    data = (*self.dep)[locs[0]:locs[1]]
-;    *self.yrange = [Min(data), Max(data)]
     
     ; Draw the plot.
     self -> Draw
@@ -941,6 +988,48 @@ END
 
 
 ;+
+; This method performs the REDO action and restores the plot to
+; it's previous condition.
+; 
+; :Params:
+;    event: in, optional, type=structure
+;        The event structure passed by the window manager. Not used in this method.
+;-
+PRO cgZPlot::Redo, event
+
+   ; Standard error handling.
+   Catch, theError
+   IF theError NE 0 THEN BEGIN
+      Catch, /Cancel
+      void = Error_Message()
+      RETURN
+   ENDIF
+   
+   ; Get the list count. Return if there is nothing in the list
+   listCnt = self.redoList -> Get_Count()
+   IF listCnt EQ 0 THEN BEGIN
+      void = Dialog_Message('Nothing to REDO')
+      RETURN
+   ENDIF
+   
+   ; Retrieve the last item on this list.
+   item = self.redoList -> Get_Item()
+   
+   ; Remove the last item from the list.
+   IF listCnt GT 1 THEN self.redoList -> Delete
+
+   ; Update the range variables and draw the plot.
+   IF listCnt GE 1 THEN BEGIN
+     *self.xrange = item.xrange
+     *self.yrange = item.yrange
+     self -> Draw
+   ENDIF
+   
+END
+
+
+;
+;+
 ; This event handler method resizes the graphics window.
 ; 
 ; :Params:
@@ -989,6 +1078,10 @@ PRO cgZPlot::Undo, event
    ; Get the list count. Return if there is nothing in the list
    listCnt = self.undoList -> Get_Count()
    IF listCnt EQ 0 THEN RETURN
+   
+   ; Retrieve the last item from the list, and add it to the REDO list.
+   item = self.undoList -> Get_Item()
+   self.redoList -> Add, item
    
    ; Remove the last item from the list.
    IF listCnt GT 1 THEN self.undoList -> Delete
@@ -1091,14 +1184,12 @@ PRO cgZPlot::Zoom_Events, event
            yd = Reform(xy[1,*])
            
            ; The range depends on whether you are using log axes or not.
-           IF N_Elements(*self.xlog) EQ 0 THEN xlog = 0 ELSE xlog = *self.xlog
-           IF N_Elements(*self.ylog) EQ 0 THEN ylog = 0 ELSE ylog = *self.ylog
-           IF xlog THEN BEGIN
+           IF *self.xlog THEN BEGIN
               x = 10^!X.CRange[0] > xd < 10^!X.CRange[1]
            ENDIF ELSE BEGIN
               x = !X.CRange[0] > xd < !X.CRange[1]
            ENDELSE
-           IF ylog THEN BEGIN
+           IF *self.ylog THEN BEGIN
               y = 10^!Y.CRange[0] > yd < 10^!Y.CRange[1]
            ENDIF ELSE BEGIN
               y = !Y.CRange[0] > yd < !Y.CRange[1]
@@ -1191,6 +1282,7 @@ PRO cgZPlot__Define, class
              current_position: DblArr(4), $
              zoomFactor: 0.0, $
              undoList: Obj_New(), $
+             redoList: Obj_New(), $
              drag: 0B, $               ; A flag that tells me if I am panning or not. Necessary for UNDO.
              
              indep: Ptr_New(), $

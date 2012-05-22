@@ -60,6 +60,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 16 May 2012, by David W. Fanning.
+;        Added missing LINESTYLE keyword. 22 May 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -80,6 +81,7 @@ FUNCTION cgGraphicsKeywords::INIT, $
     COLOR=color, $
     DATA=data, $
     DEVICE=device, $
+    LINESTYLE=linestyle, $
     NORMAL=normal, $
     FONT=font, $
     NOCLIP=noclip, $
@@ -171,6 +173,7 @@ FUNCTION cgGraphicsKeywords::INIT, $
     self.data = Ptr_New(/Allocate_Heap)
     self.device = Ptr_New(/Allocate_Heap)
     self.font = Ptr_New(/Allocate_Heap)
+    self.linestyle = Ptr_New(/Allocate_Heap)
     self.normal = Ptr_New(/Allocate_Heap)
     self.noclip = Ptr_New(/Allocate_Heap)
     self.nodata = Ptr_New(/Allocate_Heap)
@@ -251,6 +254,7 @@ FUNCTION cgGraphicsKeywords::INIT, $
         DATA=data, $
         DEVICE=device, $
         FONT=font, $
+        LINESTYLE=linestyle, $
         NORMAL=normal, $
         NOCLIP=noclip, $
         NODATA=nodata, $
@@ -339,6 +343,7 @@ PRO cgGraphicsKeywords::CLEANUP
     Ptr_Free, self.data
     Ptr_Free, self.device
     Ptr_Free, self.font
+    Ptr_Free, self.linestyle
     Ptr_Free, self.normal
     Ptr_Free, self.noclip
     Ptr_Free, self.nodata
@@ -421,8 +426,9 @@ PRO cgGraphicsKeywords::GetProperty, $
     COLOR=color, $
     DATA=data, $
     DEVICE=device, $
-    NORMAL=normal, $
     FONT=font, $
+    LINESTYLE=linestyle, $
+    NORMAL=normal, $
     NOCLIP=noclip, $
     NODATA=nodata, $
     NOERASE=noerase, $
@@ -508,6 +514,7 @@ PRO cgGraphicsKeywords::GetProperty, $
     IF Arg_Present(device) THEN IF N_Elements(*self.device) NE 0 THEN device = *self.device
     IF Arg_Present(normal) THEN IF N_Elements(*self.normal) NE 0 THEN normal = *self.normal
     IF Arg_Present(font) THEN IF N_Elements(*self.font) NE 0 THEN font = *self.font
+    IF Arg_Present(linestyle) THEN IF N_Elements(*self.linestyle) NE 0 THEN linestyle = *self.linestyle
     IF Arg_Present(noclip) THEN IF N_Elements(*self.noclip) NE 0 THEN noclip = *self.noclip
     IF Arg_Present(nodata) THEN IF N_Elements(*self.nodata) NE 0 THEN nodata = *self.nodata 
     IF Arg_Present(noerase) THEN IF N_Elements(*self.noerase) NE 0 THEN noerase = *self.noerase
@@ -591,6 +598,7 @@ PRO cgGraphicsKeywords::SetProperty, $
     DEVICE=device, $
     NORMAL=normal, $
     FONT=font, $
+    LINESTYLE=linestyle, $
     NOCLIP=noclip, $
     NODATA=nodata, $
     NOERASE=noerase, $
@@ -675,6 +683,7 @@ PRO cgGraphicsKeywords::SetProperty, $
     IF N_Elements(device) NE 0 THEN *self.device = Keyword_Set(device)
     IF N_Elements(normal) NE 0 THEN *self.normal = Keyword_Set(normal)
     IF N_Elements(font) NE 0 THEN *self.font = font 
+    IF N_Elements(linestyle) NE 0 THEN *self.linestyle = linestyle 
     IF N_Elements(noclip) NE 0 THEN *self.noclip = Keyword_Set(noclip)
     IF N_Elements(nodata) NE 0 THEN *self.nodata = Keyword_Set(nodata)
     IF N_Elements(noerase) NE 0 THEN *self.noerase = Keyword_Set(noerase)
@@ -762,6 +771,7 @@ PRO cgGraphicsKeywords__Define, class
               DEVICE: Ptr_New(), $
               NORMAL: Ptr_New(), $
               FONT: Ptr_New(), $
+              LINESTYLE: Ptr_New(), $
               NOCLIP: Ptr_New(), $
               NODATA: Ptr_New(), $
               NOERASE: Ptr_New(), $

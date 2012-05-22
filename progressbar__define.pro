@@ -163,6 +163,7 @@
 ;       Added keyword keyword TITLE to Update method. 23 Feb 2005. Benjamin Hornberger
 ;       Added BACKGROUND keyword. 22 Dec 2006. DWF.
 ;       Added RETAIN=1 keyword to Widget_Draw command. 9 Dec 2007. DWF.
+;       Modifed the RETAIN keyword to set the value based on OS type. 22 May 2012. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -914,7 +915,8 @@ FUNCTION PROGRESSBAR::INIT, $
    self.tlb = Widget_Base(Title=title, Column=1, Base_Align_Center=1, $
       Map=0, Group_Leader=group_leader, TLB_FRAME_ATTR=11)
    self.labelID = Widget_Label(self.tlb, Value=text, /Dynamic_Resize)
-   self.drawID = Widget_Draw(self.tlb, XSize=self.xsize, YSize=self.ysize, RETAIN=1)
+   retain = (StrUpCase(!Version.OS_Family) EQ 'UNIX') ? 2 : 1
+   self.drawID = Widget_Draw(self.tlb, XSize=self.xsize, YSize=self.ysize, RETAIN=retain)
    Widget_Control, self.tlb, Set_UValue=self
 
    IF Keyword_Set(accept) THEN BEGIN

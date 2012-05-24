@@ -130,6 +130,8 @@
 ;        Added DEPTH and ZDEPTH keywords. 31 Dec 2010. DWF.
 ;        Added a do-nothing NULL device to Case statement. 4 Jan 2011. DWF.
 ;        Removed the Z-graphics buffer from control by this program. 24 Dec 2011. DWF.
+;        Added back the ability to set decomposed state for the Z-buffer, but only
+;           if the depth buffer is 24-bits or higher. 25 May 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -170,6 +172,10 @@ PRO SetDecomposedState, state, CURRENTSTATE=currentState, DEPTH=depth, ZDEPTH=zd
 ;                    1: Device, Decomposed=state, Set_Pixel_Depth=24
 ;                 ENDCASE
 ;             ENDIF
+             
+             ; I am going to allow the user to set the decomposed state, but only if
+             ; they are using a buffer depth that will allow that.
+             IF (depth GE 24) THEN Device, Decomposed=state
              END
              
         'MAC': BEGIN

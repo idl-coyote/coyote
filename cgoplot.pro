@@ -93,6 +93,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 28 February 2012.
+;        Modified to make sure both input arguments are defined before call to cgPlot. 25 May 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -106,7 +107,27 @@ PRO cgOPlot, x, y, $
     SYMSIZE=symsize, $
     _REF_EXTRA=extra
     
-    cgPlot, x, y, $
+    ; Sort out which is the dependent and which is independent data.
+    CASE N_Params() OF
+      
+       1: BEGIN
+       dep = x
+       indep = Findgen(N_Elements(dep))
+       ENDCASE
+    
+       2: BEGIN
+       dep = y
+       indep = x
+       ENDCASE
+    
+    ENDCASE
+    
+    ; If either of these input vectors are scalars, make them vectors.
+    IF N_Elements(dep) EQ 1 THEN dep = [dep]
+    IF N_Elements(indep) EQ 1 THEN indep = [indep]
+    
+    ; Call the cgPlot command with OVERPLOT set.
+    cgPlot, indep, dep, $
         ADDCMD=addcmd, $
         CHARSIZE=charsize, $
         COLOR=color, $

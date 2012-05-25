@@ -166,11 +166,15 @@
 ;       The fill pattern for the polygons if the `FILLPOLYGON` keyword is set. (See POLYFILL documentation.)
 ;    polycolor: in, optional, type=string, default="rose"
 ;       The name of the polygon fill color if the `FILLPOLYGON` keyword is set.
+;    position: in, optional, type=fltarr
+;       The position of the plot axes in normalized data coordinates, [x0,y0,x1,y1].
 ;    probability_function: out, optional, type=float
 ;       The total cummulative probability of the histogram plot, scaled from 0 to 1.
 ;    probcolorname: in, optional, type=string, default="blue"                      
 ;       The name of the probability color for overplotting the cumulative probability
 ;       on the plot. 
+;    probthick: in, optional, type=float, default=1.0
+;       The thickness of the probability line drawn on the plot.
 ;    reverse_indices: out, optional
 ;       The list of reverse indices returned from the HISTOGRAM command. (See HISTOGRAM documentation.)
 ;    rotate: in, optional, type=boolean, default=0                     
@@ -284,6 +288,10 @@
 ;       Added a SMOOTH keyword. 26 April 2012. DWF.
 ;       Small fix (CR missing!) to allow overplotting in cgWindow. 26 April 2012. DWF.
 ;       The Outline keyword was incorrectly drawing the last histogram bin outline. Fixed. 26 April 2012. DWF.
+;       Added POSITION and PROBTHICK keywords to set the plot position and the thickness of the cumulative
+;          probability line, respectively. 25 may 2012. DWF.
+;       If the cumulative probability option (keyword OPROBABILITY) is set, a second axis is drawn indicating
+;          the cumulative probablity from 0 to 1.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
@@ -323,8 +331,10 @@ PRO cgHistoplot, $                  ; The program name.
    OUTPUT=output, $                 ; The type of output file desired.
    PATTERN=pattern, $               ; The fill pattern.
    POLYCOLOR=polycolorname, $       ; The name of the polygon draw/fill color.
+   POSITION=position, $             ; The position of the plot in the window in normalized coordinates.
    PROBABILITY_FUNCTION=probability, $
    PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
+   PROBTHICK=probthick, $           ; The thickness of the probability line.
    REVERSE_INDICES=ri, $
    ROTATE=rotate, $                 ; Rotate plot so histogram bars are drawn left to right.
    SMOOTH=smooth, $                 ; Run a smoothing filter of this width over the histogram data before plotting.
@@ -378,7 +388,9 @@ PRO cgHistoplot, $                  ; The program name.
                OPLOT=overplot, $
                OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
                OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
+               POSITION=position, $             ; The position of the plot in the window in normalized coordinates.
                PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
+               PROBTHICK=probthick, $           ; The thickness of the probability line.
                ROTATE=rotate, $
                SMOOTH=smooth, $
                THICK=thick, $                   ; Set to draw thicker lines and axes.
@@ -436,7 +448,9 @@ PRO cgHistoplot, $                  ; The program name.
                OPLOT=overplot, $                ; Set if you want overplotting.
                OPROBABILITY=oprob, $            ; Overplot the cummulative probability distribution.
                OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
+               POSITION=position, $             ; The position of the plot in the window in normalized coordinates.
                PROBCOLORNAME=probColorName, $   ; The color for the probability plot, if it is used. By default, "blue".
+               PROBTHICK=probthick, $           ; The thickness of the probability line.
                ROTATE=rotate, $
                SMOOTH=smooth, $
                THICK=thick, $                   ; Set to draw thicker lines and axes.
@@ -592,6 +606,21 @@ PRO cgHistoplot, $                  ; The program name.
    IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize()
    IF N_Elements(smooth) NE 0 THEN BEGIN
      IF (smooth MOD 2) NE 0 THEN smooth = smooth + 1
+   ENDIF
+   IF N_Elements(position) EQ 0 THEN BEGIN
+       IF Keyword_Set(oprob) THEN BEGIN
+          IF Keyword_Set(rotate) THEN BEGIN
+             position = [0.125, 0.125, 0.925, 0.875]
+          ENDIF ELSE BEGIN
+             position = [0.175, 0.125, 0.875, 0.925]
+          ENDELSE
+       ENDIF ELSE BEGIN
+          IF Keyword_Set(rotate) THEN BEGIN
+             position = [0.125, 0.15, 0.925, 0.925]
+          ENDIF ELSE BEGIN
+             position = [0.175, 0.125, 0.925, 0.875]
+          ENDELSE
+       ENDELSE
    ENDIF
    
    ; What kind of data are we doing a HISTOGRAM on?
@@ -796,6 +825,7 @@ PRO cgHistoplot, $                  ; The program name.
              XLOG=log, $
              NoData=1, $                              ; Draw the axes only. No data.
              NOERASE=noerase, $
+             POSITION=position, $
              XTHICK=thick, $                          ; Axes thicker, if needed.
              YTHICK=thick, $
              XStyle=5, $                              ; Exact axis scaling. No autoscaled axes.
@@ -812,6 +842,7 @@ PRO cgHistoplot, $                  ; The program name.
              YLOG=log, $
              NoData=1, $                              ; Draw the axes only. No data.
              NOERASE=noerase, $
+             POSITION=position, $
              XTHICK=thick, $                          ; Axes thicker, if needed.
              YTHICK=thick, $
              XStyle=5, $                              ; Exact axis scaling. No autoscaled axes.
@@ -921,18 +952,36 @@ PRO cgHistoplot, $                  ; The program name.
    IF ~Keyword_Set(overplot) THEN BEGIN
        xrange = [xmin, xmax]
        yrange = [ymin, ymax]
+       IF Keyword_Set(oprob) THEN BEGIN
+          IF Keyword_Set(rotate) THEN BEGIN
+             xstyle = 9
+             ystyle = 9
+          ENDIF ELSE BEGIN
+             xstyle = 9
+             ystyle = 9
+          ENDELSE
+       ENDIF ELSE BEGIN
+          IF Keyword_Set(rotate) THEN BEGIN
+             xstyle = 1
+             ystyle = 9
+          ENDIF ELSE BEGIN
+             xstyle = 9
+             ystyle = 1
+          ENDELSE
+       ENDELSE
        IF Keyword_Set(rotate) THEN BEGIN
        Plot, [0,0], xrange=xrange, yrange=yrange, $             
              Background=backColor, $
              Charsize=charsize, $
              Color=axisColor, $                       ; The color of the axes.
+             POSITION=position, $
              XLOG=log, $
              NoData=1, $                              ; Draw the axes only. No data.
              XThick=thick, $  
              YThick=thick, $
-             YStyle=9, $                              ; Exact axis scaling. No autoscaled axes.
+             YStyle=ystyle, $                              ; Exact axis scaling. No autoscaled axes.
              XMinor=1, $                              ; No minor tick mark on X axis.
-             XStyle=1, $                              ; Exact axis scaling. No autoscaled axes.
+             XStyle=xstyle, $                              ; Exact axis scaling. No autoscaled axes.
              XTickformat=xtickformat, $               ; Y Tickformat
              YTickformat=ytickformat, $
              XTickV=tickV, $
@@ -947,13 +996,14 @@ PRO cgHistoplot, $                  ; The program name.
              Background=backColor, $
              Charsize=charsize, $
              Color=axisColor, $                       ; The color of the axes.
+             POSITION=position, $
              YLOG=log, $
              NoData=1, $                              ; Draw the axes only. No data.
              XThick=thick, $  
              YThick=thick, $
-             XStyle=9, $                              ; Exact axis scaling. No autoscaled axes.
+             XStyle=xstyle, $                              ; Exact axis scaling. No autoscaled axes.
              YMinor=1, $                              ; No minor tick mark on X axis.
-             YStyle=1, $                              ; Exact axis scaling. No autoscaled axes.
+             YStyle=ystyle, $                              ; Exact axis scaling. No autoscaled axes.
              XTickformat=xtickformat, $               ; Y Tickformat
              YTickformat=ytickformat, $
              YTickV=tickv, $
@@ -965,6 +1015,7 @@ PRO cgHistoplot, $                  ; The program name.
              _Strict_Extra=extra                      ; Pass any extra PLOT keywords.
         ENDELSE
              
+        ; Repair the damage caused by polygon filling.
         IF Keyword_Set(rotate) THEN BEGIN
             IF log THEN BEGIN
                 Axis, 10^!X.CRange[1], 10^!Y.CRange[0], YAXIS=1, YTickformat='(A1)', YMINOR=1, $
@@ -982,6 +1033,17 @@ PRO cgHistoplot, $                  ; The program name.
                 COLOR=axisColor, XSTYLE=1, XTHICK=thick, CHARSIZE=charsize
             ENDELSE
         ENDELSE
+
+        ; If you are plotting the probability plot, label the axes appropriately.
+        IF Keyword_Set(oprob) THEN BEGIN
+            IF Keyword_Set(rotate) THEN BEGIN
+                Axis, !X.CRange[0], !Y.CRange[1], XAXIS=1, COLOR=axisColor, $
+                     XSTYLE=1, XTHICK=thick, CHARSIZE=charsize, XRANGE=[0,1], XTITLE='Cumulative Probability'
+            ENDIF ELSE BEGIN
+                Axis, !X.CRange[1], !Y.CRange[0], YAXIS=1, YMINOR=1, COLOR=axisColor, $
+                     YSTYLE=1, YTHICK=thick, CHARSIZE=charsize, YRANGE=[0,1], YTITLE='Cumulative Probability'
+            ENDELSE
+        ENDIF
     ENDIF
     
     step = (xrange[1] - xrange[0]) / (binsize + 1)
@@ -1026,16 +1088,17 @@ PRO cgHistoplot, $                  ; The program name.
    
    ; Need to overplot probability function?
    IF Keyword_Set(oprob) THEN BEGIN
+        IF N_Elements(probthick) EQ 0 THEN probthick = (!D.Name NE 'PS') ? 1.0 : 3.0
         IF Keyword_Set(rotate) THEN BEGIN
             probx = Scale_Vector(probability, !X.CRange[0], !X.CRange[1], MIN=0, MAX=1)
             IF Keyword_Set(oplot) THEN bsize = 0 ELSE bsize = binsize
             proby = Scale_Vector(Findgen(N_Elements(probx)), !Y.CRange[0] + bsize, !Y.CRange[1] - bsize)
-            Oplot, probx, proby, COLOR=probcolor
+            Oplot, probx, proby, COLOR=probcolor, THICK=probthick
         ENDIF ELSE BEGIN
             proby = Scale_Vector(probability, !Y.CRange[0], !Y.CRange[1], MIN=0, MAX=1)
             IF Keyword_Set(oplot) THEN bsize = 0 ELSE bsize = binsize
             probx = Scale_Vector(Findgen(N_Elements(proby)), !X.CRange[0] + bsize, !X.CRange[1] - bsize)
-            Oplot, probx, proby, COLOR=probcolor
+            Oplot, probx, proby, COLOR=probcolor, THICK=probthick
         ENDELSE
    ENDIF
 

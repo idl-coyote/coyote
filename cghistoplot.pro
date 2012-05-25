@@ -289,9 +289,10 @@
 ;       Small fix (CR missing!) to allow overplotting in cgWindow. 26 April 2012. DWF.
 ;       The Outline keyword was incorrectly drawing the last histogram bin outline. Fixed. 26 April 2012. DWF.
 ;       Added POSITION and PROBTHICK keywords to set the plot position and the thickness of the cumulative
-;          probability line, respectively. 25 may 2012. DWF.
+;          probability line, respectively. 25 May 2012. DWF.
 ;       If the cumulative probability option (keyword OPROBABILITY) is set, a second axis is drawn indicating
-;          the cumulative probablity from 0 to 1.
+;          the cumulative probablity from 0 to 1.25 May 2012. DWF.
+;        Whoops! Don't want to set default position unless Total(!P.MULTI) equals  zero. 25 May 2012. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
@@ -607,7 +608,7 @@ PRO cgHistoplot, $                  ; The program name.
    IF N_Elements(smooth) NE 0 THEN BEGIN
      IF (smooth MOD 2) NE 0 THEN smooth = smooth + 1
    ENDIF
-   IF N_Elements(position) EQ 0 THEN BEGIN
+   IF N_Elements(position) EQ 0 && (Total(!P.Multi) LE 0) THEN BEGIN
        IF Keyword_Set(oprob) THEN BEGIN
           IF Keyword_Set(rotate) THEN BEGIN
              position = [0.125, 0.125, 0.925, 0.875]

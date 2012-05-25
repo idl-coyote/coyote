@@ -76,10 +76,8 @@
 ;
 ; :Examples:
 ;    Use as you would use the IDL OPLOT command::
-;       cgPlot, Findgen(11)
-;       cgPlot, Findgen(11), Aspect=1.0
-;       cgPlot, Findgen(11), Color='olive', AxisColor='red', Thick=2
-;       cgPlot, Findgen(11), Color='blue', SymColor='red', PSym=-16
+;       cgPlot, cgDemoData(17), Color='olive'
+;       cgPlot, cgDemoData(17), Color='blue', SymColor='red', PSym=-16, /Overplot
 ;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::

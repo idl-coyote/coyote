@@ -796,12 +796,12 @@ PRO cgHistoplot, $                  ; The program name.
        xmin = min_value
        xmax = max_value
        ymin = Double(omin) - binsize
-       ymax = Double(omax) + (binsize * 2)
+       ymax = Double(omax) + (binsize * 1.5)
    ENDIF ELSE BEGIN
        ymin = min_value
        ymax = max_value
        xmin = Double(omin) - binsize
-       xmax = Double(omax) + (binsize * 2)
+       xmax = Double(omax) + (binsize * 1.5)
    ENDELSE
    
    ; Save the current system variables, if doing multiple plots.
@@ -1091,15 +1091,11 @@ PRO cgHistoplot, $                  ; The program name.
         ENDELSE
         IF N_Elements(probthick) EQ 0 THEN probthick = (!D.Name NE 'PS') ? 1.0 : 3.0
         IF Keyword_Set(rotate) THEN BEGIN
-            probx = probability
-            IF Keyword_Set(overplot) THEN bsize = 0 ELSE bsize = binsize
-            proby = Scale_Vector(Findgen(N_Elements(probx)), !Y.CRange[0] + bsize, !Y.CRange[1] - bsize)
-            Oplot, probx, proby, COLOR=probcolor, THICK=probthick
+            proby = locations + (binsize/2.0)
+            Oplot, probability, proby, COLOR=probcolor, THICK=probthick;, PSYM=-2
         ENDIF ELSE BEGIN
-            proby = probability
-            IF Keyword_Set(overplot) THEN bsize = 0 ELSE bsize = binsize
-            probx = Scale_Vector(Findgen(N_Elements(proby)), !X.CRange[0] + bsize, !X.CRange[1] - bsize)
-            Oplot, probx, proby, COLOR=probcolor, THICK=probthick
+            probx = locations + (binsize/2.0)
+            Oplot, probx, probability, COLOR=probcolor, THICK=probthick;, PSYM=-2
         ENDELSE
    ENDIF
 

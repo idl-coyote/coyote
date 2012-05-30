@@ -291,8 +291,9 @@
 ;       Added POSITION and PROBTHICK keywords to set the plot position and the thickness of the cumulative
 ;          probability line, respectively. 25 May 2012. DWF.
 ;       If the cumulative probability option (keyword OPROBABILITY) is set, a second axis is drawn indicating
-;          the cumulative probablity from 0 to 1.25 May 2012. DWF.
-;        Whoops! Don't want to set default position unless Total(!P.MULTI) equals  zero. 25 May 2012. DWF.
+;          the cumulative probablity from 0 to 1. 25 May 2012. DWF.
+;        Whoops! Don't want to set default position unless Total(!P.MULTI) equals zero. 25 May 2012. DWF.
+;        More work on getting the cumulative probability to be correctly plotted. 30 May 2012. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
@@ -1035,17 +1036,7 @@ PRO cgHistoplot, $                  ; The program name.
             ENDELSE
         ENDELSE
 
-        ; If you are plotting the probability plot, label the axes appropriately.
-        IF Keyword_Set(oprob) THEN BEGIN
-            IF Keyword_Set(rotate) THEN BEGIN
-                Axis, !X.CRange[0], !Y.CRange[1], XAXIS=1, COLOR=axisColor, $
-                     XSTYLE=1, XTHICK=thick, CHARSIZE=charsize, XRANGE=[0,1], XTITLE='Cumulative Probability'
-            ENDIF ELSE BEGIN
-                Axis, !X.CRange[1], !Y.CRange[0], YAXIS=1, YMINOR=1, COLOR=axisColor, $
-                     YSTYLE=1, YTHICK=thick, CHARSIZE=charsize, YRANGE=[0,1], YTITLE='Cumulative Probability'
-            ENDELSE
-        ENDIF
-    ENDIF
+   ENDIF
     
     step = (xrange[1] - xrange[0]) / (binsize + 1)
     IF Keyword_Set(rotate) THEN BEGIN
@@ -1089,15 +1080,24 @@ PRO cgHistoplot, $                  ; The program name.
    
    ; Need to overplot probability function?
    IF Keyword_Set(oprob) THEN BEGIN
+        ; If you are plotting the probability plot, label the axes appropriately.
+        IF Keyword_Set(overplot) THEN style = 5 ELSE style = 1
+        IF Keyword_Set(rotate) THEN BEGIN
+            Axis, !X.CRange[0], !Y.CRange[1], XAXIS=1, COLOR=axisColor, /SAVE, $
+                 XSTYLE=style, XTHICK=thick, CHARSIZE=charsize, XRANGE=[0,1], XTITLE='Cumulative Probability'
+        ENDIF ELSE BEGIN
+            Axis, !X.CRange[1], !Y.CRange[0], YAXIS=1, YMINOR=1, COLOR=axisColor, /SAVE, $
+                 YSTYLE=style, YTHICK=thick, CHARSIZE=charsize, YRANGE=[0,1], YTITLE='Cumulative Probability'
+        ENDELSE
         IF N_Elements(probthick) EQ 0 THEN probthick = (!D.Name NE 'PS') ? 1.0 : 3.0
         IF Keyword_Set(rotate) THEN BEGIN
-            probx = Scale_Vector(probability, !X.CRange[0], !X.CRange[1], MIN=0, MAX=1)
-            IF Keyword_Set(oplot) THEN bsize = 0 ELSE bsize = binsize
+            probx = probability
+            IF Keyword_Set(overplot) THEN bsize = 0 ELSE bsize = binsize
             proby = Scale_Vector(Findgen(N_Elements(probx)), !Y.CRange[0] + bsize, !Y.CRange[1] - bsize)
             Oplot, probx, proby, COLOR=probcolor, THICK=probthick
         ENDIF ELSE BEGIN
-            proby = Scale_Vector(probability, !Y.CRange[0], !Y.CRange[1], MIN=0, MAX=1)
-            IF Keyword_Set(oplot) THEN bsize = 0 ELSE bsize = binsize
+            proby = probability
+            IF Keyword_Set(overplot) THEN bsize = 0 ELSE bsize = binsize
             probx = Scale_Vector(Findgen(N_Elements(proby)), !X.CRange[0] + bsize, !X.CRange[1] - bsize)
             Oplot, probx, proby, COLOR=probcolor, THICK=probthick
         ENDELSE

@@ -92,6 +92,7 @@
 ;     Change History::
 ;        Written, 28 February 2012.
 ;        Modified to make sure both input arguments are defined before call to cgPlot. 25 May 2012. DWF.
+;        Typo in the keyword inheritance code cause keywords to be ignorned. Fixed. 5 June 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -133,7 +134,7 @@ PRO cgOPlot, x, y, $
         PSYM=psym, $
         SYMCOLOR=symcolor, $
         SYMSIZE=symsize, $
-        _REF_EXTRA=extra    
+        _EXTRA=extra    
         
     END
     

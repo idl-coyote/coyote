@@ -109,6 +109,9 @@
 ;           different versions of IDL. 23 Feb 2012. DWF.
 ;        Added ability to use IM_WIDTH keyword to set the width of raster file output
 ;           created with ImageMagick. 3 April 2012. DWF.
+;        Forgot to specify the GROUP_LEADER when calling PS_START. Caused PSConfig to
+;           run though its block when cgWindow was called from a blocking widget program.
+;           5 June 2012. DWF.
 ;-
 
 
@@ -1164,6 +1167,7 @@ PRO cgCmdWindow::AutoPostScriptFile, filename
         DECOMPOSED=self.ps_decomposed, $
         EUROPEAN=self.ps_metric, $
         ENCAPSULATED=self.ps_encapsulated, $
+        GROUP_LEADER=self.tlb, $
         SCALE_FACTOR=self.ps_scale_factor, $
         CHARSIZE=self.ps_charsize, $
         FONT=self.ps_font, $
@@ -1237,6 +1241,7 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
            PS_Start, $
                 DECOMPOSED=self.ps_decomposed, $
                 FILENAME=thisname, $
+                GROUP_LEADER=self.tlb, $
                 METRIC=self.ps_metric, $
                 KEYWORDS=keywords, $ ; Returned PSConfig keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $
@@ -1273,6 +1278,7 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
            PS_Start, $
                 DECOMPOSED=self.ps_decomposed, $
                 FILENAME=thisname, $
+                GROUP_LEADER=self.tlb, $
                 METRIC=self.ps_metric, $
                 KEYWORDS=keywords, $ ; Returned PSConfig keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $
@@ -1525,6 +1531,7 @@ PRO cgCmdWindow::CreatePostScriptFile, event
         DECOMPOSED=self.ps_decomposed, $
         EUROPEAN=self.ps_metric, $
         ENCAPSULATED=self.ps_encapsulated, $
+        GROUP_LEADER=self.tlb, $
         SCALE_FACTOR=self.ps_scale_factor, $
         CHARSIZE=self.ps_charsize, $
         FONT=self.ps_font, $
@@ -2415,6 +2422,7 @@ PRO cgCmdWindow::SaveAsRaster, event
            PS_Start, $
                 DECOMPOSED=self.ps_decomposed, $
                 FILENAME=thisname, $
+                GROUP_LEADER=self.tlb, $
                 METRIC=self.ps_metric, $
                 KEYWORDS=keywords, $ ; Returned PSConfig keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $
@@ -2451,6 +2459,7 @@ PRO cgCmdWindow::SaveAsRaster, event
            PS_Start, $
                 DECOMPOSED=self.ps_decomposed, $
                 FILENAME=thisname, $
+                GROUP_LEADER=self.tlb, $
                 METRIC=self.ps_metric, $
                 KEYWORDS=keywords, $ ; Returned PSConfig keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $

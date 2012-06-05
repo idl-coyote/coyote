@@ -67,6 +67,29 @@
 ;        Readf, 1, data
 ;        Close, 1
 ;        cgBoxPlot, data, XTITLE='Experiment Number', YTITLE='Speed of Light'
+;        
+;    Here is an example that produces a low, medium, and high box for each of
+;    six experiments and plots them::
+;    
+;         data = fltarr(18, 40)
+;         index = indgen(6)*3
+;         for j=0,5 do data[index[j],*] = Randomu(seed, 40)*6
+;         index = index+1
+;         for j=0,5 do data[index[j],*] = Randomu(seed, 40)*10
+;         index = index+1
+;         for j=0,5 do data[index[j],*] = Randomu(seed, 40)*15
+;         cgPlot, [0,1], /nodata, yrange=[0,16], xrange=[0,19], $
+;            xtickformat='(A1)', ytitle='Gc(mms-1)', YStyle=1
+;         index = indgen(6)*3
+;         width = ((!X.CRange[1] - !X.Crange[0]) / (20)) * 0.75
+;         cgBoxPlot, data[index, *],/overplot, XLOCATION=index+1, WIDTH=width, $
+;            BOXCOLOR='rose', /FILLBOX
+;         cgBoxPlot, data[index+1, *],/overplot, XLOCATION=index+2, WIDTH=width, $
+;            BOXCOLOR='pale green', /FILLBOX
+;         cgBoxPlot, data[index+2, *],/overplot, XLOCATION=index+3, WIDTH=width, $
+;            BOXCOLOR='goldenrod', /FILLBOX
+;         labels = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF']
+;         for j=0,5 do cgText, (index+2)[j], -1, labels[j], Alignment=0.5
 ;           
 ;    An article about his program can be found here::
 ;       
@@ -103,7 +126,8 @@
 ;          XCHARSIZE and XTHICK keywords you would use for a plot. 3 Dec 2010. DWF.
 ;        Fixed a couple of typos, added ADDCMD, CHARSIZE, LAYOUT and WINDOW keywords. 2 Feb 2011. DWF.
 ;        Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
-;        PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
+;        PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2011. DWF.
+;        Added XLOCATION and WIDTH keywords. 5 June 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
@@ -417,10 +441,18 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 ;       quartile and 75th percent quartile of the data, repectively, "IRG" is the
 ;       Interquartile Range, SDEV is the standard deviation, and N is the number of points
 ;       used to construct the box plot.
+;    width: in, optional, type=float
+;        The "width" of each box plot in data units. The default is calculated from
+;        the X axis range and the number of boxes to draw on the plot like this:
+;        ((!X.CRange[1] - !X.Crange[0]) / (numbox+2.0)) * 0.9.
 ;    window: in, optional, type=boolean, default=0               
 ;       Set this keyword to display the plot in a resizeable graphics window (cgWindow).
 ;    xcharsize: in, optional, type=float, default=1.0
 ;       The size of the X axis labels.
+;    xlocation: in, optional, type=integer
+;       The X location where the data should be plotted. Can be an array the save size as 
+;       the first dimension of data. Normally, this is an integer from 1 to the number of
+;       boxplots that are on the final plot.
 ;    xthick: in, optional, type=integer, default=1
 ;       The thickness of the X axis labels.
 ;    _ref_extra: in, optional
@@ -444,7 +476,9 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
         ROTATE=rotate, $
         STATS=stats, $
         XCHARSIZE=xcharsize, $
+        XLOCATION=xlocation, $
         XTHICK=xthick, $
+        WIDTH=width, $
         WINDOW=window, $
         _REF_EXTRA=extra
         
@@ -485,7 +519,9 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
                 ROTATE=rotate, $
                 STATS=stats, $
                 XCHARSIZE=xcharsize, $
+                XLOCATION=xlocation, $
                 XTHICK=xthick, $
+                WIDTH=width, $
                 ADDCMD=1, $
                 _EXTRA=extra
              RETURN
@@ -506,7 +542,9 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
                 ROTATE=rotate, $
                 STATS=stats, $
                 XCHARSIZE=xcharsize, $
+                XLOCATION=xlocation, $
                 XTHICK=xthick, $
+                WIDTH=width, $
                 REPLACECMD=replaceCmd, $
                 _Extra=extra
          RETURN
@@ -723,7 +761,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
       ENDIF
       
       ; Draw the boxes.
-      width = ((!X.CRange[1] - !X.Crange[0]) / (numbox+2.0)) * 0.9
+      IF N_Elements(width) EQ 0 THEN width = ((!X.CRange[1] - !X.Crange[0]) / (numbox+2.0)) * 0.9
       s = { Median:0.0D, Mean: 0.0D, Min:0.0D, Max:0.0D, $
            Q25:0.0D, Q75:0.0D, IQR:0.0D, SDEV:0.0D, N:0L }
       IF Arg_Present(stats) THEN stats = Replicate(s, numbox)
@@ -735,8 +773,9 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
                 IF isRowVector THEN dataToBox = thisData ELSE dataToBox = Reform(thisData[j-1,*])
              ENDIF
           ENDELSE
+          IF N_Elements(xlocation) EQ 0 THEN location=j ELSE location = xlocation[j-1]
           cgBoxPlot_Draw, dataToBox, COLOR=color, BOXCOLOR=boxcolor, FILLBOXES=fillboxes, $
-             WIDTH=width, XLOCATION=j, STATS=s
+             WIDTH=width, XLOCATION=location, STATS=s
           IF Arg_Present(stats) THEN stats[j-1] = s
       ENDFOR
           

@@ -1092,10 +1092,10 @@ PRO cgHistoplot, $                  ; The program name.
         IF N_Elements(probthick) EQ 0 THEN probthick = (!D.Name NE 'PS') ? 1.0 : 3.0
         IF Keyword_Set(rotate) THEN BEGIN
             proby = locations + (binsize/2.0)
-            Oplot, probability, proby, COLOR=probcolor, THICK=probthick;, NOCLIP=1, PSYM=2
+            Oplot, probability, proby, COLOR=probcolor, THICK=probthick;, PSYM=2
         ENDIF ELSE BEGIN
             probx = locations + (binsize/2.0)
-            Oplot, probx, probability, COLOR=probcolor, THICK=probthick;, NOCLIP=1, PSYM=2
+            Oplot, probx, probability, COLOR=probcolor, THICK=probthick;, PSYM=2
         ENDELSE
    ENDIF
 

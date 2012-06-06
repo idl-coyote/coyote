@@ -150,9 +150,11 @@
 ;       I was passing the wrong MINVALUE and MAXVALUE values to the scaling function. 12 Feb 2012. DWF.
 ;       I made cgImage aware of a "feature" of MAP_SET that sets !P.MULTI[0]=-1, which was screwing
 ;          up the algorithm to cause cgImage to erase the display window. 28 Feb 2012. DWF.
+;       Added a Standard Deviation stretch, including the EXCLUDE and MULTIPLIER keywords to the
+;          SDevScl command. 6 June 2012. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
 ;
 ;+
@@ -332,6 +334,8 @@ END
 ;    clip: in, optional, type=float, default=2
 ;         A number between 0 and 50 that indicates the percentage of pixels to clip
 ;         off either end of the image histogram before performing a linear stretch.
+;    exclude: in, optional, type=numeric
+;         The value to exclude in a standard deviation stretch.
 ;    exponent: in, optional, type=float, default=4.0
 ;         The logarithm exponent in a logarithmic stretch.
 ;    gamma: in, optional, type=float, default=1.5
@@ -363,6 +367,9 @@ END
 ;         The index of the missing color in the final byte scaled image.
 ;    missing_value: in, optional, type=integer
 ;         The number that represents the missing value in the image.
+;    multiplier: in, optional, type=float
+;         The multiplication factor in a standard deviation stretch. The standard deviation
+;         is multiplied by this factor to produce the thresholds for a linear stretch.
 ;    negative: in, optional, type=boolean, default=0
 ;         Set this keyword if you want to display the image with a negative or reverse stretch.
 ;    scale: in, optional, type=boolean, default=0
@@ -371,7 +378,7 @@ END
 ;         any of the keywords normally associated with byte scaling an image.
 ;    stretch: in, optional, type=integer/string, default=1
 ;         The type of scaling performed prior to display. 
-;         May be specified as a number or as a string (e.g, 3 or "Log").
+;         May be specified as a number or as a string (e.g, 4 or "Log").
 ;
 ;           Number   Type of Stretch
 ;             0         None           No scaling whatsoever is done.
@@ -385,6 +392,7 @@ END
 ;             8         Gaussian       A Gaussian normal function is applied to the image histogram.
 ;             9         MODIS          Scaling done in the differential manner of the MODIS Rapid Response Team
 ;                                      and implemented in the Coyote Library routine ScaleModis.
+;             10        StdDev         A standard deviation stretch. scaled = SDevScl(image, Multiplier=2.0).
 ;    sigma: in, optional, type=float, default=1.0
 ;         The sigma scale factor in a Gaussian stretch.
 ;    top: in, optional, type=integer, default=255
@@ -396,6 +404,7 @@ FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
    BOTTOM=bottom, $
    BETA=beta, $
    CLIP=clip, $
+   EXCLUDE=exclude, $
    EXPONENT=exponent, $
    GAMMA=gamma, $
    INTERPOLATE=interpolate, $
@@ -405,6 +414,7 @@ FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
    MINVALUE=minvalue, $
    MISSING_INDEX=missing_index, $
    MISSING_VALUE=missing_value, $
+   MULTIPLIER=multiplier, $
    NEGATIVE=negative, $
    SCALE=scale, $
    STRETCH=stretch, $
@@ -489,6 +499,7 @@ FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
 ;             7         Equalization   A linear stretch of the histogram equalized image histogram.
 ;             8         Gaussian       A Gaussian normal function is applied to the image histogram.
 ;             9         MODIS          Scaling done in the differential manner of the MODIS Rapid Response Team
+;             10        StdDev         A standard deviation stretch.
 
           0: ; No stretch at all. 
        
@@ -536,7 +547,12 @@ FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
           9: BEGIN ; MODIS image stretch.
              tempImage = ScaleModis(tempImage)
              END
-    
+             
+          10: BEGIN ; Standard deviation stretch.
+              tempImage = SDevScl(tempImage, MULTIPLIER=multiplier, EXCLUDE=exclude, $
+                   Negative=negative, OMAX=top, OMIN=bottom)
+              END
+               
             ELSE: Message, 'Unknown scaling index.'
             
        ENDCASE
@@ -919,6 +935,7 @@ PRO cgImage, image, x, y, $
    COLOR=color, $
    DISPLAY=display, $      ; Make sure this keyword is NOT is the list of keywords passed to cgWindow.
    ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
+   EXCLUDE=exclude, $
    EXPONENT=exponent, $
    FIT_INSIDE=fit_inside, $
    FONT=font, $
@@ -936,6 +953,7 @@ PRO cgImage, image, x, y, $
    MINUS_ONE=minusOne, $
    MINVALUE=min, $
    MULTIMARGIN=multimargin, $
+   MULTIPLIER=multiplier, $
    NCOLORS=ncolors, $
    NOERASE=noerase, $
    NOINTERPOLATION=obsolete_nointerpolation, $ ; Added for compatibility with TVIMAGE.
@@ -1036,6 +1054,7 @@ PRO cgImage, image, x, y, $
                CLIP=clip, $
                COLOR=color, $
                ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
+               EXCLUDE=exclude, $
                EXPONENT=exponent, $
                FIT_INSIDE=fit_inside, $
                FONT=font, $
@@ -1049,11 +1068,12 @@ PRO cgImage, image, x, y, $
                MISSING_COLOR=missing_color, $
                MISSING_INDEX=missing_index, $
                MISSING_VALUE=missing_value, $
-               NEGATIVE=negative, $
                MINUS_ONE=minusOne, $
                MINVALUE=min, $
                MULTIMARGIN=multimargin, $
+               MULTIPIER=multiplier, $
                NCOLORS=ncolors, $
+               NEGATIVE=negative, $
                NOERASE=noerase, $
                NOINTERPOLATION=obsolete_nointerpolation, $ ; Added for compatibility with TVIMAGE.
                NORMAL=normal, $
@@ -1093,6 +1113,7 @@ PRO cgImage, image, x, y, $
                CLIP=clip, $
                COLOR=color, $
                ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
+               EXCLUDE=exclude, $
                EXPONENT=exponent, $
                FIT_INSIDE=fit_inside, $
                FONT=font, $
@@ -1106,11 +1127,12 @@ PRO cgImage, image, x, y, $
                MISSING_COLOR=missing_color, $
                MISSING_INDEX=missing_index, $
                MISSING_VALUE=missing_value, $
-               NEGATIVE=negative, $
                MINUS_ONE=minusOne, $
                MINVALUE=min, $
                MULTIMARGIN=multimargin, $
+               MULTIPLIER=multiplier, $
                NCOLORS=ncolors, $
+               NEGATIVE=negative, $
                NOERASE=noerase, $
                NOINTERPOLATION=obsolete_nointerpolation, $ ; Added for compatibility with TVIMAGE.
                NORMAL=normal, $
@@ -1316,7 +1338,7 @@ PRO cgImage, image, x, y, $
     ; Make sure you can specify the type of stretch with a string name.
     IF Size(stretch, /TNAME) EQ 'STRING' THEN BEGIN
         stretches = ['None', 'Linear', 'Clip', 'Gamma', 'Log', 'ASinh', $
-              'SquareRoot', 'Equalization', 'Gaussian', 'MODIS']
+              'SquareRoot', 'Equalization', 'Gaussian', 'MODIS', 'StdDev']
        
        index = Where(StrUpCase(stretch) EQ StrUpCase(stretches), count)
        IF count GT 0 THEN stretch=index ELSE Message, 'Cannot find stretch: ' + StrUpCase(stretch)
@@ -1726,8 +1748,8 @@ PRO cgImage, image, x, y, $
     
        ; Find the proposed size of the image in pixels without aspect
        ; considerations.
-       xpixSize = (position(2) - position(0)) * !D.X_VSize
-       ypixSize = (position(3) - position(1)) * !D.Y_VSize
+       xpixSize = (position[2] - position[0]) * !D.X_VSize
+       ypixSize = (position[3] - position[1]) * !D.Y_VSize
     
        ; Try to fit the image width. If you can't maintain
        ; the aspect ratio, fit the image height.
@@ -1776,6 +1798,7 @@ PRO cgImage, image, x, y, $
                        BOTTOM=bottom, $
                        BETA=beta, $
                        CLIP=clip, $
+                       EXCLUDE=exclude, $
                        EXPONENT=exponent, $
                        GAMMA=gamma, $
                        INTERPOLATE=interpolate, $
@@ -1785,6 +1808,7 @@ PRO cgImage, image, x, y, $
                        MINVALUE=min, $
                        MISSING_INDEX=missing_index, $
                        MISSING_VALUE=missing_value, $
+                       MULTIPLIER=multiplier, $
                        NEGATIVE=negative, $
                        SCALE=scale, $
                        STRETCH=stretch, $
@@ -1800,6 +1824,7 @@ PRO cgImage, image, x, y, $
                        BOTTOM=bottom, $
                        BETA=beta, $
                        CLIP=clip, $
+                       EXCLUDE=exclude, $
                        EXPONENT=exponent, $
                        GAMMA=gamma, $
                        INTERPOLATE=interpolate, $
@@ -1809,6 +1834,7 @@ PRO cgImage, image, x, y, $
                        MINVALUE=min, $
                        MISSING_INDEX=missing_index, $
                        MISSING_VALUE=missing_value, $
+                       MULTIPLIER=multiplier, $
                        NEGATIVE=negative, $
                        SCALE=scale, $
                        STRETCH=stretch, $

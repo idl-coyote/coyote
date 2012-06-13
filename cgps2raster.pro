@@ -103,6 +103,9 @@
 ;         raster file. It will be set to 0 otherwise.
 ;     tiff: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a TIFF image. Requires ImageMagick.
+;     width: in, optional, type=integer
+;        Set this keyword to set the resulting width of the raster file. The height of the
+;        raster will be such as to preserve the aspect ratio of the starting image.
 ;          
 ; :Examples:
 ;    To create a line plot in a PostScript file named lineplot.ps and

@@ -58,6 +58,8 @@
 ;     im_density: in, optional, type=integer, default=300
 ;         Set this keyword to the sampling density when ImageMagick creates raster image
 ;         file from PostScript outout.
+;     im_png8: in, optional, type=boolean, default=0
+;         Set this keyword to create an 8-bit PNG file rather than the normal 24-bit PNG file.
 ;     im_options: in, optional, type=string, default=""
 ;         Set this keyword to any ImageMagick options you would like to pass along to the
 ;         ImageMagick convert command when creating raster image files from PostScript output.

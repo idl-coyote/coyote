@@ -106,6 +106,7 @@
 ;           widget programs. 21 may 2012. DWF.
 ;        Added compile options idl2 to all modules. Fixed a typo for REDO button. 14 June 2012. DWF.
 ;        Separated the object code from the driver code for easier inheritance. 14 June 2012. DWF.
+;        Removed the POLAR keyword, which can't be used in a zoom plot. 15 June 2012. DWF.
 ;-
 
 ;+
@@ -135,16 +136,18 @@
 ;     parent: in, optional, type=long
 ;         The identifer of the parent widget for this program's draw widget. If not
 ;         provided, the program will create it's own top-level base widget as a parent.
-;     polar: in, optional, type=boolean, default=0
-;         Set this keyword to draw a polar plot.
 ;     xlog: in, optional, type=boolean, default=0
 ;         Set this keyword to use a logarithmic X axis
+;     xrange: in, optional, type=double
+;          Set this keyword to a two-element array giving the X data range of the plot.
 ;     xsize: in, optional, type=int, default=640
 ;         The X size of the program's draw widget.
 ;     ylog: in, optional, type=boolean, default=0
 ;         Set this keyword to use a logarithmic Y axis
 ;     ynozero: in, optional, type=boolean, default=0
 ;         Set this keyword to use allow the Y axis to start at a value other than zero.
+;     yrange: in, optional, type=double
+;          Set this keyword to a two-element array giving the Y data range of the plot.
 ;     ysize: in, optional, type=int, default=512
 ;         The Y size of the program's draw widget.
 ;     zoomfactor: in, optional, type=float
@@ -154,7 +157,8 @@
 ;         end of the axis, resulting in a 10 percent change in the axis length.
 ;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot or Coyote Graphic cgPlot command is 
-;        allowed in the program.
+;        allowed in the program. Note that this is not the same as saying it is a good
+;        idea to use every one of the these keywords. Use good judgement.
 ;-
 FUNCTION cgZPlot::INIT, x, y, $
     ASPECT=aspect, $
@@ -162,7 +166,6 @@ FUNCTION cgZPlot::INIT, x, y, $
     MAX_VALUE=max_value, $
     MIN_VALUE=min_value, $
     PARENT=parent, $
-    POLAR=polar, $
     XLOG=xlog, $
     XRANGE=xrange, $
     XSIZE=xsize, $
@@ -213,7 +216,6 @@ FUNCTION cgZPlot::INIT, x, y, $
     self.aspect = Ptr_New(/Allocate_Heap)
     self.max_value = Ptr_New(/Allocate_Heap)
     self.min_value = Ptr_New(/Allocate_Heap)
-    self.polar = Ptr_New(/Allocate_Heap)
     self.xlog = Ptr_New(/Allocate_Heap)
     self.ylog = Ptr_New(/Allocate_Heap)
     self.ynozero = Ptr_New(/Allocate_Heap)
@@ -226,7 +228,6 @@ FUNCTION cgZPlot::INIT, x, y, $
         ASPECT=aspect, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
-        POLAR=polar, $
         XLOG=xlog, $
         XRANGE=xrange, $
         YLOG=ylog, $
@@ -322,7 +323,6 @@ PRO cgZPlot::CLEANUP
     Ptr_Free, self.aspect
     Ptr_Free, self.max_value
     Ptr_Free, self.min_value
-    Ptr_Free, self.polar
     Ptr_Free, self.xlog
     Ptr_Free, self.ylog
     Ptr_Free, self.ynozero
@@ -651,7 +651,6 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         ASPECT=*self.aspect, $
         MAX_VALUE=*self.max_value, $
         MIN_VALUE=*self.min_value, $
-        POLAR=*self.polar, $
         XLOG=*self.xlog, $
         YLOG=*self.ylog, $
         YNOZERO=*self.ynozero, $
@@ -782,8 +781,6 @@ END
 ;         The maximum value to plot. 
 ;     min_value: out, optional, type=float
 ;         The minimum value to plot. 
-;     polar: out, optional, type=boolean
-;         Set if a polar plot is to be drawn.
 ;     undolist: out, optional, type=objref
 ;         The LinkedList object that maintains the undo list.
 ;     xlog: out, optional, type=boolean
@@ -804,7 +801,6 @@ PRO cgZPlot::GetProperty, $
         ASPECT=aspect, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
-        POLAR=polar, $
         UNDOLIST=undolist, $
         XLOG=xlog, $
         YLOG=ylog, $
@@ -828,7 +824,6 @@ PRO cgZPlot::GetProperty, $
     IF Arg_Present(aspect) NE 0 THEN IF N_Elements(*self.aspect) NE 0 THEN aspect = *self.aspect
     IF Arg_Present(max_value) NE 0 THEN IF N_Elements(*self.max_value) NE 0 THEN max_value = *self.max_value
     IF Arg_Present(min_value) NE 0 THEN IF N_Elements(*self.min_value) NE 0 THEN min_value = *self.min_value
-    IF Arg_Present(polar) NE 0 THEN IF N_Elements(*self.polar) NE 0 THEN polar = *self.polar
     IF Arg_Present(xlog) NE 0 THEN IF N_Elements(*self.xlog) NE 0 THEN xlog = *self.xlog
     IF Arg_Present(ylog) NE 0 THEN IF N_Elements(*self.ylog) NE 0 THEN ylog = *self.ylog
     IF Arg_Present(ynozero) NE 0 THEN IF N_Elements(*self.ynozero) NE 0 THEN ynozero = *self.ynozero
@@ -994,8 +989,6 @@ END
 ;     min_value: in, optional, type=float
 ;         Set this keyword to the minimu value to plot. Any values smaller than this 
 ;         value are treated as missing.
-;     polar: in, optional, type=boolean, default=0
-;         Set this keyword to draw a polar plot.
 ;     xlog: in, optional, type=boolean, default=0
 ;         Set this keyword to use a logarithmic X axis
 ;     ylog: in, optional, type=boolean, default=0
@@ -1018,7 +1011,6 @@ PRO cgZPlot::SetProperty, $
         INDEP=indep, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
-        POLAR=polar, $
         XLOG=xlog, $
         YLOG=ylog, $
         YNOZERO=ynozero, $
@@ -1041,7 +1033,6 @@ PRO cgZPlot::SetProperty, $
     IF N_Elements(aspect) NE 0 THEN *self.aspect = aspect
     IF N_Elements(max_value) NE 0 THEN *self.max_value = max_value
     IF N_Elements(min_value) NE 0 THEN *self.min_value = min_value
-    IF N_Elements(polar) NE 0 THEN *self.polar = Keyword_Set(polar)
     IF N_Elements(xlog) NE 0 THEN *self.xlog = Keyword_Set(xlog)
     IF N_Elements(ylog) NE 0 THEN *self.ylog = Keyword_Set(ylog)
     IF N_Elements(ynozero) NE 0 THEN *self.ynozero = Keyword_Set(ynozero)
@@ -1382,7 +1373,6 @@ PRO cgZPlot__Define, class
              MAX_VALUE: Ptr_New(), $
              MIN_VALUE: Ptr_New(), $
              NSUM: Ptr_New(), $
-             POLAR: Ptr_New(), $
              XLOG: Ptr_New(), $
              YLOG: Ptr_New(), $
              YNOZERO: Ptr_New(), $

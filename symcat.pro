@@ -107,6 +107,10 @@
 ;       Whoops! Added two symbols but forgot to change limits to allow for them. 4 May 2007. DWF.
 ;       Added THICK keyword. 21 Aug 2007. DWF.
 ;       Added COLOR keyword and made THICK keyword apply to all symbols. 11 Nov 2008. DWF.
+;       If you are using USERSYM, the "color" can get "stuck" on the last color used to draw
+;          a symbol. To "unstick" the color,  you have to call USERSYM without a color keyword
+;          before calling it again with a color keyword. This is, without a doubt, the strangest
+;          bug I've ever seen in IDL! 20 June 2012. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -145,6 +149,10 @@ FUNCTION SymCat, theSymbol, THICK=thick, COLOR=color
    IF N_Elements(thick) EQ 0 THEN thick = (!P.Thick EQ 0) ? 1 : !P.Thick
    IF (theSymbol LT 0) OR (theSymbol GT 46) THEN Message, 'Symbol number out of defined range.'
    theSymbol = Fix(theSymbol)
+   
+   ; The following line is necessary to "unstick" the USERSYM color. Don't ask
+   ; me, I just know it's friggin' needed!
+   IF N_Elements(color) NE 0 THEN UserSym,[1, -1, 0, 0, 0], [0, 0, 0, -1, 1]
 
    ; Define helper variables for creating circles.
    phi = Findgen(36) * (!PI * 2 / 36.)

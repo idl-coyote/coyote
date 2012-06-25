@@ -464,6 +464,16 @@ END
 ;         Set this keyword to the type of map you wish to retrieve from Google Maps. The
 ;         choices are listed in the Google Static Map API documentation and are: "roadmap",
 ;         "terrain", "satellite", and "hybrid".
+;     markers: in, optional, type=structure
+;         A scalar or array of GoogleMapMarker structures. If present, the markers will
+;         be requested with the map from Google. The GoogleMapMarker structure is defined
+;         like this::
+;            struct = { GOOGLEMAPMARKER, $
+;               size: "", $         ; The marker size ("tiny", "small", "mid" or "normal")
+;               color: "", $        ; A color name as provided with cgColor.
+;               label: "", $        ; A single uppercase character label from the set {A-Z,0-9}.
+;               lats: Ptr_New(), $  ; A pointer to one or more latitude values.
+;               lons: Ptr_New() }   ; A pointer to one or more longitude values.
 ;     motion_events: in, optional, type=boolean, default=0
 ;         Set this keyword to turn motion events on for the draw widget in the program.
 ;     tempDir: in, optional, type=string
@@ -484,6 +494,7 @@ FUNCTION GoogleMapWidget::INIT, parent, $
     IMAGETYPE=imageType, $
     KEEP_IMAGE=keep_image, $
     MAPTYPE=maptype, $
+    MARKERS=markers, $
     MOTION_EVENTS=motion_events, $
     TEMPDIR=tempdir, $
     XSIZE=xsize, $

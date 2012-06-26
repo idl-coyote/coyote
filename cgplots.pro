@@ -122,6 +122,8 @@
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;        Fixed a problem in which the colors of the line was not accurate in some cases. 29 November 2011. DWF.
 ;        Added the MAP_OBJECT keyword for plotting on map projections. 2 Jan 2012. DWF.
+;        Made sure the map coordinate system is established before drawing if a map object is passed
+;             into the program. 26 June 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -234,7 +236,10 @@ PRO cgPlotS, x, y, z, $
             1: IF psym[0] LE 0 THEN PlotS, x, Color=color, _STRICT_EXTRA=extra
             2: BEGIN
                IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
-                   IF psym[0] LE 0 THEN PlotS, xmap, ymap, Color=color, _STRICT_EXTRA=extra
+                   IF psym[0] LE 0 THEN BEGIN
+                      map_object -> Draw
+                      PlotS, xmap, ymap, Color=color, _STRICT_EXTRA=extra
+                   ENDIF
                ENDIF ELSE BEGIN
                    IF psym[0] LE 0 THEN PlotS, x, y, Color=color, _STRICT_EXTRA=extra
                ENDELSE
@@ -254,6 +259,7 @@ PRO cgPlotS, x, y, z, $
                    END
                 2: IF psym[0] LE 0 THEN BEGIN
                        IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
+                           map_object -> Draw
                            PlotS, [xmap[j],xmap[j+1]], [ymap[j], ymap[j+1]], $
                                 Color=thisColor, _STRICT_EXTRA=extra
                        ENDIF ELSE BEGIN
@@ -288,6 +294,7 @@ PRO cgPlotS, x, y, z, $
                    
                 2: BEGIN
                    IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
+                       map_object -> Draw
                        PlotS, xmap[j], ymap[j], COLOR=thisColor, PSYM=SymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
                            SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    ENDIF ELSE BEGIN

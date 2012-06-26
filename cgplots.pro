@@ -237,7 +237,7 @@ PRO cgPlotS, x, y, z, $
             2: BEGIN
                IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
                    IF psym[0] LE 0 THEN BEGIN
-                      map_object -> Draw
+                      map_object -> Draw, /NoGraphics
                       PlotS, xmap, ymap, Color=color, _STRICT_EXTRA=extra
                    ENDIF
                ENDIF ELSE BEGIN
@@ -259,7 +259,7 @@ PRO cgPlotS, x, y, z, $
                    END
                 2: IF psym[0] LE 0 THEN BEGIN
                        IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
-                           map_object -> Draw
+                           map_object -> Draw, /NoGraphics
                            PlotS, [xmap[j],xmap[j+1]], [ymap[j], ymap[j+1]], $
                                 Color=thisColor, _STRICT_EXTRA=extra
                        ENDIF ELSE BEGIN
@@ -294,7 +294,7 @@ PRO cgPlotS, x, y, z, $
                    
                 2: BEGIN
                    IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
-                       map_object -> Draw
+                       map_object -> Draw, /NoGraphics
                        PlotS, xmap[j], ymap[j], COLOR=thisColor, PSYM=SymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
                            SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    ENDIF ELSE BEGIN

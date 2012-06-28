@@ -609,7 +609,7 @@ PRO cgHistoplot, $                  ; The program name.
    IF N_Elements(smooth) NE 0 THEN BEGIN
      IF (smooth MOD 2) NE 0 THEN smooth = smooth + 1
    ENDIF
-   IF N_Elements(position) EQ 0 && (Total(!P.Multi) LE 0) THEN BEGIN
+   IF N_Elements(position) EQ 0 && (Total(!P.Multi) LE 0) && (Total(!P.Position) EQ 0.0) THEN BEGIN
        IF Keyword_Set(oprob) THEN BEGIN
           IF Keyword_Set(rotate) THEN BEGIN
              position = [0.125, 0.125, 0.925, 0.875]

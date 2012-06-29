@@ -356,10 +356,7 @@ PRO cgZPlot::AdjustRange, event
       void = Error_Message()
       RETURN
    ENDIF
-   
-   ; Only interested in selection events.
-   IF event.select NE 1 THEN RETURN
-   
+      
    ; Get the current X range of the data display.
    xrange = *self.xrange
    

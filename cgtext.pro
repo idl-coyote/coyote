@@ -72,6 +72,12 @@
 ;         Set this keyword to indicate xloc and yloc are in device coordinates.
 ;     font: in, optional, type=integer, default=!P.Font
 ;         The type of font desired. By default, !P.Font.
+;     map_object: in, optional, type=object
+;        If you are drawing on a map projection set up with Map_Proj_Init
+;        and using projected meter space, rather than lat/lon space, then you can use this
+;        keyword to provide a cgMap object that will allow you to convert the `x` and `y`
+;        parameters from longitude and latitude, respectively, to projected meter space
+;        before drawing.
 ;     normal: in, optional, type=boolean
 ;         Set this keyword to indicate xloc and yloc are in normalized coordinates.
 ;     outloc: out, optional, type=various
@@ -129,9 +135,10 @@
 ;        Modified to allow the user to place the text in a resizeable graphics window. 13 Dec 2011. DWF.
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;        Modifications to the way I obtain the WIDTH when adding the command to a cgWindow. 26 Jan 2012. DWF.
-;
+;        Added MAP_OBJECT keyword so that I can draw text on plots using a cgMap map coordinate object. 29 June 2012. DWF.
+;        
 ; :Copyright:
-;     Copyright (c) 2010, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgText, xloc, yloc, text, $
     ADDCMD=addcmd, $
@@ -141,6 +148,7 @@ PRO cgText, xloc, yloc, text, $
     DATA=data, $
     DEVICE=device, $
     FONT=font, $
+    MAP_OBJECT=map_object, $
     NORMAL=normal, $
     OUTLOC=outloc, $
     PLACE=place, $
@@ -207,6 +215,7 @@ PRO cgText, xloc, yloc, text, $
             DATA=data, $
             DEVICE=device, $
             FONT=font, $
+            MAP_OBJECT=map_object, $
             NORMAL=normal, $
             OUTLOC=outloc, $
             TT_FONT=tt_font, $
@@ -300,10 +309,25 @@ PRO cgText, xloc, yloc, text, $
     ; Choose a color.
     color = cgDefaultColor(scolor, MODE=currentState, DEFAULT='OPPOSITE')
     IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = cgColor(color) ELSE thisColor = color
+    
+    ; Do you have a map obect? If so, you need both an X and a Y vector.
+    ; Convert from lon/lat to projected XY.
+    IF Obj_Valid(map_object) THEN BEGIN
+          xy = map_object -> Forward(x, y)
+          xmap = Reform(xy[0,*])
+          ymap = Reform(xy[1,*])
+    ENDIF 
+    
      
     ; Draw the text.
-    XYOutS, x, y, textStr, CHARSIZE=charsize, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
-        DATA=data, DEVICE=device, NORMAL=normal, WIDTH=width, _STRICT_EXTRA=extra
+    IF Obj_Valid(map_object) THEN BEGIN
+        XYOutS, xmap, ymap, textStr, CHARSIZE=charsize, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
+            WIDTH=width, _STRICT_EXTRA=extra
+    ENDIF ELSE BEGIN
+        XYOutS, x, y, textStr, CHARSIZE=charsize, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
+            DATA=data, DEVICE=device, NORMAL=normal, WIDTH=width, _STRICT_EXTRA=extra
+    ENDELSE
+    
    SetDecomposedState, currentState
    
    ; Restore the color tables.

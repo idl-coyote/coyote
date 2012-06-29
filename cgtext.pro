@@ -321,6 +321,7 @@ PRO cgText, xloc, yloc, text, $
      
     ; Draw the text.
     IF Obj_Valid(map_object) THEN BEGIN
+        map_object -> Draw, /NoGraphics
         XYOutS, xmap, ymap, textStr, CHARSIZE=charsize, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
             WIDTH=width, _STRICT_EXTRA=extra
     ENDIF ELSE BEGIN

@@ -107,6 +107,7 @@
 ;        Added compile options idl2 to all modules. Fixed a typo for REDO button. 14 June 2012. DWF.
 ;        Separated the object code from the driver code for easier inheritance. 14 June 2012. DWF.
 ;        Removed the POLAR keyword, which can't be used in a zoom plot. 15 June 2012. DWF.
+;        Added a persistent output save directory.  30 June 2012. DWF.
 ;-
 
 ;+
@@ -760,9 +761,13 @@ PRO cgZPlot::FileOutput, event
       'TIFF FILE': filename = 'cgzplot.tif'
    ENDCASE
    
-   filename = cgPickfile(File=filename)
+   IF self.saveDir NE "" THEN thisDir = self.saveDir ELSE CD, CURRENT=thisDir
+   
+   filename = cgPickfile(PATH=thisDir, File=filename, GET_PATH=saveDir, $
+       Title='Save Plot As...', /Write)
    IF filename EQ "" THEN RETURN
    
+   self.saveDir = saveDir
    self -> DrawPlot, OUTPUT=filename
    
    
@@ -1380,6 +1385,7 @@ PRO cgZPlot__Define, class
              zoomFactor: 0.0, $
              undoList: Obj_New(), $
              redoList: Obj_New(), $
+             savedir: "", $            ; The output directory where files are saved.
              drag: 0B, $               ; A flag that tells me if I am panning or not. Necessary for UNDO.
              
              indep: Ptr_New(), $

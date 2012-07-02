@@ -39,9 +39,6 @@
 ;   This program provides a significantly modified MAP_GRID command that 
 ;   can be used with other Coyote Graphics routines.
 ;
-;   This software can be purchased, along with other Coyote Graphic map projection
-;   software, from the `Coyote Store <http://www.idlcoyote.com/store/index.php?act=viewCat&catId=3>`.
-;
 ;     Description of known MAP_GRID problems::
 ;        http://www.idlcoyote.com/map_tips/noclip.html
 ;        http://www.idlcoyote.com/map_tips/missinggrid.html

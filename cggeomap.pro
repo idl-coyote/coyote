@@ -48,9 +48,6 @@
 ;   I am interested in supporting as many GeoTIFF files as possible and I will take pains to do so if
 ;   I know they are needed.
 ;   
-;   This software can be purchased, along with other Coyote Graphic map projection
-;   software, from the `Coyote Store <http://www.idlcoyote.com/store/index.php?act=viewCat&catId=3>`.
-;   
 ; :Categories:
 ;    Graphics, Map Projections
 ;    

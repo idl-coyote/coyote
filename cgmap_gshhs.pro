@@ -59,9 +59,6 @@
 ; you need from the commented list in the code itself. The current code uses the structure
 ; for the 2.2 version of the GSHHS software.
 ;
-; This software can be purchased, along with other Coyote Graphic map projection
-; software, from the `Coyote Store <http://www.idlcoyote.com/store/index.php?act=viewCat&catId=3>`.
-;   
 ; :Categories:
 ;    Graphics, Map Projections
 ;    

@@ -54,9 +54,6 @@
 ;   to zero, at least with some map projections. I've thought about forcing it to be
 ;   zero and forcing you to use well-behaved map projections, but have decided to leave
 ;   the program the way it is so you can discover the limitations yourself.
-;   
-;   This software can be purchased, along with other Coyote Graphic map projection
-;   software, from the `Coyote Store <http://www.idlcoyote.com/store/index.php?act=viewCat&catId=3>`.
 ;
 ; :Categories:
 ;    Graphics, Map Projections

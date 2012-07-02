@@ -40,9 +40,6 @@
 ;   is basically a wrapper for Map_Proj_Init, with additional features that make it 
 ;   superiour for working with map projections in IDL.
 ;
-;   This software can be purchased, along with other Coyote Graphic map projection
-;   software, from the `Coyote Store <http://www.idlcoyote.com/store/index.php?act=viewCat&catId=3>`.
-;
 ; :Categories:
 ;    Graphics, Map Projections
 ;    

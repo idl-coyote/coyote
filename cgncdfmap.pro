@@ -43,9 +43,6 @@
 ;   used to georeference images with a map data coordinate system. The Coyote 
 ;   Library is required.
 ;
-;   This software can be purchased, along with other Coyote Graphic map projection
-;   software, from the `Coyote Store <http://www.idlcoyote.com/store/index.php?act=viewCat&catId=3>`.
-;
 ; :Categories:
 ;    Graphics, Map Projections  
 ;          

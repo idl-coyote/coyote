@@ -41,9 +41,6 @@
 ;   to draw map continental outlines in a device and color independent way with 
 ;   Coyote Graphics programs.
 ;
-;   This software can be purchased, along with other Coyote Graphic map projection
-;   software, from the `Coyote Store <http://www.idlcoyote.com/store/index.php?act=viewCat&catId=3>`.
-;
 ; :Categories:
 ;    Graphics, Map Projections
 ;       

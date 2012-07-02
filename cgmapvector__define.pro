@@ -39,9 +39,6 @@
 ;   This object allows vectors (arrows) to be placed as annotations on map 
 ;   projections created with the cgMap coordinate object.
 ;
-;   This software can be purchased, along with other Coyote Graphic map projection
-;   software, from the `Coyote Store <http://www.idlcoyote.com/store/index.php?act=viewCat&catId=3>`.
-;
 ; :Categories:
 ;    Graphics, Map Projections
 ;    

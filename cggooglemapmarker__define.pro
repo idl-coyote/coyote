@@ -62,9 +62,9 @@
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
-PRO cgGoggleMapMarker__Define
+PRO cgGoogleMapMarker__Define
 
-    struct = { cgGOOGLEMAPMARKER, $
+    struct = { CGGOOGLEMAPMARKER, $
                size: "", $         ; The marker size ("tiny", "small", "mid" or "normal") Default: "normal".
                color: "", $        ; A color name as provided with cgColor. Default: "red".
                label: "", $        ; A single uppercase character label from the set {A-Z,0-9}. Default: "".

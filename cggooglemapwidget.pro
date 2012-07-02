@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   cgGoggleMapWidget
+;   cgGoogleMapWidget
 ;
 ; PURPOSE:
 ;   This is the driver for the cgGoggleMapWidget object, which is a compound widget
@@ -153,7 +153,7 @@
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
-FUNCTION cgGoggleMapWidget, parent, $
+FUNCTION cgGoogleMapWidget, parent, $
     BOX_AXES=box_axes, $
     BUTTON_EVENTS=button_events, $
     CENTER_LATITUDE=centerLat, $

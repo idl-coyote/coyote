@@ -60,8 +60,8 @@
 ; :Examples:
 ;    Used to put two markers on a map of Fort Collins, Colorado, in a stand-alone window::
 ;        PRO cgGoogleMapWidget_Test
-;            marker1 = {GOOGLEMAPMARKER, 'normal', 'dodger blue', 'A', Ptr_New(40.600), Ptr_New(-105.100)}
-;            marker2 = {GOOGLEMAPMARKER, 'normal', 'purple',      'B', Ptr_New(40.605), Ptr_New(-105.105)}
+;            marker1 = {cgGOOGLEMAPMARKER, 'normal', 'dodger blue', 'A', Ptr_New(40.600), Ptr_New(-105.100)}
+;            marker2 = {cgGOOGLEMAPMARKER, 'normal', 'purple',      'B', Ptr_New(40.605), Ptr_New(-105.105)}
 ;            googleObject = Obj_New('cgGoogleMapWidget', MARKERS=[marker1, marker2], MAPTYPE='Terrain')
 ;        END
 ;       
@@ -129,10 +129,10 @@
 ;         choices are listed in the Google Static Map API documentation and are: "roadmap",
 ;         "terrain", "satellite", and "hybrid".
 ;     markers: in, optional, type=structure
-;         A scalar or array of GoogleMapMarker structures. If present, the markers will
+;         A scalar or array of cgGoogleMapMarker structures. If present, the markers will
 ;         be requested with the map from Google. The GoogleMapMarker structure is defined
 ;         like this::
-;            struct = { GOOGLEMAPMARKER, $
+;            struct = { cgGOOGLEMAPMARKER, $
 ;               size: "", $         ; The marker size ("tiny", "small", "mid" or "normal")
 ;               color: "", $        ; A color name as provided by cgColor.
 ;               label: "", $        ; A single uppercase character label from the set {A-Z,0-9}.
@@ -339,7 +339,7 @@ PRO cgGoogleMapWidget::CreateMapCoordObject
     ; radius of the Earth, calculating the number of meters per deg lon, then
     ; the number of pixels per deg lon (256/360 for zoom level 0), then figuring
     ; in the zoom level.
-    metersPerPixel = Google_MetersPerPixel(self.zoomlevel)
+    metersPerPixel = cgGoogle_MetersPerPixel(self.zoomlevel)
     xy = mapCoord -> Forward(self.centerLon, self.centerLat)
     xrange = [xy[0] - ((self.map_xsize/2.0)*metersPerPixel), xy[0] + ((self.map_xsize/2.0)*metersPerPixel)]
     yrange = [xy[1] - ((self.map_ysize/2.0)*metersPerPixel), xy[1] + ((self.map_ysize/2.0)*metersPerPixel)]
@@ -701,10 +701,10 @@ END
 ;         choices are listed in the Google Static Map API documentation and are: "roadmap",
 ;         "terrain", "satellite", and "hybrid".
 ;     markers: in, optional, type=structure
-;         A scalar or array of GoogleMapMarker structures. If present, the markers will
+;         A scalar or array of cgGoogleMapMarker structures. If present, the markers will
 ;         be requested with the map from Google. The GoogleMapMarker structure is defined
 ;         like this::
-;            struct = { GOOGLEMAPMARKER, $
+;            struct = { cgGOOGLEMAPMARKER, $
 ;               size: "", $         ; The marker size ("tiny", "small", "mid" or "normal")
 ;               color: "", $        ; A color name as provided by cgColor.
 ;               label: "", $        ; A single uppercase character label from the set {A-Z,0-9}.

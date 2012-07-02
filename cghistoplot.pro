@@ -346,6 +346,8 @@ PRO cgHistoplot, $                  ; The program name.
    XTITLE=xtitle, $                 ; The X title.
    YTITLE=ytitle, $                 ; The Y title.
     _REF_EXTRA=extra               ; For passing extra keywords.
+    
+   Compile_Opt idl2
 
    ; Catch any error in the cgHistoplot program.
    Catch, theError

@@ -54,7 +54,7 @@ All Coyote Library routines use the following BSD Open Source License:
 
 ;******************************************************************************************;
 ;                                                                                          ;
-;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
+;  Copyright (c) 2012, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -80,3 +80,14 @@ All Coyote Library routines use the following BSD Open Source License:
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 
+DOCUMENTATION:
+
+   Documentation for Coyote Graphics Routines (any program starting with "cg" as
+   a prefex) is available on line:
+
+        http://www.idlcoyote.com/idldoc/cg/index.html
+
+   Documentation for other routines is available as an HTML file in the Coyote
+   directory:
+
+         http://www.idlcoyote.com/programs/program.documentation.html

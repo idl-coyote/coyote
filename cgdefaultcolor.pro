@@ -94,7 +94,7 @@
 ;        Allow other data types to be treated as color table index numbers, as long as they are in the
 ;           range 0 to 255, and the MODE indicates indexed color. 7 March 2012. DWF.
 ;        Modified so that the variable MODE will not change in the calling program program. 8 March 2012. DWF.
-;        Added Compile_Opt statement to force long integers. 3 July 2012. DWF.
+;        Made FOR loop counter a LONG integer. 3 July 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -104,8 +104,6 @@ FUNCTION cgDefaultColor, inputColour, $
     DEFAULT=default, $
     MODE=mode, $
     TRADITIONAL=traditional
-    
-    Compile_Opt idl2
     
     ; Return to the caller on error.
     On_Error, 2
@@ -176,7 +174,7 @@ FUNCTION cgDefaultColor, inputColour, $
     ENDELSE
 
     ; Fill the color return array.
-    FOR j=0,N_Elements(theColors)-1 DO BEGIN
+    FOR j=0L,N_Elements(theColors)-1 DO BEGIN
         thisColor = inputColor[j]
         CASE thisType OF
         

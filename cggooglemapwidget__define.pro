@@ -130,7 +130,7 @@
 ;         "terrain", "satellite", and "hybrid".
 ;     markers: in, optional, type=structure
 ;         A scalar or array of cgGoogleMapMarker structures. If present, the markers will
-;         be requested with the map from Google. The GoogleMapMarker structure is defined
+;         be requested with the map from Google. The cgGoogleMapMarker structure is defined
 ;         like this::
 ;            struct = { cgGOOGLEMAPMARKER, $
 ;               size: "", $         ; The marker size ("tiny", "small", "mid" or "normal")

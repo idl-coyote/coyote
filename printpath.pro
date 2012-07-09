@@ -26,7 +26,8 @@
 ;
 ; INPUTS:
 ;
-;       None.
+;       filename: The name of the output file. If not present, the output is
+;                 written into the command log window.
 ;
 ;  KEYWORDS:
 ;
@@ -35,6 +36,7 @@
 ; MODIFICATION HISTORY:
 ;
 ;       Written by David W. Fanning, 8 Nov 2007.
+;       Added FILENAME parameter, 9 July 2012. DWF.
 ;
 ;
 ;******************************************************************************************;
@@ -64,9 +66,16 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-PRO PrintPath
+PRO PrintPath, filename
 
    parts = StrSplit(!PATH, Path_Sep(/SEARCH_PATH), /Extract)
-   FOR j=0L,N_Elements(parts)-1 DO Print, parts[j]
+   
+   IF N_Elements(filename) NE 0 THEN BEGIN
+   
+       OpenW, lun, filename, /Get_Lun
+       FOR j=0L,N_Elements(parts)-1 DO PrintF, lun, parts[j]
+       Free_Lun, lun
+       
+    ENDIF ELSE FOR j=0L,N_Elements(parts)-1 DO Print, parts[j]
    
 END

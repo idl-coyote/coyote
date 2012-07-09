@@ -111,6 +111,9 @@
 ;          a symbol. To "unstick" the color,  you have to call USERSYM without a color keyword
 ;          before calling it again with a color keyword. This is, without a doubt, the strangest
 ;          bug I've ever seen in IDL! 20 June 2012. DWF.
+;       Changed the way I "unstick" the color from calling USERSYM to calling SYMCAT. This
+;          avoids a problem in changing the symbol when SYMCAT is used (unnecessarily) to pass
+;          a symbol into Coyote Graphics programs. 9 July 2012. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -152,7 +155,7 @@ FUNCTION SymCat, theSymbol, THICK=thick, COLOR=color
    
    ; The following line is necessary to "unstick" the USERSYM color. Don't ask
    ; me, I just know it's friggin' needed!
-   IF N_Elements(color) NE 0 THEN UserSym,[1, -1, 0, 0, 0], [0, 0, 0, -1, 1]
+   IF N_Elements(color) NE 0 THEN void = SymCat(theSymbol)
 
    ; Define helper variables for creating circles.
    phi = Findgen(36) * (!PI * 2 / 36.)

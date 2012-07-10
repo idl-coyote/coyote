@@ -108,6 +108,7 @@
 ;        Separated the object code from the driver code for easier inheritance. 14 June 2012. DWF.
 ;        Removed the POLAR keyword, which can't be used in a zoom plot. 15 June 2012. DWF.
 ;        Added a persistent output save directory.  30 June 2012. DWF.
+;        Added an ERASE method to erase the current display. 10 July 2012. DWF.
 ;-
 
 ;+
@@ -726,6 +727,30 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         ZTITLE=ztitle, $
         ZVALUE=zvalue
 END
+
+
+;+
+; This method simply erases the display.
+;-
+PRO cgZPlot::Erase
+
+    Compile_Opt idl2
+    
+   ; Standard error handling.
+   Catch, theError
+   IF theError NE 0 THEN BEGIN
+      Catch, /Cancel
+      void = Error_Message()
+      RETURN
+   ENDIF
+ 
+    WSet, self.pixmapID
+    cgErase
+    self -> CopyPixmap
+    
+END
+
+
 
 ;+
 ; This event handler method allows the plot in the graphics window to be output

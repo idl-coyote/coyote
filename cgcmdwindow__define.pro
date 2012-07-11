@@ -112,6 +112,9 @@
 ;        Forgot to specify the GROUP_LEADER when calling PS_START. Caused PSConfig to
 ;           run though its block when cgWindow was called from a blocking widget program.
 ;           5 June 2012. DWF.
+;        Added the ability to save the file name and directory of the last output file, so
+;            that subsequent file saves can use that last name and directory as a starting
+;            default filename. 11 July 2012. DWF.
 ;-
 
 
@@ -1145,13 +1148,14 @@ PRO cgCmdWindow::AutoPostScriptFile, filename
         Catch, /CANCEL
         void = Error_Message()
         
+        ; Close the PostScript file.
+        PS_END, /NoFix     
+
         ; Set the window index number back.
         IF N_Elements(currentWindow) NE 0 THEN BEGIN
             IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
         ENDIF
         
-        ; Close the PostScript file.
-        PS_END, /NoFix     
         RETURN
     ENDIF
     
@@ -1206,13 +1210,14 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
         Catch, /CANCEL
         void = Error_Message()
         
+        ; Close the PostScript file.
+        PS_END, /NoFix     
+
         ; Set the window index number back.
         IF N_Elements(currentWindow) NE 0 THEN BEGIN
             IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
         ENDIF
         
-        ; Close the PostScript file.
-        PS_END, /NoFix     
         RETURN
     ENDIF
     
@@ -1511,33 +1516,49 @@ PRO cgCmdWindow::CreatePostScriptFile, event
         Catch, /CANCEL
         void = Error_Message()
         
+        ; Close the PostScript file.
+        PS_END, /NoFix     
+
         ; Set the window index number back.
         IF N_Elements(currentWindow) NE 0 THEN BEGIN
             IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
         ENDIF
         
-        ; Close the PostScript file.
-        PS_END, /NoFix     
         RETURN
     ENDIF
     
-    ; Make this window the current graphics windows.
+    ; Make this window the current graphics windows
     currentWindow = !D.Window
     WSet, self.wid
+    
+    ; Construct a file name, if you have one.
+    ext = self.ps_encapsulated ? '.eps' : '.ps'
+    IF self.lastWriteFile NE "" THEN BEGIN
+        filename = Filepath(ROOT_DIR=self.lastWriteDir, self.lastWriteFile + ext)
+    ENDIF ELSE BEGIN
+         CD, CURRENT=thisDir
+         filename = Filepath(ROOT_DIR=thisDir, 'cgwindow' + ext)
+    ENDELSE
 
     ; Allow the user to configure the PostScript file.
     PS_Start, /GUI, $
         CANCEL=cancelled, $
+        CHARSIZE=self.ps_charsize, $
         DECOMPOSED=self.ps_decomposed, $
         EUROPEAN=self.ps_metric, $
         ENCAPSULATED=self.ps_encapsulated, $
-        GROUP_LEADER=self.tlb, $
-        SCALE_FACTOR=self.ps_scale_factor, $
-        CHARSIZE=self.ps_charsize, $
+        FILENAME=filename, $
         FONT=self.ps_font, $
+        GROUP_LEADER=self.tlb, $
+        KEYWORDS=keywords, $
+        SCALE_FACTOR=self.ps_scale_factor, $
         QUIET=self.ps_quiet, $
         TT_FONT=self.ps_tt_font
     IF cancelled THEN RETURN
+    
+    ; Save the name of the last output file.
+    self.lastWriteDir = File_DirName(keywords.filename)
+    self.lastWriteFile = FSC_Base_Filename(keywords.filename)
     
     ; Execute the graphics commands.
     self -> ExecuteCommands
@@ -2360,13 +2381,14 @@ PRO cgCmdWindow::SaveAsRaster, event
         Catch, /CANCEL
         void = Error_Message()
         
+        ; Close the PostScript file.
+        PS_END, /NoFix     
+
         ; Set the window index number back.
         IF N_Elements(currentWindow) NE 0 THEN BEGIN
             IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
         ENDIF
         
-        ; Close the PostScript file.
-        PS_END, /NoFix     
         RETURN
     ENDIF
 
@@ -2395,21 +2417,41 @@ PRO cgCmdWindow::SaveAsRaster, event
     ; Make this window the current graphics windows.
     currentWindow = !D.Window
     WSet, self.wid
-
+    
+    ; Construct a file name, if you have one.
+    CASE filetype OF
+       'BMP':  ext = '.bmp'
+       'GIF':  ext = '.gif'
+       'JPEG': ext = '.jpg'
+       'PDF':  ext = '.pdf'
+       'PNG':  ext = '.png'
+       'TIFF': ext = '.tif'
+    ENDCASE
+    IF self.lastWriteFile NE "" THEN BEGIN
+        filename = Filepath(ROOT_DIR=self.lastWriteDir, self.lastWriteFile + ext)
+    ENDIF ELSE BEGIN
+         CD, CURRENT=thisDir
+         filename = Filepath(ROOT_DIR=thisDir, 'cgwindow' + ext)
+    ENDELSE
+    
     ; Get a filename from the user.
     CASE filetype OF
-       'BMP':  filename = cgPickfile(FILE='cgwindow.bmp', /WRITE, TITLE='Select an Output File...')
-       'GIF':  filename = cgPickfile(FILE='cgwindow.gif', /WRITE, TITLE='Select an Output File...')
-       'JPEG': filename = cgPickfile(FILE='cgwindow.jpg', /WRITE, TITLE='Select an Output File...')
-       'PDF':  filename = cgPickfile(FILE='cgwindow.pdf', /WRITE, TITLE='Select an Output File...')
-       'PNG':  filename = cgPickfile(FILE='cgwindow.png', /WRITE, TITLE='Select an Output File...')
-       'TIFF': filename = cgPickfile(FILE='cgwindow.tif', /WRITE, TITLE='Select an Output File...')
+       'BMP':  filename = cgPickfile(FILE=filename, /WRITE, TITLE='Select an Output File...')
+       'GIF':  filename = cgPickfile(FILE=filename, /WRITE, TITLE='Select an Output File...')
+       'JPEG': filename = cgPickfile(FILE=filename, /WRITE, TITLE='Select an Output File...')
+       'PDF':  filename = cgPickfile(FILE=filename, /WRITE, TITLE='Select an Output File...')
+       'PNG':  filename = cgPickfile(FILE=filename, /WRITE, TITLE='Select an Output File...')
+       'TIFF': filename = cgPickfile(FILE=filename, /WRITE, TITLE='Select an Output File...')
     ENDCASE
     IF filename EQ "" THEN RETURN
     
     ; Parset the name.
     root_name = FSC_Base_Filename(filename, DIRECTORY=dirName)
     outname = Filepath(ROOT_DIR=dirname, root_name)
+    
+    ; Save this name.
+    self.lastWriteFile = root_name
+    self.lastWriteDir = dirName
     
     ; What kind of raster file.
     CASE rasterType OF
@@ -2928,6 +2970,8 @@ PRO cgCmdWindow__Define, class
               storage: Ptr_New(), $         ; Holder for user information, like UVALUE.
               title: "", $                  ; The "title" of the object when it is stored.
               createParent: 0B, $           ; Flag that indicates whether this object created its own parent widget.
+              lastWriteFile: "", $          ; The name of the last file written.
+              lastWriteDir: "", $           ; The name of the last directory written to.
               
               ; cgWindow parameters
               aspect: 0.0, $                ; The aspect ratio of the window.

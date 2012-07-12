@@ -67,6 +67,11 @@
 ;        Set this keyword to add the command to an cgWindow. Setting this keyword
 ;        automatically sets the WINDOW keyword, but the command does not erase the
 ;        graphics window as it would normally.
+;     aspect: in, optional, type=float, default=none
+;        Set this keyword to a floating point ratio that represents the aspect ratio 
+;        (ysize/xsize) of the resulting plot. The plot position may change as a result
+;        of setting this keyword. Note that `Aspect` cannot be used when plotting with
+;        !P.MULTI.
 ;     axiscolor: in, optional, type=string/integer, default='opposite'
 ;        If this keyword is a string, the name of the axis color. 
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -328,12 +333,14 @@
 ;        Now allowing the user to draw in the "background" color, if the COLOR or AXISCOLOR is "BACKGROUND". 19 March 2012. DWF.
 ;        The axis repair change on 9 March was not working in multi plots because the plot was already
 ;            advanced. Added a fix to make sure the repair is to the correct multi plot. 20 April 2012. DWF.           
-;                   
+;        Added an ASPECT keyword to maintain the program aspect ratio. 12 July 2012. DWF.
+;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
 ;-
 PRO cgContour, data, x, y, $
     ADDCMD=addcmd, $
+    ASPECT=aspect, $
     AXISCOLOR=saxiscolor, $
     AXESCOLOR=saxescolor, $
     BACKGROUND=sbackground, $
@@ -416,6 +423,7 @@ PRO cgContour, data, x, y, $
             
         IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
             cgWindow, 'cgContour', data, x, y, $
+                ASPECT=aspect, $
                 AXISCOLOR=saxiscolor, $
                 AXESCOLOR=saxescolor, $
                 BACKGROUND=sbackground, $
@@ -465,6 +473,7 @@ PRO cgContour, data, x, y, $
         currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
         cgWindow, 'cgContour', data, x, y, $
+            ASPECT=aspect, $
             AXISCOLOR=saxiscolor, $
             AXESCOLOR=saxescolor, $
             BACKGROUND=sbackground, $
@@ -622,6 +631,35 @@ PRO cgContour, data, x, y, $
     
     ENDIF
    
+    IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
+    
+        ; If position is set, then fit the plot into those bounds.
+        IF (N_Elements(position) GT 0) THEN BEGIN
+          trial_position = Aspect(aspect, margin=0.)
+          trial_width = trial_position[2]-trial_position[0]
+          trial_height = trial_position[3]-trial_position[1]
+          pos_width = position[2]-position[0]
+          pos_height = position[3]-position[1]
+
+          ; Same logic as cgImage: try to fit image width, then if you can't get the right aspect
+          ; ratio, fit the image height instead.
+          fit_ratio = pos_width / trial_width
+          IF trial_height * fit_ratio GT pos_height THEN $
+             fit_ratio = pos_height / trial_height
+
+          ; new width and height
+          trial_width *= fit_ratio
+          trial_height *= fit_ratio
+
+          ; calculate position vector based on trial_width and trial_height
+          position[0] += 0.5*(pos_width - trial_width)
+          position[2] -= 0.5*(pos_width - trial_width)
+          position[1] += 0.5*(pos_height - trial_height)
+          position[3] -= 0.5*(pos_height - trial_height)
+        ENDIF ELSE position=Aspect(aspect)   ; if position isn't set, just use output of Aspect
+        
+    ENDIF
+    
     ; If you want to overplot on an image, set the OVERPLOT keyword.
     IF Keyword_Set(onImage) THEN overplot = 1
     

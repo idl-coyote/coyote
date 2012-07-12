@@ -51,21 +51,25 @@
 ;         A vector representing the dependent values to be plotted.
 ;         
 ; :Keywords:
+;    label: in, optional, type=string
+;         A label is similar to a plot title, but it is aligned to the left edge
+;         of the plot and is written in hardware fonts. Use of the label keyword
+;         will suppress the plot title.
 ;    object: out, optional, type=objref
 ;         The object reference to the underlying object.
-;     parent: in, optional, type=long
+;    parent: in, optional, type=long
 ;         The identifer of the parent widget for this program's draw widget. If not
 ;         provided, the program will create it's own top-level base widget as the parent widget.
-;     xsize: in, optional, type=int, default=640
+;    xsize: in, optional, type=int, default=640
 ;         The X size of the program's draw widget.
-;     ysize: in, optional, type=int, default=512
+;    ysize: in, optional, type=int, default=512
 ;         The Y size of the program's draw widget.
-;     zoomfactor: in, optional, type=float
+;    zoomfactor: in, optional, type=float
 ;         Set this keyword to a number between 0.01 and 0.25. This affects the amount
 ;         of zooming when the X axis and Y axis are zoomed with the LEFT mouse button.
 ;         The default value is 0.05 or five percent of the current axis range on each
 ;         end of the axis, resulting in a 10 percent change in the axis length.
-;     _ref_extra: in, optional, type=any
+;    _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot or Coyote Graphic cgPlot command is 
 ;        allowed in the program.
 ;        
@@ -84,8 +88,10 @@
 ; :History:
 ;     Change History::
 ;        Separated the object code (cgZPlot__Define) from this driver code for easier inheritance. 14 June 2012. DWF.
+;        Added LABEL keyword. 12 July 2012. DWF.
 ;-
 PRO cgZPlot, x, y, $
+    LABEL=label, $
     OBJECT=thisObject, $
     PARENT=parent, $
     XSIZE=xsize, $
@@ -116,6 +122,7 @@ PRO cgZPlot, x, y, $
     ENDCASE
 
     thisObject = Obj_New('cgZPlot', indep, dep, $
+       LABEL=label, $
        PARENT=parent, $
        XSIZE=xsize, $
        YSIZE=ysize, $

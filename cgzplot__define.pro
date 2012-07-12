@@ -129,27 +129,31 @@
 ;        (ysize/xsize) of the resulting plot. The plot position may change as a result
 ;        of setting this keyword. Note that `Aspect` cannot be used when plotting with
 ;        !P.MULTI.
+;     label: in, optional, type=string
+;        A label is similar to a plot title, but it is aligned to the left edge
+;        of the plot and is written in hardware fonts. Use of the label keyword
+;        will suppress the plot title.
 ;     max_value: in, optional, type=float
-;         Set this keyword to the maximum value to plot. Any values greater than this 
-;         value are treated as missing.
+;        Set this keyword to the maximum value to plot. Any values greater than this 
+;        value are treated as missing.
 ;     min_value: in, optional, type=float
-;         Set this keyword to the minimu value to plot. Any values smaller than this 
-;         value are treated as missing.
+;        Set this keyword to the minimu value to plot. Any values smaller than this 
+;        value are treated as missing.
 ;     parent: in, optional, type=long
-;         The identifer of the parent widget for this program's draw widget. If not
-;         provided, the program will create it's own top-level base widget as a parent.
+;        The identifer of the parent widget for this program's draw widget. If not
+;        provided, the program will create it's own top-level base widget as a parent.
 ;     xlog: in, optional, type=boolean, default=0
-;         Set this keyword to use a logarithmic X axis
+;        Set this keyword to use a logarithmic X axis
 ;     xrange: in, optional, type=double
-;          Set this keyword to a two-element array giving the X data range of the plot.
+;        Set this keyword to a two-element array giving the X data range of the plot.
 ;     xsize: in, optional, type=int, default=640
-;         The X size of the program's draw widget.
+;        The X size of the program's draw widget.
 ;     ylog: in, optional, type=boolean, default=0
-;         Set this keyword to use a logarithmic Y axis
+;        Set this keyword to use a logarithmic Y axis
 ;     ynozero: in, optional, type=boolean, default=0
-;         Set this keyword to use allow the Y axis to start at a value other than zero.
+;        Set this keyword to use allow the Y axis to start at a value other than zero.
 ;     yrange: in, optional, type=double
-;          Set this keyword to a two-element array giving the Y data range of the plot.
+;         Set this keyword to a two-element array giving the Y data range of the plot.
 ;     ysize: in, optional, type=int, default=512
 ;         The Y size of the program's draw widget.
 ;     zoomfactor: in, optional, type=float
@@ -165,6 +169,7 @@
 FUNCTION cgZPlot::INIT, x, y, $
     ASPECT=aspect, $
     DRAWID=drawid, $
+    LABEL=label, $
     MAX_VALUE=max_value, $
     MIN_VALUE=min_value, $
     PARENT=parent, $
@@ -281,6 +286,7 @@ FUNCTION cgZPlot::INIT, x, y, $
     
     ; Set object properties.
     self.drag = 0
+    IF N_Elements(label) NE 0 THEN self.label = label
     IF N_Elements(xrange) EQ 0 THEN xrange = [Min(indep), Max(indep)]
     IF N_Elements(yrange) EQ 0 THEN yrange = [Min(dep), Max(dep)*1.05]
     self.orig_xrange = xrange
@@ -648,6 +654,7 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
    cgPlot, *self.indep, *self.dep, $
         OUTPUT=output, $
         ASPECT=*self.aspect, $
+        LABEL=self.label, $
         MAX_VALUE=*self.max_value, $
         MIN_VALUE=*self.min_value, $
         XLOG=*self.xlog, $
@@ -804,6 +811,8 @@ END
 ; :Keywords:
 ;     aspect: out, optional, type=float
 ;        A value that represents the aspect ratio (ysize/xsize) of the resulting plot. 
+;     label: out, optional, type=string
+;         The label that is used for the zoom plot.
 ;     max_value: out, optional, type=float
 ;         The maximum value to plot. 
 ;     min_value: out, optional, type=float
@@ -826,6 +835,7 @@ PRO cgZPlot::GetProperty, $
         DATA_X=indep, $
         DATA_Y=dep, $
         ASPECT=aspect, $
+        LABEL=label, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
         UNDOLIST=undolist, $
@@ -849,6 +859,7 @@ PRO cgZPlot::GetProperty, $
     IF Arg_Present(indep) NE 0 THEN IF N_Elements(*self.indep) NE 0 THEN indep = *self.indep
     IF Arg_Present(dep) NE 0 THEN IF N_Elements(*self.dep) NE 0 THEN dep = *self.dep
     IF Arg_Present(aspect) NE 0 THEN IF N_Elements(*self.aspect) NE 0 THEN aspect = *self.aspect
+    IF Arg_Present(label) NE 0 THEN IF N_Elements(self.label) NE 0 THEN label = self.label
     IF Arg_Present(max_value) NE 0 THEN IF N_Elements(*self.max_value) NE 0 THEN max_value = *self.max_value
     IF Arg_Present(min_value) NE 0 THEN IF N_Elements(*self.min_value) NE 0 THEN min_value = *self.min_value
     IF Arg_Present(xlog) NE 0 THEN IF N_Elements(*self.xlog) NE 0 THEN xlog = *self.xlog
@@ -1010,6 +1021,10 @@ END
 ;         Set this keyword if you would like to immediately draw the plot after properties are set.
 ;     indep: in, optional, type=any
 ;         The independent data to plot.
+;     label: in, optional, type=string
+;         A label is similar to a plot title, but it is aligned to the left edge
+;         of the plot and is written in hardware fonts. Use of the label keyword
+;         will suppress the plot title.
 ;     max_value: in, optional, type=float
 ;         Set this keyword to the maximum value to plot. Any values greater than this 
 ;         value are treated as missing.
@@ -1036,6 +1051,7 @@ PRO cgZPlot::SetProperty, $
         DEP=dep, $
         DRAW=draw, $
         INDEP=indep, $
+        LABEL=label, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
         XLOG=xlog, $
@@ -1058,6 +1074,7 @@ PRO cgZPlot::SetProperty, $
     IF N_Elements(indep) NE 0 THEN *self.indep = indep
     IF N_Elements(dep) NE 0 THEN *self.dep = dep
     IF N_Elements(aspect) NE 0 THEN *self.aspect = aspect
+    IF N_Elements(label) NE 0 THEN self.label = label
     IF N_Elements(max_value) NE 0 THEN *self.max_value = max_value
     IF N_Elements(min_value) NE 0 THEN *self.min_value = min_value
     IF N_Elements(xlog) NE 0 THEN *self.xlog = Keyword_Set(xlog)
@@ -1410,6 +1427,7 @@ PRO cgZPlot__Define, class
              zoomFactor: 0.0, $
              undoList: Obj_New(), $
              redoList: Obj_New(), $
+             label: "", $              ; The plot label. Suppress TITLE if present.
              savedir: "", $            ; The output directory where files are saved.
              drag: 0B, $               ; A flag that tells me if I am panning or not. Necessary for UNDO.
              

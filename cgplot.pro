@@ -85,6 +85,10 @@
 ;        The type of font desired for axis annotation.
 ;     isotropic: in, optional, type=boolean, default=0
 ;        A short-hand way of setting the `Aspect` keyword to 1.
+;     label: in, optional, type=string
+;        A label is similar to a plot title, but it is aligned to the left edge
+;        of the plot and is written in hardware fonts. Use of the label keyword
+;        will suppress the plot title.
 ;     layout: in, optional, type=intarr(3)
 ;        This keyword specifies a grid with a graphics window and determines where the
 ;        graphic should appear. The syntax of LAYOUT is three numbers: [ncolumns, nrows, location].
@@ -137,6 +141,8 @@
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     symsize: in, optional, type=float, default=1.0
 ;        The symbol size.
+;     title: in, optional, type=string
+;         The title of the plot.
 ;     traditional: in, optional, type=boolean, default=0
 ;        If this keyword is set, the traditional color scheme of a black background for
 ;        graphics windows on the display is used and PostScript files always use a white background.
@@ -204,6 +210,7 @@
 ;         Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
 ;         Now allowing the user to draw in the "background" color, if the COLOR or AXISCOLOR is "BACKGROUND". 19 March 2012. DWF.
 ;         Scalar input parameters are changed to 1-element vectors to avoid annoying error messages from PLOT. 6 April 2012. DWF.
+;         Added a LABEL keyword. 12 July 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -218,6 +225,7 @@ PRO cgPlot, x, y, $
     COLOR=scolor, $
     FONT=font, $
     ISOTROPIC=isotropic, $
+    LABEL=label, $
     LAYOUT=layout, $
     NODATA=nodata, $
     NOERASE=noerase, $
@@ -228,6 +236,7 @@ PRO cgPlot, x, y, $
     PSYM=psym, $
     SYMCOLOR=ssymcolor, $
     SYMSIZE=symsize, $
+    TITLE=title, $
     TRADITIONAL=traditional, $
     WINDOW=window, $
     _REF_EXTRA=extra
@@ -275,6 +284,7 @@ PRO cgPlot, x, y, $
             COLOR=scolor, $
             FONT=font, $
             ISOTROPIC=isotropic, $
+            LABEL=label, $
             LAYOUT=layout, $
             NODATA=nodata, $
             NOERASE=noerase, $
@@ -283,6 +293,7 @@ PRO cgPlot, x, y, $
             PSYM=psym, $
             SYMCOLOR=ssymcolor, $
             SYMSIZE=symsize, $
+            TITLE=title, $
             TRADITIONAL=traditional, $
             ADDCMD=1, $
             _Extra=extra
@@ -301,6 +312,7 @@ PRO cgPlot, x, y, $
             COLOR=scolor, $
             FONT=font, $
             ISOTROPIC=isotropic, $
+            LABEL=label, $
             LAYOUT=layout, $
             NODATA=nodata, $
             NOERASE=noerase, $
@@ -309,6 +321,7 @@ PRO cgPlot, x, y, $
             PSYM=psym, $
             SYMCOLOR=ssymcolor, $
             SYMSIZE=symsize, $
+            TITLE=title, $
             TRADITIONAL=traditional, $
             REPLACECMD=replaceCmd, $
             _Extra=extra
@@ -467,6 +480,8 @@ PRO cgPlot, x, y, $
     ENDIF
 
     ; Check the color keywords.
+    IF N_Elements(title) EQ 0 THEN title = ""
+    IF N_Elements(label) NE 0 THEN title = ""
     traditional = Keyword_Set(traditional)
     background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional, MODE=currentState)
     IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
@@ -588,7 +603,7 @@ PRO cgPlot, x, y, $
        IF psym LE 0 THEN OPlot, indep, dep, COLOR=color, _EXTRA=extra
     ENDIF ELSE BEGIN
       Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
-            POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, _STRICT_EXTRA=extra
+            POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, TITLE=title, _STRICT_EXTRA=extra
         IF psym LE 0 THEN BEGIN
            IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=color, _EXTRA=extra  
         ENDIF  
@@ -597,6 +612,14 @@ PRO cgPlot, x, y, $
         IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=symcolor, $
             PSYM=SymCat(Abs(psym), COLOR=symcolor, _Extra=extra), SYMSIZE=symsize, _EXTRA=extra
     ENDIF 
+    
+    ; Need a label on the plot?
+    IF N_Elements(label) NE 0 THEN BEGIN
+        x = !X.Window[0]
+        y = !Y.Window[1] + 0.015
+        labelfont = (!D.Name EQ 'PS') ? 1 : 0
+        cgText, x, y, /NORMAL, label, FONT=labelfont
+    ENDIF
          
     ; If this is the first plot in PS, then we have to make it appear that we have
     ; drawn a plot, even though we haven't.

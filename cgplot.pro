@@ -618,7 +618,7 @@ PRO cgPlot, x, y, $
         x = !X.Window[0]
         y = !Y.Window[1] + 0.015
         labelfont = (!D.Name EQ 'PS') ? 1 : 0
-        cgText, x, y, /NORMAL, label, FONT=labelfont
+        cgText, x, y, /NORMAL, label, FONT=labelfont, COLOR=axiscolor
     ENDIF
          
     ; If this is the first plot in PS, then we have to make it appear that we have

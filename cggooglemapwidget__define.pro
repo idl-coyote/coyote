@@ -205,6 +205,9 @@ FUNCTION cgGoogleMapWidget::INIT, parent, $
     IF N_Elements(zoomlevel) EQ 0 THEN zoomlevel = 12 ELSE zoomlevel = 0 > zoomLevel < 21
     map_xsize = box_axes ? (xsize-50) : xsize
     map_ysize = box_axes ? (ysize-50) : ysize
+    
+    ; Make sure the temporary directory exists.
+    IF ~File_Test(tempDir, /DIRECTORY) THEN File_MkDir, tempDir    
 
     ; Add a random number generator.
     self.random = Obj_New('RandomNumberGenerator')

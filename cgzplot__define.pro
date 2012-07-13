@@ -109,6 +109,7 @@
 ;        Removed the POLAR keyword, which can't be used in a zoom plot. 15 June 2012. DWF.
 ;        Added a persistent output save directory.  30 June 2012. DWF.
 ;        Added an ERASE method to erase the current display. 10 July 2012. DWF.
+;        Added a LABEL keyword to add a label instead of a title to a plot. 13 July 2012. DWF.
 ;-
 
 ;+

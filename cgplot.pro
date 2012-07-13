@@ -211,6 +211,7 @@
 ;         Now allowing the user to draw in the "background" color, if the COLOR or AXISCOLOR is "BACKGROUND". 19 March 2012. DWF.
 ;         Scalar input parameters are changed to 1-element vectors to avoid annoying error messages from PLOT. 6 April 2012. DWF.
 ;         Added a LABEL keyword. 12 July 2012. DWF.
+;         Yikes! Bad choice of variable names in LABEL work yesterday has severe consequences. Changed names. 13 July 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -615,10 +616,10 @@ PRO cgPlot, x, y, $
     
     ; Need a label on the plot?
     IF N_Elements(label) NE 0 THEN BEGIN
-        x = !X.Window[0]
-        y = !Y.Window[1] + 0.015
+        xx = !X.Window[0]
+        yy = !Y.Window[1] + 0.015
         labelfont = (!D.Name EQ 'PS') ? 1 : 0
-        cgText, x, y, /NORMAL, label, FONT=labelfont, COLOR=axiscolor
+        cgText, xx, yy, /NORMAL, label, FONT=labelfont, COLOR=axiscolor
     ENDIF
          
     ; If this is the first plot in PS, then we have to make it appear that we have

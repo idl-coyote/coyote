@@ -292,7 +292,7 @@ FUNCTION cgCmdWindow::Init, parent, $
        Title = d_title, $                                ; The window title.
        XPos = d_xpos, $                                  ; The X offset of the window on the display.
        YPos = d_ypos, $                                  ; The Y offset of the window on the display. 
-       WAspect = d_aspect, $                             ; The aspect ratio of the window.
+       Aspect = d_aspect, $                              ; The aspect ratio of the window.
        Palette = d_palette, $                            ; The color table palette to use for the window.
        
        ; PDF properties.

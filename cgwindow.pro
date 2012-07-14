@@ -293,6 +293,8 @@
 ;         Added the ability to specify a fourth positional parameter. 6 Jan 2012. DWF.
 ;         Separated off the cgCmdWindow part of the code to make an object-widget draw widget. 19 Jan 2012. DWF.
 ;         Fixed a small type with the Outside Margin keywords that was preventing these from being used. 19 April 2012. DWF.
+;         In decompling cgWindow from cgCmdWindow, I accidentally named the WASPECT keyword ASPECT. Restored
+;             original name in this version. 13 July 2012. DWF.
 ;-
 PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.
@@ -545,12 +547,12 @@ PRO cgWindow, $
                                         ; should be "P1", "P2", "P3" or "P4".
        Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
        Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
-       Aspect = waspect, $              ; Set the window aspect ratio to this value.
        Background = wbackground, $      ; The background color. Not used unless set.
        Multi = wmulti, $                ; Set this in the same way !P.Multi is used.
        Erase = weraseit, $              ; Set this keyword to erase the display before executing the command.
        OXMargin = woxMargin, $          ; The X outside margin.
        OYMargin = woymargin, $          ; The Y outside margin.
+       WAspect = waspect, $             ; Set the window aspect ratio to this value.
        WXSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 400.
        WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 400.
        WTitle = wtitle, $               ; The window title.

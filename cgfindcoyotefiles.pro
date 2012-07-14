@@ -38,14 +38,13 @@
 ;+
 ; This procedure looks for Coyote Library routines in every directory in the IDL path
 ; and reports the directories that it strongly suspects contain Coyote Library files.
+; The purpose of this is to aid in eliminating old and out-dated Coyote Library routines
+; from your IDL path. The goal is to have a single Coyote Library directory with the latest
+; Coyote Library programs in it.
 ;
 ; :Categories:
 ;    Utility
 ;    
-; :Params:
-;    theDirectory: in, optional, type=string
-;       The name of the directory to add to !PATH. If missing, the current directory.
-;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
 ;       David W. Fanning 

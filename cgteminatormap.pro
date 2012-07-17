@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   cgcgTeminatorMap
+;   cgTeminatorMap
 ;
 ; PURPOSE:
 ;   This is a program for viewing a map of the Earth in several different projections
@@ -337,7 +337,7 @@ PRO cgTeminatorMap, center_lon, center_lat, $
    cgImage, warp, Position=position
 
    ; Plot the sun on the map.
-   cgPlotS, sun_lon, sun_lat, psym=SymCat(16), color='yellow', symsize=3
+   cgPlotS, sun_lon, sun_lat, psym=cgSymCat(16), color='yellow', symsize=3
 
    ; Add continental outlines and time zones.
    cgMap_Continents, Color='Medium Gray'

@@ -149,7 +149,7 @@
 ;        possibly changed if the `Aspect` keyword is used.
 ;     psym: in, optional, type=integer, default=2
 ;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
-;        routine SYMCAT. An integer between 1 and 46.
+;        routine cgSYMCAT. An integer between 1 and 46.
 ;     symsize: in, optional, type=float, default=1.0
 ;        The symbol size.
 ;     title: in, optional, type=string, default=""
@@ -689,7 +689,7 @@ PRO cgScatter2D, x, y, $
       ENDELSE
     ENDELSE
     IF Abs(psym) GT 1 THEN BEGIN
-        PlotS, x, y, COLOR=color, PSYM=SymCat(Abs(psym), _Extra=extra), $
+        PlotS, x, y, COLOR=color, PSYM=cgSymCat(Abs(psym), _Extra=extra), $
            SYMSIZE=symsize, _EXTRA=extra
     ENDIF 
     

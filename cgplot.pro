@@ -135,7 +135,7 @@
 ;        possibly set if the `Aspect` keyword is used.
 ;     psym: in, optional, type=integer
 ;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
-;        routine SYMCAT. An integer between 0 and 46.
+;        routine cgSYMCAT. An integer between 0 and 46.
 ;     symcolor: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the symbol color. By default, 'black'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -171,7 +171,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 12 November 2010. DWF.
-;        Added SYMCOLOR keyword, and allow all 46 symbols from SYMCAT. 15 November 2010. DWF.
+;        Added SYMCOLOR keyword, and allow all 46 symbols from cgSYMCAT. 15 November 2010. DWF.
 ;        Added NODATA keyword. 15 November 2010. DWF.
 ;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
 ;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
@@ -611,7 +611,7 @@ PRO cgPlot, x, y, $
     ENDELSE
     IF Abs(psym) GT 0 THEN BEGIN
         IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=symcolor, $
-            PSYM=SymCat(Abs(psym), COLOR=symcolor, _Extra=extra), SYMSIZE=symsize, _EXTRA=extra
+            PSYM=cgSymCat(Abs(psym), COLOR=symcolor, _Extra=extra), SYMSIZE=symsize, _EXTRA=extra
     ENDIF 
     
     ; Need a label on the plot?

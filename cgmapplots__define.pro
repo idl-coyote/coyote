@@ -92,7 +92,7 @@
 ;        Set this keyword to supress clipping of the plot.
 ;     psym: in, optional, type=integer, default=0
 ;        The plotting symbol to use for the plot. Can use any symbol available in
-;        the Coyote Library routine SYMCAT.
+;        the Coyote Library routine cgSYMCAT.
 ;     symsize: in, optional, type=float, default=1.0
 ;        Set this keyword to the size of symbols.
 ;     t3d: in, optional, type=boolean, default=0
@@ -236,8 +236,8 @@ PRO cgMapPlotS::Draw
         lats = *self.lats
     ENDELSE
     
-;    ; Accommodate SYMCAT symbols
-;    IF self.psym GE 0 THEN psym = SymCat(self.psym) ELSE psym = (-1) * SymCat(Abs(self.psym))
+;    ; Accommodate cgSYMCAT symbols
+;    IF self.psym GE 0 THEN psym = cgSymCat(self.psym) ELSE psym = (-1) * cgSymCat(Abs(self.psym))
 ;    
     ; If clip is not defined, then set it here.
     IF Total(self.clip) EQ 0 $
@@ -288,7 +288,7 @@ END
 ;        Set this keyword to supress clipping of the plot.
 ;     psym: out, optional, type=integer, default=0
 ;        The plotting symbol to use for the plot. Can use any symbol available in
-;        the Coyote Library routine SYMCAT.
+;        the Coyote Library routine cgSYMCAT.
 ;     symsize: out, optional, type=float, default=1.0
 ;        Set this keyword to the size of symbols.
 ;     t3d: out, optional, type=boolean, default=0
@@ -373,7 +373,7 @@ END
 ;        Set this keyword to supress clipping of the plot.
 ;     psym: in, optional, type=integer, default=0
 ;        The plotting symbol to use for the plot. Can use any symbol available in
-;        the Coyote Library routine SYMCAT.
+;        the Coyote Library routine cgSYMCAT.
 ;     symsize: in, optional, type=float, default=1.0
 ;        Set this keyword to the size of symbols.
 ;     t3d: in, optional, type=boolean, default=0

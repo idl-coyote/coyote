@@ -689,7 +689,7 @@ PRO cgGraphicsKeywords::SetProperty, $
     IF N_Elements(noerase) NE 0 THEN *self.noerase = Keyword_Set(noerase)
     IF N_Elements(position) NE 0 THEN *self.position = position 
     IF N_Elements(psym) NE 0 THEN BEGIN
-        thisSym = SymCat(Abs(psym))
+        thisSym = cgSymCat(Abs(psym))
         IF psym LT 0 THEN *self.psym = -thisSym ELSE *self.psym = thisSym
     ENDIF
     IF N_Elements(subtitle) NE 0 THEN *self.subtitle = subtitle

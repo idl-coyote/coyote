@@ -75,7 +75,7 @@
 ;        before drawing. X and Y must both be present.
 ;     psym: in, optional, type=integer
 ;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
-;        routine SYMCAT. An integer between 0 and 46. 
+;        routine cgSYMCAT. An integer between 0 and 46. 
 ;     symcolor: in, optional, type=string/integer/vector, default=COLOR
 ;        If this keyword is a string, the name of the symbol color. By default, same as COLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -105,7 +105,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 12 November 2010. DWF.
-;        Added SYMCOLOR keyword. PSYM accepts all values from SYMCAT. SYMCOLOR and SYMSIZE
+;        Added SYMCOLOR keyword. PSYM accepts all values from cgSYMCAT. SYMCOLOR and SYMSIZE
 ;           keywords can be vectors the size of x. 15 November 2010. DWF
 ;        Added ability to support COLOR keyword as a vector the size of x. 15 November 2010. DWF
 ;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
@@ -288,23 +288,23 @@ PRO cgPlotS, x, y, z, $
           CASE n_params OF
               
                 1: BEGIN
-                   PlotS, x[*,j], COLOR=thisColor, PSYM=SymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
+                   PlotS, x[*,j], COLOR=thisColor, PSYM=cgSymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
                       SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    END
                    
                 2: BEGIN
                    IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
                        map_object -> Draw, /NoGraphics
-                       PlotS, xmap[j], ymap[j], COLOR=thisColor, PSYM=SymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
+                       PlotS, xmap[j], ymap[j], COLOR=thisColor, PSYM=cgSymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
                            SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    ENDIF ELSE BEGIN
-                       PlotS, x[j], y[j], COLOR=thisColor, PSYM=SymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
+                       PlotS, x[j], y[j], COLOR=thisColor, PSYM=cgSymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
                            SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    ENDELSE
                    END
                    
                 3: BEGIN
-                   PlotS, x[j], y[j], z[j], COLOR=thisColor, PSYM=SymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
+                   PlotS, x[j], y[j], z[j], COLOR=thisColor, PSYM=cgSymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
                        SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    END
                        

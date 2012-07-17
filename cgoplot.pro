@@ -65,7 +65,7 @@
 ;        to be a color index into the current color table.
 ;     psym: in, optional, type=integer
 ;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
-;        routine SYMCAT. An integer between 0 and 46.
+;        routine cgSYMCAT. An integer between 0 and 46.
 ;     symcolor: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the symbol color. By default, 'black'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.

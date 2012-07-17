@@ -336,11 +336,11 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
       ; Draw outliners if there are any.
       IF maxcount GT 0 THEN BEGIN
          FOR j=0,maxcount-1 DO PLOTS, xlocation, data[imax[j]], $
-            PSYM=SymCat(9), COLOR=cgColor(color), NOCLIP=0
+            PSYM=cgSymCat(9), COLOR=cgColor(color), NOCLIP=0
       ENDIF
       IF mincount GT 0 THEN BEGIN
          FOR j=0,mincount-1 DO PLOTS, xlocation, data[imin[j]], $
-            PSYM=SymCat(9), COLOR=cgColor(color), NOCLIP=0
+            PSYM=cgSymCat(9), COLOR=cgColor(color), NOCLIP=0
       ENDIF
       
       IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState

@@ -96,6 +96,8 @@
 ;        rows (nrows). The location of the graphic is determined by the third number. The
 ;        grid numbering starts in the upper left (1) and goes sequentually by column and then
 ;        by row.
+;     legends: in, optional, type=object
+;        One or more cgLegendItem objects that are to be drawn on the plot.
 ;     nodata: in, optional, type=boolean, default=0
 ;        Set this keyword to draw axes, but no data.
 ;     noerase: in, optional, type=boolean, default=0
@@ -233,6 +235,7 @@ PRO cgPlot, x, y, $
     ISOTROPIC=isotropic, $
     LABEL=label, $
     LAYOUT=layout, $
+    LEGENDS=legends, $
     NODATA=nodata, $
     NOERASE=noerase, $
     OPLOTS=oplots, $
@@ -293,6 +296,7 @@ PRO cgPlot, x, y, $
             ISOTROPIC=isotropic, $
             LABEL=label, $
             LAYOUT=layout, $
+            LEGENDS=legends, $
             NODATA=nodata, $
             NOERASE=noerase, $
             OPLOTS=oplots, $
@@ -322,6 +326,7 @@ PRO cgPlot, x, y, $
             ISOTROPIC=isotropic, $
             LABEL=label, $
             LAYOUT=layout, $
+            LEGENDS=legends, $
             NODATA=nodata, $
             NOERASE=noerase, $
             OPLOTS=oplots, $
@@ -628,6 +633,11 @@ PRO cgPlot, x, y, $
         FOR j=0,N_Elements(oplots)-1 DO oplots[j] -> Draw
     ENDIF
     
+    ; Do you have legend objects to draw?
+    IF N_Elements(legends) NE 0 THEN BEGIN
+        FOR j=0,N_Elements(legends)-1 DO legends[j] -> Draw
+    ENDIF
+
     ; Need a label on the plot?
     IF N_Elements(label) NE 0 THEN BEGIN
         xx = !X.Window[0]

@@ -135,6 +135,9 @@
 ;        A label is similar to a plot title, but it is aligned to the left edge
 ;        of the plot and is written in hardware fonts. Use of the label keyword
 ;        will suppress the plot title.
+;     legends: in, optional, type=object
+;         A single cgLegendItem object, or an array of cgLegendItem objects that will be
+;         drawn on the plot as a legend.
 ;     max_value: in, optional, type=float
 ;        Set this keyword to the maximum value to plot. Any values greater than this 
 ;        value are treated as missing.
@@ -175,6 +178,7 @@ FUNCTION cgZPlot::INIT, x, y, $
     ASPECT=aspect, $
     DRAWID=drawid, $
     LABEL=label, $
+    LEGENDS=legends, $
     MAX_VALUE=max_value, $
     MIN_VALUE=min_value, $
     OPLOTS=oplots, $
@@ -235,6 +239,7 @@ FUNCTION cgZPlot::INIT, x, y, $
     self.undoList = Obj_New('LinkedList')
     self.redoList = Obj_New('LinkedList')
     IF N_Elements(oplots) NE 0 THEN self.oplots = Ptr_New(oplots) ELSE self.oplots = Ptr_New(/ALLOCATE_HEAP)
+    IF N_Elements(legends) NE 0 THEN self.legends = Ptr_New(legends) ELSE self.legends = Ptr_New(/ALLOCATE_HEAP)
     
     self -> SetProperty, $
         INDEP=indep, $
@@ -728,6 +733,7 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         ZVALUE=zvalue
         
    ; Draw the plot.
+   help, *self.legends
    cgPlot, *self.indep, *self.dep, $
         OUTPUT=output, $
         ASPECT=*self.aspect, $
@@ -747,6 +753,7 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         DEVICE=device, $
         NORMAL=normal, $
         FONT=font, $
+        LEGENDS=*self.legends, $
         NOCLIP=noclip, $
         NODATA=nodata, $
         NOERASE=noerase, $
@@ -892,6 +899,8 @@ END
 ;        A value that represents the aspect ratio (ysize/xsize) of the resulting plot. 
 ;     label: out, optional, type=string
 ;         The label that is used for the zoom plot.
+;     legends: out, optional, type=object
+;         The current legend objects, if there are any. If not, a null object.
 ;     max_value: out, optional, type=float
 ;         The maximum value to plot. 
 ;     min_value: out, optional, type=float
@@ -917,6 +926,7 @@ PRO cgZPlot::GetProperty, $
         DATA_Y=dep, $
         ASPECT=aspect, $
         LABEL=label, $
+        LEGENDS=legends, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
         OPLOTS=oplots, $
@@ -942,6 +952,9 @@ PRO cgZPlot::GetProperty, $
     IF Arg_Present(dep) NE 0 THEN IF N_Elements(*self.dep) NE 0 THEN dep = *self.dep
     IF Arg_Present(aspect) NE 0 THEN IF N_Elements(*self.aspect) NE 0 THEN aspect = *self.aspect
     IF Arg_Present(label) NE 0 THEN IF N_Elements(self.label) NE 0 THEN label = self.label
+    IF Arg_Present(legends) NE 0 THEN IF Ptr_Valid(self.legends) $
+        THEN legends = *self.legends $
+        ELSE legends = Obj_New()
     IF Arg_Present(max_value) NE 0 THEN IF N_Elements(*self.max_value) NE 0 THEN max_value = *self.max_value
     IF Arg_Present(min_value) NE 0 THEN IF N_Elements(*self.min_value) NE 0 THEN min_value = *self.min_value
     IF Arg_Present(oplots) NE 0 THEN IF Ptr_Valid(self.oplots) $
@@ -1110,12 +1123,18 @@ END
 ;         A label is similar to a plot title, but it is aligned to the left edge
 ;         of the plot and is written in hardware fonts. Use of the label keyword
 ;         will suppress the plot title.
+;     legends: in, optional, type=object
+;         A single cgLegendItem object, or an array of cgLegendItem objects that will be
+;         drawn on the plot as a legend.
 ;     max_value: in, optional, type=float
-;         Set this keyword to the maximum value to plot. Any values greater than this 
-;         value are treated as missing.
+;        Set this keyword to the maximum value to plot. Any values greater than this 
+;        value are treated as missing.
 ;     min_value: in, optional, type=float
-;         Set this keyword to the minimu value to plot. Any values smaller than this 
-;         value are treated as missing.
+;        Set this keyword to the minimu value to plot. Any values smaller than this 
+;        value are treated as missing.
+;     oplots: in, optional, type=object
+;         A single cgOverPlot object, or an array of cgOverPlot objects that will be
+;         overplot on the axes set up by the original data.
 ;     xlog: in, optional, type=boolean, default=0
 ;         Set this keyword to use a logarithmic X axis
 ;     ylog: in, optional, type=boolean, default=0
@@ -1137,8 +1156,10 @@ PRO cgZPlot::SetProperty, $
         DRAW=draw, $
         INDEP=indep, $
         LABEL=label, $
+        LEGENDS=legends, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
+        OPLOTS=oplots, $
         XLOG=xlog, $
         YLOG=ylog, $
         YNOZERO=ynozero, $
@@ -1160,8 +1181,10 @@ PRO cgZPlot::SetProperty, $
     IF N_Elements(dep) NE 0 THEN *self.dep = dep
     IF N_Elements(aspect) NE 0 THEN *self.aspect = aspect
     IF N_Elements(label) NE 0 THEN self.label = label
+    IF N_Elements(legends) NE 0 THEN *self.legends = legends
     IF N_Elements(max_value) NE 0 THEN *self.max_value = max_value
     IF N_Elements(min_value) NE 0 THEN *self.min_value = min_value
+    IF N_Elements(oplots) NE 0 THEN *self.oplots = oplots
     IF N_Elements(xlog) NE 0 THEN *self.xlog = Keyword_Set(xlog)
     IF N_Elements(ylog) NE 0 THEN *self.ylog = Keyword_Set(ylog)
     IF N_Elements(ynozero) NE 0 THEN *self.ynozero = Keyword_Set(ynozero)
@@ -1513,6 +1536,7 @@ PRO cgZPlot__Define, class
              undoList: Obj_New(), $
              redoList: Obj_New(), $
              oplots: Ptr_New(), $      ; A pointer to a cgOverPlot object or array of cgOverPlot objects.
+             legends: Ptr_New(), $     ; A pointer to a cgLegendItem object or array of cgLegendItem objects.
              label: "", $              ; The plot label. Suppress TITLE if present.
              savedir: "", $            ; The output directory where files are saved.
              drag: 0B, $               ; A flag that tells me if I am panning or not. Necessary for UNDO.

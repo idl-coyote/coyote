@@ -55,9 +55,12 @@
 ;         A label is similar to a plot title, but it is aligned to the left edge
 ;         of the plot and is written in hardware fonts. Use of the label keyword
 ;         will suppress the plot title.
+;    legends: in, optional, type=object
+;         A single cgLegendItem object, or an array of cgLegendItem objects that will be
+;         drawn on the plot as a legend.
 ;    object: out, optional, type=objref
 ;         The object reference to the underlying object.
-;    overplots: in, optional, type=object
+;    oplots: in, optional, type=object
 ;         A single cgOverPlot object, or an array of cgOverPlot objects that will be
 ;         overplot on the axes set up by the original data.
 ;    parent: in, optional, type=long
@@ -95,8 +98,9 @@
 ;-
 PRO cgZPlot, x, y, $
     LABEL=label, $
+    LEGENDS=legends, $
     OBJECT=thisObject, $
-    OVERPLOTS=overplots, $
+    OPLOTS=oplots, $
     PARENT=parent, $
     XSIZE=xsize, $
     YSIZE=ysize, $
@@ -127,7 +131,8 @@ PRO cgZPlot, x, y, $
 
     thisObject = Obj_New('cgZPlot', indep, dep, $
        LABEL=label, $
-       OVERPLOTS=overplots, $
+       LEGENDS=legends, $
+       OPLOTS=oplots, $
        PARENT=parent, $
        XSIZE=xsize, $
        YSIZE=ysize, $

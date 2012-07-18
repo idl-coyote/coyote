@@ -101,6 +101,9 @@
 ;        The thickness of the symbol.
 ;     thick: in, optional, type=float, default = 1.0
 ;        The thickness of the line.
+;     visible: in, optional, type=boolean, default=1
+;        Set this keyword to determine in the line should be drawn (visible=1), or
+;        if the line should not be drawn (visible=0).
 ;-
 FUNCTION cgOverPlot::INIT, x, y, $
     ADDCMD=addcmd, $
@@ -112,7 +115,8 @@ FUNCTION cgOverPlot::INIT, x, y, $
     SYMCOLOR=symcolor, $
     SYMSIZE=symsize, $
     SYMTHICK=symthick, $
-    THICK=thick
+    THICK=thick, $
+    VISIBLE=visible
     
     Compile_Opt idl2
 
@@ -170,6 +174,7 @@ FUNCTION cgOverPlot::INIT, x, y, $
     IF N_Elements(skip) EQ 0 THEN skip = 1
     IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
     IF N_Elements(symthick) EQ 0 THEN symthick = 1.0
+    IF N_Elements(visible) EQ 0 THEN visible = 1
     
     ; Load the object.
     self.dep = Ptr_New(dep)
@@ -183,6 +188,7 @@ FUNCTION cgOverPlot::INIT, x, y, $
     self.symthick = symthick
     self.xrange = [Min(indep), Max(indep)]
     self.yrange = [Min(dep), Max(dep)]
+    self.visible = visible
     
     IF Keyword_Set(draw) THEN self -> Draw
     IF Keyword_Set(addcmd) THEN cgControl, Execute=1
@@ -223,6 +229,9 @@ PRO cgOverPlot::Draw, SKIP=skip
         void = Error_Message()
         RETURN
     ENDIF
+    
+    ; If the plot is not visible, return now.
+    IF ~self.visible THEN RETURN
     
     ; Are we skipping data points?
     IF N_Elements(skip) NE 0 THEN skipCount = skip
@@ -277,6 +286,8 @@ END
 ;        The range of the dependent data.
 ;     yrange: out, optional, type=fltarr
 ;        The range of the independent data.
+;     visible: out, optional, type=boolean
+;        The visibility of the objects plot line.
 ;-
 PRO cgOverPlot::GetProperty, $
     COLOR=color, $
@@ -291,7 +302,8 @@ PRO cgOverPlot::GetProperty, $
     SYMTHICK=symthick, $
     THICK=thick, $
     XRANGE=xrange, $
-    YRANGE=yrange
+    YRANGE=yrange, $
+    VISIBLE=visible
 
     Compile_Opt idl2
 
@@ -314,6 +326,7 @@ PRO cgOverPlot::GetProperty, $
     IF Arg_Present(thick) THEN thick = self.thick
     IF Arg_Present(xrange) THEN xrange = self.xrange
     IF Arg_Present(yrange) THEN yrange = self.yrange
+    IF Arg_Present(visible) THEN visible = self.visible
     
 END
     
@@ -346,6 +359,9 @@ END
 ;        The thickness of the symbol.
 ;     thick: in, optional, type=float, default = 1.0
 ;        The thickness of the line.
+;     visible: in, optional, type=boolean, default=1
+;        Set this keyword to determine in the line should be drawn (visible=1), or
+;        if the line should not be drawn (visible=0).
 ;-
 PRO cgOverPlot::SetProperty, $
     COLOR=color, $
@@ -358,7 +374,8 @@ PRO cgOverPlot::SetProperty, $
     SYMCOLOR=symcolor, $
     SYMSIZE=symsize, $
     SYMTHICK=symthick, $
-    THICK=thick
+    THICK=thick, $
+    VISIBLE=visible
 
     Compile_Opt idl2
 
@@ -381,6 +398,7 @@ PRO cgOverPlot::SetProperty, $
     IF N_Elements(symsize) NE 0 THEN self.symsize = symsize
     IF N_Elements(symthick) NE 0 THEN self.symthick = symthick
     IF N_Elements(thick) NE 0 THEN self.thick = thick
+    IF N_Elements(visible) NE 0 THEN self.visible = visible
     
     ; Need to draw?
     IF Keyword_Set(draw) THEN self -> Draw
@@ -408,6 +426,7 @@ PRO cgOverPlot__Define, class
               symsize: 0L, $         ; The size of the line symbol.
               thick: 0L, $, $        ; The thickness of the overplotted line.
               skip: 0L, $            ; The number of data points to skip in the drawing.
+              visible: 0L, $         ; A flag that indicates if the plot should be drawn.
               xrange: FltArr(2), $   ; The X range of the data.
               yrange: FltArr(2) $    ; The Y range of the data.
             }

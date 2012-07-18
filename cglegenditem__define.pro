@@ -9,6 +9,9 @@ PRO cgLegendItem::Draw
         RETURN
     ENDIF
     
+    ; If this is not visible, return now.
+    IF ~self.visible THEN RETURN
+    
     x0 = self.location[0]
     x1 = x0 + self.length
     y = self.location[1]
@@ -30,6 +33,90 @@ PRO cgLegendItem::Draw
 END
 
 
+PRO cgLegendItem::GetProperty, $
+   CHARSIZE=charsize, $
+   COLOR=color, $
+   FONT=font, $
+   LENGTH=length, $
+   LINESTYLE=linestyle, $
+   LOCATION=location, $
+   PSYM=psym, $
+   SYMCOLOR=symcolor, $
+   SYMSIZE=symsize, $
+   SYMTHICK=symthick, $
+   THICK=thick, $
+   TCOLOR=tcolor, $
+   TITLE=title
+
+    Compile_Opt idl2
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /Cancel
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    IF Arg_Present(charsize) THEN charsize = self.charsize
+    IF Arg_Present(color) THEN color = self.color
+    IF Arg_Present(font) THEN font = *self.font
+    IF Arg_Present(length) THEN length = self.length
+    IF Arg_Present(linestyle) THEN linestyle = self.linestyle
+    IF Arg_Present(location) THEN location = self.location
+    IF Arg_Present(psym) THEN psym = self.psym
+    IF Arg_Present(symcolor) THEN symcolor = self.symcolor
+    IF Arg_Present(symsize) THEN symsize = self.symsize
+    IF Arg_Present(symthick) THEN symthick = self.symthick
+    IF Arg_Present(thick) THEN thick = self.thick
+    IF Arg_Present(tcolor) THEN tcolor = self.tcolor
+    IF Arg_Present(title) THEN title = self.title
+    IF Arg_Present(visible) THEN visible = self.visible
+
+END
+
+
+PRO cgLegendItem::SetProperty, $
+   CHARSIZE=charsize, $
+   COLOR=color, $
+   FONT=font, $
+   LENGTH=length, $
+   LINESTYLE=linestyle, $
+   LOCATION=location, $
+   PSYM=psym, $
+   SYMCOLOR=symcolor, $
+   SYMSIZE=symsize, $
+   SYMTHICK=symthick, $
+   THICK=thick, $
+   TCOLOR=tcolor, $
+   TITLE=title, $
+   VISIBLE=visible
+
+    Compile_Opt idl2
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /Cancel
+        void = Error_Message()
+        RETURN
+    ENDIF
+
+    IF N_Elements(charsize) NE 0 THEN self.charsize = charsize
+    IF N_Elements(color) NE 0 THEN self.color = color
+    IF N_Elements(font) NE 0 THEN *self.font = font
+    IF N_Elements(length) NE 0 THEN self.length = length
+    IF N_Elements(linestyle) NE 0 THEN self.linestyle = linestyle
+    IF N_Elements(location) NE 0 THEN self.location = location
+    IF N_Elements(psym) NE 0 THEN self.psym = psym
+    IF N_Elements(symcolor) NE 0 THEN self.symcolor = symcolor
+    IF N_Elements(symsize) NE 0 THEN self.symsize = symsize
+    IF N_Elements(symthick) NE 0 THEN self.symthick = symthick
+    IF N_Elements(thick) NE 0 THEN self.thick = thick
+    IF N_Elements(tcolor) NE 0 THEN self.tcolor = tcolor
+    IF N_Elements(title) NE 0 THEN self.title = title
+    IF N_Elements(visible) NE 0 THEN self.visible = visible
+    
+END
+
 
 PRO cgLegendItem::CLEANUP
    Ptr_Free, self.font
@@ -49,7 +136,8 @@ FUNCTION cgLegendItem::INIT, $
    SYMTHICK=symthick, $
    THICK=thick, $
    TCOLOR=tcolor, $
-   TITLE=title
+   TITLE=title, $
+   VISIBLE=visible
 
     Compile_Opt idl2
     
@@ -73,6 +161,7 @@ FUNCTION cgLegendItem::INIT, $
     SetDefaultValue, thick, 1.0
     SetDefaultValue, tcolor, color
     SetDefaultValue, title, 'Plot Item'
+    SetDefaultValue, visible, 1
     
     ; Populate the object.
     self.charsize = charsize
@@ -88,6 +177,7 @@ FUNCTION cgLegendItem::INIT, $
     self.tcolor = tcolor
     self.thick = thick
     self.title = title
+    self.visible = visible
 
     RETURN, 1
 END
@@ -98,6 +188,7 @@ PRO cgLegendItem__Define, class
     Compile_Opt idl2
 
     class = { CGLEGENDITEM, $
+              INHERITS IDL_Object, $
               charsize: 0.0, $
               color: "", $
               font: Ptr_New(), $
@@ -110,6 +201,7 @@ PRO cgLegendItem__Define, class
               symthick: 0.0, $
               thick: 0.0, $
               tcolor: "", $
-              title: "" $
+              title: "", $
+              visible: 0 $
             }
 END

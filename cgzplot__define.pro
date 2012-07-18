@@ -733,7 +733,6 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         ZVALUE=zvalue
         
    ; Draw the plot.
-   help, *self.legends
    cgPlot, *self.indep, *self.dep, $
         OUTPUT=output, $
         ASPECT=*self.aspect, $

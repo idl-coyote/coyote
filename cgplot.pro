@@ -630,12 +630,18 @@ PRO cgPlot, x, y, $
     
     ; Do you have overplot objects to plot?
     IF N_Elements(oplots) NE 0 THEN BEGIN
-        FOR j=0,N_Elements(oplots)-1 DO oplots[j] -> Draw
+        FOR j=0,N_Elements(oplots)-1 DO BEGIN
+           thisObject = oplots[j]
+           IF Obj_Valid(thisObject) THEN thisObject -> Draw
+        ENDFOR
     ENDIF
     
     ; Do you have legend objects to draw?
     IF N_Elements(legends) NE 0 THEN BEGIN
-        FOR j=0,N_Elements(legends)-1 DO legends[j] -> Draw
+        FOR j=0,N_Elements(legends)-1 DO BEGIN
+           thisObject = legends[j]
+           IF Obj_Valid(thisObject) THEN thisObject -> Draw
+        ENDFOR
     ENDIF
 
     ; Need a label on the plot?

@@ -57,6 +57,9 @@
 ;         will suppress the plot title.
 ;    object: out, optional, type=objref
 ;         The object reference to the underlying object.
+;    overplots: in, optional, type=object
+;         A single cgOverPlot object, or an array of cgOverPlot objects that will be
+;         overplot on the axes set up by the original data.
 ;    parent: in, optional, type=long
 ;         The identifer of the parent widget for this program's draw widget. If not
 ;         provided, the program will create it's own top-level base widget as the parent widget.
@@ -93,6 +96,7 @@
 PRO cgZPlot, x, y, $
     LABEL=label, $
     OBJECT=thisObject, $
+    OVERPLOTS=overplots, $
     PARENT=parent, $
     XSIZE=xsize, $
     YSIZE=ysize, $
@@ -123,6 +127,7 @@ PRO cgZPlot, x, y, $
 
     thisObject = Obj_New('cgZPlot', indep, dep, $
        LABEL=label, $
+       OVERPLOTS=overplots, $
        PARENT=parent, $
        XSIZE=xsize, $
        YSIZE=ysize, $

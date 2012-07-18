@@ -110,6 +110,7 @@
 ;        Added a persistent output save directory.  30 June 2012. DWF.
 ;        Added an ERASE method to erase the current display. 10 July 2012. DWF.
 ;        Added a LABEL keyword to add a label instead of a title to a plot. 13 July 2012. DWF.
+;        Added the ability to include overplot objects in the zoom window. 17 July 2012. DWF.
 ;-
 
 ;+
@@ -140,6 +141,9 @@
 ;     min_value: in, optional, type=float
 ;        Set this keyword to the minimu value to plot. Any values smaller than this 
 ;        value are treated as missing.
+;     overplots: in, optional, type=object
+;         A single cgOverPlot object, or an array of cgOverPlot objects that will be
+;         overplot on the axes set up by the original data.
 ;     parent: in, optional, type=long
 ;        The identifer of the parent widget for this program's draw widget. If not
 ;        provided, the program will create it's own top-level base widget as a parent.
@@ -173,6 +177,7 @@ FUNCTION cgZPlot::INIT, x, y, $
     LABEL=label, $
     MAX_VALUE=max_value, $
     MIN_VALUE=min_value, $
+    OVERPLOTS=overplots, $
     PARENT=parent, $
     XLOG=xlog, $
     XRANGE=xrange, $
@@ -229,6 +234,7 @@ FUNCTION cgZPlot::INIT, x, y, $
     self.ynozero = Ptr_New(/Allocate_Heap)
     self.undoList = Obj_New('LinkedList')
     self.redoList = Obj_New('LinkedList')
+    IF N_Elements(overplots) NE 0 THEN self.overplots = Ptr_New(overplots)
     
     self -> SetProperty, $
         INDEP=indep, $
@@ -338,10 +344,77 @@ PRO cgZPlot::CLEANUP
     Obj_Destroy, self.undoList
     Obj_Destroy, self.redoList
     
+    ; Get rid of the overplot objects, if any.
+    IF Ptr_Valid(self.overplots) THEN BEGIN
+      FOR j=0,N_Elements(*self.overplots)-1 DO BEGIN
+         Obj_Destroy, (*self.overplots)[j]
+      ENDFOR
+      Ptr_Free, self.overplots
+    ENDIF
+    
     ; Call the superclass CLEANUP method.
     self -> cgGraphicsKeywords::CLEANUP
 
 END
+
+;+
+; This method adds a cgOverplot object or array of objects to the plot. The
+; overplot objects are drawn on the plot after the orginal plot is drawn.
+;
+; :Params:
+;    oplotobject: in, optional, type=object
+;        A cgOverPlot object, or an array of cgOverplot objects that should be overplot
+;        when the Draw method is called. The overplot objects will be destroyed when this
+;        object is destroyed.
+;        
+; :Keywords:
+;     clear: in, optional, type=boolean, default=0
+;        If this keyword is set, the overplot list is cleared before the new overplot objects
+;        are added. Otherwise, the overplot object or objects is added to the end of the list
+;        already present.
+;     draw: in, optional, type=boolean, default=0
+;        If this keyword is set, the object calls its Draw method after the overplot objects are added.
+;-
+PRO cgZPlot::AddOverplot, oplotObject, CLEAR=clear, DRAW=draw
+
+    Compile_Opt idl2
+    
+   ; Standard error handling.
+   Catch, theError
+   IF theError NE 0 THEN BEGIN
+      Catch, /Cancel
+      void = Error_Message()
+      RETURN
+   ENDIF
+  
+   ; Clear all current overplots, if needed.
+   IF Keyword_Set(clear) THEN BEGIN
+   
+        ; Get rid of the overplot objects, if any.
+        IF Ptr_Valid(self.overplots) THEN BEGIN
+           FOR j=0,N_Elements(*self.overplots)-1 DO BEGIN
+             Obj_Destroy, (*self.overplots)[j]
+           ENDFOR
+           Ptr_Free, self.overplots
+        ENDIF
+
+   ENDIF
+   
+   ; If nothing to add, return.
+   IF N_Elements(oplotObject) EQ 0 THEN RETURN
+   
+   ; Otherwise, add the overplot objects.
+   IF Ptr_Valid(self.overplots) THEN BEGIN
+       *self.overplots = [*self.overplots, oplotObject]
+   ENDIF ELSE BEGIN
+       self.overplots = Ptr_New(oplotObject)
+   ENDELSE
+   
+   ; Draw the object?
+   IF Keyword_Set(draw) THEN self -> Draw
+   
+END
+
 
 
 ;+
@@ -734,6 +807,15 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         ZTICKV=ztickv, $
         ZTITLE=ztitle, $
         ZVALUE=zvalue
+        
+        ; If you have any overplot objects, draw those now, too.
+        IF Ptr_Valid(self.overplots) THEN BEGIN
+           FOR j=0,N_Elements(*self.overplots)-1 DO BEGIN
+                thisObject = (*self.overplots)[j]
+                thisObject -> Draw
+                Empty
+           ENDFOR
+        ENDIF
 END
 
 
@@ -818,6 +900,8 @@ END
 ;         The maximum value to plot. 
 ;     min_value: out, optional, type=float
 ;         The minimum value to plot. 
+;     overplots: out, optional, type=object
+;         The current overplot objects, if there are any. If not, a null object.
 ;     undolist: out, optional, type=objref
 ;         The LinkedList object that maintains the undo list.
 ;     xlog: out, optional, type=boolean
@@ -839,6 +923,7 @@ PRO cgZPlot::GetProperty, $
         LABEL=label, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
+        OVERPLOTS=overplots, $
         UNDOLIST=undolist, $
         XLOG=xlog, $
         YLOG=ylog, $
@@ -863,6 +948,9 @@ PRO cgZPlot::GetProperty, $
     IF Arg_Present(label) NE 0 THEN IF N_Elements(self.label) NE 0 THEN label = self.label
     IF Arg_Present(max_value) NE 0 THEN IF N_Elements(*self.max_value) NE 0 THEN max_value = *self.max_value
     IF Arg_Present(min_value) NE 0 THEN IF N_Elements(*self.min_value) NE 0 THEN min_value = *self.min_value
+    IF Arg_Present(overplots) NE 0 THEN IF Ptr_Valid(self.overplots) $
+        THEN overplots = *self.overplots $
+        ELSE overplots = Obj_New()
     IF Arg_Present(xlog) NE 0 THEN IF N_Elements(*self.xlog) NE 0 THEN xlog = *self.xlog
     IF Arg_Present(ylog) NE 0 THEN IF N_Elements(*self.ylog) NE 0 THEN ylog = *self.ylog
     IF Arg_Present(ynozero) NE 0 THEN IF N_Elements(*self.ynozero) NE 0 THEN ynozero = *self.ynozero
@@ -1428,6 +1516,7 @@ PRO cgZPlot__Define, class
              zoomFactor: 0.0, $
              undoList: Obj_New(), $
              redoList: Obj_New(), $
+             overplots: Ptr_New(), $   ; A pointer to a cgOverPlot object or array of cgOverPlot objects.
              label: "", $              ; The plot label. Suppress TITLE if present.
              savedir: "", $            ; The output directory where files are saved.
              drag: 0B, $               ; A flag that tells me if I am panning or not. Necessary for UNDO.

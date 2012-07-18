@@ -61,6 +61,7 @@
 ;     Change History::
 ;        Written, 16 May 2012, by David W. Fanning.
 ;        Added missing LINESTYLE keyword. 22 May 2012. DWF.
+;        BIG problem in the way I was handling the PSYM keyword solved! 18 July 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -688,10 +689,7 @@ PRO cgGraphicsKeywords::SetProperty, $
     IF N_Elements(nodata) NE 0 THEN *self.nodata = Keyword_Set(nodata)
     IF N_Elements(noerase) NE 0 THEN *self.noerase = Keyword_Set(noerase)
     IF N_Elements(position) NE 0 THEN *self.position = position 
-    IF N_Elements(psym) NE 0 THEN BEGIN
-        thisSym = cgSymCat(Abs(psym))
-        IF psym LT 0 THEN *self.psym = -thisSym ELSE *self.psym = thisSym
-    ENDIF
+    IF N_Elements(psym) NE 0 THEN *self.psym = psym
     IF N_Elements(subtitle) NE 0 THEN *self.subtitle = subtitle
     IF N_Elements(symsize) NE 0 THEN *self.symsize = symsize
     IF N_Elements(t3d) NE 0 THEN *self.t3d = Keyword_Set(t3d)

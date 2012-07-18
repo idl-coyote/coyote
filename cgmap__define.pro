@@ -1099,7 +1099,7 @@ PRO cgMap::LatLonLabels, $
        lats = Scale_Vector(Findgen(5), 0 > lat_min < 80) 
        latsdone = 1 
        IF lonstep GT 40 THEN BEGIN
-          lons = Findgen(11) * 36
+          lons = Findgen(11) * 36 
           lonsDone = 1
        ENDIF      
     ENDIF ELSE BEGIN
@@ -1107,7 +1107,7 @@ PRO cgMap::LatLonLabels, $
            lats = Scale_Vector(Findgen(5), -80, 0 < lat_max)  
            latsdone = 1    
            IF lonstep GT 40 THEN BEGIN
-              lons = Findgen(11) * 36
+              lons = Findgen(11) * 36 
               lonsDone = 1
            ENDIF 
        ENDIF    
@@ -1214,9 +1214,9 @@ PRO cgMap::LatLonLabels, $
     lons = lons[Sort(lons)]
     
     ; Labels should be near the center.
-    index = Value_Locate(lons, center_lon)
+    index = N_Elements(lons) / 2
     latlab = (lons[index] - lons[index-1]) / 2.0 + lons[index-1]
-    index = Value_Locate(lats, center_lat)
+    index = N_Elements(lats) / 2 
     lonlab = (lats[index] - lats[index-1]) / 2.0 + lats[index-1]
 
     ; Set up the latitude and longitude names.

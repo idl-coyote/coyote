@@ -610,8 +610,9 @@ PRO cgPlot, x, y, $
         ENDIF  
     ENDELSE
     IF Abs(psym) GT 0 THEN BEGIN
+        asymbol = cgSymCat(Abs(psym), COLOR=symcolor, _Extra=extra)
         IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=symcolor, $
-            PSYM=cgSymCat(Abs(psym), COLOR=symcolor, _Extra=extra), SYMSIZE=symsize, _EXTRA=extra
+            PSYM=asymbol, SYMSIZE=symsize, _EXTRA=extra
     ENDIF 
     
     ; Need a label on the plot?

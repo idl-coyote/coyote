@@ -139,6 +139,8 @@
 ;       Added the ability (via Jack Saba) to ask for symbols by name. 17 July 2012. DWF.
 ;       Added the ability to ask for the color by name. 17 July 2012. DWF.
 ;       Renamed to cgSYMCAT from SYMCAT. 17 July 2012. DWF.
+;       The previous problem with USERSYM colors "sticking" turned out to be a problem
+;           with cgGraphicsKeywords, so I removed previous "fix". 18 July 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2006-2012, Fanning Software Consulting, Inc.
@@ -146,7 +148,6 @@
 FUNCTION cgSymCat, theInSymbol, THICK=thick, COLOR=color
 
    On_Error, 2
-   
    IF ( SIZE(theInSymbol,/TNAME) EQ 'STRING' ) THEN BEGIN
    
       ; Aliases defined here.
@@ -210,7 +211,7 @@ FUNCTION cgSymCat, theInSymbol, THICK=thick, COLOR=color
          'FILLEDSTAR':               theSymbol = 46
          ELSE: Message, 'Symbol not defined.'
       ENDCASE
-   ENDIF ELSE theSymbol = theInSymbol
+   ENDIF ELSE theSymbol = theInSymbol[0]
 
    ; Error checking.
    IF N_Elements(theSymbol) EQ 0 THEN RETURN, 0
@@ -221,10 +222,6 @@ FUNCTION cgSymCat, theInSymbol, THICK=thick, COLOR=color
    ; Do you have a color?
    IF N_Elements(color) NE 0 THEN BEGIN
    
-       ; The following line is necessary to "unstick" the USERSYM color. Don't ask
-       ; me, I just know it's friggin' needed!
-       void = SymCat(theSymbol)
-
       ; Is color a string?
       IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = cgColor(color) ELSE thisColor = color
       
@@ -302,7 +299,6 @@ FUNCTION cgSymCat, theInSymbol, THICK=thick, COLOR=color
                      [ 0, .33, 1,.33,0,-.33,-1,-.33, 0], /Fill, THICK=thick, COLOR=thisColor                                   ; Filled star.
 
    ENDCASE
-
    RETURN, result
 END ;-----------------------------------------------------------------------------------------------------------------------------
 

@@ -100,6 +100,10 @@
 ;        Set this keyword to draw axes, but no data.
 ;     noerase: in, optional, type=boolean, default=0
 ;        Set this keyword to draw the plot without erasing the display first.
+;     oplots: in, optional, type=object
+;        A single cgOverPlot object, or an array of cgOverPlot objects that will be
+;        overplot on the axes set up by the original data. The user will be responsible
+;        for destroying the objects. The cgPlot program will simply draw the objects.
 ;     outfilename: in, optional, type=string
 ;        If the `Output` keyword is set, the user will be asked to supply an output
 ;        filename, unless this keyword is set to a non-null string. In that case, the
@@ -212,6 +216,7 @@
 ;         Scalar input parameters are changed to 1-element vectors to avoid annoying error messages from PLOT. 6 April 2012. DWF.
 ;         Added a LABEL keyword. 12 July 2012. DWF.
 ;         Yikes! Bad choice of variable names in LABEL work yesterday has severe consequences. Changed names. 13 July 2012. DWF.
+;         Added OPLOTS keyword to allow cgOverplot objects. 18 July 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -230,6 +235,7 @@ PRO cgPlot, x, y, $
     LAYOUT=layout, $
     NODATA=nodata, $
     NOERASE=noerase, $
+    OPLOTS=oplots, $
     OUTFILENAME=outfilename, $
     OUTPUT=output, $
     OVERPLOT=overplot, $
@@ -289,6 +295,7 @@ PRO cgPlot, x, y, $
             LAYOUT=layout, $
             NODATA=nodata, $
             NOERASE=noerase, $
+            OPLOTS=oplots, $
             OVERPLOT=overplot, $
             POSITION=position, $
             PSYM=psym, $
@@ -317,6 +324,7 @@ PRO cgPlot, x, y, $
             LAYOUT=layout, $
             NODATA=nodata, $
             NOERASE=noerase, $
+            OPLOTS=oplots, $
             OVERPLOT=overplot, $
             POSITION=position, $
             PSYM=psym, $
@@ -614,6 +622,11 @@ PRO cgPlot, x, y, $
         IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=symcolor, $
             PSYM=asymbol, SYMSIZE=symsize, _EXTRA=extra
     ENDIF 
+    
+    ; Do you have overplot objects to plot?
+    IF N_Elements(oplots) NE 0 THEN BEGIN
+        FOR j=0,N_Elements(oplots)-1 DO oplots[j] -> Draw
+    ENDIF
     
     ; Need a label on the plot?
     IF N_Elements(label) NE 0 THEN BEGIN

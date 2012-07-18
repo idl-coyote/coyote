@@ -216,8 +216,8 @@ FUNCTION cgSymCat, theInSymbol, THICK=thick, COLOR=color
    ; Error checking.
    IF N_Elements(theSymbol) EQ 0 THEN RETURN, 0
    IF N_Elements(thick) EQ 0 THEN thick = (!P.Thick EQ 0) ? 1 : !P.Thick
-   IF (theSymbol LT 0) OR (theSymbol GT 46) THEN Message, 'Symbol number out of defined range.'
-   theSymbol = Fix(theSymbol)
+   IF (Abs(theSymbol) LT 0) OR (Abs(theSymbol) GT 46) THEN Message, 'Symbol number out of defined range.'
+   theFinalSymbol = Fix(Abs(theSymbol))
    
    ; Do you have a color?
    IF N_Elements(color) NE 0 THEN BEGIN
@@ -234,7 +234,7 @@ FUNCTION cgSymCat, theInSymbol, THICK=thick, COLOR=color
    ; Use user defined symbol by default.
    result = 8
 
-   CASE theSymbol OF
+   CASE theFinalSymbol OF
 
        0  : result = 0                                                                               ; No symbol.
        1  : UserSym, [1, -1, 0, 0, 0], [0, 0, 0, -1, 1], THICK=thick, COLOR=thisColor                    ; Plus sign.
@@ -297,7 +297,7 @@ FUNCTION cgSymCat, theInSymbol, THICK=thick, COLOR=color
                      [ 0, .33, 1,.33,0,-.33,-1,-.33, 0], THICK=thick, COLOR=thisColor                                          ; Star.
       46  : UserSym, [-1,-.33, 0,.33,1, .33, 0,-.33,-1], $
                      [ 0, .33, 1,.33,0,-.33,-1,-.33, 0], /Fill, THICK=thick, COLOR=thisColor                                   ; Filled star.
-
+      ELSE: Message, 'Cannot resolve the symbol. Please specify an integer between 0 and 46.'
    ENDCASE
    RETURN, result
 END ;-----------------------------------------------------------------------------------------------------------------------------

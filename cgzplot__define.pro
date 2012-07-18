@@ -141,7 +141,7 @@
 ;     min_value: in, optional, type=float
 ;        Set this keyword to the minimu value to plot. Any values smaller than this 
 ;        value are treated as missing.
-;     overplots: in, optional, type=object
+;     oplots: in, optional, type=object
 ;         A single cgOverPlot object, or an array of cgOverPlot objects that will be
 ;         overplot on the axes set up by the original data.
 ;     parent: in, optional, type=long
@@ -177,7 +177,7 @@ FUNCTION cgZPlot::INIT, x, y, $
     LABEL=label, $
     MAX_VALUE=max_value, $
     MIN_VALUE=min_value, $
-    OVERPLOTS=overplots, $
+    OPLOTS=oplots, $
     PARENT=parent, $
     XLOG=xlog, $
     XRANGE=xrange, $
@@ -234,7 +234,7 @@ FUNCTION cgZPlot::INIT, x, y, $
     self.ynozero = Ptr_New(/Allocate_Heap)
     self.undoList = Obj_New('LinkedList')
     self.redoList = Obj_New('LinkedList')
-    IF N_Elements(overplots) NE 0 THEN self.overplots = Ptr_New(overplots)
+    IF N_Elements(oplots) NE 0 THEN self.oplots = Ptr_New(oplots) ELSE self.oplots = Ptr_New(/ALLOCATE_HEAP)
     
     self -> SetProperty, $
         INDEP=indep, $
@@ -345,11 +345,11 @@ PRO cgZPlot::CLEANUP
     Obj_Destroy, self.redoList
     
     ; Get rid of the overplot objects, if any.
-    IF Ptr_Valid(self.overplots) THEN BEGIN
-      FOR j=0,N_Elements(*self.overplots)-1 DO BEGIN
-         Obj_Destroy, (*self.overplots)[j]
+    IF Ptr_Valid(self.oplots) THEN BEGIN
+      FOR j=0,N_Elements(*self.oplots)-1 DO BEGIN
+         Obj_Destroy, (*self.oplots)[j]
       ENDFOR
-      Ptr_Free, self.overplots
+      Ptr_Free, self.oplots
     ENDIF
     
     ; Call the superclass CLEANUP method.
@@ -391,23 +391,26 @@ PRO cgZPlot::AddOverplot, oplotObject, CLEAR=clear, DRAW=draw
    IF Keyword_Set(clear) THEN BEGIN
    
         ; Get rid of the overplot objects, if any.
-        IF Ptr_Valid(self.overplots) THEN BEGIN
-           FOR j=0,N_Elements(*self.overplots)-1 DO BEGIN
-             Obj_Destroy, (*self.overplots)[j]
+        IF Ptr_Valid(self.oplots) THEN BEGIN
+           FOR j=0,N_Elements(*self.oplots)-1 DO BEGIN
+             Obj_Destroy, (*self.oplots)[j]
            ENDFOR
-           Ptr_Free, self.overplots
-        ENDIF
+           Ptr_Free, self.oplots
+         ENDIF
 
    ENDIF
    
    ; If nothing to add, return.
-   IF N_Elements(oplotObject) EQ 0 THEN RETURN
+   IF N_Elements(oplotObject) EQ 0 THEN BEGIN
+       IF Ptr_Valid(self.oplots) EQ 0 THEN self.oplots = Ptr_New(/ALLOCATE_HEAP)
+       RETURN
+   ENDIF
    
    ; Otherwise, add the overplot objects.
-   IF Ptr_Valid(self.overplots) THEN BEGIN
-       *self.overplots = [*self.overplots, oplotObject]
+   IF Ptr_Valid(self.oplots) THEN BEGIN
+       *self.oplots = [*self.oplots, oplotObject]
    ENDIF ELSE BEGIN
-       self.overplots = Ptr_New(oplotObject)
+       self.oplots = Ptr_New(oplotObject)
    ENDELSE
    
    ; Draw the object?
@@ -724,7 +727,7 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         ZTITLE=ztitle, $
         ZVALUE=zvalue
         
-  ; Draw the plot.
+   ; Draw the plot.
    cgPlot, *self.indep, *self.dep, $
         OUTPUT=output, $
         ASPECT=*self.aspect, $
@@ -747,6 +750,7 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         NOCLIP=noclip, $
         NODATA=nodata, $
         NOERASE=noerase, $
+        OPLOTS=*self.oplots, $
         POSITION=position, $
         PSYM=psym, $
         SUBTITLE=subtitle, $
@@ -808,14 +812,6 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         ZTITLE=ztitle, $
         ZVALUE=zvalue
         
-        ; If you have any overplot objects, draw those now, too.
-        IF Ptr_Valid(self.overplots) THEN BEGIN
-           FOR j=0,N_Elements(*self.overplots)-1 DO BEGIN
-                thisObject = (*self.overplots)[j]
-                thisObject -> Draw
-                Empty
-           ENDFOR
-        ENDIF
 END
 
 
@@ -900,7 +896,7 @@ END
 ;         The maximum value to plot. 
 ;     min_value: out, optional, type=float
 ;         The minimum value to plot. 
-;     overplots: out, optional, type=object
+;     oplots: out, optional, type=object
 ;         The current overplot objects, if there are any. If not, a null object.
 ;     undolist: out, optional, type=objref
 ;         The LinkedList object that maintains the undo list.
@@ -923,7 +919,7 @@ PRO cgZPlot::GetProperty, $
         LABEL=label, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
-        OVERPLOTS=overplots, $
+        OPLOTS=oplots, $
         UNDOLIST=undolist, $
         XLOG=xlog, $
         YLOG=ylog, $
@@ -948,9 +944,9 @@ PRO cgZPlot::GetProperty, $
     IF Arg_Present(label) NE 0 THEN IF N_Elements(self.label) NE 0 THEN label = self.label
     IF Arg_Present(max_value) NE 0 THEN IF N_Elements(*self.max_value) NE 0 THEN max_value = *self.max_value
     IF Arg_Present(min_value) NE 0 THEN IF N_Elements(*self.min_value) NE 0 THEN min_value = *self.min_value
-    IF Arg_Present(overplots) NE 0 THEN IF Ptr_Valid(self.overplots) $
-        THEN overplots = *self.overplots $
-        ELSE overplots = Obj_New()
+    IF Arg_Present(oplots) NE 0 THEN IF Ptr_Valid(self.oplots) $
+        THEN oplots = *self.oplots $
+        ELSE oplots = Obj_New()
     IF Arg_Present(xlog) NE 0 THEN IF N_Elements(*self.xlog) NE 0 THEN xlog = *self.xlog
     IF Arg_Present(ylog) NE 0 THEN IF N_Elements(*self.ylog) NE 0 THEN ylog = *self.ylog
     IF Arg_Present(ynozero) NE 0 THEN IF N_Elements(*self.ynozero) NE 0 THEN ynozero = *self.ynozero
@@ -1516,7 +1512,7 @@ PRO cgZPlot__Define, class
              zoomFactor: 0.0, $
              undoList: Obj_New(), $
              redoList: Obj_New(), $
-             overplots: Ptr_New(), $   ; A pointer to a cgOverPlot object or array of cgOverPlot objects.
+             oplots: Ptr_New(), $      ; A pointer to a cgOverPlot object or array of cgOverPlot objects.
              label: "", $              ; The plot label. Suppress TITLE if present.
              savedir: "", $            ; The output directory where files are saved.
              drag: 0B, $               ; A flag that tells me if I am panning or not. Necessary for UNDO.

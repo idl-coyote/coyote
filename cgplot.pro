@@ -243,7 +243,7 @@ PRO cgPlot, x, y, $
     OUTPUT=output, $
     OVERPLOT=overplot, $
     POSITION=position, $
-    PSYM=psym, $
+    PSYM=psymIn, $
     SYMCOLOR=ssymcolor, $
     SYMSIZE=symsize, $
     TITLE=title, $
@@ -270,6 +270,15 @@ PRO cgPlot, x, y, $
     IF N_Params() EQ 0 THEN BEGIN
         Print, 'USE SYNTAX: cgPlot, x, y'
         RETURN
+    ENDIF
+    
+    ; Check to see if psymIn is a string. If so, covert it here.
+    IF N_Elements(psymIn) NE 0 THEN BEGIN
+        IF Size(psymIn, /TNAME) EQ 'STRING' THEN BEGIN
+              names = cgSymCat(/Names) 
+              index = Where(STRUPCASE(StrCompress(names, /REMOVE_ALL)) EQ STRUPCASE(StrCompress(psymIN, /REMOVE_ALL)), count)
+              IF count GT 0 THEN psym = index[0] ELSE Message, 'Cannot resolve the PSYM value: ' + psymIn
+        ENDIF ELSE psym = psymIn
     ENDIF
     
     ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be

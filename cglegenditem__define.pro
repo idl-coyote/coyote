@@ -6,6 +6,7 @@ PRO cgLegendItem::Draw
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
         void = Error_Message()
+        IF N_Elements(thisFont) NE 0 THEN !P.Font = thisFont
         RETURN
     ENDIF
     
@@ -27,16 +28,23 @@ PRO cgLegendItem::Draw
     ENDIF
     
     ; Draw the title.
+    IF self.hardware THEN BEGIN
+        thisFont = !P.Font
+        !P.Font = (!D.Name EQ 'PS') ? 1 : 0
+    ENDIF
     cgText, x1+(2.0*!D.X_CH_SIZE/!D.X_Size), y-(0.5*!D.Y_CH_SIZE/!D.Y_Size),$
         /NORMAL, ALIGNMENT=0.0, self.title, COLOR=self.tcolor, $
-        FONT=*self.font, CHARSIZE=self.charsize
+        TT_FONT=*self.tt_font, CHARSIZE=self.charsize, FONT=!P.Font
+    IF self.hardware THEN !P.Font = thisFont
+    
 END
 
 
 PRO cgLegendItem::GetProperty, $
    CHARSIZE=charsize, $
    COLOR=color, $
-   FONT=font, $
+   TT_FONT=tt_font, $
+   HARDWARE=hardware, $
    LENGTH=length, $
    LINESTYLE=linestyle, $
    LOCATION=location, $
@@ -59,7 +67,8 @@ PRO cgLegendItem::GetProperty, $
 
     IF Arg_Present(charsize) THEN charsize = self.charsize
     IF Arg_Present(color) THEN color = self.color
-    IF Arg_Present(font) THEN font = *self.font
+    IF Arg_Present(tt_font) THEN tt_font = *self.tt_font
+    IF Arg_Present(hardware) THEN hardware = self.hardware
     IF Arg_Present(length) THEN length = self.length
     IF Arg_Present(linestyle) THEN linestyle = self.linestyle
     IF Arg_Present(location) THEN location = self.location
@@ -78,7 +87,8 @@ END
 PRO cgLegendItem::SetProperty, $
    CHARSIZE=charsize, $
    COLOR=color, $
-   FONT=font, $
+   TT_FONT=tt_font, $
+   HARDWARE=hardware, $
    LENGTH=length, $
    LINESTYLE=linestyle, $
    LOCATION=location, $
@@ -102,7 +112,8 @@ PRO cgLegendItem::SetProperty, $
 
     IF N_Elements(charsize) NE 0 THEN self.charsize = charsize
     IF N_Elements(color) NE 0 THEN self.color = color
-    IF N_Elements(font) NE 0 THEN *self.font = font
+    IF N_Elements(tt_font) NE 0 THEN *self.tt_font = tt_font
+    IF N_Elements(hardware) NE 0 THEN self.hardware = hardware
     IF N_Elements(length) NE 0 THEN self.length = length
     IF N_Elements(linestyle) NE 0 THEN self.linestyle = linestyle
     IF N_Elements(location) NE 0 THEN self.location = location
@@ -119,14 +130,15 @@ END
 
 
 PRO cgLegendItem::CLEANUP
-   Ptr_Free, self.font
+   Ptr_Free, self.tt_font
 END
 
 
 FUNCTION cgLegendItem::INIT, $
    CHARSIZE=charsize, $
    COLOR=color, $
-   FONT=font, $
+   TT_FONT=tt_font, $
+   HARDWARE=hardware, $
    LENGTH=length, $
    LINESTYLE=linestyle, $
    LOCATION=location, $
@@ -151,6 +163,7 @@ FUNCTION cgLegendItem::INIT, $
     ; Define default parameters.
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharsize()
     SetDefaultValue, color, 'black'
+    SetDefaultValue, hardware, 0
     SetDefaultValue, length, 0.075
     SetDefaultValue, linestyle, 0
     SetDefaultValue, location, [0.1, 0.95]
@@ -166,7 +179,8 @@ FUNCTION cgLegendItem::INIT, $
     ; Populate the object.
     self.charsize = charsize
     self.color = color
-    IF N_Elements(font) NE 0 THEN self.font = Ptr_New(font) ELSE self.font = Ptr_New(/ALLOCATE_HEAP)
+    IF N_Elements(tt_font) NE 0 THEN self.tt_font = Ptr_New(tt_font) ELSE self.tt_font = Ptr_New(/ALLOCATE_HEAP)
+    self.hardware = hardware
     self.length = length
     self.linestyle = linestyle
     self.location = location
@@ -191,7 +205,8 @@ PRO cgLegendItem__Define, class
               INHERITS IDL_Object, $
               charsize: 0.0, $
               color: "", $
-              font: Ptr_New(), $
+              tt_font: Ptr_New(), $
+              hardware: 0, $
               length: 0.0, $
               linestyle: 0L, $
               location: FltArr(2), $

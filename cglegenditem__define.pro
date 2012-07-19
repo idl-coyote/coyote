@@ -133,7 +133,7 @@ END
 ;        you wish to only plot symbols in the legend.
 ;     linestyle: out, optional, type=integer
 ;        The line style for drawing the line.
-;     location: out, optional, type=fltarr, default=[0.1, 0.95]
+;     location: out, optional, type=fltarr
 ;        The location of the upper-left corner of the legend item,
 ;        in normalized coordinates (0 to 1 in the graphics window).
 ;     psym: out, optional, type=integer
@@ -219,9 +219,10 @@ END
 ;        you wish to only plot symbols in the legend.
 ;     linestyle: in, optional, type=integer
 ;        The line style for drawing the line.
-;     location: in, optional, type=fltarr, default=[0.1, 0.95]
+;     location: in, optional, type=fltarr
 ;        The location of the upper-left corner of the legend item,
 ;        in normalized coordinates (0 to 1 in the graphics window).
+;        The default is [0.1, 0.95].
 ;     psym: in, optional, type=integer
 ;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
 ;        routine cgSYMCAT. An integer between 0 and 46.
@@ -313,9 +314,10 @@ END
 ;        you wish to only plot symbols in the legend.
 ;     linestyle: in, optional, type=integer
 ;        The line style for drawing the line.
-;     location: in, optional, type=fltarr, default=[0.1, 0.95]
+;     location: in, optional, type=fltarr
 ;        The location of the upper-left corner of the legend item,
 ;        in normalized coordinates (0 to 1 in the graphics window).
+;        The default is [0.1, 0.95].
 ;     psym: in, optional, type=integer
 ;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
 ;        routine cgSYMCAT. An integer between 0 and 46.

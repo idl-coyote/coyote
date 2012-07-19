@@ -95,6 +95,9 @@
 ;     color: in, optional, type=varies
 ;         Set this keyword to the color (color table index, 24-bit value, or color name) 
 ;         of the color desired. 
+;     names: in, optional, type=boolean, default=0
+;         If this keyword is set, the function returns the names of the symbols allowed.
+;         The index number of the name is its symbol number.
 ;     thick: in, optional, type=float, default=1.0
 ;         Set this keyword to the thickness desired. Default is 1. 
 ;          
@@ -145,22 +148,77 @@
 ; :Copyright:
 ;     Copyright (c) 2006-2012, Fanning Software Consulting, Inc.
 ;-
-FUNCTION cgSymCat, theInSymbol, THICK=thick, COLOR=color
+FUNCTION cgSymCat, theInSymbol, COLOR=color, NAMES=names, THICK=thick
 
    On_Error, 2
+   
+   IF Keyword_Set(names) THEN BEGIN
+      names = [ $
+         'None', $
+         'Plus Sign', $
+         'Asterisk', $
+         'Dot', $
+         'Open Diamond', $
+         'Open Up Triangle', $
+         'Open Square', $
+         'X', $
+         'UserSym', $
+         'Open Circle', $
+         'Histogram', $
+         'Open Down Triangle', $
+         'Open Right Triangle', $
+         'Open Left Triangle', $
+         'Filled Diamod', $
+         'Filled Square', $
+         'Filled Circle', $
+         'Filled Up Triangle', $
+         'Filled Down Triangle', $
+         'Filled Right Triangle', $
+         'Filled Left Triangle', $
+         'Hourglass', $
+         'Filled Hourglass', $
+         'Bowtie', $
+         'Filled Bowtie', $
+         'Standing Bar', $
+         'Filled Standing Bar', $
+         'Laying Bar', $
+         'Filled Laying Bar', $
+         'Hat Up', $
+         'Hat Down', $
+         'Hat Right', $
+         'Hat Left', $
+         'Big Cross', $
+         'Filled Big Cross', $
+         'Circle Plus', $
+         'Circle X', $
+         'Upper Half Circle', $
+         'Fillled Upper Half Circle', $
+         'Lower Half Circle', $
+         'Filled Lower Half Circle', $
+         'Left Half Circle', $
+         'Filled Left Half Circle', $
+         'Right Half Circle', $
+         'Filled Right Half Circle', $
+         'Star', $
+         'Filled Star' ]
+       
+       RETURN, names
+   ENDIF
+   
+   ; Is the symbol input as a string?
    IF ( SIZE(theInSymbol,/TNAME) EQ 'STRING' ) THEN BEGIN
    
       ; Aliases defined here.
-      IF StrUpCase(theInSymbol) EQ 'OPENUPWARDTRIANGLE' THEN theInSymbol = 'OPENUPTRIANGLE'
-      IF StrUpCase(theInSymbol) EQ 'OPENDOWNWARDTRIANGLE' THEN theInSymbol = 'OPENDOWNTRIANGLE'
-      IF StrUpCase(theInSymbol) EQ 'OPENRIGHTWARDTRIANGLE' THEN theInSymbol = 'OPENRIGHTTRIANGLE'
-      IF StrUpCase(theInSymbol) EQ 'OPENLEFTWARDTRIANGLE' THEN theInSymbol = 'OPENLEFTTRIANGLE'
-      IF StrUpCase(theInSymbol) EQ 'FILLEDUPWARDTRIANGLE' THEN theInSymbol = 'FILLEDUPTRIANGLE'
-      IF StrUpCase(theInSymbol) EQ 'FILLEDDOWNWARDTRIANGLE' THEN theInSymbol = 'FILLEDDOWNTRIANGLE'
-      IF StrUpCase(theInSymbol) EQ 'FILLEDDOWNWARDTRIANGLE' THEN theInSymbol = 'FILLEDDOWNTRIANGLE'
-      IF StrUpCase(theInSymbol) EQ 'FILLEDLEFTWARDTRIANGLE' THEN theInSymbol = 'FILLEDLEFTTRIANGLE'
+      IF StrUpCase(StrCompress(theInSymbol, /REMOVE_ALL)) EQ 'OPENUPWARDTRIANGLE' THEN theInSymbol = 'OPENUPTRIANGLE'
+      IF StrUpCase(StrCompress(theInSymbol, /REMOVE_ALL)) EQ 'OPENDOWNWARDTRIANGLE' THEN theInSymbol = 'OPENDOWNTRIANGLE'
+      IF StrUpCase(StrCompress(theInSymbol, /REMOVE_ALL)) EQ 'OPENRIGHTWARDTRIANGLE' THEN theInSymbol = 'OPENRIGHTTRIANGLE'
+      IF StrUpCase(StrCompress(theInSymbol, /REMOVE_ALL)) EQ 'OPENLEFTWARDTRIANGLE' THEN theInSymbol = 'OPENLEFTTRIANGLE'
+      IF StrUpCase(StrCompress(theInSymbol, /REMOVE_ALL)) EQ 'FILLEDUPWARDTRIANGLE' THEN theInSymbol = 'FILLEDUPTRIANGLE'
+      IF StrUpCase(StrCompress(theInSymbol, /REMOVE_ALL)) EQ 'FILLEDDOWNWARDTRIANGLE' THEN theInSymbol = 'FILLEDDOWNTRIANGLE'
+      IF StrUpCase(StrCompress(theInSymbol, /REMOVE_ALL)) EQ 'FILLEDDOWNWARDTRIANGLE' THEN theInSymbol = 'FILLEDDOWNTRIANGLE'
+      IF StrUpCase(StrCompress(theInSymbol, /REMOVE_ALL)) EQ 'FILLEDLEFTWARDTRIANGLE' THEN theInSymbol = 'FILLEDLEFTTRIANGLE'
       
-      CASE STRUPCASE(theInSymbol) OF
+      CASE StrUpCase(StrCompress(theInSymbol, /REMOVE_ALL)) OF
          '':                         theSymbol = 0
          'NONE':                     theSymbol = 0
          'PLUSSIGN':                 theSymbol = 1

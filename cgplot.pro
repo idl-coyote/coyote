@@ -141,7 +141,8 @@
 ;        possibly set if the `Aspect` keyword is used.
 ;     psym: in, optional, type=integer
 ;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
-;        routine cgSYMCAT. An integer between 0 and 46.
+;        routine cgSYMCAT. An integer between 0 and 46. This may also be set to the
+;        "name" of a symbol, such as returned from Print, cgSymCat(/Names).
 ;     symcolor: in, optional, type=string/integer, default='black'
 ;        If this keyword is a string, the name of the symbol color. By default, 'black'.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -219,6 +220,7 @@
 ;         Added a LABEL keyword. 12 July 2012. DWF.
 ;         Yikes! Bad choice of variable names in LABEL work yesterday has severe consequences. Changed names. 13 July 2012. DWF.
 ;         Added OPLOTS keyword to allow cgOverplot objects. 18 July 2012. DWF.
+;         Added the ability to specify a symbol name with the PSYM keyword. 19 Juyl 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.

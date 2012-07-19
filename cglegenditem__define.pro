@@ -1,3 +1,79 @@
+; docformat = 'rst'
+;
+; NAME:
+;   cgLegendItem__Define
+;
+; PURPOSE:
+;   The purpose of this program is to a create simple legend object that can be drawn on
+;   a data plot.
+;
+;******************************************************************************************;
+;                                                                                          ;
+;  Copyright (c) 2012, by Fanning Software Consulting, Inc. All rights reserved.           ;
+;                                                                                          ;
+;  Redistribution and use in source and binary forms, with or without                      ;
+;  modification, are permitted provided that the following conditions are met:             ;
+;                                                                                          ;
+;      * Redistributions of source code must retain the above copyright                    ;
+;        notice, this list of conditions and the following disclaimer.                     ;
+;      * Redistributions in binary form must reproduce the above copyright                 ;
+;        notice, this list of conditions and the following disclaimer in the               ;
+;        documentation and/or other materials provided with the distribution.              ;
+;      * Neither the name of Fanning Software Consulting, Inc. nor the names of its        ;
+;        contributors may be used to endorse or promote products derived from this         ;
+;        software without specific prior written permission.                               ;
+;                                                                                          ;
+;  THIS SOFTWARE IS PROVIDED BY FANNING SOFTWARE CONSULTING, INC. ''AS IS'' AND ANY        ;
+;  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES    ;
+;  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT     ;
+;  SHALL FANNING SOFTWARE CONSULTING, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,             ;
+;  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED    ;
+;  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;         ;
+;  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND             ;
+;  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
+;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
+;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
+;******************************************************************************************;
+;+
+;   The purpose of this program is to create a simple legend object that can be drawn on
+;   a data plot. Perhaps later such objects can be collected into a more sophisticated
+;   "legend" object.
+;        
+; :Categories:
+;    Graphics
+;    
+; :Examples:
+;    A plot with a simple legend::
+;       cgDisplay, 800, 450
+;       legendItem1 = Obj_New('cgLegendItem', SymColor='red7', PSym=6, Symsize=1.5, $
+;           Location=[0.825, 0.875], Title='May 27', /Hardware, Length=0.05)
+;       legendItem2 = Obj_New('cgLegendItem', SymColor='blu7', PSym=15, Symsize=1.5, $
+;           Location=[0.825, 0.835], Title='June 27', /Hardware, Length=0.05)
+;       cgPlot, cgDemoData(17), PSym=-6, SymColor='red7', Position=[0.15, 0.15, 0.8, 0.9], $
+;          Legends=[legendItem1,legendItem2], Label='First Experiment'
+;       cgOPlot, cgDemoData(17), PSym=-15, SymColor='blu7'
+;       Obj_Destroy, [legendItem1,legendItem2]
+;           
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning 
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :Copyright:
+;     Copyright (c) 2012, Fanning Software Consulting, Inc.
+;     
+; :History:
+;     Change History::
+;        Written 18 July 2012. DWF.
+;-
+
+;+
+; This method draws the legend item in a graphics window.
+;-
 PRO cgLegendItem::Draw
 
     Compile_Opt idl2
@@ -40,10 +116,50 @@ PRO cgLegendItem::Draw
 END
 
 
+;+
+; This method obtains properties from the object.
+;
+; :Keywords:
+;     charsize: out, optional, type=float
+;        The character size for the legend text. Uses cgDefCharsize by default.
+;        Ignored if using hardware fonts on the display.
+;     color: out, optional, type=string
+;        The name of the data color. This is the color of the data line.
+;     hardware: out, optional, type=boolean
+;        Set this keyword if you want to output the legend text in a hardware font.
+;     length: out, optional, type=float, default=0.075
+;        The length of the line connecting symbols in the legend, in normalized
+;        coordinates (0 to 1 in the graphics window). Set this equal to 0.0 if
+;        you wish to only plot symbols in the legend.
+;     linestyle: out, optional, type=integer
+;        The line style for drawing the line.
+;     location: out, optional, type=fltarr, default=[0.1, 0.95]
+;        The location of the upper-left corner of the legend item,
+;        in normalized coordinates (0 to 1 in the graphics window).
+;     psym: out, optional, type=integer
+;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
+;        routine cgSYMCAT. An integer between 0 and 46.
+;     symcolor: out, optional, type=string
+;        The name of the symbol color. By default, the same as the `COLOR` keyword.
+;     symsize: out, optional, type=float, default=1.0
+;        The symbol size.
+;     symthick: out, optional, type=float, default=1.0
+;        The thickness of the symbol.
+;     tcolor: out, optional, type=string
+;        The `Title` color. Set by default to `Color`.
+;     thick: out, optional, type=float, default=1.0
+;        The thickness of the line.
+;     title: out, optional, type=string, default='Plot Item'
+;        The "title" or text for the legend item.
+;     tt_font: out, optional, type=string
+;        The name of a true-type font to use for the legend text.
+;     visible: out, optional, type=boolean, default=1
+;        Set this keyword to determine in the line should be drawn (visible=1), or
+;        if the line should not be drawn (visible=0).
+;-
 PRO cgLegendItem::GetProperty, $
    CHARSIZE=charsize, $
    COLOR=color, $
-   TT_FONT=tt_font, $
    HARDWARE=hardware, $
    LENGTH=length, $
    LINESTYLE=linestyle, $
@@ -52,9 +168,11 @@ PRO cgLegendItem::GetProperty, $
    SYMCOLOR=symcolor, $
    SYMSIZE=symsize, $
    SYMTHICK=symthick, $
-   THICK=thick, $
    TCOLOR=tcolor, $
-   TITLE=title
+   THICK=thick, $
+   TITLE=title, $
+   TT_FONT=tt_font, $
+   VISIBLE=visible
 
     Compile_Opt idl2
     
@@ -67,7 +185,6 @@ PRO cgLegendItem::GetProperty, $
 
     IF Arg_Present(charsize) THEN charsize = self.charsize
     IF Arg_Present(color) THEN color = self.color
-    IF Arg_Present(tt_font) THEN tt_font = *self.tt_font
     IF Arg_Present(hardware) THEN hardware = self.hardware
     IF Arg_Present(length) THEN length = self.length
     IF Arg_Present(linestyle) THEN linestyle = self.linestyle
@@ -79,15 +196,56 @@ PRO cgLegendItem::GetProperty, $
     IF Arg_Present(thick) THEN thick = self.thick
     IF Arg_Present(tcolor) THEN tcolor = self.tcolor
     IF Arg_Present(title) THEN title = self.title
+    IF Arg_Present(tt_font) THEN tt_font = *self.tt_font
     IF Arg_Present(visible) THEN visible = self.visible
 
 END
 
 
+;+
+; This method sets properties of the object.
+; 
+; :Keywords:
+;     charsize: in, optional, type=float
+;        The character size for the legend text. Uses cgDefCharsize by default.
+;        Ignored if using hardware fonts on the display.
+;     color: in, optional, type=string
+;        The name of the data color. This is the color of the data line.
+;     hardware: in, optional, type=boolean
+;        Set this keyword if you want to output the legend text in a hardware font.
+;     length: in, optional, type=float, default=0.075
+;        The length of the line connecting symbols in the legend, in normalized
+;        coordinates (0 to 1 in the graphics window). Set this equal to 0.0 if
+;        you wish to only plot symbols in the legend.
+;     linestyle: in, optional, type=integer
+;        The line style for drawing the line.
+;     location: in, optional, type=fltarr, default=[0.1, 0.95]
+;        The location of the upper-left corner of the legend item,
+;        in normalized coordinates (0 to 1 in the graphics window).
+;     psym: in, optional, type=integer
+;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
+;        routine cgSYMCAT. An integer between 0 and 46.
+;     symcolor: in, optional, type=string
+;        The name of the symbol color. By default, the same as the `COLOR` keyword.
+;     symsize: in, optional, type=float, default=1.0
+;        The symbol size.
+;     symthick: in, optional, type=float, default=1.0
+;        The thickness of the symbol.
+;     tcolor: in, optional, type=string
+;        The `Title` color. Set by default to `Color`.
+;     thick: in, optional, type=float, default=1.0
+;        The thickness of the line.
+;     title: in, optional, type=string, default='Plot Item'
+;        The "title" or text for the legend item.
+;     tt_font: in, optional, type=string
+;        The name of a true-type font to use for the legend text.
+;     visible: in, optional, type=boolean, default=1
+;        Set this keyword to determine in the line should be drawn (visible=1), or
+;        if the line should not be drawn (visible=0).
+;-
 PRO cgLegendItem::SetProperty, $
    CHARSIZE=charsize, $
    COLOR=color, $
-   TT_FONT=tt_font, $
    HARDWARE=hardware, $
    LENGTH=length, $
    LINESTYLE=linestyle, $
@@ -96,9 +254,10 @@ PRO cgLegendItem::SetProperty, $
    SYMCOLOR=symcolor, $
    SYMSIZE=symsize, $
    SYMTHICK=symthick, $
-   THICK=thick, $
    TCOLOR=tcolor, $
+   THICK=thick, $
    TITLE=title, $
+   TT_FONT=tt_font, $
    VISIBLE=visible
 
     Compile_Opt idl2
@@ -112,7 +271,6 @@ PRO cgLegendItem::SetProperty, $
 
     IF N_Elements(charsize) NE 0 THEN self.charsize = charsize
     IF N_Elements(color) NE 0 THEN self.color = color
-    IF N_Elements(tt_font) NE 0 THEN *self.tt_font = tt_font
     IF N_Elements(hardware) NE 0 THEN self.hardware = hardware
     IF N_Elements(length) NE 0 THEN self.length = length
     IF N_Elements(linestyle) NE 0 THEN self.linestyle = linestyle
@@ -124,20 +282,64 @@ PRO cgLegendItem::SetProperty, $
     IF N_Elements(thick) NE 0 THEN self.thick = thick
     IF N_Elements(tcolor) NE 0 THEN self.tcolor = tcolor
     IF N_Elements(title) NE 0 THEN self.title = title
+    IF N_Elements(tt_font) NE 0 THEN *self.tt_font = tt_font
     IF N_Elements(visible) NE 0 THEN self.visible = visible
     
 END
 
 
+;+
+; This method destroys anything the object uses that retains memory space.
+;-
 PRO cgLegendItem::CLEANUP
    Ptr_Free, self.tt_font
 END
 
 
+;+
+; This method creates an instance of the object.
+; 
+; :Keywords:
+;     charsize: in, optional, type=float
+;        The character size for the legend text. Uses cgDefCharsize by default.
+;        Ignored if using hardware fonts on the display.
+;     color: in, optional, type=string
+;        The name of the data color. This is the color of the data line.
+;     hardware: in, optional, type=boolean
+;        Set this keyword if you want to output the legend text in a hardware font.
+;     length: in, optional, type=float, default=0.075
+;        The length of the line connecting symbols in the legend, in normalized
+;        coordinates (0 to 1 in the graphics window). Set this equal to 0.0 if
+;        you wish to only plot symbols in the legend.
+;     linestyle: in, optional, type=integer
+;        The line style for drawing the line.
+;     location: in, optional, type=fltarr, default=[0.1, 0.95]
+;        The location of the upper-left corner of the legend item,
+;        in normalized coordinates (0 to 1 in the graphics window).
+;     psym: in, optional, type=integer
+;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
+;        routine cgSYMCAT. An integer between 0 and 46.
+;     symcolor: in, optional, type=string
+;        The name of the symbol color. By default, the same as the `COLOR` keyword.
+;     symsize: in, optional, type=float, default=1.0
+;        The symbol size.
+;     symthick: in, optional, type=float, default=1.0
+;        The thickness of the symbol.
+;     tcolor: in, optional, type=string
+;        The `Title` color. Set by default to `Color`.
+;     thick: in, optional, type=float, default=1.0
+;        The thickness of the line.
+;     title: in, optional, type=string, default='Plot Item'
+;        The "title" or text for the legend item.
+;     tt_font: in, optional, type=string
+;        The name of a true-type font to use for the legend text.
+;     visible: in, optional, type=boolean, default=1
+;        Set this keyword to determine in the line should be drawn (visible=1), or
+;        if the line should not be drawn (visible=0).
+;-
 FUNCTION cgLegendItem::INIT, $
    CHARSIZE=charsize, $
    COLOR=color, $
-   TT_FONT=tt_font, $
    HARDWARE=hardware, $
    LENGTH=length, $
    LINESTYLE=linestyle, $
@@ -146,9 +348,10 @@ FUNCTION cgLegendItem::INIT, $
    SYMCOLOR=symcolor, $
    SYMSIZE=symsize, $
    SYMTHICK=symthick, $
-   THICK=thick, $
    TCOLOR=tcolor, $
+   THICK=thick, $
    TITLE=title, $
+   TT_FONT=tt_font, $
    VISIBLE=visible
 
     Compile_Opt idl2
@@ -196,7 +399,13 @@ FUNCTION cgLegendItem::INIT, $
     RETURN, 1
 END
 
-
+;+
+; The class definition module for the object.
+; 
+; :Params:
+;     class: out, optional, type=struct
+;        The class definition as a structure variable. Occasionally useful.
+;-
 PRO cgLegendItem__Define, class
 
     Compile_Opt idl2

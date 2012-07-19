@@ -357,6 +357,14 @@ PRO cgZPlot::CLEANUP
       ENDFOR
       Ptr_Free, self.oplots
     ENDIF
+
+    ; Get rid of the legend objects, if any.
+    IF Ptr_Valid(self.legends) THEN BEGIN
+      FOR j=0,N_Elements(*self.legends)-1 DO BEGIN
+         Obj_Destroy, (*self.legends)[j]
+      ENDFOR
+      Ptr_Free, self.legends
+    ENDIF
     
     ; Call the superclass CLEANUP method.
     self -> cgGraphicsKeywords::CLEANUP

@@ -348,6 +348,7 @@ PRO cgZPlot::CLEANUP
     Ptr_Free, self.ynozero
     Obj_Destroy, self.undoList
     Obj_Destroy, self.redoList
+    WDelete, self.pixmapID
     
     ; Get rid of the overplot objects, if any.
     IF Ptr_Valid(self.oplots) THEN BEGIN
@@ -360,6 +361,88 @@ PRO cgZPlot::CLEANUP
     ; Call the superclass CLEANUP method.
     self -> cgGraphicsKeywords::CLEANUP
 
+END
+
+
+;+
+; This method adds a cgLegendItem object or array of objects to the plot. The
+; legend objects are drawn on the plot after the orginal plot is drawn.
+;
+; :Params:
+;    legendobject: in, optional, type=object
+;        A cgLegendItem object, or an array of cgLegendItem objects that should be drawn
+;        when the Draw method is called. The legend objects will be destroyed when this
+;        object is destroyed.
+;        
+; :Keywords:
+;     clear: in, optional, type=boolean, default=0
+;        If this keyword is set, the overplot list is cleared before the new overplot objects
+;        are added. Otherwise, the overplot object or objects is added to the end of the list
+;        already present.
+;     draw: in, optional, type=boolean, default=0
+;        If this keyword is set, the object calls its Draw method after the overplot objects are added.
+;     index: in, optional, type=integer, default=0
+;         Used only if the `REPLACE` keyword is set. Specifies the replacement index.
+;     replace: in, optional, type=boolean, default=0
+;        If this keyword is set, the new object replaces a current object, in the object
+;        array at the `INDEX` location.
+;-
+PRO cgZPlot::AddLegends, legendObject, $
+   CLEAR=clear, $
+   DRAW=draw, $
+   INDEX=index, $
+   REPLACE=replace
+
+    Compile_Opt idl2
+    
+   ; Standard error handling.
+   Catch, theError
+   IF theError NE 0 THEN BEGIN
+      Catch, /Cancel
+      void = Error_Message()
+      RETURN
+   ENDIF
+  
+   ; Clear all current legends, if needed.
+   IF Keyword_Set(clear) THEN BEGIN
+   
+        ; Get rid of the overplot objects, if any.
+        IF Ptr_Valid(self.legends) THEN BEGIN
+           FOR j=0,N_Elements(*self.legends)-1 DO BEGIN
+             Obj_Destroy, (*self.legends)[j]
+           ENDFOR
+           Ptr_Free, self.legends
+         ENDIF
+
+   ENDIF
+   
+   ; Are we replacing an object in the current list?
+   ; If so, do it and return.
+   IF Keyword_Set(replace) THEN BEGIN
+   
+       IF N_Elements(index) EQ 0 THEN index = 0
+       Obj_Destroy, (*self.legends)[index]
+       (*self.legends)[index] = legendObject
+        RETURN
+        
+   ENDIF
+   
+   ; If nothing to add, return.
+   IF N_Elements(legendObject) EQ 0 THEN BEGIN
+       IF Ptr_Valid(self.legends) EQ 0 THEN self.legends = Ptr_New(/ALLOCATE_HEAP)
+       RETURN
+   ENDIF
+   
+   ; Otherwise, add the legend objects.
+   IF Ptr_Valid(self.legends) THEN BEGIN
+       *self.legends = [*self.legends, legendObject]
+   ENDIF ELSE BEGIN
+       self.legends = Ptr_New(legendObject)
+   ENDELSE
+   help, *self.legends
+   ; Draw the object?
+   IF Keyword_Set(draw) THEN self -> Draw
+   
 END
 
 ;+
@@ -379,8 +462,17 @@ END
 ;        already present.
 ;     draw: in, optional, type=boolean, default=0
 ;        If this keyword is set, the object calls its Draw method after the overplot objects are added.
+;     index: in, optional, type=integer, default=0
+;         Used only if the `REPLACE` keyword is set. Specifies the replacement index.
+;     replace: in, optional, type=boolean, default=0
+;        If this keyword is set, the new object replaces a current object, in the object
+;        array at the `INDEX` location.
 ;-
-PRO cgZPlot::AddOverplot, oplotObject, CLEAR=clear, DRAW=draw
+PRO cgZPlot::AddOverplots, oplotObject, $
+   CLEAR=clear, $
+   DRAW=draw, $
+   INDEX=index, $
+   REPLACE=replace
 
     Compile_Opt idl2
     
@@ -392,6 +484,17 @@ PRO cgZPlot::AddOverplot, oplotObject, CLEAR=clear, DRAW=draw
       RETURN
    ENDIF
   
+   ; Are we replacing an object in the current list?
+   ; If so, do it and return.
+   IF Keyword_Set(replace) THEN BEGIN
+   
+       IF N_Elements(index) EQ 0 THEN index = 0
+       Obj_Destroy, (*self.oplots)[index]
+       (*self.oplots)[index] = oplotObject
+        RETURN
+        
+   ENDIF
+   
    ; Clear all current overplots, if needed.
    IF Keyword_Set(clear) THEN BEGIN
    
@@ -1180,10 +1283,10 @@ PRO cgZPlot::SetProperty, $
     IF N_Elements(dep) NE 0 THEN *self.dep = dep
     IF N_Elements(aspect) NE 0 THEN *self.aspect = aspect
     IF N_Elements(label) NE 0 THEN self.label = label
-    IF N_Elements(legends) NE 0 THEN *self.legends = legends
+    IF N_Elements(legends) NE 0 THEN self -> AddLegends, legends, /Clear
     IF N_Elements(max_value) NE 0 THEN *self.max_value = max_value
     IF N_Elements(min_value) NE 0 THEN *self.min_value = min_value
-    IF N_Elements(oplots) NE 0 THEN *self.oplots = oplots
+    IF N_Elements(oplots) NE 0 THEN self -> AddOverplots, oplots, /Clear
     IF N_Elements(xlog) NE 0 THEN *self.xlog = Keyword_Set(xlog)
     IF N_Elements(ylog) NE 0 THEN *self.ylog = Keyword_Set(ylog)
     IF N_Elements(ynozero) NE 0 THEN *self.ynozero = Keyword_Set(ynozero)

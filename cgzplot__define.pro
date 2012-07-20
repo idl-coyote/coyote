@@ -1213,6 +1213,50 @@ PRO cgZPlot::Pan_Events, event
     
 END
 
+
+;+
+; This method resizes the draw widget.
+; 
+; :Params:
+; 
+;    xsize: in, required, type=integer
+;        The requested X size of the draw widget.
+;    ysize: in, required, type=integer
+;        The requested Y size of the draw widget.
+;        
+; :Keywords:
+; 
+;     draw: in, optional, type=boolean, default=0
+;        If this keyword is set, the DRAW method is called after the widget is resized.
+;-
+PRO cgZPlot::ResizeDrawWidget, xsize, ysize, DRAW=draw
+
+   Compile_Opt idl2
+   
+   ; Standard error handling.
+   Catch, theError
+   IF theError NE 0 THEN BEGIN
+      Catch, /Cancel
+      void = Error_Message()
+      RETURN
+   ENDIF
+   
+   ; Delete and recreate the pixmap at the right size. 
+   WDelete, self.pixmapID
+   Window, /Pixmap, /Free, XSize=xsize, YSize=ysize
+   self.pixmapID = !D.Window
+   
+   ; Make the draw widget the right size.
+   Widget_Control, self.drawID, Draw_XSize=xsize, Draw_YSize=ysize
+   self.xsize = xsize
+   self.ysize = ysize
+
+    ; Draw the plot?
+    IF Keyword_Set(draw) THEN self -> Draw
+    
+END
+
+
 ;+
 ; This method allow plot keywords to be set to appropriate values.
 ; 

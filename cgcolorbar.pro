@@ -171,10 +171,14 @@
 ;       Set this keyword to display the plot in a resizeable graphics window (cgWindow).
 ;    xlog: in, optional, type=boolean, default=0
 ;       Set this keyword to use logarithmic scaling for the colorbar data range.
+;    xtickinterval: in, optional, type=float
+;       Set this keyword to the interval spacing of X major tick marks.
 ;    xtitle: in, optional, type=string
 ;        This keyword is ignored. Use the `Title` keyword to set a title for the color bar.
 ;    ylog: in, optional, type=boolean, default=0
 ;       Set this keyword to use logarithmic scaling for the colorbar data range.
+;    ytickinterval: in, optional, type=float
+;       Set this keyword to the interval spacing of Y major tick marks.
 ;    ytitle: in, optional, type=string
 ;        This keyword is ignored. Use the `Title` keyword to set a title for the color bar.
 ;    _ref_extra: in, optional
@@ -234,6 +238,7 @@
 ;       Set the maximum number of divisions at 59 to recognize the IDL plot limit for tick marks. 19 March 2012. DWF.
 ;       Modifications to the FIT algorithm to make sure the color bar is completely inside
 ;           the graphics window. Also fixed mis-spelled variable name. 20 March 2012. DWF.
+;       Added XTickInterval and YTickInterval keywords to accommodate interval spacing of major tick marks. 21 July 2012. DWF.
 ;           
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -272,8 +277,10 @@ PRO cgColorbar, $
     TOP=top, $
     VERTICAL=vertical, $
     XLOG=xlog, $
+    XTICKINTERVAL=xtickinterval, $
     XTITLE=xtitle, $ ; Ignored.
     YLOG=ylog, $
+    YTICKINTERVAL=ytickinterval, $
     YTITLE=ytitle, $ ; Ignored
     WINDOW=window, $
     _REF_EXTRA=extra
@@ -328,8 +335,10 @@ PRO cgColorbar, $
             TOP=top, $
             VERTICAL=vertical, $
             XLOG=xlog, $
-            XTITLE=xtitle, $
+            XTICKINTERVAL=xtickinterval, $
+            XTITLE=xtitle, $ ; Ignored.
             YLOG=ylog, $
+            YTICKINTERVAL=ytickinterval, $
             YTITLE=ytitle, $
             REPLACECMD=Keyword_Set(window), $
             ADDCMD=Keyword_Set(addcmd), $
@@ -395,16 +404,35 @@ PRO cgColorbar, $
        minrange = Float(range[0])
        maxrange = Float(range[1])
     ENDIF
-    IF N_ELEMENTS(divisions) EQ 0 THEN BEGIN
-      IF format EQ "" THEN divisions = 0 ELSE divisions = 6
-    ENDIF
-    divisions = divisions < 59 ; IDL limit to the plot command.
     SetDefaultValue, font, !P.Font
     SetDefaultValue, title, ""
     SetDefaultValue, oob_factor, 1.0
     xlog = Keyword_Set(xlog)
     ylog = Keyword_Set(ylog)
     
+    ; Deal with tick intervals, if you have them.
+    IF Keyword_Set(vertical) THEN BEGIN
+       IF (N_Elements(yTickInterval) NE 0) && (ylog EQ 0) THEN tickInterval = yTickInterval
+    ENDIF ELSE BEGIN
+       IF (N_Elements(xTickInterval) NE 0) && (xlog EQ 0) THEN tickInterval = xTickInterval    
+    ENDELSE
+    
+    ; Now handle DIVISIONS properly.
+    IF N_Elements(divisions) EQ 0 THEN BEGIN
+       IF format EQ "" THEN BEGIN
+           divisions = 0 
+       ENDIF ELSE BEGIN
+           ; You can't have both DIVISONS and a tick interval at the same time,
+           ; so the following value will be disgarded soon if you have a tick interval
+           ; defined.
+           divisions = 6
+       ENDELSE
+    ENDIF
+    divisions = divisions < 59 ; Limit to the PLOT command.
+    
+    ; You can't specify both DIVISIONS and a tick interval, so fix that here.
+    IF N_Elements(tickInterval) NE 0 THEN divisions = 0
+        
     ; If needed create a window first, so the drawing
     ; colors are correct for the window you want to draw into.
     IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
@@ -586,12 +614,12 @@ PRO cgColorbar, $
              YTICKS=divisions, XSTYLE=1, YSTYLE=9, XTITLE="", YTITLE="", $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', YMINOR=minor, _STRICT_EXTRA=extra, $
-             YTICKNAME=ticknames, FONT=font, YLOG=ylog
+             YTICKNAME=ticknames, FONT=font, YLOG=ylog, YTICKINTERVAL=tickinterval
 
           AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
              YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
              FONT=font, YTITLE=title, _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, $
-             YLOG=ylog
+             YLOG=ylog, YTICKINTERVAL=tickinterval
 
        ENDIF ELSE BEGIN
 
@@ -599,11 +627,13 @@ PRO cgColorbar, $
              YTICKS=divisions, YSTYLE=9, XSTYLE=1, YTITLE=title, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              XTICKFORMAT='(A1)', YTICKFORMAT=format, YMinor=minor, _STRICT_EXTRA=extra, $
-             YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font, XTITLE=""
+             YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font, XTITLE="", $
+             YTICKINTERVAL=tickinterval
 
           AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT='(A1)', YTICKS=divisions, $
              YTICKLEN=0.001, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
-             FONT=font, YTITLE="", _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME="", YLOG=ylog
+             FONT=font, YTITLE="", _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME="", YLOG=ylog, $
+             YTICKINTERVAL=tickinterval
 
        ENDELSE
 
@@ -616,12 +646,12 @@ PRO cgColorbar, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              YTICKFORMAT='(A1)', XTICKFORMAT='(A1)', XTICKLEN=0.01, $
              XRANGE=[minrange, maxrange], FONT=font, XMINOR=minor, _STRICT_EXTRA=extra, $
-             XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE=""
+             XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE="", XTICKINTERVAL=tickInterval
 
           AXIS, XTICKS=divisions, XSTYLE=1, COLOR=color, CHARSIZE=charsize, $
              XTICKFORMAT=format, XTICKLEN=ticklen, XRANGE=[minrange, maxrange], XAXIS=1, $
              FONT=font, XTITLE=title, _STRICT_EXTRA=extra, XMINOR=minor, $
-             XTICKNAME=ticknames, XLOG=xlog, YTITLE=""
+             XTICKNAME=ticknames, XLOG=xlog, YTITLE="", XTICKINTERVAL=tickInterval
 
        ENDIF ELSE BEGIN
 
@@ -630,12 +660,12 @@ PRO cgColorbar, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              YTICKFORMAT='(A1)', XTICKFORMAT=format, XTICKLEN=ticklen, $
              XRANGE=[minrange, maxrange], FONT=font, XMinor=minor, _STRICT_EXTRA=extra, $
-             XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE=""
+             XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE="", XTICKINTERVAL=tickInterval
 
           AXIS, XTICKS=divisions, XSTYLE=1, COLOR=color, CHARSIZE=charsize, $
              XTICKFORMAT='(A1)', XTICKLEN=0.001, XRANGE=[minrange, maxrange], XAXIS=1, $
              FONT=font, XTITLE="", XCHARSIZE=charsize, XMINOR=minor, $
-             XTICKNAME="", XLOG=xlog, YTITLE=""
+             XTICKNAME="", XLOG=xlog, YTITLE="", XTICKINTERVAL=tickInterval
         ENDELSE
 
     ENDELSE

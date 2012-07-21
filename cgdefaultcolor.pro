@@ -95,6 +95,8 @@
 ;           range 0 to 255, and the MODE indicates indexed color. 7 March 2012. DWF.
 ;        Modified so that the variable MODE will not change in the calling program program. 8 March 2012. DWF.
 ;        Made FOR loop counter a LONG integer. 3 July 2012. DWF.
+;        More work on getting the MODE correct to handle LONG integers properly. Now, in PostScript, we get
+;            the current mode, except if we have been told what mode to be in. 21 July 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -111,8 +113,14 @@ FUNCTION cgDefaultColor, inputColour, $
     ; Default values and variables needed for the program.
     background = Keyword_Set(background)
     IF N_Elements(inputColour) NE 0 THEN inputColor = inputColour
-    IF (N_Elements(mode) EQ 0) || (!D.Name EQ 'PS') THEN BEGIN
-       thisMode = GetDecomposedState() 
+    
+    ; Getting the mode correct is critical for handling LONG integers correctly.
+    ; If we are doing this in PostScript, then we have to get the mode while we
+    ; are in the PostScript file (since we try to draw in DECOMPOSED mode always).
+    ; But, if we are TOLD what mode to use, we have to honor that, even in PostScript.
+    IF ((N_Elements(mode) EQ 0) || (!D.Name EQ 'PS')) THEN BEGIN
+       thisMode = GetDecomposedState()
+       IF (N_Elements(mode) NE 0) THEN thisMode = Keyword_Set(mode)
     ENDIF ELSE thisMode = Keyword_Set(mode)
     traditional = Keyword_Set(traditional)
     thisDevice = !D.Name

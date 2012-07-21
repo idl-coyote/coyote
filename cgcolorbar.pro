@@ -152,6 +152,9 @@
 ;    right: in, optional, type=boolean, default=0   
 ;       This puts the labels on the right-hand side of a vertical color bar. It applies 
 ;       only to vertical color bars.
+;    tickinterval: in, optional, type=float
+;       Set this keyword to the interval spacing of major tick marks. Use this keyword in
+;       place of XTickInterval or YTickInterval keywords.
 ;    ticklen: in, optional, type=float, default=0.25
 ;       Set this keyword to the major tick length desired. Default is 0.25. Setting this 
 ;       keyword to a value greater than or equal to 0.5 will result in major tick marks 
@@ -172,13 +175,13 @@
 ;    xlog: in, optional, type=boolean, default=0
 ;       Set this keyword to use logarithmic scaling for the colorbar data range.
 ;    xtickinterval: in, optional, type=float
-;       Set this keyword to the interval spacing of X major tick marks.
+;       This keyword is trapped, but unused. Please use the`TickInterval` keyword instead.
 ;    xtitle: in, optional, type=string
 ;        This keyword is ignored. Use the `Title` keyword to set a title for the color bar.
 ;    ylog: in, optional, type=boolean, default=0
 ;       Set this keyword to use logarithmic scaling for the colorbar data range.
 ;    ytickinterval: in, optional, type=float
-;       Set this keyword to the interval spacing of Y major tick marks.
+;       This keyword is trapped, but unused. Please use the`TickInterval` keyword instead.
 ;    ytitle: in, optional, type=string
 ;        This keyword is ignored. Use the `Title` keyword to set a title for the color bar.
 ;    _ref_extra: in, optional
@@ -238,7 +241,8 @@
 ;       Set the maximum number of divisions at 59 to recognize the IDL plot limit for tick marks. 19 March 2012. DWF.
 ;       Modifications to the FIT algorithm to make sure the color bar is completely inside
 ;           the graphics window. Also fixed mis-spelled variable name. 20 March 2012. DWF.
-;       Added XTickInterval and YTickInterval keywords to accommodate interval spacing of major tick marks. 21 July 2012. DWF.
+;       Added TickInterval, XTickInterval and YTickInterval keywords to accommodate interval 
+;           spacing of major tick marks. 21 July 2012. DWF.
 ;           
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -271,6 +275,7 @@ PRO cgColorbar, $
     RANGE=range, $
     REVERSE=reverse, $
     RIGHT=right, $
+    TICKINTERVAL=tickinterval, $
     TICKLEN=ticklen, $
     TICKNAMES=ticknames, $
     TITLE=title, $
@@ -329,6 +334,7 @@ PRO cgColorbar, $
             RANGE=range, $
             REVERSE=reverse, $
             RIGHT=right, $
+            TICKINTERVAL=tickinterval, $
             TICKLEN=ticklen, $
             TICKNAMES=ticknames, $
             TITLE=title, $
@@ -412,9 +418,13 @@ PRO cgColorbar, $
     
     ; Deal with tick intervals, if you have them.
     IF Keyword_Set(vertical) THEN BEGIN
-       IF (N_Elements(yTickInterval) NE 0) && (ylog EQ 0) THEN tickInterval = yTickInterval
+       IF (N_Elements(yTickInterval) NE 0) && (ylog EQ 0) THEN BEGIN
+           IF N_Elements(tickInterval) EQ 0 THEN tickInterval = yTickInterval
+       ENDIF
     ENDIF ELSE BEGIN
-       IF (N_Elements(xTickInterval) NE 0) && (xlog EQ 0) THEN tickInterval = xTickInterval    
+       IF (N_Elements(xTickInterval) NE 0) && (xlog EQ 0) THEN BEGIN
+           IF N_Elements(tickInterval) EQ 0 THEN tickInterval = xTickInterval    
+       ENDIF
     ENDELSE
     
     ; Now handle DIVISIONS properly.
@@ -425,14 +435,13 @@ PRO cgColorbar, $
            ; You can't have both DIVISONS and a tick interval at the same time,
            ; so the following value will be disgarded soon if you have a tick interval
            ; defined.
-           divisions = 6
+           IF N_Elements(tickInterval) NE 0 $
+               THEN divisions = Abs(maxrange - minrange) / tickInterval $
+               ELSE divisions = 6
        ENDELSE
     ENDIF
     divisions = divisions < 59 ; Limit to the PLOT command.
     
-    ; You can't specify both DIVISIONS and a tick interval, so fix that here.
-    IF N_Elements(tickInterval) NE 0 THEN divisions = 0
-        
     ; If needed create a window first, so the drawing
     ; colors are correct for the window you want to draw into.
     IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
@@ -597,6 +606,9 @@ PRO cgColorbar, $
     ; Get the current colortable.
     TVLCT, rr, gg, bb, /GET
     
+    ; You can't specify both DIVISIONS and a tick interval, so fix that here.
+    IF N_Elements(tickInterval) NE 0 THEN divisions = 0
+        
     ; Annotate the color bar.
     annotateColor = cgDefaultColor(annotateColor, DEFAULT=color, MODE=currentState)
     

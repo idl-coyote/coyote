@@ -75,7 +75,8 @@
 ;        before drawing. X and Y must both be present.
 ;     psym: in, optional, type=integer
 ;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
-;        routine cgSYMCAT. An integer between 0 and 46. 
+;        routine cgSYMCAT. An integer between 0 and 46. May also be specified as a
+;        symbol names. See cgSymCat for details.
 ;     symcolor: in, optional, type=string/integer/vector, default=COLOR
 ;        If this keyword is a string, the name of the symbol color. By default, same as COLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -124,6 +125,7 @@
 ;        Added the MAP_OBJECT keyword for plotting on map projections. 2 Jan 2012. DWF.
 ;        Made sure the map coordinate system is established before drawing if a map object is passed
 ;             into the program. 26 June 2012. DWF.
+;        Added the ability to specify the PSYM keyword as a string. 20 July 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -132,7 +134,7 @@ PRO cgPlotS, x, y, z, $
     ADDCMD=addcmd, $
     COLOR=scolor, $
     MAP_OBJECT=map_object, $
-    PSYM=psym, $
+    PSYM=psymIn, $
     SYMCOLOR=ssymcolor, $
     SYMSIZE=symsize, $
     WINDOW=window, $
@@ -154,6 +156,15 @@ PRO cgPlotS, x, y, z, $
     IF N_Params() EQ 0 THEN BEGIN
         Print, 'USE SYNTAX: cgPlotS, x, y, [z]'
         RETURN
+    ENDIF
+    
+    ; Check to see if psymIn is a string. If so, covert it here.
+    IF N_Elements(psymIn) NE 0 THEN BEGIN
+        IF Size(psymIn, /TNAME) EQ 'STRING' THEN BEGIN
+              names = cgSymCat(/Names) 
+              index = Where(STRUPCASE(StrCompress(names, /REMOVE_ALL)) EQ STRUPCASE(StrCompress(psymIN, /REMOVE_ALL)), count)
+              IF count GT 0 THEN psym = index[0] ELSE Message, 'Cannot resolve the PSYM value: ' + psymIn
+        ENDIF ELSE psym = psymIn
     ENDIF
     
     ; Should this be added to a resizeable graphics window?

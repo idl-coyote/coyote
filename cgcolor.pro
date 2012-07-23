@@ -114,6 +114,7 @@
 ;        Added "Background" as a color name. The opposite of "Opposite". 1 Feb 2012. DWF.
 ;        When returning a vector of color values, now making sure to return a byte array if 
 ;             in indexed color mode. 27 Feb 2012. DWF.
+;        Added Compile Opt id2 to all file modules. 22 July 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2009-2012, Fanning Software Consulting, Inc.
@@ -134,6 +135,8 @@
 ;       color triples.
 ;-
 FUNCTION cgColor_Color24, color
+
+    Compile_Opt idl2
 
     ON_ERROR, 2
     
@@ -307,6 +310,8 @@ FUNCTION cgColor, theColour, colorIndex, $
    SelectColor=selectcolor, $
    Triple=triple, $
   _Ref_Extra=extra
+  
+    Compile_Opt idl2
    
     ; Return to caller as the default error behavior.
     On_Error, 2

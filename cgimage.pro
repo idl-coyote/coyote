@@ -152,6 +152,8 @@
 ;          up the algorithm to cause cgImage to erase the display window. 28 Feb 2012. DWF.
 ;       Added a Standard Deviation stretch, including the EXCLUDE and MULTIPLIER keywords to the
 ;          SDevScl command. 6 June 2012. DWF.
+;       Now saving the image POSITION in FSC_$CGIMAGE common block, even if in PostScript, because other
+;          routines (e.g., cgMap) may depend on it (e.g., using ONIMAGE keyword). 26 July 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -1975,6 +1977,12 @@ PRO cgImage, image, x, y, $
             _cgimage_position = position
             _cgimage_current = 1
         ENDIF 
+        
+        ; Save the position, at least, if you are in PostScript as cgMap may need it.
+        IF (!D.NAME EQ 'PS') THEN BEGIN
+            _cgimage_position = position
+            _cgimage_current = 1
+        ENDIF
     ENDIF
     
     ; Save plot system variables.

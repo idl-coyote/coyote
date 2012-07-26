@@ -294,6 +294,7 @@
 ;          the cumulative probablity from 0 to 1. 25 May 2012. DWF.
 ;        Whoops! Don't want to set default position unless Total(!P.MULTI) equals zero. 25 May 2012. DWF.
 ;        More work on getting the cumulative probability to be correctly plotted. 30 May 2012. DWF.
+;        More whoops! Setting POSITION now interfering with LAYOUT keyword. More fixes to restore LAYOUT. 26 July 2012. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
@@ -698,6 +699,7 @@ PRO cgHistoplot, $                  ; The program name.
    
     ; Set up the layout, if necessary.
     IF N_Elements(layout) NE 0 THEN BEGIN
+       IF N_Elements(postition) NE 0 THEN Undefine, position
        thisMulti = !P.Multi
        totalPlots = layout[0]*layout[1]
        !P.Multi = [0,layout[0], layout[1], 0, 0]

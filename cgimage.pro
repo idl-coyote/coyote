@@ -154,6 +154,7 @@
 ;          SDevScl command. 6 June 2012. DWF.
 ;       Now saving the image POSITION in FSC_$CGIMAGE common block, even if in PostScript, because other
 ;          routines (e.g., cgMap) may depend on it (e.g., using ONIMAGE keyword). 26 July 2012. DWF.
+;       Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -1994,6 +1995,11 @@ PRO cgImage, image, x, y, $
     IF N_Elements(plotxrange) EQ 0 THEN plotxrange = [0, imgXsize]
     IF N_Elements(plotyrange) EQ 0 THEN plotyrange = [0, imgYsize]
     
+    ; Check title for cgSymbols.
+    IF N_Elements(plotxtitle) NE 0 THEN plotxtitle = cgCheckForSymbols(plotxtitle)
+    IF N_Elements(plotytitle) NE 0 THEN plotytitle = cgCheckForSymbols(plotytitle)
+    IF N_Elements(title) NE 0 THEN title = cgCheckForSymbols(title)
+
     ; If the user wanted axes, draw them now.
     IF axes THEN BEGIN
     

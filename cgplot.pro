@@ -156,6 +156,10 @@
 ;     window: in, optional, type=boolean, default=0
 ;        Set this keyword to replace all the commands in a current cgWindow or to
 ;        create a new cgWindow for displaying this command.
+;     xtitle: in, optional, type=string
+;         The X title of the plot.
+;     ytitle: in, optional, type=string
+;         The Y title of the plot.
 ;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot command is allowed in the program.
 ;
@@ -221,6 +225,7 @@
 ;         Yikes! Bad choice of variable names in LABEL work yesterday has severe consequences. Changed names. 13 July 2012. DWF.
 ;         Added OPLOTS keyword to allow cgOverplot objects. 18 July 2012. DWF.
 ;         Added the ability to specify a symbol name with the PSYM keyword. 19 Juyl 2012. DWF.
+;         Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -251,6 +256,8 @@ PRO cgPlot, x, y, $
     TITLE=title, $
     TRADITIONAL=traditional, $
     WINDOW=window, $
+    XTITLE=xtitle, $
+    YTITLE=ytitle, $
     _REF_EXTRA=extra
     
     Compile_Opt idl2
@@ -318,6 +325,8 @@ PRO cgPlot, x, y, $
             SYMSIZE=symsize, $
             TITLE=title, $
             TRADITIONAL=traditional, $
+            XTITLE=xtitle, $
+            YTITLE=ytitle, $
             ADDCMD=1, $
             _Extra=extra
              RETURN
@@ -348,6 +357,8 @@ PRO cgPlot, x, y, $
             SYMSIZE=symsize, $
             TITLE=title, $
             TRADITIONAL=traditional, $
+            XTITLE=xtitle, $
+            YTITLE=ytitle, $
             REPLACECMD=replaceCmd, $
             _Extra=extra
             
@@ -506,6 +517,11 @@ PRO cgPlot, x, y, $
 
     ; Check the color keywords.
     IF N_Elements(title) EQ 0 THEN title = ""
+    IF N_Elements(xtitle) EQ 0 THEN xtitle = ""
+    IF N_Elements(ytitle) EQ 0 THEN ytitle = ""
+    title = cgCheckForSymbols(title)
+    xtitle = cgCheckForSymbols(xtitle)
+    ytitle = cgCheckForSymbols(ytitle)
     IF N_Elements(label) NE 0 THEN title = ""
     traditional = Keyword_Set(traditional)
     background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional, MODE=currentState)
@@ -628,7 +644,8 @@ PRO cgPlot, x, y, $
        IF psym LE 0 THEN OPlot, indep, dep, COLOR=color, _EXTRA=extra
     ENDIF ELSE BEGIN
       Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
-            POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, TITLE=title, _STRICT_EXTRA=extra
+            POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, TITLE=title, $
+            XTITLE=xtitle, YTITLE=ytitle, _STRICT_EXTRA=extra
         IF psym LE 0 THEN BEGIN
            IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=color, _EXTRA=extra  
         ENDIF  

@@ -227,6 +227,7 @@
 ;         Added BARCOORDS keyword to return bar plot locations. 25 Jan 2012.
 ;         Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
 ;         Small problem with setting range keywords and with extraneous marks on the bar plot axis fixed. 6 Feb 2012. DWF.
+;         Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -528,15 +529,15 @@ PRO cgBarPlot, values, $
        Message, 'There is a mismatch between the number of bars and number of overplot colors.'
     noerase = Keyword_set(noerase)
     rotate = Keyword_Set(rotate)
-    IF N_Elements(title) EQ 0 THEN title = ""
+    IF N_Elements(title) EQ 0 THEN title = "" ELSE title = cgCheckForSymbols(title)
     IF rotate THEN BEGIN
         IF N_Elements(ystyle) EQ 0 THEN ystyle = 1 ELSE ystyle = 1 XOR ystyle
     ENDIF ELSE BEGIN
         IF N_Elements(xstyle) EQ 0 THEN xstyle = 1 ELSE xstyle = 1 XOR xstyle    
     ENDELSE
     window = Keyword_Set(window)
-    IF N_Elements(xtitle) EQ 0 THEN xtitle = ""
-    IF N_Elements(ytitle) EQ 0 THEN ytitle = ""
+    IF N_Elements(xtitle) EQ 0 THEN xtitle = "" ELSE ytitle = cgCheckForSymbols(xtitle)
+    IF N_Elements(ytitle) EQ 0 THEN ytitle = "" ELSE ytitle = cgCheckForSymbols(ytitle)
     
     
     ; Find the min and max of the data range. Comparing baselines and values.

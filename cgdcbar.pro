@@ -167,6 +167,7 @@
 ;       Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;       Previous change incorrectly implemented for PS device. Fixed. 29 Dec 2011. DWF.
 ;       Added CHARPERCENT, FIT, and TREVERSE keywords. Cleaned up documentation. 20 March 2012. DWF.
+;       Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2009-2012, Fanning Software Consulting, Inc.
@@ -256,7 +257,7 @@ PRO cgDCBar, colors, $
     IF N_Elements(rotate) EQ 0 THEN rotate = 0
     rotate = (-180) > rotate < 180 ; Restrict to -180 to 180 degrees.
     IF N_Elements(spacing) EQ 0 THEN spacing = 1.0
-    IF N_Elements(title) EQ 0 THEN title = ""
+    IF N_Elements(title) EQ 0 THEN title = "" ELSE title = cgCheckForSymbols(title)
     IF N_Elements(tcharsize) EQ 0 THEN tcharsize = cgDefCharsize()
     treverse = Keyword_Set(treverse)
     vertical = Keyword_Set(vertical)

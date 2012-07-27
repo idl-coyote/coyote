@@ -209,6 +209,7 @@
 ;        Written, 12 January 2012. DWF.
 ;        Removed an extra COLOR keyword and changed an OPLOT command to a PLOTS command
 ;           to allow a vector of colors to be used for the scatter points.
+;         Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -649,6 +650,11 @@ PRO cgScatter2D, x, y, $
          ENDIF
     ENDELSE
     
+    ; Check for symbols in titles.
+    IF N_Elements(title) NE 0 THEN title = cgCheckForSymbols(title)
+    IF N_Elements(xtitle) NE 0 THEN xtitle = cgCheckForSymbols(xtitle)
+    IF N_Elements(ytitle) NE 0 THEN ytitle = cgCheckForSymbols(ytitle)    
+
     ; Draw the plot.
     IF Keyword_Set(overplot) THEN BEGIN
        IF psym LE 0 THEN OPlot, dep, indep, COLOR=color, _EXTRA=extra

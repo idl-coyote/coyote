@@ -125,6 +125,7 @@
 ;        Modifed the way I am handling brain dead AXIS command. 30 May 2011. DWF.
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;        Added T3D keyword. 1 March 2012. DWF.
+;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -201,6 +202,10 @@ PRO cgAxis, xloc, yloc, zloc, $
     ENDIF
         
     ; Did the user specify a title with the TITLE keyword?
+    IF (N_ElementS(title) NE 0) THEN title = cgCheckForSymbols(title)
+    IF (N_Elements(xtitle) NE 0) THEN xtitle = cgCheckForSymbols(xtitle)
+    IF (N_Elements(ytitle) NE 0) THEN ytitle = cgCheckForSymbols(ytitle)
+    IF (N_Elements(ztitle) NE 0) THEN ztitle = cgCheckForSymbols(ztitle)
     IF (N_Elements(xtitle) EQ 0) && (N_Elements(title) NE 0) THEN xtitle = title
     IF (N_Elements(ytitle) EQ 0) && (N_Elements(title) NE 0) THEN ytitle = title
     IF (N_Elements(ztitle) EQ 0) && (N_Elements(title) NE 0) THEN ztitle = title

@@ -161,10 +161,16 @@
 ;         Set this keyword if you want to display the plot in a resizable graphics window.
 ;     xstyle: in, hidden
 ;         The normal XSTYLE keyword.
+;     xtitle: in, optional, type=string
+;         The X title of the plot.
 ;     ystyle: in, hidden
 ;         The normal YSTYLE keyword.
+;     ytitle: in, optional, type=string
+;         The Y title of the plot.
 ;     zstyle: in, hidden
 ;         The normal ZSTYLE keyword.
+;     ztitle: in, optional, type=string
+;         The Z title of the plot.
 ;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Surface command is allowed in the program.
 ;
@@ -222,6 +228,7 @@
 ;        Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;        PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;        Now allowing the user to draw in the "background" color, if the COLOR or AXISCOLOR is "BACKGROUND". 19 March 2012. DWF.
+;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -252,8 +259,11 @@ PRO cgSurf, data, x, y, $
     TSPACE=tspace, $
     WINDOW=window, $
     XSTYLE=xstyle, $
+    XTITLE=xtitle, $
     YSTYLE=ystyle, $
+    YTITLE=ytitle, $
     ZSTYLE=zstyle, $
+    ZTITLE=ztitle, $
     _Ref_Extra=extra
     
     Compile_Opt idl2
@@ -310,8 +320,11 @@ PRO cgSurf, data, x, y, $
                 TSIZE=tsize, $
                 TSPACE=tspace, $
                 XSTYLE=xstyle, $
+                XTITLE=xtitle, $
                 YSTYLE=ystyle, $
+                YTITLE=ytitle, $
                 ZSTYLE=zstyle, $
+                ZTITLE=ztitle, $
                 ADDCMD=1, $
                 _Extra=extra
                 
@@ -341,8 +354,11 @@ PRO cgSurf, data, x, y, $
             TSIZE=tsize, $
             TSPACE=tspace, $
             XSTYLE=xstyle, $
+            XTITLE=xtitle, $
             YSTYLE=ystyle, $
+            YTITLE=ytitle, $
             ZSTYLE=zstyle, $
+            ZTITLE=ztitle, $
             REPLACECMD=replaceCmd, $
             _Extra=extra
             
@@ -485,6 +501,10 @@ PRO cgSurf, data, x, y, $
     ENDIF
 
     ; Check parameters.
+    IF N_Elements(title) EQ 0 THEN title = "" ELSE title = cgCheckForSymbols(title)
+    IF N_Elements(xtitle) EQ 0 THEN xtitle = "" ELSE xtitle = cgCheckForSymbols(xtitle)
+    IF N_Elements(ytitle) EQ 0 THEN ytitle = "" ELSE ytitle = cgCheckForSymbols(ytitle)
+    IF N_Elements(ztitle) EQ 0 THEN ztitle = "" ELSE ztitle = cgCheckForSymbols(ztitle)
     ndims = Size(data, /N_DIMENSIONS)
     IF ndims NE 2 THEN Message, 'Data must be 2D.'
     s = Size(data, /DIMENSIONS)
@@ -652,7 +672,7 @@ PRO cgSurf, data, x, y, $
     Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
         /NODATA, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
         FONT=font, CHARSIZE=charsize, NOERASE=tempNoErase, _STRICT_EXTRA=extra, $
-        AX=rotx, AZ=rotz  
+        AX=rotx, AZ=rotz, XTITLE=xtitle, YTITLE=ytitle, ZTITLE=ztitle
         
     ; Draw the title, if you have one.
     IF N_Elements(title) NE 0 THEN BEGIN
@@ -728,7 +748,8 @@ PRO cgSurf, data, x, y, $
         ; Shaded surface plot.
          Shade_Surf, data, x, y, /NOERASE, COLOR=color, BOTTOM=bottom, SHADES=checkShades, $
             XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, _STRICT_EXTRA=extra, $
-            BACKGROUND=shadebackground, AX=rotx, AZ=rotz, CHARSIZE=charsize  
+            BACKGROUND=shadebackground, AX=rotx, AZ=rotz, CHARSIZE=charsize, $
+            XTITLE=xtitle, YTITLE=ytitle, ZTITLE=ztitle  
             
         ; Have to repair the axes. Do this in decomposed color mode, if possible.
         ; If its not possible, you have to reload the color table that has the drawing
@@ -773,7 +794,8 @@ PRO cgSurf, data, x, y, $
             IF N_Elements(palette) NE 0 THEN TVLCT, palette ELSE TVLCT, rr, gg, bb
             Surface, data, x, y, NOERASE=1, SHADES=shades, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
-                FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz         
+                FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz , $
+                XTITLE=xtitle, YTITLE=ytitle, ZTITLE=ztitle       
         ENDIF ELSE BEGIN
             IF currentState THEN BEGIN
                 SetDecomposedState, 1 
@@ -783,7 +805,8 @@ PRO cgSurf, data, x, y, $
             Surface, data, x, y, NOERASE=1, COLOR=color, BOTTOM=bottom, $
                 BACKGROUND=background, SHADES=shades, SKIRT=skirt, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
-                FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz 
+                FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz , $
+                XTITLE=xtitle, YTITLE=ytitle, ZTITLE=ztitle
         ENDELSE
         
     ENDELSE

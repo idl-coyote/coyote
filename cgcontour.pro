@@ -201,6 +201,8 @@
 ;        contour plot.
 ;     t3d: in, optional, type=boolean, default=0
 ;        Set this keyword to use the 3D axis rotation matrix in !P.T3D.
+;     title: in, optional, type=string
+;        Set this keyword to the title of the plot.
 ;     traditional: in, optional, type=boolean, default=0
 ;         If this keyword is set, the traditional color scheme of a black background for
 ;         graphics windows on the display is used and PostScript files always use a white background.
@@ -218,6 +220,8 @@
 ;     xtickv: in, optional, type=string
 ;        A vector of tick values to use with the tick marks. See IDL documentation for
 ;        graphics keywords for additional information.
+;     xtitle: in, optional, type=string
+;        Set this keyword to the X title of the plot.
 ;     ystyle: in, optional, type=integer, default=1
 ;        If unused in the program, set to 1 to force exact axis scaling.
 ;     ythick: in, optional, type=integer, default=1
@@ -230,6 +234,8 @@
 ;     ytickv: in, optional, type=string
 ;        A vector of tick values to use with the tick marks. See IDL documentation for
 ;        graphics keywords for additional information.
+;     ytitle: in, optional, type=string
+;        Set this keyword to the Y title of the plot.
 ;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Contour command is allowed in the program.
 ;
@@ -334,6 +340,7 @@
 ;        The axis repair change on 9 March was not working in multi plots because the plot was already
 ;            advanced. Added a fix to make sure the repair is to the correct multi plot. 20 April 2012. DWF.           
 ;        Added an ASPECT keyword to maintain the program aspect ratio. 12 July 2012. DWF.
+;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -372,6 +379,7 @@ PRO cgContour, data, x, y, $
     POSITION=position, $
     RESOLUTION=resolution, $
     T3D=t3d, $
+    TITLE=title, $
     TRADITIONAL=traditional, $
     WINDOW=window, $
     XSTYLE=xstyle, $
@@ -379,11 +387,13 @@ PRO cgContour, data, x, y, $
     XTICKLEN=xticklen, $
     XTICKV=xtickv, $
     XTICKS=xticks, $
+    XTITLE=xtitle, $
     YSTYLE=ystyle, $
     YTHICK=ythick, $
     YTICKLEN=yticklen, $
     YTICKV=ytickv, $
     YTICKS=yticks, $
+    YTITLE=ytitle, $
     ZVALUE=zvalue, $
     _REF_EXTRA=extra
     
@@ -453,17 +463,20 @@ PRO cgContour, data, x, y, $
                 POSITION=position, $
                 RESOLUTION=resolution, $
                 T3D=t3d, $
+                TITLE=title, $
                 TRADITIONAL=traditional, $
                 XSTYLE=xstyle, $
                 XTHICK=xthick, $
                 XTICKLEN=xticklen, $
                 XTICKV=xtickv, $
                 XTICKS=xticks, $
+                XTITLE=xtitle, $
                 YSTYLE=ystyle, $
                 YTHICK=ythick, $
                 YTICKLEN=yticklen, $
                 YTICKV=ytickv, $
                 YTICKS=yticks, $
+                YTITLE=ytitle, $
                 ZVALUE=zvalue, $
                 ADDCMD=1, $
                 _Extra=extra
@@ -503,17 +516,20 @@ PRO cgContour, data, x, y, $
             POSITION=position, $
             RESOLUTION=resolution, $
             T3D=t3d, $
+            TITLE=title, $
             TRADITIONAL=traditional, $
             XSTYLE=xstyle, $
             XTHICK=xthick, $
             XTICKLEN=xticklen, $
             XTICKV=xtickv, $
             XTICKS=xticks, $
+            XTITLE=xtitle, $
             YSTYLE=ystyle, $
             YTHICK=ythick, $
             YTICKLEN=yticklen, $
             YTICKV=ytickv, $
             YTICKS=yticks, $
+            YTITLE=ytitle, $
             ZVALUE=zvalue, $
             REPLACECMD=replaceCmd, $
             _Extra=extra
@@ -686,6 +702,9 @@ PRO cgContour, data, x, y, $
     ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font
     IF Keyword_Set(t3d) && (!D.Name EQ 'PS') THEN font = -1
+    IF N_Elements(title) EQ 0 THEN title = "" ELSE title = cgCheckForSymbols(title)
+    IF N_Elements(xtitle) EQ 0 THEN xtitle = "" ELSE xtitle = cgCheckForSymbols(xtitle)
+    IF N_Elements(ytitle) EQ 0 THEN ytitle = "" ELSE ytitle = cgCheckForSymbols(ytitle)
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     IF N_Elements(c_charsize) EQ 0 THEN c_charsize = charsize * 0.75
     
@@ -982,7 +1001,8 @@ PRO cgContour, data, x, y, $
             POSITION=position, _STRICT_EXTRA=extra, T3D=t3d, /NODATA, NOERASE=tempNoErase, $
             XTHICK=xthick, YTHICK=ythick, FONT=font, C_CHARSIZE=c_charsize, $
             XTICKLEN=xticklen, YTICKLEN=yticklen, XTICKV=xtickv, XTICKS=xticks, $
-            YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip
+            YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip, $
+            TITLE=title, XTITLE=xtitle, YTITLE=ytitle
                     
     ENDIF
     

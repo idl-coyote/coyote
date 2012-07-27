@@ -136,6 +136,7 @@
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;        Modifications to the way I obtain the WIDTH when adding the command to a cgWindow. 26 Jan 2012. DWF.
 ;        Added MAP_OBJECT keyword so that I can draw text on plots using a cgMap map coordinate object. 29 June 2012. DWF.
+;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -320,6 +321,7 @@ PRO cgText, xloc, yloc, text, $
     
      
     ; Draw the text.
+    textStr = cgCheckForSymbols(textStr)
     IF Obj_Valid(map_object) THEN BEGIN
         map_object -> Draw, /NoGraphics
         XYOutS, xmap, ymap, textStr, CHARSIZE=charsize, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $

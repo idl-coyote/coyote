@@ -243,6 +243,7 @@
 ;           the graphics window. Also fixed mis-spelled variable name. 20 March 2012. DWF.
 ;       Added TickInterval, XTickInterval and YTickInterval keywords to accommodate interval 
 ;           spacing of major tick marks. 21 July 2012. DWF.
+;       Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;           
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -412,6 +413,7 @@ PRO cgColorbar, $
     ENDIF
     SetDefaultValue, font, !P.Font
     SetDefaultValue, title, ""
+    IF N_Elements(title) NE "" THEN title = cgCheckForSymbols(title)
     SetDefaultValue, oob_factor, 1.0
     xlog = Keyword_Set(xlog)
     ylog = Keyword_Set(ylog)

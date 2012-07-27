@@ -172,10 +172,16 @@
 ;         Set this keyword if you want to display the plot in a resizable graphics window.
 ;     xstyle: in, hidden
 ;         The normal XSTYLE keyword.
+;     xtitle: in, optional, type=string
+;         The X title of the plot.
 ;     ystyle: in, hidden
 ;         The normal YSTYLE keyword.
+;     ytitle: in, optional, type=string
+;         The Y title of the plot.
 ;     zstyle: in, hidden
 ;         The normal ZSTYLE keyword.
+;     ztitle: in, optional, type=string
+;         The Z title of the plot.
 ;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Surface command is allowed in the program.
 ;        
@@ -212,8 +218,11 @@ PRO cgShade_Surf, data, x, y, $
     TSPACE=tspace, $
     WINDOW=window, $
     XSTYLE=xstyle, $
+    XTITLE=xtitle, $
     YSTYLE=ystyle, $
+    YTITLE=ytitle, $
     ZSTYLE=zstyle, $
+    ZTITLE=ztitle, $
     _Ref_Extra=extra
     
     cgSurf, data, x, y, $
@@ -242,8 +251,11 @@ PRO cgShade_Surf, data, x, y, $
         TSPACE=tspace, $
         WINDOW=window, $
         XSTYLE=xstyle, $
+        XTITLE=xtitle, $
         YSTYLE=ystyle, $
+        YTITLE=ytitle, $
         ZSTYLE=zstyle, $
+        ZTITLE=ztitle, $
        _Ref_Extra=extra
       
 END

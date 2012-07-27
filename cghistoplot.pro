@@ -188,6 +188,8 @@
 ;       The spacing of fill line if the 'LINE_FILL` keyword is set. (See POLYFILL documentation.)
 ;    thick: in, optional, type=integer, default=1   
 ;       Set this keyword to a value greater than 1 to draw thicker axes and lines.
+;    title: in, optional, type=string
+;        Set this keyword to the plot title.
 ;    window: in, optional, type=boolean, default=0
 ;       Set this keyword to replace all the commands in a current cgWindow or to
 ;       create a new cgWindow for displaying this command.
@@ -296,6 +298,8 @@
 ;        More work on getting the cumulative probability to be correctly plotted. 30 May 2012. DWF.
 ;        More whoops! Setting POSITION now interfering with LAYOUT keyword. More fixes to restore LAYOUT. 26 July 2012. DWF.
 ;        Aaauuughhh! Typo introduced in yesterday's fix before I saved final version. 27 July 2012. DWF.
+;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
+;         
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
 ;-
@@ -343,10 +347,11 @@ PRO cgHistoplot, $                  ; The program name.
    SMOOTH=smooth, $                 ; Run a smoothing filter of this width over the histogram data before plotting.
    SPACING=spacing, $               ; The spacing of filled lines.
    THICK=thick, $                   ; Set to draw thicker lines and axes.
+   TITLE=title, $                   ; The plot title.
    WINDOW=window, $                 ; Display this in an cgWindow.
    XTITLE=xtitle, $                 ; The X title.
    YTITLE=ytitle, $                 ; The Y title.
-    _REF_EXTRA=extra               ; For passing extra keywords.
+    _REF_EXTRA=extra                ; For passing extra keywords.
     
    Compile_Opt idl2
 
@@ -399,6 +404,7 @@ PRO cgHistoplot, $                  ; The program name.
                ROTATE=rotate, $
                SMOOTH=smooth, $
                THICK=thick, $                   ; Set to draw thicker lines and axes.
+               TITLE=title, $
                XTITLE=xtitle, $
                YTITLE=ytitle, $                 ; The Y title.
                ;
@@ -459,6 +465,7 @@ PRO cgHistoplot, $                  ; The program name.
                ROTATE=rotate, $
                SMOOTH=smooth, $
                THICK=thick, $                   ; Set to draw thicker lines and axes.
+               TITLE=title, $
                XTITLE=xtitle, $
                YTITLE=ytitle, $                 ; The Y title.
                ;
@@ -696,6 +703,7 @@ PRO cgHistoplot, $                  ; The program name.
    ; Check for keywords.
    IF N_Elements(backColorName) EQ 0 THEN backColorName = "background"
    IF N_Elements(dataColorName) EQ 0 THEN dataColorName = "Indian Red"
+   SetDefaultValue, title, ""
    
     ; Set up the layout, if necessary.
     IF N_Elements(layout) NE 0 THEN BEGIN
@@ -763,8 +771,14 @@ PRO cgHistoplot, $                  ; The program name.
       ENDELSE
    ENDELSE
    
-  ; Calculate the histogram.
-   histdata = Histogram(_data, $
+   ; Check for symbols in titles.
+   IF N_Elements(title) NE 0 THEN title = cgCheckForSymbols(title)
+   IF N_Elements(xtitle) NE 0 THEN xtitle = cgCheckForSymbols(xtitle)
+   IF N_Elements(ytitle) NE 0 THEN ytitle = cgCheckForSymbols(ytitle)
+   
+   
+   ; Calculate the histogram.
+    histdata = Histogram(_data, $
       BINSIZE=binsize, $
       L64=l64, $
       MAX=maxinput, $
@@ -832,6 +846,7 @@ PRO cgHistoplot, $                  ; The program name.
              NoData=1, $                              ; Draw the axes only. No data.
              NOERASE=noerase, $
              POSITION=position, $
+             TITLE=title, $
              XTHICK=thick, $                          ; Axes thicker, if needed.
              YTHICK=thick, $
              XStyle=5, $                              ; Exact axis scaling. No autoscaled axes.
@@ -849,6 +864,7 @@ PRO cgHistoplot, $                  ; The program name.
              NoData=1, $                              ; Draw the axes only. No data.
              NOERASE=noerase, $
              POSITION=position, $
+             TITLE=title, $
              XTHICK=thick, $                          ; Axes thicker, if needed.
              YTHICK=thick, $
              XStyle=5, $                              ; Exact axis scaling. No autoscaled axes.

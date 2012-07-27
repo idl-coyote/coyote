@@ -295,7 +295,7 @@
 ;        Whoops! Don't want to set default position unless Total(!P.MULTI) equals zero. 25 May 2012. DWF.
 ;        More work on getting the cumulative probability to be correctly plotted. 30 May 2012. DWF.
 ;        More whoops! Setting POSITION now interfering with LAYOUT keyword. More fixes to restore LAYOUT. 26 July 2012. DWF.
-;       
+;        Aaauuughhh! Typo introduced in yesterday's fix before I saved final version. 27 July 2012. DWF.
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
 ;-

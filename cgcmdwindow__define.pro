@@ -117,6 +117,9 @@
 ;            default filename. 11 July 2012. DWF.
 ;        In decompling cgWindow from cgCmdWindow, I accidentally named the WASPECT keyword ASPECT. Restored
 ;             original name in this version. 13 July 2012. DWF.
+;        I added a new method, ReplaceEscapeSequences, that can evaluate escape sequences in
+;             string parameters and keywords to call the appropriate cgSymbol value at run-time.
+;             This eliminates the need for alternate keywords. 27 July 2012. DWF.
 ;-
 
 
@@ -768,7 +771,12 @@ PRO cgWindow_Command::Draw, SUCCESS=success, KEYWORDS=keywords
     IF Ptr_Valid(self.altps_Keywords) THEN BEGIN
        keywords = self -> EvaluateKeywords(*self.keywords, SUCCESS=success)
        IF success EQ 0 THEN Ptr_Free, self.keywords
-    ENDIF ELSE IF Ptr_Valid(self.keywords) THEN keywords = *self.keywords
+    ENDIF ELSE BEGIN
+        IF Ptr_Valid(self.keywords) THEN BEGIN
+            keywords = *self.keywords
+            keywords = self -> ReplaceEscapeSequences(keywords)
+        ENDIF
+    ENDELSE
     
     ; Do we have alternative parameters?
     IF Ptr_Valid(self.altps_params) THEN BEGIN
@@ -801,6 +809,12 @@ PRO cgWindow_Command::Draw, SUCCESS=success, KEYWORDS=keywords
         IF Ptr_Valid(self.p3) THEN p3 = *self.p3
         IF Ptr_Valid(self.p4) THEN p4 = *self.p4
     ENDELSE
+    
+    ; Remove escape sequences, if you need to.
+    IF Size(p1, /TNAME) EQ 'STRING' THEN p1 = self -> ReplaceEscapeSequences(p1)
+    IF Size(p2, /TNAME) EQ 'STRING' THEN p2 = self -> ReplaceEscapeSequences(p2)
+    IF Size(p3, /TNAME) EQ 'STRING' THEN p3 = self -> ReplaceEscapeSequences(p3)
+    IF Size(p4, /TNAME) EQ 'STRING' THEN p4 = self -> ReplaceEscapeSequences(p4)
 
     ; What kind of command is this?
     CASE self.type OF 
@@ -935,6 +949,9 @@ FUNCTION cgWindow_Command::EvaluateKeywords, keywords, SUCCESS=success
     ENDELSE
     
   ENDFOR
+  
+  ; Evaluate string keywords for escape sequences (e.g, $\mu$).
+  ;mkeys = cgWindow_Command -> ReplaceEscapeSequences(mkeys)
  
   Ptr_Free, theseTags
   RETURN, mkeys
@@ -981,6 +998,90 @@ PRO cgWindow_Command::List, prefix
     
     Print, prefix + cmdString
 END ;----------------------------------------------------------------------------------------------------------------
+
+;+
+; This method searches for escape sequences in text keywords and replaces
+; them if necessary with the particular token from cgSymbol. To create an
+; micrometer symbol, for example, you might specify an XTITLE keyword like
+; this: XTITLE='Length ($\mu$M)'. The symbol name should be proceeded by
+; a "$\" and ended with a "$".
+; 
+; :Params:
+;     kwords: in, required
+;        Either a scalar or array of strings, or a structure of keyword parameters. 
+;        If a structure, then the ReplaceEscapeSequences method is called recursively.
+;-
+FUNCTION cgWindow_Command::ReplaceEscapeSequences, aString
+
+    Compile_Opt idl2
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        IF N_Elements(aString) EQ 0 THEN RETURN, "" ELSE RETURN, aString
+    ENDIF
+    
+    ; Must have a parameter.
+    IF N_Elements(aString) EQ 0 THEN Message, 'Must pass a string or structure of keywords.'
+    
+    ; What kind of thing is the parameter?
+    type = Size(aString, /TNAME)
+    
+    ; If this is a structure of keyword parameters, sort though and call all string
+    ; parameters recursively.
+    IF type EQ "STRUCT" THEN BEGIN
+    
+        tags = Tag_Names(aString)
+        FOR j=0,N_Elements(tags)-1 DO BEGIN
+           type = Size(aString.(j), /TNAME)
+           IF (type EQ 'STRING') || (type EQ 'STRUCT') || (type EQ 'POINTER') THEN BEGIN
+              aString.(j) = self -> ReplaceEscapeSequences(aString.(j))
+           ENDIF
+        ENDFOR
+        RETURN, aString
+        
+    ENDIF
+    
+    ; Is this a pointer type?
+    IF type EQ 'POINTER' THEN BEGIN
+    
+       IF Size(*aString, /TNAME) EQ 'STRING' THEN *aString = self -> ReplaceEscapeSequences(*aString)
+    
+    ENDIF
+    
+    ; If this is a string, then do your thing.
+    IF type EQ 'STRING' THEN BEGIN
+    
+        FOR j=0,N_Elements(aString)-1 DO BEGIN
+            thisString = aString[j]
+            
+            ; Can you find an escape sequence (i.e., "{\") in this string?
+            locstart = StrPos(thisString, '$\')
+            IF locStart NE -1 THEN BEGIN
+            
+               finalLoc = StrPos(StrMid(thisString, locstart+2), '$')
+               IF finalLoc NE -1 THEN BEGIN
+                  token = StrMid(thisString, locStart+2, finalLoc)
+                  strToReplace = StrMid(thisString, locStart, finalLoc+3)
+                  newString = StrMid(thisString, 0, locstart) + cgSymbol(token) + StrMid(thisString, locstart+3+StrLen(token))
+                  thisString = self -> ReplaceEscapeSequences(newString)
+               ENDIF
+               
+            ENDIF
+            
+            aString[j] = thisString
+         
+        ENDFOR
+        
+        RETURN, aString
+        
+    ENDIF
+
+END ;----------------------------------------------------------------------------------------------------------------
+
+
 
 ;+
 ; The clean-up routine for the command object.

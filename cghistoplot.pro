@@ -699,7 +699,7 @@ PRO cgHistoplot, $                  ; The program name.
    
     ; Set up the layout, if necessary.
     IF N_Elements(layout) NE 0 THEN BEGIN
-       IF N_Elements(postition) NE 0 THEN Undefine, position
+       IF N_Elements(position) NE 0 THEN Undefine, position
        thisMulti = !P.Multi
        totalPlots = layout[0]*layout[1]
        !P.Multi = [0,layout[0], layout[1], 0, 0]

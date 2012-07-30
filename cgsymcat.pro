@@ -144,6 +144,8 @@
 ;       Renamed to cgSYMCAT from SYMCAT. 17 July 2012. DWF.
 ;       The previous problem with USERSYM colors "sticking" turned out to be a problem
 ;           with cgGraphicsKeywords, so I removed previous "fix". 18 July 2012. DWF.
+;       Modified the program to allow a "negative" string to be used as the symbol name
+;           (e.g., PSYM="-star"). 30 July 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2006-2012, Fanning Software Consulting, Inc.
@@ -208,6 +210,12 @@ FUNCTION cgSymCat, theInSymbol, COLOR=color, NAMES=names, THICK=thick
    ; Is the symbol input as a string?
    IF ( SIZE(theInSymbol,/TNAME) EQ 'STRING' ) THEN BEGIN
    
+      ; Is the first character a minus sign?
+      IF (StrMid(theInSymbol,0,1) EQ "-") THEN BEGIN
+          aMinusString = 1
+          theInSymbol = StrMid(theInSymbol,1)
+      ENDIF
+   
       ; Aliases defined here.
       IF StrUpCase(StrCompress(theInSymbol, /REMOVE_ALL)) EQ 'OPENUPWARDTRIANGLE' THEN theInSymbol = 'OPENUPTRIANGLE'
       IF StrUpCase(StrCompress(theInSymbol, /REMOVE_ALL)) EQ 'OPENDOWNWARDTRIANGLE' THEN theInSymbol = 'OPENDOWNTRIANGLE'
@@ -269,6 +277,7 @@ FUNCTION cgSymCat, theInSymbol, COLOR=color, NAMES=names, THICK=thick
          'FILLEDSTAR':               theSymbol = 46
          ELSE: Message, 'Symbol not defined.'
       ENDCASE
+            
    ENDIF ELSE theSymbol = theInSymbol[0]
 
    ; Error checking.
@@ -357,6 +366,13 @@ FUNCTION cgSymCat, theInSymbol, COLOR=color, NAMES=names, THICK=thick
                      [ 0, .33, 1,.33,0,-.33,-1,-.33, 0], /Fill, THICK=thick, COLOR=thisColor                                   ; Filled star.
       ELSE: Message, 'Cannot resolve the symbol. Please specify an integer between 0 and 46.'
    ENDCASE
+
+   ; If this is a minus string, we have to modify the result and fix the input.
+   IF Keyword_Set(aMinusString) THEN BEGIN
+      result = -result
+      theInSymbol[0] = '-' + theInSymbol
+   ENDIF
+   
    RETURN, result
 END ;-----------------------------------------------------------------------------------------------------------------------------
 

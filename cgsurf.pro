@@ -158,21 +158,23 @@
 ;        of the distance between !Y.Window[1] and !Y.Window[0] to locate the title above 
 ;        !Y.Window[1]. When Total(!P.MULTI) EQ 0, the default is 0.005, and it is 0.0025 otherwise.
 ;     window: in, optional, type=boolean, default=0
-;         Set this keyword if you want to display the plot in a resizable graphics window.
+;        Set this keyword to replace all the commands in the current cgWindow or to
+;        create a new cgWindow, if one doesn't currenly exist, for displaying this command.
+;        To create a new cgWindow if one currenly exists, use the `cgWindow` command
 ;     xstyle: in, hidden
-;         The normal XSTYLE keyword.
+;        The normal XSTYLE keyword.
 ;     xtitle: in, optional, type=string
-;         The X title of the plot.
+;        The X title of the plot.
 ;     ystyle: in, hidden
-;         The normal YSTYLE keyword.
+;        The normal YSTYLE keyword.
 ;     ytitle: in, optional, type=string
-;         The Y title of the plot.
+;        The Y title of the plot.
 ;     zstyle: in, hidden
-;         The normal ZSTYLE keyword.
+;        The normal ZSTYLE keyword.
 ;     ztitle: in, optional, type=string
-;         The Z title of the plot.
+;        The Z title of the plot.
 ;     _ref_extra: in, optional, type=any
-;        Any keyword appropriate for the IDL Surface command is allowed in the program.
+;         Any keyword appropriate for the IDL Surface command is allowed in the program.
 ;
 ; :Examples:
 ;    Use as you would use the IDL SURFACE of SHADE_SURF command::

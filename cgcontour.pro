@@ -207,7 +207,9 @@
 ;         If this keyword is set, the traditional color scheme of a black background for
 ;         graphics windows on the display is used and PostScript files always use a white background.
 ;     window: in, optional, type=boolean, default=0
-;         Set this keyword if you want to display the plot in a resizable graphics window.
+;        Set this keyword to replace all the commands in the current cgWindow or to
+;        create a new cgWindow, if one doesn't currenly exist, for displaying this command.
+;        To create a new cgWindow if one currenly exists, use the `cgWindow` command
 ;     xstyle: in, optional, type=integer, default=1
 ;        If unused in the program, set to 1 to force exact axis scaling.
 ;     xthick: in, optional, type=integer, default=1

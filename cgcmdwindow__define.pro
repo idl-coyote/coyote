@@ -1007,7 +1007,7 @@ END ;---------------------------------------------------------------------------
 ; a "$\" and ended with a "$".
 ; 
 ; :Params:
-;     kwords: in, required
+;     aString: in, required
 ;        Either a scalar or array of strings, or a structure of keyword parameters. 
 ;        If a structure, then the ReplaceEscapeSequences method is called recursively.
 ;-

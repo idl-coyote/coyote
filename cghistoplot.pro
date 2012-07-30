@@ -177,13 +177,13 @@
 ;       The thickness of the probability line drawn on the plot.
 ;    reverse_indices: out, optional
 ;       The list of reverse indices returned from the HISTOGRAM command. (See HISTOGRAM documentation.)
-;    rotate: in, optional, type=boolean, default=0                     
+;       rotate: in, optional, type=boolean, default=0                     
 ;       Set this keyword to cause the histogram bins to be drawn from left to right, rather 
 ;       than from bottom to top.
 ;    smooth: in, optional, type=integer, default=0
-;        Set this keyword to an odd positive integer to smooth the histogram output before plotting.
-;        The integer will set the width of a smoothing box to be applied to the histogram data with
-;        the Smooth function.
+;       Set this keyword to an odd positive integer to smooth the histogram output before plotting.
+;       The integer will set the width of a smoothing box to be applied to the histogram data with
+;       the Smooth function.
 ;    spacing: in, optional
 ;       The spacing of fill line if the 'LINE_FILL` keyword is set. (See POLYFILL documentation.)
 ;    thick: in, optional, type=integer, default=1   
@@ -191,14 +191,15 @@
 ;    title: in, optional, type=string
 ;        Set this keyword to the plot title.
 ;    window: in, optional, type=boolean, default=0
-;       Set this keyword to replace all the commands in a current cgWindow or to
-;       create a new cgWindow for displaying this command.
+;        Set this keyword to replace all the commands in the current cgWindow or to
+;        create a new cgWindow, if one doesn't currenly exist, for displaying this command.
+;        To create a new cgWindow if one currenly exists, use the `cgWindow` command
 ;    xtitle: in, optional, type=string, default="Relative Frequency"
-;       The X title of the histogram plot.
+;        The X title of the histogram plot.
 ;    ytitle: in, optional, type=string, default="Histogram Density"
-;       The Y title of the histogram plot.
+;        The Y title of the histogram plot.
 ;    _ref_extra: in, optional
-;       Any additional PLOT commands are passed via keyword inheritance.
+;         Any additional PLOT commands are passed via keyword inheritance.
 ;          
 ; :Examples:
 ;    Some of the ways cgHistogram can be used::

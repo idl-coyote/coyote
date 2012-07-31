@@ -300,6 +300,7 @@
 ;        More whoops! Setting POSITION now interfering with LAYOUT keyword. More fixes to restore LAYOUT. 26 July 2012. DWF.
 ;        Aaauuughhh! Typo introduced in yesterday's fix before I saved final version. 27 July 2012. DWF.
 ;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
+;        Mis-spelled "probability" in one section of the code. Fixed. 31 July 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
@@ -797,7 +798,7 @@ PRO cgHistoplot, $                  ; The program name.
    IF frequency THEN histdata = Float(histdata)/N_Elements(_data)
    
    ; Need a probability distribution?
-   IF Arg_Present(probablity) OR Keyword_Set(oprob) THEN BEGIN
+   IF Arg_Present(probability) OR Keyword_Set(oprob) THEN BEGIN
        cumTotal = Total(histData, /CUMULATIVE)
        probability = Total(Double(histdata)/Total(Double(histdata)), /CUMULATIVE)
    ENDIF

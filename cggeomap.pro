@@ -143,6 +143,7 @@
 ;         Modified code to read GeoTiff files created by HEG v2.11 from HDF-EOS2 grid files. 30 Dec 2011. DWF.
 ;         Modified to read multi-dimensional GeoTiff images and reverse the images correct. 12 Jan 2012. DWF.
 ;         Write base filename as title for window if the DISPLAY keyword is set. 22 Feb 2012. DWF.
+;         Had inexplicably left out CENTER_LATITUDE parameter in Equirectangular projection. 30 July 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -1260,6 +1261,7 @@ Function cgGeoMap, image, geotiff, $
         
         mapCoord = Obj_New('cgMap', thisProjection, DATUM=thisDatum, $
             CENTER_LONGITUDE=(xrange[1]-xrange[0])/2.0 + xrange[0], $
+            CENTER_LATITUDE=(yrange[1]-yrange[0])/2.0 + yrange[0], $
             COLOR=mcolor, TITLE=title, ONIMAGE=onimage, XRANGE=xrange, YRANGE=yrange)
  
    ENDIF

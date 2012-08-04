@@ -80,6 +80,9 @@
 ;        before drawing.
 ;     normal: in, optional, type=boolean
 ;         Set this keyword to indicate xloc and yloc are in normalized coordinates.
+;     orientation: in, optional, type=float, default=0.0
+;         Use this keyword to specify the counterclockwise angle of rotation of the text
+;         in degrees from the horizontal.
 ;     outloc: out, optional, type=various
 ;         Only used if PLACE is set, this is a two-element array containing the xloc and yloc
 ;         of the cursor position in the window.
@@ -96,7 +99,8 @@
 ;         The true-type font to use for the text. Only used if FONT=1.
 ;     width: out, optional, type=float
 ;         Set this keyword to a named variable in which to return the width of the text string, 
-;         in normalized coordinate units.
+;         in normalized coordinate units. Note that output keyword values cannot be returned
+;         from the routine if the command is being executed in a cgWindow.
 ;     window: in, optional, type=boolean
 ;         Set this keyword to add the command to the in the current cgWindow application.
 ;     _ref_extra: in, optional
@@ -137,6 +141,7 @@
 ;        Modifications to the way I obtain the WIDTH when adding the command to a cgWindow. 26 Jan 2012. DWF.
 ;        Added MAP_OBJECT keyword so that I can draw text on plots using a cgMap map coordinate object. 29 June 2012. DWF.
 ;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
+;        Added ORIENTATION keyword to make it explicit, and improved documentation. 3 Aug 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -151,6 +156,7 @@ PRO cgText, xloc, yloc, text, $
     FONT=font, $
     MAP_OBJECT=map_object, $
     NORMAL=normal, $
+    ORIENTATION=orientation, $
     OUTLOC=outloc, $
     PLACE=place, $
     TT_FONT=tt_font, $
@@ -218,6 +224,7 @@ PRO cgText, xloc, yloc, text, $
             FONT=font, $
             MAP_OBJECT=map_object, $
             NORMAL=normal, $
+            ORIENTATION=orientation, $
             OUTLOC=outloc, $
             TT_FONT=tt_font, $
 ;            WIDTH=width, $
@@ -325,10 +332,10 @@ PRO cgText, xloc, yloc, text, $
     IF Obj_Valid(map_object) THEN BEGIN
         map_object -> Draw, /NoGraphics
         XYOutS, xmap, ymap, textStr, CHARSIZE=charsize, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
-            WIDTH=width, _STRICT_EXTRA=extra
+            WIDTH=width, ORIENTATION=orientation, _STRICT_EXTRA=extra
     ENDIF ELSE BEGIN
         XYOutS, x, y, textStr, CHARSIZE=charsize, COLOR=thisColor, FONT=font, ALIGNMENT=alignment, $
-            DATA=data, DEVICE=device, NORMAL=normal, WIDTH=width, _STRICT_EXTRA=extra
+            DATA=data, DEVICE=device, NORMAL=normal, WIDTH=width, ORIENTATION=orientation, _STRICT_EXTRA=extra
     ENDELSE
     
    SetDecomposedState, currentState

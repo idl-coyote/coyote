@@ -1,0 +1,12 @@
+;;
+;; IDLWAVE catalog for library coyote
+;; Automatically Generated -- do not edit.
+;; Created by idlwave_catalog on Mon Aug  6 11:13:32 2012
+;;
+(setq idlwave-library-catalog-libname "coyote")
+(setq idlwave-library-catalog-routines
+ '(("loglevels" fun nil (lib "loglevels.pro" nil "coyote") "Result = %s(range)" (nil ("coarse") ("fine") ("max") ("min")))
+   ("pg_plotimage" pro nil (lib "pg_plotimage.pro" nil "coyote") "%s, im, x, y" (nil ("_extra") ("addcmd") ("axiscolor") ("background") ("fulledges") ("isotropic") ("layout") ("no_rescale") ("noerase") ("position") ("psresolution") ("smooth") ("title") ("window") ("xcharsize") ("xgridstyle") ("xlog") ("xminor") ("xrange") ("xstyle") ("xthick") ("xtick_get") ("xtickformat") ("xtickinterval") ("xticklayout") ("xticklen") ("xtickname") ("xticks") ("xtickunits") ("xtickv") ("xtitle") ("ycharsize") ("ygridstyle") ("ylog") ("yminor") ("yrange") ("ystyle") ("ythick") ("ytick_get") ("ytickformat") ("ytickinterval") ("yticklayout") ("yticklen") ("ytickname") ("yticks") ("ytickunits") ("ytickv") ("ytitle")))
+   ("plotimage_resamp" fun nil (lib "plotimage.pro" nil "coyote") "Result = %s(image, nx, ny, bdepth, newx, newy)" (nil ("interp")))
+   ("plotimage_pos" pro nil (lib "plotimage.pro" nil "coyote") "%s, xrange0, imgxrange0, imgxsize, xreverse, srcxpix, imgxpanel" (nil ("logscale") ("pixtolerance") ("quiet") ("status")))
+   ("plotimage" pro nil (lib "plotimage.pro" nil "coyote") "%s, img0" (nil ("_EXTRA") ("bottom") ("dither") ("imgxrange") ("imgyrange") ("interp") ("min_dpi") ("ncolors") ("noaxes") ("nodata") ("noerase") ("order") ("panel") ("pixel_aspect_ratio") ("pixtolerance") ("position") ("preserve_aspect") ("quiet") ("range") ("subpanel") ("title") ("xlog") ("xrange") ("xstyle") ("ylog") ("yrange") ("ystyle")))))

@@ -74,6 +74,9 @@
 ;        Set the default CENTER_LATITUDE and CENTER_LONGITUDE to 0.0. 9 April 2012. DWF.
 ;        Added NOFORWARDFIX keyword to allow skipping of the "fix" in the FORWRD method,
 ;           as sometimes this is not needed or required. 29 June 2012. DWF.
+;        Fixed a problem that required having to set the UTM zone in addition to the latitude
+;           and longitude in a UTM projection. Now using cgUTMZone to determine the proper
+;           zone. 8 Aug 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -400,7 +403,7 @@ FUNCTION cgMap::INIT, map_projection, $
    ENDIF
    IF N_Elements(semimajor_axis) NE 0 THEN thisDatum.semimajor_axis = semimajor_axis
    IF N_Elements(semiminor_axis) NE 0 THEN thisDatum.semiminor_axis = semiminor_axis
-   IF N_Elements(zone) EQ 0 THEN zone = 1
+   IF N_Elements(zone) EQ 0 THEN zone = cgUTMZone(center_longitude, center_latitude)
    
       ; Default MAP_PROJ_INIT keywords.
    IF N_Elements(extraKeywords) NE 0 $

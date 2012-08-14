@@ -531,6 +531,10 @@ FUNCTION cgColor, theColour, colorIndex, $
            rvalue = [ rvalue,  84,    163,   197,   220,   105,    51,    13,     0 ]
            gvalue = [ gvalue,  48,    103,   141,   188,   188,   149,   113,    81 ]
            bvalue = [ bvalue,   5,     26,    60,   118,   177,   141,   105,    71 ]
+           colors = [ colors, 'OPPOSITE', 'BACKGROUND']
+           rvalue = [ rvalue,  opixel[0],  bgcolor[0]]
+           gvalue = [ gvalue,  opixel[1],  bgcolor[1]]
+           bvalue = [ bvalue,  opixel[2],  bgcolor[2]]
        
        ENDIF ELSE BEGIN
        

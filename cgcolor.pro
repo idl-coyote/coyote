@@ -115,6 +115,7 @@
 ;        When returning a vector of color values, now making sure to return a byte array if 
 ;             in indexed color mode. 27 Feb 2012. DWF.
 ;        Added Compile Opt id2 to all file modules. 22 July 2012. DWF.
+;        Added "opposite" and "background" colors to Brewer colors. 14 August 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2009-2012, Fanning Software Consulting, Inc.

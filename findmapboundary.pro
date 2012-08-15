@@ -1,65 +1,17 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;    FINDMAPBOUNDARY
+;   FINDMAPBOUNDARY
 ;
 ; PURPOSE:
-;
-;    Utility routine to find the map projection grid boundary from a file,
-;    if it is possible to do so. Currently works with GeoTIFF files, CF 1.4
-;    compliant netCDF files, and GPD files created with the GPD_Viewer software
-;    from the Catatlyst Library.
-;
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: david@idlcoyote.com
-;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CATEGORY:
-;
-;    Utility.
-;
-; CALLING SEQUENCE:
-;
-;    success = FindMapBoundar(filename, boundary)
-;
-; INPUTS:
-;
-;    filename:    The name of a filename to open to see if a projected map
-;                 grid boundary can be found.
-;                 
-; OUTPUTS:
 ; 
-;    boundary:    A four-element array of boundary values in the form [x0,y0,x1,y1].
-;
-; RETURN VALUE:
-;
-;    success:     A 1 if a boundary can be found. A 0 otherwise.
-;
-; KEYWORDS:
-; 
-;    USE_LATLON:  If the filename is a netCDF file, set this keyword to force
-;                 the boundary to be determined by reading the include latitude/longitude
-;                 arrays.
-;
-;    XRANGE:      A two element vector: boundary[[0,2]].
-;
-;    YRANGE:      A two element vector: boundary[[1,3]].
-;
-; MODIFICATION HISTORY:
-;
-;    Written by: David W. Fanning, 21 February 2010.
-;    Added XRANGE and YRANGE keywords. 25 February 2010. DWF
-;    Added USE_LATLON keyword for finding boundary of netCDF files containing latitude
-;        and longitude arrays. 6 April 2010. DWF.
-;-
+; Utility routine to find the map projection grid boundary from a file,
+; if it is possible to do so. Currently works with GeoTIFF files, CF 1.4
+; compliant netCDF files, and GPD files created with the GPD_Viewer software
+; from the Catatlyst Library.
 ;******************************************************************************************;
-;  Copyright (c) 2010, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2012, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -84,22 +36,69 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
+;
+;+
+; Utility routine to find the map projection grid boundary from a file,
+; if it is possible to do so. Currently works with GeoTIFF files, CF 1.4
+; compliant netCDF files, and GPD files created with the GPD_Viewer software
+; from the Catatlyst Library.
+;
+; :Categories:
+;    Utility
+; 
+; :Returns:
+;    The return value is either a 1, indicating a boundary can be found, or a 0 indicating
+;    that the boundary could not be found.
+;    
+; :Params:
+;    filename: in, required, type='string'
+;       The name of a filename to open to see if a projected map grid boundary can be found.
+;    boundary: out, optional, type=float
+;       The boundary of the image in projected meter space, in the form [x0,y0,x1,y1].
+;       
+; :Keywords:
+;    use_latlon:  in, optional, type=boolean, default=0
+;       If the filename is a netCDF file, set this keyword to force the boundary 
+;       to be determined by reading the include latitude/longitude arrays.
+;     utm_south: in, optional, type=boolean, default=0
+;        Set this keyword to add 10e6 to each of the Y values. This is sometimes
+;        necessary with LandSat images in the Southern hemisphere, where the Y values
+;        are given in negative values to indicate southern UTM zones.
+;     xrange: out, optional, type=float
+;        A two element vector: boundary[[0,2]]
+;     yrange: out, optional, type=float
+;        A two element vector: boundary[[1,3]]
+;
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning 
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;    Written by: David W. Fanning, 23 February 2010.::
+;       Added XRANGE and YRANGE keywords. 25 February 2010. DWF
+;       Added USE_LATLON keyword for finding boundary of netCDF files containing latitude
+;          and longitude arrays. 6 April 2010. DWF.
+;       Added UTM_SOUTH keyword to handle Landsat dat in UTM projections in GeoTiff files
+;          that have to have 10e6 added to Y values to make them work in IDL. 14 Aug 2012. DWF.
+;          
+; :Copyright:
+;     Copyright (c) 2012, Fanning Software Consulting, Inc.
+;-
 FUNCTION FindMapBoundary, filename, boundary, $
     USE_LATLON=use_latlon, $
+    UTM_SOUTH=utm_south, $
     XRANGE=xrange, $
     YRANGE=yrange
 
     COMPILE_OPT idl2
 
     On_Error, 2
-    
-    ; Enforce proper calling sequence.
-    IF N_Params() NE 2 THEN BEGIN
-        Message, 'Called improperly. Proper calling sequence is:', /INFORMATIONAL
-        Message, '"success = FindMapBoundary(filename, boundary)"', /INFORMATIONAL
-        RETURN, 0
-    ENDIF
-    
+        
     ; Is this a GeoTIFF file:
     isGeoTiff = Query_Tiff(filename, geoInfo, GEOTIFF=geoStruct)
 
@@ -118,6 +117,13 @@ FUNCTION FindMapBoundary, filename, boundary, $
         yOrigin = tp[1] - (yscale * ysize)
         xEnd = xOrigin + (xscale * xsize)
         yEnd = tp[1]
+        
+        ; Some UTM projections indicate southern hemisphere scenes with negative
+        ; values for the lats. These have to have 10e6 added to them to work in IDL.
+        IF Keyword_Set(UTM_SOUTH) THEN BEGIN
+           yOrigin = yOrigin + 10e6
+           yEnd = yEnd + 10e6
+        ENDIF
         
         boundary = [xOrigin, yOrigin, xEnd, yEnd]
         xrange = boundary[[0,2]]

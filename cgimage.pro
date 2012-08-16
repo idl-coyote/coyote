@@ -155,6 +155,9 @@
 ;       Now saving the image POSITION in FSC_$CGIMAGE common block, even if in PostScript, because other
 ;          routines (e.g., cgMap) may depend on it (e.g., using ONIMAGE keyword). 26 July 2012. DWF.
 ;       Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
+;       Modified the way the XRANGE and YRANGE keywords work when the OVERPLOT keyword is also set. In this case,
+;          I will modify the image position to honor the XRANGE and YRANGE values with respect to the axes that the
+;          image is being overplot onto. 15 August 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -835,7 +838,9 @@ END
 ;    overplot: in, optional, type=boolean, default=0
 ;         Setting this keyword causes the POSITION keyword to be ignored
 ;         and the image is positioned in the location established by the
-;         last graphics command.
+;         last graphics command. If the XRange and YRange keywords are also
+;         used, the image position is adjusted with respect to the current axes
+;         range.
 ;    palette: in, optional, type=byte
 ;         Set this keyword to a 3x256 or 256x3 byte array containing the RGB color 
 ;         vectors to be loaded before the image is displayed. Such vectors can be 
@@ -1535,7 +1540,15 @@ PRO cgImage, image, x, y, $
           TVLCT, rr, gg, bb
        ENDIF ELSE BEGIN
           IF Keyword_Set(overplot) THEN BEGIN
-             position = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
+             IF (N_Elements(plotxrange) NE 0) && (N_Elements(plotyrange) NE 0) THEN BEGIN
+                x0 = !X.S[1]*plotxrange[0] + !X.S[0]
+                x1 = !X.S[1]*plotxrange[1] + !X.S[0]
+                y0 = !Y.S[1]*plotyrange[0] + !Y.S[0]
+                y1 = !Y.S[1]*plotyrange[1] + !Y.S[0]
+                position = [x0, y0, x1, y1]
+             ENDIF ELSE BEGIN
+                position = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
+             ENDELSE
           ENDIF ELSE position = [0.0, 0.0, 1.0, 1.0]
        ENDELSE
     ENDIF ELSE BEGIN
@@ -1560,8 +1573,14 @@ PRO cgImage, image, x, y, $
     
        ENDIF ELSE BEGIN
           IF Keyword_Set(overplot) THEN BEGIN
-             position = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
-          ENDIF ELSE position = Float(position)
+             IF (N_Elements(plotxrange) NE 0) && (N_Elements(plotyrange) NE 0) THEN BEGIN
+                x0 = !X.S[1]*plotxrange[0] + !X.S[0]
+                x1 = !X.S[1]*plotxrange[1] + !X.S[0]
+                y0 = !Y.S[1]*plotyrange[0] + !Y.S[0]
+                y1 = !Y.S[1]*plotyrange[1] + !Y.S[0]
+                position = [x0, y0, x1, y1]
+             ENDIF ELSE position = Float(position)
+          ENDIF
        ENDELSE
     ENDELSE
     

@@ -4,7 +4,7 @@
 ;   ANSI_VALUE
 ;
 ; PURPOSE:
-;   Provides a way to display non-printable characters in widget elements.
+;   Provides a new way to display non-printable characters in widget elements.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;

@@ -94,10 +94,10 @@
 ;     onimage: in, optional, type=boolean, default=0
 ;         Set this keword if the map object is to get its position from the last
 ;         cgImage command issued.
-;     palette: out, optional, type=bytarr(3,256)
+;     palette: out, optional, type=bytarr
 ;         If the GeoTiff file contains RGB color vectors, and keywords to cgGeoTiff cause the
 ;         file to be read (e.g, IMAGE or DISPLAY), then this output keyword will contain those
-;         vectors.
+;         vectors in a 3-by-256 byte array.
 ;     silent: in, optional, type=boolean, default=0
 ;         IDL cannot map every GeoTiff image to a supported map projection or datum.
 ;         Normally, if the GeoTIFF image is unsupported, an error message is issued.

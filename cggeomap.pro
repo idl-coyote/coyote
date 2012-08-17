@@ -94,6 +94,10 @@
 ;     onimage: in, optional, type=boolean, default=0
 ;         Set this keword if the map object is to get its position from the last
 ;         cgImage command issued.
+;     palette: out, optional, type=bytarr(3,256)
+;         If the GeoTiff file contains RGB color vectors, and keywords to cgGeoTiff cause the
+;         file to be read (e.g, IMAGE or DISPLAY), then this output keyword will contain those
+;         vectors.
 ;     silent: in, optional, type=boolean, default=0
 ;         IDL cannot map every GeoTiff image to a supported map projection or datum.
 ;         Normally, if the GeoTIFF image is unsupported, an error message is issued.
@@ -144,6 +148,7 @@
 ;         Modified to read multi-dimensional GeoTiff images and reverse the images correct. 12 Jan 2012. DWF.
 ;         Write base filename as title for window if the DISPLAY keyword is set. 22 Feb 2012. DWF.
 ;         Had inexplicably left out CENTER_LATITUDE parameter in Equirectangular projection. 30 July 2012. DWF.
+;         Added PALETTE keyword to return the RGB color palette present in the file, if any. 16 August 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -158,6 +163,7 @@ Function cgGeoMap, image, geotiff, $
     IMAGE=outImage, $
     MCOLOR=mcolor, $
     ONIMAGE=onimage, $
+    PALETTE=palette, $
     SILENT=silent, $
     SUB_RECT=sub_rect, $
     SUCCESS=success, $
@@ -1312,24 +1318,27 @@ Function cgGeoMap, image, geotiff, $
        thisImage = Read_Tiff(geofile, r, g, b, SUB_RECT=sub_rect)
        dims = Image_Dimensions(thisImage, YINDEX=yindex)
        thisImage = Reverse(Temporary(thisImage), yindex+1)
-       IF N_Elements(r) NE 0 THEN TVLCT, r, g, b
+       IF N_Elements(r) NE 0 THEN palette=[[r],[g],[b]]
        mapCoord -> SetProperty, ONIMAGE=1
        cgWindow, WASPECT=Float(ysize)/xsize, WTitle=FSC_Base_Filename(geofile)
        IF Keyword_Set(clip) THEN BEGIN
-            cgImage, thisImage, /Keep_Aspect, /AddCmd, Margin=0.05, STRETCH=2, _EXTRA=extra       
+            cgImage, thisImage, /Keep_Aspect, /AddCmd, Margin=0.05, $
+                STRETCH=2, PALETTE=palette, _EXTRA=extra       
        ENDIF ELSE BEGIN
-            cgImage, thisImage, /Keep_Aspect, /AddCmd, Margin=0.05, _EXTRA=extra
+            cgImage, thisImage, /Keep_Aspect, /AddCmd, Margin=0.05, PALETTE=palette, _EXTRA=extra
        ENDELSE
        cgWindow, 'Draw', mapCoord, /Method, /AddCmd
    ENDIF
    
    IF Arg_Present(outimage) THEN BEGIN 
        IF N_Elements(thisImage) NE 0 THEN BEGIN
+            IF N_Elements(r) NE 0 THEN palette=[[r],[g],[b]]
             outimage = Temporary(thisImage)
        ENDIF ELSE BEGIN
              IF N_Elements(geofile) EQ 0 THEN BEGIN
                 geofile = image
-                outimage = Read_Tiff(geofile, SUB_RECT=sub_rect)
+                outimage = Read_Tiff(geofile, r, g, b, SUB_RECT=sub_rect)
+                IF N_Elements(r) NE 0 THEN palette=[[r],[g],[b]]
                 dims = Image_Dimensions(outimage, YINDEX=yindex)
                 outimage = Reverse(Temporary(outimage), yindex+1)
               ENDIF ELSE outimage = image

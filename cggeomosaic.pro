@@ -15,10 +15,8 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
     
     ; Need two files to do the job!
     IF N_Params() NE 2 THEN BEGIN
-       
         void = Dialog_Message('Calling Syntax: geofile = cgGeoMosaic( geofile_1, geofile_2 )')
         RETURN, ""
-    
     ENDIF
     
     IF N_Elements(missing) EQ 0 THEN missing = 0B
@@ -28,7 +26,7 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
     IF ~success THEN RETURN, ""
     m2 = cgGeoMap(geofile_2, IMAGE=image_2, PALETTE=palette_2, SUCCESS=success)
     IF ~success THEN RETURN, ""
-    
+
     ; The images must have the same number of dimensions
     IF Size(image_1, /N_DIMENSIONS) NE Size(image_2, /N_DIMENSIONS) THEN $
        Message, 'The images do not have the same number of dimensions'
@@ -50,8 +48,8 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
     yscale_1 = geo_1.ModelPixelScaleTag[1]
     xscale_2 = geo_2.ModelPixelScaleTag[0]
     yscale_2 = geo_2.ModelPixelScaleTag[1]
-    IF xscale_1 NE xscale_2 THEN Message, 'Pixel X scales are incompatible.'
-    IF yscale_1 NE yscale_2 THEN Message, 'Pixel Y scales are incompatible.'
+    xscale = xscale_1 > xscale_2
+    yscale = yscale_1 > yscale_2
     
     ; Get the image map ranges and create a mosaic image of the proper size.
     m1 -> GetProperty, XRange=xr_1, YRange=yr_1
@@ -60,8 +58,8 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
     yr = [yr_1[0] < yr_2[0], yr_1[1] > yr_2[1]]
     
     ; How many pixels are in the new image?
-    xNumPixels = (xr[1] - xr[0]) / xscale_1
-    yNumPixels = (yr[1] - yr[0]) / yscale_1
+    xNumPixels = Ceil((xr[1] - xr[0]) / xscale)
+    yNumPixels = Ceil((yr[1] - yr[0]) / yscale)
     
     ; If necessary, make sure these images are band interleaved.
     void = Image_Dimensions(image_1, TRUEINDEX=trueIndex, XINDEX=xindex, YINDEX=yindex, $
@@ -70,7 +68,6 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
     void = Image_Dimensions(image_2, TRUEINDEX=trueIndex, XINDEX=xindex, YINDEX=yindex, $
        XSIZE=xsize_2, YSIZE=ysize_2)
     IF (trueIndex NE -1) && (trueIndex NE 2) THEN image_2 = Transpose(image_2, [xindex, yindex, trueindex])
-    
     
     ; Create a new image of the proper size. 
     imageType = Size(image_1, /Type)
@@ -98,11 +95,11 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
            Undefine, temp2
        ENDFOR
     ENDIF ELSE BEGIN
-    print, xloc[0], yloc[0]
-    print, xloc[0], yloc[0]
-    help, newImage, image_1, image_2
-        newImage[xloc[0], yloc[0]] = image_1
-        newImage[xloc[1], yloc[1]] = image_2
+        s = Size(image_1, /DIMENSIONS)
+        newImage[xloc[0]:xloc[0]+s[0]-1, yloc[0]:yloc[0]+s[1]-1] = image_1
+        s = Size(image_2, /DIMENSIONS)
+        newImage[xloc[1]:xloc[1]+s[0]-1, yloc[1]:yloc[1]+s[1]-1] = $
+              image_2 > newImage[xloc[1]:xloc[1]+s[0]-1, yloc[1]:yloc[1]+s[1]-1]
     ENDELSE
     
     IF Keyword_Set(image) THEN BEGIN

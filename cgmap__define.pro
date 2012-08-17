@@ -77,6 +77,7 @@
 ;        Fixed a problem that required having to set the UTM zone in addition to the latitude
 ;           and longitude in a UTM projection. Now using cgUTMZone to determine the proper
 ;           zone. 8 Aug 2012. DWF.
+;         Added a BOUNDARY keyword to the GetProperty method. 16 Aug 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -841,6 +842,10 @@ END
 ;   the same keywords that are used for the INIT method can be used here.
 ;   
 ; :Keywords:
+;     boundary: out, optional, type=array
+;        A four-element array giving the boundaries of the image in the form
+;        [x0,y0,x1,y1]. This is a more convenient way of expressing the range
+;        of the map space.
 ;     overlays: out, optional, type=object
 ;        Set this keyword to a named variable that will return an object
 ;        array containing the overlay objects in the map object.
@@ -848,6 +853,7 @@ END
 PRO cgMap::GetProperty, $
     BACKGROUND=background, $
     BCOLOR=bcolor, $
+    BOUNDARY=boundary, $
     CENTER_LATITUDE=center_latitude, $
     CENTER_LONGITUDE=center_longitude, $
     COLOR=color, $
@@ -902,6 +908,19 @@ PRO cgMap::GetProperty, $
             llcoords = Map_Proj_Inverse(self._cg_xrange, self._cg_yrange, MAP_STRUCTURE=mapStruct)
             yrange = Reform(llcoords[1,*])
       ENDIF ELSE yrange = self._cg_yrange
+   ENDIF
+   
+   ; The boundary is just the XRANGE and YRANGE in another form.
+   IF Arg_Present(boundary) THEN BEGIN
+      IF Keyword_Set(latlon_ranges) THEN BEGIN
+            llcoords = Map_Proj_Inverse(self._cg_xrange, self._cg_yrange, MAP_STRUCTURE=mapStruct)
+            xrange = Reform(llcoords[0,*])
+      ENDIF ELSE xrange = self._cg_xrange
+      IF Keyword_Set(latlon_ranges) THEN BEGIN
+            llcoords = Map_Proj_Inverse(self._cg_xrange, self._cg_yrange, MAP_STRUCTURE=mapStruct)
+            yrange = Reform(llcoords[1,*])
+      ENDIF ELSE yrange = self._cg_yrange
+      boundary = [xrange[0], yrange[0], xrange[1], yrange[1]]
    ENDIF
    
    ; Other keywords.

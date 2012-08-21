@@ -48,12 +48,14 @@
 ;        Either a 2D or true-color image (in which case a map coordinate object must be provided with the
 ;        MAP keyword) or the name of the GeoTiff file from which an image and a map coordinate object
 ;        can be obtained.
-;    boundary: in, required, type=fltarr(4)
+;    boundary: in, required, type=fltarr
 ;        A four-element array containing the map boundary to which the image should be clipped.
 ;       
 ; :Keywords:
 ;     map: in, optional, type=object
 ;         A map coordinate object (cgMap) that maps or georeferences the input image.
+;     outboundary: out, optional, type=fltarr
+;         A four-element array containing the final map boundary of the clipped image.
 ;         
 ; :Author:
 ;     FANNING SOFTWARE CONSULTING::

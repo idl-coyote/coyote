@@ -51,9 +51,6 @@
 ;   If the ATTRVALUES keyword is undefined, all entities are drawn, but only a single value
 ;   for COLORS, FCOLORS, FILL, LINESTYLE, and THICK is allowed.
 ;
-;   This software can be purchased, along with other Coyote Graphic map projection
-;   software, from the `Coyote Store <http://www.idlcoyote.com/store/index.php?act=viewCat&catId=3>`.
-;
 ; :Categories:
 ;    Graphics, Map Projections
 ;       

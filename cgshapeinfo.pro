@@ -89,7 +89,15 @@
 ;       
 ; :Copyright:
 ;    Copyright (c) 2006-2012, Fanning Software Consulting, Inc.
+;-   
+;
 ;+
+; The event handler for the program.
+; 
+; :Params:
+;      event: in, required, type=struct
+;          The event structure passed by the window manager.
+;-
 PRO cgShapeInfo_Events, event
 
    Compile_Opt idl2
@@ -200,7 +208,13 @@ PRO cgShapeInfo_Events, event
 
 END ; -----------------------------------------------------------------------------------------
 
-
+;+
+; The clean-up routine for the program.
+;
+; :Params:
+;     tlb: in, required, type=long
+;         The identifier of the widget that just died.
+;-
 PRO cgShapeInfo_Cleanup, tlb
    Widget_Control, tlb, Get_UValue=info
    Heap_Free, (*info).entities
@@ -209,7 +223,20 @@ PRO cgShapeInfo_Cleanup, tlb
    Ptr_Free, info
 END ; -----------------------------------------------------------------------------------------
 
-
+;+
+; The calling program for learning more about the contents of the shapefile.
+;
+; :Params:
+;     filename: in, optional, type=string
+;         The name of the shapefile you wish to browse. If not provided, the user
+;         will be asked to select a shapefile.
+;
+; :Keywords:
+;     xrange: out, optional, type=float
+;          The X range of the shapefile contents in the native units of the shapefile.
+;     yrange: out, optional, type=float
+;          The Y range of the shapefile contents in the native units of the shapefile.
+;-
 PRO cgShapeInfo, filename, XRANGE=xrange, YRANGE=yrange
 
    Compile_Opt idl2

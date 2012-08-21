@@ -124,7 +124,8 @@
 ;          pointers as I go. Also added MinNumVerts keyword to screen out the drawing of
 ;          small polygons. 6 October 2011. DWF.
 ;       Wrong string case for discovering particular attributes caused them not to be drawn. 27 Oct 2011. DWF.
-;        
+;       Added the ability to draw point shapefiles. Changed default color to "opposite". 20 Aug 2012. DWF.
+;       
 ; :Copyright:
 ;    Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;---------------------------------------------------------------------------
@@ -139,7 +140,8 @@
 ;
 ; :Keywords:
 ;     color: in, required, type=string
-;         The name of the color used to draw the entity.
+;         The name of the color used to draw the entity. Used as fill color
+;         for filled symbols when drawing points.
 ;     fcolor: in, required, type=string
 ;         The name of the color used to fill the entity. Used if the FILL
 ;         keyword is set.
@@ -154,6 +156,11 @@
 ;         The program assumes the shapefile entities are expressed in latitude and
 ;         longitude values. If the entiites are expressed in projected XY Cartesian
 ;         coordinates, then set this value.
+;     psym: in, optional, type=integer, default=16
+;         When drawing points, the symbol to use. May be any value supported by
+;         cgSymbol. The default is a filled circle, filled with `Colors`.
+;     symsize: in, optional, type=float, default=1.0
+;         The default symbol size. Used only when displaying points.
 ;     thick: in, required, type=integer
 ;         The thickness of the line used to draw the entity.
 ;-
@@ -164,6 +171,8 @@ PRO cgDrawShapes_DrawEntity, entity, $
     LINESTYLE=linestyle, $
     MAPCOORD=mapCoord, $
     PROJECTED_XY=projected_xy, $
+    PSYM=psym, $
+    SYMSIZE=symsize, $
     THICK=thick
 
    Compile_Opt idl2
@@ -249,9 +258,21 @@ PRO cgDrawShapes_DrawEntity, entity, $
                ENDCASE
             ENDFOR
          ENDIF
-      ENDCASE ; Polyline shapes.
-
-      ELSE: ; All other shapes fall through and are silently ignored.
+     ENDCASE ; Polyline shapes.
+         
+     ; Various kinds of points.
+     entity.shape_type eq  1 or $   ; Point
+     entity.shape_type eq 11 or $   ; PointZ (ignoring Z)
+     entity.shape_type eq 21 or $   ; PointM (ignoring M)
+     entity.shape_type eq  8 or $   ; MultiPoint
+     entity.shape_type eq 18 or $   ; MultiPointZ (ignoring Z)
+     entity.shape_type eq 28: BEGIN ; MultiPointM (ignoring M)
+         cgPlotS, entity.bounds[0], entity.bounds[1], $
+             PSYM=psym, COLOR=color, SYMSIZE=symsize, THICK=thick
+         ENDCASE
+         
+ 
+      ELSE: Message, 'Not currently handling entity type: ' + StrTrim(entity.shape_type,2)
 
    ENDCASE
 
@@ -259,9 +280,11 @@ END ;---------------------------------------------------------------------------
 
 ;+
 ;   This program draws the entities in a shapefile, containing latitude and 
-;   longitude polygons or polylines, on a map projection. To draw the shapefile 
+;   longitude points, polygons, polylines, or polypoings on a map projection. 
+;   Values may also be in projected meter space, if the proper map coordinate
+;   object is passed to the program (e.g, via the MapCoord keyword). To draw the shapefile 
 ;   entities automatically, no matter what kind of values the polygon vertices
-;   have, and without a map projection, set the AUTODRAW keyword.
+;   or points have, and without a map projection, set the AUTODRAW keyword.
 ;
 ; :Params:
 ;    shapefile: in, optional, type=string
@@ -284,7 +307,7 @@ END ;---------------------------------------------------------------------------
 ;         The name of the attribute in the file that you wish to draw.
 ;         By default, this is set to the first attribute name in the file.
 ;         If you are unsure of the attribute names in your shapefile,
-;         use the Coyote Library program SHAPEINFO to browse the file
+;         use the Coyote Library program `cgShapeInfo` to browse the file
 ;         ahead of time.
 ;     attrvalues: in, optional, type=varies
 ;         The value of the attribute identified by ATTRNAME. This variable can
@@ -294,7 +317,7 @@ END ;---------------------------------------------------------------------------
 ;         ATTRVALUE=['ARIZONA', 'WYOMING', 'OREGON']. By default, the value
 ;         is "ALL", which means that all of the shape entities identified by
 ;         ATTRNAME will be drawn.
-;     colors: in, optional, type=string, default="blu4"
+;     colors: in, optional, type=string, default="opposite"
 ;         The name of the color or colors used to draw the entity. This
 ;         may be a string array of the same size as ATTRVALUES.
 ;     fcolors: in, optional, type=string
@@ -320,6 +343,11 @@ END ;---------------------------------------------------------------------------
 ;         The program assumes the shapefile entities are expressed in latitude and
 ;         longitude values. If the entiites are expressed in projected XY Cartesian
 ;         coordinates, then set this value.
+;     psym: in, optional, type=integer, default=16
+;         When drawing points, the symbol to use. May be any value supported by
+;         cgSymbol. The default is a filled circle, filled with `Colors`.
+;     symsize: in, optional, type=float, default=1.0
+;         The default symbol size. Used only when displaying points.
 ;     thick: in, optional, type=integer, default=1
 ;         The thickness of the line used to draw the entity.
 ;     uselimit: in, optional, type=boolean, default=0
@@ -341,6 +369,8 @@ PRO cgDrawShapes, shapeFile, $
    MAPCOORD=mapCoord, $
    MINNUMVERTS=minNumVerts, $
    PROJECTED_XY=projected_xy, $
+   PSYM=psym, $
+   SYMSIZE=symsize, $
    THICK=thick, $
    USELIMIT=uselimit, $
    WINDOW=window
@@ -375,6 +405,8 @@ PRO cgDrawShapes, shapeFile, $
            MAPCOORD=mapCoord, $
            MINNUMVERTS=minNumVerts, $
            PROJECTED_XY=projected_xy, $
+           PSYM=psym, $
+           SYMSIZE=symsize, $
            THICK=thick, $
            USELIMIT=uselimit, $
            REPLACECMD=1
@@ -397,6 +429,8 @@ PRO cgDrawShapes, shapeFile, $
            MAPCOORD=mapCoord, $
            MINNUMVERTS=minNumVerts, $
            PROJECTED_XY=projected_xy, $
+           PSYM=psym, $
+           SYMSIZE=symsize, $
            THICK=thick, $
            USELIMIT=uselimit, $
            ADDCMD=1
@@ -416,10 +450,14 @@ PRO cgDrawShapes, shapeFile, $
          IF shapeFile EQ "" THEN RETURN
       ENDELSE
    ENDIF
-   IF N_Elements(colors) EQ 0 THEN colors = 'blu4'
+   IF N_Elements(colors) EQ 0 THEN colors = 'opposite'
    IF N_Elements(fcolors) EQ 0 THEN fcolors = colors
+   fastColors = cgColor(colors)
+   fastFillColors = cgColor(fcolors)
    IF N_Elements(fill) EQ 0 THEN fill = Keyword_Set(fill)
    IF N_Elements(linestyle) EQ 0 THEN linestyle = 0
+   IF N_Elements(psym) EQ 0 THEN psym = 16
+   IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
    IF N_Elements(thick) EQ 0 THEN thick = 1.0
    IF N_Elements(minNumVerts) EQ 0 THEN minNumVerts = 3
    projected_xy = Keyword_Set(projected_xy)
@@ -432,11 +470,11 @@ PRO cgDrawShapes, shapeFile, $
    ; Make sure arrays have the same number of elements.
    IF N_Elements(attrvalues) NE 1 THEN BEGIN
       numEntities = N_Elements(attrvalues)
-      IF N_Elements(colors) EQ 1 THEN colors = Replicate(colors, numEntities)
-      IF N_Elements(colors) NE numEntities THEN $
+      IF N_Elements(fastColors) EQ 1 THEN fastColors = Replicate(fastColors, numEntities)
+      IF N_Elements(fastColors) NE numEntities THEN $
          Message, 'Number of COLORS does not match number of entity names.'
-      IF N_Elements(fcolors) EQ 1 THEN fcolors = Replicate(fcolors, numEntities)
-      IF N_Elements(fcolors) NE numEntities THEN $
+      IF N_Elements(fastFillColors) EQ 1 THEN fastFillColors = Replicate(fastFillColors, numEntities)
+      IF N_Elements(fastFillColors) NE numEntities THEN $
          Message, 'Number of FCOLORS does not match number of entity names.'
       IF N_Elements(fill) EQ 1 THEN fill = Replicate(fill, numEntities)
       IF N_Elements(fill) NE numEntities THEN $
@@ -444,6 +482,12 @@ PRO cgDrawShapes, shapeFile, $
       IF N_Elements(linestyle) EQ 1 THEN linestyle = Replicate(linestyle, numEntities)
       IF N_Elements(linestyle) NE numEntities THEN $
          Message, 'Number of LINESTYLE values does not match number of entity names.'
+      IF N_Elements(psym) EQ 1 THEN psym = Replicate(psym, numEntities)
+      IF N_Elements(psym) NE numEntities THEN $
+         Message, 'Number of PSYM values does not match number of entity names.'
+      IF N_Elements(symsize) EQ 1 THEN symsize = Replicate(symsize, numEntities)
+      IF N_Elements(symsize) NE numEntities THEN $
+         Message, 'Number of SYMSIZE values does not match number of entity names.'
       IF N_Elements(thick) EQ 1 THEN thick = Replicate(thick, numEntities)
       IF N_Elements(thick) NE numEntities THEN $
          Message, 'Number of THICK values does not match number of entity names.'
@@ -537,12 +581,18 @@ PRO cgDrawShapes, shapeFile, $
          test = 1
       ENDIF
       IF (test EQ 1) THEN BEGIN
-          IF N_Elements(*thisEntity.vertices) GE minNumVerts THEN BEGIN
-              cgDrawShapes_DrawEntity, (*entities)[j], Color=(colors[index])[0], $
-                 Fill=(fill[index])[0], LineStyle=(linestyle[index])[0], $
-                 Thick=(thick[index])[0], PROJECTED_XY=projected_xy, $
-                 MapCoord=mapCoord, FCOLOR=(fcolors[index])[0]
-          ENDIF
+          IF Ptr_Valid(thisEntity.vertices) THEN BEGIN
+              IF (N_Elements(*thisEntity.vertices) GE minNumVerts) THEN BEGIN
+                  cgDrawShapes_DrawEntity, (*entities)[j], COLOR=(fastColors[index])[0], $
+                     Fill=(fill[index])[0], LineStyle=(linestyle[index])[0], $
+                     THICK=(thick[index])[0], PROJECTED_XY=projected_xy, $
+                     MapCoord=mapCoord, FCOLOR=(fastFillColors[index])[0]
+              ENDIF 
+          ENDIF ELSE BEGIN
+              cgDrawShapes_DrawEntity, (*entities)[j], COLOR=(fastColors[index])[0], $
+                 PSYM=(psym[index])[0], THICK=(thick[index])[0], $
+                 PROJECTED_XY=projected_xy, MapCoord=mapCoord, SYMSIZE=(symsize[index])[0]
+          ENDELSE
       ENDIF
       Ptr_Free, thisEntity.vertices
       Ptr_Free, thisEntity.measure

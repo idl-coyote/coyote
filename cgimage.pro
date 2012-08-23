@@ -158,7 +158,10 @@
 ;       Modified the way the XRANGE and YRANGE keywords work when the OVERPLOT keyword is also set. In this case,
 ;          I will modify the image position to honor the XRANGE and YRANGE values with respect to the axes that the
 ;          image is being overplot onto. 15 August 2012. DWF.
-;
+;        Set the NOERASE keyword if the OVERPLOT keyword is set and NOERASE is undefined. 16 Aug 2012. DWF.
+;        Modified the way the HIST_EQUAL stretch works. Previously the image was displayed as all zeros
+;           if the input image had a minimum value less that zero. 21 Aug 2012. DWF.
+;           
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
@@ -541,7 +544,11 @@ FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
              END
     
           7: BEGIN ; Histogram equalization stretch.
-             tempImage = BytScl(Hist_Equal(tempImage), Max=maxvalue, Min=minvalue, /NAN, TOP=top) + bottom
+             IF (top EQ 255) && (bottom EQ 0) THEN BEGIN
+                 tempImage = Hist_Equal(tempImage, MaxV=maxvalue, MinV=minvalue)
+             ENDIF ELSE BEGIN
+                 tempImage = Bytscl(Float(Hist_Equal(tempImage, MaxV=maxvalue, MinV=minvalue)), /NAN, TOP=top) + bottom
+             ENDELSE
              IF negative THEN tempImage = Byte(top) - tempImage
              END
     
@@ -840,7 +847,7 @@ END
 ;         and the image is positioned in the location established by the
 ;         last graphics command. If the XRange and YRange keywords are also
 ;         used, the image position is adjusted with respect to the current axes
-;         range.
+;         range.  Setting this keyword also sets the NoErase keyword, if it is not currently set.
 ;    palette: in, optional, type=byte
 ;         Set this keyword to a 3x256 or 256x3 byte array containing the RGB color 
 ;         vectors to be loaded before the image is displayed. Such vectors can be 
@@ -1279,7 +1286,12 @@ PRO cgImage, image, x, y, $
     
     ; Which release of IDL is this?
     thisRelease = Float(!Version.Release)
-        
+    
+    ; If the OVERPLOT keyword is set, also set the NOERASE keyword, unless it is already set.
+    IF Keyword_Set(overplot) THEN BEGIN
+        IF (N_Elements(noerase) EQ 0) THEN noerase = 1
+    ENDIF
+            
     ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
     ; done BEFORE checking the LAYOUT properties.
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)

@@ -69,6 +69,8 @@
 ; :History:
 ;     Change History::
 ;        Written, 16 August 2012. DWF. 
+;        If the absolute value of the maximum of the boundary is LE 360, assume you need to convert
+;           from lat/lon space to projected meter space. 23 Aug 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -96,6 +98,13 @@ FUNCTION cgCliptoMap, imageIn, boundary, MAP=map, OUTBOUNDARY=outboundary
    ; You MUST have a map coordinate object at this point.
    IF N_Elements(map) EQ 0 THEN Message, 'A map coordinate object is required.'
    
+   ; If the absoulte value of the maximum of the boundary is less that 360, then assume the boundary
+   ; is given in lat/lon space and convert it.
+   IF Abs(Max(boundary)) LE 360 THEN BEGIN
+       xy = map -> Forward(boundary[[0,2]], boundary[[1,3]])
+       thisBoundary = [xy[0,0], xy[1,0], xy[0,1], xy[1,1]]
+   ENDIF ELSE thisBoundary = boundary
+   
    ; Current dimension of the image.
    dims = Image_Dimensions(image, XSIZE=xsize, YSIZE=ysize, TRUEINDEX=trueindex, XINDEX=xindex, YINDEX=yindex)
    IF (trueindex NE -1) && (trueindex NE 2) THEN image = Transpose(image, [xindex, yindex, trueindex])
@@ -108,8 +117,8 @@ FUNCTION cgCliptoMap, imageIn, boundary, MAP=map, OUTBOUNDARY=outboundary
    yvec = Scale_Vector(DIndgen(dims[1]), yr[0], yr[1])
    
    ; Clip to get new image subscripts.
-   xsubs = 0 > Value_Locate(xvec, [boundary[0],boundary[2]]) < (dims[0]-1)
-   ysubs = 0 > Value_Locate(yvec, [boundary[1],boundary[3]]) < (dims[1]-1)
+   xsubs = 0 > Value_Locate(xvec, [thisBoundary[0],thisBoundary[2]]) < (dims[0]-1)
+   ysubs = 0 > Value_Locate(yvec, [thisBoundary[1],thisBoundary[3]]) < (dims[1]-1)
    
    ; Output boundary.
    outboundary = [ xvec[xsubs[0]], yvec[ysubs[0]], xvec[xsubs[1]], yvec[ysubs[1]] ]

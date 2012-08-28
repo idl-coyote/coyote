@@ -208,7 +208,6 @@ FUNCTION cgTasseledCap, input, $
        !P.Multi=[0,3,1]
        LoadCT, 0
        FOR j=0,2 DO BEGIN
-          minmax, tasseledImage[*,*,j]
           cgImage, tasseledImage[*,*,j], Stretch=2
        ENDFOR
        cgText, 0.05, 0.025, /Normal, Font=0, 'Brightness', Color='red'

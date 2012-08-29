@@ -122,6 +122,7 @@
 ;          small polygons. 6 October 2011. DWF.
 ;       Wrong string case for discovering particular attributes caused them not to be drawn. 27 Oct 2011. DWF.
 ;       Added the ability to draw point shapefiles. Changed default color to "opposite". 20 Aug 2012. DWF.
+;       Made sure a window is open when the default color is chosen. 29 Aug 2012. DWF.
 ;       
 ; :Copyright:
 ;    Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -235,7 +236,7 @@ PRO cgDrawShapes_DrawEntity, entity, $
                IF N_Elements(mapCoord) NE 0 THEN BEGIN
                    IF Obj_Valid(mapCoord) THEN BEGIN
                         mapCoord -> Draw
-                        mapStruct = mapCoord->GetMapStructure()
+                        mapStruct = mapCoord->GetMapStruct()
                    ENDIF ELSE mapStruct = mapCoord
                    xy = Map_Proj_Forward((*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
                                          (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
@@ -264,8 +265,25 @@ PRO cgDrawShapes_DrawEntity, entity, $
      entity.shape_type eq  8 or $   ; MultiPoint
      entity.shape_type eq 18 or $   ; MultiPointZ (ignoring Z)
      entity.shape_type eq 28: BEGIN ; MultiPointM (ignoring M)
-         cgPlotS, entity.bounds[0], entity.bounds[1], $
-             PSYM=psym, COLOR=color, SYMSIZE=symsize, THICK=thick
+         IF N_Elements(mapCoord) NE 0 THEN BEGIN
+                   IF Obj_Valid(mapCoord) THEN BEGIN
+                        mapCoord -> Draw
+                        mapStruct = mapCoord->GetMapStruct()
+                   ENDIF ELSE mapStruct = mapCoord
+                   IF Keyword_Set(projected_xy) THEN BEGIN
+                        xy = Map_Proj_Forward(entity.bounds[0], entity.bounds[1], $
+                                          MAP_STRUCTURE=mapStruct)
+                        x = Reform(xy[0,*])
+                        y = Reform(xy[1,*])
+                        cgPlotS, x, y, PSYM=psym, COLOR=color, SYMSIZE=symsize, THICK=thick
+                   ENDIF ELSE BEGIN
+                      cgPlotS, entity.bounds[0], entity.bounds[1], $
+                          PSYM=psym, COLOR=color, SYMSIZE=symsize, THICK=thick
+                   ENDELSE
+         ENDIF ELSE BEGIN 
+            cgPlotS, entity.bounds[0], entity.bounds[1], $
+                PSYM=psym, COLOR=color, SYMSIZE=symsize, THICK=thick
+         ENDELSE
          ENDCASE
          
  
@@ -380,11 +398,12 @@ PRO cgDrawShapes, shapeFile, $
       ok = Error_Message()
       IF Obj_Valid(shapefile) THEN Obj_Destroy, shapefile
       IF Ptr_Valid(entities) THEN Heap_Free, entities
+      IF N_Elements(thisState) NE 0 THEN SetDecomposedState, thisState
       RETURN
    ENDIF
    
    ; A flag to allow graphics windows to be open.
-   nowindows = 0
+   nowindows = ((!D.FLAGS AND 256) EQ 0)
    
     ; Replace the commands in or create a cgWindow.
     IF Keyword_Set(window) THEN BEGIN
@@ -435,6 +454,13 @@ PRO cgDrawShapes, shapeFile, $
        RETURN
     
    ENDIF
+   
+   ; If a graphics window isn't open, open one now. Necessary to make
+   ; sure the drawing is not done white on white.
+   IF ~noWindows AND (!D.Window EQ -1) THEN cgDisplay
+   
+   ; Let's do the drawing in decomposed color.
+   SetDecomposedState, 1, CURRENT=thisState
 
    ; Check parameters.
    IF N_Elements(shapeFile) EQ 0 THEN BEGIN
@@ -602,5 +628,6 @@ PRO cgDrawShapes, shapeFile, $
    ; Clean up.
    Obj_Destroy, shapefileObj
    Ptr_Free, entities
-
+   SetDecomposedState, thisState
+   
 END ;---------------------------------------------------------------------------------

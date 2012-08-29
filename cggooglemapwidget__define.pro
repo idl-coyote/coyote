@@ -572,6 +572,7 @@ PRO cgGoogleMapWidget::GetProperty, $
     MAPCOORD=mapCoord, $
     MAPTYPE=maptype, $
     MARKERS=markers, $
+    WID=wid, $
     XSIZE=xsize, $
     YSIZE=ysize, $
     ZOOMLEVEL=zoomlevel
@@ -595,6 +596,7 @@ PRO cgGoogleMapWidget::GetProperty, $
     IF Arg_Present(map_position) THEN map_position = self.map_position
     IF Arg_Present(maptype) THEN maptype = self.maptype
     IF Arg_Present(markers) THEN IF Ptr_Valid(self.markers) THEN markers = *self.markers
+    IF Arg_Present(wid) THEN wid = self.wid
     IF Arg_Present(xsize) THEN xsize = self.xsize
     IF Arg_Present(ysize) THEN ysize = self.ysize
     IF Arg_Present(zoomlevel) THEN zoomlevel = self.zoomlevel

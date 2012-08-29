@@ -65,12 +65,14 @@
 ;     mss: in, optional, type=boolean
 ;       Set this keyword to return the tasseled cap coeficients originally reported by R.J Kauth and G.S. Thomas
 ;       for MSS LandSat imagery. Reference: http://web.pdx.edu/~jduh/courses/Archive/geog481w07/Students/Marcello_TasselledCap.pdf.
+;       Also: http://www.sjsu.edu/faculty/watkins/tassel.htm.
 ;     quickbird: in, optional, type=boolean
 ;       Set this keyword to return the tasseled cap Graham-Schmidt coeficients reportedly used for Quickbird imagery.
 ;       Reference: http://www.asprs.org/a/publications/proceedings/pecora16/Yarbrough_L.pdf
 ;     tm: in, optional, type=boolean
 ;       Set this keyword to return the tasseled cap coeficients originally proposed for TM imagery by Kauth and Thomas.
 ;       Reference: http://web.pdx.edu/~jduh/courses/Archive/geog481w07/Students/Marcello_TasselledCap.pdf.
+;       Also: http://www.sjsu.edu/faculty/watkins/tassel.htm.
 ;
 ; :Examples:
 ;    tasseledCapTransformedImage = landsat_tm_image ## cgTasselecCapCoeffs(/TM)
@@ -137,11 +139,12 @@ FUNCTION cgTasseledCapCoeffs, $
         Keyword_Set(mss_landsat): BEGIN
         ; Coefficients from: http://web.pdx.edu/~jduh/courses/Archive/geog481w07/Students/Marcello_TasselledCap.pdf.
         ; These are from R.J Kauth and G.S. Thomas original 1976 article: http://docs.lib.purdue.edu/cgi/viewcontent.cgi?article=1160&context=lars_symp&sei-redir=1&referer=http%3A%2F%2Fscholar.google.com%2Fscholar_url%3Fhl%3Den%26q%3Dhttp%3A%2F%2Fdocs.lib.purdue.edu%2Fcgi%2Fviewcontent.cgi%253Farticle%253D1160%2526context%253Dlars_symp%26sa%3DX%26scisig%3DAAGBfm3MWqyNxnJ7UYudI9atplMsxTPgzw%26oi%3Dscholarr#search=%22http%3A%2F%2Fdocs.lib.purdue.edu%2Fcgi%2Fviewcontent.cgi%3Farticle%3D1160%26context%3Dlars_symp%22
-        coefficients = FltArr(4,3)
+        coefficients = FltArr(4,4)
         ;                     Band1     Band2    Band3    Band4
         coefficients[*,0] = [ 0.4330,  0.6320,  0.5860,  0.2640] ; Brightness
         coefficients[*,1] = [-0.2900, -0.5620,  0.6000,  0.4910] ; Greenness
-        coefficients[*,2] = [-0.8290,  0.5220,  0.6000,  0.4910] ; Yellowness
+        coefficients[*,2] = [-0.8290,  0.5220, -0.0390,  0.1940] ; Yellowness
+        coefficients[*,3] = [ 0.2230,  0.0120, -0.5430,  0.8100] ; Yellowness
         END
         
         Keyword_Set(mss_imagine): BEGIN
@@ -174,11 +177,14 @@ FUNCTION cgTasseledCapCoeffs, $
         
         Keyword_Set(ETM_landsat): BEGIN
         ; Coefficients from: http://landcover.usgs.gov/pdf/tasseled.pdf.
-        coefficients = FltArr(6,3)
+        coefficients = FltArr(6,6)
         ;                     Band1     Band2    Band3    Band4    Band5    Band7
         coefficients[*,0] = [ 0.3561,  0.3972,  0.3904,  0.6966,  0.2286,  0.1596] ; Brightness
         coefficients[*,1] = [-0.3344, -0.3544, -0.4556,  0.6966, -0.0242, -0.2630] ; Greenness
         coefficients[*,2] = [ 0.2626,  0.2141,  0.0926,  0.0656, -0.7629, -0.5388] ; Yellowness
+        coefficients[*,3] = [ 0.0805, -0.0498,  0.1950, -0.1327,  0.5752, -0.7775] ; Fourth
+        coefficients[*,4] = [-0.7252, -0.0202,  0.6683,  0.0631, -0.1494, -0.0274] ; Fifth
+        coefficients[*,5] = [ 0.4000, -0.8172,  0.3832,  0.0602, -0.1095,  0.0985] ; Sixth
         END
         
         ELSE: Message, 'Must set a keyword to specify type of Tasseled Cap coefficients required.'

@@ -81,7 +81,9 @@
 ;        Beefed up and changed error handling when failing to obtain a map from Google Maps. 28 June 2012. DWF.
 ;        Added NoForwardFix keyword to call to cgMap to allow better drawing of markers. 29 June 2012. DWF.
 ;        Added the ability to turn markers on or off with VisibleMarkers keyword and property. 29 June 2012. DWF.
-
+;        Added a WID keyword to the GetProperty method to all the user to obtain the Goggle Map 
+;            window index number. 29 Aug 2012. DWF.
+;            
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-

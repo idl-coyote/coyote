@@ -398,7 +398,6 @@ PRO cgDrawShapes, shapeFile, $
       ok = Error_Message()
       IF Obj_Valid(shapefile) THEN Obj_Destroy, shapefile
       IF Ptr_Valid(entities) THEN Heap_Free, entities
-      IF N_Elements(thisState) NE 0 THEN SetDecomposedState, thisState
       RETURN
    ENDIF
    
@@ -459,9 +458,6 @@ PRO cgDrawShapes, shapeFile, $
    ; sure the drawing is not done white on white.
    IF ~noWindows AND (!D.Window EQ -1) THEN cgDisplay
    
-   ; Let's do the drawing in decomposed color.
-   SetDecomposedState, 1, CURRENT=thisState
-
    ; Check parameters.
    IF N_Elements(shapeFile) EQ 0 THEN BEGIN
       shapeFile = Filepath(Subdirectory=['examples', 'data'], 'states.shp')
@@ -628,6 +624,5 @@ PRO cgDrawShapes, shapeFile, $
    ; Clean up.
    Obj_Destroy, shapefileObj
    Ptr_Free, entities
-   SetDecomposedState, thisState
    
 END ;---------------------------------------------------------------------------------

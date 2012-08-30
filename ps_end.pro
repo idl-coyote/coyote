@@ -67,6 +67,10 @@
 ;     density: in, optional, type=integer, default=300
 ;        The horizontal and vertical density (in dots per inch, DPI) of the image when the PostScript file
 ;        is converted to a raster format by ImageMagick. 
+;     filetype: in, optional type='string', default=""
+;        This keyword provides a generic way of setting the `BMP`, `GIF`, `JPEG`, `PNG`, and `TIFF` 
+;        keywords. Set this keyword to the type of file output desired, and the correct "output"
+;        keyword will be set.
 ;     gif: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a GIF image. Requires ImageMagick.
 ;     gs_path: in, optional, type=string
@@ -174,6 +178,7 @@
 ;           PNG file should be created. 3 April 2012. DWF.
 ;        Modified the ImageMagick commands that resizes the image to a particular width. Necessary
 ;           to accommodate PNG8 file output. Using ImageMagick 6.7.2-9. 4 April 2012. DWF.
+;        Added FILETYPE keyword to provide a generic way of creating raster file output. 30 August 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -184,6 +189,7 @@ PRO PS_END, $
     DELETE_PS=delete_ps, $
     DENSITY=density, $
     IM_OPTIONS=im_options, $
+    FILETYPE=filetype, $
     GIF=gif, $
     GS_PATH=gs_path, $
     JPEG=jpeg, $
@@ -243,6 +249,18 @@ PRO PS_END, $
    
    ; Need to convert with ImageMagick?
    allow_transparent = Keyword_Set(allow_transparent)
+   IF N_Elements(filetype) EQ 0 THEN filetype = ""
+   CASE StrUpCase(filetype) OF
+       'BMP': bmp = 1
+       'GIF': gif = 1
+       'PDF': pdf = 1
+       'PNG': png = 1
+       'JPEG': jpeg = 1
+       'JPG': jpeg = 1
+       'TIFF': tiff = 1
+       'TIF': tiff = 1
+       ELSE: 
+   ENDCASE
    IF Keyword_Set(bmp) THEN ps_struct.convert = 'BMP'
    IF Keyword_Set(gif) THEN ps_struct.convert = 'GIF'
    IF Keyword_Set(pdf) THEN ps_struct.convert = 'PDF'

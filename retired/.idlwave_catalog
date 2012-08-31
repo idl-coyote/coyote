@@ -1,7 +1,7 @@
 ;;
 ;; IDLWAVE catalog for library coyote
 ;; Automatically Generated -- do not edit.
-;; Created by idlwave_catalog on Mon Aug  6 11:13:32 2012
+;; Created by idlwave_catalog on Fri Aug 31 07:45:20 2012
 ;;
 (setq idlwave-library-catalog-libname "coyote")
 (setq idlwave-library-catalog-routines
@@ -16,6 +16,7 @@
    ("DrawCounties" pro nil (lib "drawcounties.pro" nil "coyote") "%s, countyFile" (nil ("ATTRIBUTE_NAME") ("COLORS") ("LINESTYLE") ("STATENAMES") ("THICK")))
    ("DrawStates_DrawEntity" pro nil (lib "drawstates.pro" nil "coyote") "%s, entity" (nil ("COLOR") ("FILL") ("LINESTYLE") ("THICK")))
    ("DrawStates" pro nil (lib "drawstates.pro" nil "coyote") "%s, stateFile" (nil ("ATTRIBUTE_NAME") ("COLORS") ("FILL") ("LINESTYLE") ("MINNUMVERTS") ("STATENAMES") ("THICK")))
+   ("FindMapBoundary" fun nil (lib "findmapboundary.pro" nil "coyote") "Result = %s(filename, boundary)" (nil ("USE_LATLON") ("UTM_SOUTH") ("XRANGE") ("YRANGE")))
    ("FSC_Arrow" pro nil (lib "fsc_arrow.pro" nil "coyote") "%s, x0, y0, x1, y1" (nil ("_EXTRA") ("COLOR") ("DATA") ("HSIZE") ("HTHICK") ("LINESTYLE") ("NORMAL") ("SOLID") ("THICK") ("WINDOW")))
    ("FSC_Axis" pro nil (lib "fsc_axis.pro" nil "coyote") "%s, xloc, yloc, zloc" (nil ("_REF_EXTRA") ("CHARSIZE") ("COLOR") ("DATA") ("DEVICE") ("FONT") ("NORMAL") ("SAVE") ("TITLE") ("WINDOW") ("XAXIS") ("XLOG") ("XTITLE") ("YAXIS") ("YLOG") ("YNOZERO") ("YTITLE") ("ZAXIS") ("ZLOG") ("ZTITLE")))
    ("FSC_Color_Count_Rows" fun nil (lib "fsc_color.pro" nil "coyote") "Result = %s(filename)" (nil ("MaxRows")))
@@ -27,6 +28,7 @@
    ("FSC_DefCharSize" fun nil (lib "fsc_defcharsize.pro" nil "coyote") "Result = %s" (nil ("FONT")))
    ("FSC_Display" pro nil (lib "fsc_display.pro" nil "coyote") "%s, pxsize, pysize" (nil ("_EXTRA") ("COLOR") ("FREE") ("WID") ("XSIZE") ("YSIZE")))
    ("FSC_Erase" pro nil (lib "fsc_erase.pro" nil "coyote") "%s, background_color" (nil ("COLOR") ("LAYOUT") ("WINDOW")))
+   ("FSC_Pickfile" fun nil (lib "fsc_pickfile.pro" nil "coyote") "Result = %s" (nil ("_REF_EXTRA") ("DATA") ("DEMO") ("HDF") ("JPEG") ("LAST_FILE") ("LIDAR") ("NCDF") ("PNG") ("TIFF")))
    ("FSC_Plot" pro nil (lib "fsc_plot.pro" nil "coyote") "%s, x, y" (nil ("_REF_EXTRA") ("ADDCMD") ("ASPECT") ("AXESCOLOR") ("AXISCOLOR") ("BACKGROUND") ("CHARSIZE") ("COLOR") ("FONT") ("ISOTROPIC") ("LAYOUT") ("NODATA") ("NOERASE") ("OVERPLOT") ("POSITION") ("PSYM") ("SYMCOLOR") ("SYMSIZE") ("TRADITIONAL") ("WINDOW")))
    ("FSC_PlotS" pro nil (lib "fsc_plots.pro" nil "coyote") "%s, x, y, z" (nil ("_EXTRA") ("ADDCMD") ("COLOR") ("PSYM") ("SYMCOLOR") ("SYMSIZE") ("WINDOW")))
    ("FSC_QueryWin" fun nil (lib "fsc_querywin.pro" nil "coyote") "Result = %s" (nil ("COUNT") ("CURRENT") ("OBJECTREF") ("TITLE") ("WIDGETID")))
@@ -91,6 +93,9 @@
    ("LOADDATA_EVENT" pro nil (lib "loaddata.pro" nil "coyote") "%s, event" (nil))
    ("LOADDATA" fun nil (lib "loaddata.pro" nil "coyote") "Result = %s(number)" (nil ("CANCEL") ("Group_Leader") ("Images")))
    ("Map_GSHHS_Shoreline" pro nil (lib "map_gshhs_shoreline.pro" nil "coyote") "%s, filename" (nil ("_EXTRA") ("COLOR") ("FILL") ("LAND_COLOR") ("LEVEL") ("MAP_PROJECTION") ("MINAREA") ("OUTLINE") ("WATER_COLOR")))
+   ("ShapeInfo_Events" pro nil (lib "shapeinfo.pro" nil "coyote") "%s, event" (nil))
+   ("ShapeInfo_Cleanup" pro nil (lib "shapeinfo.pro" nil "coyote") "%s, tlb" (nil))
+   ("ShapeInfo" pro nil (lib "shapeinfo.pro" nil "coyote") "%s, filename" (nil ("XRANGE") ("YRANGE")))
    ("SymCat" fun nil (lib "symcat.pro" nil "coyote") "Result = %s(theSymbol)" (nil ("COLOR") ("THICK")))
    ("TVIMAGE_PREPARE_ALPHA" fun nil (lib "tvimage.pro" nil "coyote") "Result = %s(image, position, alphaBackgroundImage)" (nil ("ALPHABGPOSITION") ("NOINTERP") ("TV")))
    ("TVIMAGE" pro nil (lib "tvimage.pro" nil "coyote") "%s, image, x, y" (nil ("_EXTRA") ("ACOLOR") ("ADDCMD") ("ALPHABACKGROUNDIMAGE") ("ALPHABGPOSITION") ("AXES") ("AXIS") ("AXKEYWORDS") ("BACKGROUND") ("BOTTOM") ("BREWER") ("COLOR") ("ERASE") ("HALF_HALF") ("KEEP_ASPECT_RATIO") ("LAYOUT") ("MARGIN") ("MAXVALUE") ("MINUS_ONE") ("MINVALUE") ("MULTIMARGIN") ("NCOLORS") ("NOINTERPOLATION") ("NORMAL") ("OVERPLOT") ("PALETTE") ("POSITION") ("QUIET") ("SAVE") ("SCALE") ("TOP") ("TV") ("WHITE") ("WINDOW") ("XRANGE") ("XTITLE") ("YRANGE") ("YTITLE")))

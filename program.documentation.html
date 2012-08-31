@@ -14,7 +14,7 @@ this routine, refer to the IDL Online Help Navigator
 or type: <P>
 <PRE>     ? mk_html_help</PRE><P>
 at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Mon Aug 06 11:13:31 2012.<P>
+<STRONG>Last modified: </STRONG>Fri Aug 31 07:45:19 2012.<P>
  
 <HR>
  
@@ -48,10 +48,8 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#DECOMPOSEDCOLOR">DECOMPOSEDCOLOR</A>
 <LI><A HREF="#DIRPATH">DIRPATH</A>
 <LI><A HREF="#DRAWCOLORS">DRAWCOLORS</A>
-<LI><A HREF="#DRAWSHAPES">DRAWSHAPES</A>
 <LI><A HREF="#ERRORLOGGER__DEFINE">ERRORLOGGER__DEFINE</A>
 <LI><A HREF="#ERROR_MESSAGE">ERROR_MESSAGE</A>
-<LI><A HREF="#FINDMAPBOUNDARY">FINDMAPBOUNDARY</A>
 <LI><A HREF="#FIND_BOUNDARY">FIND_BOUNDARY</A>
 <LI><A HREF="#FIND_RESOURCE_FILE">FIND_RESOURCE_FILE</A>
 <LI><A HREF="#FIT_ELLIPSE">FIT_ELLIPSE</A>
@@ -144,7 +142,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#SETDIFFERENCE">SETDIFFERENCE</A>
 <LI><A HREF="#SETINTERSECTION">SETINTERSECTION</A>
 <LI><A HREF="#SETUNION">SETUNION</A>
-<LI><A HREF="#SHAPEINFO">SHAPEINFO</A>
 <LI><A HREF="#SHARPEN">SHARPEN</A>
 <LI><A HREF="#SIMPLE_SURFACE">SIMPLE_SURFACE</A>
 <LI><A HREF="#SORT_ND">SORT_ND</A>
@@ -2009,7 +2006,7 @@ at the IDL command line prompt.<P>
 <A NAME="DRAWCOLORS">
 <H2>DRAWCOLORS</H2></A>
 <A HREF="#DIRPATH">[Previous Routine]</A>
-<A HREF="#DRAWSHAPES">[Next Routine]</A>
+<A HREF="#ERRORLOGGER__DEFINE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -2464,162 +2461,9 @@ at the IDL command line prompt.<P>
 <STRONG>(See drawcolors__define.pro)</STRONG><P>
 <HR>
  
-<A NAME="DRAWSHAPES">
-<H2>DRAWSHAPES</H2></A>
-<A HREF="#DRAWCOLORS">[Previous Routine]</A>
-<A HREF="#ERRORLOGGER__DEFINE">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-       DRAWSHAPES
-
- PURPOSE:
-
-       Draws entities in a shapefile, containing latitude and longitude
-       polygons, on a map projection. To draw the shapefile entities
-       automatically, no matter what kind of values the polygon vertices
-       have, set the AUTODRAW keyword.
-
- AUTHOR:
-
-       FANNING SOFTWARE CONSULTING
-       David Fanning, Ph.D.
-       1645 Sheely Drive
-       Fort Collins, CO 80526 USA
-       Phone: 970-221-0438
-       E-mail: david@idlcoyote.com
-       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- CATEGORY:
-
-       Utilities
-
- CALLING SEQUENCE:
-
-       DrawShapes, shapeFile
-
- ARGUMENTS:
-
-       shapeFile:     The name of the input shapefile containing map polygons or shapes.
-                      If undefined, the "states.shp" file in the IDL distribution is used
-                      as an initial selection.
-
- KEYWORDS:
-
-     ATTRNAME:        The name of the attribute in the file that you wish to draw.
-                      By default, this is set to the first attribute name in the file.
-                      If you are unsure of the attribute names in your shapefile,
-                      use the Coyote Library program SHAPEINFO to browse the file
-                      ahead of time.
-
-     ATTRVALUE:       The value of the attribute identified by ATTRNAME. This variable can
-                      be a scalar or vector string array identifying a subset of attribute
-                      values to be drawn. For example, if ATTRNAME='STATE_NAME', then
-                      ATTRVALUE can identify the particular states to draw. For example,
-                      ATTRVALUE=['ARIZONA', 'WYOMING', 'OREGON']. By default, the value
-                      is "ALL", which means that all of the shape entities identified by
-                      ATTRNAME will be drawn.
-                      
-     AUTODRAW:        If set, the shapefile entities are examined to find the X and Y
-                      boundaries and a data coordinate space is set up display the 
-                      entities automatically. If the shapefile is drawn automatically,
-                      the restriction that the shapefile vertices be in latitude and
-                      longitude values is removed. Do NOT set this keyword, if you
-                      are using the MAPCOORD keyword, too.
-                      
-     COLORS:          The name of a color to draw the shapefile polygon in. This
-                      may be a string array of the same size as ATTRVALUES. Color names
-                      correspond to the colors available in cgCOLOR. By default, "blu4".
-                      
-     FCOLORS:         The name of the color to draw filled polygons in. If undefined,
-                      the same as COLOR. This may be a string array of the same size as 
-                      ATTRVALUES.
-
-     FILL:            Normally, the polygon outline is drawn. If this keyword is set,
-                      the polygon is filled with a solid color. May be a vector of 
-                      the same size as ATTRVALUES.
-
-     LINESTYLE:       The normal LINESTYLE keyword index to choose plotting linestyles.
-                      By default, set to 0 and solid lines. May be a vector of the same
-                      size as ATTRVALUES.
-
-     MAPCOORD:        A MapCoord object which implements a map coordinate system using the
-                      GCTP map projections, as implemented with MAP_PROJ_INIT. For more information
-                      about MapCoord objects, see http://www.idlcoyote.com/catalyst/maponimage.html.
-                      Note that this could also be a map structure as returned from MAP_PROJ_INIT,
-                      but in that case the user is resposible for setting up the XY map
-                      coordinate space independently and outside of this program. Details on 
-                      how this can be done can be found at http://www.idlcoyote.com/map_tips/ephemeral.html.
-                     
-     MINNUMVERTS:     Set this keyword to the minimum number of vertices required to actually
-                      draw a polygon. In other words, to to drawn, a polygon must have at least
-                      this number of vertices. The default value is 3.
-
-     THICK:           The line thickness. By default, 1.0.
-
- RESTRICTIONS:
-
-     It is assumed a map projection command has been issued and is in effect at
-     the time this program is called. Alternatively, you can use a MapCoord object,
-     which will set up the map coordinate space and provide the map structure required
-     for plotting in that XY map coordinate space.
-
-     If ATTRVALUES is undefined, all entities are drawn, but only a single value
-     for COLORS, FCOLORS, FILL, LINESTYLE, and THICK is allowed.
-
-     Programs from the Coyote and Catalyst Libraries are required.
-     
-         http://www.idlcoyote.com/catalyst/howtoinstall.html
-
- EXAMPLES:
-
-       Window, XSize=700, YSize=800
-       Map_Set, 37.5, -117.5, /Albers, /IsoTropic, Limit=[30, -125, 45, -108], $
-           Position=[0.05, 0.05, 0.95, 0.95]
-       Erase, cgColor('ivory')
-       DrawShapes, AttrName='STATE_ABBR', $
-           AttrValues=['CA', 'OR', 'WA', 'AZ', 'UT', 'ID', 'NV'], Thick=1, $
-           FColors=['firebrick', 'grn4', 'pur4', 'tan4', 'steel blue', 'org4', 'yellow'], $
-           Fill = Replicate(1, 7), Colors='charcoal'
-       Map_Grid, LatDel = 2.0, LonDel = 2.0, /Box_Axes, Color=cgColor('charcoal')
-
-  Example using a MapCoord object.
-
-       Window, XSize=700, YSize=800
-       mapCoord = Obj_New('MapCoord', 'Albers Equal Area', LIMIT=[30, -125, 45, -108], $
-                  Position=[0.05, 0.05, 0.95, 0.95], CENTER_LATITUDE=37.5, $
-                  CENTER_LONGITUDE=-117, STANDARD_PAR1=40, STANDARD_PAR2=-39)
-       Erase, cgColor('ivory')
-       DrawShapes, AttrName='STATE_ABBR', $
-           AttrValues=['CA', 'OR', 'WA', 'AZ', 'UT', 'ID', 'NV'], Thick=1, $
-           FColors=['firebrick', 'grn4', 'pur4', 'tan4', 'steel blue', 'org4', 'yellow'], $
-           Fill = Replicate(1, 7), Colors='charcoal', MapCoord=mapCoord
-       Map_Grid, LatDel = 2.0, LonDel = 2.0, /Box_Axes, Color=cgColor('charcoal'), $
-            Map_Structure=mapCoord->GetMapStructure()
-
-  Example drawing the states.shp file automatically.
-  
-       DrawShapes, Filepath(subdir=['examples','data'], 'states.shp'), /Autodraw
-       
- MODIFICATION HISTORY:
-
-       Written by David W. Fanning by modifiying DrawStates to be more
-          general, 13 May 2010. DWF.
-       Added the AUTODRAW keyword for automatic drawing. 15 May 2010. DWF.
-       Added COMPILE_OPT idl2 to make sure all loop variables are longs. 5 July 2010. DWF.
-       Corrected an aspect ratio problem with AUTODRAW and upgraded to Coyote Graphics. 
-          3 January 2011. DWF.
-       Previous method of freeing entity pointers took 10 times times longer than freeing
-          pointers as I go. Also added MinNumVerts keyword to screen out the drawing of
-          small polygons. 6 October 2011. DWF.
-       Wrong string case for discovering particular attributes caused them not to be drawn. 27 Oct 2011. DWF.
-</PRE><P>
-<STRONG>(See drawshapes.pro)</STRONG><P>
-<HR>
- 
 <A NAME="ERRORLOGGER__DEFINE">
 <H2>ERRORLOGGER__DEFINE</H2></A>
-<A HREF="#DRAWSHAPES">[Previous Routine]</A>
+<A HREF="#DRAWCOLORS">[Previous Routine]</A>
 <A HREF="#ERROR_MESSAGE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -2740,7 +2584,7 @@ at the IDL command line prompt.<P>
 <A NAME="ERROR_MESSAGE">
 <H2>ERROR_MESSAGE</H2></A>
 <A HREF="#ERRORLOGGER__DEFINE">[Previous Routine]</A>
-<A HREF="#FINDMAPBOUNDARY">[Next Routine]</A>
+<A HREF="#FIND_BOUNDARY">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -2860,76 +2704,9 @@ at the IDL command line prompt.<P>
 <STRONG>(See error_message.pro)</STRONG><P>
 <HR>
  
-<A NAME="FINDMAPBOUNDARY">
-<H2>FINDMAPBOUNDARY</H2></A>
-<A HREF="#ERROR_MESSAGE">[Previous Routine]</A>
-<A HREF="#FIND_BOUNDARY">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-    FINDMAPBOUNDARY
-
- PURPOSE:
-
-    Utility routine to find the map projection grid boundary from a file,
-    if it is possible to do so. Currently works with GeoTIFF files, CF 1.4
-    compliant netCDF files, and GPD files created with the GPD_Viewer software
-    from the Catatlyst Library.
-
- AUTHOR:
-
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: david@idlcoyote.com
-   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-
- CATEGORY:
-
-    Utility.
-
- CALLING SEQUENCE:
-
-    success = FindMapBoundar(filename, boundary)
-
- INPUTS:
-
-    filename:    The name of a filename to open to see if a projected map
-                 grid boundary can be found.
-                 
- OUTPUTS:
- 
-    boundary:    A four-element array of boundary values in the form [x0,y0,x1,y1].
-
- RETURN VALUE:
-
-    success:     A 1 if a boundary can be found. A 0 otherwise.
-
- KEYWORDS:
- 
-    USE_LATLON:  If the filename is a netCDF file, set this keyword to force
-                 the boundary to be determined by reading the include latitude/longitude
-                 arrays.
-
-    XRANGE:      A two element vector: boundary[[0,2]].
-
-    YRANGE:      A two element vector: boundary[[1,3]].
-
- MODIFICATION HISTORY:
-
-    Written by: David W. Fanning, 21 February 2010.
-    Added XRANGE and YRANGE keywords. 25 February 2010. DWF
-    Added USE_LATLON keyword for finding boundary of netCDF files containing latitude
-        and longitude arrays. 6 April 2010. DWF.
-</PRE><P>
-<STRONG>(See findmapboundary.pro)</STRONG><P>
-<HR>
- 
 <A NAME="FIND_BOUNDARY">
 <H2>FIND_BOUNDARY</H2></A>
-<A HREF="#FINDMAPBOUNDARY">[Previous Routine]</A>
+<A HREF="#ERROR_MESSAGE">[Previous Routine]</A>
 <A HREF="#FIND_RESOURCE_FILE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -10952,6 +10729,10 @@ OUTPUTS:
      density: in, optional, type=integer, default=300
         The horizontal and vertical density (in dots per inch, DPI) of the image when the PostScript file
         is converted to a raster format by ImageMagick. 
+     filetype: in, optional type='string', default=""
+        This keyword provides a generic way of setting the `BMP`, `GIF`, `JPEG`, `PNG`, and `TIFF` 
+        keywords. Set this keyword to the type of file output desired, and the correct "output"
+        keyword will be set.
      gif: in, optional, type=boolean, default=0                 
         Set this keyword to convert the PostScript output file to a GIF image. Requires ImageMagick.
      gs_path: in, optional, type=string
@@ -11059,6 +10840,7 @@ OUTPUTS:
            PNG file should be created. 3 April 2012. DWF.
         Modified the ImageMagick commands that resizes the image to a particular width. Necessary
            to accommodate PNG8 file output. Using ImageMagick 6.7.2-9. 4 April 2012. DWF.
+        Added FILETYPE keyword to provide a generic way of creating raster file output. 30 August 2012. DWF.
 
  :Copyright:
      Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -12400,7 +12182,7 @@ OUTPUTS:
 <A NAME="SETUNION">
 <H2>SETUNION</H2></A>
 <A HREF="#SETINTERSECTION">[Previous Routine]</A>
-<A HREF="#SHAPEINFO">[Next Routine]</A>
+<A HREF="#SHARPEN">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -12472,92 +12254,9 @@ OUTPUTS:
 <STRONG>(See setunion.pro)</STRONG><P>
 <HR>
  
-<A NAME="SHAPEINFO">
-<H2>SHAPEINFO</H2></A>
-<A HREF="#SETUNION">[Previous Routine]</A>
-<A HREF="#SHARPEN">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-       SHAPEINFO
-
- PURPOSE:
-
-       The purpose of this program is allow the user to browse a very narrow
-       selection of shapefiles. Namely, those containing geographical shapes
-       in latitude and longitude coordinates. In other words, shapefiles
-       containing maps. File attributes are listed in the left-hand list
-       widget. Clicking on a file attribute, will list all the entity
-       attributes for that file attribute in the right-hand list. Clicking
-       an entity attribute with list the type of entity, and the X and Y
-       bounds of that entity (shown as LON and LAT, respectively), in the
-       statusbar at the bottom of the display.
-
-       Knowing the attribute and entity names of a shapefile will give
-       you insight into how to read and display the information in the file.
-       For examples, see the Coyote Library programs DrawCounties and DrawStates.
-
-
- AUTHOR:
-
-       FANNING SOFTWARE CONSULTING
-       David Fanning, Ph.D.
-       1645 Sheely Drive
-       Fort Collins, CO 80526 USA
-       Phone: 970-221-0438
-       E-mail: david@idlcoyote.com
-       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- CATEGORY:
-
-       Utilities
-
- CALLING SEQUENCE:
-
-       ShapeInfo, shapefile
-
- ARGUMENTS:
-
-       shapefile:     The name of the input shapefile. If not provided, the user
-                      will be prompted to select a shapefile.
-
- OUTPUT KEYWORDS:
-
-     XRANGE:      An output two-element vector containing the minimum and maximum
-                  X boundary of the shapefile entities.
-
-     YRANGE:      An output two-element vector containing the minimum and maximum
-                  Y boundary of the shapefile entities.
-
- RESTRICTIONS:
-
-     It is assumed the shapefile contains 2D map information. The X and Y bounds of
-     each shapefile entity are reported as LON and LAT values, respectively.
-
-     Required Coyote Library programs:
-
-       CenterTLB
-       Error_Message
-
- EXAMPLE:
-
-       filename = Filepath(SubDir=['examples','data'], 'states.shp')
-       ShapeInfo, filename, XRANGE=xr, YRANGE=yr
-       Plot, xr, yr, /NoData, XStyle=1, YStyle=1
-       DrawShapes, filename
-
- MODIFICATION HISTORY:
-
-       Written by David W. Fanning, 21 October 2006.
-       Slight modifications to the interface. 14 May 2010. DWF.
-       Added XRANGE and YRANGE output keywords. 15 May 2010. DWF.
-</PRE><P>
-<STRONG>(See shapeinfo.pro)</STRONG><P>
-<HR>
- 
 <A NAME="SHARPEN">
 <H2>SHARPEN</H2></A>
-<A HREF="#SHAPEINFO">[Previous Routine]</A>
+<A HREF="#SETUNION">[Previous Routine]</A>
 <A HREF="#SIMPLE_SURFACE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>

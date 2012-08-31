@@ -158,9 +158,9 @@
 ;       Modified the way the XRANGE and YRANGE keywords work when the OVERPLOT keyword is also set. In this case,
 ;          I will modify the image position to honor the XRANGE and YRANGE values with respect to the axes that the
 ;          image is being overplot onto. 15 August 2012. DWF.
-;        Set the NOERASE keyword if the OVERPLOT keyword is set and NOERASE is undefined. 16 Aug 2012. DWF.
-;        Modified the way the HIST_EQUAL stretch works. Previously the image was displayed as all zeros
-;           if the input image had a minimum value less that zero. 21 Aug 2012. DWF.
+;       Set the NOERASE keyword if the OVERPLOT keyword is set and NOERASE is undefined. 16 Aug 2012. DWF.
+;       Modified the way the HIST_EQUAL stretch works. Previously the image was displayed as all zeros
+;          if the input image had a minimum value less that zero. 21 Aug 2012. DWF.
 ;           
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.

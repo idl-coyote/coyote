@@ -53,6 +53,7 @@
 ;
 ; :History:
 ;    Written by David W. Fanning, 7 November 2011.
+;    Added a BACKGROUND keyword. 31 Aug 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -72,6 +73,10 @@
 ;        If this keyword is set, the object is added to the resizeable graphics
 ;        window, cgWindow. Note that a map projection command must be 
 ;        added to the window before this command is added to be effective.
+;     background: in, optional, type=string
+;        The name of the background color. A polygon of this color is drawn
+;        in the map space set up by the map projection before continents and
+;        other items are drawn.
 ;     coasts: in, optional, type=boolean, default=0
 ;        Set this keyword if you want coasts to be drawn. This keyword is ignored if using FILENAME.
 ;     color: in, optional, type=string, default='opposite'
@@ -127,6 +132,7 @@
 ;---------------------------------------------------------------------------
 FUNCTION cgMapContinents::INIT, mapCoord, $
     ADDCMD=addcmd, $
+    BACKGROUND=background, $
     COASTS=coasts, $
     COLOR=color, $
     CONTINENTS=continents, $
@@ -166,7 +172,7 @@ FUNCTION cgMapContinents::INIT, mapCoord, $
         AND Keyword_Set(usa)) EQ 0 THEN continents = 1
     coasts = Keyword_Set(coasts)
     countries = Keyword_Set(countries)
-    IF Keyword_Set(color) EQ 0 THEN color = 'opposite'
+    IF N_Elements(color) EQ 0 THEN color = 'opposite'
     IF N_Elements(land_color) EQ 0 THEN land_color = 'tan8'
     continents = Keyword_Set(continents)
     fill = Keyword_Set(fill)
@@ -195,6 +201,7 @@ FUNCTION cgMapContinents::INIT, mapCoord, $
             Message, 'Cannot locate the file ' + filename + '.'
     ENDIF
         
+    IF N_Elements(background) EQ 0 THEN self.background = Ptr_New(/Allocate_Heap) ELSE self.background = Ptr_New(background)
     self.coasts = coasts
     self.color = color
     self.continents = continents
@@ -334,6 +341,7 @@ PRO cgMapContinents::Draw
     ENDIF ELSE BEGIN
         IF self.fill AND (self.color NE self.land_color) THEN BEGIN
             cgMAP_CONTINENTS, $
+                BACKGROUND=*self.background, $
                 COASTS=self.coasts, $
                 COLOR=self.land_color, $
                 CONTINENTS=self.continents, $
@@ -363,6 +371,7 @@ PRO cgMapContinents::Draw
                 ZVALUE=self.zvalue
         ENDIF ELSE BEGIN
             cgMAP_CONTINENTS, $
+                BACKGROUND=*self.background, $
                 COASTS=self.coasts, $
                 COLOR=self.color, $
                 CONTINENTS=self.continents, $
@@ -387,6 +396,8 @@ END
 ;   This method allows the user to get various properties of the object. 
 ;
 ; :Keywords:
+;     background: in, optional, type=string
+;        The name of the background color. 
 ;     coasts: in, optional, type=boolean, default=0
 ;        Set this keyword if you want coasts to be drawn. This keyword is ignored if using FILENAME.
 ;     color: in, optional, type=string, default='opposite'
@@ -441,6 +452,7 @@ END
 ;        This keyword is ignored if using FILENAME.
 ;---------------------------------------------------------------------------
 PRO cgMapContinents::GetProperty, $
+    BACKGROUND=background, $
     COASTS=coasts, $
     COLOR=color, $
     CONTINENTS=continents, $
@@ -473,6 +485,7 @@ PRO cgMapContinents::GetProperty, $
     ENDIF
     
     ; Get the properties.
+    IF N_Elements(*self.background) NE 0 THEN background = *self.background
     coasts = self.coasts
     color = self.color 
     continents = self.continents
@@ -504,6 +517,10 @@ END
 ;   This method allows the user to set various properties of the object. In general,
 ;   
 ; :Keywords:
+;     background: in, optional, type=string
+;        The name of the background color. A polygon of this color is drawn
+;        in the map space set up by the map projection before continents and
+;        other items are drawn.
 ;     coasts: in, optional, type=boolean, default=0
 ;        Set this keyword if you want coasts to be drawn. This keyword is ignored if using FILENAME.
 ;     color: in, optional, type=string, default='opposite'
@@ -590,6 +607,7 @@ PRO cgMapContinents::SetProperty, $
     ENDIF
     
     ; Set the properties.
+    IF N_Elements(background) NE 0 THEN *self.background = background
     IF N_Elements(coasts) NE 0 THEN self.coasts = Keyword_Set(coasts)
     IF N_Elements(color) NE 0 THEN self.color = color
     IF N_Elements(continents) NE 0 THEN self.continents = Keyword_Set(continents)
@@ -626,14 +644,15 @@ END
 ;---------------------------------------------------------------------------
 PRO cgMapContinents::CLEANUP
 
-    self -> cgContainer::CLEANUP    
+    self -> cgContainer::CLEANUP
+    Ptr_Free, self.background    
     
 END 
 
 
 ;+--------------------------------------------------------------------------
 ;   This is the class definition module. Structures used to manipulate
-;   map projectatum information are also created here.
+;   map projection information are also created here.
 ;
 ; :Params:
 ;    class: out, optional, type=structure
@@ -643,6 +662,7 @@ END
 PRO cgMapContinents__DEFINE, class
 
     class = { cgMapContinents, $
+              background: Ptr_New(), $     ; The name of the background color.
               coasts: 0B, $                ; A flag that indicates coasts, island, lakes are drawn.
               continents: 0B, $            ; A flat that indicates continental outlines should be drawn.
               color: "", $                 ; The name of the color to draw outlines in.

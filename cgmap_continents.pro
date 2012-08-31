@@ -43,12 +43,22 @@
 ;
 ; :Categories:
 ;    Graphics, Map Projections
+;    
+; :Examples:
+;     To display a map of the Cuba and Haiti::
+;         cgMap_Set, /Mercator, Limit=[5.0, -95, 35.0, -55.0]
+;         cgMap_Continents, Background='dodger blue', /Continents, /Fill, Color='tan'
+;         cgMap_Continents, /Countries, /USA, Color='navy', /Continents
 ;       
 ; :Keywords:
 ;     addcmd: in, optional, type=boolean, default=0
 ;        If this keyword is set, the object is added to the resizeable graphics
 ;        window, cgWindow. Note that a map projection command must be 
 ;        added to the window before this command is added to be effective.
+;     background: in, optional, type=string
+;        The name of the background color. A polygon of this color is drawn
+;        in the map space set up by the map projection before continents and
+;        other items are drawn.
 ;     coasts: in, optional, type=boolean, default=0
 ;        Set this keyword if you want coasts to be drawn. This keyword is ignored if using FILENAME.
 ;     color: in, optional, type=string, default='opposite'
@@ -112,12 +122,14 @@
 ;       Added an ERASE=0 to the /NOGRAPHICS keyword on the Draw method call to cgMap. 27 Dec 2011. DWF
 ;       Changed the default line thickness to !P.Thick to better support PostScript files. 28 Dec 2011. DWF.
 ;       Modified slightly to allow a three-element byte array to be used as the COLOR. 18 April 2012. DWF.
+;       Added a BACKGROUND keyword. 31 Aug 2012. DWF.
 ;        
 ; :Copyright:
-;    Copyright (c) 2011, Fanning Software Consulting, Inc.
+;    Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;---------------------------------------------------------------------------
 PRO cgMap_Continents, $
     ADDCMD=addcmd, $
+    BACKGROUND=background, $
     COASTS=kcoasts, $
     COLOR=color, $
     CONTINENTS=kcont, $
@@ -151,6 +163,7 @@ PRO cgMap_Continents, $
     
        cgWindow, 'cgMap_Continents', $
           COASTS=kcoasts, $
+          BACKGROUND=background, $
           COLOR=color, $
           CONTINENTS=kcont, $
           COUNTRIES=kcountries, $
@@ -211,6 +224,15 @@ PRO cgMap_Continents, $
           mapObj -> Draw, /NoGraphics, Erase=0
        ENDIF ELSE thisMapStruct = mapStruct
    ENDIF 
+   
+   ; Need a background color?
+   IF Keyword_Set(background) NE 0 THEN BEGIN
+      x = !X.Window
+      y = !Y.Window
+      cgColorFill, [x[0], x[1], x[1], x[0], x[0]], $
+                   [y[0], y[0], y[1], y[1], y[0]], $
+                   /NORMAL, Color=background
+    ENDIF
 
     ; Call the IDL routine with default values.
     Map_Continents, $

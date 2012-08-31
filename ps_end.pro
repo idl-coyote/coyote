@@ -67,7 +67,7 @@
 ;     density: in, optional, type=integer, default=300
 ;        The horizontal and vertical density (in dots per inch, DPI) of the image when the PostScript file
 ;        is converted to a raster format by ImageMagick. 
-;     filetype: in, optional type='string', default=""
+;     filetype: in, optional, type='string', default=""
 ;        This keyword provides a generic way of setting the `BMP`, `GIF`, `JPEG`, `PNG`, and `TIFF` 
 ;        keywords. Set this keyword to the type of file output desired, and the correct "output"
 ;        keyword will be set.

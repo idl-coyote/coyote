@@ -75,9 +75,20 @@
 ;    free: in, optional, type=boolean, default=0
 ;         Set this keyword to open a window with a free or unused window index number.
 ;         This keyword applied only to graphics windows created on the computer display.
+;    location: in, optional, type=integer
+;         Set this keyword to a two-element integer array indicated the pixel position of
+;         the upper-left corner of the graphics window from the upper-left corner of the display.
 ;    match: in, optional, type=boolean, default=0
 ;         If this keyword is set, the new display window will match the size of the current
 ;         display window, if there is one.
+;    pixmap: in, optional, type=boolean, default=0
+;         Set this keyword to create a pixmap window (a window in memory only).
+;    retain: in, optional, type=integer
+;         Set this keyword to the values 0, 1, or 2, to indicate no backing store, server
+;         provided backing store, or IDL provided backing store, respectively. By default,
+;         set to 1 for Windows users and to 2 for UNIX users.
+;    title: in, optional, type=string
+;         Set this keyword to a string that is used as the window title.
 ;    wid: in, optional, type=integer, default=0
 ;         The window index number of the IDL graphics window to create.
 ;    window: in, optional, type=integer, default=0
@@ -87,9 +98,21 @@
 ;         Setting this keyword will overrule this check and create a normal IDL graphics window
 ;         on the display. This will allow you to open a normal graphics window at the same
 ;         time a resizeable graphics window exists on the display.
+;    xpos: in, optional, type=integer
+;         The X position of the window, specified in device coordinates. On Motif platforms, 
+;         XPOS specifies the X position of the lower left corner and is measured from the 
+;         lower left corner of the screen. On Windows platforms, XPOS specifies the X position 
+;         of the upper left corner and is measured from the upper left corner of the screen.
+;         This value can also be specified as the first element in the `Location` keyword.
 ;    xsize: in, optional, type=integer, default=640
 ;         The X size of the graphics window created. By default, 640. The PXSIZE parameter 
 ;         is used in preference to the XSIZE keyword value.
+;    ypos: in, optional, type=integer
+;         The Y position of the window, specified in device coordinates. On Motif platforms, 
+;         YPOS specifies the Y position of the lower left corner and is measured from the 
+;         lower left corner of the screen. On Windows platforms, YPOS specifies the Y position 
+;         of the upper left corner and is measured from the upper left corner of the screen.
+;         This value can also be specified as the second element in the `Location` keyword.
 ;    ysize: in, optional, type=integer, default=512
 ;         The Y size of the graphics window created. By default, 512. The PYSIZE parameter 
 ;         is used in preference to the YSIZE keyword value.
@@ -127,6 +150,7 @@
 ;        Now use Scope_Level to always create a display when cgDisplay is called from
 ;           the main IDL level. 7 Feb 2012. DWF.
 ;        Added FORCE and MATCH keywords. 16 Feb 2012. DWF.
+;        Added PIXMAP, RETAIN, TITLE, XPOS, YPOS, and LOCATION keywords. 4 Sept 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -136,10 +160,16 @@ PRO cgDisplay, pxsize, pysize, $
     COLOR=scolor, $
     FREE=free, $
     FORCE=force, $
+    LOCATION=location, $
     MATCH=match, $
+    PIXMAP=pixmap, $
+    RETAIN=retain, $
+    TITLE=title, $
     WID=windowIndex, $
     WINDOW=window, $
+    XPOS=xpos, $
     XSIZE=xsize, $
+    YPOS=ypos, $
     YSIZE=ysize, $
     _EXTRA=extra
 
@@ -164,6 +194,11 @@ PRO cgDisplay, pxsize, pysize, $
           ysize = !D.Y_Size
        ENDIF
     ENDIF
+    IF N_Elements(location) NE 0 THEN BEGIN
+       IF N_Elements(xpos) EQ 0 THEN xpos = location[0]
+       IF N_Elements(ypos) EQ 0 THEN ypos = location[1]
+    ENDIF
+    IF N_Elements(retain) EQ 0 THEN retain = (StrUpCase(!Version.OS_Family) EQ 'UNIX') ? 2 : 1
     IF N_Elements(scolor) EQ 0 THEN color = 'white' ELSE color = scolor
     IF N_Elements(windowIndex) EQ 0 THEN windowIndex = 0
     IF N_Elements(xsize) EQ 0 THEN xsize = 640
@@ -217,8 +252,9 @@ PRO cgDisplay, pxsize, pysize, $
         ; If you are not running this program in a cgWindow, feel
         ; free to create a window!
         IF createWindow THEN BEGIN
-            Window, windowIndex, XSIZE=pxsize, YSIZE=pysize, $
-                 FREE=free, _STRICT_EXTRA=extra
+            Window, windowIndex, XSIZE=pxsize, YSIZE=pysize, PIXMAP=pixmap, $
+                 FREE=free, TITLE=title, XPOS=xpos, YPOS=ypos, $
+                 RETAIN=retain, _STRICT_EXTRA=extra
             
             ; cgErase will take care of sorting out what kind of 
             ; "color" indicator we are using (string, long, etc.)

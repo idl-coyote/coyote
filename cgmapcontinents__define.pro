@@ -575,6 +575,7 @@ END
 ;        This keyword is ignored if using FILENAME.
 ;---------------------------------------------------------------------------
 PRO cgMapContinents::SetProperty, $
+    BACKGROUND=background, $
     COASTS=coasts, $
     COLOR=color, $
     CONTINENTS=continents, $

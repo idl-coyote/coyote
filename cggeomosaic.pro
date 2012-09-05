@@ -62,6 +62,9 @@
 ;         The missing value in the input images. Missing values are set to zero
 ;         to create the mosaic. This assumes that valid values in the images are
 ;         not zero, which may be a weakness in the current algorithm.
+;     success: out, optional, type=boolean
+;         This keyword is set to 1 if the function completed successfully. And to
+;         0 otherwise.
 ;                
 ; :Author:
 ;     FANNING SOFTWARE CONSULTING::
@@ -75,6 +78,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 18 August 2012. DWF. 
+;        Added SUCCESS keyword 4 September 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -83,7 +87,8 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
    FILENAME=filename, $
    IMAGEOUT=newImage, $
    MAPOUT=mapout, $
-   MISSING=missing
+   MISSING=missing, $
+   SUCCESS=success
 
     Compile_Opt idl2
     
@@ -94,6 +99,7 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
         void = Error_Message()
         IF Obj_Valid(m1) THEN Obj_Destroy, m1
         IF Obj_Valid(m2) THEN Obj_Destroy, m2
+        success = 0
         RETURN, ""
     ENDIF
     
@@ -102,6 +108,9 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
         void = Dialog_Message('Calling Syntax: geofile = cgGeoMosaic( geofile_1, geofile_2 )')
         RETURN, ""
     ENDIF
+    
+    ; Assume success.
+    success = 1
     
     IF N_Elements(missing) EQ 0 THEN missing = 0B
     
@@ -133,6 +142,14 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
           Message, 'Not a geoTiff file: ' + geofile_1
     IF Query_Tiff(geofile_2, info_2, GEOTIFF=geo_2) NE 1 THEN $
           Message, 'Not a geoTiff file: ' + geofile_2
+          
+    ; If the projected coordinate system is not the same, we have problems.
+    IF geo_1.PROJECTEDCSTYPEGEOKEY NE geo_2.PROJECTEDCSTYPEGEOKEY THEN BEGIN
+        Print, 'File 1: ', geofile_1
+        Print, 'File 2: ', geofile_2
+        Message, 'The projected coordinate systems of the two files are not the same: ' + $
+          StrTrim(geo_1.PROJECTEDCSTYPEGEOKEY, 2) + ' and ' + StrTrim(geo_2.PROJECTEDCSTYPEGEOKEY,2)
+    ENDIF
               
     ; The scales can be off by a little. We will use the larger of the two
     ; to make sure we can accommodate both images in the mosaic.

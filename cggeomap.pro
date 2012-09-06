@@ -60,13 +60,7 @@
 ;        A GeoTIFF image. This can optionally be the name of a GeoTiff file.
 ;        If a filename is used, do not pass the geoTiff parameter, as this
 ;        parameter will be obtained from the GeoTiff file.
-;    geotiff: in, optional, type=structure
-;        A GeoTIFF structure of geoTags. Normally obtained by calling
-;        QUERY_TIFF or READ_TIFF, but will be read from the file if a
-;        filename is passed as the first positional parameter. It the geotag
-;        is read from the file, it can be passed back to the user by setting
-;        this parameter to a named variable.         
-;       
+;               
 ; :Keywords:
 ;     ccolor: in, optional, type=string, default='Charcoal'
 ;        The name of a color the map continents should be displayed with. The default
@@ -83,6 +77,12 @@
 ;     gcolor: in, optional, type=string, default='Gray'
 ;         The name of a color the map grid should be displayed with. The default
 ;         is "gray". Color names are those supported by cgColor.
+;    geotiff: in, optional, type=structure
+;        A GeoTIFF structure of geoTags. Normally obtained by calling
+;        QUERY_TIFF or READ_TIFF, but will be read from the file if a
+;        filename is passed as the first positional parameter. If the geotag
+;        is read from the file, it can be passed back to the user by setting
+;        this keyword to a named variable.         
 ;     grid: in, optional, type=boolean, default=0
 ;         If a cgMap object is made successfully, then setting this keyword
 ;         will add a cgMapGrid object to the cgMap object.  
@@ -149,14 +149,16 @@
 ;         Write base filename as title for window if the DISPLAY keyword is set. 22 Feb 2012. DWF.
 ;         Had inexplicably left out CENTER_LATITUDE parameter in Equirectangular projection. 30 July 2012. DWF.
 ;         Added PALETTE keyword to return the RGB color palette present in the file, if any. 16 August 2012. DWF.
+;         Moved the geotiff argument to a GEOTIFF keyword, as I always expect it to be this way. 6 Sept 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
-Function cgGeoMap, image, geotiff, $
+Function cgGeoMap, image, $
     CLIP=clip, $
     DISPLAY=display, $
     GCOLOR=gcolor, $
+    GEOTIFF=geotiff, $
     GRID=grid, $
     CCOLOR=ccolor, $
     CONTINENTS=continents, $

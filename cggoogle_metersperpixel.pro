@@ -49,9 +49,9 @@
 ;       
 ;
 ; :Examples:
-;    For example, to find the pixels per meter for a zoom level of 12::
+;    For example, to find the meters per pixel for a zoom level of 12::
 ;       IDL> Print, cgGoogle_MetersPerPixel(12)
-;            38.1757
+;            38.218514
 ;
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -64,6 +64,8 @@
 ;
 ; :History:
 ;     Written, 20 June 2012.
+;     Updated the algorithm for determining meters per pixel to use WGS-84 equitorial radius
+;        based on suggestion by Alain LeCacheax. 11 Sept 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -81,23 +83,13 @@ Function cgGoogle_MetersPerPixel, zoomLevel
    ; Number of pixels in an image with a zoom level of 0.
    pixels_in_image = 256
    
-   ; The number of meters in a longitude degree at the equator,
-   ; assuming an Earth radius of 6371000 meters.
-   metersPerLonDeg = (2*!DPI*6371000.0) / 360
+   ; The equitorial radius of the Earth assuming WGS-84 ellipsoid.
+   earth_radius = 6378137.0D
    
-   ; Create some variables.
-   pixelsPerLonDeg = FIndgen(zoomLevel+1)
-   metersPerPixel = FIndgen(zoomLevel+1)
+   ; The number of meters per pixel.
+   res = (2*!DPI*earth_radius) / pixels_in_image / 2L^zoomLevel
    
-   ; Calculate the pixels per meter for all the zoom levels,
-   ; including the one you are interested in (the last one).
-   FOR j=0,zoomLevel DO BEGIN
-       pixelsPerLonDeg[j] = pixels_in_image / 360.0
-       metersPerPixel[j] = 1.0 / (pixelsPerLonDeg[j] / metersPerLonDeg)
-       pixels_in_image = pixels_in_image * 2
-   ENDFOR
-   
-   ; Return the value you are after.
-   RETURN, metersPerPixel[N_Elements(metersPerPixel)-1]
+   ; Return the value.
+   RETURN, res
    
 END

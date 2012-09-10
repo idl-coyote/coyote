@@ -78,6 +78,7 @@
 ;           and longitude in a UTM projection. Now using cgUTMZone to determine the proper
 ;           zone. 8 Aug 2012. DWF.
 ;         Added a BOUNDARY keyword to the GetProperty method. 16 Aug 2012. DWF.
+;         Modified to allow Hotine Oblique Mercator map projections to work correctly. 7 Sept 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -1742,12 +1743,17 @@ FUNCTION cgMap::SetMapProjection, map_projection, $
    ; Center latitudes are not allowed in some projections. Here are the ones where
    ; they are prohibited.
    centerlatOK = 1
-   badprojstr = ['GOODES HOMOLOSINE', 'STATE PLANE', 'MERCATOR', 'SINUSOIDAL', 'EQUIRECTANGULAR', $
+   centerlonOK = 1
+   badprojLatstr = ['GOODES HOMOLOSINE', 'STATE PLANE', 'MERCATOR', 'SINUSOIDAL', 'EQUIRECTANGULAR', $
       'MILLER CYLINDRICAL', 'ROBINSON', 'SPACE OBLIQUE MERCATOR A', 'SPACE OBLIQUE MERCATOR B', $
       'ALASKA CONFORMAL', 'INTERRUPTED GOODE', 'MOLLWEIDE', 'INTERRUPED MOLLWEIDE', 'HAMMER', $
       'WAGNER IV', 'WAGNER VII', 'INTEGERIZED SINUSOIDAL']
-   void = Where(badprojstr EQ StrUpCase(thisProjection), count)
+   void = Where(badprojLatstr EQ StrUpCase(thisProjection), count)
    IF count GT 0 THEN centerlatOK = 0
+
+   badprojLonstr = ['HOTINE OBLIQUE MERCATOR A','HOTINE OBLIQUE MERCATOR B']
+   void = Where(badprojLonstr EQ StrUpCase(thisProjection), count)
+   IF count GT 0 THEN centerLonOK = 0
     
     ; UTM and State Plane projections have to be handled differently.
     IF (StrUpCase(thisProjection) EQ 'UTM') OR (StrUpCase(thisProjection) EQ 'STATE PLANE') THEN BEGIN
@@ -1773,7 +1779,7 @@ FUNCTION cgMap::SetMapProjection, map_projection, $
         ; Call MAP_PROJ_INIT to get the map projection structure.
         CASE 1 OF
         
-            centerLatOK AND sphereOnly: BEGIN
+            centerLatOK && centerLonOK && sphereOnly: BEGIN
                 mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
                     CENTER_LATITUDE=center_lat, $
                     CENTER_LONGITUDE=center_lon, $
@@ -1783,7 +1789,7 @@ FUNCTION cgMap::SetMapProjection, map_projection, $
                     FALSE_NORTHING=northing, FALSE_EASTING=easting)
                 END
                 
-            ~centerLatOK AND sphereOnly: BEGIN
+            ~centerLatOK && centerLonOK && sphereOnly: BEGIN
 
                 mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
                     CENTER_LONGITUDE=center_lon, $
@@ -1793,7 +1799,7 @@ FUNCTION cgMap::SetMapProjection, map_projection, $
                     FALSE_NORTHING=northing, FALSE_EASTING=easting)
                 END
                 
-            ~centerLatOK AND ~sphereOnly: BEGIN
+            ~centerLatOK && centerLonOK &&  ~sphereOnly: BEGIN
                 mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
                     CENTER_LONGITUDE=center_lon, $
                     SEMIMAJOR_AXIS=semimajor_axis, $
@@ -1803,10 +1809,20 @@ FUNCTION cgMap::SetMapProjection, map_projection, $
                     FALSE_NORTHING=northing, FALSE_EASTING=easting)
                 END
     
-            centerLatOK AND ~sphereOnly: BEGIN
+            centerLatOK && centerLonOK && ~sphereOnly: BEGIN
                 mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
                     CENTER_LATITUDE=center_lat, $
                     CENTER_LONGITUDE=center_lon, $
+                    SEMIMAJOR_AXIS=semimajor_axis, $
+                    SEMIMINOR_AXIS=semiminor_axis, $
+                    LIMIT=limit, RADIANS=radians, $
+                    _EXTRA=keywords, $
+                    FALSE_NORTHING=northing, FALSE_EASTING=easting)
+                END
+                
+            centerLatOK && ~centerLonOK && ~sphereOnly: BEGIN
+                mapStruct = Map_Proj_Init(thisProjection, /GCTP, $
+                    CENTER_LATITUDE=center_lat, $
                     SEMIMAJOR_AXIS=semimajor_axis, $
                     SEMIMINOR_AXIS=semiminor_axis, $
                     LIMIT=limit, RADIANS=radians, $

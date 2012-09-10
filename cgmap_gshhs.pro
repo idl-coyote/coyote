@@ -58,6 +58,12 @@
 ; at least four different structures in common use. Please find the one
 ; you need from the commented list in the code itself. The current code uses the structure
 ; for the 2.2 version of the GSHHS software.
+; 
+; I have noticed that the polygon areas in the 2.2 version of the GSHHS software seem
+; to contain completely bogus information. For example, the Great Lakes polygon is 1.7e7 
+; square kilometers, while a tiny lake near-by is listed as 3.5e7 square kilometers. I have
+; no explanation for why these values seem to be so wrong. I haven't tested this on other
+; GSHHS versions of the data.
 ;
 ; :Categories:
 ;    Graphics, Map Projections
@@ -303,7 +309,6 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
           greenwich = ISHFT(f, -16) AND 255B
           source = ISHFT(f, -24) AND 255B
       ENDIF ELSE BEGIN
-          level = f AND 255B
           polygonLevel = (f AND 255B) 
           greenwich = ISHFT(f, -16) AND 1B
           source = ISHFT(f, -24) AND 1B
@@ -319,6 +324,7 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
 
       ; Discriminate polygons based on header information.
       polygonArea = header.area * 0.1
+   
       IF polygonLevel GT level THEN CONTINUE
       IF polygonArea LE minArea THEN CONTINUE
 
@@ -347,9 +353,11 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
       ; Draw polygons. Outlines drawn with PLOTS, filled polygons drawn with
       ; POLYFILL. Assumes lat/lon data coordinate space and colors are set up.
       IF Keyword_Set(fill) THEN BEGIN
-         IF (polygonLevel EQ 1) OR (polygonLevel EQ 3) THEN $
-             POLYFILL, lon, lat, Color=cgColor(land_color), NOCLIP=noclip ELSE $
+         IF (polygonLevel EQ 1) OR (polygonLevel EQ 3) THEN BEGIN
+             POLYFILL, lon, lat, Color=cgColor(land_color), NOCLIP=noclip 
+         ENDIF ELSE BEGIN
              POLYFILL, lon, lat, Color=cgColor(water_color), NOCLIP=noclip
+         ENDELSE
 
       ENDIF ELSE BEGIN
 

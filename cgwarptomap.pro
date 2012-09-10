@@ -1,6 +1,6 @@
 
 
-FUNCTION cgWarpToMap, data, lons, lats, MAP=map, MISSING=missing, RESOLUTION=resolution
+FUNCTION cgWarpToMap, data, lons, lats, GRIDDATA=griddata, MAP=map, MISSING=missing, RESOLUTION=resolution
 
    Compile_Opt idl2
    
@@ -32,9 +32,9 @@ FUNCTION cgWarpToMap, data, lons, lats, MAP=map, MISSING=missing, RESOLUTION=res
          END
          
       2: BEGIN
-         dims = Size(data, /DIMENSIONS)
-         IF N_Elements(lons) EQ 0 THEN lons = Scale_Vector(Findgen(dims[0]), -180, 180)
-         IF N_Elements(lats) EQ 0 THEN lats = Scale_Vector(Findgen(dims[1]), -90, 90)
+         s = Size(data, /DIMENSIONS)
+         IF N_Elements(lons) EQ 0 THEN lons = Scale_Vector(Findgen(s[0]), -180, 180)
+         IF N_Elements(lats) EQ 0 THEN lats = Scale_Vector(Findgen(s[1]), -90, 90)
          
          slats = Size(lats, /DIMENSIONS)
          slons = Size(lons, /DIMENSIONS)
@@ -44,6 +44,7 @@ FUNCTION cgWarpToMap, data, lons, lats, MAP=map, MISSING=missing, RESOLUTION=res
          IF Size(lats, /N_DIMENSIONS) EQ 1 THEN BEGIN
             lats = Rebin(Reform(lats, 1, slats), slons, slats)
          ENDIF
+         
          END
          
       ELSE: Message, 'Input data must be either 1D or 2D.'
@@ -54,30 +55,68 @@ FUNCTION cgWarpToMap, data, lons, lats, MAP=map, MISSING=missing, RESOLUTION=res
    lons = ((lons + 180) MOD 360) - 180
    
    ; Cull initial points now to remove duplicates.
-   help, lons, lats, data
    Grid_Input, lons, lats, data, lons_p, lats_p, data_p
 
-   ; Find the data range in X.
+   ; Set the data ranges for the map object.
    xy = map -> Forward(lons_p, lats_p)
    x = Reform(xy[0,*])
    y = Reform(xy[1,*])
    xmin = Min(x, MAX=xmax)
    ymin = Min(y, MAX=ymax)
    rect = [xmin, ymin, xmax, ymax]
+   map -> SetProperty, XRange=[xmin, xmax], YRANGE=[ymin, ymax]
    
-   ; Construct the grid array.
+   ; Set the output resolution of the grid.
    IF N_Elements(resolution) EQ 0 THEN BEGIN
       delta_x = (xmax - xmin) / 499
       delta_y = (ymax - ymin) / 499
+      resolution=[500,500]
    ENDIF ELSE BEGIN
       delta_x = resolution[0]
       delta_y = resolution[1]
    ENDELSE
+      
+   QHull, x, y, triangles, /Delaunay
+   IF Keyword_Set(griddata) THEN BEGIN
+      warpedImage = GridData(x, y, data_p, TRIANGLES=triangles, DELTA=[delta_x, delta_y], $
+         DIMENSION=resolution, START=[Min(x), Min(y)], MISSING=missing, METHOD='NaturalNeighbor')
+   ENDIF ELSE BEGIN
+      warpedImage = TriGrid(x, y, data_p, triangles, [delta_x, delta_y], rect, MISSING=missing)
+   ENDELSE
    
-   starttime = systime(1)
-   
-   Triangulate, x, y, triangles, TOLERANCE=1e-6
-   warpedImage = TriGrid(x, y, data_p, triangles, [delta_x, delta_y], rect, MISSING=missing)
    RETURN, warpedImage
     
+END
+
+filename = 'C:\xampp\htdocs\coyoteguide\misc\goes_example_data.sav'
+Restore, filename
+peru_lat = Temporary(peru_lat) / 10000.
+peru_lon = Temporary(peru_lon) / 10000.
+s = Size(peruimage, /DIMENSIONS)
+centerLat = peru_lat[s[0]/2, s[1]/2]
+centerLon = peru_lon[s[0]/2, s[1]/2]
+map = Obj_New('cgMap', 'mercator', Ellipsoid='WGS 84', /OnImage, CENTER_LAT=centerLat, CENTER_LON=centerLon)
+start = systime(1)
+gridData = 1
+warped = cgWarpToMap(peruImage, peru_lon, peru_lat, MAP=map, MISSING=0, GRIDDATA=gridData)
+Print, 'Elapsed Time: ', systime(1) - start
+IF keyword_Set(griddata) THEN title='Warped with GridData' ELSE title = 'Warped with TriGrid'
+cgDisplay, /Free, Title=title
+help, warped
+cgImage, warped, stretch=2, margin=0.1
+map -> Draw
+cgMap_Grid, Map=map, /Label, Color='goldenrod'
+cgMap_Continents, MAP=map, color='goldenrod'
+
+start = systime(1)
+gridData = 0
+warped = cgWarpToMap(peruImage, peru_lon, peru_lat, MAP=map, MISSING=0, GRIDDATA=gridData)
+Print, 'Elapsed Time: ', systime(1) - start
+IF keyword_Set(griddata) THEN title='Warped with GridData' ELSE title = 'Warped with TriGrid'
+cgDisplay, /Free, Title=title
+help, warped
+cgImage, warped, stretch=2, margin=0.1
+map -> Draw
+cgMap_Grid, Map=map, /Label, Color='goldenrod'
+cgMap_Continents, MAP=map, color='goldenrod'
 END

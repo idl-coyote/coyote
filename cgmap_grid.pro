@@ -66,9 +66,10 @@
 ;        Changed the default line thickness to !P.Thick to better support PostScript files. 28 Dec 2011. DWF.
 ;        Fixed a problem with grid labeling when values were passed with LATS or LONS keyword. 6 April 2012. DWF.
 ;        Modified slightly to allow a three-element byte array to be used as the COLOR. 18 April 2012. DWF.
+;        If a Map object is available, I make sure to call DRAW method before drawing graphics. 12 Sept 2012. DWF.
 ;        
 ; :Copyright:
-;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;---------------------------------------------------------------------------
 ;
 ;
@@ -509,6 +510,7 @@ PRO cgMap_Grid, $
          hasMapObj = 1
          
          mapObj = mapStruct
+         mapObj -> Draw, /NoGraphics
          thisMapStruct = mapObj -> GetMapStruct()
          
          ; I've taken this out for now, as it is not working as well as I hoped

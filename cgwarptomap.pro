@@ -139,6 +139,8 @@
 ; :History:
 ;     Modification History::
 ;        Written by David W. Fanning, 12 Sept 2012.
+;        Modifications to accommodate lat/lon arrays that are one-dimensional to go along
+;           with 2D data. 13 Sept 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -211,7 +213,15 @@ FUNCTION cgWarpToMap, data, lons, lats, $
    lons = ((lons + 180) MOD 360) - 180
    
    ; Convert to XY projected meter space.
-   xy = map -> Forward(lons, lats)
+   IF N_Elements(lons) NE N_Elements(lats) THEN BEGIN
+       s = Size(data, /DIMENSIONS)
+       lattemp = Rebin(Reform(lats, 1, s[1]), s[0], s[1])
+       lontemp = Rebin(lons, s[0], s[1])
+       help, lontemp, lattemp
+       xy = map -> Forward(lontemp, lattemp)
+   ENDIF ELSE BEGIN
+       xy = map -> Forward(lons, lats)
+   ENDELSE
    x = Reform(xy[0,*])
    y = Reform(xy[1,*])
    xmin = Min(x, MAX=xmax)
@@ -275,6 +285,7 @@ FUNCTION cgWarpToMap, data, lons, lats, $
    y_out = Rebin(Reform(yvec, 1, resolution[1]), resolution[0], resolution[1])
 
    ; Get the fractional indices of the output grid on the input grid.
+   dims = Size(data, /DIMENSIONS)
    xindex = Scale_Vector(x_out, 0, dims[0], Min=xmin, Max=xmax)
    yindex = Scale_Vector(y_out, 0, dims[1], MIN=ymin, MAX=ymax)
    

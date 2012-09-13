@@ -87,9 +87,9 @@ Function cgGoogle_MetersPerPixel, zoomLevel
    earth_radius = 6378137.0D
    
    ; The number of meters per pixel.
-   res = (2*!DPI*earth_radius) / pixels_in_image / 2L^zoomLevel
+   metersPerPixel = (2*!DPI*earth_radius) / pixels_in_image / 2L^zoomLevel
    
    ; Return the value.
-   RETURN, res
+   RETURN, metersPerPixel
    
 END

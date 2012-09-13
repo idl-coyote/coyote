@@ -161,6 +161,7 @@
 ;       Set the NOERASE keyword if the OVERPLOT keyword is set and NOERASE is undefined. 16 Aug 2012. DWF.
 ;       Modified the way the HIST_EQUAL stretch works. Previously the image was displayed as all zeros
 ;          if the input image had a minimum value less that zero. 21 Aug 2012. DWF.
+;       Fixed a problem with the INTERPOLATE variable that prevented interpolaton from occurring. 12 Sept 2012. DWF.
 ;           
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -955,7 +956,7 @@ PRO cgImage, image, x, y, $
    FIT_INSIDE=fit_inside, $
    FONT=font, $
    GAMMA=gamma, $
-   INTERPOLATE=interp, $
+   INTERPOLATE=interpolate, $
    KEEP_ASPECT_RATIO=keep_aspect, $
    LAYOUT=layout, $
    MARGIN=margin, $
@@ -1074,7 +1075,7 @@ PRO cgImage, image, x, y, $
                FIT_INSIDE=fit_inside, $
                FONT=font, $
                GAMMA=gamma, $
-               INTERPOLATE=interp, $
+               INTERPOLATE=interpolate, $
                KEEP_ASPECT_RATIO=keep_aspect, $
                LAYOUT=layout, $
                MARGIN=margin, $
@@ -1133,7 +1134,7 @@ PRO cgImage, image, x, y, $
                FIT_INSIDE=fit_inside, $
                FONT=font, $
                GAMMA=gamma, $
-               INTERPOLATE=interp, $
+               INTERPOLATE=interpolate, $
                KEEP_ASPECT_RATIO=keep_aspect, $
                LAYOUT=layout, $
                MARGIN=margin, $

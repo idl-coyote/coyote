@@ -72,13 +72,14 @@
 ;           I've created a fix wherein, I fixed the uv_box latitude values to correspond
 ;           to the LIMIT of the map projection. 6 April 2012. DWF.
 ;        Set the default CENTER_LATITUDE and CENTER_LONGITUDE to 0.0. 9 April 2012. DWF.
-;        Added NOFORWARDFIX keyword to allow skipping of the "fix" in the FORWRD method,
+;        Added NOFORWARDFIX keyword to allow skipping of the "fix" in the FORWARD method,
 ;           as sometimes this is not needed or required. 29 June 2012. DWF.
 ;        Fixed a problem that required having to set the UTM zone in addition to the latitude
 ;           and longitude in a UTM projection. Now using cgUTMZone to determine the proper
 ;           zone. 8 Aug 2012. DWF.
 ;         Added a BOUNDARY keyword to the GetProperty method. 16 Aug 2012. DWF.
 ;         Modified to allow Hotine Oblique Mercator map projections to work correctly. 7 Sept 2012. DWF.
+;         Additional changes to better handle IDL 8.2 map projections. 12 Sept 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -324,6 +325,10 @@ FUNCTION cgMap::INIT, map_projection, $
                   
     IF Float(!Version.Release) GE 8.0 THEN BEGIN
         projections = [projections, {cgMap_PROJECTION, 'Cylindrical Equal Area', 132, 0 }]
+        
+        ; Lambert Azimuthal now allows all ellipsoids.
+        index = Where(projections.name EQ 'Lambert Azimuthal', count)
+        IF count GT 0 THEN projections[index].sphereOnly = 0
     ENDIF
 
     ; Find the map projection.
@@ -381,8 +386,16 @@ FUNCTION cgMap::INIT, map_projection, $
    ENDIF ELSE BEGIN
         IF Size(datum, /TNAME) EQ 'STRING' THEN BEGIN
             index = Where(StrUpCase(theDatums.name) EQ StrUpCase(datum))
+            
+            ; If you can't find one, try compressing the names.
+            IF index[0] EQ -1 THEN BEGIN
+               index = Where(StrCompress(StrUpCase(theDatums.name), /Remove_All) EQ $
+                    StrCompress(StrUpCase(datum), /Remove_All))
+            ENDIF
+            
+            ; Now if you can't find one, report it.
             IF index[0] EQ -1 THEN Message, 'Cannot find datum ' + datum + ' in datum list.' 
-            thisDatum = theDatums[index]
+            thisDatum = theDatums[index[0]]
         ENDIF ELSE thisDatum = theDatums[0 > datum < (N_Elements(theDatums)-1)]
    ENDELSE
    
@@ -391,7 +404,7 @@ FUNCTION cgMap::INIT, map_projection, $
    ; with a WGS84 datum (the most common datum used in this projection). Here
    ; we substitute the WALBECK datum, which is nearly identical to WGS84 are
    ; results in position errors of less than a meter typically.
-   IF (StrUpCase(thisDatum.Name) EQ 'WGS 84') && $
+   IF ((StrUpCase(thisDatum.Name) EQ 'WGS 84') || (StrUpCase(thisDatum.Name) EQ 'WGS84')) && $
       (StrUpCase(this_map_projection.Name) EQ 'UTM') && $
       (Float(!version.release) LE 8.2) THEN BEGIN
           Print, 'Switching UTM datum from WGS84 to WALBECK to avoid UTM projection bug.'
@@ -680,11 +693,14 @@ PRO cgMap::Draw, ERASE=erase, NOGRAPHICS=nographics, _EXTRA=extra
         self -> SetProperty, POSITION=_cgimage_position
     ENDIF
     
-    ; Do you need to erase in the background color?
-    IF N_Elements(erase) EQ 0 THEN erase = self._cg_erase
-    self -> GetProperty, POSITION=p
-    IF erase THEN cgColorFill, [p[0],p[0],p[2],p[2],p[0]], NORMAL=1, $
-                               [p[1],p[3],p[3],p[1],p[1]], COLOR=self._cg_background
+    ; Do you need to erase in the background color? Don't do this if you
+    ; are just drawing the coordinate system.
+    IF ~Keyword_Set(nographics) THEN BEGIN
+        IF N_Elements(erase) EQ 0 THEN erase = self._cg_erase
+        self -> GetProperty, POSITION=p
+        IF erase THEN cgColorFill, [p[0],p[0],p[2],p[2],p[0]], NORMAL=1, $
+                                   [p[1],p[3],p[3],p[1],p[1]], COLOR=self._cg_background
+    ENDIF
     
    ; Draw the map data coordinate system.
     mapStruct = self -> SetMapProjection()

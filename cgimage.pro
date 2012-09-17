@@ -162,7 +162,8 @@
 ;       Modified the way the HIST_EQUAL stretch works. Previously the image was displayed as all zeros
 ;          if the input image had a minimum value less that zero. 21 Aug 2012. DWF.
 ;       Fixed a problem with the INTERPOLATE variable that prevented interpolaton from occurring. 12 Sept 2012. DWF.
-;           
+;       A misspelled MULTIPLIER keyword was interferring with a Standard Deviation stretch. 16 Sept 2012.
+;          
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
@@ -1087,7 +1088,7 @@ PRO cgImage, image, x, y, $
                MINUS_ONE=minusOne, $
                MINVALUE=min, $
                MULTIMARGIN=multimargin, $
-               MULTIPIER=multiplier, $
+               MULTIPLIER=multiplier, $
                NCOLORS=ncolors, $
                NEGATIVE=negative, $
                NOERASE=noerase, $

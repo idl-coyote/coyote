@@ -39,7 +39,8 @@
 ;+--------------------------------------------------------------------------
 ;   This object is a wrapper for the cgPlotS routine in IDL. It provides a simple 
 ;   way to allow lines and symbols to be placed as annotations on map projections
-;   created with the cgMap coordinate object.
+;   created with the cgMap coordinate object. Note that it may be easier and more
+;   convenient to use cgPlotS, if you don't need a complete object solution.
 ;
 ; :Categories:
 ;    Graphics, Map Projections
@@ -56,6 +57,8 @@
 ; :History:
 ;     Change History::
 ;        Written by David W. Fanning, 21 November 2011.
+;        Never tested, for some reason. Now, several bugs have been fixed and the 
+;           program works as advertised. 17 Sept 2012. DWF.
 ;                
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -92,7 +95,7 @@
 ;        Set this keyword to supress clipping of the plot.
 ;     psym: in, optional, type=integer, default=0
 ;        The plotting symbol to use for the plot. Can use any symbol available in
-;        the Coyote Library routine cgSYMCAT.
+;        the Coyote Library routine SYMCAT.
 ;     symsize: in, optional, type=float, default=1.0
 ;        Set this keyword to the size of symbols.
 ;     t3d: in, optional, type=boolean, default=0
@@ -135,7 +138,7 @@ FUNCTION cgMapPlotS::INIT, mapCoord, $
     IF ~Obj_Valid(mapCoord) THEN Message, 'A valid map object is required to create a cgMapPlotS object.'
     
     ; Initialize superclass object,
-     ok = self -> cgContainer::INIT(parent, _EXTRA=extra) 
+     ok = self -> cgContainer::INIT(_EXTRA=extra) 
      IF ~ok THEN RETURN, 0
 
     ; Default values.
@@ -236,8 +239,8 @@ PRO cgMapPlotS::Draw
         lats = *self.lats
     ENDELSE
     
-;    ; Accommodate cgSYMCAT symbols
-;    IF self.psym GE 0 THEN psym = cgSymCat(self.psym) ELSE psym = (-1) * cgSymCat(Abs(self.psym))
+;    ; Accommodate SYMCAT symbols
+;    IF self.psym GE 0 THEN psym = SymCat(self.psym) ELSE psym = (-1) * SymCat(Abs(self.psym))
 ;    
     ; If clip is not defined, then set it here.
     IF Total(self.clip) EQ 0 $
@@ -250,14 +253,11 @@ PRO cgMapPlotS::Draw
         COLOR=self.color, $
         LINESTYLE=self.linestyle, $
         NOCLIP=self.noclip, $
-        PSYM=psym, $
+        PSYM=self.psym, $
         SYMSIZE=self.symsize, $
         T3D=self.t3d, $
         THICK=self.thick, $
         Z=self.zvalue
-
-    ; Draw children?
-    self -> cgContainer::Draw
 
 END 
 
@@ -288,7 +288,7 @@ END
 ;        Set this keyword to supress clipping of the plot.
 ;     psym: out, optional, type=integer, default=0
 ;        The plotting symbol to use for the plot. Can use any symbol available in
-;        the Coyote Library routine cgSYMCAT.
+;        the Coyote Library routine SYMCAT.
 ;     symsize: out, optional, type=float, default=1.0
 ;        Set this keyword to the size of symbols.
 ;     t3d: out, optional, type=boolean, default=0
@@ -373,7 +373,7 @@ END
 ;        Set this keyword to supress clipping of the plot.
 ;     psym: in, optional, type=integer, default=0
 ;        The plotting symbol to use for the plot. Can use any symbol available in
-;        the Coyote Library routine cgSYMCAT.
+;        the Coyote Library routine SYMCAT.
 ;     symsize: in, optional, type=float, default=1.0
 ;        Set this keyword to the size of symbols.
 ;     t3d: in, optional, type=boolean, default=0
@@ -413,12 +413,10 @@ PRO cgMapPlotS::SetProperty, $
         RETURN
     ENDIF
     IF N_Elements(lons) NE 0 THEN BEGIN
-    ;print, 'lons:', lons
         *self.lons = lons
     ENDIF
     IF N_Elements(lats) NE 0 THEN BEGIN
         *self.lats = lats
-    ;print, 'lats:',  lats
     ENDIF
 
     IF N_Elements(addcmd) NE 0 THEN self -> AddCmd

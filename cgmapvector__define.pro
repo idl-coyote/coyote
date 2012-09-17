@@ -54,6 +54,7 @@
 ; :History:
 ;     Change History::
 ;        Written by David W. Fanning, 21 November 2011.
+;        Tested and bugs fixed. 17 Sept 2012. DWF.
 ;                
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -143,7 +144,7 @@ FUNCTION cgMapVector::INIT, mapCoord, $
     IF ~Obj_Valid(mapCoord) THEN Message, 'A valid map object is required to create a cgMapPlotS object.'
     
     ; Initialize superclass object,
-     ok = self -> cgContainer::INIT(parent, _EXTRA=extra) 
+     ok = self -> cgContainer::INIT( _EXTRA=extra) 
      IF ~ok THEN RETURN, 0
 
     ; Default values.
@@ -400,9 +401,6 @@ PRO cgMapVector::Draw
            HTHICK=self.thick, LENGTH=length, COLOR=self.color, SOLID=self.solid, $
            _EXTRA=extrakeywords, /DATA, LINESTYLE=self.linestyle
     ENDFOR
-
-    ; Draw children?
-    self -> cgContainer::Draw
 
 END 
 

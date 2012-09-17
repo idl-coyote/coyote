@@ -54,6 +54,9 @@
 ;         The name of the output GeoTiff file. If not provided, the user will
 ;         be asked to create a name. If provided, the user will not be prompted
 ;         and this name will be used.
+;     histomatch: in, optional, type=boolean, default=0
+;         Set this keyword to use the histogram of the first image to adjust
+;         the image values of the second image before creating the mosaic.
 ;     imageout: out, optional, type=varies
 ;         The final image mosaic.
 ;     mapout: out, optional, type=object
@@ -79,12 +82,14 @@
 ;     Change History::
 ;        Written, 18 August 2012. DWF. 
 ;        Added SUCCESS keyword 4 September 2012. DWF.
+;        Now blending overlap regions using 50% of pixel values from the two images. 14 Sept 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
 FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
    FILENAME=filename, $
+   HISTOMATCH=histomatch, $
    IMAGEOUT=newImage, $
    MAPOUT=mapout, $
    MISSING=missing, $
@@ -151,14 +156,14 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
           StrTrim(geo_1.PROJECTEDCSTYPEGEOKEY, 2) + ' and ' + StrTrim(geo_2.PROJECTEDCSTYPEGEOKEY,2)
     ENDIF
               
-    ; The scales can be off by a little. We will use the larger of the two
+    ; The scales can be off by a little. We will use the smaller of the two
     ; to make sure we can accommodate both images in the mosaic.
     xscale_1 = geo_1.ModelPixelScaleTag[0]
     yscale_1 = geo_1.ModelPixelScaleTag[1]
     xscale_2 = geo_2.ModelPixelScaleTag[0]
     yscale_2 = geo_2.ModelPixelScaleTag[1]
-    xscale = xscale_1 > xscale_2
-    yscale = yscale_1 > yscale_2
+    xscale = xscale_1 < xscale_2
+    yscale = yscale_1 < yscale_2
     
     ; Get the image map ranges and create a mosaic image of the proper size.
     m1 -> GetProperty, XRange=xr_1, YRange=yr_1
@@ -190,28 +195,49 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
     xvec = Scale_Vector(DIndgen(xnumPixels), xr[0], xr[1])
     yvec = Scale_Vector(DIndgen(ynumPixels), yr[0], yr[1])
 
-    ; Locate the lower-left corner of each image in pixel coordinates.
-    xloc = 0 > Value_Locate(xvec, [xr_1[0], xr_2[0]])
-    yloc = 0 > Value_Locate(yvec, [yr_1[0], yr_2[0]]) 
+    ; Match histograms?
+    IF Keyword_Set(histomatch) THEN image_2 = Histomatch(Temporary(image_2), image_1)
     
     IF trueIndex NE -1 THEN BEGIN
        FOR j=0,2 DO BEGIN
            temp1 = image_1[*,*,j]
-           s = Size(temp_1, /DIMENSIONS)
-           newImage[xloc[0]:xloc[0]+s[0]-1, yloc[0]:yloc[0]+s[1]-1] = temp1
+           xloc = 0 > Value_Locate(xvec, [xr_1[0], xr_1[1]])
+           yloc = 0 > Value_Locate(yvec, [yr_1[0], yr_1[1]])
+           xsize = xloc[1]-xloc[0]+1
+           ysize = yloc[1]-yloc[0]+1 
+           newImage[xloc[0]:xloc[1], yloc[0]:yloc[1], j] = Congrid(temp1, xsize, ysize)
            Undefine, temp1
            temp2 = image_2[*,*,j]
-           s = Size(temp2, /DIMENSIONS)
-           newImage[xloc[1]:xloc[1]+s[0]-1, yloc[1]:yloc[1]+s[1]-1] = $
-              temp_2 > newImage[xloc[1]:xloc[1]+s[0]-1, yloc[1]:yloc[1]+s[1]-1]
-           Undefine, temp2
+           xloc = 0 > Value_Locate(xvec, [xr_2[0], xr_2[1]])
+           yloc = 0 > Value_Locate(yvec, [yr_2[0], yr_2[1]]) 
+           xsize = xloc[1]-xloc[0]+1
+           ysize = yloc[1]-yloc[0]+1 
+           temp = Make_Array(xnumPixels, ynumPixels, TYPE=imageType, VALUE=0)
+           temp[xloc[0]:xloc[1], yloc[0]:yloc[1]] = Congrid(temp2, xsize, ysize)
+           overlap = Where((temp NE 0) AND (temp2 NE 0), count)
+           temp[overlap] = Byte(Float(temp[overlap])*0.5 + Float(temp2[overlap])*0.5)
+           zeros = Where(temp EQ 0)
+           temp[zeros] = temps2[zeros]
+           temp2 = Temporary(temp)
+           newImage[*,*,j] = Temporary(temp2)
        ENDFOR
     ENDIF ELSE BEGIN
-        s = Size(image_1, /DIMENSIONS)
-        newImage[xloc[0]:xloc[0]+s[0]-1, yloc[0]:yloc[0]+s[1]-1] = image_1
-        s = Size(image_2, /DIMENSIONS)
-        newImage[xloc[1]:xloc[1]+s[0]-1, yloc[1]:yloc[1]+s[1]-1] = $
-              image_2 > newImage[xloc[1]:xloc[1]+s[0]-1, yloc[1]:yloc[1]+s[1]-1]
+        xloc = 0 > Value_Locate(xvec, [xr_1[0], xr_1[1]])
+        yloc = 0 > Value_Locate(yvec, [yr_1[0], yr_1[1]])
+        xsize = xloc[1]-xloc[0]+1
+        ysize = yloc[1]-yloc[0]+1 
+        newImage[xloc[0]:xloc[1], yloc[0]:yloc[1]] = Congrid(image_1, xsize, ysize)
+        xloc = 0 > Value_Locate(xvec, [xr_2[0], xr_2[1]])
+        yloc = 0 > Value_Locate(yvec, [yr_2[0], yr_2[1]]) 
+        xsize = xloc[1]-xloc[0]+1
+        ysize = yloc[1]-yloc[0]+1 
+        temp = Make_Array(xnumPixels, ynumPixels, TYPE=imageType, VALUE=0)
+        temp[xloc[0]:xloc[1], yloc[0]:yloc[1]] = Congrid(image_2, xsize, ysize)
+        overlap = Where((temp NE 0) AND (newimage NE 0), count)
+        temp[overlap] = Byte(Float(temp[overlap])*0.5 + Float(newimage[overlap])*0.5)
+        zeros = Where(temp EQ 0)
+        temp[zeros] = newimage[zeros]
+        newImage = Temporary(temp)
     ENDELSE
     
     ; Set all zero values in the new image to the missing value. This

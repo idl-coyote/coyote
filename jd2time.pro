@@ -1,58 +1,15 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;    JD2TIME
+;   jd2Time
 ;
 ; PURPOSE:
+;   The purpose of this function is to convert a Julian day number into
+;   a time string of the form "16 Mar 2009".
 ;
-;    The purpose of this function is to convert a Julian day number into
-;    a time string of the form "16 Mar 2009".
-;
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: david@idlcoyote.com
-;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CATEGORY:
-;
-;    Utility.
-;
-; CALLING SEQUENCE:
-;
-;    result = JD2TIME(jdnumber, jdyear)
-;
-; INPUTS:
-;
-;    jdnumber:   A Julian day number or array of Julian day numbers. If absent,
-;                today's current Julian day number.
-;                
-;    jdyear:     The year for which the Julian day number applies. If absent, the current year.
-;    
-; OUTPUTS:
-;
-;    result:     A scalar or vector of time strings of the form "16 Mar 2009 15:34:26".
-;
-; KEYWORDS:
-;
-;    None.
-;    
-; DEPENDENCIES:
-; 
-;    Requires THEMONTHS from the Coyote Library.
-;    
-;         http://www.idlcoyote.com/programs/themonths.pro
-;
-; MODIFICATION HISTORY:
-;
-;    Written by: David W. Fanning, 25 June 2009.
-;-
 ;******************************************************************************************;
-;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -77,7 +34,54 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-FUNCTION JD2Time, jdnumber, jdyear
+;
+;+
+; The purpose of this function is to convert a Julian day number into
+; a time string of the form "16 Mar 2009".
+; 
+; :Categories:
+;    Utilities
+;    
+; :Returns:
+;    A scalar or vector of time strings of the form "16 Mar 2009 15:34:26".
+;    
+; :Params:
+;    jdnumber: in, optional, type=integer
+;       A Julian day number or array of Julian day numbers. If absent,
+;       today's current Julian day number.
+;    jdyear: in, optional, type=integer
+;       The year for which the Julian day number applies. If absent, the current year.
+;       
+; :Keywords:
+;     day: out, optional, type=integer
+;        The day of the month as an integer.
+;     month: out, optional, type=integer
+;        The month as an integer.
+;     year: out, optional, type=integer
+;        The year as an integer.
+;        
+; :Examples:
+;    Used like the IDL AXIS command::
+;       IDL> cgPlot, cgDemoData(1), YStyle=8, Position=[0.1, 0.1, 0.85, 0.9], /Window
+;       IDL> cgAxis, /YAxis, Color='red', YRange=[-500, 500], /Save, /Window
+;       
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning 
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Written by: David W. Fanning, 25 June 2009.
+;
+; :Copyright:
+;     Copyright (c) 2009-2012, Fanning Software Consulting, Inc.
+;-
+FUNCTION JD2Time, jdnumber, jdyear, DAY=day, MONTH=month, YEAR=year
 
     ; Return to caller, on error
     On_Error, 2
@@ -102,6 +106,7 @@ FUNCTION JD2Time, jdnumber, jdyear
     ; Make sure you have a year and that the number matches the number of days.
     IF N_Elements(jdyear) EQ 0 THEN jdyear = Replicate(Fix(StrMid(Systime(), 19)), num)
     IF N_Elements(jdyear) NE num THEN jdyear = Replicate(jdyear, num)
+    year = jdyear
     
     ; Calculate the date.
     CalDat, Julday(1, jdnumber, jdyear), month, day

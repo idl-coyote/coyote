@@ -1878,7 +1878,7 @@ IF Obj_Valid(self.filenameID) THEN BEGIN
 ENDIF ELSE BEGIN
    IF self.filenameSet NE "" THEN BEGIN
       IF N_Elements(directoryName) EQ 0 THEN BEGIN
-            defaultFileName = FSC_Base_Filename(self.filenameSet, EXTENSION=ext, DIRECTORY=directoryName)
+            defaultFileName = cgRootName(self.filenameSet, EXTENSION=ext, DIRECTORY=directoryName)
             IF directoryName EQ "" THEN CD, Current=directoryName 
        ENDIF ELSE BEGIN
             defaultFileName = "idl"

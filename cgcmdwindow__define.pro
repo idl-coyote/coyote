@@ -1333,7 +1333,7 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
     IF StrUpCase(filetype) EQ 'PDF' THEN rastertype = -1 ELSE rastertype = self.im_raster
     
     ; Strip the extension off the filename.
-    outname = FSC_Base_Filename(filename, DIRECTORY=dirName)
+    outname = cgRootName(filename, DIRECTORY=dirName)
     
     ; Put it back together without an extension.
     outputFilename = Filepath(ROOT_DIR=dirName, outname)
@@ -1661,7 +1661,7 @@ PRO cgCmdWindow::CreatePostScriptFile, event
     
     ; Save the name of the last output file.
     self.lastWriteDir = File_DirName(keywords.filename)
-    self.lastWriteFile = FSC_Base_Filename(keywords.filename)
+    self.lastWriteFile = cgRootName(keywords.filename)
     
     ; Execute the graphics commands.
     self -> ExecuteCommands
@@ -2257,7 +2257,7 @@ PRO cgCmdWindow::Output, filename
     IF N_Elements(filename) EQ 0 THEN filename = 'idl.ps'
     
     ; The type of file is determined by the filename extension.
-    rootname = FSC_Base_Filename(filename, DIRECTORY=dir, EXTENSION=ext)
+    rootname = cgRootName(filename, DIRECTORY=dir, EXTENSION=ext)
     CASE StrUpCase(ext) OF
        'PS':   self -> AutoPostScriptFile, filename
        'EPS':  self -> AutoPostScriptFile, filename
@@ -2549,7 +2549,7 @@ PRO cgCmdWindow::SaveAsRaster, event
     IF filename EQ "" THEN RETURN
     
     ; Parset the name.
-    root_name = FSC_Base_Filename(filename, DIRECTORY=dirName)
+    root_name = cgRootName(filename, DIRECTORY=dirName)
     outname = Filepath(ROOT_DIR=dirname, root_name)
     
     ; Save this name.

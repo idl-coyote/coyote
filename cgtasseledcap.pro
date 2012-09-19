@@ -128,7 +128,7 @@ FUNCTION cgTasseledCap, input, $
    
    ; Is the input a filename or an actual image?
    IF Size(input, /TNAME) EQ 'STRING' THEN BEGIN
-       rootName = FSC_Base_Filename(input, DIRECTORY=filedir, EXTENSION=ext)
+       rootName = cgRootName(input, DIRECTORY=filedir, EXTENSION=ext)
        image = Read_Image(input)
        putback = 0
    ENDIF ELSE BEGIN

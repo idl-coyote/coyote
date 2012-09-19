@@ -272,7 +272,7 @@ PRO PS_END, $
    
    IF ps_struct.convert NE "" THEN BEGIN
 
-        basename = FSC_Base_Filename(ps_struct.filename, DIRECTORY=theDir, EXTENSION=theExtension)
+        basename = cgRootName(ps_struct.filename, DIRECTORY=theDir, EXTENSION=theExtension)
         CASE 1 OF
             ps_struct.convert EQ 'BMP':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.bmp')
             ps_struct.convert EQ 'GIF':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.gif')

@@ -93,7 +93,7 @@ FUNCTION cgFileSelect::INIT, parent, $
    IF filename EQ "" THEN BEGIN
       CD, CURRENT=lastDir 
    ENDIF ELSE BEGIN
-      root = FSC_Base_Filename(filename, DIRECTORY=lastDir)
+      root = cgRootName(filename, DIRECTORY=lastDir)
    ENDELSE
    
    ; Create the widgets for the program.
@@ -142,9 +142,9 @@ PRO cgFileSelect_Events, event
     Widget_Control, event.id, GET_UVALUE=self
     self -> GetProperty, LASTDIR=lastDir, FILENAME=filename, PARENT=parent, TLB=tlb
     filename = Dialog_Pickfile(PATH=lastDir, /WRITE, Title='Select File...', $
-       FILE=FSC_Base_Filename(filename))
+       FILE=cgRootName(filename))
     IF filename NE "" THEN BEGIN
-       rootname = FSC_Base_Filename(filename, DIRECTORY=lastDir)
+       rootname = cgRootName(filename, DIRECTORY=lastDir)
        self -> SetProperty, FILENAME=filename, LASTDIR=lastDir
     ENDIF
         

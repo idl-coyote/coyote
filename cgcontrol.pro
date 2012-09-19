@@ -313,7 +313,7 @@ PRO cgControl, selection, $
         Undefine, create_tiff
         
         ; Parse the filename to find a file extension.
-        rootName = FSC_Base_Filename(output, DIRECTORY=thisDir, EXTENSION=ext)
+        rootName = cgRootName(output, DIRECTORY=thisDir, EXTENSION=ext)
         extension = StrUpCase(ext)
 
         typeOfOutput = ['BMP','EPS', 'GIF','JPEG','JPG','PDF', 'PNG','PS', 'TIFF', 'TIF']

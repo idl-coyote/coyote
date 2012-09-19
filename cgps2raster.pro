@@ -198,7 +198,7 @@ PRO cgPS2Raster, ps_file, $
       ysize = 11
    ENDELSE
    ; Construct an output filename, if needed.
-   basename = FSC_Base_Filename(ps_file, DIRECTORY=theDir, EXTENSION=theExtension)
+   basename = cgRootName(ps_file, DIRECTORY=theDir, EXTENSION=theExtension)
    IF theDir EQ "" THEN CD, CURRENT=theDir
    IF N_Elements(outfilename) EQ 0 THEN BEGIN
        CASE 1 OF

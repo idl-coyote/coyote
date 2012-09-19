@@ -85,7 +85,7 @@
 ;              http://www.idlcoyote.com/centertlb.pro
 ;              http://www.idlcoyote.com/undefine.pro
 ;              http://www.idlcoyote.com/textbox.pro
-;              http://www.idlcoyote.com/fsc_base_filename.pro
+;              http://www.idlcoyote.com/cgRootName.pro
 ;              http://www.idlcoyote.com/textlineformat.pro
 ;
 ; MODIFICATION HISTORY:

@@ -325,7 +325,7 @@ PRO cgTeminatorMap, center_lon, center_lat, $
    
    ; Need a PostScript file? Make sure you have a PostScript file extension.
    IF N_Elements(outfilename) EQ 0 THEN outfilename = 'cgTeminatorMap.ps'
-   rootname = FSC_Base_Filename(outfilename, EXTENSION=ext, DIRECTORY=dir)
+   rootname = cgRootName(outfilename, EXTENSION=ext, DIRECTORY=dir)
    IF (StrUpCase(ext) EQ "PNG") && png THEN BEGIN
         outfilename = FilePath(ROOT_DIR=dir, rootname + '.' + 'ps')
    ENDIF

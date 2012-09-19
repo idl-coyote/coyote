@@ -154,7 +154,7 @@ PRO cgPS2PDF, ps_file, pdf_file, $
    
    ; Need to construct the PDF output file name?
    IF N_Elements(pdf_file) EQ 0 THEN BEGIN
-      root_name = FSC_Base_Filename(ps_file, DIRECTORY=thisDir)
+      root_name = cgRootName(ps_file, DIRECTORY=thisDir)
       pdf_file = Filepath(ROOT_DIR=thisDir, root_name + ".pdf")
    ENDIF
    

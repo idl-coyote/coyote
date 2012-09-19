@@ -373,7 +373,7 @@ PRO cgSurf, data, x, y, $
        ; If the output string has a dot character, then this must be a
        ; filename, and we will determine the type of file from the filename extension.
        IF StrPos(output, '.') NE -1 THEN BEGIN
-             root_name = FSC_Base_Filename(output, DIRECTORY=theDir, EXTENSION=ext)
+             root_name = cgRootName(output, DIRECTORY=theDir, EXTENSION=ext)
              IF theDir EQ "" THEN CD, CURRENT=theDir
              outfilename = output
              outputSelection = StrUpCase(ext)
@@ -448,7 +448,7 @@ PRO cgSurf, data, x, y, $
        ; We need to know the root name of the file, because we have to make a PostScript
        ; file of the same name. At least we do if the type is not PS or EPS.
        IF (outputSelection NE 'PS') && (outputSelection NE 'EPS') THEN BEGIN
-           root_name = FSC_Base_Filename(outfilename, DIRECTORY=theDir)
+           root_name = cgRootName(outfilename, DIRECTORY=theDir)
            IF theDir EQ "" THEN CD, CURRENT=theDir
            ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
        ENDIF ELSE ps_filename = outfilename

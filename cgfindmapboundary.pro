@@ -149,7 +149,7 @@ FUNCTION cgFindMapBoundary, filename, boundary, $
     
     ; Maybe it is a GPD file produced from the GPD_Viewer.
     ; If so, compute the limits from the file.
-    root_name = FSC_Base_Filename(filename, EXTENSION=ext)
+    root_name = cgRootName(filename, EXTENSION=ext)
     IF StrLowCase(ext) NE 'gpd' THEN $
         Message, 'Do not recognize the file as one for which a ' + $
                  'grid boundary can be computed.'

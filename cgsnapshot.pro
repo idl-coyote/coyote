@@ -214,7 +214,7 @@ FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
     ; Is the FILENAME keyword being used? If so, get the type of the
     ; file from the filename extension.
     IF N_Elements(filename) NE 0 THEN BEGIN
-       root_name = FSC_Base_Filename(filename, DIRECTORY=theDir, EXTENSION=ext)
+       root_name = cgRootName(filename, DIRECTORY=theDir, EXTENSION=ext)
        IF ext NE "" THEN BEGIN
            type = StrUpCase(ext)
            typeFromExtension = 1

@@ -72,7 +72,7 @@
 ;              http://www.idlcoyote.com/programs/centertlb.pro
 ;              http://www.idlcoyote.com/programs/undefine.pro
 ;              http://www.idlcoyote.com/programs/textbox.pro
-;              http://www.idlcoyote.com/programs/fsc_base_filename.pro
+;              http://www.idlcoyote.com/programs/cgrootname.pro
 ;              http://www.idlcoyote.com/programs/textlineformat.pro
 ;              
 ;     These files may be (almost certainly are!) dependent on other Coyote Library files.

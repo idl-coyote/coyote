@@ -1322,7 +1322,7 @@ Function cgGeoMap, image, $
        thisImage = Reverse(Temporary(thisImage), yindex+1)
        IF N_Elements(r) NE 0 THEN palette=[[r],[g],[b]]
        mapCoord -> SetProperty, ONIMAGE=1
-       cgWindow, WASPECT=Float(ysize)/xsize, WTitle=FSC_Base_Filename(geofile)
+       cgWindow, WASPECT=Float(ysize)/xsize, WTitle=cgRootName(geofile)
        IF Keyword_Set(clip) THEN BEGIN
             cgImage, thisImage, /Keep_Aspect, /AddCmd, Margin=0.05, $
                 STRETCH=2, PALETTE=palette, _EXTRA=extra       

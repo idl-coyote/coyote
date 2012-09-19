@@ -94,7 +94,7 @@
 ;              http://www.idlcoyote.com/programs/centertlb.pro
 ;              http://www.idlcoyote.com/programs/undefine.pro
 ;              http://www.idlcoyote.com/programs/textbox.pro
-;              http://www.idlcoyote.com/programs/fsc_base_filename.pro
+;              http://www.idlcoyote.com/programs/cgrootname.pro
 ;              http://www.idlcoyote.com/programs/textlineformat.pro
 ;
 ; METHODS:
@@ -1517,7 +1517,7 @@ PRO NCDF_DATA::ReadAttributeFromGUI, event
    b = Widget_Base(tlb, ROW=1, XPAD=0, YPAD=0, /NONEXCLUSIVE)
    
    okToAppend = 1
-   IF StrPos(FSC_BASE_FILENAME(self.filename), '.') NE -1 THEN okToAppend = 0
+   IF StrPos(cgRootName(self.filename), '.') NE -1 THEN okToAppend = 0
    IF StrPos(self.filename, '-') NE -1 THEN okToAppend = 0
    IF StrPos(self.filename, ' ') NE -1 THEN okToAppend = 0
    IF okToAppend THEN self.appendNameID = Widget_Button(b, Value='Append Filename to Attribute Name', UVALUE='APPEND_FILENAME')
@@ -1574,7 +1574,7 @@ PRO NCDF_DATA::ReadAttributeFromGUI_Events, event
                   attrName = thisAttrName
                ENDIF
                
-               attrName = (addName) ? FSC_Base_FileName(self.filename) + '_' + attrName[0] : attrName[0]
+               attrName = (addName) ? cgRootName(self.filename) + '_' + attrName[0] : attrName[0]
                IF attrName EQ "" THEN Message, 'Must have a non-null attribute name to create an attribute.'
                
                ; Which attribute do you want to read?
@@ -1605,7 +1605,7 @@ PRO NCDF_DATA::ReadAttributeFromGUI_Events, event
                IF Widget_Info(self.appendNameID, /Valid_ID) THEN $
                   addName = Widget_Info(self.appendNameID, /BUTTON_SET) ELSE addName = 0
                Widget_Control, self.attrNameID, Get_Value=attrName
-               attrName = (addName) ? FSC_Base_FileName(self.filename) + '_' + attrName[0] : attrName[0]
+               attrName = (addName) ? cgRootName(self.filename) + '_' + attrName[0] : attrName[0]
                thisAttrName = IDL_ValidName(attrName, /CONVERT_ALL)
                IF thisAttrName NE attrName THEN BEGIN
                   Widget_Control, self.attrNameID, Set_Value=thisAttrName       
@@ -2225,7 +2225,7 @@ PRO NCDF_DATA::ReadVariableFromGUI, event
    b = Widget_Base(tlb, ROW=1, XPAD=0, YPAD=0, /NONEXCLUSIVE)
    
    okToAppend = 1
-   IF StrPos(FSC_BASE_FILENAME(self.filename), '.') NE -1 THEN okToAppend = 0
+   IF StrPos(cgRootName(self.filename), '.') NE -1 THEN okToAppend = 0
    IF StrPos(self.filename, '-') NE -1 THEN okToAppend = 0
    IF StrPos(self.filename, ' ') NE -1 THEN okToAppend = 0
    IF okToAppend THEN self.appendNameID = Widget_Button(b, Value='Append Filename to Variable Name', UVALUE='APPEND_FILENAME')
@@ -2320,7 +2320,7 @@ PRO NCDF_DATA::ReadVariableFromGUI_Events, event
                IF Widget_Info(self.appendNameID, /Valid_ID) THEN $
                   addName = Widget_Info(self.appendNameID, /BUTTON_SET) ELSE addName = 0
                Widget_Control, self.varNameID, Get_Value=varName
-               varName = (addName) ? FSC_Base_FileName(self.filename) + '_' + varName[0] : varName[0]
+               varName = (addName) ? cgRootName(self.filename) + '_' + varName[0] : varName[0]
                thisVarName = IDL_ValidName(varName, /CONVERT_ALL)
                IF thisVarName NE varName THEN BEGIN
                   Widget_Control, self.varNameID, Set_Value=IDL_ValidName(thisVarName, /CONVERT_ALL)       
@@ -2352,7 +2352,7 @@ PRO NCDF_DATA::ReadVariableFromGUI_Events, event
                IF Widget_Info(self.appendNameID, /Valid_ID) THEN $
                   addName = Widget_Info(self.appendNameID, /BUTTON_SET) ELSE addName = 0
                Widget_Control, self.varNameID, Get_Value=varName
-               varName = (addName) ? FSC_Base_FileName(self.filename) + '_' + varName[0] : varName[0]
+               varName = (addName) ? cgRootName(self.filename) + '_' + varName[0] : varName[0]
                IF varName EQ "" THEN Message, 'Must have a non-null variable name to create a variable.'
                
                ; Which variable do you want to read?
@@ -2575,7 +2575,7 @@ PRO NCDF_DATA::ReadVarPlusFromGUI, event
    b = Widget_Base(tlb, ROW=1, XPAD=0, YPAD=0, /NONEXCLUSIVE)
    
    okToAppend = 1
-   IF StrPos(FSC_BASE_FILENAME(self.filename), '.') NE -1 THEN okToAppend = 0
+   IF StrPos(cgRootName(self.filename), '.') NE -1 THEN okToAppend = 0
    IF StrPos(self.filename, '-') NE -1 THEN okToAppend = 0
    IF StrPos(self.filename, ' ') NE -1 THEN okToAppend = 0
    IF okToAppend THEN self.appendNameID = Widget_Button(b, Value='Append Filename to Variable Name', UVALUE='APPEND_FILENAME')
@@ -2626,7 +2626,7 @@ PRO NCDF_DATA::ReadVarPlusFromGUI_Events, event
                IF Widget_Info(self.appendNameID, /Valid_ID) THEN $
                   addName = Widget_Info(self.appendNameID, /BUTTON_SET) ELSE addName = 0
                Widget_Control, self.varPlusNameID, Get_Value=varName
-               varName = (addName) ? FSC_Base_FileName(self.filename) + '_' + varName[0] : varName[0]
+               varName = (addName) ? cgRootName(self.filename) + '_' + varName[0] : varName[0]
                thisVarName = IDL_ValidName(varName, /CONVERT_ALL)
                IF thisVarName NE varName THEN BEGIN
                   Widget_Control, self.varPlusNameID, Set_Value=IDL_ValidName(thisVarName, /CONVERT_ALL)       
@@ -2658,7 +2658,7 @@ PRO NCDF_DATA::ReadVarPlusFromGUI_Events, event
                IF Widget_Info(self.appendNameID, /Valid_ID) THEN $
                   addName = Widget_Info(self.appendNameID, /BUTTON_SET) ELSE addName = 0
                Widget_Control, self.varplusNameID, Get_Value=varName
-               varName = (addName) ? FSC_Base_FileName(self.filename) + '_' + varName[0] : varName[0]
+               varName = (addName) ? cgRootName(self.filename) + '_' + varName[0] : varName[0]
                IF varName EQ "" THEN Message, 'Must have a non-null variable name to create a variable.'
                
                ; Which variable do you want to read?

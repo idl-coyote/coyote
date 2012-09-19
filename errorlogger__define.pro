@@ -590,7 +590,7 @@ FUNCTION ErrorLogger::OpenFile, newLogFilename, DELETE_CURRENT_FILE=delete_curre
     ENDIF
     
     ; Can we write into the specified directory?
-    basename = FSC_Base_Filename(newLogFilename, EXTENSION=ext, DIRECTORY=dir)
+    basename = cgRootName(newLogFilename, EXTENSION=ext, DIRECTORY=dir)
     IF File_Test(dir, /DIRECTORY) EQ 0 THEN Message, 'Specified directory (' + dir + ') does not exist.' 
     
     ; Close the current file (if any) before opening a new one.
@@ -923,7 +923,7 @@ FUNCTION ErrorLogger::INIT, filename, $
     
     ; Does the name need a time stamp?
     IF Keyword_Set(timestamp) THEN BEGIN
-       basename = FSC_Base_Filename(logFilename, EXTENSION=ext, DIRECTORY=dir)
+       basename = cgRootName(logFilename, EXTENSION=ext, DIRECTORY=dir)
        time = Systime(1)
        randomdigits =  StrMid(StrTrim(time - Long(time),2), 2)
        logFilename = Filepath(ROOT_DIR=dir, basename +  Timestamp(RANDOM_DIGITS=6, /VALID))

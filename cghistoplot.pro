@@ -72,6 +72,10 @@
 ;       all your problems.
 ;    charsize: in, optional, type=float
 ;       The character size of the annotations. Default set by calling cgDefCharSize().
+;    color: in, optional, type=string
+;       Used as a shorthand way of setting the `DataColorName` keyword or, if the `FillPolygon`
+;       keyword is set, the `PolyColor` keyword. Only used if those other two keywords are not
+;       set.
 ;    datacolorname: in, optional, type=string, default="indian red"
 ;       The name of the data color for drawing the histogram outlines.
 ;    filename: in, optional, type=string
@@ -301,6 +305,7 @@
 ;        Aaauuughhh! Typo introduced in yesterday's fix before I saved final version. 27 July 2012. DWF.
 ;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;        Mis-spelled "probability" in one section of the code. Fixed. 31 July 2012. DWF.
+;        Added COLOR keyword. 19 Sept 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
@@ -312,6 +317,7 @@ PRO cgHistoplot, $                  ; The program name.
    BACKCOLORNAME=backcolorName, $   ; The background color.
    BINSIZE=binsize, $               ; The histogram bin size.
    CHARSIZE=charsize, $
+   COLOR=color, $
    DATACOLORNAME=datacolorName, $   ; The data color.
    FILENAME=file, $                 ; For specifying a color name file.
    FILLPOLYGON=fillpolygon, $       ; Set if you want filled polygons
@@ -387,6 +393,7 @@ PRO cgHistoplot, $                  ; The program name.
                AXISCOLORNAME=axisColorName, $   ; The axis color.
                BACKCOLORNAME=backcolorName, $   ; The background color.
                CHARSIZE=charsize, $
+               COLOR=color, $
                DATACOLORNAME=datacolorName, $   ; The data color.
                _EXTRA=extra, $                  ; For passing extra keywords.
                FILENAME=file, $                 ; For specifying a color name file.
@@ -448,6 +455,7 @@ PRO cgHistoplot, $                  ; The program name.
                AXISCOLORNAME=axisColorName, $   ; The axis color.
                BACKCOLORNAME=backcolorName, $   ; The background color.
                CHARSIZE=charsize, $
+               COLOR=color, $
                DATACOLORNAME=datacolorName, $   ; The data color.
                _EXTRA=extra, $                  ; For passing extra keywords.
                FILENAME=file, $                 ; For specifying a color name file.
@@ -616,6 +624,10 @@ PRO cgHistoplot, $                  ; The program name.
    IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
    ; Check for parameters.
+   IF N_Elements(color) NE 0 THEN BEGIN
+       IF Keyword_Set(fillpolygon) && (N_Elements(polycolorname) EQ 0) THEN polycolorname = color
+       IF ~Keyword_Set(fillpolygon) && (N_Elements(datacolorname) EQ 0) THEN datacolorname = color
+   ENDIF
    IF N_Elements(data) EQ 0 THEN Message, 'Must pass data to histogram.'
    IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize()
    IF N_Elements(smooth) NE 0 THEN BEGIN

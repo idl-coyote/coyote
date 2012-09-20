@@ -196,11 +196,12 @@
 ;   Fixed a problem in which the starting directory was changed on exit. 20 Nov 2010. DWF.
 ;   Change EXAMPLES to more easily remembered DEMO keyword. 29 Nov 2010. DWF.
 ;   Removed NOINTERPOLATION keywords in going from TVIMAGE to cgImage. 22 Feb 2011. DWF.
+;   Fixed a problem reading 2D Tiff files. 20 Sept 2012. DWF.
 ;   
 ;-
 ;
 ;******************************************************************************************;
-;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
+;  Copyright (c) 2008-2012, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -1200,7 +1201,7 @@ PRO ImageSelect_ReadFiles, extension, filename, info, fileinfo, image, ok, type,
                (Scope_VarFetch('geotiff', LEVEL=1, /ENTER)) = geotiff
             
             ENDIF
-         ENDIF
+         ENDIF ELSE orientation = 1
          IF orientation EQ 1 THEN BEGIN
              dims = Image_Dimensions(image, YINDEX=yindex)
              image = Reverse(Temporary(image), yindex+1)
@@ -1222,7 +1223,7 @@ PRO ImageSelect_ReadFiles, extension, filename, info, fileinfo, image, ok, type,
                (Scope_VarFetch('geotiff', LEVEL=1, /ENTER)) = geotiff
             
             ENDIF
-         ENDIF
+         ENDIF ELSE orientation = 1
          IF orientation EQ 1 THEN BEGIN
              dims = Image_Dimensions(image, YINDEX=yindex)
              image = Reverse(Temporary(image), yindex+1)

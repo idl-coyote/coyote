@@ -98,8 +98,8 @@ PRO cgZImage_ZoomWindow_Events, event
     ; Create the proper vectors to locate the cursor in the image.
     xvec = Scale_Vector(Findgen(info.zxsize), info.xrange[0], info.xrange[1])
     yvec = Scale_Vector(Findgen(info.zysize), info.yrange[0], info.yrange[1])
-    xloc = Round(xvec[event.x])
-    yloc = Round(yvec[event.y])
+    xloc = 0 > Round(xvec[event.x]) < (info.xsize-1)
+    yloc = 0 > Round(yvec[event.y]) < (info.ysize-1)
     
     ; Create the text for the status bar.
     dims = Image_Dimensions(info.image, XSize=xsize, YSize=ysize, TrueIndex=trueindex)
@@ -121,7 +121,15 @@ PRO cgZImage_ZoomWindow_Events, event
     ENDCASE
     
     ; Create the text for the statusbar widget and update the status bar.
-    loctext = 'XLoc: ' + Strtrim(xloc,2) + '  YLoc: ' + Strtrim(yloc,2)
+    IF Obj_Valid(*info.map) THEN BEGIN
+        *info.map -> GetProperty, XRANGE=xrange, YRANGE=yrange
+        xvec = Scale_Vector(Findgen(info.xsize), xrange[0], xrange[1])
+        yvec = Scale_Vector(Findgen(info.ysize), yrange[0], yrange[1])
+        ll = *info.map -> Inverse(xvec[xloc], yvec[yloc])
+        loctext = 'Lat: ' + String(ll[1], Format='(F0.3)') + '  Lon: ' + String(ll[0], Format='(F0.3)')
+    ENDIF ELSE BEGIN
+       loctext = 'XLoc: ' + Strtrim(xloc,2) + '  YLoc: ' + Strtrim(yloc,2)
+    ENDELSE
     imageType = Size(value, /TNAME)
     IF imageType EQ 'BYTE' THEN value = Fix(value)
     IF N_Elements(value) EQ 1 THEN BEGIN
@@ -131,6 +139,19 @@ PRO cgZImage_ZoomWindow_Events, event
              StrTrim(value[1],2) + ', ' + StrTrim(value[2],2) + ')'
     ENDELSE
     Widget_Control, info.statusbar, Set_Value=loctext + valuetext
+     
+    ; Draw the box and a small circle to locate the cursor on the
+    ; larger image.
+    WSet, info.drawIndex
+    Device, Copy=[0, 0, info.xsize, info.ysize, 0, 0, info.pixIndex]    
+    xvec = Scale_Vector(Findgen(!D.X_Size), 0, info.xsize)
+    yvec = Scale_Vector(Findgen(!D.Y_Size), 0, info.ysize)
+    xdloc = Value_Locate(xvec, xloc)
+    ydloc = Value_Locate(yvec, yloc)
+    cgPlotS, [info.xs, info.xs, info.xd, info.xd, info.xs], $
+             [info.ys, info.yd, info.yd, info.ys, info.ys], $
+              /Device, Color=info.boxcolor
+    cgPlotS, xdloc, ydloc, /Device, PSYM='OpenCircle', Color=info.boxcolor, SymSize=1.5
     
     ; Replace the info structure.
     Widget_Control, tlb, Set_UValue=info, /No_Copy
@@ -196,6 +217,9 @@ PRO cgZImage_ZoomDied, zoomID
        
     WSet, info.pixIndex
     Device, Copy=[0, 0, info.xsize, info.ysize, 0, 0, info.drawIndex]
+    
+    ; Clear the statusbar widget.
+    Widget_Control, info.statusbar, Set_Value=""
     
     ; Store the info structure.
     Widget_Control, tlb, Set_UValue=info, /No_Copy
@@ -301,7 +325,7 @@ PRO cgZImage_LoadColors, event
                 Bottom=info.bottom, NotifyID=[event.id, event.top], $
                 Title='ZImage Colors (' + StrTrim(info.drawIndex,2) + ')'
             Widget_Control, info.controlID, Map=0
-            info.map = 0
+            info.mapcontrols = 0
             END
             
         'XCOLORS_LOAD':BEGIN
@@ -418,6 +442,14 @@ PRO cgZImage_Cleanup, tlb
         Ptr_Free, info.exponent
         Ptr_Free, info.gamma
         Ptr_Free, info.interpolate
+        IF info.createdmap THEN BEGIN
+           mapObj = *info.map
+           Obj_Destroy, mapObj
+           Ptr_Free, info.map 
+        ENDIF ELSE BEGIN
+           mapObj = *info.map
+           Ptr_Free, info.map
+        ENDELSE
         Ptr_Free, info.max
         Ptr_Free, info.mean
         Ptr_Free, info.missing_color
@@ -463,7 +495,7 @@ PRO cgZImage_Factor, event
     Widget_Control, event.id, Get_UValue=factor
     info.zoomfactor = factor[event.index]
     Widget_Control, info.controlID, Map=0
-    info.map = 0
+    info.mapcontrols = 0
     Widget_Control, event.top, Set_UValue=info, /No_Copy
 END ; ----------------------------------------------------------------------
 
@@ -512,12 +544,12 @@ PRO cgZImage_DrawEvents, event
        ; If RIGHT, then map or unmap controls.
        buttonPressed = buttons[event.press]
        IF buttonPressed EQ 'RIGHT' THEN BEGIN
-          IF info.map EQ 1 THEN BEGIN
+          IF info.mapcontrols EQ 1 THEN BEGIN
              Widget_Control, info.controlID, Map=0
              info.map = 0
           ENDIF ELSE BEGIN
              Widget_Control, info.controlID, Map=1
-             info.map = 1
+             info.mapcontrols = 1
           ENDELSE
           Widget_Control, event.top, Set_UValue=info, /No_Copy
           RETURN
@@ -729,7 +761,7 @@ PRO cgZImage_DrawEvents, event
          ENDIF ELSE info.hasScrollBars = 0
          
          ; Zoom window does not exist. Create it.
-         zoomtlb = Widget_Base(Title='Zoomed Image', Group=event.top, $
+         zoomtlb = Widget_Base(Title='Zoomed Image', Group=event.top, TLB_Frame_Attr=1, $
              XOffset=xpos, YOffset=ypos, KILL_NOTIFY='cgZImage_ZoomDied', $
              UVALUE=event.top, X_Scroll_Size=x_scroll_size, Y_Scroll_Size=y_scroll_size)
          zoomdraw = Widget_Draw(zoomtlb, XSize=zoomXSize, YSize=zoomYSize, $
@@ -768,9 +800,9 @@ PRO cgZImage_DrawEvents, event
       ENDELSE
 
       ; If the controls were mapped, unmap them.
-      IF info.map EQ 1 THEN BEGIN
+      IF info.mapcontrols EQ 1 THEN BEGIN
           Widget_Control, info.controlID, Map=0
-          info.map = 0
+          info.mapcontrols = 0
       ENDIF
     
       ENDCASE
@@ -827,7 +859,7 @@ END ; ----------------------------------------------------------------------
 ;         If the SCALE keyword is set, the image is scaled before display so that all 
 ;         displayed pixels have values greater than or equal to BOTTOM and less than 
 ;         or equal to TOP. Available only with 2D images.
-;    boxcolor: in, optional, type=string, default='red'
+;    boxcolor: in, optional, type=string, default='gold'
 ;         The name of the color of the rubber-band selection box.
 ;    clip: in, optional, type=float, default=2
 ;         A number between 0 and 50 that indicates the percentage of pixels to clip
@@ -837,6 +869,8 @@ END ; ----------------------------------------------------------------------
 ;         The value to exclude in a standard deviation stretch.
 ;    exponent: in, optional, type=float, default=4.0
 ;         The logarithm exponent in a logarithmic stretch. Available only with 2D images.
+;    filename: in, optional, type=string
+;         The name of a file that IDL can read with READ_IMAGE (e.g, TIF, JPEG, PNG, etc.).
 ;    gamma: in, optional, type=float, default=1.5
 ;         The gamma factor in a gamma stretch. Available only with 2D images.
 ;    group_leader: in, optional, type=long
@@ -848,6 +882,8 @@ END ; ----------------------------------------------------------------------
 ;         create image values that do not exist in the original image. The default is to do no
 ;         interpolation, so that image values to not change upon resizing. Interpolation can
 ;         result in smoother looking final images.
+;    map: in, optioinal, type=structure
+;         A cgMap object for navigating the input image.
 ;    maxvalue: in, optional, type=varies
 ;         If this value is defined, the data is linearly scaled between MINVALUE
 ;         and MAXVALUE. MAXVALUE is set to MAX(image) by default. Setting this 
@@ -925,9 +961,11 @@ PRO cgZImage, image, $
    CLIP=clip, $
    EXCLUDE=exclude, $
    EXPONENT=exponent, $
+   FILENAME=filename, $
    GAMMA=gamma, $
    GROUP_LEADER=group_leader, $
    INTERPOLATE=interpolate, $
+   MAP=map, $
    MAXVALUE=max, $
    MEAN=mean, $
    MISSING_COLOR=missing_color, $
@@ -953,25 +991,49 @@ PRO cgZImage, image, $
         void = Error_Message()
         RETURN
     ENDIF
-
+    
+    ; Was a filename used to pass in an image filename? Check to see if this is a GeoTiff image
+    ; before doing anything else. If it is, use cgGeoMap to read it. Otherwise, read the image
+    ; file with READ_IMAGE.
+    IF N_Elements(filename) NE 0 THEN BEGIN
+        check = Query_Tiff(filename, GEOTIFF=geo)
+        IF (check EQ 1) && (N_Elements(geo) NE 0) THEN BEGIN
+           map = cgGeoMap(filename, IMAGE=image)
+           createdMap = 1
+        ENDIF ELSE BEGIN
+           createdMap = 0
+           image = Read_Image(filename)
+        ENDELSE
+    ENDIF 
+    IF N_Elements(createdMap) EQ 0 THEN createdMap = 0
+    
     ; Was an image passed into the procedure?
     ; If not, find one in the IDL examples/data directory.
-    IF N_Params() EQ 0 THEN BEGIN
+    IF N_Elements(image) EQ 0 THEN BEGIN
        image = ImageSelect(FILENAME='marsglobe.jpg', CANCEL=cancelled, /EXAMPLES)
        IF cancelled THEN RETURN
     ENDIF
     
-    ; Just make sure nothing undefined got passed in.
-    IF N_Elements(image) EQ 0 THEN Message, 'An image parameter is required.
-
-    ; Check for keywords. 
-    IF N_Elements(sboxcolor) EQ 0 THEN boxcolor = 'red8' ELSE boxcolor = sboxcolor
-    IF N_Elements(factor) EQ 0 THEN factor = 4
-    nointerp = Keyword_Set(nointerp)
+    ; Make sure this is a 2D or true-color image.
+    ndims = Size(image, /N_DIMENSIONS)
+    IF (ndims LT 2) || (ndims GT 3) THEN Message, 'Only 2D or True-Color images are allowed in cgZImage.'
     
     ; Get image size.
     dims = Image_Dimensions(image, XSize=ixsize, YSize=iysize, $
         XIndex=xindex, YIndex=yindex, TrueIndex=trueindex)
+    IF trueIndex NE -1 THEN nframes = dims[trueIndex] ELSE nframes = 1 
+    IF nframes GT 3 THEN BEGIN
+        Help, image
+        Message, 'Image does not have the correct dimensions for cgZImage.'
+    ENDIF
+    
+    ; Check for keywords. 
+    IF N_Elements(sboxcolor) EQ 0 THEN boxcolor = 'gold' ELSE boxcolor = sboxcolor
+    IF N_Elements(factor) EQ 0 THEN factor = 4
+    IF N_Elements(stretch) EQ 0 THEN BEGIN
+       maxValue = Max(image, MIN=minValue)
+       IF (minValue LT 0) || (maxValue GT 255) THEN stretch=1
+    ENDIF
     
     ; Calculate a window size. Maximum window size is 600.
      aspect = Float(ixsize)/iysize
@@ -995,6 +1057,7 @@ PRO cgZImage, image, $
         ysize = iysize
      ENDELSE
 
+     ; Check cgImage keywords.
      IF N_Elements(beta) EQ 0 THEN  beta = Ptr_New(/Allocate_Heap) ELSE beta = Ptr_New(beta)
      IF N_Elements(bottom) EQ 0 THEN  bottom = Ptr_New(/Allocate_Heap) ELSE bottom = Ptr_New(bottom)
      IF N_Elements(clip) EQ 0 THEN  clip = Ptr_New(/Allocate_Heap) ELSE clip = Ptr_New(clip)
@@ -1002,6 +1065,7 @@ PRO cgZImage, image, $
      IF N_Elements(exponent) EQ 0 THEN  exponent = Ptr_New(/Allocate_Heap) ELSE exponent = Ptr_New(exponent)
      IF N_Elements(gamma) EQ 0 THEN  gamma = Ptr_New(/Allocate_Heap) ELSE gamma = Ptr_New(gamma)
      IF N_Elements(interpolate) EQ 0 THEN  interpolate = Ptr_New(/Allocate_Heap) ELSE interpolate = Ptr_New(interpolate)
+     IF N_Elements(map) EQ 0 THEN mapptr = Ptr_New(/Allocate_Heap) ELSE mapptr = Ptr_New(map)
      IF N_Elements(max) EQ 0 THEN  max = Ptr_New(/Allocate_Heap) ELSE max = Ptr_New(max)
      IF N_Elements(mean) EQ 0 THEN  mean = Ptr_New(/Allocate_Heap) ELSE mean = Ptr_New(mean)
      IF N_Elements(missing_color) EQ 0 THEN  missing_color = Ptr_New(/Allocate_Heap) ELSE missing_color = Ptr_New(missing_color)
@@ -1035,7 +1099,7 @@ PRO cgZImage, image, $
        Event_Pro='cgZImage_Quit')
     
     drawbase = Widget_Base(tlb, Map=1, Column=1)
-    draw = Widget_Draw(drawbase, XSize=xsize, YSize=ysize, $
+    drawID = Widget_Draw(drawbase, XSize=xsize, YSize=ysize, $
        Button_Events=1, Event_Pro='cgZImage_DrawEvents')
 
     statusbar = Widget_Label(drawbase, Value="Ready for Zooming", SCR_XSIZE=xsize, /Sunken_Frame)
@@ -1049,7 +1113,7 @@ PRO cgZImage, image, $
     ; Get the window index number of the draw widget.
     ; Make the draw widget the current graphics window
     ; and display the image in it.
-    Widget_Control, draw, Get_Value=drawIndex
+    Widget_Control, drawID, Get_Value=drawIndex
     WSet, drawIndex
     cgImage, image, $
        BETA=*beta, $
@@ -1134,10 +1198,12 @@ PRO cgZImage, image, $
        beta:beta, $
        bottom:bottom, $
        clip:clip, $
+       createdMap: createdmap, $
        exclude:exclude, $
        exponent:exponent, $
        gamma:gamma, $
        interpolate:interpolate, $
+       map:mapptr, $
        max:max, $
        mean:mean, $
        missing_color:missing_color, $
@@ -1157,7 +1223,7 @@ PRO cgZImage, image, $
        zxsize: 0, $
        zysize: 0, $
        zoomfactor:factor, $         ; The initial zoom factor.
-       map:0, $                     ; A flag to tell if the controls are mapped.
+       mapcontrols:0, $             ; A flag to tell if the controls are mapped.
        xindex:xindex, $             ; The X size index.
        yindex:yindex, $             ; The Y size index.
        trueIndex:trueIndex, $       ; The "true-color" index. 0 if image is 2D.

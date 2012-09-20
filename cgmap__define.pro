@@ -406,7 +406,7 @@ FUNCTION cgMap::INIT, map_projection, $
    ; results in position errors of less than a meter typically.
    IF ((StrUpCase(thisDatum.Name) EQ 'WGS 84') || (StrUpCase(thisDatum.Name) EQ 'WGS84')) && $
       (StrUpCase(this_map_projection.Name) EQ 'UTM') && $
-      (Float(!version.release) LE 8.2) THEN BEGIN
+      (Float(!version.release) LT 8.2) THEN BEGIN
           Print, 'Switching UTM datum from WGS84 to WALBECK to avoid UTM projection bug.'
           thisDatum = { cgMAP_DATUM, 12, 'Walbeck', 6378137.0, 6356752.314245 }
    ENDIF

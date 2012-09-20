@@ -788,6 +788,9 @@ END
 ;                  
 ;         This keyword applies *only* to images displayed with !P.Multi, and if
 ;         passed a scalar value, will use the same value for all four positions.
+;    multiplier: in, optional, type=float
+;         The multiplication factor in a standard deviation stretch. The standard deviation
+;         is multiplied by this factor to produce the thresholds for a linear stretch.
 ;    ncolors: in, optional, type=integer, default=256
 ;         If this keyword is supplied, the `TOP` keyword is ignored and the TOP keyword 
 ;         is set equal to  NCOLORS-1. This keyword is provided to make cgImage easier 

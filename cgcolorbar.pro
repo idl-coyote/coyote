@@ -165,6 +165,16 @@
 ;       A string array of names or values for the color bar tick marks.
 ;    title: in, optional, type=string, default=""
 ;       This is title for the color bar. The default is to have no title.
+;    tcharsize: in, optional, type=float
+;       The title size. By default, the same as `Charsize`. Note that this keyword is
+;       ignored for vertical color bars unless the title location (`TLocation`) is on
+;       the opposite side of the color bar from the color bar labels. This is a consequence
+;       of being upable to determine the length of color bar labels programmatically in this
+;       orientation.
+;    tlocation: in, optional, type=string
+;       The title location, which allows the user to set the title location independently 
+;       of the colorbar labels. May be "TOP" or "BOTTOM" for horizontal color bars, and
+;       "LEFT" or "RIGHT" for vertical color bars.
 ;    top: in, optional, type=boolean, default=0
 ;       This puts the labels on top of the bar rather than under it. The keyword only 
 ;       applies if a horizontal color bar is rendered.
@@ -244,7 +254,8 @@
 ;       Added TickInterval, XTickInterval and YTickInterval keywords to accommodate interval 
 ;           spacing of major tick marks. 21 July 2012. DWF.
 ;       Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
-;           
+;       Added TLOCATION and TCHARSIZE keywords. 20 September 2012. DWF.
+;       
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
 ;-
@@ -276,6 +287,8 @@ PRO cgColorbar, $
     RANGE=range, $
     REVERSE=reverse, $
     RIGHT=right, $
+    TLOCATION=tlocation, $
+    TCHARSIZE=tcharsize, $
     TICKINTERVAL=tickinterval, $
     TICKLEN=ticklen, $
     TICKNAMES=ticknames, $
@@ -335,6 +348,8 @@ PRO cgColorbar, $
             RANGE=range, $
             REVERSE=reverse, $
             RIGHT=right, $
+            TLOCATION=tlocation, $
+            TCHARSIZE=tcharsize, $
             TICKINTERVAL=tickinterval, $
             TICKLEN=ticklen, $
             TICKNAMES=ticknames, $
@@ -401,6 +416,7 @@ PRO cgColorbar, $
     SetDefaultValue, ncolors, 256
     SetDefaultValue, bottom, 0B
     SetDefaultValue, charsize, cgDefCharsize() * charPercent
+    SetDefaultValue, tcharsize, charsize
     SetDefaultValue, format, ""
     IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
     minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange[0])
@@ -420,10 +436,12 @@ PRO cgColorbar, $
     
     ; Deal with tick intervals, if you have them.
     IF Keyword_Set(vertical) THEN BEGIN
+       IF (N_Elements(tlocation) EQ 0) THEN tlocation = Keyword_Set(right) ? 'RIGHT' : 'LEFT'
        IF (N_Elements(yTickInterval) NE 0) && (ylog EQ 0) THEN BEGIN
            IF N_Elements(tickInterval) EQ 0 THEN tickInterval = yTickInterval
        ENDIF
     ENDIF ELSE BEGIN
+       IF (N_Elements(tlocation) EQ 0) THEN tlocation = Keyword_Set(top) ? 'TOP' : 'BOTTOM'
        IF (N_Elements(xTickInterval) NE 0) && (xlog EQ 0) THEN BEGIN
            IF N_Elements(tickInterval) EQ 0 THEN tickInterval = xTickInterval    
        ENDIF
@@ -485,7 +503,11 @@ PRO cgColorbar, $
        bar = REPLICATE(1B,20) # BINDGEN(ncolors)
        IF Keyword_Set(invertcolors) THEN bar = Reverse(bar, 2)
        IF N_ELEMENTS(position) EQ 0 THEN BEGIN
-          position = [0.88, 0.1, 0.95, 0.9]
+          IF Keyword_Set(right) THEN BEGIN
+             position = [0.83, 0.1, 0.90, 0.9]
+          ENDIF ELSE BEGIN
+             position = [0.88, 0.1, 0.95, 0.9]
+          ENDELSE
        ENDIF ELSE BEGIN
           IF position[2]-position[0] GT position[3]-position[1] THEN BEGIN
              position = [position[1], position[0], position[3], position[2]]
@@ -512,7 +534,11 @@ PRO cgColorbar, $
        bar = BINDGEN(ncolors) # REPLICATE(1B, 20)
        IF Keyword_Set(invertcolors) THEN bar = Reverse(bar, 1)
        IF N_ELEMENTS(position) EQ 0 THEN BEGIN
-          position = [0.1, 0.88, 0.9, 0.95]
+          IF Keyword_Set(top) THEN BEGIN
+             position = [0.1, 0.82, 0.9, 0.90]
+          ENDIF ELSE BEGIN
+             position = [0.1, 0.88, 0.9, 0.95]
+          ENDELSE
        ENDIF ELSE BEGIN
           IF position[3]-position[1] GT position[2]-position[0] THEN BEGIN
              position = [position[1], position[0], position[3], position[2]]
@@ -624,30 +650,69 @@ PRO cgColorbar, $
 
        IF KEYWORD_SET(right) THEN BEGIN
 
-          PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1, $
-             YTICKS=divisions, XSTYLE=1, YSTYLE=9, XTITLE="", YTITLE="", $
-             POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
-             XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', YMINOR=minor, _STRICT_EXTRA=extra, $
-             YTICKNAME=ticknames, FONT=font, YLOG=ylog, YTICKINTERVAL=tickinterval
-
-          AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
-             YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
-             FONT=font, YTITLE=title, _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, $
-             YLOG=ylog, YTICKINTERVAL=tickinterval
+          IF StrUpCase(tlocation) EQ 'LEFT' THEN BEGIN
+              PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1, $
+                 YTICKS=divisions, XSTYLE=1, YSTYLE=9, XTITLE="", YTITLE="", $
+                 POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
+                 XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', YMINOR=minor, _STRICT_EXTRA=extra, $
+                 YTICKNAME=ticknames, FONT=font, YLOG=ylog, YTICKINTERVAL=tickinterval
+    
+              AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
+                 YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
+                 FONT=font, YTITLE="", _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, $
+                 YLOG=ylog, YTICKINTERVAL=tickinterval, YTICK_GET=ticks
+                 
+              truecharsize = Float(!D.X_CH_SIZE * tcharsize) / !D.X_SIZE
+              yloc = (position[3] - position[1]) / 2.0 + position[1]
+              xloc = position[0] - (1.5 * truecharsize)
+              XYOUTS, xloc, yloc, title, /NORMAL, COLOR=color, $
+                ALIGNMENT=0.5, FONT=font, CHARSIZE=tcharsize, ORIENTATION=-270
+          ENDIF ELSE BEGIN
+              PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1, $
+                 YTICKS=divisions, XSTYLE=1, YSTYLE=9, XTITLE="", YTITLE="", $
+                 POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
+                 XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', YMINOR=minor, _STRICT_EXTRA=extra, $
+                 YTICKNAME=ticknames, FONT=font, YLOG=ylog, YTICKINTERVAL=tickinterval
+    
+              AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
+                 YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
+                 FONT=font, YTITLE=title, _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, $
+                 YLOG=ylog, YTICKINTERVAL=tickinterval, YTICK_GET=ticks
+          ENDELSE
 
        ENDIF ELSE BEGIN
 
-          PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1,  $
-             YTICKS=divisions, YSTYLE=9, XSTYLE=1, YTITLE=title, $
-             POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
-             XTICKFORMAT='(A1)', YTICKFORMAT=format, YMinor=minor, _STRICT_EXTRA=extra, $
-             YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font, XTITLE="", $
-             YTICKINTERVAL=tickinterval
-
-          AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT='(A1)', YTICKS=divisions, $
-             YTICKLEN=0.001, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
-             FONT=font, YTITLE="", _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME="", YLOG=ylog, $
-             YTICKINTERVAL=tickinterval
+          IF StrUpCase(tlocation) EQ 'RIGHT' THEN BEGIN
+              PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1,  $
+                 YTICKS=divisions, YSTYLE=9, XSTYLE=1, YTITLE="", $
+                 POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
+                 XTICKFORMAT='(A1)', YTICKFORMAT=format, YMinor=minor, _STRICT_EXTRA=extra, $
+                 YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font, XTITLE="", $
+                 YTICKINTERVAL=tickinterval
+    
+              AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT='(A1)', YTICKS=divisions, $
+                 YTICKLEN=0.001, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
+                 FONT=font, YTITLE="", _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME="", YLOG=ylog, $
+                 YTICKINTERVAL=tickinterval
+                 
+              truecharsize = Float(!D.X_CH_SIZE * tcharsize) / !D.X_SIZE
+              yloc = (position[3] - position[1]) / 2.0 + position[1]
+              xloc = position[2] + (2.0 * truecharsize)
+              XYOUTS, xloc, yloc, title, /NORMAL, COLOR=color, $
+                ALIGNMENT=0.5, FONT=font, CHARSIZE=tcharsize, ORIENTATION=-270
+          ENDIF ELSE BEGIN
+              PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1,  $
+                 YTICKS=divisions, YSTYLE=9, XSTYLE=1, YTITLE=title, $
+                 POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
+                 XTICKFORMAT='(A1)', YTICKFORMAT=format, YMinor=minor, _STRICT_EXTRA=extra, $
+                 YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font, XTITLE="", $
+                 YTICKINTERVAL=tickinterval
+    
+              AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT='(A1)', YTICKS=divisions, $
+                 YTICKLEN=0.001, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
+                 FONT=font, YTITLE="", _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME="", YLOG=ylog, $
+                 YTICKINTERVAL=tickinterval
+          ENDELSE
 
        ENDELSE
 
@@ -664,13 +729,32 @@ PRO cgColorbar, $
 
           AXIS, XTICKS=divisions, XSTYLE=1, COLOR=color, CHARSIZE=charsize, $
              XTICKFORMAT=format, XTICKLEN=ticklen, XRANGE=[minrange, maxrange], XAXIS=1, $
-             FONT=font, XTITLE=title, _STRICT_EXTRA=extra, XMINOR=minor, $
+             FONT=font, XTITLE="", _STRICT_EXTRA=extra, XMINOR=minor, $
              XTICKNAME=ticknames, XLOG=xlog, YTITLE="", XTICKINTERVAL=tickInterval
+             
+          IF title NE "" THEN BEGIN
+             xloc = (position[2] - position[0]) / 2.0 + position[0]
+             CASE StrUpCase(tlocation) OF
+                'TOP': BEGIN
+                     truecharsize = Float(!D.Y_CH_SIZE * charsize) / !D.Y_SIZE
+                     yloc = position[3] + (2.25 * truecharsize)
+                     END
+                'BOTTOM': BEGIN
+                      truecharsize = Float(!D.Y_CH_SIZE * tcharsize) / !D.Y_SIZE
+                      yloc = position[1] - (1.5 * truecharsize)
+                      END
+                'RIGHT': Message, 'Illegal specification for title position: ' + StrUpCase(tlocation)
+                'LEFT': Message, 'Illegal specification for title position: ' + StrUpCase(tlocation)
+                ELSE: Message, 'Illegal specification for title position: ' + StrUpCase(tlocation)
+             ENDCASE
+             XYOUTS, xloc, yloc, title, /NORMAL, COLOR=color, $
+                ALIGNMENT=0.5, FONT=font, CHARSIZE=tcharsize
+          ENDIF
 
        ENDIF ELSE BEGIN
 
           PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=divisions, $
-             YTICKS=1, XSTYLE=9, YSTYLE=1, TITLE=title, $
+             YTICKS=1, XSTYLE=9, YSTYLE=1, TITLE="", $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              YTICKFORMAT='(A1)', XTICKFORMAT=format, XTICKLEN=ticklen, $
              XRANGE=[minrange, maxrange], FONT=font, XMinor=minor, _STRICT_EXTRA=extra, $
@@ -680,6 +764,27 @@ PRO cgColorbar, $
              XTICKFORMAT='(A1)', XTICKLEN=0.001, XRANGE=[minrange, maxrange], XAXIS=1, $
              FONT=font, XTITLE="", XCHARSIZE=charsize, XMINOR=minor, $
              XTICKNAME="", XLOG=xlog, YTITLE="", XTICKINTERVAL=tickInterval
+
+          IF title NE "" THEN BEGIN
+             xloc = (position[2] - position[0]) / 2.0 + position[0]
+             CASE StrUpCase(tlocation) OF
+                'TOP': BEGIN
+                     truecharsize = Float(!D.Y_CH_SIZE * charsize) / !D.Y_SIZE
+                     yloc = position[3] + (0.75 * truecharsize)
+                     END
+                'BOTTOM': BEGIN
+                      truecharsize = Float(!D.Y_CH_SIZE * charsize) / !D.Y_SIZE
+                      yloc = position[1] - (2.25 * truecharsize) - $
+                           (Float(!D.Y_CH_SIZE * tcharsize) / !D.Y_SIZE)
+                      END
+                'RIGHT': Message, 'Illegal specification for title position: ' + StrUpCase(tlocation)
+                'LEFT': Message, 'Illegal specification for title position: ' + StrUpCase(tlocation)
+               ELSE: Message, 'Illegal specification for title position: ' + StrUpCase(tlocation)
+             ENDCASE
+             XYOUTS, xloc, yloc, title, /NORMAL, COLOR=color, $
+                ALIGNMENT=0.5, FONT=font, CHARSIZE=tcharsize
+          ENDIF
+
         ENDELSE
 
     ENDELSE

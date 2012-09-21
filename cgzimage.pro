@@ -242,7 +242,7 @@ PRO cgZImage_BoxColor, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message(/Quiet)
+        void = Error_Message()
          
         ; Put the info structure back.
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
@@ -252,7 +252,7 @@ PRO cgZImage_BoxColor, event
     ; Get the information you need to redisplaythe image.
     Widget_Control, event.top, Get_UValue=info, /No_Copy
     
-    boxcolor = PickColorName(info.boxColor)
+    boxcolor = PickColorName(info.boxColor, Group_Leader=event.top)
     info.boxColor = boxColor
     
     ; Redisplay the image.
@@ -283,6 +283,10 @@ PRO cgZImage_BoxColor, event
     WSet, info.pixIndex
     Device, Copy=[0, 0, info.xsize, info.ysize, 0, 0, info.drawIndex]
     
+    ; Unmap the controls.
+    Widget_Control, info.controlID, Map=0
+    info.mapcontrols = 0    
+    
     ; Store the info structure.
     Widget_Control, event.top, Set_UValue=info, /No_Copy
 
@@ -304,7 +308,7 @@ PRO cgZImage_LoadColors, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message(/Quiet)
+        void = Error_Message()
          
         ; Put the info structure back.
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
@@ -320,9 +324,9 @@ PRO cgZImage_LoadColors, event
     CASE thisEvent OF
     
         'WIDGET_BUTTON': BEGIN
-            TVLCT, info.r, info.g, info.b, info.bottom
-            XColors, Group=event.top, NColors = info.ncolors, $
-                Bottom=info.bottom, NotifyID=[event.id, event.top], $
+            TVLCT, info.r, info.g, info.b, *info.bottom
+            XColors, Group=event.top, NColors = *info.ncolors, $
+                Bottom=*info.bottom, NotifyID=[event.id, event.top], $
                 Title='ZImage Colors (' + StrTrim(info.drawIndex,2) + ')'
             Widget_Control, info.controlID, Map=0
             info.mapcontrols = 0
@@ -332,9 +336,9 @@ PRO cgZImage_LoadColors, event
     
                 ; Extract the new color table vectors from XCOLORS.
     
-            info.r = event.r(info.bottom:info.bottom+info.ncolors-1)
-            info.g = event.g(info.bottom:info.bottom+info.ncolors-1)
-            info.b = event.b(info.bottom:info.bottom+info.ncolors-1)
+            info.r = event.r(*info.bottom:*info.bottom+*info.ncolors-1)
+            info.g = event.g(*info.bottom:*info.bottom+*info.ncolors-1)
+            info.b = event.b(*info.bottom:*info.bottom+*info.ncolors-1)
     
             ; Redisplay the image.
             WSet, info.drawIndex
@@ -484,7 +488,7 @@ PRO cgZImage_Factor, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message(/Quiet)
+        void = Error_Message()
          
         ; Put the info structure back.
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
@@ -625,10 +629,10 @@ PRO cgZImage_DrawEvents, event
 
       ; Subset the image, and apply the zoom factor to it.
       CASE info.trueIndex OF
-          -1: imageSubset = info.image[x[0]:x[1], y[0]:y[1]]
-           0: imageSubset = info.image[*, x[0]:x[1], y[0]:y[1]]
-           1: imageSubset = info.image[x[0]:x[1], *, y[0]:y[1]]
-           2: imageSubset = info.image[x[0]:x[1], y[0]:y[1], *]
+          -1: imageSubset = info.scaled[x[0]:x[1], y[0]:y[1]]
+           0: imageSubset = info.scaled[*, x[0]:x[1], y[0]:y[1]]
+           1: imageSubset = info.scaled[x[0]:x[1], *, y[0]:y[1]]
+           2: imageSubset = info.scaled[x[0]:x[1], y[0]:y[1], *]
       ENDCASE
       
       zoomedImage = FSC_Resize_Image(imageSubset, zoomXSize, zoomYSize, Interp=0)
@@ -680,60 +684,14 @@ PRO cgZImage_DrawEvents, event
              info.zoomDrawID = zoomdraw
              info.zoomWindowID = windowID
              WSet, windowID
-             IF Ptr_Valid(info.zoomedImage) THEN BEGIN
-                cgImage, *info.zoomedImage, $      
-                   BETA=*info.beta, $
-                   BOTTOM=*info.bottom, $
-                   CLIP=*info.clip, $
-                   EXCLUDE=*info.exclude, $
-                   EXPONENT=*info.exponent, $
-                   GAMMA=*info.gamma, $
-                   INTERPOLATE=*info.interpolate, $
-                   MAXVALUE=*info.max, $
-                   MEAN=*info.mean, $
-                   MISSING_COLOR=*info.missing_color, $
-                   MISSING_INDEX=*info.missing_index, $
-                   MISSING_VALUE=*info.missing_value, $
-                   NEGATIVE=*info.negative, $
-                   MINVALUE=*info.min, $
-                   MULTIPLIER=*info.multiplier, $
-                   NCOLORS=*info.ncolors, $
-                   PALETTE=*info.palette, $
-                   SCALE=*info.scale, $
-                   SIGMA=*info.sigma, $
-                   STRETCH=*info.stretch, $
-                   TOP=*info.top
-             ENDIF
+             IF Ptr_Valid(info.zoomedImage) THEN cgImage, *info.zoomedImage
      
           ENDIF ELSE BEGIN
          
          ; Zoomed window exists. Make it correct size and load image.
          Widget_Control, info.zoomDrawID, XSize=zoomXSize, YSize=zoomYSize
          WSet, info.zoomWindowID
-         IF Ptr_Valid(info.zoomedImage) THEN BEGIN
-            cgImage, *info.zoomedImage, $      
-               BETA=*info.beta, $
-               BOTTOM=*info.bottom, $
-               CLIP=*info.clip, $
-               EXCLUDE=*info.exclude, $
-               EXPONENT=*info.exponent, $
-               GAMMA=*info.gamma, $
-               INTERPOLATE=*info.interpolate, $
-               MAXVALUE=*info.max, $
-               MEAN=*info.mean, $
-               MISSING_COLOR=*info.missing_color, $
-               MISSING_INDEX=*info.missing_index, $
-               MISSING_VALUE=*info.missing_value, $
-               NEGATIVE=*info.negative, $
-               MINVALUE=*info.min, $
-               MULTIPLIER=*info.multiplier, $
-               NCOLORS=*info.ncolors, $
-               PALETTE=*info.palette, $
-               SCALE=*info.scale, $
-               SIGMA=*info.sigma, $
-               STRETCH=*info.stretch, $
-               TOP=*info.top
-         ENDIF
+         IF Ptr_Valid(info.zoomedImage) THEN cgImage, *info.zoomedImage
          
          ENDELSE
       ENDIF ELSE BEGIN
@@ -771,31 +729,7 @@ PRO cgZImage_DrawEvents, event
          info.zoomDrawID = zoomdraw
          info.zoomWindowID = windowID
          WSet, windowID
-         IF Ptr_Valid(info.zoomedImage) THEN BEGIN
-            cgImage, *info.zoomedImage, $
-               BETA=*info.beta, $
-               BOTTOM=*info.bottom, $
-               CLIP=*info.clip, $
-               EXCLUDE=*info.exclude, $
-               EXPONENT=*info.exponent, $
-               GAMMA=*info.gamma, $
-               INTERPOLATE=*info.interpolate, $
-               MAXVALUE=*info.max, $
-               MEAN=*info.mean, $
-               MISSING_COLOR=*info.missing_color, $
-               MISSING_INDEX=*info.missing_index, $
-               MISSING_VALUE=*info.missing_value, $
-               NEGATIVE=*info.negative, $
-               MINVALUE=*info.min, $
-               MULTIPLIER=*info.multiplier, $
-               NCOLORS=*info.ncolors, $
-               PALETTE=*info.palette, $
-               SCALE=*info.scale, $
-               SIGMA=*info.sigma, $
-               STRETCH=*info.stretch, $
-               TOP=*info.top
-            
-         ENDIF
+         IF Ptr_Valid(info.zoomedImage) THEN cgImage, *info.zoomedImage
          
       ENDELSE
 
@@ -998,11 +932,11 @@ PRO cgZImage, image, $
     IF N_Elements(filename) NE 0 THEN BEGIN
         check = Query_Tiff(filename, GEOTIFF=geo)
         IF (check EQ 1) && (Size(geo, /TNAME) EQ 'STRUCT') THEN BEGIN
-           map = cgGeoMap(filename, IMAGE=image)
+           map = cgGeoMap(filename, IMAGE=image, Palette=palette)
            createdMap = 1
         ENDIF ELSE BEGIN
            createdMap = 0
-           image = Read_Image(filename)
+           image = Read_Image(filename, r, g, b)
         ENDELSE
     ENDIF 
     IF N_Elements(createdMap) EQ 0 THEN createdMap = 0
@@ -1058,28 +992,28 @@ PRO cgZImage, image, $
      ENDELSE
 
      ; Check cgImage keywords.
-     IF N_Elements(beta) EQ 0 THEN  beta = Ptr_New(/Allocate_Heap) ELSE beta = Ptr_New(beta)
-     IF N_Elements(bottom) EQ 0 THEN  bottom = Ptr_New(/Allocate_Heap) ELSE bottom = Ptr_New(bottom)
-     IF N_Elements(clip) EQ 0 THEN  clip = Ptr_New(/Allocate_Heap) ELSE clip = Ptr_New(clip)
-     IF N_Elements(exclude) EQ 0 THEN  exclude = Ptr_New(/Allocate_Heap) ELSE exclude = Ptr_New(exclude)
-     IF N_Elements(exponent) EQ 0 THEN  exponent = Ptr_New(/Allocate_Heap) ELSE exponent = Ptr_New(exponent)
-     IF N_Elements(gamma) EQ 0 THEN  gamma = Ptr_New(/Allocate_Heap) ELSE gamma = Ptr_New(gamma)
-     IF N_Elements(interpolate) EQ 0 THEN  interpolate = Ptr_New(/Allocate_Heap) ELSE interpolate = Ptr_New(interpolate)
+     IF N_Elements(beta) EQ 0 THEN  betaptr = Ptr_New(/Allocate_Heap) ELSE betaptr = Ptr_New(beta)
+     IF N_Elements(bottom) EQ 0 THEN  bottomptr = Ptr_New(/Allocate_Heap) ELSE bottomptr = Ptr_New(bottom)
+     IF N_Elements(clip) EQ 0 THEN  clipptr = Ptr_New(/Allocate_Heap) ELSE clipptr = Ptr_New(clip)
+     IF N_Elements(exclude) EQ 0 THEN  excludeptr = Ptr_New(/Allocate_Heap) ELSE excludeptr = Ptr_New(exclude)
+     IF N_Elements(exponent) EQ 0 THEN  exponentptr = Ptr_New(/Allocate_Heap) ELSE exponentptr = Ptr_New(exponent)
+     IF N_Elements(gamma) EQ 0 THEN  gammaptr = Ptr_New(/Allocate_Heap) ELSE gammaptr = Ptr_New(gamma)
+     IF N_Elements(interpolate) EQ 0 THEN  interpolateptr = Ptr_New(/Allocate_Heap) ELSE interpolateptr = Ptr_New(interpolate)
      IF N_Elements(map) EQ 0 THEN mapptr = Ptr_New(/Allocate_Heap) ELSE mapptr = Ptr_New(map)
-     IF N_Elements(max) EQ 0 THEN  max = Ptr_New(/Allocate_Heap) ELSE max = Ptr_New(max)
-     IF N_Elements(mean) EQ 0 THEN  mean = Ptr_New(/Allocate_Heap) ELSE mean = Ptr_New(mean)
-     IF N_Elements(missing_color) EQ 0 THEN  missing_color = Ptr_New(/Allocate_Heap) ELSE missing_color = Ptr_New(missing_color)
-     IF N_Elements(missing_index) EQ 0 THEN  missing_index = Ptr_New(/Allocate_Heap) ELSE missing_index = Ptr_New(missing_index)
-     IF N_Elements(missing_value) EQ 0 THEN  missing_value = Ptr_New(/Allocate_Heap) ELSE missing_value = Ptr_New(missing_value)
-     IF N_Elements(negative) EQ 0 THEN  negative = Ptr_New(/Allocate_Heap) ELSE negative = Ptr_New(negative)
-     IF N_Elements(min) EQ 0 THEN  min = Ptr_New(/Allocate_Heap) ELSE min = Ptr_New(min)
-     IF N_Elements(multiplier) EQ 0 THEN  multiplier = Ptr_New(/Allocate_Heap) ELSE multiplier = Ptr_New(multiplier)
-     IF N_Elements(ncolors) EQ 0 THEN  ncolors = Ptr_New(/Allocate_Heap) ELSE ncolors = Ptr_New(ncolors)
-     IF N_Elements(palette) EQ 0 THEN  palette = Ptr_New(/Allocate_Heap) ELSE palette = Ptr_New(palette)
-     IF N_Elements(scale) EQ 0 THEN  scale = Ptr_New(/Allocate_Heap) ELSE scale = Ptr_New(scale)
-     IF N_Elements(sigma) EQ 0 THEN  sigma = Ptr_New(/Allocate_Heap) ELSE sigma = Ptr_New(sigma)
-     IF N_Elements(stretch) EQ 0 THEN  stretch = Ptr_New(/Allocate_Heap) ELSE stretch = Ptr_New(stretch)
-     IF N_Elements(top) EQ 0 THEN  top = Ptr_New(/Allocate_Heap) ELSE top = Ptr_New(top)
+     IF N_Elements(max) EQ 0 THEN  maxptr = Ptr_New(/Allocate_Heap) ELSE maxptr = Ptr_New(max)
+     IF N_Elements(mean) EQ 0 THEN  meanptr = Ptr_New(/Allocate_Heap) ELSE meanptr = Ptr_New(mean)
+     IF N_Elements(missing_color) EQ 0 THEN  missing_colorptr = Ptr_New(/Allocate_Heap) ELSE missing_colorptr = Ptr_New(missing_color)
+     IF N_Elements(missing_index) EQ 0 THEN  missing_indexptr = Ptr_New(/Allocate_Heap) ELSE missing_indexptr = Ptr_New(missing_index)
+     IF N_Elements(missing_value) EQ 0 THEN  missing_valueptr = Ptr_New(/Allocate_Heap) ELSE missing_valueptr = Ptr_New(missing_value)
+     IF N_Elements(negative) EQ 0 THEN  negativeptr = Ptr_New(/Allocate_Heap) ELSE negativeptr = Ptr_New(negative)
+     IF N_Elements(min) EQ 0 THEN  minptr = Ptr_New(/Allocate_Heap) ELSE minptr = Ptr_New(min)
+     IF N_Elements(multiplier) EQ 0 THEN  multiplierptr = Ptr_New(/Allocate_Heap) ELSE multiplierptr = Ptr_New(multiplier)
+     IF N_Elements(ncolors) EQ 0 THEN  ncolorsptr = Ptr_New(/Allocate_Heap) ELSE ncolorsptr = Ptr_New(ncolors)
+     IF N_Elements(palette) EQ 0 THEN  paletteptr = Ptr_New(/Allocate_Heap) ELSE paletteptr = Ptr_New(palette)
+     IF N_Elements(scale) EQ 0 THEN  scaleptr = Ptr_New(/Allocate_Heap) ELSE scaleptr = Ptr_New(scale)
+     IF N_Elements(sigma) EQ 0 THEN  sigmaptr = Ptr_New(/Allocate_Heap) ELSE sigmaptr = Ptr_New(sigma)
+     IF N_Elements(stretch) EQ 0 THEN  stretchptr = Ptr_New(/Allocate_Heap) ELSE stretchptr = Ptr_New(stretch)
+     IF N_Elements(top) EQ 0 THEN  topptr = Ptr_New(/Allocate_Heap) ELSE topptr = Ptr_New(top)
     
     ; Create a top-level base for this program. No resizing of this base.
     tlb = Widget_Base(TLB_Frame_Attr=1, TITLE=title)
@@ -1116,27 +1050,27 @@ PRO cgZImage, image, $
     Widget_Control, drawID, Get_Value=drawIndex
     WSet, drawIndex
     cgImage, image, $
-       BETA=*beta, $
-       BOTTOM=*bottom, $
-       CLIP=*clip, $
-       EXCLUDE=*exclude, $
-       EXPONENT=*exponent, $
-       GAMMA=*gamma, $
-       INTERPOLATE=*interpolate, $
-       MAXVALUE=*max, $
-       MEAN=*mean, $
-       MISSING_COLOR=*missing_color, $
-       MISSING_INDEX=*missing_index, $
-       MISSING_VALUE=*missing_value, $
-       NEGATIVE=*negative, $
-       MINVALUE=*min, $
-       MULTIPLIER=*multiplier, $
-       NCOLORS=*ncolors, $
-       PALETTE=*palette, $
-       SCALE=*scale, $
-       SIGMA=*sigma, $
-       STRETCH=*stretch, $
-       TOP=*top
+       BETA=*betaptr, $
+       BOTTOM=*bottomptr, $
+       CLIP=*clipptr, $
+       EXCLUDE=*excludeptr, $
+       EXPONENT=*exponentptr, $
+       GAMMA=*gammaptr, $
+       INTERPOLATE=*interpolateptr, $
+       MAXVALUE=*maxptr, $
+       MEAN=*meanptr, $
+       MISSING_COLOR=*missing_colorptr, $
+       MISSING_INDEX=*missing_indexptr, $
+       MISSING_VALUE=*missing_valueptr, $
+       NEGATIVE=*negativeptr, $
+       MINVALUE=*minptr, $
+       MULTIPLIER=*multiplierptr, $
+       NCOLORS=*ncolorsptr, $
+       PALETTE=*paletteptr, $
+       SCALE=*scaleptr, $
+       SIGMA=*sigmaptr, $
+       STRETCH=*stretchptr, $
+       TOP=*topptr
 
     ; Set the title of the window.
     IF N_Elements(title) EQ 0 THEN BEGIN
@@ -1150,35 +1084,57 @@ PRO cgZImage, image, $
     Window, /Free, XSize=xsize, YSize=ysize, /Pixmap
     pixIndex = !D.Window
     cgImage, image, $
-       BETA=*beta, $
-       BOTTOM=*bottom, $
-       CLIP=*clip, $
-       EXCLUDE=*exclude, $
-       EXPONENT=*exponent, $
-       GAMMA=*gamma, $
-       INTERPOLATE=*interpolate, $
-       MAXVALUE=*max, $
-       MEAN=*mean, $
-       MISSING_COLOR=*missing_color, $
-       MISSING_INDEX=*missing_index, $
-       MISSING_VALUE=*missing_value, $
-       NEGATIVE=*negative, $
-       MINVALUE=*min, $
-       MULTIPLIER=*multiplier, $
-       NCOLORS=*ncolors, $
-       PALETTE=*palette, $
-       SCALE=*scale, $
-       SIGMA=*sigma, $
-       STRETCH=*stretch, $
-       TOP=*top
+       BETA=*betaptr, $
+       BOTTOM=*bottomptr, $
+       CLIP=*clipptr, $
+       EXCLUDE=*excludeptr, $
+       EXPONENT=*exponentptr, $
+       GAMMA=*gammaptr, $
+       INTERPOLATE=*interpolateptr, $
+       MAXVALUE=*maxptr, $
+       MEAN=*meanptr, $
+       MISSING_COLOR=*missing_colorptr, $
+       MISSING_INDEX=*missing_indexptr, $
+       MISSING_VALUE=*missing_valueptr, $
+       NEGATIVE=*negativeptr, $
+       MINVALUE=*minptr, $
+       MULTIPLIER=*multiplierptr, $
+       NCOLORS=*ncolorsptr, $
+       PALETTE=*paletteptr, $
+       SCALE=*scaleptr, $
+       SIGMA=*sigmaptr, $
+       STRETCH=*stretchptr, $
+       TOP=*topptr
 
    ; Get color vectors for this application.
-   TVLCT, r, g, b, /Get
+   IF N_Elements(r) EQ 0 THEN TVLCT, r, g, b, /Get
+   
+   ; Scale the data, because this is what you will show in the zoomed window.
+   scaled = cgImgScl(image, $
+       BETA=*betaptr, $
+       BOTTOM=*bottomptr, $
+       CLIP=*clipptr, $
+       EXCLUDE=*excludeptr, $
+       EXPONENT=*exponentptr, $
+       GAMMA=*gammaptr, $
+       INTERPOLATE=*interpolateptr, $
+       MAXVALUE=*maxptr, $
+       MEAN=*meanptr, $
+       MISSING_INDEX=*missing_indexptr, $
+       MISSING_VALUE=*missing_valueptr, $
+       NEGATIVE=*negativeptr, $
+       MINVALUE=*minptr, $
+       MULTIPLIER=*multiplierptr, $
+       NCOLORS=*ncolorsptr, $
+       SCALE=*scaleptr, $
+       SIGMA=*sigmaptr, $
+       STRETCH=*stretchptr, $
+       TOP=*topptr)
 
    ; Create an info structure to hold information required by the program.
-   
-    info = { $
+   info = { $
        image:image, $               ; The original image.
+       scaled:scaled, $             ; The scaled image.
        zoomedimage:Ptr_New(), $     ; The scaled and resized subimage.
        xsize:ixsize, $              ; The x size of the image.
        ysize:iysize, $              ; The y size of the image.
@@ -1195,29 +1151,29 @@ PRO cgZImage, image, $
        r:r, $                       ; The red color vector.
        g:g, $                       ; The green color vector.
        b:b, $                       ; The blue color vector.
-       beta:beta, $
-       bottom:bottom, $
-       clip:clip, $
+       beta:betaptr, $
+       bottom:bottomptr, $
+       clip:clipptr, $
        createdMap: createdmap, $
-       exclude:exclude, $
-       exponent:exponent, $
-       gamma:gamma, $
-       interpolate:interpolate, $
+       exclude:excludeptr, $
+       exponent:exponentptr, $
+       gamma:gammaptr, $
+       interpolate:interpolateptr, $
        map:mapptr, $
-       max:max, $
-       mean:mean, $
-       missing_color:missing_color, $
-       missing_index:missing_index, $
-       missing_value:missing_value, $
-       negative:negative, $
-       min:min, $
-       multiplier:multiplier, $
-       ncolors:ncolors, $
-       palette:palette, $
-       scale:scale, $
-       sigma:sigma, $
-       stretch:stretch, $
-       top:top, $
+       max:maxptr, $
+       mean:meanptr, $
+       missing_color:missing_colorptr, $
+       missing_index:missing_indexptr, $
+       missing_value:missing_valueptr, $
+       negative:negativeptr, $
+       min:minptr, $
+       multiplier:multiplierptr, $
+       ncolors:ncolorsptr, $
+       palette:paletteptr, $
+       scale:scaleptr, $
+       sigma:sigmaptr, $
+       stretch:stretchptr, $
+       top:topptr, $
        xrange: [0,ixsize], $
        yrange: [0,iysize], $
        zxsize: 0, $

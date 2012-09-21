@@ -816,7 +816,7 @@ END ; ----------------------------------------------------------------------
 ;         create image values that do not exist in the original image. The default is to do no
 ;         interpolation, so that image values to not change upon resizing. Interpolation can
 ;         result in smoother looking final images.
-;    map: in, optioinal, type=structure
+;    map: in, optional, type=structure
 ;         A cgMap object for navigating the input image.
 ;    maxvalue: in, optional, type=varies
 ;         If this value is defined, the data is linearly scaled between MINVALUE

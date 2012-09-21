@@ -101,8 +101,6 @@
 ;         is multiplied by this factor to produce the thresholds for a linear stretch.
 ;    negative: in, optional, type=boolean, default=0
 ;         Set this keyword if you want to display the image with a negative or reverse stretch.
-;    nosizing: in, optional, type=boolean, default=0
-;         Set this keyword to return the scaled image only, with no resizing to fit the display.
 ;    scale: in, optional, type=boolean, default=0
 ;         Set this keyword to byte scale the image before display. If this keyword is not set, 
 ;         the image is not scaled before display. This keyword will be set automatically by using

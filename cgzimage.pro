@@ -997,7 +997,7 @@ PRO cgZImage, image, $
     ; file with READ_IMAGE.
     IF N_Elements(filename) NE 0 THEN BEGIN
         check = Query_Tiff(filename, GEOTIFF=geo)
-        IF (check EQ 1) && (N_Elements(geo) NE 0) THEN BEGIN
+        IF (check EQ 1) && (Size(geo, /TNAME) EQ 'STRUCT') THEN BEGIN
            map = cgGeoMap(filename, IMAGE=image)
            createdMap = 1
         ENDIF ELSE BEGIN

@@ -774,7 +774,7 @@ PRO cgColorbar, $
                      END
                 'BOTTOM': BEGIN
                       truecharsize = Float(!D.Y_CH_SIZE * charsize) / !D.Y_SIZE
-                      yloc = position[1] - (2.25 * truecharsize) - $
+                      yloc = position[1] - (2.00 * truecharsize) - $
                            (Float(!D.Y_CH_SIZE * tcharsize) / !D.Y_SIZE)
                       END
                 'RIGHT': Message, 'Illegal specification for title position: ' + StrUpCase(tlocation)

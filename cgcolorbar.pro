@@ -255,6 +255,8 @@
 ;           spacing of major tick marks. 21 July 2012. DWF.
 ;       Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;       Added TLOCATION and TCHARSIZE keywords. 20 September 2012. DWF.
+;       Implemented a fix that will allow the user to specify a tick formatting function name 
+;          with the FORMAT keyword. 21 September 2012. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -477,28 +479,57 @@ PRO cgColorbar, $
 
     ; You can't have a format set *and* use ticknames.
     IF N_ELEMENTS(ticknames) NE 0 THEN format = ""
+    
+    ; If the format is NOT null and is is the name of a tick formating function, then we have
+    ; to handle things differently.
+    IF (format NE "") && (StrPos(format, '(') EQ -1) THEN BEGIN
+    
+       IF minrange LT maxrange THEN BEGIN
+           step = (maxrange - minrange) / divisions
+           levels = minrange > (Indgen(divisions+1) * step + minrange) < maxrange
+           nlevels = N_Elements(levels)
+           ticknames = StrArr(nlevels)
+           FOR j=0,nlevels-1 DO BEGIN
+               ticknames[j] = Call_Function(format, 0, j, levels[j])
+           ENDFOR
+           format = "" ; No formats allowed in PLOT call now that we have ticknames.
+        ENDIF ELSE BEGIN
+           step = (minrange - maxrange) / divisions
+           levels = maxrange > (Indgen(divisions+1) * step + maxrange) < minrange
+           levels = Reverse(levels)
+           nlevels = N_Elements(levels)
+           ticknames = StrArr(nlevels)
+           FOR j=0,nlevels-1 DO BEGIN
+               ticknames[j] = Call_Function(format, 0, j, levels[j])
+           ENDFOR
+           format = "" ; No formats allowed in PLOT call now that we have ticknames.
+       ENDELSE
+    
+    ENDIF ELSE BEGIN
 
-    ; If the format is NOT null, then format the ticknames yourself.
-    ; Can't assume minrange is less than maxrange.
-    IF (xlog XOR ylog) EQ 0 THEN BEGIN
-        IF format NE "" THEN BEGIN
-           IF minrange LT maxrange THEN BEGIN
-               step = (maxrange - minrange) / divisions
-               levels = minrange > (Indgen(divisions+1) * step + minrange) < maxrange
-               IF StrPos(StrLowCase(format), 'i') NE -1 THEN levels = Round(levels)
-               ticknames = String(levels, Format=format)
-               format = "" ; No formats allowed in PLOT call now that we have ticknames.
-           ENDIF ELSE BEGIN
-               step = (minrange - maxrange) / divisions
-               levels = maxrange > (Indgen(divisions+1) * step + maxrange) < minrange
-               levels = Reverse(levels)
-               IF StrPos(StrLowCase(format), 'i') NE -1 THEN levels = Round(levels)
-               ticknames = String(levels, Format=format)
-               format = "" ; No formats allowed in PLOT call now that we have ticknames.
-           ENDELSE
+        ; If the format is NOT null, then format the ticknames yourself.
+        ; Can't assume minrange is less than maxrange.
+        IF (xlog XOR ylog) EQ 0 THEN BEGIN
+            IF format NE "" THEN BEGIN
+               IF minrange LT maxrange THEN BEGIN
+                   step = (maxrange - minrange) / divisions
+                   levels = minrange > (Indgen(divisions+1) * step + minrange) < maxrange
+                   IF StrPos(StrLowCase(format), 'i') NE -1 THEN levels = Round(levels)
+                   ticknames = String(levels, Format=format)
+                   format = "" ; No formats allowed in PLOT call now that we have ticknames.
+               ENDIF ELSE BEGIN
+                   step = (minrange - maxrange) / divisions
+                   levels = maxrange > (Indgen(divisions+1) * step + maxrange) < minrange
+                   levels = Reverse(levels)
+                   IF StrPos(StrLowCase(format), 'i') NE -1 THEN levels = Round(levels)
+                   ticknames = String(levels, Format=format)
+                   format = "" ; No formats allowed in PLOT call now that we have ticknames.
+               ENDELSE
+            ENDIF
         ENDIF
-    ENDIF
-
+        
+    ENDELSE
+    
     IF KEYWORD_SET(vertical) THEN BEGIN
        bar = REPLICATE(1B,20) # BINDGEN(ncolors)
        IF Keyword_Set(invertcolors) THEN bar = Reverse(bar, 2)

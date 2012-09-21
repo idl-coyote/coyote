@@ -77,7 +77,7 @@
 ;     gcolor: in, optional, type=string, default='Gray'
 ;         The name of a color the map grid should be displayed with. The default
 ;         is "gray". Color names are those supported by cgColor.
-;    geotiff: in, optional, type=structure
+;     geotiff: in, optional, type=structure
 ;        A GeoTIFF structure of geoTags. Normally obtained by calling
 ;        QUERY_TIFF or READ_TIFF, but will be read from the file if a
 ;        filename is passed as the first positional parameter. If the geotag

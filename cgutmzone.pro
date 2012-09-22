@@ -70,6 +70,7 @@
 ;
 ; :History:
 ;     Written, 8 August 2012.
+;     Modified to assure the UTM band index is always in range for polar map projections. 22 Sept 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -94,7 +95,7 @@ FUNCTION cgUTMZone, longitude, latitude, FORMAL=formal
     latbands[20] = 84 ; Last zone extended 4 degrees.
     
     ; Find the latitude band.
-    latbandIndex = Value_Locate(latbands, latitude)
+    latbandIndex =  0 > Value_Locate(latbands, latitude) < (N_Elements(latnotes)-1)
     latBand = latnotes[latbandIndex]
     IF latBand EQ 'AB' THEN BEGIN
         IF (longitude LT 0) THEN latBand = 'A' ELSE latBand = 'B'

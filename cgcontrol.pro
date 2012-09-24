@@ -355,7 +355,7 @@ PRO cgControl, selection, $
    
    ; Get the values you need.
    wid = cgQuery(WIDGETID=tlb, OBJECT=objref, TITLE=titles, COUNT=count)
-   IF count EQ 0 THEN Message, 'There are no cgWindows currently on the display.', /Infomational
+   IF count EQ 0 THEN Message, 'There are no cgWindows currently on the display.', /Informational
    
    ; Get the window list.
    list = !FSC_Window_List
@@ -366,7 +366,7 @@ PRO cgControl, selection, $
         Keyword_Set(widgetID): BEGIN
             index = Where(tlb EQ selection, selectCount)
             IF selectCount EQ 0 THEN $
-                Message, 'No cgWindow matches the selection criteria.', /Infomational
+                Message, 'No cgWindow matches the selection criteria.', /Informational
             END
             
         Keyword_Set(object): BEGIN
@@ -378,13 +378,13 @@ PRO cgControl, selection, $
         Keyword_Set(title): BEGIN
             index = Where(StrUpCase(titles) EQ StrUpCase(selection), selectCount)
             IF selectCount EQ 0 THEN $
-                Message, 'No cgWindow matches the selection criteria.', /Infomational
+                Message, 'No cgWindow matches the selection criteria.', /Informational
             END
 
         ELSE: BEGIN
             index = Where(wid EQ selection, selectCount)
             IF selectCount EQ 0 THEN $
-                Message, 'No cgWindow matches the selection criteria.', /Infomational
+                Message, 'No cgWindow matches the selection criteria.', /Informational
             END
    
    ENDCASE

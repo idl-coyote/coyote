@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   cgTeminatorMap
+;   cgTerminatorMap
 ;
 ; PURPOSE:
 ;   This is a program for viewing a map of the Earth in several different projections
@@ -119,7 +119,7 @@
 ;
 ;        XInterAnimate, Set=[800,400,24], /ShowLoad, Title='Wednesday Nov 16, 2011'
 ;        FOR j=0,23 DO BEGIN
-;           cgTeminatorMap, Time = "Wed Nov 16 " + String(j, Format='(I2.2)') + ":00:00 2011"
+;           cgTerminatorMap, Time = "Wed Nov 16 " + String(j, Format='(I2.2)') + ":00:00 2011"
 ;           XInterAnimate, Frame=j, Window=!D.Window
 ;        ENDFOR
 ;        XInterAnimate, 20
@@ -144,7 +144,7 @@
 ; :Copyright:
 ;     Copyright (c) 2006-2011, Fanning Software Consulting, Inc.
 ;-
-PRO cgTeminatorMap, center_lon, center_lat, $
+PRO cgTerminatorMap, center_lon, center_lat, $
    FlipDay=flipday, $
    Image=image, $
    Map_Projection=map_index, $

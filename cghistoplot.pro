@@ -306,6 +306,8 @@
 ;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;        Mis-spelled "probability" in one section of the code. Fixed. 31 July 2012. DWF.
 ;        Added COLOR keyword. 19 Sept 2012. DWF.
+;        Now restoring previous plot parameters after drawing cumulative probability axis, so as not
+;           to interfere with subsequent overplotting. 27 Sept 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
@@ -1114,6 +1116,12 @@ PRO cgHistoplot, $                  ; The program name.
    
    ; Need to overplot probability function?
    IF Keyword_Set(oprob) THEN BEGIN
+   
+        ; Save the current axes system variable so they can be restored after
+        ; the axis is drawn.
+        xsave = !X
+        ysave = !Y
+        
         ; If you are plotting the probability plot, label the axes appropriately.
         IF Keyword_Set(overplot) THEN style = 5 ELSE style = 1
         IF Keyword_Set(rotate) THEN BEGIN
@@ -1131,6 +1139,11 @@ PRO cgHistoplot, $                  ; The program name.
             probx = locations + (binsize/2.0)
             Oplot, probx, probability, COLOR=probcolor, THICK=probthick;, PSYM=2
         ENDELSE
+        
+        ; Restore the axes system variables.
+        !X = xsave
+        !Y = ysave
+        
    ENDIF
 
    ; Advance the plot for !P.Multi purposes.

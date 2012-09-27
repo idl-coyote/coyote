@@ -90,7 +90,7 @@
 ; The initialization routine for the cgPROGRESSBAR object class.
 ;
 ; :Keywords:
-;    cancel: in, optional, type=boolean, default=0
+;    cancelbutton: in, optional, type=boolean, default=0
 ;       Set this keyword if you wish to have a CANCEL button on the 
 ;       progress bar. If a CANCEL button is present, the user is reponsible
 ;       for checking if the user has canceled while the progress bar is running.
@@ -118,7 +118,7 @@
 ;        The Y size, in pixels, of the progress bar.       
 ;-
 FUNCTION cgProgressBar::INIT, $
-    CANCEL=cancel, $             ; Set this keyword if you desire a CANCEL button on progress bar.
+    CANCELBUTTON=cancelbutton, $ ; Set this keyword if you desire a CANCEL button on progress bar.
     GROUP_LEADER=group_leader, $ ; The identifier of the group leader widget.
     PERCENT=percent, $           ; Initial percent of the progress bar. (Only recognized if START used.)
     START=start, $               ; Set this keyword if you wish to call the START method from INIT.
@@ -140,7 +140,7 @@ FUNCTION cgProgressBar::INIT, $
     ENDIF
     
     ; Check keywords.
-    SetDefaultValue, cancel, 0, /Boolean
+    SetDefaultValue, cancelbutton, 0, /Boolean
     SetDefaultValue, percent, 0.0
     SetDefaultValue, start, 0, /Boolean
     SetDefaultValue, text, ""
@@ -167,7 +167,7 @@ FUNCTION cgProgressBar::INIT, $
     ENDIF
     self.drawID = Widget_Draw(self.tlb, XSize=xsize, YSize=ysize, $
         Graphics_Level=2, Renderer=1, Retain=2)
-    IF Keyword_Set(cancel) THEN BEGIN
+    IF cancelbutton THEN BEGIN
        self.cancelID = Widget_Button(self.tlb, Value='Cancel')
     ENDIF
     

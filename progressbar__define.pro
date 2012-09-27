@@ -164,6 +164,7 @@
 ;       Added BACKGROUND keyword. 22 Dec 2006. DWF.
 ;       Added RETAIN=1 keyword to Widget_Draw command. 9 Dec 2007. DWF.
 ;       Modifed the RETAIN keyword to set the value based on OS type. 22 May 2012. DWF.
+;       Retired 27 Sept 2012 and replaced with cgProgressBar. 27 Sept 2012. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;

@@ -36,7 +36,7 @@
 ;******************************************************************************************;
 ;+
 ; This function scales an image using the same keywords and scaling available in 
-; cgImage and xStretch. Sed the `Stretch` keyword for the types of image scaling
+; cgImage and xStretch. Set the `Stretch` keyword for the types of image scaling
 ; or stretching available.
 ; 
 ; :Categories:
@@ -99,6 +99,16 @@
 ;    multiplier: in, optional, type=float
 ;         The multiplication factor in a standard deviation stretch. The standard deviation
 ;         is multiplied by this factor to produce the thresholds for a linear stretch.
+;    ncolors: in, optional, type=integer, default=256
+;         If this keyword is supplied, the `TOP` keyword is ignored and the TOP keyword 
+;         is set equal to  NCOLORS-1. This keyword is provided to make cgImgScl easier 
+;         to use with the color-loading programs such as cgLOADCT::
+;
+;              cgLoadCT, 5, NColors=100, Bottom=100
+;              scaled = cgImgScl(image, NColors=100, Bottom=100)
+;                  
+;         Setting this keyword to a value automatically sets SCALE=1 and STRETCH='LINEAR', if not
+;         defined otherwise. Available only with 2D images.
 ;    negative: in, optional, type=boolean, default=0
 ;         Set this keyword if you want to display the image with a negative or reverse stretch.
 ;    scale: in, optional, type=boolean, default=0
@@ -188,7 +198,7 @@ FUNCTION cgImgScl, image, xsize, ysize, $
     ; Did the user want to scale the image?
     ; If either MIN or MAX are set, this implies SCALE=1.
     ; If min LT 0 or max GT 255, this implies SCALE=1.
-    ; If NCOLORS is used, this implies SCALE=1.
+    ; If NCOLORS is used, this implies SCALE=1 and STRETCH='linear', if STRETCH is undefined.
     IF N_Elements(min) EQ 0 THEN min = Min(image, /NAN) ELSE scale = 1
     IF N_Elements(max) EQ 0 THEN max = Max(image, /NAN) ELSE scale = 1
     IF (min LT 0) OR (max GT 255) THEN scale = 1
@@ -197,7 +207,7 @@ FUNCTION cgImgScl, image, xsize, ysize, $
     IF N_Elements(ncolors) NE 0 THEN BEGIN
         top = (N_Elements(missing_value) NE 0) ? (ncolors - 2) < 255 : (ncolors - 1)
         scale = 1
-    ENDIF
+     ENDIF
     
     ncolors = top-bottom+1
     negative = Keyword_Set(negative)

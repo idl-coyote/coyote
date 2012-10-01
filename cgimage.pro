@@ -793,13 +793,14 @@ END
 ;         is multiplied by this factor to produce the thresholds for a linear stretch.
 ;    ncolors: in, optional, type=integer, default=256
 ;         If this keyword is supplied, the `TOP` keyword is ignored and the TOP keyword 
-;         is set equal to  NCOLORS-1. This keyword is provided to make cgImage easier 
+;         is set equal to  NCOLORS-1. This keyword is provided to make cgImgScl easier 
 ;         to use with the color-loading programs such as cgLOADCT::
 ;
 ;              cgLoadCT, 5, NColors=100, Bottom=100
-;              cgImage, image, NColors=100, Bottom=100
+;              scaled = cgImgScl(image, NColors=100, Bottom=100)
 ;                  
-;         Setting this keyword to a value automatically sets SCALE=1. Available only with 2D images.
+;         Setting this keyword to a value automatically sets SCALE=1 and STRETCH='LINEAR', if not
+;         defined otherwise. Available only with 2D images.
 ;    negative: in, optional, type=boolean, default=0
 ;         Set this keyword if you want to display the image with a negative or reverse stretch.
 ;         Available only with 2D images.

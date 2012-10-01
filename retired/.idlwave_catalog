@@ -1,7 +1,7 @@
 ;;
 ;; IDLWAVE catalog for library coyote
 ;; Automatically Generated -- do not edit.
-;; Created by idlwave_catalog on Fri Aug 31 07:45:20 2012
+;; Created by idlwave_catalog on Fri Sep 28 08:41:19 2012
 ;;
 (setq idlwave-library-catalog-libname "coyote")
 (setq idlwave-library-catalog-routines
@@ -19,6 +19,7 @@
    ("FindMapBoundary" fun nil (lib "findmapboundary.pro" nil "coyote") "Result = %s(filename, boundary)" (nil ("USE_LATLON") ("UTM_SOUTH") ("XRANGE") ("YRANGE")))
    ("FSC_Arrow" pro nil (lib "fsc_arrow.pro" nil "coyote") "%s, x0, y0, x1, y1" (nil ("_EXTRA") ("COLOR") ("DATA") ("HSIZE") ("HTHICK") ("LINESTYLE") ("NORMAL") ("SOLID") ("THICK") ("WINDOW")))
    ("FSC_Axis" pro nil (lib "fsc_axis.pro" nil "coyote") "%s, xloc, yloc, zloc" (nil ("_REF_EXTRA") ("CHARSIZE") ("COLOR") ("DATA") ("DEVICE") ("FONT") ("NORMAL") ("SAVE") ("TITLE") ("WINDOW") ("XAXIS") ("XLOG") ("XTITLE") ("YAXIS") ("YLOG") ("YNOZERO") ("YTITLE") ("ZAXIS") ("ZLOG") ("ZTITLE")))
+   ("FSC_Base_Filename" fun nil (lib "fsc_base_filename.pro" nil "coyote") "Result = %s(filename)" (nil ("Directory") ("Extension") ("Path_Separator")))
    ("FSC_Color_Count_Rows" fun nil (lib "fsc_color.pro" nil "coyote") "Result = %s(filename)" (nil ("MaxRows")))
    ("FSC_Color_Color24" fun nil (lib "fsc_color.pro" nil "coyote") "Result = %s(color)" (nil))
    ("FSC_Color" fun nil (lib "fsc_color.pro" nil "coyote") "Result = %s(theColour, colorIndex)" (nil ("_Extra") ("AllColors") ("Brewer") ("Cancel") ("Check_Connection") ("ColorStructure") ("Decomposed") ("Filename") ("Names") ("NColors") ("NODISPLAY") ("Row") ("SelectColor") ("Triple")))
@@ -83,6 +84,19 @@
    ("FSC_Window_Get_Defaults" pro nil (lib "fsc_window_get_defaults.pro" nil "coyote") "%s" (nil ("Background") ("Delay") ("EraseIt") ("IM_Density") ("IM_Options") ("IM_Resize") ("IM_Transparent") ("Multi") ("Palette") ("PS_CHARSIZE") ("PS_Delete") ("PS_Encapsulated") ("PS_FONT") ("PS_Metric") ("PS_SCALE_FACTOR") ("PS_TT_FONT") ("Title") ("XOMargin") ("XPos") ("XSize") ("YOMargin") ("YPos") ("YSize")))
    ("FSC_Window_Set_Defaults" pro nil (lib "fsc_window_set_defaults.pro" nil "coyote") "%s" (nil ("Background") ("Delay") ("EraseIt") ("IM_Density") ("IM_Options") ("IM_Resize") ("IM_Transparent") ("Multi") ("Palette") ("PS_CHARSIZE") ("PS_Delete") ("PS_Encapsulated") ("PS_FONT") ("PS_Metric") ("PS_SCALE_FACTOR") ("PS_TT_FONT") ("Reset") ("Title") ("XOMargin") ("XPos") ("XSize") ("YOMargin") ("YPos") ("YSize")))
    ("FSC_WSet" pro nil (lib "fsc_wset.pro" nil "coyote") "%s, selection" (nil ("OBJECT") ("TITLE") ("WIDGETID")))
+   ("FSC_ZImage_ZoomDied" pro nil (lib "fsc_zimage.pro" nil "coyote") "%s, zoomID" (nil))
+   ("FSC_ZImage_BoxColor" pro nil (lib "fsc_zimage.pro" nil "coyote") "%s, event" (nil))
+   ("FSC_ZImage_LoadColors" pro nil (lib "fsc_zimage.pro" nil "coyote") "%s, event" (nil))
+   ("FSC_ZImage_Quit" pro nil (lib "fsc_zimage.pro" nil "coyote") "%s, event" (nil))
+   ("FSC_ZImage_Cleanup" pro nil (lib "fsc_zimage.pro" nil "coyote") "%s, tlb" (nil))
+   ("FSC_ZImage_Factor" pro nil (lib "fsc_zimage.pro" nil "coyote") "%s, event" (nil))
+   ("FSC_ZImage_DrawEvents" pro nil (lib "fsc_zimage.pro" nil "coyote") "%s, event" (nil))
+   ("FSC_ZImage" pro nil (lib "fsc_zimage.pro" nil "coyote") "%s, image" (nil ("BOTTOM") ("BOXCOLOR") ("GROUP_LEADER") ("MAXVALUE") ("MINVALUE") ("NCOLORS") ("NOINTERPOLATE") ("SCALE") ("TOP")))
+   ("FSC_ZPlot_Cleanup" pro nil (lib "fsc_zplot.pro" nil "coyote") "%s, tlb" (nil))
+   ("FSC_ZPlot_Resize" pro nil (lib "fsc_zplot.pro" nil "coyote") "%s, event" (nil))
+   ("FSC_ZPlot_Events" pro nil (lib "fsc_zplot.pro" nil "coyote") "%s, event" (nil))
+   ("FSC_ZPlot_Drawbox" pro nil (lib "fsc_zplot.pro" nil "coyote") "%s, event" (nil))
+   ("FSC_ZPlot" pro nil (lib "fsc_zplot.pro" nil "coyote") "%s, x, y" (nil ("_Extra") ("ArrowColor") ("AxisColor") ("Background") ("Color") ("Group_Leader") ("SymColor") ("XLog") ("XSize") ("YLog") ("YSize")))
    ("HistoPlot" pro nil (lib "histoplot.pro" nil "coyote") "%s, dataToHistogram" (nil ("_REF_EXTRA") ("ADDCMD") ("AXISCOLORNAME") ("BACKCOLORNAME") ("BINSIZE") ("CHARSIZE") ("DATACOLORNAME") ("FILE") ("FILLPOLYGON") ("FREQUENCY") ("HISTDATA") ("L64") ("LAYOUT") ("LINE_FILL") ("LOCATIONS") ("MAX_VALUE") ("MAXINPUT") ("MIN_VALUE") ("MININPUT") ("MISSING") ("NAN") ("NBINS") ("NOERASE") ("OMAX") ("OMIN") ("OPLOT") ("OPROBABILITY") ("ORIENTATION") ("OUTLINE") ("PATTERN") ("POLYCOLOR") ("PROBABILITY_FUNCTION") ("PROBCOLORNAME") ("REVERSE_INDICES") ("SPACING") ("THICK") ("WINDOW")))
    ("smooth2" fun nil (lib "loaddata.pro" nil "coyote") "Result = %s(i, w)" (nil ("help")))
    ("makez" fun nil (lib "loaddata.pro" nil "coyote") "Result = %s(nx, ny, w)" (nil ("help") ("lastseed") ("periodic") ("seed")))
@@ -93,6 +107,19 @@
    ("LOADDATA_EVENT" pro nil (lib "loaddata.pro" nil "coyote") "%s, event" (nil))
    ("LOADDATA" fun nil (lib "loaddata.pro" nil "coyote") "Result = %s(number)" (nil ("CANCEL") ("Group_Leader") ("Images")))
    ("Map_GSHHS_Shoreline" pro nil (lib "map_gshhs_shoreline.pro" nil "coyote") "%s, filename" (nil ("_EXTRA") ("COLOR") ("FILL") ("LAND_COLOR") ("LEVEL") ("MAP_PROJECTION") ("MINAREA") ("OUTLINE") ("WATER_COLOR")))
+   ("PROGRESSBAR_Cleanup" pro nil (lib "progressbar__define.pro" nil "coyote") "%s, tlb" (nil))
+   ("PROGRESSBAR_Error_Message" fun nil (lib "progressbar__define.pro" nil "coyote") "Result = %s(theMessage)" (nil ("_Extra") ("Error") ("Informational") ("NoName") ("Title") ("Traceback")))
+   ("PROGRESSBAR_Event" pro nil (lib "progressbar__define.pro" nil "coyote") "%s, event" (nil))
+   ("CheckButton" fun "PROGRESSBAR" (lib "progressbar__define.pro" nil "coyote") "Result = Obj ->[%s::]%s" (nil ("ACCEPT") ("CANCEL")))
+   ("CheckCancel" fun "PROGRESSBAR" (lib "progressbar__define.pro" nil "coyote") "Result = Obj ->[%s::]%s" (nil))
+   ("Destroy" pro "PROGRESSBAR" (lib "progressbar__define.pro" nil "coyote") "Obj ->[%s::]%s" (nil))
+   ("GetProperty" pro "PROGRESSBAR" (lib "progressbar__define.pro" nil "coyote") "Obj ->[%s::]%s" (nil ("BACKGROUND") ("COLOR") ("FAST_LOOP") ("PERCENT") ("TEXT") ("TLB_ID")))
+   ("SetProperty" pro "PROGRESSBAR" (lib "progressbar__define.pro" nil "coyote") "Obj ->[%s::]%s" (nil ("BACKGROUND") ("CANCEL") ("COLOR") ("FAST_LOOP") ("TEXT") ("TITLE") ("XOFFSET") ("YOFFSET")))
+   ("Start" pro "PROGRESSBAR" (lib "progressbar__define.pro" nil "coyote") "Obj ->[%s::]%s, initialPercent" (nil))
+   ("Update" pro "PROGRESSBAR" (lib "progressbar__define.pro" nil "coyote") "Obj ->[%s::]%s, percent" (nil ("Text") ("Title")))
+   ("CLEANUP" pro "PROGRESSBAR" (lib "progressbar__define.pro" nil "coyote") "Obj ->[%s::]%s" (nil))
+   ("INIT" fun "PROGRESSBAR" (lib "progressbar__define.pro" nil "coyote") "Result = Obj ->[%s::]%s" (nil ("ACCEPT") ("BACKGROUND") ("COLOR") ("FAST_LOOP") ("GROUP_LEADER") ("NOCANCEL") ("PERCENT") ("START") ("TEXT") ("TITLE") ("XOFFSET") ("XSIZE") ("YOFFSET") ("YSIZE")))
+   ("PROGRESSBAR__DEFINE" pro nil (lib "progressbar__define.pro" nil "coyote") "%s" (nil))
    ("ShapeInfo_Events" pro nil (lib "shapeinfo.pro" nil "coyote") "%s, event" (nil))
    ("ShapeInfo_Cleanup" pro nil (lib "shapeinfo.pro" nil "coyote") "%s, tlb" (nil))
    ("ShapeInfo" pro nil (lib "shapeinfo.pro" nil "coyote") "%s, filename" (nil ("XRANGE") ("YRANGE")))

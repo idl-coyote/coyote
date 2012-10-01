@@ -105,11 +105,13 @@
 ;         Set this keyword to byte scale the image before display. If this keyword is not set, 
 ;         the image is not scaled before display. This keyword will be set automatically by using
 ;         any of the keywords normally associated with byte scaling an image.
-;    stretch: in, optional, type=integer/string, default=1
-;         The type of scaling performed prior to display. 
-;         May be specified as a number or as a string (e.g, 4 or "Log").
+;    stretch: in, optional, type=integer/string, default=0
+;         The type of scaling performed prior to display. May be specified as a number 
+;         or as a string (e.g, 3 or "Log"). Available only with 2D images. If  Min(image)
+;         is less than zero or Max(image) is greater than 255, then the default value for
+;         stretch is 1.
 ;
-;           Number   Type of Stretch
+;         Number   Type of Stretch::
 ;             0         None           No scaling whatsoever is done.
 ;             1         Linear         scaled = BytScl(image, MIN=minValue, MAX=maxValue)
 ;             2         Clip           A histogram stretch, with a percentage of pixels clipped at both the top and bottom
@@ -121,7 +123,7 @@
 ;             8         Gaussian       A Gaussian normal function is applied to the image histogram.
 ;             9         MODIS          Scaling done in the differential manner of the MODIS Rapid Response Team
 ;                                      and implemented in the Coyote Library routine ScaleModis.
-;             10        StdDev         A standard deviation stretch. scaled = SDevScl(image, Multiplier=2.0).
+;             10        StdDev         Standard deviation stretch. scaled = SDevScl(image, MULTIPLIER=2).
 ;    sigma: in, optional, type=float, default=1.0
 ;         The sigma scale factor in a Gaussian stretch.
 ;    top: in, optional, type=integer, default=255

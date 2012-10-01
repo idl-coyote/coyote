@@ -43,26 +43,23 @@
 ; :Categories:
 ;    Utilities
 ;    
-; :Params:
-;    none.
-;       
 ; :Keywords:
 ;     version: out, optional, type=string
 ;        Returns the version number of the ImageMagick convert command, if found.
 ;          
 ; :Examples:
 ;    Used to determine if the ImageMagick convert command is available::
-;       IDL> available = SearchForImageMagick(Version=version)
+;       IDL> available = HasImageMagick(Version=version)
 ;       IDL> IF available THEN Print, version
 ;       
 ; :Author:
-;       FANNING SOFTWARE CONSULTING::
-;           David W. Fanning 
-;           1645 Sheely Drive
-;           Fort Collins, CO 80526 USA
-;           Phone: 970-221-0438
-;           E-mail: david@idlcoyote.com
-;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning 
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; :History:
 ;     Change History::

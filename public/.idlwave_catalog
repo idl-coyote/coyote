@@ -1,7 +1,7 @@
 ;;
 ;; IDLWAVE catalog for library coyote
 ;; Automatically Generated -- do not edit.
-;; Created by idlwave_catalog on Fri Aug 31 07:45:20 2012
+;; Created by idlwave_catalog on Fri Sep 28 08:41:19 2012
 ;;
 (setq idlwave-library-catalog-libname "coyote")
 (setq idlwave-library-catalog-routines
@@ -9,4 +9,5 @@
    ("pg_plotimage" pro nil (lib "pg_plotimage.pro" nil "coyote") "%s, im, x, y" (nil ("_extra") ("addcmd") ("axiscolor") ("background") ("fulledges") ("isotropic") ("layout") ("no_rescale") ("noerase") ("position") ("psresolution") ("smooth") ("title") ("window") ("xcharsize") ("xgridstyle") ("xlog") ("xminor") ("xrange") ("xstyle") ("xthick") ("xtick_get") ("xtickformat") ("xtickinterval") ("xticklayout") ("xticklen") ("xtickname") ("xticks") ("xtickunits") ("xtickv") ("xtitle") ("ycharsize") ("ygridstyle") ("ylog") ("yminor") ("yrange") ("ystyle") ("ythick") ("ytick_get") ("ytickformat") ("ytickinterval") ("yticklayout") ("yticklen") ("ytickname") ("yticks") ("ytickunits") ("ytickv") ("ytitle")))
    ("plotimage_resamp" fun nil (lib "plotimage.pro" nil "coyote") "Result = %s(image, nx, ny, bdepth, newx, newy)" (nil ("interp")))
    ("plotimage_pos" pro nil (lib "plotimage.pro" nil "coyote") "%s, xrange0, imgxrange0, imgxsize, xreverse, srcxpix, imgxpanel" (nil ("logscale") ("pixtolerance") ("quiet") ("status")))
-   ("plotimage" pro nil (lib "plotimage.pro" nil "coyote") "%s, img0" (nil ("_EXTRA") ("bottom") ("dither") ("imgxrange") ("imgyrange") ("interp") ("min_dpi") ("ncolors") ("noaxes") ("nodata") ("noerase") ("order") ("panel") ("pixel_aspect_ratio") ("pixtolerance") ("position") ("preserve_aspect") ("quiet") ("range") ("subpanel") ("title") ("xlog") ("xrange") ("xstyle") ("ylog") ("yrange") ("ystyle")))))
+   ("plotimage" pro nil (lib "plotimage.pro" nil "coyote") "%s, img0" (nil ("_EXTRA") ("bottom") ("dither") ("imgxrange") ("imgyrange") ("interp") ("min_dpi") ("ncolors") ("noaxes") ("nodata") ("noerase") ("order") ("panel") ("pixel_aspect_ratio") ("pixtolerance") ("position") ("preserve_aspect") ("quiet") ("range") ("subpanel") ("title") ("xlog") ("xrange") ("xstyle") ("ylog") ("yrange") ("ystyle")))
+   ("str_replace" fun nil (lib "str_replace.pro" nil "coyote") "Result = %s(str, pattern, replacement)" (nil ("evaluate") ("fold_case") ("global") ("start")))))

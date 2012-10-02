@@ -268,7 +268,7 @@ FUNCTION ERROR_MESSAGE, theMessage, Error=error, Informational=information, $
    
    ; Provide traceback information if requested and this is NOT an informational message.
    IF Keyword_Set(traceback) AND ~Keyword_Set(informational)THEN BEGIN
-      Help, /Last_Message, Output=traceback
+      IF N_Elements(traceback_msg) NE 0 THEN traceback = traceback_msg ELSE Help, /Last_Message, Output=traceback
       Print,''
       Print, 'Traceback Report from ' + StrUpCase(callingRoutine) + ':'
       Print, ''

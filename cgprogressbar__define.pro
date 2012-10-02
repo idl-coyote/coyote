@@ -222,7 +222,22 @@ PRO cgProgressBar::CLEANUP
 END
 
 
-FUNCTION cgProgressBar::CheckCancel
+;+
+; Checks to see if a Cancel button has been clicked during the on-going operation.
+; An optional response can be issued, if so.
+; 
+; :Keywords:
+;    message: in, optional, type=string
+;       If the RESPOND keyword is set, this is the message set in the blocking
+;       dialog widget. By default: "Current Operation Cancelled by User".
+;    respond: in, optional, type=boolean, default=0
+;       If this keyword is set, the program responds to a positive cancel flag
+;       by destroying the progress bar and setting a blocking dialog widget
+;       for the user. The keyword is ignored if the cancel flag is zero.
+;-
+FUNCTION cgProgressBar::CheckCancel, $
+    MESSAGE=message, $
+    RESPOND=respond
 
     Compile_Opt idl2
     
@@ -242,6 +257,13 @@ FUNCTION cgProgressBar::CheckCancel
       event = Widget_Event(self.cancelID, /NoWait)
       name = Tag_Names(event, /Structure_Name)
       IF name EQ 'WIDGET_BUTTON' THEN cancelFlag = 1
+   ENDIF
+   
+   ; Need a response to the cancel flag?
+   IF cancelFlag && Keyword_Set(respond) THEN BEGIN
+       self -> Destroy
+       IF N_Elements(message) EQ 0 THEN message = "Current Operation Cancelled by User"
+       void = Dialog_Message(message)
    ENDIF
 
    RETURN, cancelFlag

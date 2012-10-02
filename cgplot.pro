@@ -226,6 +226,7 @@
 ;         Added OPLOTS keyword to allow cgOverplot objects. 18 July 2012. DWF.
 ;         Added the ability to specify a symbol name with the PSYM keyword. 19 Juyl 2012. DWF.
 ;         Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
+;         Fixed an interaction with the LABEL keyword that prevented a Title from appearing. 2 Oct 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -522,7 +523,7 @@ PRO cgPlot, x, y, $
     title = cgCheckForSymbols(title)
     xtitle = cgCheckForSymbols(xtitle)
     ytitle = cgCheckForSymbols(ytitle)
-    IF N_Elements(label) NE 0 THEN title = ""
+    IF (N_Elements(label) NE 0) && (label NE "") THEN title = ""
     traditional = Keyword_Set(traditional)
     background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional, MODE=currentState)
     IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor

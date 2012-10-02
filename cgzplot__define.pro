@@ -111,6 +111,7 @@
 ;        Added an ERASE method to erase the current display. 10 July 2012. DWF.
 ;        Added a LABEL keyword to add a label instead of a title to a plot. 13 July 2012. DWF.
 ;        Added the ability to include overplot objects in the zoom window. 17 July 2012. DWF.
+;        Added a Destroy method and now remove widget GUI in CLEANUP method. 2 Oct 2012. DWF.
 ;-
 
 ;+
@@ -368,6 +369,9 @@ PRO cgZPlot::CLEANUP
     
     ; Call the superclass CLEANUP method.
     self -> cgGraphicsKeywords::CLEANUP
+    
+    ; If you have a valid TLB, destroy that, too.
+    IF Widget_Info(self.tlb, /VALID_ID) THEN Widget_Control, self.tlb, /Destroy
 
 END
 
@@ -698,6 +702,13 @@ PRO cgZPlot::CopyPixmap
     Device, Copy=[0, 0, self.xsize, self.ysize, 0, 0, self.pixmapID]
 
 END   
+
+;+
+; This method destroys the object and the GUI, if it still exists.
+;-
+PRO cgZplot::Destroy
+   Obj_Destroy, self
+END
 
 ;+
 ; This is the standard drawing method for the object. For smooth operation,

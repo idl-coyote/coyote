@@ -150,6 +150,8 @@
 ;         Had inexplicably left out CENTER_LATITUDE parameter in Equirectangular projection. 30 July 2012. DWF.
 ;         Added PALETTE keyword to return the RGB color palette present in the file, if any. 16 August 2012. DWF.
 ;         Moved the geotiff argument to a GEOTIFF keyword, as I always expect it to be this way. 6 Sept 2012. DWF.
+;         Removed UTM/WGS84 warning message in IDL 8.2, as this problem has been fixed in IDL 8.2. 2 Oct 2012. DWF.
+;         
 ;         
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -965,7 +967,7 @@ Function cgGeoMap, image, $
         ; with a WGS84 datum (the most common datum used in this projection). Here
         ; we substitute the WALBECK datum, which is nearly identical to WGS84 are
         ; results in position errors of less than a meter typically.
-        IF (Float(!version.release) LE 8.2) THEN BEGIN
+        IF (Float(!version.release) LT 8.2) THEN BEGIN
               IF ~Keyword_Set(silent) THEN Print, 'Switching UTM datum from WGS84 to WALBECK to avoid UTM projection bug.'
               thisDatum = 12
         ENDIF   
@@ -1004,7 +1006,7 @@ Function cgGeoMap, image, $
         ; with a WGS84 datum (the most common datum used in this projection). Here
         ; we substitute the WALBECK datum, which is nearly identical to WGS84 are
         ; results in position errors of less than a meter typically.
-        IF (Float(!version.release) LE 8.2) THEN BEGIN
+        IF (Float(!version.release) LT 8.2) THEN BEGIN
               IF ~Keyword_Set(silent) THEN Print, 'Switching UTM datum from WGS84 to WALBECK to avoid UTM projection bug.'
               thisDatum = 12
         ENDIF   
@@ -1072,7 +1074,7 @@ Function cgGeoMap, image, $
         ; with a WGS84 datum (the most common datum used in this projection). Here
         ; we substitute the WALBECK datum, which is nearly identical to WGS84 are
         ; results in position errors of less than a meter typically.
-        IF (Float(!version.release) LE 8.2) THEN BEGIN
+        IF (Float(!version.release) LT 8.2) THEN BEGIN
               IF ~Keyword_Set(silent) THEN Print, 'Switching UTM datum from WGS84 to WALBECK to avoid UTM projection bug.'
               thisDatum = 12
         ENDIF   
@@ -1140,7 +1142,7 @@ Function cgGeoMap, image, $
         ; with a WGS84 datum (the most common datum used in this projection). Here
         ; we substitute the WALBECK datum, which is nearly identical to WGS84 are
         ; results in position errors of less than a meter typically.
-        IF (Float(!version.release) LE 8.2) THEN BEGIN
+        IF (Float(!version.release) LT 8.2) THEN BEGIN
               IF ~Keyword_Set(silent) THEN Print, 'Switching UTM datum from WGS84 to WALBECK to avoid UTM projection bug.'
               thisDatum = 12
         ENDIF   

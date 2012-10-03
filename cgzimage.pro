@@ -85,47 +85,44 @@ PRO cgZImage_ZoomWindow_Events, event
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
-         
-        ; Put the info structure back.
-        IF N_Elements(info) NE 0 THEN Widget_Control, tlb, Set_UValue=info, /No_Copy
         RETURN
     ENDIF
 
     ; Get the info structure.
     Widget_Control, event.top, Get_UValue=tlb
-    Widget_Control, tlb, Get_UValue=info, /No_Copy
+    Widget_Control, tlb, Get_UValue=info
     
     ; Create the proper vectors to locate the cursor in the image.
-    xvec = Scale_Vector(Findgen(info.zxsize), info.xrange[0], info.xrange[1])
-    yvec = Scale_Vector(Findgen(info.zysize), info.yrange[0], info.yrange[1])
-    xloc = 0 > Round(xvec[event.x]) < (info.xsize-1)
-    yloc = 0 > Round(yvec[event.y]) < (info.ysize-1)
+    xvec = Scale_Vector(Findgen((*info).zxsize), (*info).xrange[0], (*info).xrange[1])
+    yvec = Scale_Vector(Findgen((*info).zysize), (*info).yrange[0], (*info).yrange[1])
+    xloc = 0 > Round(xvec[event.x]) < ((*info).xsize-1)
+    yloc = 0 > Round(yvec[event.y]) < ((*info).ysize-1)
     
     ; Create the text for the status bar.
-    dims = Image_Dimensions(info.image, XSize=xsize, YSize=ysize, TrueIndex=trueindex)
+    dims = Image_Dimensions((*info).image, XSize=xsize, YSize=ysize, TrueIndex=trueindex)
     CASE trueIndex OF
-       -1: value = (info.image)[xloc, yloc]
+       -1: value = ((*info).image)[xloc, yloc]
         0: BEGIN
-          image = Transpose(info.image, [1,2,0])
+          image = Transpose((*info).image, [1,2,0])
           value = [(image[*,*,0])[xloc, yloc], (image[*,*,1])[xloc, yloc], (image[*,*,1])[xloc, yloc]]
           Undefine, image
           END
         1: BEGIN
-          image = Transpose(info.image, [0,2,1])
+          image = Transpose((*info).image, [0,2,1])
           value = [(image[*,*,0])[xloc, yloc], (image[*,*,1])[xloc, yloc], (image[*,*,1])[xloc, yloc]]
           Undefine, image
           END
         2: BEGIN
-          value = [(info.image[*,*,0])[xloc, yloc], (info.image[*,*,1])[xloc, yloc], (info.image[*,*,1])[xloc, yloc]]
+          value = [((*info).image[*,*,0])[xloc, yloc], ((*info).image[*,*,1])[xloc, yloc], ((*info).image[*,*,1])[xloc, yloc]]
           END
     ENDCASE
     
     ; Create the text for the statusbar widget and update the status bar.
-    IF Obj_Valid(*info.map) THEN BEGIN
-        *info.map -> GetProperty, XRANGE=xrange, YRANGE=yrange
-        xvec = Scale_Vector(Findgen(info.xsize), xrange[0], xrange[1])
-        yvec = Scale_Vector(Findgen(info.ysize), yrange[0], yrange[1])
-        ll = *info.map -> Inverse(xvec[xloc], yvec[yloc])
+    IF Obj_Valid(*(*info).map) THEN BEGIN
+        *(*info).map -> GetProperty, XRANGE=xrange, YRANGE=yrange
+        xvec = Scale_Vector(Findgen((*info).xsize), xrange[0], xrange[1])
+        yvec = Scale_Vector(Findgen((*info).ysize), yrange[0], yrange[1])
+        ll = *(*info).map -> Inverse(xvec[xloc], yvec[yloc])
         loctext = 'Lat: ' + String(ll[1], Format='(F0.3)') + '  Lon: ' + String(ll[0], Format='(F0.3)')
     ENDIF ELSE BEGIN
        loctext = 'XLoc: ' + Strtrim(xloc,2) + '  YLoc: ' + Strtrim(yloc,2)
@@ -138,23 +135,21 @@ PRO cgZImage_ZoomWindow_Events, event
         valuetext = '  RGB Value: (' + StrTrim(value[0],2) + ', ' + $
              StrTrim(value[1],2) + ', ' + StrTrim(value[2],2) + ')'
     ENDELSE
-    Widget_Control, info.statusbar, Set_Value=loctext + valuetext
+    Widget_Control, (*info).statusbar, Set_Value=loctext + valuetext
      
     ; Draw the box and a small circle to locate the cursor on the
     ; larger image.
-    WSet, info.drawIndex
-    Device, Copy=[0, 0, info.xsize, info.ysize, 0, 0, info.pixIndex]    
-    xvec = Scale_Vector(Findgen(!D.X_Size), 0, info.xsize)
-    yvec = Scale_Vector(Findgen(!D.Y_Size), 0, info.ysize)
+    WSet, (*info).drawIndex
+    Device, Copy=[0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).pixIndex]    
+    xvec = Scale_Vector(Findgen(!D.X_Size), 0, (*info).xsize)
+    yvec = Scale_Vector(Findgen(!D.Y_Size), 0, (*info).ysize)
     xdloc = Value_Locate(xvec, xloc)
     ydloc = Value_Locate(yvec, yloc)
-    cgPlotS, [info.xs, info.xs, info.xd, info.xd, info.xs], $
-             [info.ys, info.yd, info.yd, info.ys, info.ys], $
-              /Device, Color=info.boxcolor
-    cgPlotS, xdloc, ydloc, /Device, PSYM='OpenCircle', Color=info.boxcolor, SymSize=1.5
+    cgPlotS, [(*info).xs, (*info).xs, (*info).xd, (*info).xd, (*info).xs], $
+             [(*info).ys, (*info).yd, (*info).yd, (*info).ys, (*info).ys], $
+              /Device, Color=(*info).boxcolor
+    cgPlotS, xdloc, ydloc, /Device, PSYM='OpenCircle', Color=(*info).boxcolor, SymSize=1.5
     
-    ; Replace the info structure.
-    Widget_Control, tlb, Set_UValue=info, /No_Copy
 END
 
 
@@ -175,9 +170,6 @@ PRO cgZImage_ZoomDied, zoomID
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message(/Quiet)
-         
-        ; Put the info structure back.
-        IF N_Elements(info) NE 0 THEN Widget_Control, tlb, Set_UValue=info, /No_Copy
         RETURN
     ENDIF
 
@@ -188,42 +180,39 @@ PRO cgZImage_ZoomDied, zoomID
     IF Widget_Info(tlb, /VALID_ID) EQ 0 THEN RETURN
     
     ; Get the information you need to redisplay the image.
-    Widget_Control, tlb, Get_UValue=info, /No_Copy
+    Widget_Control, tlb, Get_UValue=info
     
     ; Redisplay the image.
-    WSet, info.drawIndex
-    cgImage, info.image, $
-       BETA=*info.beta, $
-       BOTTOM=*info.bottom, $
-       CLIP=*info.clip, $
-       EXCLUDE=*info.exclude, $
-       EXPONENT=*info.exponent, $
-       GAMMA=*info.gamma, $
-       INTERPOLATE=*info.interpolate, $
-       MAXVALUE=*info.max, $
-       MEAN=*info.mean, $
-       MISSING_COLOR=*info.missing_color, $
-       MISSING_INDEX=*info.missing_index, $
-       MISSING_VALUE=*info.missing_value, $
-       NEGATIVE=*info.negative, $
-       MINVALUE=*info.min, $
-       MULTIPLIER=*info.multiplier, $
-       NCOLORS=*info.ncolors, $
-       PALETTE=*info.palette, $
-       SCALE=*info.scale, $
-       SIGMA=*info.sigma, $
-       STRETCH=*info.stretch, $
-       TOP=*info.top
+    WSet, (*info).drawIndex
+    cgImage, (*info).image, $
+       BETA=*(*info).beta, $
+       BOTTOM=*(*info).bottom, $
+       CLIP=*(*info).clip, $
+       EXCLUDE=*(*info).exclude, $
+       EXPONENT=*(*info).exponent, $
+       GAMMA=*(*info).gamma, $
+       INTERPOLATE=*(*info).interpolate, $
+       MAXVALUE=*(*info).max, $
+       MEAN=*(*info).mean, $
+       MISSING_COLOR=*(*info).missing_color, $
+       MISSING_INDEX=*(*info).missing_index, $
+       MISSING_VALUE=*(*info).missing_value, $
+       NEGATIVE=*(*info).negative, $
+       MINVALUE=*(*info).min, $
+       MULTIPLIER=*(*info).multiplier, $
+       NCOLORS=*(*info).ncolors, $
+       PALETTE=*(*info).palette, $
+       SCALE=*(*info).scale, $
+       SIGMA=*(*info).sigma, $
+       STRETCH=*(*info).stretch, $
+       TOP=*(*info).top
        
-    WSet, info.pixIndex
-    Device, Copy=[0, 0, info.xsize, info.ysize, 0, 0, info.drawIndex]
+    WSet, (*info).pixIndex
+    Device, Copy=[0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).drawIndex]
     
     ; Clear the statusbar widget.
-    Widget_Control, info.statusbar, Set_Value=""
+    Widget_Control, (*info).statusbar, Set_Value=""
     
-    ; Store the info structure.
-    Widget_Control, tlb, Set_UValue=info, /No_Copy
-
 END ; ----------------------------------------------------------------------
 
 
@@ -243,53 +232,47 @@ PRO cgZImage_BoxColor, event
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
-         
-        ; Put the info structure back.
-        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
-        RETURN
+       RETURN
     ENDIF
 
     ; Get the information you need to redisplaythe image.
-    Widget_Control, event.top, Get_UValue=info, /No_Copy
+    Widget_Control, event.top, Get_UValue=info
     
-    boxcolor = PickColorName(info.boxColor, Group_Leader=event.top)
-    info.boxColor = boxColor
+    boxcolor = PickColorName((*info).boxColor, Group_Leader=event.top)
+    (*info).boxColor = boxColor
     
     ; Redisplay the image.
-    WSet, info.drawIndex
-    cgImage, info.image, $      
-       BETA=*info.beta, $
-       BOTTOM=*info.bottom, $
-       CLIP=*info.clip, $
-       EXCLUDE=*info.exclude, $
-       EXPONENT=*info.exponent, $
-       GAMMA=*info.gamma, $
-       INTERPOLATE=*info.interpolate, $
-       MAXVALUE=*info.max, $
-       MEAN=*info.mean, $
-       MISSING_COLOR=*info.missing_color, $
-       MISSING_INDEX=*info.missing_index, $
-       MISSING_VALUE=*info.missing_value, $
-       NEGATIVE=*info.negative, $
-       MINVALUE=*info.min, $
-       MULTIPLIER=*info.multiplier, $
-       NCOLORS=*info.ncolors, $
-       PALETTE=*info.palette, $
-       SCALE=*info.scale, $
-       SIGMA=*info.sigma, $
-       STRETCH=*info.stretch, $
-       TOP=*info.top
+    WSet, (*info).drawIndex
+    cgImage, (*info).image, $      
+       BETA=*(*info).beta, $
+       BOTTOM=*(*info).bottom, $
+       CLIP=*(*info).clip, $
+       EXCLUDE=*(*info).exclude, $
+       EXPONENT=*(*info).exponent, $
+       GAMMA=*(*info).gamma, $
+       INTERPOLATE=*(*info).interpolate, $
+       MAXVALUE=*(*info).max, $
+       MEAN=*(*info).mean, $
+       MISSING_COLOR=*(*info).missing_color, $
+       MISSING_INDEX=*(*info).missing_index, $
+       MISSING_VALUE=*(*info).missing_value, $
+       NEGATIVE=*(*info).negative, $
+       MINVALUE=*(*info).min, $
+       MULTIPLIER=*(*info).multiplier, $
+       NCOLORS=*(*info).ncolors, $
+       PALETTE=*(*info).palette, $
+       SCALE=*(*info).scale, $
+       SIGMA=*(*info).sigma, $
+       STRETCH=*(*info).stretch, $
+       TOP=*(*info).top
 
-    WSet, info.pixIndex
-    Device, Copy=[0, 0, info.xsize, info.ysize, 0, 0, info.drawIndex]
+    WSet, (*info).pixIndex
+    Device, Copy=[0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).drawIndex]
     
     ; Unmap the controls.
-    Widget_Control, info.controlID, Map=0
-    info.mapcontrols = 0    
+    Widget_Control, (*info).controlID, Map=0
+    (*info).mapcontrols = 0    
     
-    ; Store the info structure.
-    Widget_Control, event.top, Set_UValue=info, /No_Copy
-
 END ; ----------------------------------------------------------------------
 
 
@@ -309,13 +292,10 @@ PRO cgZImage_LoadColors, event
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = Error_Message()
-         
-        ; Put the info structure back.
-        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
         RETURN
     ENDIF
 
-    Widget_Control, event.top, Get_UValue=info, /No_Copy
+    Widget_Control, event.top, Get_UValue=info
     
     ; What kind of event is this?
     thisEvent = Tag_Names(event, /Structure)
@@ -324,82 +304,81 @@ PRO cgZImage_LoadColors, event
     CASE thisEvent OF
     
         'WIDGET_BUTTON': BEGIN
-            TVLCT, info.r, info.g, info.b, *info.bottom
-            XColors, Group=event.top, NColors = *info.ncolors, $
-                Bottom=*info.bottom, NotifyID=[event.id, event.top], $
-                Title='ZImage Colors (' + StrTrim(info.drawIndex,2) + ')'
-            Widget_Control, info.controlID, Map=0
-            info.mapcontrols = 0
+            TVLCT, (*info).r, (*info).g, (*info).b, *(*info).bottom
+            XColors, Group=event.top, NColors = *(*info).ncolors, $
+                Bottom=*(*info).bottom, NotifyID=[event.id, event.top], $
+                Title='ZImage Colors (' + StrTrim((*info).drawIndex,2) + ')'
+            Widget_Control, (*info).controlID, Map=0
+            (*info).mapcontrols = 0
             END
             
         'XCOLORS_LOAD':BEGIN
     
                 ; Extract the new color table vectors from XCOLORS.
     
-            info.r = event.r(*info.bottom:*info.bottom+*info.ncolors-1)
-            info.g = event.g(*info.bottom:*info.bottom+*info.ncolors-1)
-            info.b = event.b(*info.bottom:*info.bottom+*info.ncolors-1)
+            (*info).r = event.r(*(*info).bottom:*(*info).bottom+*(*info).ncolors-1)
+            (*info).g = event.g(*(*info).bottom:*(*info).bottom+*(*info).ncolors-1)
+            (*info).b = event.b(*(*info).bottom:*(*info).bottom+*(*info).ncolors-1)
     
             ; Redisplay the image.
-            WSet, info.drawIndex
-            cgImage, info.image, $      
-               BETA=*info.beta, $
-               BOTTOM=*info.bottom, $
-               CLIP=*info.clip, $
-               EXCLUDE=*info.exclude, $
-               EXPONENT=*info.exponent, $
-               GAMMA=*info.gamma, $
-               INTERPOLATE=*info.interpolate, $
-               MAXVALUE=*info.max, $
-               MEAN=*info.mean, $
-               MISSING_COLOR=*info.missing_color, $
-               MISSING_INDEX=*info.missing_index, $
-               MISSING_VALUE=*info.missing_value, $
-               NEGATIVE=*info.negative, $
-               MINVALUE=*info.min, $
-               MULTIPLIER=*info.multiplier, $
-               NCOLORS=*info.ncolors, $
-               PALETTE=*info.palette, $
-               SCALE=*info.scale, $
-               SIGMA=*info.sigma, $
-               STRETCH=*info.stretch, $
-               TOP=*info.top
+            WSet, (*info).drawIndex
+            cgImage, (*info).image, $      
+               BETA=*(*info).beta, $
+               BOTTOM=*(*info).bottom, $
+               CLIP=*(*info).clip, $
+               EXCLUDE=*(*info).exclude, $
+               EXPONENT=*(*info).exponent, $
+               GAMMA=*(*info).gamma, $
+               INTERPOLATE=*(*info).interpolate, $
+               MAXVALUE=*(*info).max, $
+               MEAN=*(*info).mean, $
+               MISSING_COLOR=*(*info).missing_color, $
+               MISSING_INDEX=*(*info).missing_index, $
+               MISSING_VALUE=*(*info).missing_value, $
+               NEGATIVE=*(*info).negative, $
+               MINVALUE=*(*info).min, $
+               MULTIPLIER=*(*info).multiplier, $
+               NCOLORS=*(*info).ncolors, $
+               PALETTE=*(*info).palette, $
+               SCALE=*(*info).scale, $
+               SIGMA=*(*info).sigma, $
+               STRETCH=*(*info).stretch, $
+               TOP=*(*info).top
 
-            WSet, info.pixIndex
-            Device, Copy=[0, 0, info.xsize, info.ysize, 0, 0, info.drawIndex]
+            WSet, (*info).pixIndex
+            Device, Copy=[0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).drawIndex]
     
             ; Is a zoom window open? If so, redisplay it as well.
-            IF Widget_Info(info.zoomDrawID, /Valid_ID) THEN BEGIN
-               WSet, info.zoomWindowID
-               IF Ptr_Valid(info.zoomedImage) THEN BEGIN
-                  cgImage, *info.zoomedImage, $      
-                       BETA=*info.beta, $
-                       BOTTOM=*info.bottom, $
-                       CLIP=*info.clip, $
-                       EXCLUDE=*info.exclude, $
-                       EXPONENT=*info.exponent, $
-                       GAMMA=*info.gamma, $
-                       INTERPOLATE=*info.interpolate, $
-                       MAXVALUE=*info.max, $
-                       MEAN=*info.mean, $
-                       MISSING_COLOR=*info.missing_color, $
-                       MISSING_INDEX=*info.missing_index, $
-                       MISSING_VALUE=*info.missing_value, $
-                       NEGATIVE=*info.negative, $
-                       MINVALUE=*info.min, $
-                       MULTIPLIER=*info.multiplier, $
-                       NCOLORS=*info.ncolors, $
-                       PALETTE=*info.palette, $
-                       SCALE=*info.scale, $
-                       SIGMA=*info.sigma, $
-                       STRETCH=*info.stretch, $
-                       TOP=*info.top
+            IF Widget_Info((*info).zoomDrawID, /Valid_ID) THEN BEGIN
+               WSet, (*info).zoomWindowID
+               IF Ptr_Valid((*info).zoomedImage) THEN BEGIN
+                  cgImage, *(*info).zoomedImage, $      
+                       BETA=*(*info).beta, $
+                       BOTTOM=*(*info).bottom, $
+                       CLIP=*(*info).clip, $
+                       EXCLUDE=*(*info).exclude, $
+                       EXPONENT=*(*info).exponent, $
+                       GAMMA=*(*info).gamma, $
+                       INTERPOLATE=*(*info).interpolate, $
+                       MAXVALUE=*(*info).max, $
+                       MEAN=*(*info).mean, $
+                       MISSING_COLOR=*(*info).missing_color, $
+                       MISSING_INDEX=*(*info).missing_index, $
+                       MISSING_VALUE=*(*info).missing_value, $
+                       NEGATIVE=*(*info).negative, $
+                       MINVALUE=*(*info).min, $
+                       MULTIPLIER=*(*info).multiplier, $
+                       NCOLORS=*(*info).ncolors, $
+                       PALETTE=*(*info).palette, $
+                       SCALE=*(*info).scale, $
+                       SIGMA=*(*info).sigma, $
+                       STRETCH=*(*info).stretch, $
+                       TOP=*(*info).top
                ENDIF
             ENDIF
     
             END
     ENDCASE
-    Widget_Control, event.top, Set_UValue=info, /No_Copy
 END ; ----------------------------------------------------------------------
 
 
@@ -435,39 +414,39 @@ PRO cgZImage_Cleanup, tlb
    ; when the program cgZImage is destroyed. Get the info structure,
    ; which holds the pixmap window index number and delete the window.
 
-    Widget_Control, tlb, Get_UValue=info, /No_Copy
+    Widget_Control, tlb, Get_UValue=info
     IF N_Elements(info) NE 0 THEN BEGIN
-        WDelete, info.pixIndex
-        Ptr_Free, info.zoomedImage
-        Ptr_Free, info.beta
-        Ptr_Free, info.bottom
-        Ptr_Free, info.clip
-        Ptr_Free, info.exclude
-        Ptr_Free, info.exponent
-        Ptr_Free, info.gamma
-        Ptr_Free, info.interpolate
-        IF info.createdmap THEN BEGIN
-           mapObj = *info.map
+        WDelete, (*info).pixIndex
+        Ptr_Free, (*info).zoomedImage
+        Ptr_Free, (*info).beta
+        Ptr_Free, (*info).bottom
+        Ptr_Free, (*info).clip
+        Ptr_Free, (*info).exclude
+        Ptr_Free, (*info).exponent
+        Ptr_Free, (*info).gamma
+        Ptr_Free, (*info).interpolate
+        IF (*info).createdmap THEN BEGIN
+           mapObj = *(*info).map
            Obj_Destroy, mapObj
-           Ptr_Free, info.map 
+           Ptr_Free, (*info).map 
         ENDIF ELSE BEGIN
-           mapObj = *info.map
-           Ptr_Free, info.map
+           mapObj = *(*info).map
+           Ptr_Free, (*info).map
         ENDELSE
-        Ptr_Free, info.max
-        Ptr_Free, info.mean
-        Ptr_Free, info.missing_color
-        Ptr_Free, info.missing_index
-        Ptr_Free, info.missing_value
-        Ptr_Free, info.negative
-        Ptr_Free, info.min
-        Ptr_Free, info.multiplier
-        Ptr_Free, info.ncolors
-        Ptr_Free, info.palette
-        Ptr_Free, info.scale
-        Ptr_Free, info.sigma
-        Ptr_Free, info.stretch
-        Ptr_Free, info.top
+        Ptr_Free, (*info).max
+        Ptr_Free, (*info).mean
+        Ptr_Free, (*info).missing_color
+        Ptr_Free, (*info).missing_index
+        Ptr_Free, (*info).missing_value
+        Ptr_Free, (*info).negative
+        Ptr_Free, (*info).min
+        Ptr_Free, (*info).multiplier
+        Ptr_Free, (*info).ncolors
+        Ptr_Free, (*info).palette
+        Ptr_Free, (*info).scale
+        Ptr_Free, (*info).sigma
+        Ptr_Free, (*info).stretch
+        Ptr_Free, (*info).top
     ENDIF
 
 END ; ----------------------------------------------------------------------
@@ -491,16 +470,15 @@ PRO cgZImage_Factor, event
         void = Error_Message()
          
         ; Put the info structure back.
-        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
+        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info
         RETURN
     ENDIF
     
-    Widget_Control, event.top, Get_UValue=info, /No_Copy
+    Widget_Control, event.top, Get_UValue=info
     Widget_Control, event.id, Get_UValue=factor
-    info.zoomfactor = factor[event.index]
-    Widget_Control, info.controlID, Map=0
-    info.mapcontrols = 0
-    Widget_Control, event.top, Set_UValue=info, /No_Copy
+    (*info).zoomfactor = factor[event.index]
+    Widget_Control, (*info).controlID, Map=0
+    (*info).mapcontrols = 0
 END ; ----------------------------------------------------------------------
 
 
@@ -526,14 +504,11 @@ PRO cgZImage_DrawEvents, event
          
         ; Turn motion events off.
         Widget_Control, event.id, Draw_Motion_Events=0        
-        
-        ; Put the info structure back.
-        IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
         RETURN
     ENDIF
 
    ; Get the info structure out of the top-level base.
-    Widget_Control, event.top, Get_UValue=info, /No_Copy
+    Widget_Control, event.top, Get_UValue=info
     
    ; What type of an event is this?
     possibleEventTypes = [ 'DOWN', 'UP', 'MOTION', 'SCROLL' ]
@@ -548,21 +523,20 @@ PRO cgZImage_DrawEvents, event
        ; If RIGHT, then map or unmap controls.
        buttonPressed = buttons[event.press]
        IF buttonPressed EQ 'RIGHT' THEN BEGIN
-          IF info.mapcontrols EQ 1 THEN BEGIN
-             Widget_Control, info.controlID, Map=0
-             info.map = 0
+          IF (*info).mapcontrols EQ 1 THEN BEGIN
+             Widget_Control, (*info).controlID, Map=0
+             (*info).map = 0
           ENDIF ELSE BEGIN
-             Widget_Control, info.controlID, Map=1
-             info.mapcontrols = 1
+             Widget_Control, (*info).controlID, Map=1
+             (*info).mapcontrols = 1
           ENDELSE
-          Widget_Control, event.top, Set_UValue=info, /No_Copy
           RETURN
        ENDIF
 
       ; Set the static corners of the box to current
       ; cursor location.
-      info.xs = event.x
-      info.ys = event.y
+      (*info).xs = event.x
+      (*info).ys = event.y
 
       ; Turn draw MOTION events ON.
       Widget_Control, event.id, Draw_Motion_Events=1
@@ -574,10 +548,7 @@ PRO cgZImage_DrawEvents, event
        ; Is this the left or right button?
        ; If RIGHT, then do nothing.
        buttonReleased = buttons[event.release]
-       IF buttonReleased EQ 'RIGHT' THEN BEGIN
-          Widget_Control, event.top, Set_UValue=info, /No_Copy
-          RETURN
-       ENDIF
+       IF buttonReleased EQ 'RIGHT' THEN RETURN
 
       ; If this is an UP event, you need to erase the zoombox, turn motion events OFF, and
       ; draw the "zoomed" plot in both the draw widget and the pixmap.
@@ -588,82 +559,81 @@ PRO cgZImage_DrawEvents, event
 
       ; Draw the "zoomed" image. Start by getting the LAST zoom
       ; box outline. These are indices into image array.
-      event.x = 0 > event.x < (info.xsize - 1)
-      event.y = 0 > event.y < (info.ysize - 1)
-      x = [info.xs, event.x]
-      y = [info.ys, event.y]
+      event.x = 0 > event.x < ((*info).xsize - 1)
+      event.y = 0 > event.y < ((*info).ysize - 1)
+      x = [(*info).xs, event.x]
+      y = [(*info).ys, event.y]
       
       ; Make sure the user didn't just click in the window.
-      IF info.xs EQ event.x OR info.ys EQ event.y THEN BEGIN
+      IF (*info).xs EQ event.x OR (*info).ys EQ event.y THEN BEGIN
       
           ; Erase the zoombox.
-          WSet, info.drawIndex
-          TVLCT, info.r, info.g, info.b
+          WSet, (*info).drawIndex
+          TVLCT, (*info).r, (*info).g, (*info).b
           
           ; Copy from the pximap.
-          Device, Copy = [0, 0, info.xsize, info.ysize, 0, 0, info.pixIndex]
-          Widget_Control, event.top, Set_UValue=info, /No_Copy
+          Device, Copy = [0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).pixIndex]
           RETURN
           
       ENDIF
 
       ; Make sure the x and y values are ordered as [min, max].
-      IF info.xs GT event.x THEN x = [event.x, info.xs]
-      IF info.ys GT event.y THEN y = [event.y, info.ys]
+      IF (*info).xs GT event.x THEN x = [event.x, (*info).xs]
+      IF (*info).ys GT event.y THEN y = [event.y, (*info).ys]
       
       ; Make sure these are in image pixel coordinates, not just
       ; window pixel coordinates.
-      xvec = Scale_Vector(Indgen(info.xsize), 0, !D.X_Size-1)
-      yvec = Scale_Vector(Indgen(info.ysize), 0, !D.Y_Size-1)
+      xvec = Scale_Vector(Indgen((*info).xsize), 0, !D.X_Size-1)
+      yvec = Scale_Vector(Indgen((*info).ysize), 0, !D.Y_Size-1)
       x = Value_Locate(xvec, x)
       y = Value_Locate(yvec, y)
-      info.xrange = x
-      info.yrange = y
+      (*info).xrange = x
+      (*info).yrange = y
 
       ; Set the zoom factor and determine the new X and Y
       ; sizes of the Zoom Window.
-      zoomXSize = (x[1] - x[0] + 1) * info.zoomFactor
-      zoomYSize = (y[1] - y[0] + 1) * info.zoomFactor
-      info.zxsize = zoomXSize
-      info.zysize = zoomYSize
+      zoomXSize = (x[1] - x[0] + 1) * (*info).zoomFactor
+      zoomYSize = (y[1] - y[0] + 1) * (*info).zoomFactor
+      (*info).zxsize = zoomXSize
+      (*info).zysize = zoomYSize
 
       ; Subset the image, and apply the zoom factor to it.
-      CASE info.trueIndex OF
-          -1: imageSubset = info.scaled[x[0]:x[1], y[0]:y[1]]
-           0: imageSubset = info.scaled[*, x[0]:x[1], y[0]:y[1]]
-           1: imageSubset = info.scaled[x[0]:x[1], *, y[0]:y[1]]
-           2: imageSubset = info.scaled[x[0]:x[1], y[0]:y[1], *]
+      CASE (*info).trueIndex OF
+          -1: imageSubset = (*info).scaled[x[0]:x[1], y[0]:y[1]]
+           0: imageSubset = (*info).scaled[*, x[0]:x[1], y[0]:y[1]]
+           1: imageSubset = (*info).scaled[x[0]:x[1], *, y[0]:y[1]]
+           2: imageSubset = (*info).scaled[x[0]:x[1], y[0]:y[1], *]
       ENDCASE
       
       zoomedImage = FSC_Resize_Image(imageSubset, zoomXSize, zoomYSize, Interp=0)
-      IF Ptr_Valid(info.zoomedImage) $
-        THEN *info.zoomedImage = zoomedImage $
-        ELSE info.zoomedImage = Ptr_New(zoomedImage, /No_Copy)
+      IF Ptr_Valid((*info).zoomedImage) $
+        THEN *(*info).zoomedImage = zoomedImage $
+        ELSE (*info).zoomedImage = Ptr_New(zoomedImage, /No_Copy)
 
       ; If the Zoom Window exists, make it the proper size and load
       ; the zoomed image into it. If it does not exists, create it.
-      IF Widget_Info(info.zoomDrawID, /Valid_ID) THEN BEGIN
+      IF Widget_Info((*info).zoomDrawID, /Valid_ID) THEN BEGIN
 
          ; If the new zoomed image needs scroll bars, or the window has
          ; scroll bars, destroy it and recreate it.
-         dims = Image_Dimensions(*info.zoomedimage, XSIZE=ixsize, YSIZE=iysize)
-         IF (ixsize GT info.maxSize) OR (iysize GT info.maxSize) OR (info.hasScrollBars) THEN BEGIN
+         dims = Image_Dimensions(*(*info).zoomedimage, XSIZE=ixsize, YSIZE=iysize)
+         IF (ixsize GT (*info).maxSize) OR (iysize GT (*info).maxSize) OR ((*info).hasScrollBars) THEN BEGIN
          
              ; Get offset positions for the non-existing zoom window.
-             Widget_Control, info.zoomDrawID, TLB_Get_Offset=offsets
+             Widget_Control, (*info).zoomDrawID, TLB_Get_Offset=offsets
              xpos = offsets[0] 
              ypos = offsets[1]
              
-             Widget_Control, info.zoomDrawID, /Destroy
+             Widget_Control, (*info).zoomDrawID, /Destroy
              
              ; Calculate a window size. Maximum window size is 800.
-             dims = Image_Dimensions(*info.zoomedimage, XSIZE=ixsize, YSIZE=iysize)
+             dims = Image_Dimensions(*(*info).zoomedimage, XSIZE=ixsize, YSIZE=iysize)
              aspect = Float(ixsize)/iysize
              MAXSIZE = 800
              IF ixsize GT MAXSIZE OR iysize GT MAXSIZE THEN BEGIN
                  x_scroll_size = MAXSIZE < ixsize
                  y_scroll_size = MAXSIZE < iysize
-                 info.hasScrollBars = 1
+                 (*info).hasScrollBars = 1
                  
                  ; Make sure window is not off the display.
                  maxwinsize = MaxWindowSize()
@@ -671,7 +641,7 @@ PRO cgZImage_DrawEvents, event
                     xpos = maxwinsize[0] - x_scroll_size
                  IF (ypos + y_scroll_size) GT maxwinsize[1] THEN $
                     ypos = maxwinsize[1] - y_scroll_size
-             ENDIF ELSE info.hasScrollBars = 0
+             ENDIF ELSE (*info).hasScrollBars = 0
              
              ; Zoom window does not exist. Create it.
              zoomtlb = Widget_Base(Title='Zoomed Image', Group=event.top, $
@@ -681,17 +651,17 @@ PRO cgZImage_DrawEvents, event
                 /MOTION_EVENTS, Event_Pro='cgZImage_ZoomWindow_Events')
              Widget_Control, zoomtlb, /Realize
              Widget_Control, zoomdraw, Get_Value=windowID
-             info.zoomDrawID = zoomdraw
-             info.zoomWindowID = windowID
+             (*info).zoomDrawID = zoomdraw
+             (*info).zoomWindowID = windowID
              WSet, windowID
-             IF Ptr_Valid(info.zoomedImage) THEN cgImage, *info.zoomedImage
+             IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage
      
           ENDIF ELSE BEGIN
          
          ; Zoomed window exists. Make it correct size and load image.
-         Widget_Control, info.zoomDrawID, XSize=zoomXSize, YSize=zoomYSize
-         WSet, info.zoomWindowID
-         IF Ptr_Valid(info.zoomedImage) THEN cgImage, *info.zoomedImage
+         Widget_Control, (*info).zoomDrawID, XSize=zoomXSize, YSize=zoomYSize
+         WSet, (*info).zoomWindowID
+         IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage
          
          ENDELSE
       ENDIF ELSE BEGIN
@@ -702,13 +672,13 @@ PRO cgZImage_DrawEvents, event
          ypos = offsets[1] + 40
          
          ; Calculate a window size. Maximum window size is 800.
-         dims = Image_Dimensions(*info.zoomedimage, XSIZE=ixsize, YSIZE=iysize)
+         dims = Image_Dimensions(*(*info).zoomedimage, XSIZE=ixsize, YSIZE=iysize)
          aspect = Float(ixsize)/iysize
          MAXSIZE = 800
          IF ixsize GT MAXSIZE OR iysize GT MAXSIZE THEN BEGIN
              x_scroll_size = MAXSIZE < ixsize
              y_scroll_size = MAXSIZE < iysize
-             info.hasScrollBars = 1
+             (*info).hasScrollBars = 1
                  
              ; Make sure window is not off the display.
              maxwinsize = MaxWindowSize()
@@ -716,7 +686,7 @@ PRO cgZImage_DrawEvents, event
                 xpos = maxwinsize[0] - x_scroll_size
              IF (ypos + y_scroll_size) GT maxwinsize[1] THEN $
                 ypos = maxwinsize[1] - y_scroll_size
-         ENDIF ELSE info.hasScrollBars = 0
+         ENDIF ELSE (*info).hasScrollBars = 0
          
          ; Zoom window does not exist. Create it.
          zoomtlb = Widget_Base(Title='Zoomed Image', Group=event.top, TLB_Frame_Attr=1, $
@@ -726,17 +696,17 @@ PRO cgZImage_DrawEvents, event
                 /MOTION_EVENTS, Event_Pro='cgZImage_ZoomWindow_Events')
          Widget_Control, zoomtlb, /Realize
          Widget_Control, zoomdraw, Get_Value=windowID
-         info.zoomDrawID = zoomdraw
-         info.zoomWindowID = windowID
+         (*info).zoomDrawID = zoomdraw
+         (*info).zoomWindowID = windowID
          WSet, windowID
-         IF Ptr_Valid(info.zoomedImage) THEN cgImage, *info.zoomedImage
+         IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage
          
       ENDELSE
 
       ; If the controls were mapped, unmap them.
-      IF info.mapcontrols EQ 1 THEN BEGIN
-          Widget_Control, info.controlID, Map=0
-          info.mapcontrols = 0
+      IF (*info).mapcontrols EQ 1 THEN BEGIN
+          Widget_Control, (*info).controlID, Map=0
+          (*info).mapcontrols = 0
       ENDIF
     
       ENDCASE
@@ -748,29 +718,26 @@ PRO cgZImage_DrawEvents, event
     ; old zoom box and drawing a new one.
 
     ; Erase the old zoom box.
-    WSet, info.drawIndex
-    TVLCT, info.r, info.g, info.b, *info.bottom
-    Device, Copy = [0, 0, info.xsize, info.ysize, 0, 0, info.pixIndex]
+    WSet, (*info).drawIndex
+    TVLCT, (*info).r, (*info).g, (*info).b, *(*info).bottom
+    Device, Copy = [0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).pixIndex]
 
     ; Update the dynamic corner of the zoom box to the current cursor location.
-    info.xd = event.x
-    info.yd = event.y
+    (*info).xd = event.x
+    (*info).yd = event.y
 
     ; Draw the zoom box. 
     Device, Get_Decomposed=theState
     Device, Decomposed=1
-    PlotS, [info.xs, info.xs, info.xd, info.xd, info.xs], $
-       [info.ys, info.yd, info.yd, info.ys, info.ys], $
-       /Device, Color=cgColor(info.boxcolor)
+    PlotS, [(*info).xs, (*info).xs, (*info).xd, (*info).xd, (*info).xs], $
+       [(*info).ys, (*info).yd, (*info).yd, (*info).ys, (*info).ys], $
+       /Device, Color=cgColor((*info).boxcolor)
     Device, Decomposed=theState
        
     ENDCASE
 
 ENDCASE
 
-   ; Put the info structure back into its storage location.
-
-Widget_Control, event.top, Set_UValue=info, /No_Copy
 END ; ----------------------------------------------------------------------
 
 
@@ -1132,7 +1099,7 @@ PRO cgZImage, image, $
        TOP=*topptr)
 
    ; Create an info structure to hold information required by the program.
-   info = { $
+   info = Ptr_New( { $
        image:image, $               ; The original image.
        scaled:scaled, $             ; The scaled image.
        zoomedimage:Ptr_New(), $     ; The scaled and resized subimage.
@@ -1185,10 +1152,10 @@ PRO cgZImage, image, $
        trueIndex:trueIndex, $       ; The "true-color" index. 0 if image is 2D.
        MAXSIZE:800, $               ; The maximum window size.
        hasScrollBars: 0, $          ; A flag indicating the zoom window has scroll bars.
-       controlID:controlID}         ; The identifier of the control base to map.
+       controlID:controlID}, /No_Copy)        ; The identifier of the control base to map.
 
     ; Store the info structure in the user value of the top-level base.
-    Widget_Control, tlb, Set_UValue=info, /No_Copy
+    Widget_Control, tlb, Set_UValue=info
 
     ; Register this program and set up the event loop.
     XManager, 'cgzimage', tlb, Cleanup='cgZImage_Cleanup', Group_Leader=group_leader, /No_Block

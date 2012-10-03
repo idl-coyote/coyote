@@ -228,7 +228,8 @@
 ;         Changes to allow better default colors, based on changes to cgColor and cgDefaultColor. 1 Feb 2012. DWF.
 ;         Small problem with setting range keywords and with extraneous marks on the bar plot axis fixed. 6 Feb 2012. DWF.
 ;         Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
-;
+;         Fixed a typo that was interfering with the YTITLE keyword. 3 Oct 2012. DWF.
+;         
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
@@ -536,7 +537,7 @@ PRO cgBarPlot, values, $
         IF N_Elements(xstyle) EQ 0 THEN xstyle = 1 ELSE xstyle = 1 XOR xstyle    
     ENDELSE
     window = Keyword_Set(window)
-    IF N_Elements(xtitle) EQ 0 THEN xtitle = "" ELSE ytitle = cgCheckForSymbols(xtitle)
+    IF N_Elements(xtitle) EQ 0 THEN xtitle = "" ELSE xtitle = cgCheckForSymbols(xtitle)
     IF N_Elements(ytitle) EQ 0 THEN ytitle = "" ELSE ytitle = cgCheckForSymbols(ytitle)
     
     

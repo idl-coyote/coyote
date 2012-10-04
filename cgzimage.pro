@@ -64,6 +64,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 20 September 2012 from previous FSC_ZImage program. DWF.
+;        Modernized the info structure handling to reflect modern sensibilities. 3 Oct 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.

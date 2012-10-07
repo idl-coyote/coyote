@@ -69,7 +69,7 @@
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
-PRO cgCleanUp, _EXTRA=extra
+PRO cgCleanUp, ALL=all, CG=cg, DG=dg, FG=fg
 
    IF (Float(!Version.Release) GE 8.0) THEN BEGIN
       cgCleanUp8, ALL=all, CG=cg, DG=dg, FG=fg

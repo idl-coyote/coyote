@@ -62,6 +62,7 @@
 ; :History:
 ;     Change History::
 ;        Created from cgCmdWindow, 7 February 2012. DWF.
+;        Problem with the ASPECT keyword, which should have been named WASPECT. 7 Oct 2012. DWF.
 ;-
 
 ;+
@@ -84,11 +85,6 @@
 ;       to the names "P1", "P2", "P3" and "P4"to correspond to the equivalent positional
 ;       parameter. See http://www.idlcoyote.com/cg_tips/kwexpressions.php and the 
 ;       examples below for details on how to use this keyword.
-;    aspect: in, optional, type=float, default=normal
-;       Set this keyword to the aspect ratio you would like the window to have.
-;       The aspect ratio is calculated as (ysize/xsize). Must be a float value.
-;       If this keyword is set, the window will maintain this aspect ratio,
-;       even when it is resized.
 ;    background: in, optional, type=varies, default=!P.Background
 ;       The background color of the window. Specifying a background color 
 ;       automatically sets the WErase keyword.
@@ -132,6 +128,11 @@
 ;    storage: in, optional, type=any
 ;       Any user-defined IDL variable will be stored in the object storage location.
 ;       Defined here for convenience. Same as `Storage` keyword for the SetProperty method.
+;    waspect: in, optional, type=float, default=normal
+;       Set this keyword to the aspect ratio you would like the window to have.
+;       The aspect ratio is calculated as (ysize/xsize). Must be a float value.
+;       If this keyword is set, the window will maintain this aspect ratio,
+;       even when it is resized.
 ;    wxsize: in, optional, type=integer, default=640
 ;       The x size in device coordinates of the graphics window.
 ;    wysize: in, optional, type=integer, default=512
@@ -142,7 +143,6 @@
 FUNCTION cgPixmapWindow::INIT, parent, $
    AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
    AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. 
-   Aspect = aspect, $               ; Set the window aspect ratio to this value.
    Background = background, $       ; The background color. Set to !P.Background by default.
    Command=command, $               ; The graphics "command" to execute.
    EraseIt = eraseit, $             ; Set this keyword to erase the display before executing the command.
@@ -158,6 +158,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
    ReplaceCmd=replacecmd, $         ; Replace the current command and execute in the current window.
    Storage=storage, $               ; A storage pointer location. Used like a user value in a widget.
    Visible=visible, $               ; Set this keyword to make the pixmap visible.
+   WAspect = waspect, $             ; Set the window aspect ratio to this value.
    WXSize = xsize, $                ; The X size of the cgWindow graphics window in pixels. By default: 400.
    WYSize = ysize, $                ; The Y size of the cgWindow graphics window in pixels. By default: 400.
    _Extra = extra                   ; Any extra keywords. Usually the "command" keywords.
@@ -231,7 +232,6 @@ FUNCTION cgPixmapWindow::INIT, parent, $
         IF ~Obj_Valid(p1) THEN $
             Message, 'The parameter P1 must be a valid object reference when making method calls.'
     ENDIF
-    SetDefaultValue, aspect, d_aspect 
     SetDefaultValue, xsize, d_xsize 
     SetDefaultValue, ysize, d_ysize 
     SetDefaultValue, xpos, d_xpos 
@@ -241,6 +241,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
     SetDefaultValue, keyboard_events, 0, /Boolean
     SetDefaultValue, motion_events, 0, /Boolean
     SetDefaultValue, tracking_events, 0, /Boolean
+    SetDefaultValue, waspect, d_aspect 
     SetDefaultValue, wheel_events, 0, /Boolean
     IF N_Elements(storage) NE 0 THEN self.storage = Ptr_New(storage)
     IF N_Elements(background) EQ 0 THEN BEGIN
@@ -282,11 +283,11 @@ FUNCTION cgPixmapWindow::INIT, parent, $
     
     ; Check to see if you have to create a window with a particular aspect ratio.
     ; If so, your xsize and ysize values will need to be adjusted.
-    IF aspect NE 0 THEN BEGIN
-         IF aspect GE 1 THEN BEGIN
-            xsize = Round(ysize / aspect)
+    IF waspect NE 0 THEN BEGIN
+         IF waspect GE 1 THEN BEGIN
+            xsize = Round(ysize / waspect)
          ENDIF ELSE BEGIN
-            ysize = Round(xsize * aspect)
+            ysize = Round(xsize * waspect)
          ENDELSE
      ENDIF
     
@@ -314,7 +315,6 @@ FUNCTION cgPixmapWindow::INIT, parent, $
     IF N_Elements(wxomargin) NE 0 THEN self.xomargin = xomargin ELSE self.xomargin = d_xomargin
     IF N_Elements(wyomargin) NE 0 THEN self.yomargin = yomargin ELSE self.yomargin = d_yomargin
     self.adjustsize = d_adjustsize
-    self.aspect = aspect
     self.im_transparent = d_im_transparent
     self.im_density = d_im_density
     self.im_options = d_im_options
@@ -333,6 +333,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
     self.ps_scale_factor = d_ps_scale_factor
     self.ps_tt_font = d_ps_tt_font
     self.visible = visible
+    self.waspect = waspect
 
     ; Restore the current graphics window, if you can.
     IF (currentWindow GE 0) && WindowAvailable(currentWindow) THEN BEGIN

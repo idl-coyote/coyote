@@ -181,7 +181,7 @@
 ;       The thickness of the probability line drawn on the plot.
 ;    reverse_indices: out, optional
 ;       The list of reverse indices returned from the HISTOGRAM command. (See HISTOGRAM documentation.)
-;       rotate: in, optional, type=boolean, default=0                     
+;    rotate: in, optional, type=boolean, default=0                     
 ;       Set this keyword to cause the histogram bins to be drawn from left to right, rather 
 ;       than from bottom to top.
 ;    smooth: in, optional, type=integer, default=0

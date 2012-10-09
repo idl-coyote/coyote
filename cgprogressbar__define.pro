@@ -97,6 +97,9 @@
 ;    group_leader: in, optional, type=long
 ;       The identifier of a group leader widget for the progress bar. If the group
 ;       leader dies, the progress bar will be destroyed. 
+;    nocancel: in, optional, type=boolean, default=1
+;        A depreciated keyword, added for compatibility with the old Progressbar code.
+;        If set, sets the CancelButton keyword to 0.
 ;    percent: in, optional, type=float, default=0.0
 ;        The initial percentage completion of the progress bar when it first
 ;        appears on the display. Used only if the `Start` keyword is also set.
@@ -120,6 +123,7 @@
 FUNCTION cgProgressBar::INIT, $
     CANCELBUTTON=cancelbutton, $ ; Set this keyword if you desire a CANCEL button on progress bar.
     GROUP_LEADER=group_leader, $ ; The identifier of the group leader widget.
+    NOCANCEL=nocancel, $         ; Depreciated keyword.
     PERCENT=percent, $           ; Initial percent of the progress bar. (Only recognized if START used.)
     START=start, $               ; Set this keyword if you wish to call the START method from INIT.
     TEXT=text, $                 ; The message text to be written over the progress bar.
@@ -140,6 +144,7 @@ FUNCTION cgProgressBar::INIT, $
     ENDIF
     
     ; Check keywords.
+    IF N_Elements(nocancel) NE 0 THEN cancelbutton = 1 - Keyword_Set(nocancel)
     SetDefaultValue, cancelbutton, 0, /Boolean
     SetDefaultValue, percent, 0.0
     SetDefaultValue, start, 0, /Boolean

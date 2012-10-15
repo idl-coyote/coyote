@@ -200,7 +200,12 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
        'JPG': jpeg = 1
        'TIFF': tiff = 1
        'TIF': tiff = 1
-       ELSE: Message, 'File type ' + StrUpCase(filetype) + ' is not recognized as valid.'
+       "": 
+       ELSE: BEGIN
+           void = Dialog_Message('File type ' + StrUpCase(filetype) + ' invalid. No raster created.')
+           success = 0
+           RETURN
+           END
    ENDCASE
    IF Keyword_Set(bmp) THEN filetype = 'BMP'
    IF Keyword_Set(gif) THEN filetype = 'GIF'

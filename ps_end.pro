@@ -179,8 +179,8 @@
 ;        Modified the ImageMagick commands that resizes the image to a particular width. Necessary
 ;           to accommodate PNG8 file output. Using ImageMagick 6.7.2-9. 4 April 2012. DWF.
 ;        Added FILETYPE keyword to provide a generic way of creating raster file output. 30 August 2012. DWF.
-;        Apparently Macs can't handle the version number, so I have removed the version number
-;           check for Macs. 13 October 2012. DWF.
+;        Modified to use the cgPS2Raster program so code doesn't have to be maintained in 
+;            two places. 15 Oct 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -237,7 +237,6 @@ PRO PS_END, $
    xsize = !D.X_Size
    ysize = !D.Y_Size
    ps_filename = ps_struct.filename
-   outfilename = ps_filename
    showcmd = Keyword_Set(showcmd)
    
    ; If the file is in landscape mode, then fix it so that the plot
@@ -249,7 +248,8 @@ PRO PS_END, $
         ENDIF
    ENDIF
    
-   ; Need to convert with ImageMagick?
+   ; Need to convert the PostScript to a raster file?
+   needRaster = 0
    allow_transparent = Keyword_Set(allow_transparent)
    IF N_Elements(filetype) EQ 0 THEN filetype = ""
    CASE StrUpCase(filetype) OF
@@ -261,143 +261,40 @@ PRO PS_END, $
        'JPG': jpeg = 1
        'TIFF': tiff = 1
        'TIF': tiff = 1
-       ELSE: 
+       "": 
+       ELSE: BEGIN
+           void = Dialog_Message('File type ' + StrUpCase(filetype) + ' invalid. No raster created.')
+           needRaster = 0
+           END
    ENDCASE
-   IF Keyword_Set(bmp) THEN ps_struct.convert = 'BMP'
-   IF Keyword_Set(gif) THEN ps_struct.convert = 'GIF'
-   IF Keyword_Set(pdf) THEN ps_struct.convert = 'PDF'
-   IF Keyword_Set(png) THEN ps_struct.convert = 'PNG'
-   IF Keyword_Set(jpeg) THEN ps_struct.convert = 'JPEG'
-   IF Keyword_Set(tiff) THEN ps_struct.convert = 'TIFF'
+   IF Keyword_Set(bmp) THEN needRaster = 1
+   IF Keyword_Set(gif) THEN needRaster = 1
+   IF Keyword_Set(pdf) THEN needRaster = 1
+   IF Keyword_Set(png) THEN needRaster = 1
+   IF Keyword_Set(jpeg) THEN needRaster = 1
+   IF Keyword_Set(tiff) THEN needRaster = 1
    SetDefaultValue, density, 300
    SetDefaultValue, resize, 25
-   
-   IF ps_struct.convert NE "" THEN BEGIN
-
-        basename = cgRootName(ps_struct.filename, DIRECTORY=theDir, EXTENSION=theExtension)
-        CASE 1 OF
-            ps_struct.convert EQ 'BMP':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.bmp')
-            ps_struct.convert EQ 'GIF':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.gif')
-            ps_struct.convert EQ 'PDF':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.pdf')
-            ps_struct.convert EQ 'PNG':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.png')
-            ps_struct.convert EQ 'JPEG': outfilename = Filepath(ROOT_DIR=theDir, basename + '.jpg')
-            ps_struct.convert EQ 'TIFF': outfilename = Filepath(ROOT_DIR=theDir, basename + '.tif')
-        ENDCASE
-        IF N_Elements(outfilename) NE "" THEN BEGIN
-        
-            ; ImageMagick is required for this section of the code.
-            IF StrUpCase(!Version.OS) EQ 'DARWIN' THEN BEGIN
-                available = HasImageMagick()
-                doVersionTest = 0
-            ENDIF ELSE BEGIN
-                available = HasImageMagick(Version=version)
-                doVersionTest = 1
-            ENDELSE
-            IF available && ~(ps_struct.convert EQ 'PDF') THEN BEGIN
-            
-                ; Cannot successfully convert encapsulated landscape file to raster.
-                ; Limitation of ImageMagick, and specifically, GhostScript, which does
-                ; the conversion. 
-                IF  ps_struct.encapsulated &&  ps_struct.landscape THEN BEGIN
-                    Message, 'ImageMagick cannot convert an encapsulated ' + $
-                             'PostScript file in landscape mode to a raster file. '
-                ENDIF
-                
-                IF doVersionTest THEN BEGIN
-                   vp = StrSplit(version, '.', /EXTRACT)
-                   vp[2] = StrMid(vp[2],0,1)
-                   version_number = Fix(vp[0]) * 100 + Fix(vp[1])*10 + vp[2]
-                   IF version_number GT 634 THEN allowAlphaCmd = 1 ELSE allowAlphaCmd = 0
-                ENDIF ELSE allowAlphaCmd = 1
-            
-                ; Set up for various ImageMagick convert options.
-                IF allowAlphaCmd THEN alpha_cmd =  allow_transparent ? '' : ' -alpha off' 
-                density_cmd = ' -density ' + StrTrim(density,2)
-                
-                ; Normally, we just resize by a precentage, unless a specific width
-                ; has been specified.
-                IF (N_Elements(width) EQ 0) || (width LE 0) THEN BEGIN
-                     resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
-                ENDIF ELSE BEGIN
-                
-                     ; Getting the width correct has to be done in an extremely non-intuitive way.
-                     ; I wonder if this will be changed in different versions of ImageMagick?
-                     ; In fact, it does NOT correspond to the documentation for how this is suppose
-                     ; to work.
-                     height = Ceil(width*ysize/Float(xsize))
-                     IF ps_struct.landscape THEN BEGIN
-                        resize_cmd = ' -resize ' + StrCompress(height, /REMOVE_ALL) + 'x' + StrCompress(width, /REMOVE_ALL)                   
-                     ENDIF ELSE BEGIN
-                        resize_cmd = ' -resize ' + StrCompress(width, /REMOVE_ALL) + 'x' + StrCompress(height, /REMOVE_ALL)
-                     ENDELSE
-                ENDELSE
-                
-                ; Start ImageMagick convert command.
-                cmd = 'convert'
-                
-                ; Add various command options.
-                IF N_Elements(alpha_cmd) NE 0 THEN cmd = cmd + alpha_cmd
-                IF N_Elements(density_cmd) NE 0 THEN cmd = cmd + density_cmd
-                
-                 ; Add the input filename.
-                cmd = cmd +  ' "' + ps_struct.filename + '"' 
-                
-                IF N_Elements(resize_cmd) NE 0 THEN cmd = cmd + resize_cmd
-                cmd = cmd +  ' -flatten '
-                
-                IF N_Elements(im_options) NE 0 THEN BEGIN
-                    IF StrMid(im_options, 0, 1) NE " " THEN im_options = " " + im_options
-                    cmd = cmd + im_options
-                ENDIF
-                
-                ; If the landscape mode is set, rotate by 90 to allow the 
-                ; resulting file to be in landscape mode.
-                IF ps_struct.landscape THEN cmd = cmd + ' -rotate 90'
-
-                ; Add the output filename and check for PNG output.
-                IF ps_struct.convert EQ 'PNG' THEN BEGIN
-                
-                    ; Check to see whether 8-bit or 24-bit PNG files should be created.
-                    cgWindow_GetDefs, IM_PNG8=png8
-                    IF png8 THEN BEGIN
-                       cmd = cmd + ' "' + 'PNG8:' +outfilename + '"' 
-                    ENDIF ELSE BEGIN
-                       cmd = cmd + ' "' + 'PNG24:' +outfilename + '"' 
-                    ENDELSE
-                ENDIF ELSE cmd = cmd + ' "' + outfilename + '"'
-                IF ~ps_struct.quiet THEN BEGIN
-                    IF showcmd THEN Print, 'ImageMagick CONVERT command: ',  cmd
-                ENDIF
-                SPAWN, cmd, result, err_result
-
-                IF ~ps_struct.quiet THEN BEGIN
-                    IF err_result[0] NE "" THEN BEGIN
-                        FOR k=0,N_Elements(err_result)-1 DO Print, err_result[k]
-                    ENDIF ELSE Print, 'Output file located here: ' + outfilename
-                ENDIF
-                
-                ; Have you been asked to delete the PostScript file?
-                IF Keyword_Set(delete_ps) THEN BEGIN
-                    IF outfilename NE ps_filename THEN File_Delete, ps_filename
-                ENDIF
-            ENDIF ELSE BEGIN
-                IF ps_struct.convert EQ 'PDF' THEN BEGIN
-                    cgPS2PDF, ps_struct.filename, outfilename, $
-                        DELETE_PS=delete_ps, $
-                        GS_PATH=gs_path, $
-                        PAGETYPE=ps_struct.pagetype, $
-                        SILENT=1, $
-                        SUCCESS=success, $
-                        UNIX_CONVERT_CMD=unix_convert_cmd
-                    IF success THEN BEGIN
-                       IF ~ps_struct.quiet THEN Print, 'PDF Output File: ' + outfilename
-                    ENDIF ELSE Print, 'Encountered problem creating PDF file. Proceeding...'
-                ENDIF ELSE BEGIN
-                    Message, 'ImageMagick could not be found. No conversion to raster was possible.'
-                ENDELSE
-            ENDELSE
-        ENDIF
-        
+   IF needRaster THEN BEGIN
+       cgPS2Raster, ps_filename, raster_filename, $
+          ALLOW_TRANSPARENT=allow_transparent, $
+          BMP=bmp, $
+          DELETE_PS=delete_ps, $
+          DENSITY=density, $
+          IM_OPTIONS=im_options, $
+          FILETYPE=filetype, $
+          GIF=gif, $
+          JPEG=jpeg, $
+          OUTFILENAME=outfilename, $
+          PDF=pdf, $
+          PNG=png, $
+          PORTRAIT=portrait, $
+          RESIZE=resize, $
+          SHOWCMD=showcmd, $
+          SILENT=silent, $
+          SUCCESS=success, $
+          TIFF=tiff, $
+          WIDTH=width
    ENDIF
    
    ; Clean up.

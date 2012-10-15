@@ -54,9 +54,14 @@
 ;    Utilities, Graphics
 ;    
 ; :Params:
-;     ps_file: in, required, type=string
+;     ps_filename: in, required, type=string
 ;         The name of the input PostScript file that is being converted to a raster file.
 ;         If not provided, the user will be asked to select a file.
+;     raster_filename: in, required, type=string
+;         The name of the output raster file that is being converted from the PostScript file.
+;         If not provided, the output filename is created from the input PostScript file name.
+;         Note, this is the preferred way to create the output filename, since the OUTPUTNAME
+;         keyword has been depreciated as an input keyword.
 ;         
 ; :Keywords:
 ;     allow_transparent: in, optional, type=boolean, default=0
@@ -73,6 +78,10 @@
 ;     density: in, optional, type=integer, default=300
 ;        The horizontal and vertical density (in dots per inch, DPI) of the image when the PostScript file
 ;        is converted to a raster format by ImageMagick. 
+;     filetype: in, optional, type='string', default=""
+;        This keyword provides a generic way of setting the `BMP`, `GIF`, `JPEG`, `PNG`, and `TIFF` 
+;        keywords. Set this keyword to the type of file output desired, and the correct "output"
+;        keyword will be set.
 ;     gif: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a GIF image. Requires ImageMagick.
 ;     im_options: in, optional, type=string, default=""
@@ -133,16 +142,20 @@
 ;       Added the ability to check to see if 8-bit or 24-bit PNG files should be created. 3 April 2012. DWF.
 ;       Modified the ImageMagick commands that resizes the image to a particular width. Necessary
 ;          to accommodate PNG8 file output. Using ImageMagick 6.7.2-9. 4 April 2012. DWF.
+;       Added FILETYPE keyword. 13 October 2012. DWF.
+;       Apparently Macs can't handle the version number, so I have removed the version number
+;           check for Macs. 13 October 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-PRO cgPS2Raster, ps_file, $
+PRO cgPS2Raster, ps_filename, raster_filename, $
     ALLOW_TRANSPARENT=allow_transparent, $
     BMP=bmp, $
     DELETE_PS=delete_ps, $
     DENSITY=density, $
     IM_OPTIONS=im_options, $
+    FILETYPE=filetype, $
     GIF=gif, $
     JPEG=jpeg, $
     OUTFILENAME=outfilename, $
@@ -171,13 +184,24 @@ PRO cgPS2Raster, ps_file, $
    success = 0
    
    ; Need a file?
-   IF N_Elements(ps_file) EQ 0 THEN BEGIN
-      ps_file = cgPickfile(Filter=['*.ps','*.eps'], Title='Select a PostScript file.')
-      IF ps_file EQ "" THEN RETURN
+   IF N_Elements(ps_filename) EQ 0 THEN BEGIN
+      ps_filename = cgPickfile(Filter=['*.ps','*.eps'], Title='Select a PostScript file.')
+      IF ps_filename EQ "" THEN RETURN
    ENDIF
 
    ; ImageMagick parameters. Assume we will convert to PNG file, unless told otherwise
-   filetype = 'PNG'
+   IF N_Elements(filetype) EQ 0 THEN filetype = ""
+   CASE StrUpCase(filetype) OF
+       'BMP': bmp = 1
+       'GIF': gif = 1
+       'PDF': pdf = 1
+       'PNG': png = 1
+       'JPEG': jpeg = 1
+       'JPG': jpeg = 1
+       'TIFF': tiff = 1
+       'TIF': tiff = 1
+       ELSE: Message, 'File type ' + StrUpCase(filetype) + ' is not recognized as valid.'
+   ENDCASE
    IF Keyword_Set(bmp) THEN filetype = 'BMP'
    IF Keyword_Set(gif) THEN filetype = 'GIF'
    IF Keyword_Set(png) THEN filetype = 'PNG'
@@ -197,8 +221,13 @@ PRO cgPS2Raster, ps_file, $
       xsize = 8.5
       ysize = 11
    ENDELSE
-   ; Construct an output filename, if needed.
-   basename = cgRootName(ps_file, DIRECTORY=theDir, EXTENSION=theExtension)
+   
+   ; Construct an output filename, if needed. First, look to see if the raster_filename
+   ; positional parameter is being used to specify the output filename.
+   IF (N_Elements(raster_filename) NE 0) && (N_Elements(outfilename) EQ 0) THEN BEGIN
+       outfilename = raster_filename
+   ENDIF
+   basename = cgRootName(ps_filename, DIRECTORY=theDir, EXTENSION=theExtension)
    IF theDir EQ "" THEN CD, CURRENT=theDir
    IF N_Elements(outfilename) EQ 0 THEN BEGIN
        CASE 1 OF
@@ -209,17 +238,30 @@ PRO cgPS2Raster, ps_file, $
           filetype EQ 'TIFF': outfilename = Filepath(ROOT_DIR=theDir, basename + '.tif')
        ENDCASE
    ENDIF
+   
+   ; Make sure the outfilename is an absolute file path.
+   IF File_BaseName(outfilename) EQ outfilename THEN outfilename = Filepath(ROOT_DIR=theDir, outfilename)
+   
+   ; If you have an output filename, then do it.
    IF N_Elements(outfilename) NE "" THEN BEGIN
         
       ; ImageMagick is required for this section of the code.
-      available = HasImageMagick(Version=version)
+      IF StrUpCase(!Version.OS) EQ 'DARWIN' THEN BEGIN
+          available = HasImageMagick()
+          doVersionTest = 0
+      ENDIF ELSE BEGIN
+          available = HasImageMagick(Version=version)
+          doVersionTest = 1
+      ENDELSE
       IF available THEN BEGIN
             
           ; Some functionality depends on the ImageMagick version. Check the version here.
-          vp = StrSplit(version, '.', /EXTRACT)
-          vp[2] = StrMid(vp[2],0,1)
-          version_number = Fix(vp[0]) * 100 + Fix(vp[1])*10 + vp[2]
-          IF version_number GT 634 THEN allowAlphaCmd = 1 ELSE allowAlphaCmd = 0
+          IF doVersionTest THEN BEGIN
+             vp = StrSplit(version, '.', /EXTRACT)
+             vp[2] = StrMid(vp[2],0,1)
+             version_number = Fix(vp[0]) * 100 + Fix(vp[1])*10 + vp[2]
+             IF version_number GT 634 THEN allowAlphaCmd = 1 ELSE allowAlphaCmd = 0
+          ENDIF ELSE allowAlphaCmd = 1
             
           ; Set up for various ImageMagick convert options.
           IF allowAlphaCmd THEN alpha_cmd =  allow_transparent ? '' : ' -alpha off' 
@@ -249,7 +291,7 @@ PRO cgPS2Raster, ps_file, $
           IF N_Elements(density_cmd) NE 0 THEN cmd = cmd + density_cmd
                 
           ; Add the input filename.
-          cmd = cmd +  ' "' + ps_file + '"' 
+          cmd = cmd +  ' "' + ps_filename + '"' 
                 
           IF N_Elements(resize_cmd) NE 0 THEN cmd = cmd + resize_cmd
           cmd = cmd +  ' -flatten '
@@ -286,7 +328,7 @@ PRO cgPS2Raster, ps_file, $
                 
           ; Have you been asked to delete the PostScript file?
           IF Keyword_Set(delete_ps) THEN BEGIN
-              IF outfilename NE ps_file THEN File_Delete, ps_file
+              IF outfilename NE ps_filename THEN File_Delete, ps_filename
           ENDIF
       ENDIF ELSE Message, 'ImageMagick cannot be found on this machine.'
       

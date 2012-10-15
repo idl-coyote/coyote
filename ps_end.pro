@@ -179,6 +179,8 @@
 ;        Modified the ImageMagick commands that resizes the image to a particular width. Necessary
 ;           to accommodate PNG8 file output. Using ImageMagick 6.7.2-9. 4 April 2012. DWF.
 ;        Added FILETYPE keyword to provide a generic way of creating raster file output. 30 August 2012. DWF.
+;        Apparently Macs can't handle the version number, so I have removed the version number
+;           check for Macs. 13 October 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -284,7 +286,13 @@ PRO PS_END, $
         IF N_Elements(outfilename) NE "" THEN BEGIN
         
             ; ImageMagick is required for this section of the code.
-            available = HasImageMagick(Version=version)
+            IF StrUpCase(!Version.OS) EQ 'DARWIN' THEN BEGIN
+                available = HasImageMagick()
+                doVersionTest = 0
+            ENDIF ELSE BEGIN
+                available = HasImageMagick(Version=version)
+                doVersionTest = 1
+            ENDELSE
             IF available && ~(ps_struct.convert EQ 'PDF') THEN BEGIN
             
                 ; Cannot successfully convert encapsulated landscape file to raster.
@@ -295,10 +303,12 @@ PRO PS_END, $
                              'PostScript file in landscape mode to a raster file. '
                 ENDIF
                 
-                vp = StrSplit(version, '.', /EXTRACT)
-                vp[2] = StrMid(vp[2],0,1)
-                version_number = Fix(vp[0]) * 100 + Fix(vp[1])*10 + vp[2]
-                IF version_number GT 634 THEN allowAlphaCmd = 1 ELSE allowAlphaCmd = 0
+                IF doVersionTest THEN BEGIN
+                   vp = StrSplit(version, '.', /EXTRACT)
+                   vp[2] = StrMid(vp[2],0,1)
+                   version_number = Fix(vp[0]) * 100 + Fix(vp[1])*10 + vp[2]
+                   IF version_number GT 634 THEN allowAlphaCmd = 1 ELSE allowAlphaCmd = 0
+                ENDIF ELSE allowAlphaCmd = 1
             
                 ; Set up for various ImageMagick convert options.
                 IF allowAlphaCmd THEN alpha_cmd =  allow_transparent ? '' : ' -alpha off' 

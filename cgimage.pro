@@ -162,12 +162,92 @@
 ;       Modified the way the HIST_EQUAL stretch works. Previously the image was displayed as all zeros
 ;          if the input image had a minimum value less that zero. 21 Aug 2012. DWF.
 ;       Fixed a problem with the INTERPOLATE variable that prevented interpolaton from occurring. 12 Sept 2012. DWF.
-;       A misspelled MULTIPLIER keyword was interfering with a Standard Deviation stretch. 16 Sept 2012.
+;       A misspelled MULTIPLIER keyword was interfering with a Standard Deviation stretch. 16 Sept 2012. DWF
+;       Added the TRANSPARENT keyword to allow transparent display of images. 17 October 2012. DWF.
+;       Added the MAPCOORD keyword to allow the XRANGE and YRANGE of the image to be specified by the map 
+;          coordinate object. 17 October 2012. DWF.
 ;          
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
 ;
+;+
+; This function creates a transparent image out of a normal 2D or 3D image.
+; 
+; :Params:
+;     image: in, required
+;        The input image. Must be either 2D or a true-color image.
+;     transparent: in, required, type=int
+;        The transparentcy of the image with respect to the background image. A number from 0 to 100.
+;-
+FUNCTION cgImage_Make_Transparent_Image, image, transparent, PALETTE=palette, SUCCESS=success
+
+    Compile_Opt idl2
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        success = 0
+        RETURN, 0
+    ENDIF
+
+    success = 1
+    IF N_Elements(image) EQ 0 THEN Message, 'An image parameter is required'
+    IF N_Elements(transparent) EQ 0 THEN transparent = 50
+    
+    ; Make sure the transparent value is between 0 and 100 initially, and between 0 and 1 finally.
+    transparent = (0 > transparent < 100) / 100.0
+    
+    IF (transparent LT 0) || (transparent GT 1.0) THEN Message, 'The transparency factor must be a number between 0 and 100.'
+    
+    ndims = Size(image, /N_DIMENSIONS)
+    
+    CASE ndims OF
+        2: BEGIN
+           s = Size(image, /DIMENSIONS)
+           IF N_Elements(palette) NE 0 THEN BEGIN
+              IF (Size(palette, /DIMENSIONS))[0] EQ 3 THEN BEGIN
+                 r = Reform(palette[0,*])
+                 g = Reform(palette[1,*])
+                 b = Reform(palette[2,*])
+              ENDIF ELSE BEGIN
+                 r = palette[*,0]
+                 g = palette[*,1]
+                 b = palette[*,2]
+              ENDELSE
+           ENDIF ELSE BEGIN
+              TVLCT, r, g, b, /Get
+           ENDELSE
+           newimage = BytArr(4, s[0], s[1])
+           newImage[0,*,*] = r[image]
+           newImage[1,*,*] = g[image]
+           newImage[2,*,*] = b[image]
+           newimage[3,*,*] = BytArr(s[0],s[1]) + (255 * (1.0 - transparent)) 
+           END
+           
+         3: BEGIN
+            dims = Image_Dimensions(image, XSIZE=xsize, YSIZE=ysize)
+            newimage = BytArr(4, xsize, ysize)
+            
+            ; Prepare an alpha image, if needed.
+            index = Where(Size(image,/DIMENSIONS) EQ 3)
+            CASE index OF
+                 0: aImage = image
+                 1: aImage = Transpose(image, [1,0,2])
+                 2: aimage = Transpose(image, [2,0,1])
+            ENDCASE
+            newImage[0:2,*,*] = aImage
+            newimage[3,*,*] = BytArr(xsize,ysize) + (255 * (1.0 - transparent)) 
+            END
+            
+         ELSE: Message, 'Cannot process images that are not 2D or True-Color for transparentcy.'
+         
+    ENDCASE
+    RETURN, newImage
+END
+
+
 ;+
 ; This routine prepares a transparent image (an image with an alpha channel)
 ; for display.
@@ -236,12 +316,9 @@ FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
        Message, 'IDL 6.5 or higher required to correctly display alpha images.', /INFORMATIONAL
        RETURN, aImage[*,*,0:2]
     ENDIF
-                    
-    ; Some alpha channels are screwy. Just ignore those and return now.
-    IF MIN(alpha_channel) EQ MAX(alpha_channel) THEN RETURN, aImage[*,*,0:2]
-       
+                           
     ; Now we have an alpha channel.
-    alpha_channel = Scale_Vector(alpha_channel, 0.0, 1.0)
+    alpha_channel = (alpha_channel / 255.0) * 1.0
     foregndImage = aImage[*,*,0:2]
            
     ; Get the size and dimensions of the background image.
@@ -738,6 +815,10 @@ END
 ;         starts in the upper left (1) and goes sequentually by column and then
 ;         by row. Note that using the LAYOUT keyword automatically sets the NOERASE 
 ;         keyword to 1.
+;    mapcoord: in, optional, type=object
+;         An object reference to a map coordinate object (e.g., cgMap). If present, the
+;         XRANGE and YRANGE keyword values will be obtained from this map object, if they
+;         are not defined otherwise. 
 ;    margin: in, optional, type=float, default=0.0
 ;         A single value, expressed as a normalized coordinate, that
 ;         can easily be used to calculate a position in the window.
@@ -922,6 +1003,9 @@ END
 ;         If the SCALE keyword is set, the image is scaled before display so that all 
 ;         displayed pixels have values greater than or equal to BOTTOM and less than 
 ;         or equal to TOP. Available only with 2D images.
+;    transparent: in, optional, type=integer, default=50
+;         A number between 0 and 100 that specifies the percent of transparency between the
+;         image being displayed and the background image.
 ;    tv: in, optional, type=boolean, default=0
 ;         Setting this keyword makes the cgImage command work much like the brain-dead
 ;         TV command except that it will get colors right on all output devices. Most of
@@ -968,6 +1052,7 @@ PRO cgImage, image, x, y, $
    INTERPOLATE=interpolate, $
    KEEP_ASPECT_RATIO=keep_aspect, $
    LAYOUT=layout, $
+   MAPCOORD=mapcoord, $
    MARGIN=margin, $
    MAXVALUE=max, $
    MEAN=mean, $
@@ -996,6 +1081,7 @@ PRO cgImage, image, x, y, $
    STRETCH=stretch, $
    TITLE=title, $
    TOP=top, $
+   TRANSPARENT=transparent, $
    TV=tv, $
    WINDOW=window, $
    XRANGE=plotxrange, $
@@ -1010,6 +1096,7 @@ PRO cgImage, image, x, y, $
        Catch, /Cancel
        ok = Error_Message()
        IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
+       IF transparentImage THEN image = oldImage
        RETURN
     ENDIF
     
@@ -1087,6 +1174,7 @@ PRO cgImage, image, x, y, $
                INTERPOLATE=interpolate, $
                KEEP_ASPECT_RATIO=keep_aspect, $
                LAYOUT=layout, $
+               MAPCOORD=mapcoord, $
                MARGIN=margin, $
                MAXVALUE=max, $
                MEAN=mean, $
@@ -1113,6 +1201,7 @@ PRO cgImage, image, x, y, $
                STRETCH=stretch, $
                TITLE=title, $
                TOP=top, $
+               TRANSPARENT=transparent, $
                TV=tv, $
                XRANGE=plotxrange, $
                XTITLE=plotxtitle, $
@@ -1146,6 +1235,7 @@ PRO cgImage, image, x, y, $
                INTERPOLATE=interpolate, $
                KEEP_ASPECT_RATIO=keep_aspect, $
                LAYOUT=layout, $
+               MAPCOORD=mapcoord, $
                MARGIN=margin, $
                MAXVALUE=max, $
                MEAN=mean, $
@@ -1172,6 +1262,7 @@ PRO cgImage, image, x, y, $
                STRETCH=stretch, $
                TITLE=title, $
                TOP=top, $
+               TRANSPARENT=transparent, $
                TV=tv, $
                XRANGE=plotxrange, $
                XTITLE=plotxtitle, $
@@ -1179,6 +1270,18 @@ PRO cgImage, image, x, y, $
                REPLACECMD=replacecmd, $
                _EXTRA=extra
              RETURN
+    ENDIF
+    
+    ; Are we doing a transparent image?
+    transparentImage = 0
+    IF N_Elements(transparent) NE 0 THEN BEGIN
+        transparent = 0 > transparent < 100
+        transImage = cgImage_Make_Transparent_Image(image, transparent, PALETTE=palette, SUCCESS=success)
+        IF success THEN BEGIN
+            transparentImage = 1
+            oldImage = image
+            image = transImage
+        ENDIF ELSE RETURN
     ENDIF
     
     ; Are we doing some kind of output?
@@ -1353,8 +1456,11 @@ PRO cgImage, image, x, y, $
     IF scale THEN BEGIN
        IF N_Elements(stretch) EQ 0 THEN stretch = 1
     ENDIF 
+    
+    ; If you are setting the transparent keyword, then don't define an alphaFGPosition.
+    ; Use the Postion for this, later, after it has been determined.
+    IF ~transparentImage THEN SetDefaultValue, alphafgpos, [0.0, 0.0, 1.0, 1.0]
     SetDefaultValue, alphabgpos, [0.0, 0.0, 1.0, 1.0]
-    SetDefaultValue, alphafgpos, [0.0, 0.0, 1.0, 1.0]
     SetDefaultValue, beta, 3.0
     SetDefaultValue, clip, 2
     SetDefaultValue, exponent, 4.0
@@ -1815,6 +1921,16 @@ PRO cgImage, image, x, y, $
     ; Set the output position.
     oposition = position
     
+    ; If you are doing transparent images, then the alphafgposition is set to POSITION,
+    ; unless the user is doing something else.
+    IF transparentImage THEN BEGIN
+       IF N_Elements(alphafgpos) EQ 0 THEN BEGIN
+           alphafgpos = position
+           position=[0.0, 0.0, 1.0, 1.0]
+       ENDIF 
+    ENDIF ELSE SetDefaultValue, alphafgpos, [0.0, 0.0, 1.0, 1.0]
+    
+    
     ; Calculate the image size and start locations. The plus and minus
     ; factor values are designed to keep the image completely inside the axes.
     ; In other words, if you draw the axes first, then put the image in
@@ -2033,8 +2149,12 @@ PRO cgImage, image, x, y, $
     bangy = !Y
      
     ; Need a data range?
-    IF N_Elements(plotxrange) EQ 0 THEN plotxrange = [0, imgXsize]
-    IF N_Elements(plotyrange) EQ 0 THEN plotyrange = [0, imgYsize]
+    IF N_Elements(plotxrange) EQ 0 THEN BEGIN
+       IF Obj_Valid(mapCoord) THEN mapCoord -> GetProperty, XRANGE=plotxrange ELSE plotxrange = [0, imgXsize]
+    ENDIF
+    IF N_Elements(plotyrange) EQ 0 THEN BEGIN
+       IF Obj_Valid(mapCoord) THEN mapCoord -> GetProperty, YRANGE=plotyrange ELSE plotyrange = [0, imgYsize]
+    ENDIF
     
     ; Check title for cgSymbols.
     IF N_Elements(plotxtitle) NE 0 THEN plotxtitle = cgCheckForSymbols(plotxtitle)

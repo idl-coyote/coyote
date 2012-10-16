@@ -227,19 +227,31 @@ FUNCTION cgImage_Make_Transparent_Image, image, transparent, PALETTE=palette, SU
            END
            
          3: BEGIN
-            dims = Image_Dimensions(image, XSIZE=xsize, YSIZE=ysize)
+            dims = Image_Dimensions(image, XSIZE=xsize, YSIZE=ysize, ALPHACHANNEL=alpha, TRUEINDEX=true)
             newimage = BytArr(4, xsize, ysize)
             
             ; Prepare an alpha image, if needed.
-            index = Where(Size(image,/DIMENSIONS) EQ 3)
-            CASE index OF
-                 0: aImage = image
-                 1: aImage = Transpose(image, [1,0,2])
-                 2: aimage = Transpose(image, [2,0,1])
-            ENDCASE
-            newImage[0:2,*,*] = aImage
-            newimage[3,*,*] = BytArr(xsize,ysize) + (255 * (1.0 - transparent)) 
+            IF ~alpha THEN BEGIN
+                index = Where(Size(image,/DIMENSIONS) EQ 3)
+                CASE index OF
+                     0: aImage = image
+                     1: aImage = Transpose(image, [1,0,2])
+                     2: aimage = Transpose(image, [2,0,1])
+                ENDCASE
+                newImage[0:2,*,*] = aImage
+                newimage[3,*,*] = BytArr(xsize,ysize) + (255 * (1.0 - transparent)) 
+          ENDIF ELSE BEGIN
+                index = Where(Size(image,/DIMENSIONS) EQ 4)
+                CASE index OF
+                     0: aImage = image
+                     1: aImage = Transpose(image, [1,0,2])
+                     2: aimage = Transpose(image, [2,0,1])
+                ENDCASE
+                newImage[0:2,*,*] = aImage[0:2,*,*]
+                newimage[3,*,*] = BytArr(xsize,ysize) + (255 * (1.0 - transparent)) 
+          ENDELSE
             END
+            
             
          ELSE: Message, 'Cannot process images that are not 2D or True-Color for transparentcy.'
          
@@ -1284,6 +1296,21 @@ PRO cgImage, image, x, y, $
         ENDIF ELSE RETURN
     ENDIF
     
+    ; Need a data range? Set it up if you have a map coordinate object. Otherwise,
+    ; we will handle it later.
+    IF N_Elements(plotxrange) EQ 0 THEN BEGIN
+       IF Obj_Valid(mapCoord) THEN BEGIN
+             mapCoord -> GetProperty, XRANGE=plotxrange 
+             save = 1
+       ENDIF 
+    ENDIF
+    IF N_Elements(plotyrange) EQ 0 THEN BEGIN
+       IF Obj_Valid(mapCoord) THEN BEGIN
+            mapCoord -> GetProperty, YRANGE=plotyrange 
+            save = 1
+       ENDIF 
+    ENDIF 
+    
     ; Are we doing some kind of output?
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
     
@@ -1405,7 +1432,7 @@ PRO cgImage, image, x, y, $
         IF (N_Elements(noerase) EQ 0) THEN noerase = 1
     ENDIF
             
-    ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
+     ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
     ; done BEFORE checking the LAYOUT properties.
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
     keep_aspect = Keyword_Set(keep_aspect)
@@ -2150,11 +2177,17 @@ PRO cgImage, image, x, y, $
      
     ; Need a data range?
     IF N_Elements(plotxrange) EQ 0 THEN BEGIN
-       IF Obj_Valid(mapCoord) THEN mapCoord -> GetProperty, XRANGE=plotxrange ELSE plotxrange = [0, imgXsize]
-    ENDIF
+       IF Obj_Valid(mapCoord) THEN BEGIN
+             mapCoord -> GetProperty, XRANGE=plotxrange 
+             save = 1
+       ENDIF ELSE plotxrange = [0, imgXsize]
+    ENDIF ELSE save = 1
     IF N_Elements(plotyrange) EQ 0 THEN BEGIN
-       IF Obj_Valid(mapCoord) THEN mapCoord -> GetProperty, YRANGE=plotyrange ELSE plotyrange = [0, imgYsize]
-    ENDIF
+       IF Obj_Valid(mapCoord) THEN BEGIN
+            mapCoord -> GetProperty, YRANGE=plotyrange 
+            save = 1
+       ENDIF ELSE plotyrange = [0, imgYsize]
+    ENDIF ELSE save = 1
     
     ; Check title for cgSymbols.
     IF N_Elements(plotxtitle) NE 0 THEN plotxtitle = cgCheckForSymbols(plotxtitle)
@@ -2228,5 +2261,8 @@ PRO cgImage, image, x, y, $
          IF dirname EQ "." THEN CD, CURRENT=dirname
          Print, 'Output File: ' + Filepath(ROOT_DIR=dirname, basename)
     ENDIF
+    
+    ; If you were doing a transparent image, return the original.
+    IF transparentImage THEN image = oldImage
     
 END

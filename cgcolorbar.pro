@@ -257,6 +257,8 @@
 ;       Added TLOCATION and TCHARSIZE keywords. 20 September 2012. DWF.
 ;       Implemented a fix that will allow the user to specify a tick formatting function name 
 ;          with the FORMAT keyword. 21 September 2012. DWF.
+;       Fixed a problem in which setting the RANGE keyword gave different results, depending upon whether
+;          a FORMAT keyword was used or not. 16 Oct 2012. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -451,8 +453,12 @@ PRO cgColorbar, $
     
     ; Now handle DIVISIONS properly.
     IF N_Elements(divisions) EQ 0 THEN BEGIN
-       IF format EQ "" THEN BEGIN
-           divisions = 0 
+       IF (format EQ "") THEN BEGIN
+           IF N_Elements(range) NE 0 THEN BEGIN
+              IF N_Elements(tickInterval) NE 0 $
+                  THEN divisions = Abs(maxrange - minrange) / tickInterval $
+                  ELSE divisions = 6
+           ENDIF ELSE divisions = 0 
        ENDIF ELSE BEGIN
            ; You can't have both DIVISONS and a tick interval at the same time,
            ; so the following value will be disgarded soon if you have a tick interval

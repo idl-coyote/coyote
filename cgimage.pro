@@ -108,6 +108,13 @@
 ;        cgLoadCT, 4, /Brewer, NColors=254
 ;        TVLCT, palette, /Get
 ;        cgImage, image, Missing_Value=-32767, Missing_Color='white', Stretch='Clip', Clip=3
+;        
+;     To display a transparent image on top of another image::
+;     
+;        cgLoadCT, 0
+;        cgImage, cgDemoData(7)
+;        cgLoadCT, 33, RGB_TABLE=palette
+;        cgImage, cgDemoData(5), Palette=palette, Transparent=50, Position=[0.25, 0.25, 0.75, 0.75]
 ;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -1017,7 +1024,10 @@ END
 ;         or equal to TOP. Available only with 2D images.
 ;    transparent: in, optional, type=integer, default=50
 ;         A number between 0 and 100 that specifies the percent of transparency between the
-;         image being displayed and the background image.
+;         image being displayed and the background image. Because of the way transparent images
+;         are handled, a 2D image must be scaled before the image is sent to cgImage. The
+;         Coyote Library routine `cgImgScl` can be used for this purpose, since it takes
+;         all the scaling keywords present in cgImage.
 ;    tv: in, optional, type=boolean, default=0
 ;         Setting this keyword makes the cgImage command work much like the brain-dead
 ;         TV command except that it will get colors right on all output devices. Most of

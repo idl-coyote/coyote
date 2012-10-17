@@ -185,8 +185,17 @@
 ; :Params:
 ;     image: in, required
 ;        The input image. Must be either 2D or a true-color image.
-;     transparent: in, required, type=int
-;        The transparentcy of the image with respect to the background image. A number from 0 to 100.
+;     transparent: in, optional, type=integer, default=50
+;        The transparentcy of the image with respect to the background image. A number 
+;        from 0 to 100.
+;        
+; :Keywords:
+;      palette: in, optional, type=bytarr
+;         A 3x256 byte array containing the color table vectors that the image is to
+;         be displayed in.
+;      success: out, optional
+;         An output keyword that is set to 1 if the transparent image is created
+;         successfully. Otherwise, set to 0.
 ;-
 FUNCTION cgImage_Make_Transparent_Image, image, transparent, PALETTE=palette, SUCCESS=success
 
@@ -1314,6 +1323,21 @@ PRO cgImage, image, x, y, $
              RETURN
     ENDIF
     
+    ; Did you specify a color table index?
+    IF N_Elements(ctindex) NE 0 THEN BEGIN
+        cgLoadCT, ctindex, Reverse=reverse, Brewer=brewer, RGB_TABLE=palette
+    ENDIF
+    
+    ; Load the color palette if you are using one.
+    IF N_Elements(palette) NE 0 THEN BEGIN
+        IF Size(palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
+        dims = Size(palette, /DIMENSIONS)
+        threeIndex = Where(dims EQ 3)
+        IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
+        IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
+        TVLCT, p_red, p_grn, p_blu, /Get ; Save the color vectors before loading the palette.
+    ENDIF
+    
     ; Are we doing a transparent image? Please scale the image before passing
     ; it into cgImage.
     transparentImage = 0
@@ -1571,21 +1595,8 @@ PRO cgImage, image, x, y, $
     ; Choose an axis color.
     acolor = cgDefaultColor(acolorname, DEFAULT='OPPOSITE')
     
-    ; Did you specify a color table index?
-    IF N_Elements(ctindex) NE 0 THEN BEGIN
-        cgLoadCT, ctindex, Reverse=reverse, Brewer=brewer, RGB_TABLE=palette
-    ENDIF
-    
-    ; Load the color palette if you are using one.
-    IF N_Elements(palette) NE 0 THEN BEGIN
-        IF Size(palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
-        dims = Size(palette, /DIMENSIONS)
-        threeIndex = Where(dims EQ 3)
-        IF ((threeIndex)[0] LT 0) THEN Message, 'Color palette is not a 3xN array.'
-        IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
-        TVLCT, p_red, p_grn, p_blu, /Get ; Save the color vectors before loading the palette.
-        TVLCT, palette
-    ENDIF
+    ; If you have a palette, load it now.
+    IF N_Elements(palette) NE 0 THEN TVLCT, palette
     
     ; If you have a missing color, load it at the missing color index.
     IF N_Elements(missing_color) NE 0 THEN TVLCT, cgColor(missing_color, /Triple), missing_index

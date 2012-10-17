@@ -174,6 +174,7 @@
 ;       Added the MAPCOORD keyword to allow the XRANGE and YRANGE of the image to be specified by the map 
 ;          coordinate object. 17 October 2012. DWF.
 ;       Added CTINDEX, BREWER, and REVERSE keywords to make loading a color table palette easier. 17 October 2012. DWF.
+;       Now setting MISSING_VALUE pixels to completely transparent if a transparent image is created. 17 October 2012. DWF.
 ;          
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -183,21 +184,27 @@
 ; This function creates a transparent image out of a normal 2D or 3D image.
 ; 
 ; :Params:
-;     image: in, required
+;   image: in, required
 ;        The input image. Must be either 2D or a true-color image.
-;     transparent: in, optional, type=integer, default=50
+;   transparent: in, optional, type=integer, default=50
 ;        The transparentcy of the image with respect to the background image. A number 
 ;        from 0 to 100.
 ;        
 ; :Keywords:
-;      palette: in, optional, type=bytarr
+;    missing_value: in, optional, type=integer
+;         The number that represents the missing value in the image. Available only with 2D images.
+;         This value is set to be completely transparent in the image.
+;    palette: in, optional, type=bytarr
 ;         A 3x256 byte array containing the color table vectors that the image is to
 ;         be displayed in.
-;      success: out, optional
+;    success: out, optional
 ;         An output keyword that is set to 1 if the transparent image is created
 ;         successfully. Otherwise, set to 0.
 ;-
-FUNCTION cgImage_Make_Transparent_Image, image, transparent, PALETTE=palette, SUCCESS=success
+FUNCTION cgImage_Make_Transparent_Image, image, transparent, $
+   MISSING_VALUE=missing_value, $
+   PALETTE=palette, $
+   SUCCESS=success
 
     Compile_Opt idl2
     
@@ -236,11 +243,32 @@ FUNCTION cgImage_Make_Transparent_Image, image, transparent, PALETTE=palette, SU
            ENDIF ELSE BEGIN
               TVLCT, r, g, b, /Get
            ENDELSE
+           
            newimage = BytArr(4, s[0], s[1])
            newImage[0,*,*] = r[image]
            newImage[1,*,*] = g[image]
            newImage[2,*,*] = b[image]
            newimage[3,*,*] = BytArr(s[0],s[1]) + (255 * (1.0 - transparent)) 
+           
+           ; Is there missing data to consider?
+           IF (N_Elements(missing_value) NE 0) THEN BEGIN
+   
+               ; The missing value may be the symbol for NAN.
+               IF Finite(missing_value) THEN BEGIN
+                   missingIndices = Where(image EQ missing_value, missingCnt)
+               ENDIF ELSE BEGIN
+                   missingIndices = Where(Finite(image) EQ 0, missingCnt)
+               ENDELSE
+               
+               ; Make the missing pixels completely transparent in the alpha channel.
+               IF missingCnt GT 0 THEN BEGIN
+                  alpha = Reform(newimage[3,*,*])
+                  alpha[missingIndices] = 0B
+                  newimage[3,*,*] = Temporary(alpha)
+               ENDIF
+               
+           ENDIF
+           
            END
            
          3: BEGIN
@@ -1345,7 +1373,10 @@ PRO cgImage, image, x, y, $
     transparentImage = 0
     IF N_Elements(transparent) NE 0 THEN BEGIN
         transparent = 0 > transparent < 100
-        transImage = cgImage_Make_Transparent_Image(image, transparent, PALETTE=palette, SUCCESS=success)
+        transImage = cgImage_Make_Transparent_Image(image, transparent, $
+            MISSING_VALUE=missing_value, $
+            PALETTE=palette, $
+            SUCCESS=success)
         IF success THEN BEGIN
             transparentImage = 1
             oldImage = image
@@ -1788,6 +1819,13 @@ PRO cgImage, image, x, y, $
        ENDELSE
     ENDELSE
     
+    ; Check to be sure the position is not all zeros.
+    IF Total(position) EQ 0.0 THEN BEGIN
+        IF Keyword_Set(overplot) $
+            THEN Message, 'A previous coordinate system cannot be found for overplotting.' $
+            ELSE Message, 'Unable to obtain a valid position for the image.'
+    ENDIF
+    
     ; Check for margin keyword.
     IF (Keyword_Set(multi) EQ 0) AND (Keyword_Set(overplot) EQ 0) THEN BEGIN
        IF N_Elements(margin) NE 0 THEN BEGIN
@@ -2002,7 +2040,7 @@ PRO cgImage, image, x, y, $
     IF transparentImage THEN BEGIN
        IF N_Elements(alphafgpos) EQ 0 THEN BEGIN
            alphafgpos = position
-           position=[0.0, 0.0, 1.0, 1.0]
+           position=[0.0, 0.0, 1.0, 1.0] 
        ENDIF 
     ENDIF ELSE SetDefaultValue, alphafgpos, [0.0, 0.0, 1.0, 1.0]
     

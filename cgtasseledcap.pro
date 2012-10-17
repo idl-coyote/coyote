@@ -95,6 +95,7 @@
 ;
 ; :History:
 ;     Written, 24 August 2012, by David W. Fanning.
+;     Fixed a dimension problem caused by forgetting a Transpose operation. 17 October 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -141,22 +142,14 @@ FUNCTION cgTasseledCap, input, $
    dims = Size(image, /DIMENSIONS)
    bands = Min(dims, bandindex)
    CASE bandindex OF
-      0: BEGIN
-         tasseledImage = Reform(image, dims[0], dims[1]*dims[2])
-         xdim = dims[1]
-         ydim = dims[2]
-         END
-      1: BEGIN
-         tasseledImage = Reform(image, dims[1], dims[0]*dims[2])
-         xdim = dims[0]
-         ydim = dims[2]
-         END
-      2: BEGIN
-         tasseledImage = Reform(image, dims[2], dims[0]*dims[1])
-         xdim = dims[0]
-         ydim = dims[1]
-         END
+      0: 
+      1: image = Transpose(image, [1,0,2])
+      2: image = Transpose(image, [2,0,1])
    ENDCASE
+   dims = Size(image, /DIMENSIONS)
+   tasseledImage = Reform(image, dims[0], dims[1]*dims[2])
+   xdim = dims[1]
+   ydim = dims[2]
    
    ; If this is a 7 band image, we need to eliminate band 6.
    IF bands EQ 7 THEN BEGIN

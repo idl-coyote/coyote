@@ -173,6 +173,7 @@
 ;       Added the TRANSPARENT keyword to allow transparent display of images. 17 October 2012. DWF.
 ;       Added the MAPCOORD keyword to allow the XRANGE and YRANGE of the image to be specified by the map 
 ;          coordinate object. 17 October 2012. DWF.
+;       Added CTINDEX, BREWER, and REVERSE keywords to make loading a color table palette easier. 17 October 2012. DWF.
 ;          
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -781,6 +782,9 @@ END
 ;         If the SCALE keyword is set, the image is scaled before display so that all 
 ;         displayed pixels have values greater than or equal to BOTTOM and less than 
 ;         or equal to TOP. Available only with 2D images.
+;    brewer: in, optional, type=boolean, default=0
+;         This keyword is used only if the `CTIndex` keyword is used to select a color table number.
+;         Setting this keyword allows Brewer color tables to be used.
 ;    charsize: in, optional, type=float
 ;         Sets the character size. Used only if the AXES keyword is also set. By default, 
 ;         the value from cgDefCharsize().
@@ -790,6 +794,11 @@ END
 ;         Available only with 2D images.
 ;    color: in, optional, type=string, default='opposite'
 ;         The name of the color in which to draw the axes. Used only if the `AXES` keyword is set.
+;    ctindex: in, optional, type=integer
+;         The index number of a color table. The `Brewer` and `Reverse` keywords will be checked
+;         to see how to load the color table into the `Palette` keyword. This keyword will take
+;         precidence over any colors that are loaded with the `Palette` keyword. The default is
+;         to use whatever colors are loaded in the current hardware color table.
 ;    display: in, optional, type=boolean, default=0
 ;         If this keyword is set, a new display window is created (with cgDisplay) that has the
 ;         same aspect ratio as the image. The image is displayed in that window. If the WINDOW
@@ -984,6 +993,8 @@ END
 ;         filling out the FSC_$CGIMAGE common block. For example, if you are using cgImage to 
 ;         draw a color bar, it would not be necessary. Setting this keyword means that cgImage 
 ;         just goes quietly about it's business without bothering anyone else.    
+;    reverse: in, optional, type=boolean, default=0
+;         Set this keyword to reverse the color table vectors selected with the `CTIndex` keyword.
 ;    save: in, optional, type=boolean, default=0
 ;         Set this to cause a data coordinate system to be established for the image. The XRANGE 
 ;         and YRANGE keyword values will be used to establish a data coordinate system coincident 
@@ -1061,9 +1072,11 @@ PRO cgImage, image, x, y, $
    BACKGROUND=background, $
    BOTTOM=bottom, $
    BETA=beta, $
+   BREWER=brewer, $
    CHARSIZE=charsize, $
    CLIP=clip, $
    COLOR=color, $
+   CTINDEX=ctindex, $
    DISPLAY=display, $      ; Make sure this keyword is NOT is the list of keywords passed to cgWindow.
    ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
    EXCLUDE=exclude, $
@@ -1097,6 +1110,7 @@ PRO cgImage, image, x, y, $
    PALETTE=palette, $
    POSITION=position, $
    QUIET=quiet, $
+   REVERSE=reverse, $
    SAVE=save, $
    SCALE=scale, $
    SIGMA=sigma, $
@@ -1184,9 +1198,11 @@ PRO cgImage, image, x, y, $
                BACKGROUND=background, $
                BOTTOM=bottom, $
                BETA=beta, $
+               BREWER=brewer, $
                CHARSIZE=charsize, $
                CLIP=clip, $
                COLOR=color, $
+               CTINDEX=ctindex, $
                ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
                EXCLUDE=exclude, $
                EXPONENT=exponent, $
@@ -1217,6 +1233,7 @@ PRO cgImage, image, x, y, $
                PALETTE=palette, $
                POSITION=position, $
                QUIET=quiet, $
+               REVERSE=reverse, $
                SAVE=save, $
                SCALE=scale, $
                SIGMA=sigma, $
@@ -1245,9 +1262,11 @@ PRO cgImage, image, x, y, $
                BACKGROUND=background, $
                BOTTOM=bottom, $
                BETA=beta, $
+               BREWER=brewer, $
                CHARSIZE=charsize, $
                CLIP=clip, $
                COLOR=color, $
+               CTINDEX=ctindex, $
                ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
                EXCLUDE=exclude, $
                EXPONENT=exponent, $
@@ -1278,6 +1297,7 @@ PRO cgImage, image, x, y, $
                PALETTE=palette, $
                POSITION=position, $
                QUIET=quiet, $
+               REVERSE=reverse, $
                SAVE=save, $
                SCALE=scale, $
                SIGMA=sigma, $
@@ -1294,7 +1314,8 @@ PRO cgImage, image, x, y, $
              RETURN
     ENDIF
     
-    ; Are we doing a transparent image?
+    ; Are we doing a transparent image? Please scale the image before passing
+    ; it into cgImage.
     transparentImage = 0
     IF N_Elements(transparent) NE 0 THEN BEGIN
         transparent = 0 > transparent < 100
@@ -1549,6 +1570,11 @@ PRO cgImage, image, x, y, $
     
     ; Choose an axis color.
     acolor = cgDefaultColor(acolorname, DEFAULT='OPPOSITE')
+    
+    ; Did you specify a color table index?
+    IF N_Elements(ctindex) NE 0 THEN BEGIN
+        cgLoadCT, ctindex, Reverse=reverse, Brewer=brewer, RGB_TABLE=palette
+    ENDIF
     
     ; Load the color palette if you are using one.
     IF N_Elements(palette) NE 0 THEN BEGIN

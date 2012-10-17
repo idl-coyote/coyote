@@ -451,7 +451,7 @@ END
 ;    clip: in, optional, type=float, default=2
 ;         A number between 0 and 50 that indicates the percentage of pixels to clip
 ;         off either end of the image histogram before performing a linear stretch.
-;    exclude: in, optional, type=numeric
+;    exclude: in, optional
 ;         The value to exclude in a standard deviation stretch.
 ;    exponent: in, optional, type=float, default=4.0
 ;         The logarithm exponent in a logarithmic stretch.
@@ -818,6 +818,8 @@ END
 ;         default for cgImage is to always erase the graphics display before displaying the image
 ;         unless told otherwise by setting the `NOERASE` keyword. This makes cgImage consistent with
 ;         other IDL graphics commands.
+;    exclude: in, optional
+;         The value to exclude in a standard deviation stretch.
 ;    exponent: in, optional, type=float, default=4.0
 ;         The logarithm exponent in a logarithmic stretch. Available only with 2D images.
 ;    fit_inside: in, optional, type=boolean, default=0

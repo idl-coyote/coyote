@@ -850,6 +850,9 @@ END
 ;         The value to exclude in a standard deviation stretch.
 ;    exponent: in, optional, type=float, default=4.0
 ;         The logarithm exponent in a logarithmic stretch. Available only with 2D images.
+;    filename: in, optional, type=string
+;         The name of a file that IDL can read with READ_IMAGE (e.g, GEOTIFF, TIF, JPEG, PNG, etc.).
+;         The file is read to obtain the image to be displayed.
 ;    fit_inside: in, optional, type=boolean, default=0
 ;         When the AXES keyword is set, the default is to position the axes on top of the image
 ;         using the POSITION. However, if this keyword is set, the axes are positioned at POSITION
@@ -1117,6 +1120,7 @@ PRO cgImage, image, x, y, $
    ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
    EXCLUDE=exclude, $
    EXPONENT=exponent, $
+   FILENAME=filename, $
    FIT_INSIDE=fit_inside, $
    FONT=font, $
    GAMMA=gamma, $
@@ -1173,10 +1177,23 @@ PRO cgImage, image, x, y, $
     ENDIF
     
     ; Check parameters.
-    IF N_Params() EQ 0 THEN BEGIN
+    IF (N_Params() EQ 0) && (N_Elements(filename) EQ 0) THEN BEGIN
         Print, 'USE SYNTAX: cgImage, image'
         RETURN
     ENDIF
+    
+    ; Was a filename used to pass in an image filename? Check to see if this is a GeoTiff image
+    ; before doing anything else. If it is, use cgGeoMap to read it. Otherwise, read the image
+    ; file with READ_IMAGE.
+    IF N_Elements(filename) NE 0 THEN BEGIN
+        check = Query_Tiff(filename, GEOTIFF=geo)
+        IF (check EQ 1) && (Size(geo, /TNAME) EQ 'STRUCT') THEN BEGIN
+           map = cgGeoMap(filename, IMAGE=image, Palette=palette)
+        ENDIF ELSE BEGIN
+           image = Read_Image(filename, r, g, b)
+           IF N_Elements(r) NE 0 THEN palette = [[r],[g],[b]]
+        ENDELSE
+    ENDIF 
     
     ; Handle obsolete keywords.
     IF N_Elements(obsolete_erase) NE 0 THEN noerase = 1 - obsolete_erase
@@ -1242,6 +1259,7 @@ PRO cgImage, image, x, y, $
                ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
                EXCLUDE=exclude, $
                EXPONENT=exponent, $
+               FILENAME=filename, $
                FIT_INSIDE=fit_inside, $
                FONT=font, $
                GAMMA=gamma, $
@@ -1284,7 +1302,7 @@ PRO cgImage, image, x, y, $
                YTITLE=plotytitle, $
                ADDCMD=1, $
                _EXTRA=extra
-                 RETURN
+            RETURN
         ENDIF
         
         ; Otherwise, we are replacing the commands in a new or existing window.
@@ -1306,6 +1324,7 @@ PRO cgImage, image, x, y, $
                ERASE=obsolete_erase, $ ; Added for compatibility with TVIMAGE.
                EXCLUDE=exclude, $
                EXPONENT=exponent, $
+               FILENAME=filename, $
                FIT_INSIDE=fit_inside, $
                FONT=font, $
                GAMMA=gamma, $

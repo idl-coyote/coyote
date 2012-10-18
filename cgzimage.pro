@@ -65,6 +65,9 @@
 ;     Change History::
 ;        Written, 20 September 2012 from previous FSC_ZImage program. DWF.
 ;        Modernized the info structure handling to reflect modern sensibilities. 3 Oct 2012. DWF.
+;        Changes to allow this to work with very large images. Can now zoom to actual pixel values.
+;           Also fixed a problem that left zoom windows lying around unused if scroll bars were 
+;           needed. 18 October 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -625,7 +628,7 @@ PRO cgZImage_DrawEvents, event
              xpos = offsets[0] 
              ypos = offsets[1]
              
-             Widget_Control, (*info).zoomDrawID, /Destroy
+             Widget_Control, (*info).zoomtlb, /Destroy
              
              ; Calculate a window size. Maximum window size is 800.
              dims = Image_Dimensions(*(*info).zoomedimage, XSIZE=ixsize, YSIZE=iysize)
@@ -645,7 +648,7 @@ PRO cgZImage_DrawEvents, event
              ENDIF ELSE (*info).hasScrollBars = 0
              
              ; Zoom window does not exist. Create it.
-             zoomtlb = Widget_Base(Title='Zoomed Image', Group=event.top, $
+             zoomTLB = Widget_Base(Title='Zoomed Image', Group=event.top, $
                  XOffset=xpos, YOffset=ypos, KILL_NOTIFY='cgZImage_ZoomDied', $
                  UVALUE=event.top, X_Scroll_Size=x_scroll_size, Y_Scroll_Size=y_scroll_size)
              zoomdraw = Widget_Draw(zoomtlb, XSize=zoomXSize, YSize=zoomYSize, $
@@ -654,6 +657,7 @@ PRO cgZImage_DrawEvents, event
              Widget_Control, zoomdraw, Get_Value=windowID
              (*info).zoomDrawID = zoomdraw
              (*info).zoomWindowID = windowID
+             (*info).zoomTLB = zoomTLB
              WSet, windowID
              IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage
      
@@ -699,6 +703,7 @@ PRO cgZImage_DrawEvents, event
          Widget_Control, zoomdraw, Get_Value=windowID
          (*info).zoomDrawID = zoomdraw
          (*info).zoomWindowID = windowID
+         (*info).zoomTLB = zoomTLB
          WSet, windowID
          IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage
          
@@ -772,7 +777,7 @@ END ; ----------------------------------------------------------------------
 ;    exponent: in, optional, type=float, default=4.0
 ;         The logarithm exponent in a logarithmic stretch. Available only with 2D images.
 ;    filename: in, optional, type=string
-;         The name of a file that IDL can read with READ_IMAGE (e.g, TIF, JPEG, PNG, etc.).
+;         The name of a file that IDL can read with READ_IMAGE (e.g, GEOTIFF, TIF, JPEG, PNG, etc.).
 ;    gamma: in, optional, type=float, default=1.5
 ;         The gamma factor in a gamma stretch. Available only with 2D images.
 ;    group_leader: in, optional, type=long
@@ -903,8 +908,8 @@ PRO cgZImage, image, $
            map = cgGeoMap(filename, IMAGE=image, Palette=palette)
            createdMap = 1
         ENDIF ELSE BEGIN
-           createdMap = 0
            image = Read_Image(filename, r, g, b)
+           IF N_Elements(r) NE 0 THEN palette = [[r],[g],[b]]
         ENDELSE
     ENDIF 
     IF N_Elements(createdMap) EQ 0 THEN createdMap = 0
@@ -989,8 +994,8 @@ PRO cgZImage, image, $
     ; Create two bases. One for controls and the other for the
     ; draw widget. Leave the control base unmapped for now.
     controlID = Widget_Base(tlb, Map=0, Column=1)
-    factorString = ['2x', '3x', '4x', '5x', '6x', '7x', '8x', '12x', '16x']
-    factors = [Indgen(7) + 2, 12, 16]
+    factorString = ['Actual', '2x', '3x', '4x', '5x', '6x', '7x', '8x', '12x', '16x']
+    factors = [Indgen(8) + 1, 12, 16]
     zoomfactor = Widget_DropList(controlID, Value=factorString, $
        Event_Pro='cgZImage_Factor', UValue=factors, Title='Zoom Factor')
     IF trueindex EQ -1 THEN BEGIN
@@ -1010,7 +1015,7 @@ PRO cgZImage, image, $
     Widget_Control, tlb, /Realize
     
     ; Set the initial default zoom factor.
-    Widget_Control, zoomfactor, SET_DROPLIST_SELECT=2
+    Widget_Control, zoomfactor, SET_DROPLIST_SELECT=3
     
     ; Get the window index number of the draw widget.
     ; Make the draw widget the current graphics window
@@ -1115,6 +1120,7 @@ PRO cgZImage, image, $
        yd:0, $                      ; Y dynamic corner of the zoom box.
        zoomDrawID:-1L, $            ; Zoomed image draw widget ID.
        zoomWindowID:-1, $           ; Zoomed image window index number.
+       zoomTLB: -1, $               ; The zoom window TLB.
        statusbar:statusbar, $       ; The statusbar identifier.
        r:r, $                       ; The red color vector.
        g:g, $                       ; The green color vector.

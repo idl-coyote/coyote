@@ -175,7 +175,7 @@
 ;          coordinate object. 17 October 2012. DWF.
 ;       Added CTINDEX, BREWER, and REVERSE keywords to make loading a color table palette easier. 17 October 2012. DWF.
 ;       Now setting MISSING_VALUE pixels to completely transparent if a transparent image is created. 17 October 2012. DWF.
-;          
+;       Added the ability to apply a stretch to a 2D image prior to converting it to a transparent image. 18 October 2012.DWF.   
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
@@ -1074,10 +1074,7 @@ END
 ;         or equal to TOP. Available only with 2D images.
 ;    transparent: in, optional, type=integer, default=50
 ;         A number between 0 and 100 that specifies the percent of transparency between the
-;         image being displayed and the background image. Because of the way transparent images
-;         are handled, a 2D image must be scaled before the image is sent to cgImage. The
-;         Coyote Library routine `cgImgScl` can be used for this purpose, since it takes
-;         all the scaling keywords present in cgImage.
+;         image being displayed and the background image. 
 ;    tv: in, optional, type=boolean, default=0
 ;         Setting this keyword makes the cgImage command work much like the brain-dead
 ;         TV command except that it will get colors right on all output devices. Most of
@@ -1373,17 +1370,41 @@ PRO cgImage, image, x, y, $
     transparentImage = 0
     IF N_Elements(transparent) NE 0 THEN BEGIN
         transparent = 0 > transparent < 100
-        transImage = cgImage_Make_Transparent_Image(image, transparent, $
-            MISSING_VALUE=missing_value, $
-            PALETTE=palette, $
-            SUCCESS=success)
+        oldImage = image
+        scaledImage = cgImgScl(image, $
+             BOTTOM=bottom, $
+             BETA=beta, $
+             CLIP=clip, $
+             EXCLUDE=exclude, $
+             EXPONENT=exponent, $
+             GAMMA=gamma, $
+             INTERPOLATE=interpolate, $
+             MAXVALUE=maxvalue, $
+             MEAN=mean, $
+             MINUS_ONE=minus_one, $
+             MINVALUE=minvalue, $
+             MISSING_INDEX=missing_index, $
+             MISSING_VALUE=missing_value, $
+             MULTIPLIER=multiplier, $
+             NCOLORS=ncolors, $
+             NEGATIVE=negative, $
+             SCALE=scale, $
+             STRETCH=stretch, $
+             SIGMA=sigma, $
+             TOP=top)
+          transImage = cgImage_Make_Transparent_Image(scaledImage, transparent, $
+             MISSING_VALUE=missing_index, $
+             PALETTE=palette, $
+             SUCCESS=success)
         IF success THEN BEGIN
             transparentImage = 1
-            oldImage = image
             image = transImage
-        ENDIF ELSE RETURN
+        ENDIF ELSE BEGIN
+            image = oldImage
+            RETURN
+        ENDELSE
     ENDIF
-    
+      
     ; Need a data range? Set it up if you have a map coordinate object. Otherwise,
     ; we will handle it later.
     IF N_Elements(plotxrange) EQ 0 THEN BEGIN

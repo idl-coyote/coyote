@@ -47,7 +47,8 @@
 ; 
 ; :Params:
 ;    image: in, required
-;       The input image that is to be scaled. 
+;       The input image that is to be scaled. Only 2D images can be scaled, although
+;       true-color images can be resized.
 ;    xsize: in, optional
 ;       The output X size of the image.
 ;    ysize: in, optional
@@ -158,6 +159,9 @@
 ; :History:
 ;     Change History::
 ;       Written by David W. Fanning, 21 September 2012. 
+;       Only define MISSING_INDEX value if needed. Change to support TRANSPARENT keyword
+;          in cgImage. 18 October 2012. DWF.
+;       Only 2D images can be scaled. 18 October 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -220,10 +224,12 @@ FUNCTION cgImgScl, image, xsize, ysize, $
     SetDefaultValue, exponent, 4.0
     SetDefaultValue, gamma, 1.5 
     SetDefaultValue, mean, 1.0
-    SetDefaultValue, missing_index, 255
     SetDefaultValue, negative, 0
     SetDefaultValue, sigma, 1.0
     SetDefaultValue, stretch, 0
+    
+    ; Missing index only defined if needed. Change to support transparent images in cgImage.
+    IF N_Elements(missing_value) NE 0 THEN IF N_Elements(missing_index) EQ 0 THEN missing_index = 255
     
     ; Make sure you can specify the type of stretch with a string name.
     IF Size(stretch, /TNAME) EQ 'STRING' THEN BEGIN
@@ -234,8 +240,12 @@ FUNCTION cgImgScl, image, xsize, ysize, $
     ENDIF
     IF stretch NE 0 THEN scale = 1
     
-    ; I would like to avoid making a copy of the image, if possible.
-   ; If nothing needs to be done, just return the image.
+    ; Can't stretch true-color images.
+    IF Size(image, /N_DIMENSIONS) NE 2 THEN scale = 0
+    
+   ; I would like to avoid making a copy of the image, if possible.
+   ; If nothing needs to be done, just return the image. Only 2D images
+   ; can proceed.
    IF (N_Elements(xsize) EQ 0) && $
       (N_Elements(missing_value) EQ 0) && $
       ~Keyword_Set(scale) THEN RETURN, image

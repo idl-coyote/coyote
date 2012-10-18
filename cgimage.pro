@@ -176,6 +176,9 @@
 ;       Added CTINDEX, BREWER, and REVERSE keywords to make loading a color table palette easier. 17 October 2012. DWF.
 ;       Now setting MISSING_VALUE pixels to completely transparent if a transparent image is created. 17 October 2012. DWF.
 ;       Added the ability to apply a stretch to a 2D image prior to converting it to a transparent image. 18 October 2012.DWF.   
+;       Added a FILENAME keyword so that files of known format (GeoTIFF, JPEG, PNG, etc.) can be read to supply an
+;          image for display. 18 October 2012. DWF.
+;          
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-

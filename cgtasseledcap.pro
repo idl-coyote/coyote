@@ -96,6 +96,7 @@
 ; :History:
 ;     Written, 24 August 2012, by David W. Fanning.
 ;     Fixed a dimension problem caused by forgetting a Transpose operation. 17 October 2012. DWF.
+;     Fixed a type problem with the ETM keyword. 19 October 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -103,7 +104,7 @@
 FUNCTION cgTasseledCap, input, $
    DISPLAY=display, $
    ENVI=envi, $
-   ETM=etm_, $
+   ETM=etm, $
    IMAGINE=imagine, $
    LS4=ls4, $
    LS5=ls5, $
@@ -160,7 +161,7 @@ FUNCTION cgTasseledCap, input, $
    ; Get the coefficients.
    coeffs = cgTasseledCapCoeffs( $
        ENVI=envi, $
-       ETM=etm_, $
+       ETM=etm, $
        IMAGINE=imagine, $
        LS4=ls4, $
        LS5=ls5, $

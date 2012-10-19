@@ -175,7 +175,7 @@ FUNCTION cgTasseledCapCoeffs, $
         coefficients[*,2] = [ 0.1509,  0.1793,  0.3299, 0.3406, -0.7112, -0.4572] ; Yellowness
         END
         
-        Keyword_Set(ETM_landsat): BEGIN
+        Keyword_Set(etm_landsat): BEGIN
         ; Coefficients from: http://landcover.usgs.gov/pdf/tasseled.pdf.
         coefficients = FltArr(6,6)
         ;                     Band1     Band2    Band3    Band4    Band5    Band7

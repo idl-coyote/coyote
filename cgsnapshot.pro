@@ -108,6 +108,9 @@
 ;        Set this keyword to write the screen dump as a color PICT file.
 ;    png: in, optional, type=boolean, default=0
 ;        Set this keyword to write the screen dump as a color PNG file.
+;    position: in, optional, type=float
+;        An alternative way of setting the `xstart`, `ystart`, `ncols` and `nrows` parameters
+;        by specifying a four-element normalized array, [x0,y0,x1,y1].
 ;    tiff: in, optional, type=boolean, default=0
 ;        Set this keyword to write the screen dump as a color TIFF file.
 ;    true: in, optional, type=integer, default=1
@@ -155,6 +158,7 @@
 ;     Change History::
 ;        Renamed TVRead to cgSnapshot and retired TVRead. 20 February 2011. DWF.
 ;        Added the ability to get the file type from the file name extension. 26 Dec 2011. DWF.
+;        Added a POSITION keyword to select a position inside the window for capture. 20 October 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -173,6 +177,7 @@ FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
    Overwrite_Prompt=overwrite_prompt, $
    PICT=pict, $
    PNG=png, $
+   POSITION=position, $
    TIFF=tiff, $
    True=true, $
    Type=type, $
@@ -202,11 +207,19 @@ FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
     thisWindow = !D.Window
     IF (!D.Flags AND 256) NE 0 THEN WSet, wid
     
+    ; Did the user specify a normalized position in the window?
+    IF N_Elements(position) NE 0 THEN BEGIN
+       xstart = position[0] * !D.X_VSize
+       ystart = position[1] * !D.Y_VSize
+       ncols = (position[2]*!D.X_VSize) - xstart
+       nrows = (position[3]*!D.Y_VSize) - ystart
+    ENDIF
+    
     ; Check keywords and parameters. Define values if necessary.
     IF N_Elements(xstart) EQ 0 THEN xstart = 0
     IF N_Elements(ystart) EQ 0 THEN ystart = 0
-    IF N_Elements(ncols) EQ 0 THEN ncols = !D.X_Size - xstart
-    IF N_Elements(nrows) EQ 0 THEN nrows = !D.Y_Size - ystart
+    IF N_Elements(ncols) EQ 0 THEN ncols = !D.X_VSize - xstart
+    IF N_Elements(nrows) EQ 0 THEN nrows = !D.Y_VSize - ystart
     IF N_Elements(order) EQ 0 THEN order = !Order
     IF N_Elements(true) EQ 0 THEN true = 1
     dialog = 1 - Keyword_Set(nodialog)

@@ -1,15 +1,18 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   HasImageMagick
+;   cgColor24
 ;
 ; PURPOSE:
-;   Searches for the ImageMagick "convert" command to see if ImageMagick is available 
-;   on the system.
+;   The purpose of this function is to convert a RGB color triple
+;   into the equivalent 24-bit long integer. The 24-bit integer
+;   can be decomposed into the appropriate color by interpreting
+;   the lowest 8 bits as red, the middle 8 bits as green, and the
+;   highest 8 bits as blue.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
-;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
+;  Copyright (c) 2012, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -36,22 +39,31 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
-;   Searches for the ImageMagick "convert" command to see if ImageMagick is available 
-;   on the system.
-;
+; The purpose of this function is to convert a RGB color triple
+; into the equivalent 24-bit long integer. The 24-bit integer
+; can be decomposed into the appropriate color by interpreting
+; the lowest 8 bits as red, the middle 8 bits as green, and the
+; highest 8 bits as blue. This routine was written to be used with 
+; device-independent color programs like `cgColor`.
+; 
 ; :Categories:
-;    Utilities
+;    Graphics, Utilities
 ;    
-; :Keywords:
-;     version: out, optional, type=string
-;        Returns the version number of the ImageMagick convert command, if found.
-;          
+; :Returns:
+;    A 24-bit long integer that can be decomposed into a color triple value.
+;    
+; :Params:
+;    color: in, required
+;       A three-element column or row array representing a color triple. Or an 
+;       N-by-three element array of color triples. The values of the elements 
+;       must be between 0 and 255.
+;
 ; :Examples:
-;    Used to determine if the ImageMagick convert command is available::
-;       IDL> available = HasImageMagick(Version=version)
-;       IDL> IF available THEN Print, version
-;       
+;    To convert the color triple for the color YELLOW, (255, 255, 0), to the 
+;    hexadecimal value '00FFFF'x or the decimal number 65535, type::
+;    
+;       color = COLOR24([255, 255, 0])
+;
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
 ;       David W. Fanning 
@@ -63,36 +75,24 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 17 January 2011. DWF.
-;
+;        Written by:  David Fanning, 3 February 96.
+;        Completely revised the algorithm to accept color arrays. 19 October 2000. DWF.
+;            
 ; :Copyright:
-;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 1996-2012, Fanning Software Consulting, Inc.
 ;-
-FUNCTION HasImageMagick, VERSION=version
+FUNCTION cgCOLOR24, color
 
-    ; Silent error handler. If anything goes wrong, we definitely
-    ; can't use ImageMagick.
-    Catch, theError
-    IF theError NE 0 THEN BEGIN
-        Return, 0
-    ENDIF
+    ON_ERROR, 2
     
-    ; Assume failure.
-    retval = 0
+    s = Size(color)
     
-    ; To search for ImageMagick, I am going to spawn a call to convert.
-    ; If the error_result is a null string, I assume this command worked.
-    ; Otherwise, it didn't find ImageMagick.
-    Spawn, 'convert -version', result, error_result
-    
-    ; If nothing is put in the error result, then we are good to go.
-    IF error_result[0] EQ "" THEN retval = 1 
-    
-    IF retval EQ 1 && Arg_Present(version) THEN BEGIN
-       parts = StrSplit(result[0], /EXTRACT)
-       version = parts[2]
-    ENDIF
-    
-    RETURN, retval
-    
-END
+    IF s[0] EQ 1 THEN BEGIN
+       IF s[1] NE 3 THEN Message, 'Input color parameter must be a 3-element vector.'
+       RETURN, color[0] + (color[1] * 2L^8) + (color[2] * 2L^16)
+    ENDIF ELSE BEGIN
+       IF s[2] GT 3 THEN Message, 'Input color parameter must be an N-by-3 array.'
+       RETURN, color[*,0] + (color[*,1] * 2L^8) + (color[*,2] * 2L^16)
+    ENDELSE
+
+END ;--------------------------------------------------------------------------------------------

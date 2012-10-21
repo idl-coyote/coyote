@@ -72,9 +72,9 @@
 PRO cgCleanUp, ALL=all, CG=cg, DG=dg, FG=fg
 
    IF (Float(!Version.Release) GE 8.0) THEN BEGIN
-      cgCleanUp8, ALL=all, CG=cg, DG=dg, FG=fg
+      fscCleanUp8, ALL=all, CG=cg, DG=dg, FG=fg
    ENDIF ELSE BEGIN
-      cgCleanUp7, ALL=all, CG=cg, DG=dg
+      fscCleanUp7, ALL=all, CG=cg, DG=dg
    ENDELSE
 
 END

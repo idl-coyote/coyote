@@ -125,7 +125,7 @@
 ;         Number   Type of Stretch::
 ;             0         None           No scaling whatsoever is done.
 ;             1         Linear         scaled = BytScl(image, MIN=minValue, MAX=maxValue)
-;             2         Clip           A histogram stretch, with a percentage of pixels clipped at both the top and bottom
+;             2         Linear 2%      A histogram stretch, with a percentage of pixels clipped at both the top and bottom
 ;             3         Gamma          scaled = GmaScl(image, MIN=minValue, MAX=maxValue, Gamma=gamma)
 ;             4         Log            scaled = LogScl(image, MIN=minValue, MAX=maxValue, Mean=mean, Exponent=exponent)
 ;             5         Asinh          scaled = AsinhScl(image, MIN=minValue, MAX=maxValue, Beta=beta)

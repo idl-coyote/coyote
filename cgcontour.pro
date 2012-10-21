@@ -784,12 +784,12 @@ PRO cgContour, data, x, y, $
             
             ; Set up contour colors for the palette. If you passed contour colors,
             ; then I assume these are indices into the color palette.
-            IF N_Elements(c_colors) NE 0 THEN con_colors = Color24(palette[c_colors,*])
+            IF N_Elements(c_colors) NE 0 THEN con_colors = cgColor24(palette[c_colors,*])
             
             ; If the palette contains fewer colors than the color table, then I assume
             ; the palette is just for contour colors.
             IF (N_Elements(c_colors) EQ 0) && ((N_Elements(palette)/3) LT 256) THEN BEGIN
-                con_colors = Color24(palette)
+                con_colors = cgColor24(palette)
             ENDIF
             
             ; If the number of contour colors is less than 256, and LEVELS and NLEVELS are

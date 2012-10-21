@@ -158,12 +158,12 @@ FUNCTION ColorsAreIdentical, color_1, color_2
 
             ; First color a LONG and second color an INTEGER.
            (Size(c1, /TYPE) EQ 3) AND (Size(c2, /TYPE) LE 2): BEGIN
-                answer = Array_Equal(c1, Color24([r[c2], g[c2], b[c2]]))
+                answer = Array_Equal(c1, cgColor24([r[c2], g[c2], b[c2]]))
                 END
 
            ; First color an INTEGER, second color a LONG.
            (Size(c1, /TYPE) LE 2) AND (Size(c2, /TYPE) EQ 3): BEGIN
-                answer = Array_Equal(c2, Color24([r[c1], g[c1], b[c1]]))
+                answer = Array_Equal(c2, cgColor24([r[c1], g[c1], b[c1]]))
                 END
 
            ELSE: Message, 'Colors do not meet type expectations. Unsure how to proceed.'

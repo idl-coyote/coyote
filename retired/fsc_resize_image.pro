@@ -88,6 +88,7 @@
 ;         CENTER keyword is set, the MINUS_ONE keyword is not needed, since 
 ;         it was created to solve the same problem. So, I have changed the 
 ;         default setting of MINUS_ONE to 0. 11 Jan 2011. DWF.
+;     Retired and renamed cgResizeImage. 20 Oct 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.

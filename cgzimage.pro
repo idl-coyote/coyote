@@ -609,7 +609,7 @@ PRO cgZImage_DrawEvents, event
            2: imageSubset = (*info).scaled[x[0]:x[1], y[0]:y[1], *]
       ENDCASE
       
-      zoomedImage = FSC_Resize_Image(imageSubset, zoomXSize, zoomYSize, Interp=0)
+      zoomedImage = cgResizeImage(imageSubset, zoomXSize, zoomYSize, Interp=0)
       IF Ptr_Valid((*info).zoomedImage) $
         THEN *(*info).zoomedImage = zoomedImage $
         ELSE (*info).zoomedImage = Ptr_New(zoomedImage, /No_Copy)

@@ -84,8 +84,8 @@
 ;    mean: in, optional, type=float, default=0.5
 ;         The mean factor in a logarithmic stretch.
 ;    minus_one: in, optional, type=boolean, default=0
-;         The value of this keyword is passed along to the FSC_RESIZE_IMAGE
-;         command. It prevents FSC_RESIZE_IMAGE from adding an extra row and
+;         The value of this keyword is passed along to the cgResizeImage
+;         command. It prevents cgResizeImage from adding an extra row and
 ;         column to the resulting array, which can be a problem with
 ;         small image arrays. 
 ;    minvalue: in, optional, type=varies
@@ -393,14 +393,14 @@ FUNCTION cgImgScl, image, xsize, ysize, $
        IF (N_Elements(xsize) EQ 0) THEN BEGIN
            RETURN, image
        ENDIF ELSE BEGIN
-           RETURN, FSC_Resize_Image(image, xsize, ysize, $
+           RETURN, cgResizeImage(image, xsize, ysize, $
                     INTERP=interpolate, MINUS_ONE=minus_one)
        ENDELSE
    ENDIF ELSE BEGIN
        IF (N_Elements(xsize) EQ 0) THEN BEGIN
            RETURN, tempImage
        ENDIF ELSE BEGIN
-           RETURN, FSC_Resize_Image(tempImage, xsize, ysize, $
+           RETURN, cgResizeImage(tempImage, xsize, ysize, $
                     INTERP=interpolate, MINUS_ONE=minus_one)
        ENDELSE
    ENDELSE

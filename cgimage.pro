@@ -446,8 +446,8 @@ FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
     Set_Plot, thisDevice
             
      ; Make the foreground image the right size.
-     foregndImage = FSC_Resize_Image(foregndImage, cols, rows)
-     alpha = FSC_Resize_Image(alpha_channel, sb[0], sb[1], /INTERPOLATE)
+     foregndImage = cgResizeImage(foregndImage, cols, rows)
+     alpha = cgResizeImage(alpha_channel, sb[0], sb[1], /INTERPOLATE)
      alpha = Rebin(alpha, sb[0], sb[1], 3)
             
      ; Blend the two images in the location of the POSITION.
@@ -514,8 +514,8 @@ END
 ;    mean: in, optional, type=float, default=0.5
 ;         The mean factor in a logarithmic stretch.
 ;    minus_one: in, optional, type=boolean, default=0
-;         The value of this keyword is passed along to the FSC_RESIZE_IMAGE
-;         command. It prevents FSC_RESIZE_IMAGE from adding an extra row and
+;         The value of this keyword is passed along to the cgResizeImage
+;         command. It prevents cgResizeImage from adding an extra row and
 ;         column to the resulting array, which can be a problem with
 ;         small image arrays. 
 ;    minvalue: in, optional, type=varies
@@ -741,14 +741,14 @@ FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
        IF (N_Elements(xsize) EQ 0) THEN BEGIN
            RETURN, image
        ENDIF ELSE BEGIN
-           RETURN, FSC_Resize_Image(image, xsize, ysize, $
+           RETURN, cgResizeImage(image, xsize, ysize, $
                     INTERP=interpolate, MINUS_ONE=minus_one)
        ENDELSE
    ENDIF ELSE BEGIN
        IF (N_Elements(xsize) EQ 0) THEN BEGIN
            RETURN, tempImage
        ENDIF ELSE BEGIN
-           RETURN, FSC_Resize_Image(tempImage, xsize, ysize, $
+           RETURN, cgResizeImage(tempImage, xsize, ysize, $
                     INTERP=interpolate, MINUS_ONE=minus_one)
        ENDELSE
    ENDELSE
@@ -925,8 +925,8 @@ END
 ;    mean: in, optional, type=float, default=0.5
 ;         The mean factor in a logarithmic stretch. Available only with 2D images.
 ;    minus_one: in, optional, type=boolean, default=0
-;         The value of this keyword is passed along to the FSC_RESIZE_IMAGE
-;         command. It prevents FSC_RESIZE_IMAGE from adding an extra row and
+;         The value of this keyword is passed along to the cgResizeImage
+;         command. It prevents cgResizeImage from adding an extra row and
 ;         column to the resulting array, which can be a problem with
 ;         small image arrays. 
 ;    minvalue: in, optional, type=varies
@@ -2189,13 +2189,13 @@ PRO cgImage, image, x, y, $
                 IF alphaImage THEN BEGIN
                     outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
                        ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
-                    TV, FSC_Resize_Image(outImage, xsize, ysize, INTERP=interp, $
+                    TV, cgResizeImage(outImage, xsize, ysize, INTERP=interp, $
                        MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDIF ELSE BEGIN
                     CASE scale OF
-                        0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
+                        0: TV, cgResizeImage(image, xsize, ysize, INTERP=interp, $
                                 MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=1
-                        1: TV, BYTSCL(FSC_Resize_Image(image, xsize, ysize, $
+                        1: TV, BYTSCL(cgResizeImage(image, xsize, ysize, $
                                 INTERP=interp, MINUS_ONE=minusOne), Top=top-bottom, $
                                 Max=max, Min=min) + bottom, xstart, ystart, _STRICT_EXTRA=extra, True=1
                      ENDCASE
@@ -2209,20 +2209,20 @@ PRO cgImage, image, x, y, $
                     image2d = Color_Quan(image, 1, r, g, b, _EXTRA=extra)   
                 ENDELSE                
                 TVLCT, r, g, b
-                TV, FSC_Resize_Image(image2d, xsize, ysize, INTERP=0, $
+                TV, cgResizeImage(image2d, xsize, ysize, INTERP=0, $
                    MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=0
              ENDELSE
           2: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
                     outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
                        ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
-                    TV, FSC_Resize_Image(outImage, xsize, ysize, INTERP=interp, $
+                    TV, cgResizeImage(outImage, xsize, ysize, INTERP=interp, $
                        MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDIF ELSE BEGIN
                     CASE scale OF
-                        0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
+                        0: TV, cgResizeImage(image, xsize, ysize, INTERP=interp, $
                                 MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=2
-                        1: TV, BYTSCL(FSC_Resize_Image(image, xsize, ysize, $
+                        1: TV, BYTSCL(cgResizeImage(image, xsize, ysize, $
                                 INTERP=interp, MINUS_ONE=minusOne), Top=top-bottom, Max=max, $
                                 Min=min) + bottom, xstart, ystart, _STRICT_EXTRA=extra, True=2
                     ENDCASE
@@ -2235,20 +2235,20 @@ PRO cgImage, image, x, y, $
                     image2d = Color_Quan(image, 2, r, g, b, _EXTRA=extra)
                 ENDELSE                
                 TVLCT, r, g, b
-                TV, FSC_Resize_Image(image2d, xsize, ysize, INTERP=0, $
+                TV, cgResizeImage(image2d, xsize, ysize, INTERP=0, $
                    MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=0
              ENDELSE
           3: IF thisDepth GT 8 THEN BEGIN
                 IF alphaImage THEN BEGIN
                     outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
                        ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
-                    TV, FSC_Resize_Image(outImage, xsize, ysize, INTERP=interp, $
+                    TV, cgResizeImage(outImage, xsize, ysize, INTERP=interp, $
                        MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
                 ENDIF ELSE BEGIN
                     CASE scale OF
-                        0: TV, FSC_Resize_Image(image, xsize, ysize, INTERP=interp, $
+                        0: TV, cgResizeImage(image, xsize, ysize, INTERP=interp, $
                                 MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=3
-                        1: TV, BYTSCL(FSC_Resize_Image(image, xsize, ysize, $
+                        1: TV, BYTSCL(cgResizeImage(image, xsize, ysize, $
                                 INTERP=interp, MINUS_ONE=minusOne), Top=top-bottom, Max=max, $
                                 Min=min) + bottom, xstart, ystart, _STRICT_EXTRA=extra, True=3
                     ENDCASE
@@ -2262,7 +2262,7 @@ PRO cgImage, image, x, y, $
                     image2d = Color_Quan(image, 3, r, g, b, _EXTRA=extra)
                 ENDELSE
                 TVLCT, r, g, b
-                TV, FSC_Resize_Image(image2d, xsize, ysize, INTERP=0, $
+                TV, cgResizeImage(image2d, xsize, ysize, INTERP=0, $
                    MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=0
              ENDELSE
       ENDCASE

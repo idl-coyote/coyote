@@ -574,17 +574,17 @@ PRO cgSurf, data, x, y, $
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN BEGIN
         axiscolor = cgColor(axiscolor)
     ENDIF ELSE BEGIN
-         IF currentState EQ 0 THEN axiscolor = Color24(rr[axiscolor], gg[axiscolor], bb[axiscolor])
+         IF currentState EQ 0 THEN axiscolor = cgColor24(rr[axiscolor], gg[axiscolor], bb[axiscolor])
     ENDELSE
     IF Size(bottom, /TNAME) EQ 'STRING' THEN BEGIN
         bottom = cgColor(bottom)
     ENDIF ELSE BEGIN
-         IF currentState EQ 0 THEN bottom = Color24(rr[bottom], gg[bottom], bb[bottom])
+         IF currentState EQ 0 THEN bottom = cgColor24(rr[bottom], gg[bottom], bb[bottom])
     ENDELSE
     IF Size(color, /TNAME) EQ 'STRING' THEN BEGIN
         color = cgColor(color)
     ENDIF ELSE BEGIN
-         IF currentState EQ 0 THEN color = Color24(rr[color], gg[color], bb[color])
+         IF currentState EQ 0 THEN color = cgColor24(rr[color], gg[color], bb[color])
     ENDELSE
     IF Size(background, /TNAME) EQ 'STRING' THEN BEGIN
         originalbg = background
@@ -594,7 +594,7 @@ PRO cgSurf, data, x, y, $
          ; Different values based on current state of the device. Indexed color mode here.
          IF currentState EQ 0 THEN BEGIN
             originalbg = [rr[background], gg[background], bb[background]]
-            background = Color24(rr[background], gg[background], bb[background])
+            background = cgColor24(rr[background], gg[background], bb[background])
          ENDIF
          ; Decomposed color mode here. Not sure how this should be handled. Just
          ; do white. If it is not right, then use strings for color values!

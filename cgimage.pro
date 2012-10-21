@@ -330,12 +330,12 @@ END
 ;    image: in, required
 ;       The input image that is being prepared for display. It will contain
 ;       an alpha channel.
-;    backgroundimage: in, required
+;    alphabackgroundimage: in, required
 ;       The background image. The input image will be blended
 ;       with the background image.
 ;   
 ; :Keywords:
-;    alphabgposposition: in, require, type=fltarr
+;    alphabgposition: in, require, type=fltarr
 ;       The normalized position or portion of the background image used to create the alpha image.
 ;    alphafgposition: in, required, type=fltarr
 ;       The normalized position in the background image where the input image is to be located.

@@ -616,16 +616,21 @@ END ;--------------------------------------------------------------------
 
 
 ;+
-; This event handler draws the histogram plot for the image.
+; This procedure draws the histogram plot for the image.
 ; 
 ; :Params:
-;     event: in, required
-;        The event structure.
+;     info: in, required
+;        The information structure for the program.
+; 
+; :Keywords:
+;      maxvalue: in, optional
+;          The maximum value that the histogram plot will display.
+;      wid: in, optional
+;          The window index number of the window the histogram plot should be drawn in.
 ;-
 PRO cgSTRETCH_HISTOPLOT, info, $
-   WID=wid, $
    MAXVALUE=maxvalue, $
-   _Extra=extra
+   WID=wid
 
 ; This is a utility program to draw a histogram plot in a
 ; display window.
@@ -2446,11 +2451,11 @@ END ;---------------------------------------------------------------------
 ;         Images with lots of pixels of one color (e.g. black) skew the histogram. This 
 ;         helps make a better looking plot. Set by default to the maximum value of the 
 ;         histogram data.
-;    maxthreshold: in, optional
+;    maxthresh: in, optional
 ;         The initial maximum threshold value for the stretch.
 ;    mean: in, optional, type=float, default=0.5
 ;         The mean factor in a logarithmic stretch.
-;    minthreshold: in, optional
+;    minthresh: in, optional
 ;         The initial minimun threshold value for the stretch.
 ;    multiplier: in, optional, type=float
 ;         The multiplication factor in a standard deviation stretch. The standard deviation

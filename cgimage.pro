@@ -1,10 +1,15 @@
 ; docformat = 'rst'
 ;
 ; PURPOSE:
-;     The purpose of cgIMAGE is to create a device-independent TV command
-;     with the power and functionality to be used in sophisticated graphics
-;     programs, as well as at the IDL command line. It can be thought of as 
-;     a "smart" TV command.
+; The purpose of this program is to create a TV command that works the way
+; the TV command would be expected to work if it was written today, rather
+; than 25 years ago. In other words, it knows the difference between an
+; 8-bit device and a 24-bit device, it honors the POSITION keyword like 
+; other graphics commands in IDL, it honors the !P.MULTI value, like other
+; graphics commands in IDL, it works seamlessly with both 8-bit and 24-bit
+; images. In addition to other modern features, this program can also 
+; display images that contain an alpha channel and can display image with
+; transparency.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -35,10 +40,15 @@
 ;******************************************************************************************;
 ;
 ;+
-; The purpose of cgIMAGE is to create a device-independent TV command
-; with the power and functionality to be used in sophisticated graphics
-; programs, as well as at the IDL command line. It can be thought of as 
-; a "smart" TV command.
+; The purpose of this program is to create a TV command that works the way
+; the TV command would be expected to work if it was written today, rather
+; than 25 years ago. In other words, it knows the difference between an
+; 8-bit device and a 24-bit device, it honors the POSITION keyword like 
+; other graphics commands in IDL, it honors the !P.MULTI value, like other
+; graphics commands in IDL, it works seamlessly with both 8-bit and 24-bit
+; images. In addition to other modern features, this program can also 
+; display images that contain an alpha channel and can display transparent
+; images.
 ;   
 ; There is a common block in cgImage that is defined as follows upon exiting
 ; this command::
@@ -111,10 +121,9 @@
 ;        
 ;     To display a transparent image on top of another image::
 ;     
-;        cgLoadCT, 0
-;        cgImage, cgDemoData(7)
-;        cgLoadCT, 33, RGB_TABLE=palette
-;        cgImage, cgDemoData(5), Palette=palette, Transparent=50, Position=[0.25, 0.25, 0.75, 0.75]
+;        cgImage, cgDemoData(7), CTIndex=0
+;        cgImage, cgDemoData(5), CTIndex=33, Transparent=50, $
+;             AlphaFGPosition=[0.25, 0.25, 0.75, 0.75], Missing_Value=0
 ;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -178,6 +187,7 @@
 ;       Added the ability to apply a stretch to a 2D image prior to converting it to a transparent image. 18 October 2012.DWF.   
 ;       Added a FILENAME keyword so that files of known format (GeoTIFF, JPEG, PNG, etc.) can be read to supply an
 ;          image for display. 18 October 2012. DWF.
+;       Fixed a problem that prevented transparent images from be displayed with !P.Multi. 20 Oct 2012. DWF.
 ;          
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -320,17 +330,15 @@ END
 ;    image: in, required
 ;       The input image that is being prepared for display. It will contain
 ;       an alpha channel.
-;    alphaBackgroundImage: in, required
-;       The background image. The foregroundimage, image, will be blended
+;    backgroundimage: in, required
+;       The background image. The input image will be blended
 ;       with the background image.
 ;   
 ; :Keywords:
-;    alphabgposition: in, required, type=fltarr
-;       The normalized position in the window where the background 
-;       image is to be located.
+;    alphabgposposition: in, require, type=fltarr
+;       The normalized position or portion of the background image used to create the alpha image.
 ;    alphafgposition: in, required, type=fltarr
-;       The normalized position in the window where the foreground 
-;       image is to be located.
+;       The normalized position in the background image where the input image is to be located.
 ;    tv: in, optional, type=boolean, default=0
 ;       If this keyword is set, the alpha channel is removed from the
 ;       input image, because we cannot display an image with an alpha
@@ -411,12 +419,16 @@ FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
     Set_Plot, 'Z'
     Device, Get_Decomposed=theState
     Device, Set_Resolution=sb[0:1], Decomposed=1, Set_Pixel_Depth=24
-   
+
+    ; Turn off !P.MULTI handling for this part.
+    multi = !P.Multi
+    !P.Multi = 0
     IF N_Elements(alphabgpos) EQ 0 THEN BEGIN
         cgImage, bImage
     ENDIF ELSE BEGIN
         cgImage, bImage, Position=alphabgpos
     ENDELSE
+    !P.Multi = multi
     
     ; Calculate the parameters for taking a snapshot of the
     ; relevant portion of the window.
@@ -751,7 +763,8 @@ END
 ; other graphics commands in IDL, it honors the !P.MULTI value, like other
 ; graphics commands in IDL, it works seamlessly with both 8-bit and 24-bit
 ; images. In addition to other modern features, this program can also 
-; display images that contain an alpha channel.
+; display images that contain an alpha channel and can display transparent
+; images.
 ; 
 ; Also, two-dimensional image arrays can be manipulated, stretched,
 ; and scaled directly with keywords to cgImage. These keywords do not
@@ -793,13 +806,12 @@ END
 ;         to have the same dimensions as the alpha channel image. The background image
 ;         can be either a 2D image or a 24-bit image.
 ;    alphabgposition: in, optional, type=fltarr(4)
-;         The normalized position where the background image is to be displayed in the
-;         graphics window. By default, the position is calculated to position the image 
-;         so that it covers the entire graphics window, [0.0, 0.0, 1.0, 1.0].
+;         The normalized position or portion of the background image that is going to be used
+;         to create the alpha channel image. Normally, and by default, the alphabgposition encompasses 
+;         the entire graphics window, [0.0, 0.0, 1.0, 1.0].
 ;    alphafgposition: in, optional, type=fltarr(4)
-;         The normalized position where the foreground image (the image parameter) is to 
-;         be displayed in the graphics window. By default, the position is calculated to 
-;         position the image so that it covers the entire graphics window, [0.0, 0.0, 1.0, 1.0].
+;         The normalized position in the background image where the input image is to be located.
+;         By default, the input image takes up the entire extent of the background image, [0.0, 0.0, 1.0, 1.0].
 ;    axis: in, optional, type=boolean, default=0
 ;         A misspelled version of the AXES keyword. Provided as a service to people whose
 ;         fingers have minds of their own.
@@ -1080,7 +1092,8 @@ END
 ;         or equal to TOP. Available only with 2D images.
 ;    transparent: in, optional, type=integer, default=50
 ;         A number between 0 and 100 that specifies the percent of transparency between the
-;         image being displayed and the background image. 
+;         image being displayed and the background image. Displaying a transparent image does
+;         not advance !P.Multi.
 ;    tv: in, optional, type=boolean, default=0
 ;         Setting this keyword makes the cgImage command work much like the brain-dead
 ;         TV command except that it will get colors right on all output devices. Most of
@@ -1373,6 +1386,7 @@ PRO cgImage, image, x, y, $
     ENDIF
     
     ; Did you specify a color table index?
+    TVLCT, r_start, g_start, b_start, /Get
     IF N_Elements(ctindex) NE 0 THEN BEGIN
         cgLoadCT, ctindex, Reverse=reverse, Brewer=brewer, RGB_TABLE=palette
     ENDIF
@@ -1391,6 +1405,10 @@ PRO cgImage, image, x, y, $
     ; it into cgImage.
     transparentImage = 0
     IF N_Elements(transparent) NE 0 THEN BEGIN
+    
+        ; Do you need a window?
+        IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
+    
         transparent = 0 > transparent < 100
         oldImage = image
         scaledImage = cgImgScl(image, $
@@ -1421,6 +1439,15 @@ PRO cgImage, image, x, y, $
         IF success THEN BEGIN
             transparentImage = 1
             image = transImage
+            IF (N_Elements(alphabackgroundimage) EQ 0) THEN BEGIN
+                IF !D.Name NE "PS" THEN BEGIN
+                   alphabackgroundimage = cgSnapshot(POSITION=_cgimage_position)
+                ENDIF ELSE Message, 'An AlphaBackgroundImage is required to create transparent images in PostScript.'
+            ENDIF 
+            alphabgpos = [0,0,1,1]
+            IF N_Elements(alphafgpos) EQ 0 THEN alphafgpos = [0,0,1,1]
+            position=_cgimage_position
+            noerase = 1
         ENDIF ELSE BEGIN
             image = oldImage
             RETURN
@@ -1617,7 +1644,7 @@ PRO cgImage, image, x, y, $
     
     ; If you are setting the transparent keyword, then don't define an alphaFGPosition.
     ; Use the Postion for this, later, after it has been determined.
-    IF ~transparentImage THEN SetDefaultValue, alphafgpos, [0.0, 0.0, 1.0, 1.0]
+    SetDefaultValue, alphafgpos, [0.0, 0.0, 1.0, 1.0]
     SetDefaultValue, alphabgpos, [0.0, 0.0, 1.0, 1.0]
     SetDefaultValue, beta, 3.0
     SetDefaultValue, clip, 2
@@ -1698,6 +1725,15 @@ PRO cgImage, image, x, y, $
                alphabackgroundImage = BytArr(100,100) + 255B
            ENDIF
        ENDELSE
+    ENDIF
+    
+    ; If you have an alpha background image, make sure it is a true-color image.
+    IF N_Elements(alphaBackgroundImage) NE 0 THEN BEGIN
+       IF Size(alphaBackgroundImage, /N_DIMENSIONS) EQ 2 THEN BEGIN
+          TVLCT, r, g, b, /Get
+          alphaBackgroundImage = [ [[r_start[alphaBackgroundImage]]], $
+             [[g_start[alphaBackgroundImage]]], [[b_start[alphaBackgroundImage]]] ]
+       ENDIF
     ENDIF
     
     ; Do you need to erase the window before image display?
@@ -1833,22 +1869,23 @@ PRO cgImage, image, x, y, $
        IF Keyword_Set(multi) AND (Keyword_Set(overplot) NE 1)THEN BEGIN
           ; Draw the invisible plot to get plot position.
           IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
-          Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
-              XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]], $
-             NOERASE=N_Elements(layout) EQ 0 ? tempNoErase : 1
-          TVLCT, rr, gg, bb
-          ; Use position coordinates to indicate position in this set of coordinates.
-          xrange = !X.Window[1] - !X.Window[0]
-          xstart = !X.Window[0] + position[0]*xrange
-          xend = xrange * (position[2] - position[0]) + xstart
-    
-          yrange = !Y.Window[1] - !Y.Window[0]
-          ystart = !Y.Window[0] + position[1]*yrange
-          yend = yrange * (position[3] - position[1]) + ystart
-    
-          ; New position based on !P.MULTI position.
-          position = [xstart, ystart, xend, yend]
-    
+          IF transparentImage EQ 0 THEN BEGIN
+              Plot, Findgen(11), XStyle=4, YStyle=4, /NoData, Background=background, $
+                  XMargin=multimargin[[1,3]], YMargin=multimargin[[0,2]], $
+                 NOERASE=N_Elements(layout) EQ 0 ? tempNoErase : 1
+              TVLCT, rr, gg, bb
+              ; Use position coordinates to indicate position in this set of coordinates.
+              xrange = !X.Window[1] - !X.Window[0]
+              xstart = !X.Window[0] + position[0]*xrange
+              xend = xrange * (position[2] - position[0]) + xstart
+        
+              yrange = !Y.Window[1] - !Y.Window[0]
+              ystart = !Y.Window[0] + position[1]*yrange
+              yend = yrange * (position[3] - position[1]) + ystart
+        
+              ; New position based on !P.MULTI position.
+              position = [xstart, ystart, xend, yend]
+          ENDIF
        ENDIF ELSE BEGIN
           IF Keyword_Set(overplot) THEN BEGIN
              IF (N_Elements(plotxrange) NE 0) && (N_Elements(plotyrange) NE 0) THEN BEGIN
@@ -2077,16 +2114,6 @@ PRO cgImage, image, x, y, $
     
     ; Set the output position.
     oposition = position
-    
-    ; If you are doing transparent images, then the alphafgposition is set to POSITION,
-    ; unless the user is doing something else.
-    IF transparentImage THEN BEGIN
-       IF N_Elements(alphafgpos) EQ 0 THEN BEGIN
-           alphafgpos = position
-           position=[0.0, 0.0, 1.0, 1.0] 
-       ENDIF 
-    ENDIF ELSE SetDefaultValue, alphafgpos, [0.0, 0.0, 1.0, 1.0]
-    
     
     ; Calculate the image size and start locations. The plus and minus
     ; factor values are designed to keep the image completely inside the axes.

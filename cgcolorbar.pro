@@ -55,6 +55,9 @@
 ;       use ANNOTATECOLOR in place of COLOR for complete color model independent results.
 ;    bottom: in, optional, type=integer, default=0
 ;       The lowest color index of the colors to be loaded in the color bar.
+;    brewer: in, optional, type=boolean, default=0
+;         This keyword is used only if the `CTIndex` keyword is used to select a color table number.
+;         Setting this keyword allows Brewer color tables to be used.
 ;    charpercent: in, optional, type=float, default=0.85                 
 ;       A value from 0.0 go 1.0 that is multiplied by the CHARSIZE to produce
 ;       the character size for the color bar. This value is only used if CHARSIZE is 
@@ -73,6 +76,10 @@
 ;    color: in, optional, type=string
 ;        The name of the color to use for color bar annotations. Ignored unless passed 
 ;        the name of a cgColor color. The default value is to use the ANNOTATECOLOR.
+;    ctindex: in, optional, type=integer
+;         The index number of a color table. The `Brewer` and `Reverse` keywords will be checked
+;         to see how to load the color table into the `Palette` keyword. This keyword will take
+;         precidence over any colors that are loaded with the `Palette` keyword. 
 ;    discrete: in, optional, type=boolean, default=0
 ;         Set this keyword to configure certain properties of the color bar to make
 ;         discrete color blocks for the color bar. This works best if you are using
@@ -95,8 +102,15 @@
 ;    font: in, optional, type=integer, default=!P.Font
 ;       Sets the font of the annotation. Hershey: -1, Hardware:0, True-Type: 1.
 ;    format: in, optional, type=string, default=""
-;       The format of the color bar annotations. Default is "", which allows
-;       the Plot command to determine the appropriate format.
+;       The format of the color bar annotations. Default is "". Note that the
+;       formatting behaviour can change, depending up values for the keywords
+;       `RANGE` and `DIVISIONS`. If you prefer to let the IDL Plot command determine
+;       how the color bar labels are formatted, set the format to a null string and
+;       set the `DIVISIONS` keyword to 0. Note the difference in these two commands::
+;       
+;           cgColorbar, Range=[18,125], Position=[0.1, 0.8, 0.9, 0.85]
+;           cgColorbar, Range=[18,125], Position=[0.1, 0.7, 0.9, 0.75], Divisions=0
+;           
 ;    invertcolors: in, optional, type=boolean, default=0
 ;       Setting this keyword inverts the colors in the color bar.
 ;    maxrange: in, optional
@@ -258,7 +272,10 @@
 ;       Implemented a fix that will allow the user to specify a tick formatting function name 
 ;          with the FORMAT keyword. 21 September 2012. DWF.
 ;       Fixed a problem in which setting the RANGE keyword gave different results, depending upon whether
-;          a FORMAT keyword was used or not. 16 Oct 2012. DWF.
+;          a FORMAT keyword was used or not. This change will affect the default color bar labeling
+;          *if* the user specifies a range. If you prefer the old labeling behavior, simiply set
+;          the `Divisions` keyword to 0. 16 Oct 2012. DWF.
+;       Added CTINDEX, and BREWER keywords to make loading a color table palette easier. 20 October 2012. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -267,10 +284,12 @@ PRO cgColorbar, $
     ADDCMD=addcmd, $
     ANNOTATECOLOR=annotatecolor, $
     BOTTOM=bottom, $
+    BREWER=brewer, $
     CHARPERCENT=charpercent, $
     CHARSIZE=charsize, $
     CLAMP=clamp, $
     COLOR=color, $
+    CTINDEX=ctindex, $
     DISCRETE=discrete, $
     DIVISIONS=divisions, $
     FIT=fit, $
@@ -328,10 +347,12 @@ PRO cgColorbar, $
         cgWindow, 'cgColorbar', $
             ANNOTATECOLOR=annotatecolor, $
             BOTTOM=bottom, $
+            BREWER=brewer, $
             CHARPERCENT=charpercent, $
             CHARSIZE=charsize, $
             CLAMP=clamp, $
             COLOR=color, $
+            CTINDEX=ctindex, $
             DISCRETE=discrete, $
             DIVISIONS=divisions, $
             FIT=fit, $
@@ -382,6 +403,11 @@ PRO cgColorbar, $
         THEN charPercent = 0.85 $
         ELSE charPercent = 0.0 > charPercent < 1.0
         
+    ; Did you specify a color table index?
+    IF N_Elements(ctindex) NE 0 THEN BEGIN
+        cgLoadCT, ctindex, Brewer=brewer, RGB_TABLE=palette
+    ENDIF
+
     ; If you have a palette, load the colors now. Otherwise whatever colors
     ; are in the current color table will be used.
     IF N_Elements(palette) NE 0 THEN BEGIN

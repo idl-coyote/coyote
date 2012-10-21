@@ -403,7 +403,7 @@ FUNCTION cgCmdWindow::Init, parent, $
         
         ; If you can find ImageMagick on this machine, you can convert to better
         ; looking raster files.
-        IF HasImageMagick() EQ 1 THEN BEGIN
+        IF cgHasImageMagick() EQ 1 THEN BEGIN
             imraster = Widget_Button(saveID, Value='Raster Image File via ImageMagick', /MENU)
             button = Widget_Button(imraster, Value='BMP', UNAME='IMAGEMAGICK_BMP')
             button = Widget_Button(imraster, Value='GIF', UNAME='IMAGEMAGICK_GIF')

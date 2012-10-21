@@ -39,7 +39,7 @@
 ;                      linearly scales approximately 96% of the image histogram.
 ;                      Clipping percents are approximations only, and depend
 ;                      entirely on the distribution of pixels in the image. For
-;                      interactive scaling, see XSTRETCH.
+;                      interactive scaling, see cgStretch.
 ;
 ; INPUT KEYWORDS:
 ;

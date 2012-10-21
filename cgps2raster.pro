@@ -252,10 +252,10 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
         
       ; ImageMagick is required for this section of the code.
       IF StrUpCase(!Version.OS) EQ 'DARWIN' THEN BEGIN
-          available = HasImageMagick()
+          available = cgHasImageMagick()
           doVersionTest = 0
       ENDIF ELSE BEGIN
-          available = HasImageMagick(Version=version)
+          available = cgHasImageMagick(Version=version)
           doVersionTest = 1
       ENDELSE
       IF available THEN BEGIN

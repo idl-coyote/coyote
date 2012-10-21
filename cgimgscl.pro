@@ -5,7 +5,7 @@
 ;
 ; PURPOSE:
 ;   This function scales an image using the same keywords and scaling available in 
-;   cgImage and xStretch.
+;   cgImage and cgStretch.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -36,7 +36,7 @@
 ;******************************************************************************************;
 ;+
 ; This function scales an image using the same keywords and scaling available in 
-; cgImage and xStretch. Set the `Stretch` keyword for the types of image scaling
+; cgImage and cgStretch. Set the `Stretch` keyword for the types of image scaling
 ; or stretching available.
 ; 
 ; :Categories:

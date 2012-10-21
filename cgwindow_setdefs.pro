@@ -225,7 +225,7 @@ PRO cgWindow_SetDefs, $
         im_png8 = Keyword_Set(im_png8)
         IF N_Elements(im_options) EQ 0 THEN im_options = ""
         IF N_Elements(im_raster) EQ 0 THEN BEGIN
-            IF HasImageMagick() THEN im_raster = 1 ELSE im_raster = 0
+            IF cgHasImageMagick() THEN im_raster = 1 ELSE im_raster = 0
         ENDIF
         IF N_Elements(im_resize) EQ 0 THEN im_resize = 25
         IF N_Elements(im_transparent) EQ 0 THEN im_transparent = 0

@@ -335,7 +335,7 @@ END
 ;       with the background image.
 ;   
 ; :Keywords:
-;    alphabgposition: in, require, type=fltarr
+;    alphabgposition: in, required, type=fltarr
 ;       The normalized position or portion of the background image used to create the alpha image.
 ;    alphafgposition: in, required, type=fltarr
 ;       The normalized position in the background image where the input image is to be located.

@@ -149,7 +149,7 @@ PRO cgFIXPS, in_filename, out_filename, $
   
   ; Is there an output filename?
   IF N_Elements(out_filename) EQ 0 THEN BEGIN
-        root_name = FSC_Base_Filename(in_filename, EXTENSION=ext)
+        root_name = cgRootName(in_filename, EXTENSION=ext)
         out_filename = Filepath(ROOT_DIR=GetEnv('IDL_TMPDIR'), root_name + '_tmp.' + ext)
         print_out = 1
         no_output_filename = 1
@@ -157,7 +157,7 @@ PRO cgFIXPS, in_filename, out_filename, $
   
   ; The out_filename can be the same as the in_filename in some cases.
   IF out_filename EQ in_filename THEN BEGIN
-     rootname = FSC_Base_Filename(out_filename, DIRECTORY=outDir, EXTENSION=ext)
+     rootname = cgRootName(out_filename, DIRECTORY=outDir, EXTENSION=ext)
      out_filename = FilePath(ROOT_DIR=outDir, rootname + '_tmp.' + ext)
   ENDIF
   

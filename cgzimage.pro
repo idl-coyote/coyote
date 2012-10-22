@@ -242,7 +242,7 @@ PRO cgZImage_BoxColor, event
     ; Get the information you need to redisplaythe image.
     Widget_Control, event.top, Get_UValue=info
     
-    boxcolor = PickColorName((*info).boxColor, Group_Leader=event.top)
+    boxcolor = cgPickColorName((*info).boxColor, Group_Leader=event.top)
     (*info).boxColor = boxColor
     
     ; Redisplay the image.

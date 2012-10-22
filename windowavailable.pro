@@ -39,7 +39,7 @@
 ;
 ;       The window vector obtained from the DEVICE command is not always the same length. It
 ;       is normally (on my machine) 65 elements long, but can be much longer if you have lots
-;       of IDL windows open (by calling PickColorName, for example). But if no windows with 
+;       of IDL windows open (by calling cgPickColorName, for example). But if no windows with 
 ;       index numbers greater than 65 are open, IDL shinks the larger vector to the smaller one
 ;       as part of its housekeeping operations, which means it happens on their timetable, not yours.
 ;       This can result in the user having "stale" index numbers greater than 65, but no larger vector

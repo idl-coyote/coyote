@@ -386,7 +386,7 @@ FUNCTION FSC_ColorSelect::PickColorEvents, event
             self.tlb, event.top, 0L, tableName, cinfo.index, $
             cinfo.brewer, self.ct_ncolors, self}        
     ENDIF ELSE BEGIN
-        color = PickColorName(self.color, CANCEL=cancelled, GROUP_LEADER=self.tlb)
+        color = cgPickColorName(self.color, CANCEL=cancelled, GROUP_LEADER=self.tlb)
         IF cancelled THEN RETURN, 0
         
         ; Style the color name.

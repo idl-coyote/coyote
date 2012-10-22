@@ -459,25 +459,25 @@ PRO cgSurface_Change_Colors, event
     CASE StrUpCase(buttonValue) OF
         'TITLE COLOR': BEGIN
             title = 'Set Title Color'
-            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
+            color = cgPickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
             info.tcolor = cgColor(color, /Triple, /Row)
             info.plottitle -> SetProperty, COLOR=info.tcolor
             END
         'SURFACE COLOR': BEGIN
             title = 'Set Surface Color'
-            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
+            color = cgPickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
             info.color = cgColor(color, /Triple, /Row)
             info.thisSurface -> SetProperty, COLOR=info.color
             END
         'BACKGROUND COLOR': BEGIN
             title = 'Set Background Color'
-            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
+            color = cgPickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
             info.background = cgColor(color, /Triple, /Row)
             info.thisView -> SetProperty, COLOR=info.background
             END
         'AXIS COLOR': BEGIN
             title = 'Set Axis Color'
-            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
+            color = cgPickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
             info.axiscolor = cgColor(color, /Triple, /Row)
             info.xaxis -> SetProperty, COLOR=info.axiscolor
             info.yaxis -> SetProperty, COLOR=info.axiscolor
@@ -485,7 +485,7 @@ PRO cgSurface_Change_Colors, event
             END
         'BOTTOM COLOR': BEGIN
             title = 'Set Bottom Color'
-            color = PickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
+            color = cgPickColorName(buttonUValue, TITLE=title, GROUP_LEADER=event.top)
             info.bottom = cgColor(color, /Triple, /Row)
             info.thisSurface -> SetProperty, BOTTOM=info.bottom
             END

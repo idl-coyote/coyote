@@ -86,7 +86,7 @@
 ;     jpeg: in, optional, type=boolean, default=0                 
 ;        Set this keyword to convert the PostScript output file to a JPEG image. Requires ImageMagick.
 ;     nofix: in, optional, type=boolean, default=0  
-;        If this keyword is set, then the FixPS program to fix IDL landscape
+;        If this keyword is set, then the cgFixPS program to fix IDL landscape
 ;        PostScript files is not called.
 ;     nomessage: in, optional, type=boolean, default=0                  
 ;        If this keyword is set, then no error messages are issued. The keyword is used primarily 
@@ -158,11 +158,11 @@
 ;           returned to 25%. 23 April 2009. DWF.
 ;       Still having a devil of a time getting the ImageMagick "convert" command right. Fonts
 ;           have become a problem. Now trying a "flatten" option in the command. 12 May 2009. DWF.
-;       If the PostScript file is in Landscape mode, it is now "fixed" with FixPS to allow it
+;       If the PostScript file is in Landscape mode, it is now "fixed" with cgFixPS to allow it
 ;           to be displayed right-side up in PostScript viewers. 8 August 2009. DWF.
 ;       Fixed a problem in not checking the GIF keyword properly. 4 December 2009. DWF.
 ;       Added NOFIX keyword to the program. 1 November 2010. DWF.
-;       Added better handing of errors coming from FIXPS after update to FIXPS. 15 November 2010. DWF.
+;       Added better handing of errors coming from cgFixPS after update to FIXPS. 15 November 2010. DWF.
 ;       Added DELETE_PS keyword. 16 Jan 2011. DWF.
 ;       Better protection of code from not finding ImageMagick. 17 Jan 2011. DWF.
 ;       Collecting result of SPAWN command. Only printing if QUIET=0. 16 Feb 2011. DWF.
@@ -243,7 +243,7 @@ PRO PS_END, $
    ; is right-side up.
    IF ps_struct.landscape THEN BEGIN
         IF ~Keyword_Set(nofix) THEN BEGIN
-            FixPS, ps_struct.filename, PAGETYPE=ps_struct.pagetype, SUCCESS=success, QUIET=1
+            cgFixPS, ps_struct.filename, PAGETYPE=ps_struct.pagetype, SUCCESS=success, QUIET=1
             IF success EQ 0 THEN Print, 'Encountered problem fixing landscape PostScript file. Proceeding...'
         ENDIF
    ENDIF

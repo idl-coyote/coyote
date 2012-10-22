@@ -86,9 +86,9 @@
 ;    
 ;        IDL> color = cgColor(/SelectColor)
 ;        
-;    The PickColorName program is a good way to learn the names of the colors available::
+;    The cgPickColorName program is a good way to learn the names of the colors available::
 ;    
-;        IDL> color = PickColorName()
+;        IDL> color = cgPickColorName()
 ;
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -237,7 +237,7 @@ END ;---------------------------------------------------------------------------
 ;        vectors internally.
 ;     cancel: out, optional, type=boolean, default=0
 ;        This keyword is always set to 0, unless that SELECTCOLOR keyword is used.
-;        Then it will correspond to the value of the CANCEL output keyword in PICKCOLORNAME.
+;        Then it will correspond to the value of the CANCEL output keyword in cgPickColorName.
 ;     check_connection: in, optional, type=boolean, default=0
 ;         An obsolete keyword now completely ignored.
 ;     colorstructure: out, optional, type=structure
@@ -281,9 +281,9 @@ END ;---------------------------------------------------------------------------
 ;        TRIPLE keyword.
 ;     selectcolor: in, optional, type=boolean
 ;       Set this keyword if you would like to select the color name with
-;       the PICKCOLORNAME program. Selecting this keyword automaticallys sets
+;       the cgPickColorName program. Selecting this keyword automaticallys sets
 ;       the INDEX positional parameter. If this keyword is used, any keywords
-;       appropriate for PICKCOLORNAME can also be used. If this keyword is used,
+;       appropriate for cgPickColorName can also be used. If this keyword is used,
 ;       the first positional parameter can be a color name that will appear in
 ;       the SelectColor box.
 ;     triple: in, optional, type=boolean
@@ -292,7 +292,7 @@ END ;---------------------------------------------------------------------------
 ;        visual depth of the machine. The value will be a three-element column
 ;        vector unless the ROW keyword is also set.
 ;     _ref_extra: in, optional
-;        Any keyword parameter appropriate for PICKCOLORNAME can be used.
+;        Any keyword parameter appropriate for cgPickColorName can be used.
 ;       These include BOTTOM, COLUMNS, GROUP_LEADER, INDEX, and TITLE.
 ;
 ;-
@@ -720,7 +720,7 @@ FUNCTION cgColor, theColour, colorIndex, $
     
        CASE N_Params() OF
           0: BEGIN
-             theColor = PickColorName(Filename=filename, _Strict_Extra=extra, Cancel=cancelled, BREWER=brewer)
+             theColor = cgPickColorName(Filename=filename, _Strict_Extra=extra, Cancel=cancelled, BREWER=brewer)
              IF cancelled THEN RETURN, !P.Color
              IF theDepth GT 8 AND (decomposedState EQ 1) THEN BEGIN
                    colorIndex = Fix(!P.Color < (!D.Table_Size - 1))
@@ -736,11 +736,11 @@ FUNCTION cgColor, theColour, colorIndex, $
                 colorIndex = Fix(theColor)
                 theColor = brewer ? 'WT1' : 'White'
              ENDIF ELSE colorIndex = Fix(!P.Color < 255)
-             theColor = PickColorName(theColor, Filename=filename, _Strict_Extra=extra, Cancel=cancelled, BREWER=brewer)
+             theColor = cgPickColorName(theColor, Filename=filename, _Strict_Extra=extra, Cancel=cancelled, BREWER=brewer)
              IF cancelled THEN RETURN, !P.Color
              END
           2: BEGIN
-             theColor = PickColorName(theColor, Filename=filename, _Strict_Extra=extra, Cancel=cancelled, BREWER=brewer)
+             theColor = cgPickColorName(theColor, Filename=filename, _Strict_Extra=extra, Cancel=cancelled, BREWER=brewer)
              IF cancelled THEN RETURN, !P.Color
              END
        ENDCASE

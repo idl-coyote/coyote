@@ -52,7 +52,7 @@
 ;
 ;       To call the program from within a widget program::
 ;
-;          color = PickColorName("red", Group_Leader=event.top) & Print, color
+;          color = cgPickColorName("red", Group_Leader=event.top) & Print, color
 ;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::

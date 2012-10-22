@@ -159,7 +159,7 @@
 ;           default values (namely, 0). This allows users to set their own system variables
 ;           before they call PS_START, rather than after. 23 March  2009. DWF.
 ;       Moved PS_END to its own file to allow the IDLExBr_Assistant to work properly. 7 April 2009. DWF.
-;       Modified to allow PostScript page type to be stored for future processing with FixPS. 9 August 2009. DWF.
+;       Modified to allow PostScript page type to be stored for future processing with cgFixPS. 9 August 2009. DWF.
 ;       Added NoFix keyword to PS_END calls to repair previous, but unused set-ups. 1 Nov 2010. DWF.
 ;       Added Charsize keyword to PS_START. 14 Nov 2010. DWF.
 ;       Changed the way default character sizes are set. 19 Nov 2010. DWF.

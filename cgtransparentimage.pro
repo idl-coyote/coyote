@@ -110,7 +110,7 @@
 ;    To create and display a transparent image::
 ;       cgDisplay, WID=0
 ;       cgImage, cgDemoData(5), CTIndex=0, /Interp
-;       timage = cgTransparentImage(COLOR='black', TRANSPARENT=50)
+;       timage = cgTransparentImage(MISSING_COLOR='black', TRANSPARENT=50)
 ;       cgDisplay, WID=1
 ;       cgImage, cgDemoData(7), CTIndex=22
 ;       cgImage, timage

@@ -236,8 +236,6 @@ FUNCTION cgImage_Make_Transparent_Image, image, transparent, $
     ; Make sure the transparent value is between 0 and 100 initially, and between 0 and 1 finally.
     transparent = (0 > transparent < 100) / 100.0
     
-    IF (transparent LT 0) || (transparent GT 1.0) THEN Message, 'The transparency factor must be a number between 0 and 100.'
-    
     ndims = Size(image, /N_DIMENSIONS)
     
     CASE ndims OF

@@ -81,7 +81,8 @@
 ;       An input map projection object (cgMap). If provided, the data will be gridded into
 ;       this map projection. If not provided, a map object using a equirectangular map projection
 ;       with a spherical datum will be used. The XRANGE and YRANGE properties of the map object
-;       will be set by the program in the course of doing the gridding.
+;       will be set by the program in the course of doing the gridding if the `SetRange` keyword is
+;       set.
 ;    missing: in, optional, type=numberical
 ;       Missing data in the gridding process will be set to this value.
 ;    nearest_neighbor: in, optional, type=boolean, default=0

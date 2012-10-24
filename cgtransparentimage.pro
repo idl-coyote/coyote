@@ -59,13 +59,13 @@
 ;         to see how to load the color table into the `Palette` keyword. This keyword will take
 ;         precidence over any colors that are loaded with the `Palette` keyword. 
 ;         
-;     missing_color: in, optional, type=various
-;        The "color" of a pixel that will be treated as a "missing" color.
+;     missing_value: in, optional, type=various
+;        The "color" of a pixel that will be treated as a "missing" color or value.
 ;        Any pixels in the image with this color value will be set completely
 ;        transparent. If `Color` is a string, use cgColor to obtain a color triple. 
-;        If `Color` is a scalar, this value is taken to be the missing color index
+;        If `Color` is a non-strint scalar, this value is taken to be the missing color index
 ;        in a 2D image. Otherwise, this is assumed to be a color triple that indicates
-;        the "missing" color in the output image. The alpha channel in the output image
+;        the "missing" color or value in the output image. The alpha channel in the output image
 ;        is set to 0 for the "missing" color, which makes this value completely transparent.
 ;        
 ;     filename: in, optional, type=string
@@ -110,7 +110,7 @@
 ;    To create and display a transparent image::
 ;       cgDisplay, WID=0
 ;       cgImage, cgDemoData(5), CTIndex=0, /Interp
-;       timage = cgTransparentImage(MISSING_COLOR='black', TRANSPARENT=50)
+;       timage = cgTransparentImage(MISSING_VALUE='black', TRANSPARENT=50)
 ;       cgDisplay, WID=1
 ;       cgImage, cgDemoData(7), CTIndex=22
 ;       cgImage, timage
@@ -134,7 +134,7 @@
 FUNCTION cgTransparentImage, image, $
   BREWER=brewer, $
   CTINDEX=ctindex, $
-  MISSING_COLOR=missing_color, $
+  MISSING_VALUE=missing_value, $
   FILENAME=filename, $
   NOGUI=nogui, $
   PALETTE=palette, $
@@ -207,8 +207,8 @@ FUNCTION cgTransparentImage, image, $
            alpha = Byte(image) * 0 + (255 * (1.0 - transparent))
            
            ; Handle missing color index here.
-           IF (N_Elements(missing_color) EQ 1) && (Size(missing_color, /TNAME) NE 'STRING') THEN BEGIN
-              missingIndices = Where(image EQ missing_color, missingCnt)
+           IF (N_Elements(missing_value) EQ 1) && (Size(missing_value, /TNAME) NE 'STRING') THEN BEGIN
+              missingIndices = Where(image EQ missing_value, missingCnt)
               IF missingCnt GT 0 THEN alpha[missingIndices] = 0B
            ENDIF
            END
@@ -247,15 +247,15 @@ FUNCTION cgTransparentImage, image, $
     ENDCASE
     
     ; Did the user pass a color? 
-    CASE N_Elements(missing_color) OF
+    CASE N_Elements(missing_value) OF
         0: 
         1: BEGIN
-           IF Size(missing_color, /TNAME) EQ 'STRING' THEN BEGIN
-               missingColor = cgColor(missing_color, /TRIPLE)
+           IF Size(missing_value, /TNAME) EQ 'STRING' THEN BEGIN
+               missingColor = cgColor(missing_value, /TRIPLE)
            ENDIF
            END
         2: Message, 'The COLOR keyword contains unexpected values.'
-        3: missingColor = missing_color
+        3: missingColor = missing_value
         ELSE: Message, 'The COLOR keyword must be a color triple.'
     ENDCASE
     

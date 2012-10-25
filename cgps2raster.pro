@@ -236,7 +236,6 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
    basename = cgRootName(ps_filename, DIRECTORY=theDir, EXTENSION=theExtension)
    IF theDir EQ "" THEN CD, CURRENT=theDir
    IF N_Elements(outfilename) EQ 0 THEN BEGIN
-   print, 'Filetype: ', filetype
        CASE 1 OF
           filetype EQ 'BMP':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.bmp')
           filetype EQ 'GIF':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.gif')
@@ -255,7 +254,8 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
    
       ; PDF files handled a bit differently.
       IF filetype EQ 'PDF' THEN BEGIN
-          cgPS2PDF, ps_filename, outfilename
+          cgPS2PDF, ps_filename, outfilename, DELETE_PS=delete_ps, SHOWCMD=showcmd, $
+              SILENT=silent, SUCCESS=success
           RETURN
       ENDIF
         

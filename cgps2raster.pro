@@ -207,6 +207,7 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
            RETURN
            END
    ENDCASE
+   IF Keyword_Set(pdf) THEN filetype = 'PDF'
    IF Keyword_Set(bmp) THEN filetype = 'BMP'
    IF Keyword_Set(gif) THEN filetype = 'GIF'
    IF Keyword_Set(png) THEN filetype = 'PNG'
@@ -235,10 +236,12 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
    basename = cgRootName(ps_filename, DIRECTORY=theDir, EXTENSION=theExtension)
    IF theDir EQ "" THEN CD, CURRENT=theDir
    IF N_Elements(outfilename) EQ 0 THEN BEGIN
+   print, 'Filetype: ', filetype
        CASE 1 OF
           filetype EQ 'BMP':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.bmp')
           filetype EQ 'GIF':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.gif')
           filetype EQ 'JPEG': outfilename = Filepath(ROOT_DIR=theDir, basename + '.jpg')
+          filetype EQ 'PDF':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.pdf')
           filetype EQ 'PNG':  outfilename = Filepath(ROOT_DIR=theDir, basename + '.png')
           filetype EQ 'TIFF': outfilename = Filepath(ROOT_DIR=theDir, basename + '.tif')
        ENDCASE
@@ -249,6 +252,12 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
    
    ; If you have an output filename, then do it.
    IF N_Elements(outfilename) NE "" THEN BEGIN
+   
+      ; PDF files handled a bit differently.
+      IF filetype EQ 'PDF' THEN BEGIN
+          cgPS2PDF, ps_filename, outfilename
+          RETURN
+      ENDIF
         
       ; ImageMagick is required for this section of the code.
       IF StrUpCase(!Version.OS) EQ 'DARWIN' THEN BEGIN

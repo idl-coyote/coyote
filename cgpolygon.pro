@@ -60,6 +60,10 @@
 ;         connected. Z must contain at least three elements.
 ;
 ; :Keywords:
+;     addcmd: in, optional, type=boolean, default=0
+;        Set this keyword to add the command to an cgWindow. Setting this keyword
+;        automatically sets the WINDOW keyword, but the command does not erase the
+;        graphics window as it would normally.
 ;     color: in, optional, type=string, default='rose'
 ;         The name of the polygon color. Color names are those used with cgColor. 
 ;         This value can also be a long integer or an index into the current color
@@ -105,11 +109,13 @@
 ;        Written, 26 March 2012. David Fanning.
 ;        Added Position keyword to allow a fill of a particular portion of the graphics 
 ;            window. 20 Apr 2012. DWF.
+;        Added AddCmd keyword. 25 Oct 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgPolygon, x, y, z, $
+    ADDCMD=addcmd, $
     COLOR=color, $
     FCOLOR=fcolor, $
     FILL=fill, $
@@ -135,23 +141,46 @@ PRO cgPolygon, x, y, z, $
         RETURN
     ENDIF
     
-    ; Should this be added to a resizeable graphics window?
+    ; Do they want this plot in a resizeable graphics window?
+    IF Keyword_Set(addcmd) THEN window = 1
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-        cgWindow, 'cgColorFill', x, y, z, $
-            COLOR=color, $
-            FCOLOR=fcolor, $
-            FILL=fill, $
-            NORMAL=normal, $
-            DEVICE=device, $
-            POSITION=position, $
-            ADDCMD=1, $
-            _EXTRA=extra
+        currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
+        IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
+        
+        ; If adding a command, have to do this differently.
+        IF Keyword_Set(addcmd) THEN BEGIN
+           cgWindow, 'cgColorFill', x, y, z, $
+              COLOR=color, $
+              FCOLOR=fcolor, $
+              FILL=fill, $
+              NORMAL=normal, $
+              DEVICE=device, $
+              POSITION=position, $
+              ADDCMD=1, $
+              _EXTRA=extra
+                
+            RETURN
             
-         RETURN
+        ENDIF ELSE BEGIN
+        
+           ; Otherwise, we are just replacing the commands in a new or existing window.
+           cgWindow, 'cgColorFill', x, y, z, $
+              COLOR=color, $
+              FCOLOR=fcolor, $
+              FILL=fill, $
+              NORMAL=normal, $
+              DEVICE=device, $
+              POSITION=position, $
+              REPLACECMD=replaceCmd, $
+              _Extra=extra
+            
+           RETURN
+         
+         ENDELSE
     ENDIF
     
-    ; Set up PostScript device for working with colors.
+  ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
     ; Do this in decomposed color, if possible.

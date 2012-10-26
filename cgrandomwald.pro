@@ -5,7 +5,7 @@
 ;
 ; PURPOSE:
 ; 
-;   This funciton creates a vector of N random numbers using an Inverse Gaussian Distribution,
+;   This function creates a vector of N random numbers using an Inverse Gaussian Distribution,
 ;   which is also known as the Wald Distribution. The reference for the code can be found at 
 ;   http://en.wikipedia.org/wiki/Inverse_Gaussian_distribution.
 ;******************************************************************************************;
@@ -37,7 +37,7 @@
 ;******************************************************************************************;
 ;
 ;+
-; This funciton creates a vector of N random numbers using an Inverse Gaussian Distribution,
+; This function creates a vector of N random numbers using an Inverse Gaussian Distribution,
 ; which is also known as the Wald Distribution. The reference for the code can be found at 
 ; http://en.wikipedia.org/wiki/Inverse_Gaussian_distribution.
 ;

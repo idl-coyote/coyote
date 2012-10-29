@@ -86,6 +86,7 @@
 ;       Added UTM_SOUTH keyword to handle Landsat dat in UTM projections in GeoTiff files
 ;          that have to have 10e6 added to Y values to make them work in IDL. 14 Aug 2012. DWF.
 ;       Renamed cgFindMapBoundary from FindMapBoundary. 21 Aug 2012. DWF.
+;       Changed reference to NCDF_Coord to cgNCDFMap. 28 Oct 2012. DWF.
 ;          
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -137,7 +138,7 @@ FUNCTION cgFindMapBoundary, filename, boundary, $
     isNCDF = NCDF_IsValidFile(filename)
     
     IF isNCDF THEN BEGIN
-        mapCoord = NCDF_Coord(filename, XRANGE=xrange, YRANGE=yrange, $
+        mapCoord = cgNCDFMap(filename, XRANGE=xrange, YRANGE=yrange, $
             SUCCESS=success, /SILENT, USE_LATLON=use_latlon)
         IF success THEN BEGIN
             boundary = [xrange[0], yrange[0], xrange[1], yrange[1]]

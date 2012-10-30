@@ -96,7 +96,7 @@
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
-PRO CenterTLB, tlb, x, y, $
+PRO cgCenterTLB, tlb, x, y, $
     CenterOnTLB=wCenterOnTLB, $
     Device=device, $
     NoCenter=nocenter 

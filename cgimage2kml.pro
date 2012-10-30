@@ -1,10 +1,13 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   cgPROGRAMNAME
+;   cgImage2KML
 ;
 ; PURPOSE:
-;   The program ...
+; This program creates a KML file that can be opened in Google Earth to display the 
+; image drapped over the Google Earth terrain. A corresponding image file is also
+; produced. The KML and image file must be in the same directory to use them with
+; Google Earth.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -35,7 +38,10 @@
 ;******************************************************************************************;
 ;
 ;+
-; This program ...
+; This program creates a KML file that can be opened in Google Earth to display the 
+; image drapped over the Google Earth terrain. A corresponding image file is also
+; produced. The KML and image file must be in the same directory to use them with
+; Google Earth.
 ;
 ; :Categories:
 ;    Graphics, FileIO, Maps

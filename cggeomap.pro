@@ -62,6 +62,10 @@
 ;        parameter will be obtained from the GeoTiff file.
 ;               
 ; :Keywords:
+;     boundary: out, optional, type=array
+;        A four-element array giving the boundaries of the map projection in the form
+;        [x0,y0,x1,y1]. This is a more convenient way of expressing the range
+;        of the map space.
 ;     ccolor: in, optional, type=string, default='Charcoal'
 ;        The name of a color the map continents should be displayed with. The default
 ;        is "charcoal". Color names are those supported by cgColor.
@@ -73,7 +77,9 @@
 ;         will add a cgMapContinents object to the cgMap object.   
 ;     display: in, optional, type=boolean, default=0
 ;         Set this keyword to display the image with the map annotations in a 
-;         resizeable cgWindow.                    
+;         resizeable cgWindow.          
+;     ellipsoid: out, optional, type=string
+;         The name of the ellipsoid used in the GeoTiff file.          
 ;     gcolor: in, optional, type=string, default='Gray'
 ;         The name of a color the map grid should be displayed with. The default
 ;         is "gray". Color names are those supported by cgColor.
@@ -88,6 +94,12 @@
 ;         will add a cgMapGrid object to the cgMap object.  
 ;     image: out, optional, type=varies
 ;         Set this keyword to a named variable that on exit will contain the image data.                     
+;     latlonbox: out, optional, type=array
+;        A four-element array giving the boundaries of the map projection in the
+;        Google Map form of [north, south, east, west]. This is useful when you
+;        are creating image overlays to be added to Goggle Earth.
+;     map_projection: out, optional, type=string
+;         The name of the map projection found in the GeoTiff file.
 ;     mcolor: in, optional, type=string, default='Black'
 ;         The name of a color the map should be displayed in. (Normally the map
 ;         border and map title are displayed in this color.)
@@ -151,20 +163,25 @@
 ;         Added PALETTE keyword to return the RGB color palette present in the file, if any. 16 August 2012. DWF.
 ;         Moved the geotiff argument to a GEOTIFF keyword, as I always expect it to be this way. 6 Sept 2012. DWF.
 ;         Removed UTM/WGS84 warning message in IDL 8.2, as this problem has been fixed in IDL 8.2. 2 Oct 2012. DWF.
-;         
+;         Added BOUNDARY, ELLIPSOID, LATLONBOX, and MAP_PROJECTION output keywords to facility 
+;            creating Google Earth overlays. 30 Oct 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
 Function cgGeoMap, image, $
+    BOUNDARY=boundary, $
     CLIP=clip, $
     DISPLAY=display, $
+    ELLIPSOID=ellipsoid, $
     GCOLOR=gcolor, $
     GEOTIFF=geotiff, $
     GRID=grid, $
     CCOLOR=ccolor, $
     CONTINENTS=continents, $
     IMAGE=outImage, $
+    LATLONBOX=latlonbox, $
+    MAP_PROJECTION=map_projection, $
     MCOLOR=mcolor, $
     ONIMAGE=onimage, $
     PALETTE=palette, $
@@ -1348,6 +1365,14 @@ Function cgGeoMap, image, $
               ENDIF ELSE outimage = image
        ENDELSE
    ENDIF
+   
+   ; Get return values.
+   mapCoord -> GetProperty, $
+      BOUNDARY=boundary, $
+      ELLIPSOID=ellipsoid, $
+      LATLONBOX=latlonbox, $
+      MAP_PROJECTION=map_projection
+   
    
    RETURN, mapCoord
 END

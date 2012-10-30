@@ -617,7 +617,7 @@ PRO cgBarPlot, values, $
        cgAxis,yaxis=0,ystyle=ystyle,yticks=(nbars-1),ytickv=tickv,ytickname=barnames, $
           yticklen=0.0, _extra=extra
     ENDIF ELSE BEGIN       ; Label the bars (X-axis)
-       cgAxis,xaxis=0,xstyle=ystyle,xticks=(nbars-1),xtickv=tickv,xtickname=barnames, $
+       cgAxis,xaxis=0,xstyle=xstyle,xticks=(nbars-1),xtickv=tickv,xtickname=barnames, $
           xticklen=0.0, _extra=extra
     ENDELSE
 

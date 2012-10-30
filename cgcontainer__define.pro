@@ -219,6 +219,7 @@ PRO cgContainer::GetProperty, NAME=name, UVALUE=uvalue, _REF_EXTRA=extra
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
       void = Error_Message()
+      IF N_Elements(extra) NE 0 THEN Print, '      ' + 'Unhandled keywords: ' + extra
       RETURN
    ENDIF
    
@@ -227,7 +228,7 @@ PRO cgContainer::GetProperty, NAME=name, UVALUE=uvalue, _REF_EXTRA=extra
     IF Arg_Present(uvalue) && Ptr_Valid(self._cg_uvalue) THEN uvalue = *self._cg_uvalue
     
     ; Get the superclass object properties.
-    IF N_Elements(extra) NE 0 THEN self -> IDL_Container::GetProperty, _STRICT_EXTRA=extra
+    IF N_Elements(extra) NE 0 THEN Message, 'There are unresolved keywords here that cannot be handled.'
     
 END
 

@@ -77,9 +77,12 @@
 ;        Fixed a problem that required having to set the UTM zone in addition to the latitude
 ;           and longitude in a UTM projection. Now using cgUTMZone to determine the proper
 ;           zone. 8 Aug 2012. DWF.
-;         Added a BOUNDARY keyword to the GetProperty method. 16 Aug 2012. DWF.
-;         Modified to allow Hotine Oblique Mercator map projections to work correctly. 7 Sept 2012. DWF.
-;         Additional changes to better handle IDL 8.2 map projections. 12 Sept 2012. DWF.
+;        Added a BOUNDARY keyword to the GetProperty method. 16 Aug 2012. DWF.
+;        Modified to allow Hotine Oblique Mercator map projections to work correctly. 7 Sept 2012. DWF.
+;        Additional changes to better handle IDL 8.2 map projections. 12 Sept 2012. DWF.
+;        Added LATLONBOX keyword to the GetProperty method to allow me to obtain
+;            the map boundary in the Google Map preferred notation of [north, south, east, west]
+;            in degrees. 30 Oct 2012.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -856,13 +859,18 @@ END
 
 ;+--------------------------------------------------------------------------
 ;   This method allows the user to get various properties of the object. In general,
-;   the same keywords that are used for the INIT method can be used here.
+;   the same keywords that are used for the INIT method can be used here. Here
+;   are a few that are different.
 ;   
 ; :Keywords:
 ;     boundary: out, optional, type=array
 ;        A four-element array giving the boundaries of the image in the form
 ;        [x0,y0,x1,y1]. This is a more convenient way of expressing the range
 ;        of the map space.
+;     latlonbox: out, optional, type=array
+;        A four-element array giving the boundaries of the map projection in the
+;        Google Map form of [north, south, east, west]. This is useful when you
+;        are creating image overlays to be added to Goggle Earth.
 ;     overlays: out, optional, type=object
 ;        Set this keyword to a named variable that will return an object
 ;        array containing the overlay objects in the map object.
@@ -880,6 +888,7 @@ PRO cgMap::GetProperty, $
     ELLIPSOID=ellipsoid, $
     ERASE=erase, $
     HIRES=hires, $
+    LATLONBOX=latlonbox, $
     LIMIT=limit, $
     MAP_PROJECTION=map_projection, $
     NAME=name, $
@@ -938,6 +947,21 @@ PRO cgMap::GetProperty, $
             yrange = Reform(llcoords[1,*])
       ENDIF ELSE yrange = self._cg_yrange
       boundary = [xrange[0], yrange[0], xrange[1], yrange[1]]
+   ENDIF
+   
+   ; The latlonbox is just the XRANGE and YRANGE in a form Google Earth prefers 
+   ; [north, south, east, west] in degrees.
+   IF Arg_Present(latlonbox) THEN BEGIN
+      latlon_ranges = 1
+      IF Keyword_Set(latlon_ranges) THEN BEGIN
+            llcoords = Map_Proj_Inverse(self._cg_xrange, self._cg_yrange, MAP_STRUCTURE=mapStruct)
+            xrange = Reform(llcoords[0,*])
+      ENDIF ELSE xrange = self._cg_xrange
+      IF Keyword_Set(latlon_ranges) THEN BEGIN
+            llcoords = Map_Proj_Inverse(self._cg_xrange, self._cg_yrange, MAP_STRUCTURE=mapStruct)
+            yrange = Reform(llcoords[1,*])
+      ENDIF ELSE yrange = self._cg_yrange
+      latlonbox = [ yrange[1], yrange[0], xrange[0], xrange[1] ]
    ENDIF
    
    ; Other keywords.

@@ -268,18 +268,19 @@ FUNCTION cgTransparentImage, image, $
     
     ; Create the transparent image.
     transparentImage = [ [[red]], [[grn]], [[blu]], [[alpha]] ]
+    transparentImage = Transpose(transparentImage, [2,0,1])
     
     ; Write this image to a file?
     IF Keyword_Set(pngfile) THEN BEGIN
         
         IF Size(pngfile, /TNAME) EQ 'STRING' THEN outfilename = pngfile ELSE outfilename = 'transparent.png'
         IF noGUI THEN BEGIN
-            Write_PNG, outfilename, Transpose(transparentImage, [2,0,1])
+            Write_PNG, outfilename, transparentImage
         ENDIF ELSE BEGIN
             outfilename = Dialog_Pickfile(Title='Select PNG File For Output...', $
                 FILE=outfilename, FILTER='*.png')
             IF outfilename NE "" THEN BEGIN
-               Write_PNG, outfilename, Transpose(transparentImage, [2,0,1])
+               Write_PNG, outfilename, transparentImage
             ENDIF
         ENDELSE
         

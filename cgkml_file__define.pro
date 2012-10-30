@@ -253,12 +253,8 @@ END
 ;+
 ; This method converts a KML file to a KMZ file.
 ; 
-; :Keywords:
-;     include: in, optional, type=strarr
-;         A string array of files and/or directories that should be included in the KMZ file
-;         along with the KML file.
 ;-
-PRO cgKML_File::KML2KMZ, include
+PRO cgKML_File::KML2KMZ
 
   Compile_Opt idl2
   

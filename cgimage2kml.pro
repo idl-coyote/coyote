@@ -65,7 +65,7 @@
 ;       This keyword is used only if the `CTIndex` keyword is used to select a color table number.
 ;       Setting this keyword allows Brewer color tables to be used.
 ;         
-;   ctindex: in, optional, type=integer
+;    ctindex: in, optional, type=integer
 ;       The index number of a color table. The `Brewer` and `Reverse` keywords will be checked
 ;       to see how to load the color table into the `Palette` keyword. This keyword will take
 ;       precidence over any colors that are loaded with the `Palette` keyword. This keyword
@@ -89,6 +89,12 @@
 ;        is obtained from the mapCoord object and need not be passed in. The values
 ;        are in latitude and longitude coordinates that go from -90 to 90 and -180 to
 ;        180 degrees, respectively.
+;        
+;    max_value: in, optional
+;        The value to use for the MAX value when the image is scaled with BYTSCL.
+;
+;    min_value: in, optional
+;        The value to use for the MIN value when the image is scaled with BYTSCL.
 ;
 ;    missing_value: in, optional, type=various
 ;        The "color" of a pixel that will be treated as a "missing" color or value.
@@ -240,10 +246,14 @@ PRO cgImage2KML, image, mapCoord, $
       IF (imgType NE 'FLOAT') && (imgType NE 'DOUBLE') THEN warped = Float(warped)
       missing = Where(warped EQ missing, count)
       IF count GT 0 THEN warped[missing] = !Values.F_NAN
-      warped = BytScl(warped, MIN=min_value, MAX=max_value, /NAN, TOP=254) + 1B
+      IF (Min(warped) LT 0) || (Max(warped) GT 255) THEN BEGIN
+         warped = BytScl(warped, MIN=min_value, MAX=max_value, /NAN, TOP=254) + 1B
+      ENDIF
       IF count GT 0 THEN warped[missing] = 0B
    ENDIF ELSE BEGIN
-      warped = BytScl(warped, MIN=min_value, MAX=max_value, /NAN, TOP=254)
+      IF (Min(warped) LT 0) || (Max(warped) GT 255) THEN BEGIN
+         warped = BytScl(warped, MIN=min_value, MAX=max_value, /NAN)
+      ENDIF
    ENDELSE
    
    ; If this is a 2D image, create a 24-bit image from the palette.

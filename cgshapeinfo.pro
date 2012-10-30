@@ -325,7 +325,7 @@ PRO cgShapeInfo, filename, XRANGE=xrange, YRANGE=yrange
    statusbar = Widget_Label(infobase,/Sunken_Frame, SCR_XSIZE=gb.scr_xsize-gl.scr_xsize, $
       Value=String(Replicate(32B, 150)))
 
-   CenterTLB, tlb
+   cgCenterTLB, tlb
    Widget_Control, tlb, /Realize
 
    ; Information to identify entity types.

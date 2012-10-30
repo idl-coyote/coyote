@@ -108,7 +108,7 @@ FUNCTION cgFileSelect::INIT, parent, $
    
    ; Need to realize the widgets?
    IF createdParent THEN BEGIN
-       CenterTLB, parent
+       cgCenterTLB, parent
        Widget_Control, parent, /REALIZE
    ENDIF
    

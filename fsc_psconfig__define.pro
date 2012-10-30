@@ -260,32 +260,6 @@ END ;-------------------------------------------------------------------------
 
 
 
-PRO FSC_PSCONFIG_CenterTLB, tlb
-
-; This procedure centers the given top-level base on the display.
-
-   ; Get the screen size and find its center.
-
-screenSize = Get_Screen_Size()
-IF screenSize[0] GT 2000 THEN screenSize[0] = screenSize[0]/2 ; Dual monitors.
-xCenter = screenSize(0) / 2
-yCenter = screenSize(1) / 2
-
-   ; Get the size of the widget program and calculate a half-size.
-
-geom = Widget_Info(tlb, /Geometry)
-xHalfSize = geom.Scr_XSize / 2
-yHalfSize = geom.Scr_YSize / 2
-
-   ; Position the widget program on the display.
-
-Widget_Control, tlb, XOffset = xCenter-xHalfSize, $
-   YOffset = yCenter-yHalfSize
-
-END ;-------------------------------------------------------------------------
-
-
-
 FUNCTION FSC_PSCONFIG_Error_Message, theMessage, Traceback=traceback, $
    NoName=noName
 
@@ -1227,7 +1201,7 @@ self.plotID->SetColor, self.colorSet
 
    ; Center and realize TLB.
 
-FSC_PSConfig_CenterTLB, tlb
+cgCenterTLB, tlb
 Widget_Control, tlb, /Realize
 
 self.noblock = Keyword_Set(noblock)

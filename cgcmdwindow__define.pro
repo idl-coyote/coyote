@@ -472,9 +472,9 @@ FUNCTION cgCmdWindow::Init, parent, $
                 ypos = 5           
             ENDELSE
         ENDELSE
-        CenterTLB, self.tlb, xpos, ypos, /NOCENTER, /DEVICE
+        cgCenterTLB, self.tlb, xpos, ypos, /NOCENTER, /DEVICE
     ENDIF ELSE BEGIN
-        IF createParent THEN CenterTLB, self.tlb, xpos, ypos, /NOCENTER, /DEVICE
+        IF createParent THEN cgCenterTLB, self.tlb, xpos, ypos, /NOCENTER, /DEVICE
     ENDELSE
     
     ; Display the widget and get window index number.

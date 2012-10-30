@@ -91,8 +91,7 @@
 ;
 ;              http://www.idlcoyote.com/programs/netcdf_data__define.pro
 ;              http://www.idlcoyote.com/programs/error_message.pro
-;              http://www.idlcoyote.com/programs/centertlb.pro
-;              http://www.idlcoyote.com/programs/undefine.pro
+;;              http://www.idlcoyote.com/programs/undefine.pro
 ;              http://www.idlcoyote.com/programs/textbox.pro
 ;              http://www.idlcoyote.com/programs/cgrootname.pro
 ;              http://www.idlcoyote.com/programs/textlineformat.pro

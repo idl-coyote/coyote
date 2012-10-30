@@ -22,18 +22,19 @@
 ;         are both strings. An optional third field DISPLAYNAME can also be present. See the
 ;         <ExtendedData> reference (https://developers.google.com/kml/documentation/kmlreference#extendeddata)
 ;         for additional information.
-;    name: in, optional, type=string
-;       User-defined text displayed in the 3D viewer as the label for the object (eg., for a Placemark).
 ;    open: in, optional, type=boolean, default=0
 ;       This keyword specifies whether a Document or Folder appears closed or open when first loaded 
 ;       into the Places panel. The default is to show the Document or Folder collapsed rather than
 ;       expanded.
 ;    phonenumber: in, optional, type=string
 ;        A phone number. Used only by Google Maps Mobile.
+;    placename: in, optional, type=string
+;        This is the <name> element in a Feature object. It is user-defined text that is used as
+;        the label for an object in Google Earth.
 ;    snippet: in, optional, type=string
-;        A short description of the feature. Restricted to two lines (may be StrArr of 2 elements). This
-;        description is displayed in the Places panel under the name of the feature. If not supplied, the
-;        first two lines of the `Description` are used.
+;        A short description of the feature. This description is displayed in the Places panel 
+;        under the name of the feature. If not supplied, the first two lines of the `Description` 
+;        are used.
 ;    styleurl: in, optional, type=string
 ;        The URL of a <Style> or <StyleMap> defined in a Document. If the style is in the same 
 ;        file, use a # reference. If the style is defined in an external file, use a full URL 
@@ -55,9 +56,9 @@ FUNCTION cgKML_Feature::INIT, $
    AUTHOR=author, $
    DESCRIPTION=description, $
    EXTENDEDDATA=extendedData, $
-   NAME=name, $
    OPEN=open, $
    PHONENUMBER=phonenumber, $
+   PLACENAME=placename, $
    SNIPPET=snippet, $
    STYLEURL=styleURL, $
    TIMEPRIMITIVE=timeprimitive, $
@@ -74,14 +75,103 @@ FUNCTION cgKML_Feature::INIT, $
   ENDIF
   
   ; Call the superclass object's INIT method.
-  IF ~self -> cgObject::INIT(_Strict_Extra=extra) THEN RETURN, 0
+  IF ~self -> cgKML_Object::INIT(_Strict_Extra=extra) THEN RETURN, 0
+  
+  ; Default values for keywords.
+  IF N_Elements(visibility) EQ 0 THEN visibility = 1
   
   ; Load the object.
-  IF N_Elements(id) NE 0 THEN self.id = id
-  IF N_Elements(targetID) NE 0 THEN self.targetID = targetID
-
+  IF Obj_Valid(abstractView) THEN self.abstractView = abstractView
+  IF N_Elements(address) NE 0 THEN self.address = address
+  IF N_Elements(author) NE 0 THEN self.author = Ptr_New(author)
+  IF N_Elements(description) NE 0 THEN self.description = description
+  IF N_Elements(extendedData) NE 0 THEN self.extendedData = Ptr_New(extendedData)
+  IF N_Elements(name) NE 0 THEN self.name = name
+  IF N_Elements(open) NE 0 THEN self.open = open
+  IF N_Elements(phonenumber) NE 0 THEN self.phonenumber = phonenumber
+  IF N_Elements(placename) NE 0 THEN self.placename = placename
+  IF N_Elements(snippet) NE 0 THEN BEGIN
+     CASE N_Elemetns(snippet) OF
+        1: self.snippet[0] = snippet
+        2: self.snippet = snippet
+        ELSE: Message, 'The SNIPPET attribute is restricted to two lines of input.'
+     ENDCASE
+  ENDIF
+  IF N_Elements(styleURL) NE 0 THEN self.styleURL = styleURL
+  IF Obj_Valid(timeprimitive) THEN self.timeprimitive = timeprimitive
+  IF N_Elements(visibility) NE 0 THEN self.visibility = visibility
+  
   RETURN, 1
 
+END
+
+
+;+
+; This method adds Feature elements to the KML file.
+; 
+; :Keywords:
+;     lun: in, required, type=integer
+;        The logical unit number of the open KML file to write to.
+;-
+PRO cgKML_Feature::Body, LUN=lun
+  Compile_Opt idl2
+  
+  Catch, theError
+  IF theError NE 0 THEN BEGIN
+     Catch, /CANCEL
+     void = Error_Message()
+     RETURN
+  ENDIF
+  
+  ; We require a logical unit number.
+  IF N_Elements(lun) EQ 0 THEN Message, 'A logical unit number (LUN) is required in this method.'
+    
+  ; Write the feature elements.
+  IF self.placeName NE "" THEN self -> XMLTag, 'name', self.placeName, LUN=lun
+  self -> XMLTag, 'visibility', Keyword_Set(self.visibility), LUN=lun, SPACE=6
+  self -> XMLTag, 'open', Keyword_Set(self.open), LUN=lun, SPACE=6
+  IF Ptr_Valid(self.author) THEN BEGIN
+    PrintF, lun, '      <atom:author>'
+    PrintF, lun, '         <atom:name>' + (*self.author).NAME + '</atom:name>
+    PrintF, lun, '      </atom:author>'
+    IF (*self.author).LINK NE "" THEN BEGIN
+       PrintF, lun, '      <atom:link href="' + (*self.author).LINK + '" />'
+    ENDIF
+  ENDIF
+  IF self.address NE "" THEN self -> XMLTag, 'address', self.address, LUN=lun, SPACE=6
+  IF self.phoneNumber NE "" THEN self -> XMLTag, 'phoneNumber', self.phoneNumber, LUN=lun, SPACE=6
+  CASE (Max(StrLen(self.snippet)) GT 1) OF
+      0:
+      ELSE: BEGIN
+         nlines = N_Elements(self.snippet)
+         PrintF, lun, '<Snippet maxLines="' + StrTrim(nlines,2) + '">'
+         FOR j=0,nlines-1 DO PrintF, lun, '   ' + self.snippet[j]
+         PrintF, lun, '</Snippet>'
+      END
+  ENDCASE
+  IF self.description NE "" THEN self -> XMLTag, 'description', self.description, LUN=lun, SPACE=6
+  IF Obj_Valid(self.AbstractView) THEN self.AbstractView -> Build, LUN=lun
+  IF Obj_Valid(self.TimePrimitive) THEN self.TimePrimitive -> Build, LUN=lun
+  IF self.styleURL NE "" THEN self -> XMLTag, 'styleURL', self.styleURL, LUN=lun, SPACE=6
+  IF Ptr_Valid(self.ExtendedData) THEN BEGIN
+    PrintF, lun, '      <ExtendedData>'
+    FOR j=0,N_Elements(*self.ExtendedData)-1 DO BEGIN
+       thisStruct = (*self.ExtendedData)[j]
+       IF thisStruct.name EQ "" THEN BEGIN
+          PrintF, lun, '         <Data>' 
+       ENDIF ELSE BEGIN
+          PrintF, lun, '         <Data name="' + thisStruct.name + '">
+       ENDELSE
+       IF thisStruct.displayName NE "" THEN BEGIN
+          self -> XMLTag, 'displayName', thisStruct.displayName, LUN=lun, SPACE=12
+       ENDIF
+       self -> XMLTag, 'value', thisStruct.value, LUN=lun, SPACE=12
+       PrintF, lun, '         </Data>'
+    ENDFOR
+    PrintF, lun, '      </ExtendedData>'
+  ENDIF
+
+  
 END
 
 
@@ -89,6 +179,10 @@ END
 ; This BUILD method is an abstract method that should be overridden by any
 ; object that you intend to add to a KML file. It is used to build the
 ; actual KML code for the element in question.
+; 
+; :Keywords:
+;     lun: in, required, type=integer
+;        The logical unit number of the open KML file to write to.
 ;-
 PRO cgKML_Feature::Build, LUN=lun
   Compile_Opt idl2
@@ -99,49 +193,97 @@ PRO cgKML_Feature::Build, LUN=lun
      void = Error_Message()
      RETURN
   ENDIF
-  
-  Message, 'The BUILD method should be overridden by the object you are adding to the KML file.'
-  
-  ;self -> Head, LUN=lun
-  ;self -> Body, LUN=lun
-  ;self -> Tail, LUN=lun
+    
+  ; Only the body can be written, since there is no head or tail in a feature object.
+  self -> cgKML_Feature::Body, LUN=lun
   
 END
 
-
-;+
-; The purpose of this function method is to return the parent object reference.
-;-
-FUNCTION cgKML_Feature::GetParent
-   RETURN, self.parent
-END
 
 
 ;+
 ; The purpose of this method is to return object properties.
 ; 
 ; :Keywords:
-;     id: out, optional, type=string
-;         The object ID.
-;     parent: out, optional, type=objref
-;         The parent object reference.
-;     targetid: out, optional, type=string
-;         The targetID of the object.
+;    abstractview: out, optional, type=object
+;        Defines a viewpoint associated with any element derived from Feature. Either a cgKML_Camera or
+;        cgKML_LookAt object.
+;    address: out, optional, type=string
+;        A string value representing an unstructured address written as a standard street, city, 
+;        state address, and/or as a postal code. You can use the <address> tag to specify the 
+;        location of a point instead of using latitude and longitude coordinates. (However, if 
+;        a <Point> is provided, it takes precedence over the <address>.)
+;    author: out, optional, type=struct
+;        An anonymous structure with two tags. Tag "NAME" is a string that gives the author's name,
+;        and tag "LINK" is a string that provides a URL to the author's web site.
+;    description: out, optional, type=string
+;        User-sullied content that appears in the description balloon. Can be complicated. See the
+;        KML Reference for "Feature", cited above.
+;    extendeddata: out, optional, type=structure
+;         A scalar or vector of anonymous structures containing a tag NAME and a tag VALUE, which
+;         are both strings. An optional third field DISPLAYNAME can also be present. See the
+;         <ExtendedData> reference (https://developers.google.com/kml/documentation/kmlreference#extendeddata)
+;         for additional information.
+;    open: out, optional, type=boolean, default=0
+;       This keyword specifies whether a Document or Folder appears closed or open when first loaded 
+;       into the Places panel. The default is to show the Document or Folder collapsed rather than
+;       expanded.
+;    phonenumber: out, optional, type=string
+;        A phone number. Used only by Google Maps Mobile.
+;    placename: out, optional, type=string
+;        This is the <name> element in a Feature object. It is user-defined text that is used as
+;        the label for an object in Google Earth.
+;    snippet: in, optional, type=string
+;        A short description of the feature. This description is displayed in the Places panel 
+;        under the name of the feature. If not supplied, the first two lines of the `Description` 
+;        are used.
+;    styleurl: out, optional, type=string
+;        The URL of a <Style> or <StyleMap> defined in a Document. If the style is in the same 
+;        file, use a # reference. If the style is defined in an external file, use a full URL 
+;        along with # referencing.
+;    timeprimitive: out, optional, type=object
+;        Associates this feature with a period of time (cgKML_Timespan object) or a point in time
+;        (cgKML_Timestamp object).
+;    visibility: out, optional, type=boolean, default=1
+;       This keyword specifies whether the feature is drawn in the 3D viewer when it is initially loaded. In 
+;       order for a feature to be visible, the <visibility> tag of all its ancestors must also be 
+;       set to 1. In the Google Earth List View, each Feature has a checkbox that allows the user 
+;       to control visibility of the Feature.
 ;     _ref_extra: out, optional
-;         Any keywords for the superclass objects are allowed.
+;         Any keywords appropriate for superclass objects may be passed into the program.
 ;-
 PRO cgKML_Feature::GetProperty, $
-   ID=id, $
-   PARENT=parent, $
-   TARGETID=targetID, $
+   ABSTRACTVIEW=abstractView, $
+   ADDRESS=address, $
+   AUTHOR=author, $
+   DESCRIPTION=description, $
+   EXTENDEDDATA=extendedData, $
+   OPEN=open, $
+   PLACENAME=placename, $
+   PHONENUMBER=phonenumber, $
+   SNIPPET=snippet, $
+   STYLEURL=styleURL, $
+   TIMEPRIMITIVE=timeprimitive, $
+   VISIBILITY=visibility, $
    _REF_EXTRA=extra
    
-  IF Arg_Present(id) THEN id = self.id
-  IF Arg_Present(parent) THEN parent = self.parent
-  IF Arg_Present(targetID) THEN targetID = self.targetID   
+   IF Arg_Present(abstractView) THEN abstractView = self.abstractView
+   IF Arg_Present(address) THEN address = self.address
+   IF Arg_Present(author) THEN IF Ptr_Valid(author) $
+      THEN author = *self.author ELSE author = self.author
+   IF Arg_Present(description) THEN description = self.description
+   IF Arg_Present(extendedData) THEN IF Ptr_Valid(extendedData) $
+      THEN extendedData = *self.extendedData ELSE extendedData = self.extendedData
+   IF Arg_Present(open) THEN open = self.open
+   IF Arg_Present(phonenumber) THEN phonenumber = self.phonenumber
+   IF Arg_Present(placename) THEN placename = self.placename
+   IF Arg_Present(snippet) THEN snippet = self.snippet
+   IF Arg_Present(styleURL) THEN styleURL = self.styleURL
+   IF Arg_Present(timeprimitive) THEN timeprimitive = self.timeprimitive
+   IF Arg_Present(visibility) THEN visibility = self.visibility
    
    ; Superclass keywords.
-   IF N_Elements(extra) NE 0 THEN self -> cgObject::GetProperty, _Strict_Extra=extra
+   IF N_Elements(extra) NE 0 THEN self -> cgKML_Object::GetProperty, _Extra=extra
    
 END
 
@@ -150,27 +292,90 @@ END
 ; The purpose of this method is to set object properties.
 ; 
 ; :Keywords:
-;     id: in, optional, type=string
-;         The object ID.
-;     parent: in, optional, type=objref
-;         The parent object reference.
-;     targetid: in, optional, type=string
-;         The targetID of the object.
-;     _ref_extra: out, optional
-;         Any keywords for the superclass objects are allowed.
+;    abstractview: in, optional, type=object
+;        Defines a viewpoint associated with any element derived from Feature. Either a cgKML_Camera or
+;        cgKML_LookAt object.
+;    address: in, optional, type=string
+;        A string value representing an unstructured address written as a standard street, city, 
+;        state address, and/or as a postal code. You can use the <address> tag to specify the 
+;        location of a point instead of using latitude and longitude coordinates. (However, if 
+;        a <Point> is provided, it takes precedence over the <address>.)
+;    author: in, optional, type=struct
+;        An anonymous structure with two tags. Tag "NAME" is a string that gives the author's name,
+;        and tag "LINK" is a string that provides a URL to the author's web site.
+;    description: in, optional, type=string
+;        User-sullied content that appears in the description balloon. Can be complicated. See the
+;        KML Reference for "Feature", cited above.
+;    extendeddata: in, optional, type=structure
+;         A scalar or vector of anonymous structures containing a tag NAME and a tag VALUE, which
+;         are both strings. An optional third field DISPLAYNAME can also be present. See the
+;         <ExtendedData> reference (https://developers.google.com/kml/documentation/kmlreference#extendeddata)
+;         for additional information.
+;    open: in, optional, type=boolean, default=0
+;       This keyword specifies whether a Document or Folder appears closed or open when first loaded 
+;       into the Places panel. The default is to show the Document or Folder collapsed rather than
+;       expanded.
+;    phonenumber: in, optional, type=string
+;        A phone number. Used only by Google Maps Mobile.
+;    placename: in, optional, type=string
+;        This is the <name> element in a Feature object. It is user-defined text that is used as
+;        the label for an object in Google Earth.
+;    snippet: in, optional, type=string
+;        A short description of the feature. This description is displayed in the Places panel 
+;        under the name of the feature. If not supplied, the first two lines of the `Description` 
+;        are used.
+;    styleurl: in, optional, type=string
+;        The URL of a <Style> or <StyleMap> defined in a Document. If the style is in the same 
+;        file, use a # reference. If the style is defined in an external file, use a full URL 
+;        along with # referencing.
+;    timeprimitive: in, optional, type=object
+;        Associates this feature with a period of time (cgKML_Timespan object) or a point in time
+;        (cgKML_Timestamp object).
+;    visibility: in, optional, type=boolean, default=1
+;       This keyword specifies whether the feature is drawn in the 3D viewer when it is initially loaded. In 
+;       order for a feature to be visible, the <visibility> tag of all its ancestors must also be 
+;       set to 1. In the Google Earth List View, each Feature has a checkbox that allows the user 
+;       to control visibility of the Feature.
+;     _ref_extra: in, optional
+;         Any keywords appropriate for superclass objects may be passed into the program.
 ;-
 PRO cgKML_Feature::SetProperty, $
-   ID=id, $
-   PARENT=parent, $
-   TARGETID=targetID, $
+   ABSTRACTVIEW=abstractView, $
+   ADDRESS=address, $
+   AUTHOR=author, $
+   DESCRIPTION=description, $
+   EXTENDEDDATA=extendedData, $
+   OPEN=open, $
+   PHONENUMBER=phonenumber, $
+   PLACENAME=placename, $
+   SNIPPET=snippet, $
+   STYLEURL=styleURL, $
+   TIMEPRIMITIVE=timeprimitive, $
+   VISIBILITY=visibility, $
    _REF_EXTRA=extra
    
-  IF N_Elements(id) NE 0 THEN self.id = id 
-  IF N_Elements(parent) NE 0 THEN self.parent = parent 
-  IF N_Elements(targetID) NE 0 THEN self.targetID = targetID 
+  IF N_Elements(abstractView) NE 0 THEN BEGIN
+    Obj_Destroy, self.abstractView
+    self.abstractView = abstractView 
+  ENDIF
+  IF N_Elements(timeprimitive) NE 0 THEN BEGIN
+    Obj_Destroy, self.timeprimitive
+    self.timeprimitive = timeprimitive 
+  ENDIF
+  IF N_Elements(author) NE 0 THEN IF Ptr_Valid(self.author) $
+     THEN *self.author = author ELSE self.author = Ptr_New(author)
+  IF N_Elements(extendedData) NE 0 THEN IF Ptr_Valid(self.extendedData) $
+     THEN *self.extendedData = extendedData ELSE self.extendedData = Ptr_New(extendedData)
+  IF N_Elements(description) NE 0 THEN self.description = description 
+  IF N_Elements(open) NE 0 THEN self.open = open 
+  IF N_Elements(phonenumber) NE 0 THEN self.phonenumber = phonenumber 
+  IF N_Elements(placename) NE 0 THEN self.placename = placename 
+  IF N_Elements(snippet) NE 0 THEN self.snippet = snippet 
+  IF N_Elements(styleURL) NE 0 THEN self.styleURL = styleURL 
+  IF N_Elements(visibility) NE 0 THEN self.visibility = visibility 
    
    ; Superclass keywords.
-   IF N_Elements(extra) NE 0 THEN self -> cgObject::GetProperty, _Strict_Extra=extra
+   IF N_Elements(extra) NE 0 THEN self -> cgKML_Object::GetProperty, _Strict_Extra=extra
    
 END
 
@@ -181,12 +386,13 @@ END
 ;-
 PRO cgKML_Feature::CLEANUP
 
-    ; Destroy all the objects in this container.
-    childObjs = self -> Get(/ALL, COUNT=count)
-    FOR j=0,count-1 DO Obj_Destroy, childObjs
+    Ptr_Free, self.author
+    Ptr_Free, self.extendedData
+    Obj_Destroy, self.abstractView
+    Obj_Destroy, self.timePrimitive
     
     ; Call the superclass object's CLEANUP method
-    self -> cgObject::Cleanup
+    self -> cgKML_Object::Cleanup
     
 END
 
@@ -204,19 +410,19 @@ END
 PRO cgKML_Feature__Define, class
 
    class = { cgKML_FEATURE, $
-             INHERITS cgKML_Object, $  ; A modified IDL_CONTAINER.
-             name: "", $                 
+             INHERITS cgKML_Object, $  ; An extended cgKML_Object class.
+             author: Ptr_New(), $                 
              visibility: 0B, $      
              open: 0B, $
-             author: "", $
              address: "", $
              phoneNumber: "", $
+             placeName: "", $
              snippet:StrArr(2), $
              description: "", $
              abstractView: Obj_New(), $
              timePrimitive: Obj_New(), $
              styleURL: "", $
-             extendedData: "" $
+             extendedData: Ptr_New() $
            }
  
 END

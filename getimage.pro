@@ -472,7 +472,7 @@ FUNCTION GETIMAGE, filename, Directory=directory, DataType=datatype, Dimensions=
    Widget_Control, filenameID, Scr_XSize=target
 
    ; Center the program on the display.
-   CenterTLB, tlb
+   cgCenterTLB, tlb
 
    ; Realize the program.
    Widget_Control, tlb, /Realize

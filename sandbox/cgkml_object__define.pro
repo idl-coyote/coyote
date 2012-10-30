@@ -43,8 +43,13 @@ END
 ; This BUILD method is an abstract method that should be overridden by any
 ; object that you intend to add to a KML file. It is used to build the
 ; actual KML code for the element in question.
+; 
+; :Keywords:
+;     lun: in, required, type=integer
+;        The logical unit number of the open KML file to write to.
 ;-
 PRO cgKML_Object::Build, LUN=lun
+
   Compile_Opt idl2
   
   Catch, theError
@@ -59,6 +64,50 @@ PRO cgKML_Object::Build, LUN=lun
   ;self -> Head, LUN=lun
   ;self -> Body, LUN=lun
   ;self -> Tail, LUN=lun
+  
+END
+
+
+;+
+; This method writes an XML tag into the file. All parameters and
+; keywords are required. Sequence is: <tag>value</tag>.
+; 
+; :Params:
+;    tag: in, required, type='string'
+;        The name of the XML tag to write to the file.
+;    value: in, required
+;        The value of the tag. May be any type of data that can be converted
+;        to a string.
+; 
+; :Keywords:
+;     lun: in, required, type=integer
+;        The logical unit number of the open KML file to write to.
+;     space
+;-
+PRO cgKML_Object::XMLTag, tag, value, LUN=lun, SPACE=space
+
+  Compile_Opt idl2
+  
+  Catch, theError
+  IF theError NE 0 THEN BEGIN
+     Catch, /CANCEL
+     void = Error_Message()
+     RETURN
+  ENDIF
+  
+  ; All positional parameters are required.
+  IF (N_Params() NE 2) THEN Message, 'Calling sequence: obj->XMLTag, tag, value, LUN=lun'
+  
+  ; LUN is required
+  IF N_Elements(lun) EQ 0 THEN Message, 'Calling sequence: obj->XMLTag, tag, value, LUN=lun'
+  
+  ; Handle indenting.
+  IF N_Elements(space) EQ 0 THEN BEGIN
+     space = "" 
+  ENDIF ELSE BEGIN
+     space = String(BytArr(space) + 32B)
+  ENDELSE
+  PrintF, lun, space + '<' + tag + '>' + StrTrim(value, 2) + '</' + tag + '>'
   
 END
 

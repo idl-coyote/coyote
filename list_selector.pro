@@ -250,7 +250,7 @@ FUNCTION List_Selector, theNames, $
    ENDIF
    
    ; Display pop-up widgets in the center of the display.
-   CenterTLB, tlb
+   cgCenterTLB, tlb
    
    ; Need sizes for sizing the TLB, if required.
    IF N_Elements(labelID) NE 0 THEN BEGIN

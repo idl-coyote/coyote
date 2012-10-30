@@ -103,26 +103,6 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-PRO TextBox_CenterTLB, tlb
-
-   ; This utility routine centers the TLB.
-
-Device, Get_Screen_Size=screenSize
-IF screenSize[0] GT 2000 THEN screenSize[0] = screenSize[0]/2 ; Dual monitors.
-xCenter = screenSize(0) / 2
-yCenter = screenSize(1) / 2
-
-geom = Widget_Info(tlb, /Geometry)
-xHalfSize = geom.Scr_XSize / 2
-yHalfSize = geom.Scr_YSize / 2
-
-Widget_Control, tlb, XOffset = xCenter-xHalfSize, $
-   YOffset = yCenter-yHalfSize
-
-END ;-----------------------------------------------------
-
-
-
 PRO TextBox_Event, event
 
    ; This event handler responds to all events. Widget
@@ -194,7 +174,7 @@ acceptID = Widget_Button(buttonBase, Value='Accept')
 
    ; Center the widgets on display.
 
-TextBox_CenterTLB, tlb
+cgCenterTLB, tlb
 Widget_Control, tlb, /Realize
 
    ; Create a pointer for the text the user will type into the program.

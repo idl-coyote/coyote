@@ -729,7 +729,7 @@ ENDELSE
 
 list = WIDGET_LIST(tlb, VALUE=value, SCR_XSIZE=400, YSIZE=listsize, UValue=indexValue)
 button = WIDGET_BUTTON(tlb, VALUE='Cancel', EVENT_PRO='cgDemoData_CANCEL')
-CenterTLB, tlb
+cgCenterTLB, tlb
 WIDGET_CONTROL, tlb, /REALIZE
 
    ; Create a pointer to store the data.

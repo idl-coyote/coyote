@@ -82,7 +82,6 @@
 ;
 ;              http://www.idlcoyote.com/netcdf_data__define.pro
 ;              http://www.idlcoyote.com/error_message.pro
-;              http://www.idlcoyote.com/centertlb.pro
 ;              http://www.idlcoyote.com/undefine.pro
 ;              http://www.idlcoyote.com/textbox.pro
 ;              http://www.idlcoyote.com/cgRootName.pro

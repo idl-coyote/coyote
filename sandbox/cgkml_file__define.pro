@@ -36,17 +36,21 @@
 ;
 ;+
 ;   This program creates a KML file that can be displayed with Google Earth.
-;   It implements some (not all) of the objects allowed in KML files. For reference,
-;   see https://developers.google.com/kml/documentation/kmlreference.
+;   It implements some (not all) of the objects or elements allowed in KML files. For 
+;   reference, see  the `Google KML Reference Documentation 
+;   <https://developers.google.com/kml/documentation/kmlreference>`.
 ;
 ; :Categories:
 ;    Graphics, FileIO
 ;    
 ; :Examples:
 ;    To create an image overlay object::
+;    
 ;      kml = Obj_New('cgKML_File', 'test.kml')
-;      overlay = Obj_New('cgKML_Overlay', IMAGE='myimage.tif')
-;      kml -> Add, overplay
+;      overlay = Obj_New('cgKML_GroundOverlay', $
+;          HREF='myimage.tif', $
+;          LATLONBOX=[])
+;      kml -> Add, overlay
 ;      kml -> Save
 ;      kml -> Destroy
 ;       
@@ -174,7 +178,7 @@ PRO cgKML_File::Body, LUN=lun
   FOR j=0,numObjects-1 DO BEGIN
       thisObject = self -> Get(Position=j)
       IF Obj_Valid(thisObject) THEN BEGIN
-         thisObject -> Build, LEVEL=1, LUN=lun
+         thisObject -> Build, LUN=lun
       ENDIF ELSE Message, 'Object ' + StrTrim(j,2) + ' is invalid.', /Informational
   ENDFOR
 
@@ -239,9 +243,9 @@ PRO cgKML_File::Head, LUN=lun
   IF N_Elements(lun) EQ 0 THEN Message, 'A logical unit number must be supplied with LUN keyword.'
   PrintF, lun, '<?xml version="1.0" encoding="UTF-8"?>'
   PrintF, lun, '<kml xmlns="http://www.opengis.net/kml/2.2"'
+  IF self.hint NE "" THEN  PrintF, lun, ' hint="target=' + self.hint  
   PrintF, lun, ' xmlns:gx="http://www.google.com/kml/ext/2.2"'
-  PrintF, lun, ' xmlns:atom="http://www.w3.org/2005/Atom"'
-  IF self.hint NE "" THEN  PrintF, lun, ' hint="target=' + self.hint + '>"' ELSE PrintF, lun, '>'
+  PrintF, lun, ' xmlns:atom="http://www.w3.org/2005/Atom">'
   
 END
 

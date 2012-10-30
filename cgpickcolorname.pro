@@ -591,7 +591,7 @@ FUNCTION cgPickColorName, theName, $         ; The name of the starting color.
   acceptID = Widget_Button(buttonbase, VALUE='Accept')
   
   ; Center the TLB.
-  CenterTLB, tlb
+  cgCenterTLB, tlb
   Widget_Control, tlb, /Realize
   
   ; Load the drawing colors.

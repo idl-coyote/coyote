@@ -106,6 +106,10 @@
 ;        is set to 0 for the "missing" color, which makes this value completely transparent.
 ;        Used only if the `Transparent` keyword is used.
 ;        
+;    order: in, optional, type=integer, default=0
+;        The drawing order of image overlay. The first order is 0. Images with a higher
+;        order are drawn on top of images with a lower order.
+;        
 ;    palette: in, optional, type=byte
 ;        Set this keyword to a 3x256 or 256x3 byte array containing the RGB color 
 ;        vectors to be loaded before the transparent image is created. Such vectors can be 
@@ -157,6 +161,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 30 October 2012 by David W. Fanning.
+;        Added ORDER keyword and fixed a typo concerning MISSING_VALUE. 31 Oct 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -171,6 +176,7 @@ PRO cgImage2KML, image, mapCoord, $
    MAX_VALUE=max_value, $
    MIN_VALUE=min_value, $
    MISSING_VALUE=missing_value, $
+   ORDER=order, $
    PALETTE=palette, $
    REVERSE=reverse, $
    TRANSPARENT=transparent
@@ -207,6 +213,7 @@ PRO cgImage2KML, image, mapCoord, $
           MAP_PROJECTION=map_projection
    ENDELSE
    IF N_Elements(latlonBox) EQ 0 THEN Message, 'Map boundaries for the image cannot be obtained.'
+   IF N_Elements(order) EQ 0 THEN order = 0
    
    ; Need a filename?
    IF N_Elements(filename) EQ 0 THEN BEGIN
@@ -285,7 +292,8 @@ PRO cgImage2KML, image, mapCoord, $
    overlay = Obj_New('cgKML_GroundOverlay', $
      HREF=imageFilename, $
      DESCRIPTION=description, $
-     LATLONBOX=latlonBox)
+     LATLONBOX=latlonBox, $
+     ORDER=order)
    kmlFile -> Add, overlay
    kmlFile -> Save
    kmlFile -> Destroy

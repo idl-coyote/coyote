@@ -74,6 +74,10 @@
 ;    description: in, optional, type=string
 ;       A string that is used to describe the image in the Google Earth interface.
 ;        
+;    draworder: in, optional, type=integer, default=0
+;        The drawing order of image overlay. The first order is 0. Images with a higher
+;        order are drawn on top of images with a lower order.
+;
 ;    geotiff: in, optional, type=string
 ;       The name of a GeoTiff file from which the `image`, `mapcoord`, `palette` (possibly), 
 ;       and `latlonbox` values can be obtained. 
@@ -105,10 +109,6 @@
 ;        the "missing" color or value in the output image. The alpha channel in the output image
 ;        is set to 0 for the "missing" color, which makes this value completely transparent.
 ;        Used only if the `Transparent` keyword is used.
-;        
-;    order: in, optional, type=integer, default=0
-;        The drawing order of image overlay. The first order is 0. Images with a higher
-;        order are drawn on top of images with a lower order.
 ;        
 ;    palette: in, optional, type=byte
 ;        Set this keyword to a 3x256 or 256x3 byte array containing the RGB color 
@@ -161,7 +161,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 30 October 2012 by David W. Fanning.
-;        Added ORDER keyword and fixed a typo concerning MISSING_VALUE. 31 Oct 2012. DWF.
+;        Added DRAWORDER keyword and fixed a typo concerning MISSING_VALUE. 31 Oct 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -170,13 +170,13 @@ PRO cgImage2KML, image, mapCoord, $
    CTINDEX=ctindex, $
    BREWER=brewer, $
    DESCRIPTION=description, $
+   DRAWORDER=draworder, $
    GEOTIFF=geotiff, $
    FILENAME=filename, $
    LATLONBOX=latlonbox, $
    MAX_VALUE=max_value, $
    MIN_VALUE=min_value, $
    MISSING_VALUE=missing_value, $
-   ORDER=order, $
    PALETTE=palette, $
    REVERSE=reverse, $
    TRANSPARENT=transparent
@@ -293,7 +293,7 @@ PRO cgImage2KML, image, mapCoord, $
      HREF=imageFilename, $
      DESCRIPTION=description, $
      LATLONBOX=latlonBox, $
-     ORDER=order)
+     DRAWORDER=draworder)
    kmlFile -> Add, overlay
    kmlFile -> Save
    kmlFile -> Destroy

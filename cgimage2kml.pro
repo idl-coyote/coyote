@@ -42,7 +42,7 @@
 ; image drapped over the Google Earth terrain. A corresponding image file is also
 ; produced. The KML and image file must be in the same directory to use them with
 ; Google Earth.
-;
+; 
 ; :Categories:
 ;    Graphics, FileIO, Maps
 ;    
@@ -125,7 +125,8 @@
 ;        between 0 and 100.
 ;        
 ; :Examples:
-;    Here is how you can put an AVHRR NDVI image of Africa on a Google Earth display::
+;    Here is how you can put an AVHRR NDVI image of Africa on a Google Earth display:: 
+;    
 ;       ;; Download the image file from the Coyote web page.
 ;       netObject = Obj_New('IDLnetURL')
 ;       url = 'http://www.idlcoyote.com/data/AF03sep15b.n16-VIg.tif'
@@ -138,6 +139,11 @@
 ;          Description='AVHRR NDVI Data from Africa'
 ;          
 ;       ;; Start Google Earth and open the KML file you just created.
+;       
+;    The output should look like the figure below.
+;    
+; .. image:: google_earth_overlay.png
+;  
 ;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -244,7 +250,7 @@ PRO cgImage2KML, image, mapCoord, $
    IF N_Elements(missing_value) NE 0 THEN BEGIN
       imgType = Size(warped, /TNAME)
       IF (imgType NE 'FLOAT') && (imgType NE 'DOUBLE') THEN warped = Float(warped)
-      missing = Where(warped EQ missing, count)
+      missing = Where(warped EQ missing_value, count)
       IF count GT 0 THEN warped[missing] = !Values.F_NAN
       IF (Min(warped) LT 0) || (Max(warped) GT 255) THEN BEGIN
          warped = BytScl(warped, MIN=min_value, MAX=max_value, /NAN, TOP=254) + 1B

@@ -231,7 +231,7 @@ PRO cgImage2KML, image, mapCoord, $
    ; to create one.
    IF N_Elements(mapCoord) EQ 0 THEN BEGIN
        mapCoord = Obj_New('cgMap', 'Equirectangular', Ellipsoid='WGS 84', $
-          XRange=[latlonbox[3], latlonbox[4]], YRange=[latlonBox[1], latlonbox[0]], /LATLON_RANGES)
+          XRange=[latlonbox[2], latlonbox[3]], YRange=[latlonBox[1], latlonbox[0]], /LATLON_RANGES)
        mapCoord -> GetProperty, $
           BOUNDARY=boundary, $
           ELLIPSOID=ellipsoid, $

@@ -45,17 +45,24 @@
 ;    
 ; :Params:
 ;    imageIn: in, required, type=varies
-;        Either a 2D or true-color image (in which case a map coordinate object must be provided with the
+;        Either a 2D or true-color image (in which, in both cases, a map coordinate object must be provided with the
 ;        MAP keyword) or the name of the GeoTiff file from which an image and a map coordinate object
 ;        can be obtained.
 ;    boundary: in, required, type=fltarr
 ;        A four-element array containing the map boundary to which the image should be clipped.
 ;       
 ; :Keywords:
-;     map: in, optional, type=object
+;     latlonbox: out, optional, type=fltarr
+;         A four-element array representing the boundary of the output image in
+;         the Google Map preferred form of [north, south, east, west] in decimal
+;         degrees.
+;     map: in, required, type=object
 ;         A map coordinate object (cgMap) that maps or georeferences the input image.
 ;     outboundary: out, optional, type=fltarr
 ;         A four-element array containing the final map boundary of the clipped image.
+;         The boundary will be in XY coordinates (projected meters).
+;     outmap: out, optional, type=object
+;         An output map coordinate object (cgMap) that describes the output image.
 ;         
 ; :Author:
 ;     FANNING SOFTWARE CONSULTING::
@@ -71,11 +78,16 @@
 ;        Written, 16 August 2012. DWF. 
 ;        If the absolute value of the maximum of the boundary is LE 360, assume you need to convert
 ;           from lat/lon space to projected meter space. 23 Aug 2012. DWF.
+;        Added MAPOUT and LATLONBOX keywords. 1 Nov 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
-FUNCTION cgCliptoMap, imageIn, boundary, MAP=map, OUTBOUNDARY=outboundary
+FUNCTION cgCliptoMap, imageIn, boundary, $
+    LATLONBOX=latlonbox, $
+    MAP=map, $
+    OUTBOUNDARY=outboundary, $
+    OUTMAP=outmap
 
    Compile_Opt idl2
    
@@ -131,6 +143,13 @@ FUNCTION cgCliptoMap, imageIn, boundary, MAP=map, OUTBOUNDARY=outboundary
       subimage[*,*,1] = image[xsubs[0]:xsubs[1], ysubs[0]:ysubs[1], 1]
       subimage[*,*,2] = image[xsubs[0]:xsubs[1], ysubs[0]:ysubs[1], 2]   
    ENDIF ELSE subimage = image[xsubs[0]:xsubs[1], ysubs[0]:ysubs[1]]
+   
+   ; Create an output map coordinate object.
+   map -> GetProperty, MAP_PROJECTION=projection, ELLIPSOID=ellipsoid, ZONE=zone
+   mapout = Obj_New('cgmap', projection, Ellipsoid=ellipsoid, ZONE=zone, $
+      XRange=[xvec[xsubs[0]],xvec[xsubs[1]]], $
+      YRange=[yvec[ysubs[0]],yvec[ysubs[1]]])
+   mapOut -> GetProperty, LATLONBOX=latlonBox
    
    RETURN, subimage
    

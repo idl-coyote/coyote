@@ -188,6 +188,7 @@ PRO cgImage2KML, image, mapCoord, $
    IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
        void = Error_Message()
+       RETURN
    ENDIF
    
    ; Has the GEOTIFF keyword been used to obtain program variables?

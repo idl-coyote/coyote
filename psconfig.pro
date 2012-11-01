@@ -40,6 +40,8 @@
 ; wrapper to the FSC_PSConfig object, which provides a powerful graphical user interface
 ; for configuring the IDL PostScript device.
 ;
+; .. image:: psconfig.png
+; 
 ; :Categories:
 ;    Utilities, Graphics
 ;    

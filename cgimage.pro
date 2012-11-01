@@ -8,7 +8,7 @@
 ; other graphics commands in IDL, it honors the !P.MULTI value, like other
 ; graphics commands in IDL, it works seamlessly with both 8-bit and 24-bit
 ; images. In addition to other modern features, this program can also 
-; display images that contain an alpha channel and can display image with
+; display images that contain an alpha channel and can display images with
 ; transparency.
 ;
 ;******************************************************************************************;
@@ -124,7 +124,9 @@
 ;        cgImage, cgDemoData(7), CTIndex=0
 ;        cgImage, cgDemoData(5), CTIndex=33, Transparent=50, $
 ;             AlphaFGPosition=[0.25, 0.25, 0.75, 0.75], Missing_Value=0
-;       
+;   
+; .. image:: cgimage.png
+; 
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
 ;        David W. Fanning 

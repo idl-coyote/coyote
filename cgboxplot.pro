@@ -91,6 +91,8 @@
 ;         labels = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF']
 ;         for j=0,5 do cgText, (index+2)[j], -1, labels[j], Alignment=0.5
 ;           
+; .. image:: cgboxplot.png 
+;
 ;    An article about his program can be found here::
 ;       
 ;         http://www.idlcoyote.com/graphics_tips/box_whisker.html

@@ -37,6 +37,8 @@
 ;+
 ; This program is used to draw a progress bar on the display.
 ; 
+; .. image:: cgprogressbar.png
+; 
 ; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
 ; to be installed on your machine.
 ;

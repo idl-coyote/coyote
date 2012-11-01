@@ -201,7 +201,9 @@
 ;       items = ['Class 1', 'Class 2', 'Class 3', 'Class 4']
 ;       Al_Legend, items, /FILL, PSYM=Replicate(15,4), COLORS=colors, SYMSIZE=Replicate(1.75,4), $
 ;           POSITION=[0.45, 0.92], /NORMAL, CHARSIZE=cgDefCharSize()
-
+;
+; .. image:: cgbarplot.png
+; 
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
 ;           David W. Fanning 

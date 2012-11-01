@@ -51,6 +51,8 @@
 ;   If the ATTRVALUES keyword is undefined, all entities are drawn, but only a single value
 ;   for COLORS, FCOLORS, FILL, LINESTYLE, and THICK is allowed.
 ;
+; .. image:: cgdrawshapes.png
+; 
 ; :Categories:
 ;    Graphics, Map Projections
 ;       

@@ -45,6 +45,8 @@
 ; deficiencies and allows the user to produce traditional contour plots in a device
 ; and machine independent manner.
 ; 
+; .. image:: cgcontour.png
+; 
 ; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
 ; to be installed on your machine.
 ;

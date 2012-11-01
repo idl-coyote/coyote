@@ -146,7 +146,7 @@
 ;       
 ;    The output should look like the figure below.
 ;    
-; .. image:: google_earth_overlay.png
+; .. image:: cgimage2kml.png
 ;  
 ;       
 ; :Author:

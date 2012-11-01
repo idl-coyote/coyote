@@ -39,6 +39,8 @@
 ; Provides an interactive method of selecting a draw color name. The program is useful
 ; for learning the color names available in the Coyote Graphics System.
 ; 
+;  .. image:: cgpickcolorname.png
+;  
 ; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
 ; to be installed on your machine.
 ;

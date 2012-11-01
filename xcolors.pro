@@ -54,6 +54,8 @@
 ; methods are called if the `NotifyObj` keyword is used. This program 
 ; is a non-blocking widget unless the `Block` keyword is set.
 ; 
+; .. image:: xcolors.png
+; 
 ; :Categories:
 ;    Graphics
 ;

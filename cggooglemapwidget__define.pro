@@ -53,6 +53,8 @@
 ; to establish a map reference coordinate system on top of the returned map image, allowing
 ; other map information to be drawn on top of the returned map image.
 ;
+; .. image:: cggooglemapwidget.png
+; 
 ; :Categories:
 ;    Graphics
 ;    

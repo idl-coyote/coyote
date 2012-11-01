@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   cgCLEANUP8
+;   FSCCLEANUP8
 ;
 ; PURPOSE:
 ; 
@@ -54,7 +54,7 @@
 ;
 ; :Examples:
 ;    For example, to destroy all windows on the display::
-;       IDL> cgCleanup8
+;       IDL> FSCCleanup8
 ;
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -71,7 +71,7 @@
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
-PRO cgCleanUp8, ALL=all, CG=cg, DG=dg, FG=fg
+PRO FSCCleanUp8, ALL=all, CG=cg, DG=dg, FG=fg
   
   Compile_Opt idl2
   

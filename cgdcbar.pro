@@ -41,6 +41,8 @@
 ; a graphics plot. A "discrete" color bar is one with a handful
 ; of colors. Labels are centered beneath or beside the color fields.
 ; 
+; .. image:: cgdcbar.png
+; 
 ; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
 ; to be installed on your machine.
 ;

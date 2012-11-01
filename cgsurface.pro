@@ -40,6 +40,61 @@
 ;******************************************************************************************;
 ;
 ;+
+;   The purpose of cgSurface is to create a window where a surface is displayed. Surfaces
+;   can be wire-framed, shaded surfaces, and surfaces with texture maps draped on top of
+;   them, among other types of surfaces. LEFT mouse button rotates the surface, MIDDLE
+;   mouse button zooms out from the surface, RIGHT mouse button zoom into the surface. 
+;   Clicking on the surface axes will allow the user to move or translate the surface, and 
+;   clicking on the plot title will allow the user to move the title.
+;
+; .. image:: cgsurface.png
+; 
+; :Categories:
+;    Graphics
+;    
+; :Examples:
+;    Use as you would use the IDL SURFACE of SHADE_SURF command::
+;       data = Dist(200)
+;       LoadCT, 33
+;       cgSurface, data
+;       cgSurface, data, /Elevation_Shading
+;       cgSurface, data, /Shaded
+;       cgSurface, data, /Shaded, Texture_Image=cgDemoData(16) 
+;       
+;       Setting up the initial surface rotation.
+;       IDL> T3D, /RESET, ROTATE=[0, 0, 30]
+;       IDL> T3D, ROTATE=[-90, 0, 0]
+;       IDL> T3D, ROTATE=[0, 30, 0]
+;       IDL> T3D, ROTATE=[30, 0, 0]
+;       IDL> cgSurface, cgDemoData(2), Transform=!P.T
+;       
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning 
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Completely re-written, 26 November 2010 from old cgSURFACE program. DWF.
+;        Added ability to translate the surface by clicking on an axis. 28 Nov 2010. DWF.
+;        Fixed a problem with light controls in which the light controls didn't show the
+;            current light color. 28 Nov 2010. DWF.
+;        I was ANDing [XYZ]Style keywords with 8 instead of 4 for hidded axes. Fixed. 4 Jan 2011. DWF.
+;        Added Axes ON/OFF button. 4 Jan 2011. DWF.
+;        Rotation is throwing underflow warnings, so switched to code that surpress 
+;            these warnings. 26 Aug 2011. DWF
+;        Added TRANSFORM keyword to allow the initial surface to be rotated to user 
+;            specifications. 26 Sept 2011. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2010-2011, Fanning Software Consulting, Inc.
+;-
+
+;+
 ; Controls light intensity by handling selection events from the Intensity Value widget.
 ; 
 ; :Params:
@@ -1222,9 +1277,6 @@ END ;---------------------------------------------------------------------------
 ;   Clicking on the surface axes will allow the user to move or translate the surface, and 
 ;   clicking on the plot title will allow the user to move the title.
 ;
-; :Categories:
-;    Graphics
-;    
 ; :Params:
 ;    data: in, required, type=any
 ;         A two-dimensional array of data to be displayed.
@@ -1333,47 +1385,6 @@ END ;---------------------------------------------------------------------------
 ;         The text for the Z axis of the surface plot.
 ;     _extra: in, optional, type=any
 ;        Any keyword appropriate for the IDLgrSurface object is allowed in the program.
-;
-; :Examples:
-;    Use as you would use the IDL SURFACE of SHADE_SURF command::
-;       data = Dist(200)
-;       LoadCT, 33
-;       cgSurface, data
-;       cgSurface, data, /Elevation_Shading
-;       cgSurface, data, /Shaded
-;       cgSurface, data, /Shaded, Texture_Image=cgDemoData(16) 
-;       
-;       Setting up the initial surface rotation.
-;       IDL> T3D, /RESET, ROTATE=[0, 0, 30]
-;       IDL> T3D, ROTATE=[-90, 0, 0]
-;       IDL> T3D, ROTATE=[0, 30, 0]
-;       IDL> T3D, ROTATE=[30, 0, 0]
-;       IDL> cgSurface, cgDemoData(2), Transform=!P.T
-;       
-; :Author:
-;       FANNING SOFTWARE CONSULTING::
-;           David W. Fanning 
-;           1645 Sheely Drive
-;           Fort Collins, CO 80526 USA
-;           Phone: 970-221-0438
-;           E-mail: david@idlcoyote.com
-;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-;
-; :History:
-;     Change History::
-;        Completely re-written, 26 November 2010 from old cgSURFACE program. DWF.
-;        Added ability to translate the surface by clicking on an axis. 28 Nov 2010. DWF.
-;        Fixed a problem with light controls in which the light controls didn't show the
-;            current light color. 28 Nov 2010. DWF.
-;        I was ANDing [XYZ]Style keywords with 8 instead of 4 for hidded axes. Fixed. 4 Jan 2011. DWF.
-;        Added Axes ON/OFF button. 4 Jan 2011. DWF.
-;        Rotation is throwing underflow warnings, so switched to code that surpress 
-;            these warnings. 26 Aug 2011. DWF
-;        Added TRANSFORM keyword to allow the initial surface to be rotated to user 
-;            specifications. 26 Sept 2011. DWF.
-;
-; :Copyright:
-;     Copyright (c) 2010-2011, Fanning Software Consulting, Inc.
 ;-
 PRO cgSurface, data, x, y, $
     Axiscolor=axiscolorName, $

@@ -50,6 +50,8 @@
 ;       GAUSSIAN       A gaussian normal distribution function is applied to the stretch.
 ;       STDDEV         The image is stretched by multiples of its standard deviation from its mean value.
 ;
+; .. image:: cgstretch.png
+; 
 ; :Categories:
 ;    Image Processing, Widgets
 ;    

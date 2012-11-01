@@ -43,6 +43,8 @@
 ;   learn more about surface rendering. All this program does is make sure the SHADED
 ;   keyword to cgSurf is set.
 ;
+; .. image:: cgshade_surf.png
+; 
 ; :Categories:
 ;    Graphics
 ;    

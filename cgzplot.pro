@@ -41,6 +41,8 @@
 ;   zoom into or out of the plot. Once a plot is zoomed, the user can then pan the plot
 ;   in both the X and Y directions. See the operating instructions for how to interact
 ;   with the line plot.
+;   
+; .. image:: cgzplot.png
 ; 
 ; :Params:
 ;    x: in, required, type=any

@@ -116,6 +116,8 @@
 ;             in indexed color mode. 27 Feb 2012. DWF.
 ;        Added Compile Opt id2 to all file modules. 22 July 2012. DWF.
 ;        Added "opposite" and "background" colors to Brewer colors. 14 August 2012. DWF.
+;        Some UNIX versions of IDL report the size of widget windows incorrectly, so I
+;             have changed the pixel location I am sampling for window "color" for them. 1 Nov 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2009-2012, Fanning Software Consulting, Inc.
@@ -406,8 +408,15 @@ FUNCTION cgColor, theColour, colorIndex, $
     
     ; Get the pixel value of the "opposite" color. This is the pixel color
     ; opposite the pixel color in the upper right corner of the display.
+    ; Because some LINUX versions of IDL report their window size incorrectly,
+    ; I back off from the corner pixel a bit to get the value I am looking for
+    ; on UNIX machines.
     IF ((!D.Window GE 0) && ((!D.Flags AND 256) NE 0)) || (!D.Name EQ 'Z') THEN BEGIN
-       opixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+       IF StrUpCase(!Version.OS_Family) EQ 'WINDOWS' THEN BEGIN
+          opixel = cgSnapshot(!D.X_Size-1,  !D.Y_Size-1, 1, 1)
+       ENDIF ELSE BEGIN
+          opixel = cgSnapshot(!D.X_Size-3,  !D.Y_Size-3, 1, 1)
+       ENDELSE
        IF N_Elements(opixel) NE 3 THEN BEGIN
             IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, /Get
             opixel = [rrr[opixel], ggg[opixel], bbb[opixel]]

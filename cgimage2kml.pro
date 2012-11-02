@@ -108,7 +108,8 @@
 ;        in a 2D image. Otherwise, this is assumed to be a color triple that indicates
 ;        the "missing" color or value in the output image. The alpha channel in the output image
 ;        is set to 0 for the "missing" color, which makes this value completely transparent.
-;        Used only if the `Transparent` keyword is used.
+;        If the `Transparent` keyword is not used, it is set to 0 by using the `Missing_Value`
+;        keyword.
 ;        
 ;    palette: in, optional, type=byte
 ;        Set this keyword to a 3x256 or 256x3 byte array containing the RGB color 
@@ -215,6 +216,9 @@ PRO cgImage2KML, image, mapCoord, $
    ENDELSE
    IF N_Elements(latlonBox) EQ 0 THEN Message, 'Map boundaries for the image cannot be obtained.'
    IF N_Elements(order) EQ 0 THEN order = 0
+   IF (N_Elements(missing_value) NE 0) && (N_Elements(transparent) EQ 0) THEN BEGIN
+      transparent = 0
+   ENDIF
    
    ; Need a filename?
    IF N_Elements(filename) EQ 0 THEN BEGIN

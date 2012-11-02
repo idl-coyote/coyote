@@ -61,6 +61,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 18 July  2012. DWF.
+;        The THICK keyword was not being set in the INIT method. Fixed. 2 Nov 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -182,6 +183,7 @@ FUNCTION cgOverPlot::INIT, x, y, $
     self.color = color
     self.linestyle = linestyle    
     self.psym = psym
+    self.thick = thick
     self.skip = 1
     self.symcolor = symcolor
     self.symsize = symsize

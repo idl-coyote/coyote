@@ -32,7 +32,15 @@
 ; INPUTS:
 ;
 ;      filename:   The name of the precipitation file. For demo, download
-;                  ST4.2005010112.24h.bin from http://www.idlcoyote.com/misc.
+;                  ST4.2005010112.24h.bin from http://www.idlcoyote.com/data/ST4.2005010112.24h.bin.
+;                  
+; KEYWORDS:
+; 
+;      DATA:   Set this keyword to a named variable that on output will contain the scaled data.
+;      
+;      PALETTE:    Set this keyword to a named variable that on output will contain the color 
+;                  palette used to display the data.
+;                   
 ;
 ; RESTRICTIONS:
 ;
@@ -47,6 +55,8 @@
 ;  Renamed Colorbar procedure to cgColorbar to avoid conflict with IDL 8 Colorbar function.
 ;        26 September 2010. DWF.
 ;  Got the polar stereo map projection correct. 5 September 2011. DWF.
+;  Added DATA, MAP, and PALETTE output keywords and updated to use more modern Coyote
+;        Library mapping routines. 2 November 2012. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -92,7 +102,7 @@ END ;----------------------------------------------------------------------
 
 
 
-PRO PrecipMap, filename
+PRO PrecipMap, filename, DATA=data, MAP=map, Palette=palette
 
    ; Error handling.
    Catch, theError
@@ -133,14 +143,14 @@ PRO PrecipMap, filename
    IF missing_count GT 0 THEN scaledImage[missing] = 15B ; Will be black.
 
    ; Set up the map structure. This image is a stereographic image.
-   mapStruct = MAP_PROJ_INIT("Polar Stereographic", CENTER_LONGITUDE=-105, CENTER_LATITUDE=70)
+   mapCoord = Obj_New('cgMap', "Polar Stereographic", CENTER_LONGITUDE=-105, CENTER_LATITUDE=70)
 
    ; Set up latitutes and longitudes at the corners of the image. (ll, ul, ur, lr)
    longitude = [-119.023D, -134.039, -59.959, -80.7500]
    latitude =  [  23.117D,   53.509,  45.619,  19.8057]
 
-   ; Project those lat/lon points into UV space..
-   uv = MAP_PROJ_FORWARD(longitude, latitude, MAP_STRUCTURE=mapStruct)
+   ; Project those lat/lon points into UV space.
+   uv = mapCoord -> Forward(longitude, latitude)
    
    ; To set up map projection space, we need values at left, top, right, and bottom
    ; of image. We calculate these in UV space. Note that these values are in the
@@ -161,25 +171,34 @@ PRO PrecipMap, filename
 
    ; Decide on a position of the image in the window.
    pos = [0.05, 0.25, 0.95, 0.95]
+   
+   ; Update the map coordinate object.
+   mapCoord -> SetProperty, XRANGE=xrange, YRANGE=yrange, POSITION=pos
 
    ; Display the image. The variable POS will change (probably) to keep the aspect.
    cgDisplay, 500, 500
    cgImage, scaledImage, POSITION=pos, /KEEP_ASPECT, /ERASE
 
    ; Set up a map coordinate space on top of the image in UV coordinates.
-   cgPlot, xrange, yrange, XSTYLE=5, YSTYLE=21, /NODATA, /NOERASE, POSITION=pos
+   mapCoord -> Draw
 ;
 ;   ; Add continent and state outlines, along with grid labels.
-   Map_Continents, /HIRES, Color=cgColor('medium gray'), /USA, MAP_STRUCTURE=mapStruct
-   Map_Grid, LATS=Indgen(8)*5+Round(MIN(latitude)), /LABEL, $
+   cgMap_Continents, /HIRES, Color='medium gray', /USA, MAP=mapCoord
+   cgMap_Grid, LATS=Indgen(8)*5+Round(MIN(latitude)), /LABEL, $
              LONS = Indgen(8)*10+Round(Min(longitude)), $
-             COLOR=cgColor('gray'), MAP_STRUCTURE=mapStruct
+             COLOR='gray', MAP=mapCoord
 
    ; Add a colorbar. Non-linear scaling requires use of tick formatting function.
    cgColorbar, NColors=13, Bottom=1, Position=[pos[0], 0.1, pos[2], 0.15], $
       Divisions=14, Title='24 Hour Precipitation (mm)', AnnotateColor='black', $
       /Discrete, OOB_High=14, XTickFormat='PrecipMap_Annotate'
   
-      
+   ; Need output keywords?
+   IF Arg_Present(data) THEN data = scaledImage
+   IF Arg_Present(palette) THEN BEGIN
+      TVLCT, r, g, b, /Get
+      palette = [[r],[g],[b]]
+   ENDIF
+   IF Arg_Present(map) THEN map = mapCoord
         
 END ;----------------------------------------------------------------------

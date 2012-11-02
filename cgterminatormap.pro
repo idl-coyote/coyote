@@ -54,6 +54,8 @@
 ;   to zero, at least with some map projections. I've thought about forcing it to be
 ;   zero and forcing you to use well-behaved map projections, but have decided to leave
 ;   the program the way it is so you can discover the limitations yourself.
+;   
+; .. image:: cgterminatormap.png
 ;
 ; :Categories:
 ;    Graphics, Map Projections

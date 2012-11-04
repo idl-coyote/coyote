@@ -37,9 +37,9 @@
 ;******************************************************************************************;
 ;
 ;+
-;   The purpose of this utility routine is to check to be sure the object argument is 
-;   valid and belongs to the specified object class. It is more useful than the built-in
-;   Obj_Isa function, because it can handle undefined variable arguments.
+; The purpose of this utility routine is to check to be sure the object argument is 
+; valid and belongs to the specified object class. It is more useful than the built-in
+; Obj_Isa function, because it can handle undefined variable arguments.
 ;
 ; :Categories:
 ;    Utilities
@@ -75,7 +75,6 @@
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
-;*****************************************************************************************************
 FUNCTION cgOBJ_ISA, object, classname
 
    Compile_Opt idl2

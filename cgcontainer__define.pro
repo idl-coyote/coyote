@@ -250,7 +250,7 @@ END
 ;      _ref_extra: in, optional
 ;         Any superclass keyword can be set here.
 ;---------------------------------------------------------------------------
-PRO cgContainer::SetProperty, NAME=name, UVALUE=uvalue, _EXTRA=extra
+PRO cgContainer::SetProperty, NAME=name, UVALUE=uvalue, _REF_EXTRA=extra
 
    Compile_Opt idl2
     

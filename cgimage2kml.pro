@@ -43,6 +43,8 @@
 ; produced. The KML and image file must be in the same directory to use them with
 ; Google Earth.
 ; 
+; .. image:: cgimage2kml.png
+;  
 ; :Categories:
 ;    Graphics, FileIO, Maps
 ;    
@@ -155,10 +157,7 @@
 ;          
 ;       ;; Start Google Earth and open the KML file you just created.
 ;       
-;    The output should look like the figure below.
-;    
-; .. image:: cgimage2kml.png
-;  
+;    The output should look like the figure above.
 ;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::

@@ -99,7 +99,7 @@
 ;     rotation: in, optional, type=double, default=0.0
 ;         This keyword indicates the angle of rotation of the screen overlay in degrees counterclockwise
 ;         from North. A value from -180 to 180.
-;     screen_xy: in, optional, type=dblarr, default=[-1,-1]
+;     screen_xy: in, optional, type=dblarr
 ;         This keyword specifies a point [x,y] relative to the screen origin that the overlay image 
 ;         is mapped to. The location of the point is specified by the values in `XUnits` and 'YUnits`. 
 ;     screen_unit_x: in, optional, type=string, default='fraction'
@@ -110,7 +110,7 @@
 ;         Three values are possible: (1) "fraction" indicates that the Y value is a fraction of the image;
 ;         (2) "pixels" indicates the the Y value is in pixels; and (3) "insetPixels" indicates the Y
 ;         value is an indent from the top edge of the image.
-;     size_xy: in, required, type=dblarr, default=[-1,-1]
+;     size_xy: in, required, type=dblarr
 ;         This keyword specifies the size of the image for the screen overlay as follows. A -1
 ;         indicates to use the native dimensions of the image. A 0 indicates that the aspect ratio
 ;         of the image should be preserved. Any other value sets the output dimension of the image,
@@ -139,7 +139,7 @@ FUNCTION cgKML_ScreenOverlay::INIT, $
   SIZE_XY=size_xy, $
   SIZE_UNIT_X=size_unit_x, $
   SIZE_UNIT_Y=size_unit_y, $
-  ROTATE=rotate, $
+  ROTATION=rotation, $
   _REF_EXTRA=extra
 
   Compile_Opt idl2
@@ -344,7 +344,7 @@ END
 ;     rotation: out, optional, type=double, default=0.0
 ;         This keyword indicates the angle of rotation of the screen overlay in degrees counterclockwise
 ;         from North. A value from -180 to 180.
-;     screen_xy: out, optional, type=dblarr, default=[-1,-1]
+;     screen_xy: out, optional, type=dblarr
 ;         This keyword specifies a point [x,y] relative to the screen origin that the overlay image 
 ;         is mapped to. The location of the point is specified by the values in `XUnits` and 'YUnits`. 
 ;     screen_unit_x: out, optional, type=string, default='fraction'
@@ -355,7 +355,7 @@ END
 ;         Three values are possible: (1) "fraction" indicates that the Y value is a fraction of the image;
 ;         (2) "pixels" indicates the the Y value is in pixels; and (3) "insetPixels" indicates the Y
 ;         value is an indent from the top edge of the image.
-;     size_xy: out, required, type=dblarr, default=[-1,-1]
+;     size_xy: out, required, type=dblarr
 ;         This keyword specifies the size of the image for the screen overlay as follows. A -1
 ;         indicates to use the native dimensions of the image. A 0 indicates that the aspect ratio
 ;         of the image should be preserved. Any other value sets the output dimension of the image,
@@ -381,7 +381,7 @@ PRO cgKML_ScreenOverlay::GetProperty, $
    SIZE_XY=size_xy, $
    SIZE_UNIT_X=size_unit_x, $
    SIZE_UNIT_Y=size_unit_y, $
-   ROTATE=rotate, $
+   ROTATION=rotation, $
    _REF_EXTRA=extra
    
    IF Arg_Present(overlay_xy) THEN overlay_xy = self.overlay_xy
@@ -393,7 +393,7 @@ PRO cgKML_ScreenOverlay::GetProperty, $
    IF Arg_Present(size_xy) THEN size_xy = self.size_xy
    IF Arg_Present(size_unit_x) THEN size_unit_x = self.size_unit_x
    IF Arg_Present(size_unit_y) THEN size_unit_y = self.size_unit_y
-   IF Arg_Present(rotate) THEN rotate = self.rotate
+   IF Arg_Present(rotation) THEN rotation = self.rotation
 
    ; Superclass keywords.
    IF N_Elements(extra) NE 0 THEN self -> cgKML_Overlay::GetProperty, _Extra=extra
@@ -420,7 +420,7 @@ END
 ;     rotation: in, optional, type=double, default=0.0
 ;         This keyword indicates the angle of rotation of the screen overlay in degrees counterclockwise
 ;         from North. A value from -180 to 180.
-;     screen_xy: in, optional, type=dblarr, default=[-1,-1]
+;     screen_xy: in, optional, type=dblarr
 ;         This keyword specifies a point [x,y] relative to the screen origin that the overlay image 
 ;         is mapped to. The location of the point is specified by the values in `XUnits` and 'YUnits`. 
 ;     screen_unit_x: in, optional, type=string, default='fraction'
@@ -431,7 +431,7 @@ END
 ;         Three values are possible: (1) "fraction" indicates that the Y value is a fraction of the image;
 ;         (2) "pixels" indicates the the Y value is in pixels; and (3) "insetPixels" indicates the Y
 ;         value is an indent from the top edge of the image.
-;     size_xy: in, required, type=dblarr, default=[-1,-1]
+;     size_xy: in, required, type=dblarr
 ;         This keyword specifies the size of the image for the screen overlay as follows. A -1
 ;         indicates to use the native dimensions of the image. A 0 indicates that the aspect ratio
 ;         of the image should be preserved. Any other value sets the output dimension of the image,
@@ -457,7 +457,7 @@ PRO cgKML_ScreenOverlay::SetProperty, $
    SIZE_XY=size_xy, $
    SIZE_UNIT_X=size_unit_x, $
    SIZE_UNIT_Y=size_unit_y, $
-   ROTATE=rotate, $
+   ROTATION=rotation, $
    _REF_EXTRA=extra
    
    Compile_Opt idl2

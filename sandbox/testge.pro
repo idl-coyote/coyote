@@ -7,9 +7,9 @@ PRO TestGE
 
    ; Get a test image.
    ;testfile = "\\paradox.warnercnr.colostate.edu\paradox\usr\dfanning\Amazon\Querencia\MSS\1973\19730630_241_068\19730630_241_068_output_b4.tif"
-   testMap = cgGeomap('19730630_241_068_b4.tif', Image=testImage)
+   landMap = cgGeomap('19730630_241_068_b4.tif', Image=landImage)
    dims = Size(testimage, /DIMENSIONS)
-   cgImage2KML, cgImgScl(testImage, MINValue=10, MAXValue=16, /Scale, Missing_Index=0), testMap, DrawOrder=1, $
+   cgImage2KML, cgImgScl(landImage, MINValue=10, MAXValue=16, /Scale, Missing_Index=0), landMap, DrawOrder=1, $
       CTIndex=0, Filename='landsat_b4.kml', Missing_Value=0, Transparent=30
    
 ;   ; Clip the zonal mask to the boundaries of the test image.

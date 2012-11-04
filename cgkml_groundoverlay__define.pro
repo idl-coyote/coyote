@@ -84,6 +84,19 @@
 ;         appear to be at ground level if the terrain beneath is also 10 meters above sea level. 
 ;         If the terrain is 3 meters above sea level, the overlay will appear elevated above the 
 ;         terrain by 7 meters. It is also possible to set the mode to "clampToSeaFloor".
+;     color: in, optional, type=string
+;         Color values are expressed in hexadecimal notation, including opacity (alpha) values. 
+;         The order of expression is alpha, blue, green, red (aabbggrr). The range of values for 
+;         any one color is 0 to 255 (00 to ff). For opacity, 00 is fully transparent and ff is 
+;         fully opaque. For example, if you want to apply a blue color with 50 percent opacity 
+;         to an overlay, you would specify the following: COLOR = "7fff0000".
+;     draworder: in, optional, type=integer
+;         This element defines the stacking order for the images in overlapping overlays. 
+;         Overlays with higher values are drawn on top of overlays with lower values.
+;     href: in, optional, type=string
+;         A URL that identifies the location of the image associated with this Overlay. The
+;         location can be either a local file (e.g., 'myimage.png') or a URL to an image
+;         on a web server (e.g., 'http://www.idlcoyote.com/images/myimage.png').
 ;     latlonbox: in, optional, type=fltarr
 ;         A four-element float array that specifies the top, bottom, right, and left sides
 ;         of a bounding box that the ground overlay is aligned to. The elements of the array
@@ -106,6 +119,9 @@
 FUNCTION cgKML_GroundOverlay::INIT, $
   ALTITUDE=altitude, $
   ALTMODE=altmode, $
+  COLOR=color, $
+  DRAWORDER=draworder, $
+  HREF=href, $
   LATLONBOX=latlonbox, $
   LATLONQUAD=latlonquad, $
   ROTATION=rotation, $
@@ -121,8 +137,8 @@ FUNCTION cgKML_GroundOverlay::INIT, $
   ENDIF
   
   ; Call the superclass object's INIT method.
-  IF ~self -> cgKML_Overlay::INIT(_Extra=extra) THEN RETURN, 0
-  
+  IF ~self -> cgKML_Overlay::INIT(COLOR=color, DRAWORDER=draworder, HREF=href, _Extra=extra) THEN RETURN, 0
+
   IF N_Elements(altmode) EQ 0 THEN altmode = 'clampToGround'
   IF N_Elements(rotation) EQ 0 THEN rotation =  0.0
   IF (N_Elements(latlonbox) EQ 0) && (N_Elements(latlonquad) EQ 0) THEN BEGIN
@@ -408,10 +424,8 @@ END
 
 
 ;+
-; The cgKML_GroundOverlay class definition module. This is an abstract class
-; that will be inherited by overlay objects (GroundOverlay, and ScreenOverlay, among others).
-; Basically, any KML element that should be added to a KML file will inherit this
-; object. It is a container object and represents part of the KML file hierarchy.
+; The cgKML_GroundOverlay class definition module. It is a container object 
+; and represents part of the KML file hierarchy.
 ;
 ; :Params:
 ;     class: out, optional, type=structure

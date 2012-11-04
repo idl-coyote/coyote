@@ -181,6 +181,7 @@
 ;        Added FILETYPE keyword to provide a generic way of creating raster file output. 30 August 2012. DWF.
 ;        Modified to use the cgPS2Raster program so code doesn't have to be maintained in 
 ;            two places. 15 Oct 2012. DWF.
+;        Added a check for ImageMagick and an informational message for raster operations. 4 Nov 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -276,6 +277,7 @@ PRO PS_END, $
    SetDefaultValue, density, 300
    SetDefaultValue, resize, 25
    IF needRaster THEN BEGIN
+       IF cgHasImageMagick() THEN BEGIN
        cgPS2Raster, ps_filename, raster_filename, $
           ALLOW_TRANSPARENT=allow_transparent, $
           BMP=bmp, $
@@ -295,6 +297,16 @@ PRO PS_END, $
           SUCCESS=success, $
           TIFF=tiff, $
           WIDTH=width
+       ENDIF ELSE BEGIN
+           Print, ''
+           Print, 'Message from the PS_End Program:'
+           Print, '   The requested raster operation cannot be completed unless ImageMagick is installed.'
+           delete_ps = 0
+           Print, '   The requested PostScript file has been saved: ' + ps_filename + '.'
+           Print, '   Please see http://www.idlcoyote.com/graphics_tips/weboutput.php for details'
+           Print, '   about converting PostScript intermediate files to raster files via ImageMagick.
+           void = Dialog_Message('PS_End: ImageMagick must be installed to complete raster operation.')
+       ENDELSE
    ENDIF
    
    ; Clean up.

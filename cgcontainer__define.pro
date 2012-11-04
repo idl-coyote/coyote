@@ -52,6 +52,8 @@
 ; :History:
 ;     Change History::
 ;        Written, by David W. Fanning, 7 November 2011.
+;        Modified the SetProperty and GetProperty method to indicate errors if
+;           extra keywords reach them. 3 Nov 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -211,7 +213,7 @@ END
 ;      _ref_extra: out, optional
 ;         Returns the value of any keyword in the superclass object.
 ;---------------------------------------------------------------------------
-PRO cgContainer::GetProperty, NAME=name, UVALUE=uvalue, _REF_EXTRA=extra
+PRO cgContainer::GetProperty, NAME=name, COUNT=count, UVALUE=uvalue, _REF_EXTRA=extra
 
    Compile_Opt idl2
     
@@ -224,11 +226,12 @@ PRO cgContainer::GetProperty, NAME=name, UVALUE=uvalue, _REF_EXTRA=extra
    ENDIF
    
     ; Get this object properties.
+    IF Arg_Present(count) THEN count  = self -> IDL_Container::Count()
     IF Arg_Present(name) THEN name = self._cg_name
     IF Arg_Present(uvalue) && Ptr_Valid(self._cg_uvalue) THEN uvalue = *self._cg_uvalue
     
-    ; Get the superclass object properties.
-    IF N_Elements(extra) NE 0 THEN Message, 'There are unresolved keywords here that cannot be handled.'
+    ; If you get to here with a keyword, it is an error.
+    IF N_Elements(extra) NE 0 THEN Message, 'There are unresolved keywords that should not be here.'
     
 END
 
@@ -247,7 +250,7 @@ END
 ;      _ref_extra: in, optional
 ;         Any superclass keyword can be set here.
 ;---------------------------------------------------------------------------
-PRO cgContainer::SetProperty, NAME=name, UVALUE=uvalue, _REF_EXTRA=extra
+PRO cgContainer::SetProperty, NAME=name, UVALUE=uvalue, _EXTRA=extra
 
    Compile_Opt idl2
     
@@ -265,8 +268,8 @@ PRO cgContainer::SetProperty, NAME=name, UVALUE=uvalue, _REF_EXTRA=extra
           ELSE self._cg_uvalue = Ptr_New(uvalue)
    ENDIF
    
-   ; Set superclass object properties, if any.
-   IF N_Elements(extra) NE 0 THEN self -> IDL_Container::SetProperty, _Strict_Extra=extra
+    ; If you get to here with a keyword, it is an error.
+    IF N_Elements(extra) NE 0 THEN Message, 'There are unresolved keywords that should not be here.'
 
 END
 

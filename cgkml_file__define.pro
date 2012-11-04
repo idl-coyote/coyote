@@ -214,7 +214,7 @@ PRO cgKML_File::GetProperty, $
   IF Arg_Present(filename) THEN filename = self.filename
   IF Arg_Present(hint) THEN hint = self.hint
   IF Arg_Present(level) THEN level = self.level
-  IF N_Elements(extra) NE 0 THEN self -> IDL_CONTAINER::GetProperty, _STRICT_EXTRA=extra
+  IF N_Elements(extra) NE 0 THEN self -> cgCONTAINER::GetProperty, _EXTRA=extra
   
 END
 
@@ -246,6 +246,7 @@ PRO cgKML_File::Head, LUN=lun
   IF self.hint NE "" THEN  PrintF, lun, ' hint="target=' + self.hint  
   PrintF, lun, ' xmlns:gx="http://www.google.com/kml/ext/2.2"'
   PrintF, lun, ' xmlns:atom="http://www.w3.org/2005/Atom">'
+  PrintF, lun, '<Document>'
   
 END
 
@@ -326,7 +327,7 @@ PRO cgKML_File::SetProperty, $
 
   IF Arg_Present(filename) THEN filename = self.filename
   IF Arg_Present(hint) THEN hint = self.hint
-  IF N_Elements(extra) NE 0 THEN self -> IDL_CONTAINER::SetProperty, _STRICT_EXTRA=extra
+  IF N_Elements(extra) NE 0 THEN self -> cgCONTAINER::SetProperty, _EXTRA=extra
   
 END
 
@@ -353,6 +354,7 @@ PRO cgKML_File::Tail, LUN=lun
   IF N_Elements(lun) EQ 0 THEN Message, 'A logical unit number must be supplied with the LUN keyword.'
   
   ; Close the element.
+  PrintF, lun, '</Document>'
   PrintF, lun, '</kml>'
   
 END

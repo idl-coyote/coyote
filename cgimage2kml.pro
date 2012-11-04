@@ -61,6 +61,12 @@
 ;       
 ; :Keywords:
 ; 
+;    addtofile: in, optional, type=object
+;       If this keyword contains a cgKML_File object, the image is added to the file
+;       as a <GroundOverlay) element and a separate KML file is not created. In other
+;       words, the `Filename` keyword is ignored and the image file created takes its
+;       name from the cgKML_File object.
+; 
 ;    brewer: in, optional, type=boolean, default=0
 ;       This keyword is used only if the `CTIndex` keyword is used to select a color table number.
 ;       Setting this keyword allows Brewer color tables to be used.
@@ -122,6 +128,10 @@
 ;        The default is to use whatever colors are loaded in the current hardware color table.
 ;        A palette applies only to 2D input images.
 ;         
+;    placename: in, optional, type=string
+;        This is the <name> element in a Feature object. It is user-defined text that is used as
+;        the label for an object in Google Earth.
+;
 ;    reverse: in, optional, type=boolean, default=0
 ;        Set this keyword to reverse the color table vectors selected with the `CTIndex` keyword.
 
@@ -168,8 +178,9 @@
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgImage2KML, image, mapCoord, $
-   CTINDEX=ctindex, $
+   ADDTOFILE=addtofile, $
    BREWER=brewer, $
+   CTINDEX=ctindex, $
    DESCRIPTION=description, $
    DRAWORDER=draworder, $
    GEOTIFF=geotiff, $
@@ -179,6 +190,7 @@ PRO cgImage2KML, image, mapCoord, $
    MIN_VALUE=min_value, $
    MISSING_VALUE=missing_value, $
    PALETTE=palette, $
+   PLACENAME=placename, $
    REVERSE=reverse, $
    TRANSPARENT=transparent
 
@@ -290,17 +302,39 @@ PRO cgImage2KML, image, mapCoord, $
    ; Save the image as a PNG file.
    dims = Image_Dimensions(warped, XINDEX=xindex, YINDEX=yindex, TRUEINDEX=trueindex)
    IF trueindex GT 0 THEN warped = Transpose(warped, [trueindex, xindex, yindex])
-   Write_PNG, imageFilename, warped
    
-   ; Write the KML file.
-   kmlFile = Obj_New('cgKML_File', filename)
-   overlay = Obj_New('cgKML_GroundOverlay', $
-     HREF=imageFilename, $
-     DESCRIPTION=description, $
-     LATLONBOX=latlonBox, $
-     DRAWORDER=draworder)
-   kmlFile -> Add, overlay
-   kmlFile -> Save
-   kmlFile -> Destroy
+   IF cgObj_Isa(addtofile, 'cgKML_File') THEN BEGIN
    
+      addToFile -> GetProperty, FILENAME=filename, COUNT=count
+      rootname = cgRootName(filename, DIRECTORY=thisDir, EXTENSION=ext)
+      imageFilename = FilePath(ROOT_DIR=thisDir, rootname + StrTrim(count+1,2) + '.png')
+      
+     ; Write the image file.
+     Write_PNG, imageFilename, warped
+      overlay = Obj_New('cgKML_GroundOverlay', $
+          HREF=imageFilename, $
+          DESCRIPTION=description, $
+          LATLONBOX=latlonBox, $
+          PLACENAME=placename, $
+          DRAWORDER=draworder)
+       addToFile -> Add, overlay
+   
+   ENDIF ELSE BEGIN
+   
+     ; Write the image file.
+     Write_PNG, imageFilename, warped
+   
+     ; Write the KML file.
+     kmlFile = Obj_New('cgKML_File', filename)
+     overlay = Obj_New('cgKML_GroundOverlay', $
+       HREF=imageFilename, $
+       DESCRIPTION=description, $
+       LATLONBOX=latlonBox, $
+       PLACENAME=placename, $
+       DRAWORDER=draworder)
+     kmlFile -> Add, overlay
+     kmlFile -> Save
+     kmlFile -> Destroy
+     
+   ENDELSE
 END

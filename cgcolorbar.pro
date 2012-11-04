@@ -430,8 +430,8 @@ PRO cgColorbar, $
             npalColors = dims[1]
         ENDIF ELSE npalColors = dims[0]
         IF N_Elements(ncolors) EQ 0 THEN ncolors = npalColors
-        IF ncolors NE npalColors THEN $
-           Message, 'The number of colors in the color palette does not match NCOLORS.'
+;        IF ncolors NE npalColors THEN $
+;           Message, 'The number of colors in the color palette does not match NCOLORS.'
         TVLCT, palette
         TVLCT, rr, gg, bb, /Get
     ENDIF

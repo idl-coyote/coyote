@@ -156,7 +156,6 @@ FUNCTION cgKML_Feature::INIT, $
   IF N_Elements(author) NE 0 THEN self.author = Ptr_New(author)
   IF N_Elements(description) NE 0 THEN self.description = description
   IF N_Elements(extendedData) NE 0 THEN self.extendedData = Ptr_New(extendedData)
-  IF N_Elements(name) NE 0 THEN self.name = name
   IF N_Elements(open) NE 0 THEN self.open = open
   IF N_Elements(phonenumber) NE 0 THEN self.phonenumber = phonenumber
   IF N_Elements(placename) NE 0 THEN self.placename = placename
@@ -197,7 +196,7 @@ PRO cgKML_Feature::Body, LUN=lun
   IF N_Elements(lun) EQ 0 THEN Message, 'A logical unit number (LUN) is required in this method.'
     
   ; Write the feature elements.
-  IF self.placeName NE "" THEN self -> XMLTag, 'name', self.placeName, LUN=lun
+  IF self.placeName NE "" THEN self -> XMLTag, 'name', self.placeName, LUN=lun, SPACE=6
   self -> XMLTag, 'visibility', Keyword_Set(self.visibility), LUN=lun, SPACE=6
   self -> XMLTag, 'open', Keyword_Set(self.open), LUN=lun, SPACE=6
   IF Ptr_Valid(self.author) THEN BEGIN

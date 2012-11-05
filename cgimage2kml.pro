@@ -134,9 +134,16 @@
 ;        This is the <name> element in a Feature object. It is user-defined text that is used as
 ;        the label for an object in Google Earth.
 ;
+;    resize_factor: in, optional, type=float
+;        Setting this keyword to a value allows the user to resize the image prior to making the
+;        PNG image file that will be output with the KML file. This is especially helpful with
+;        very large images. Setting the factor to 0.5 will reduce the image to half it's normal
+;        size before processing. Setting the factor to 2.0 will increase the size by a factor
+;        of 2 before processing. The image is resized with nearest neighbor sampling.
+;
 ;    reverse: in, optional, type=boolean, default=0
 ;        Set this keyword to reverse the color table vectors selected with the `CTIndex` keyword.
-
+;
 ;    transparent: in, optional, type=integer, default=50
 ;        The percentage of transparency desired in the output image. A number 
 ;        between 0 and 100.
@@ -190,6 +197,7 @@ PRO cgImage2KML, image, mapCoord, $
    MISSING_VALUE=missing_value, $
    PALETTE=palette, $
    PLACENAME=placename, $
+   RESIZE_FACTOR=resize_factor, $
    REVERSE=reverse, $
    TRANSPARENT=transparent
 
@@ -261,13 +269,19 @@ PRO cgImage2KML, image, mapCoord, $
    ; Otherwise, let's use gray-scale colors for the image.
    IF N_Elements(palette) EQ 0 THEN cgLoadCT, 0, RGB_TABLE=palette
    
+   ; Should the image be reduced in size before displaying it?
+   IF N_Elements(resize_factor) NE 0 THEN BEGIN
+        dims = Image_Dimensions(image, XSIZE=xsize, YSIZE=ysize)
+        warped = cgResizeImage(image, Long(xsize*resize_factor), Long(ysize*resize_factor))
+   ENDIF ELSE warped = image
+   
    ; If the map projection is not "EQUIRECTANGULAR" or the ellipsoid is not "WGS84", then the
    ; image has to be warped into the correct map projection.
    IF (StrUpCase(map_projection) NE 'EQUIRECTANGULAR') || (StrUpCase(StrCompress(ellipsoid, /REMOVE_ALL)) NE 'WGS84') THEN BEGIN
       googleMapCoord = Obj_New('cgMap', 'Equirectangular', Ellipsoid='WGS 84')
-       warped = cgChangeMapProjection(image, mapCoord, MAPOUT=googleMapCoord, $
+       warped = cgChangeMapProjection(warped, mapCoord, MAPOUT=googleMapCoord, $
           LATLONBOX=latlonbox)
-   ENDIF ELSE warped = image
+   ENDIF 
    
    ; Byte scale the image.
    IF N_Elements(missing_value) NE 0 THEN BEGIN

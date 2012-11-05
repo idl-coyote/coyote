@@ -182,6 +182,7 @@
 ;        Modified to use the cgPS2Raster program so code doesn't have to be maintained in 
 ;            two places. 15 Oct 2012. DWF.
 ;        Added a check for ImageMagick and an informational message for raster operations. 4 Nov 2012. DWF.
+;        Fixed a problem in which the NOMESSAGE keyword was not getting passed along to cgPS2Raster. 5 Nov 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -293,7 +294,7 @@ PRO PS_END, $
           PORTRAIT=portrait, $
           RESIZE=resize, $
           SHOWCMD=showcmd, $
-          SILENT=silent, $
+          SILENT=Keyword_Set(nomessage), $
           SUCCESS=success, $
           TIFF=tiff, $
           WIDTH=width

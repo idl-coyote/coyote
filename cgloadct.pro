@@ -158,9 +158,10 @@
 ;       Added missing ADDCMD keyword. 28 April 2011. DWF.
 ;       Fixed a problem that occurred when the BOTTOM keyword was used in conjuntion with
 ;          the WINDOW keyword, resulting in incorrect colors in cgWindow programs. 28 April 2011. DWF.
+;       Added CubeHelix color table from code written by James R. A. Davenport. 5 Nov 2012. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2007-2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgLoadCT, table, $
    ADDCMD=addcmd, $

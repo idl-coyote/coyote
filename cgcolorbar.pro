@@ -286,6 +286,7 @@
 ;          *if* the user specifies a range. If you prefer the old labeling behavior, simiply set
 ;          the `Divisions` keyword to 0. 16 Oct 2012. DWF.
 ;       Added CTINDEX, and BREWER keywords to make loading a color table palette easier. 20 October 2012. DWF.
+;       Fixed a strange interaction between TickInterval and the Format keywords. 5 Nov 2012. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -554,18 +555,22 @@ PRO cgColorbar, $
         IF (xlog XOR ylog) EQ 0 THEN BEGIN
             IF format NE "" THEN BEGIN
                IF minrange LT maxrange THEN BEGIN
-                   step = (maxrange - minrange) / divisions
-                   levels = minrange > (Indgen(divisions+1) * step + minrange) < maxrange
-                   IF StrPos(StrLowCase(format), 'i') NE -1 THEN levels = Round(levels)
-                   ticknames = String(levels, Format=format)
-                   format = "" ; No formats allowed in PLOT call now that we have ticknames.
+                   IF N_Elements(tickinterval) EQ 0 THEN BEGIN
+                      step = (maxrange - minrange) / divisions
+                      levels = minrange > (Indgen(divisions+1) * step + minrange) < maxrange
+                      IF StrPos(StrLowCase(format), 'i') NE -1 THEN levels = Round(levels)
+                      ticknames = String(levels, Format=format)
+                      format = "" ; No formats allowed in PLOT call now that we have ticknames.
+                   ENDIF
                ENDIF ELSE BEGIN
-                   step = (minrange - maxrange) / divisions
-                   levels = maxrange > (Indgen(divisions+1) * step + maxrange) < minrange
-                   levels = Reverse(levels)
-                   IF StrPos(StrLowCase(format), 'i') NE -1 THEN levels = Round(levels)
-                   ticknames = String(levels, Format=format)
-                   format = "" ; No formats allowed in PLOT call now that we have ticknames.
+                   IF N_Elements(tickinterval) EQ 0 THEN BEGIN
+                       step = (minrange - maxrange) / divisions
+                       levels = maxrange > (Indgen(divisions+1) * step + maxrange) < minrange
+                       levels = Reverse(levels)
+                       IF StrPos(StrLowCase(format), 'i') NE -1 THEN levels = Round(levels)
+                       ticknames = String(levels, Format=format)
+                       format = "" ; No formats allowed in PLOT call now that we have ticknames.
+                   ENDIF
                ENDELSE
             ENDIF
         ENDIF

@@ -90,6 +90,8 @@
 ;    
 ;        IDL> color = cgPickColorName()
 ;
+; .. image:: cgpickcolorname.png
+;
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
 ;           David W. Fanning 

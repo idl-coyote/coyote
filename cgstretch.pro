@@ -477,9 +477,9 @@ PRO cgSTRETCH_DRAWLINES, minThresh, maxThresh, info
       minThresh = Float(minThresh)
       maxThresh = Float(maxThresh)
    ENDIF
-   XYOuts, cmin[0], 0.90, /Normal, Number_Formatter(minThresh, Decimals=3), $
+   XYOuts, cmin[0], 0.90, /Normal, cgNumber_Formatter(minThresh, Decimals=3), $
       Color=cgColor(info.colors[2]), Alignment=1.0, Font=0
-   XYOuts, cmax[0], 0.90, /Normal, Number_Formatter(maxThresh, Decimals=3), $
+   XYOuts, cmax[0], 0.90, /Normal, cgNumber_Formatter(maxThresh, Decimals=3), $
       Color=cgColor(info.colors[3]), Alignment=0.0, Font=0
 
    CASE info.type OF
@@ -815,9 +815,9 @@ PRO cgSTRETCH_HISTOPLOT, info, $
    info.maxThresh = cgStretch_Validate_Threshold(info.maxThresh, info)
    info.minThresh = cgStretch_Validate_Threshold(info.minThresh, info)
    info.minThreshObj -> Set_Value,$
-      Number_Formatter(cgSTRETCH_VALIDATE_THRESHOLD(info.minThresh, info), Decimals=3), /FloatValue
+      cgNumber_Formatter(cgSTRETCH_VALIDATE_THRESHOLD(info.minThresh, info), Decimals=3), /FloatValue
    info.maxThreshObj -> Set_Value,$
-      Number_Formatter(cgSTRETCH_VALIDATE_THRESHOLD(info.maxThresh, info), Decimals=3), /FloatValue
+      cgNumber_Formatter(cgSTRETCH_VALIDATE_THRESHOLD(info.maxThresh, info), Decimals=3), /FloatValue
 
    ; Restore previous graphics window.
    IF cWinID GT 0 THEN IF (!D.Flags AND 256) NE 0 THEN WSet, cWinID
@@ -1141,8 +1141,8 @@ PRO cgSTRETCH_OPENIMAGE, event
    ; Validitate the threshold values. Have to do this AFTER setting xmin/xmax.
    info.minThresh = cgSTRETCH_VALIDATE_THRESHOLD(info.minThresh, info)
    info.maxThresh = cgSTRETCH_VALIDATE_THRESHOLD(info.maxThresh, info)
-   info.minThreshObj -> Set_Value, Number_Formatter(info.minThresh, Decimals=3), /FloatValue
-   info.maxThreshObj -> Set_Value, Number_Formatter(info.maxThresh, Decimals=3), /FloatValue
+   info.minThreshObj -> Set_Value, cgNumber_Formatter(info.minThresh, Decimals=3), /FloatValue
+   info.maxThreshObj -> Set_Value, cgNumber_Formatter(info.maxThresh, Decimals=3), /FloatValue
 
 
    ; Put the same plot in the pixmap.
@@ -1414,8 +1414,8 @@ PRO cgSTRETCH_SETTHRESHOLD, event
    info.minThresh = cgSTRETCH_VALIDATE_THRESHOLD(minThresh < (info.maxThresh - (info.range/200.)), info)
    maxThresh = info.maxThreshObj -> Get_Value()
    info.maxThresh = cgSTRETCH_VALIDATE_THRESHOLD((info.minThresh + (info.range/200.)) > maxThresh, info)
-   info.minThreshObj -> Set_Value, Number_Formatter(info.minThresh, Decimals=3), /FloatValue
-   info.maxThreshObj -> Set_Value, Number_Formatter(info.maxThresh, Decimals=3), /FloatValue
+   info.minThreshObj -> Set_Value, cgNumber_Formatter(info.minThresh, Decimals=3), /FloatValue
+   info.maxThreshObj -> Set_Value, cgNumber_Formatter(info.maxThresh, Decimals=3), /FloatValue
 
    ; Display the image after thresholding.
    displayImage = cgStretch_ScaleImage(info)
@@ -1713,13 +1713,13 @@ PRO cgSTRETCH_MOVELINE, event
              cgStretch_DrawLines, coord[0], info.maxThresh, info
             info.minThresh = coord[0]
             info.minThreshObj -> Set_Value, $
-               Number_Formatter(cgSTRETCH_VALIDATE_THRESHOLD(info.minThresh, info), Decimals=3), /FloatValue
+               cgNumber_Formatter(cgSTRETCH_VALIDATE_THRESHOLD(info.minThresh, info), Decimals=3), /FloatValue
             END
          'MAX': BEGIN
             cgStretch_DrawLines, info.minThresh, coord[0], info
             info.maxThresh = coord[0]
             info.maxThreshObj -> Set_Value, $
-               Number_Formatter(cgSTRETCH_VALIDATE_THRESHOLD(info.maxThresh, info), Decimals=3), /FloatValue
+               cgNumber_Formatter(cgSTRETCH_VALIDATE_THRESHOLD(info.maxThresh, info), Decimals=3), /FloatValue
             END
       ENDCASE
 
@@ -1804,14 +1804,14 @@ PRO cgSTRETCH_MOVELINE, event
          cmax = Convert_Coord(info.maxThresh, 0, /Data, /To_Normal)
          PlotS, [info.maxthresh, info.maxthresh],[info.ymin, info.ymax],  $
             Color=cgColor(info.colors[3]), Thick=2
-         XYOuts, cmax[0], 0.90, /Normal, Number_Formatter(cgStretch_Validate_Threshold(info.maxThresh, info), Decimals=3), $
+         XYOuts, cmax[0], 0.90, /Normal, cgNumber_Formatter(cgStretch_Validate_Threshold(info.maxThresh, info), Decimals=3), $
             Color=cgColor(info.colors[3]), Alignment=0.0, Font=0
          END
       'MAX': BEGIN
          cmin = Convert_Coord(info.minThresh, 0, /Data, /To_Normal)
          PlotS, [info.minthresh, info.minthresh],[info.ymin, info.ymax],  $
             Color=cgColor(info.colors[2]), Thick=2
-         XYOuts, cmin[0], 0.90, /Normal, Number_Formatter(cgStretch_Validate_Threshold(info.minThresh, info), Decimals=3), $
+         XYOuts, cmin[0], 0.90, /Normal, cgNumber_Formatter(cgStretch_Validate_Threshold(info.minThresh, info), Decimals=3), $
             Color=cgColor(info.colors[2]), Alignment=1.0, Font=0
          END
    ENDCASE
@@ -1834,12 +1834,12 @@ PRO cgSTRETCH_MOVELINE, event
       'MIN': BEGIN
              coord[0] = coord[0] > (info.xmin)
              coord[0] = coord[0] < (info.maxThresh)
-             info.minThreshObj -> Set_Value, Number_Formatter(cgSTRETCH_VALIDATE_THRESHOLD(coord[0], info), Decimals=3), /FloatValue
+             info.minThreshObj -> Set_Value, cgNumber_Formatter(cgSTRETCH_VALIDATE_THRESHOLD(coord[0], info), Decimals=3), /FloatValue
              END
       'MAX': BEGIN
              coord[0] = coord[0] > (info.minThresh)
              coord[0] = coord[0] < (info.xmax )
-             info.maxThreshObj -> Set_Value, Number_Formatter(cgSTRETCH_VALIDATE_THRESHOLD(coord[0], info), Decimals=3), /FloatValue
+             info.maxThreshObj -> Set_Value, cgNumber_Formatter(cgSTRETCH_VALIDATE_THRESHOLD(coord[0], info), Decimals=3), /FloatValue
              END
    ENDCASE
 
@@ -1850,12 +1850,12 @@ PRO cgSTRETCH_MOVELINE, event
    CASE info.lineby OF
       'MIN': BEGIN
          PlotS, [coord[0], coord[0]],[info.ymin, info.ymax], Color=cgColor(info.colors[2]), Thick=2
-         XYOuts, Float(event.x)/!D.X_Size, 0.90, /Normal, Number_Formatter(thecoord, Decimals=3), $
+         XYOuts, Float(event.x)/!D.X_Size, 0.90, /Normal, cgNumber_Formatter(thecoord, Decimals=3), $
             Color=cgColor(info.colors[2]), Alignment=1.0, Font=0
          END
       'MAX': BEGIN
          PlotS, [coord[0], coord[0]],[info.ymin, info.ymax], Color=cgColor(info.colors[3]), Thick=2
-         XYOuts, Float(event.x)/!D.X_Size, 0.90, /Normal,  Number_Formatter(thecoord, Decimals=3), $
+         XYOuts, Float(event.x)/!D.X_Size, 0.90, /Normal, cgNumber_Formatter(thecoord, Decimals=3), $
             Color=cgColor(info.colors[3]), Alignment=0.0, Font=0
          END
    ENDCASE
@@ -1909,8 +1909,8 @@ PRO cgSTRETCH_RESTORE, event
     ; Validitate the threshold values. Have to do this AFTER setting xmin/xmax.
    info.minThresh = cgSTRETCH_VALIDATE_THRESHOLD(info.minThresh, info)
    info.maxThresh = cgSTRETCH_VALIDATE_THRESHOLD(info.maxThresh, info)
-   info.minThreshObj -> Set_Value, Number_Formatter(info.minThresh, Decimals=3), /FloatValue
-   info.maxThreshObj -> Set_Value, Number_Formatter(info.maxThresh, Decimals=3), /FloatValue
+   info.minThreshObj -> Set_Value, cgNumber_Formatter(info.minThresh, Decimals=3), /FloatValue
+   info.maxThreshObj -> Set_Value, cgNumber_Formatter(info.maxThresh, Decimals=3), /FloatValue
    
    ; Determine scaling type.
    type = info.type
@@ -2783,7 +2783,7 @@ PRO cgSTRETCH, theImage, $
             UVALUE='ASINH', Event_Pro='cgStretch_Parameters')
          index = Where(betas EQ beta, count)
          IF count EQ 0 THEN BEGIN
-            Widget_Control, asinh_comboID, Combobox_AddItem=Number_Formatter(beta,Decimals=2), ComboBox_Index=0
+            Widget_Control, asinh_comboID, Combobox_AddItem=cgNumber_Formatter(beta,Decimals=2), ComboBox_Index=0
          ENDIF ELSE Widget_Control, asinh_comboID, Set_Combobox_Select=index[0]
 
          ; GAUSSIAN controls.

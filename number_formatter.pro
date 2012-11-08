@@ -66,6 +66,12 @@
 ;     Fixed a problem exposed by using 10 or more digits in a double number in which
 ;        I was having number overflow problems. Changed 10L^decimals to 10LL^decimals. 
 ;        9 Apr 2012. DWF.
+;    At request of S. Illingworth I am now checking for non-finite NaN and Inf values 
+;        and returning either "NaN" or "Inf". 8 Nov 2012. DWF.
+;    Also, absolute values between 0 and 1 retain the requested number of digits in their
+;        results. For example, Number_Formatter(0.004567890, Decimals=2) returns "0.0046"
+;        and Number_Formatter(0.004567890, Decimals=4) returns "0.004568". 8 Nov 2012. DWF.
+;     
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -98,9 +104,10 @@ FUNCTION Number_Formatter, number, DECIMALS=decimals
 
    On_Error, 2
 
+
    IF N_Elements(number) EQ 0 THEN Message, 'A number must be passed as an argument to the function.'
    IF N_Elements(decimals) EQ 0 THEN decimals = 2
-
+   
    ; If the number is a byte, convert it to an integer and return it.
    IF Size(number[0], /TNAME) EQ 'BYTE' THEN RETURN, StrTrim(String(Fix(number), Format='(I3)'),2)
 
@@ -111,7 +118,27 @@ FUNCTION Number_Formatter, number, DECIMALS=decimals
    numElements = N_Elements(number)
    retValue = StrArr(numElements)
    FOR j=0,numElements-1 DO BEGIN
-
+   
+      ; Is the number a NaN?
+      IF ~Finite(number[j]) THEN BEGIN
+         IF Finite(number[j], /NAN) THEN retValue[j] = 'NaN'
+         IF Finite(number[j], /Infinity) THEN retValue[j] = 'Inf'
+      ENDIF
+      IF ~Finite(number[j]) THEN CONTINUE
+      
+      ; Is this a number between zero and 1? Then the number of decimals should
+      ; be adjusted to save the number of significant decimals in the fractional part of this
+      ; number. This works as long as the number of zeros in front of the first
+      ; significant digits doesn't exceed the number of decimals points asked for
+      ; and the "G" formatting doesn't push into exponetial territory.
+      IF (Abs(number[j]) GT 0.0) && (Abs(number[j]) LT 1.0) THEN BEGIN
+          savedecimals = decimals
+          exponents = 1. / 10.^Indgen(12)
+          index = Where(exponents LT Abs(number[j]), count)
+          IF count EQ 0 THEN thisIndex = 11 ELSE thisindex = index[0]
+          decimals = ((thisindex-1) + decimals)
+      ENDIF
+      
       ; Is the number a negative value? Deal only with positive values, until the end.
       IF number[j] LT 0.0 THEN minus = 1 ELSE minus = 0
       theNumber = Abs(number[j])
@@ -179,6 +206,8 @@ FUNCTION Number_Formatter, number, DECIMALS=decimals
 
             ENDCASE
 
+            ; If you changed the number of decimals you were using, put it back.
+            IF N_Elements(savedecimals) NE 0 THEN decimals = savedecimals
             END
 
          'DOUBLE': BEGIN

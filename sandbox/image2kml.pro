@@ -10,7 +10,8 @@
 ;      /Brewer, /Reverse, Transparent=50, Filename='avhrr_ndvi.kml', $
 ;      Description='AVHRR NDVI Data from Africa'
 ;      
-   zonefile = '\\paradox.warnercnr.colostate.edu\paradox\usr\dfanning\Amazon\Querencia\Zone\quer_zones_ext_60m.tif'
+   ;zonefile = '\\paradox.warnercnr.colostate.edu\paradox\usr\dfanning\Amazon\Querencia\Zone\quer_zones_ext_60m.tif'
+   zonefile = 'H:\Querencia\Zone\quer_zones_ext_60m.tif'
    zoneMap = cgGeoMap(zonefile, Image=zoneImage, Palette=palette)
 ;   zoneMap = cgGeoMap('zonal_map.tif', Image=zoneImage, Palette=palette)
    cgImage2KML, zoneImage, zoneMap, Palette=palette, Filename='zonemap.kml', Missing=0, Transparent=50, resize_factor=0.25

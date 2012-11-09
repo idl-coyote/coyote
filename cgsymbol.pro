@@ -38,7 +38,7 @@
 ;
 ;+
 ; This function provides a device-independent way to ask for commonly-used
-; symbols (e.g., less than or equal to, Angstrom, degree symbol, etc.),
+; symbols (e.g., less than or equal to, Angstrom, degree symbol, subscripts, superscripts, etc.),
 ; including all 24 Greek symbols in upper and lower case, to display with text.
 ;
 ; For this program to work correctly on your graphics display, you should be using
@@ -48,6 +48,10 @@
 ; `Greek Symbols <http://www.idlcoyote.com/ps_tips/greeksym.html>` are created by
 ; calling the Coyote Library routine `Greek <http://www.idlcoyote.com/programs/greek.pro>' 
 ; from this program.
+; 
+; Normally, rather than calling cgSymbol, the symbols are embedded in Coyote Graphics
+; text that are used for axis annotation and so forth. See `Embedding Symbols in Coyote
+; Graphics Output <http://www.idlcoyote.com/cg_tips/embedsymbols.php>`.
 ;
 ; :Categories:
 ;    Graphics
@@ -61,12 +65,20 @@
 ;  
 ;        IDL> cgPlot, findgen(11), XTitle='This title contains ' + $
 ;                 cgSymbol('psi') + ' as a Greek letter' 
+;        IDL> cgPlot, findgen(11), XTitle='This title contains $\psi$ as a Greek letter'
 ;
 ;     To create an Angstrom sign::
 ;  
 ;        IDL> cgPlot, findgen(11), XTitle='This title contains (' + $
 ;                cgSymbol('Angstrom') +  ') an Angstrom sign.' 
+;        IDL> cgPlot, findgen(11), XTitle='This title contains ($\Angstrom$) an Angstrom sign.'
 ;       
+;     To create subscripts or superscripts::
+;  
+;        IDL> cgPlot, findgen(11), XTitle='E=mc$\up2$' 
+;        IDL> cgPlot, findgen(11), XTitle='H$\sub2$O'
+;        IDL> cgPlot, findgen(11), XTitle='H$\upSuper$MT $\Omega$$\subSubscript$', Charsize=2.0
+;        
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
 ;           David W. Fanning 
@@ -80,6 +92,7 @@
 ;     Change History::
 ;        Written by: David W. Fanning, 2 September 2011. 
 ;        Added plus-minus symbol. 2 Nov 2011. DWF.
+;        Added "up", "down", "exp" "sub" and "n" symbols for subscripting and superscripting. 9 Nov 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -258,6 +271,11 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
             'varphi':  retSymbol = '!Z(03D5)'
             'infinity':retSymbol = '!Z(221E)'
             'copyright': retSymbol = '!Z(00A9)'
+            'up':      retSymbol = '!U'
+            'down':    retSymbol = '!D'
+            'exp':     retSymbol = '!E'
+            'sub':     retSymbol = '!I'
+            'n':       retSymbol = '!N'
             ELSE: Message, 'The symbol ' + symbol + ' is unrecognized.'
        ENDCASE
            
@@ -314,7 +332,12 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
             'varphi':  retSymbol = '!9' + String("152B) + '!X'
             'infinity':retSymbol = '!9' + String("245B) + '!X'
             'copyright':retSymbol = '!9' + String("323B) + '!X'
-            ELSE: Message, 'The symbol ' + symbol + ' is unrecognized.'
+            'up':      retSymbol = '!U'
+            'down':    retSymbol = '!D'
+            'exp':     retSymbol = '!E'
+            'sub':     retSymbol = '!I'
+            'n':       retSymbol = '!N'
+           ELSE: Message, 'The symbol ' + symbol + ' is unrecognized.'
         ENDCASE
     
     ENDIF ELSE BEGIN
@@ -356,6 +379,11 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
             'varphi':  retSymbol = '!9' + String("120B) + '!X'
             'infinity':retSymbol = '!9' + String("44B) + '!X'
             'copyright':retSymbol = '!3' + String("251B) + '!X'
+            'up':      retSymbol = '!U'
+            'down':    retSymbol = '!D'
+            'exp':     retSymbol = '!E'
+            'sub':     retSymbol = '!I'
+            'n':       retSymbol = '!N'
             ELSE: Message, 'The symbol ' + symbol + ' is unrecognized.'      
         ENDCASE
         

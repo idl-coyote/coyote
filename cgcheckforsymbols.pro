@@ -53,9 +53,9 @@
 ;          
 ; :Examples:
 ;    To create a plot that uses the Greek mu character on the X axis and
-;    the Angstrom symbol on the Y axis::
+;    the Angstrom squared symbol on the Y axis::
 ;    
-;       cgPlot, cgDemoData(1), XTitle='Length ($\mu$M)', YTitle='Distance ($\Angstrom$)'
+;       cgPlot, cgDemoData(1), XTitle='Length ($\mu$M)', YTitle='Distance ($\Angstrom$$\up2$)'
 
 ;       
 ; :Author:
@@ -70,6 +70,7 @@
 ; :History:
 ;     Change History::
 ;        Written by David W. Fanning, 27 July 2012.
+;        Modified to check for superscript and subscript codes. 9 November 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -107,7 +108,30 @@ FUNCTION cgCheckForSymbols, aString
                IF finalLoc NE -1 THEN BEGIN
                   token = StrMid(thisString, locStart+2, finalLoc)
                   strToReplace = StrMid(thisString, locStart, finalLoc+3)
-                  newString = StrMid(thisString, 0, locstart) + cgSymbol(token) + StrMid(thisString, locstart+3+StrLen(token))
+                  
+                  ; Special handling for superscripts and subscripts.
+                  CASE 1 OF
+                      StrUpCase(StrMid(strToReplace, 2, 2)) EQ 'UP': BEGIN
+                         replaceStr = '!U' + StrMid(strToReplace,4,StrLen(strToReplace)-5) + '!N'
+                         newString = StrMid(thisString, 0, locstart) + replaceStr + StrMid(thisString, locstart+3+StrLen(token))
+                         END
+                      StrUpCase(StrMid(strToReplace, 2, 4)) EQ 'DOWN': BEGIN
+                         replaceStr = '!D' + StrMid(strToReplace,6,StrLen(strToReplace)-7) + '!N'
+                         newString = StrMid(thisString, 0, locstart) + replaceStr + StrMid(thisString, locstart+3+StrLen(token))
+                         END
+                      StrUpCase(StrMid(strToReplace, 2, 3)) EQ 'EXP': BEGIN
+                         replaceStr = '!E' + StrMid(strToReplace,5,StrLen(strToReplace)-6) + '!N'
+                         newString = StrMid(thisString, 0, locstart) + replaceStr + StrMid(thisString, locstart+3+StrLen(token))
+                         END
+                      StrUpCase(StrMid(strToReplace, 2, 3)) EQ 'SUB': BEGIN
+                         replaceStr = '!I' + StrMid(strToReplace,5,StrLen(strToReplace)-6) + '!N'
+                         newString = StrMid(thisString, 0, locstart) + replaceStr + StrMid(thisString, locstart+3+StrLen(token))
+                         END
+
+                     ELSE: newString = StrMid(thisString, 0, locstart) + cgSymbol(token) + StrMid(thisString, locstart+3+StrLen(token))
+
+                  ENDCASE
+                  
                   thisString = cgCheckForSymbols(newString)
                ENDIF
                

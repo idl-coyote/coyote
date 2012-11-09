@@ -119,7 +119,7 @@ FUNCTION cgNumber_Formatter, number, DECIMALS=decimals
       ; number. This works as long as the number of zeros in front of the first
       ; significant digits doesn't exceed the number of decimals points asked for
       ; and the "G" formatting doesn't push into exponetial territory.
-      IF (Abs(number[j]) GT 0.0) && (Abs(number[j]) LT 1.0) THEN BEGIN
+      IF (Abs(number[j]) GT 0.0001) && (Abs(number[j]) LT 1.0) THEN BEGIN
           savedecimals = decimals
           exponents = 1. / 10.^Indgen(12)
           index = Where(exponents LT Abs(number[j]), count)

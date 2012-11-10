@@ -174,7 +174,8 @@
 ;     ztitle: in, optional, type=string
 ;        The Z title of the plot.
 ;     _ref_extra: in, optional, type=any
-;         Any keyword appropriate for the IDL Surface command is allowed in the program.
+;        Any keyword appropriate for the `IDL Surface command 
+;        <http://www.exelisvis.com/docs/SURFACE_Procedure.html>` is allowed in the program.
 ;
 ; :Examples:
 ;    Use as you would use the IDL SURFACE of SHADE_SURF command::

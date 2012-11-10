@@ -82,6 +82,9 @@
 ;     background: in, optional, type=string/integer, default='background'
 ;        If this keyword is a string, the name of the background color. 
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     c_annotation: in, optional, type=string
+;        The label to be drawn on each contour. Normally contours are labeled with their
+;        value. This vector of strings may substitute for those values.
 ;     c_colors: in, optional, type=integer/string vector
 ;        Set to the index values of the contour colors or to named colors. Must contain
 ;        the same number of colors as the number of requested contour levels.
@@ -241,7 +244,8 @@
 ;     ytitle: in, optional, type=string
 ;        Set this keyword to the Y title of the plot.
 ;     _ref_extra: in, optional, type=any
-;        Any keyword appropriate for the IDL Contour command is allowed in the program.
+;        Any keyword appropriate for the `IDL Contour command 
+;        <http://www.exelisvis.com/docs/CONTOUR_Procedure.html>` is allowed in the program.
 ;
 ; :Examples:
 ;    Use as you would use the IDL CONTOUR command::
@@ -345,6 +349,7 @@
 ;            advanced. Added a fix to make sure the repair is to the correct multi plot. 20 April 2012. DWF.           
 ;        Added an ASPECT keyword to maintain the program aspect ratio. 12 July 2012. DWF.
 ;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
+;        Added C_ANNOTATION keyword. 10 Nov 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -355,6 +360,7 @@ PRO cgContour, data, x, y, $
     AXISCOLOR=saxiscolor, $
     AXESCOLOR=saxescolor, $
     BACKGROUND=sbackground, $
+    C_ANNOTATION=c_annotation, $
     C_CHARSIZE=c_charsize, $
     C_COLORS=c_colors, $
     C_LABELS=c_labels, $
@@ -441,6 +447,7 @@ PRO cgContour, data, x, y, $
                 AXISCOLOR=saxiscolor, $
                 AXESCOLOR=saxescolor, $
                 BACKGROUND=sbackground, $
+                C_ANNOTATION=c_annotation, $
                 C_CHARSIZE=c_charsize, $
                 C_COLORS=c_colors, $
                 C_LABELS=c_labels, $
@@ -494,6 +501,7 @@ PRO cgContour, data, x, y, $
             AXISCOLOR=saxiscolor, $
             AXESCOLOR=saxescolor, $
             BACKGROUND=sbackground, $
+            C_ANNOTATION=c_annotation, $
             C_CHARSIZE=c_charsize, $
             C_COLORS=c_colors, $
             C_LABELS=c_labels, $
@@ -649,6 +657,11 @@ PRO cgContour, data, x, y, $
           TT_FONT=ps_tt_font, $
           QUIET=1
     
+    ENDIF
+    
+    ; If you supplied annotation, check it for embedded symbols.
+    IF N_Elements(c_annotation) NE 0 THEN BEGIN
+        FOR j=0,N_Elements(c_annotation)-1 DO c_annotation[j] = cgCheckForSymbols(c_annotation[j])
     ENDIF
    
     IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
@@ -1053,7 +1066,8 @@ PRO cgContour, data, x, y, $
        LEVELS=levels, C_Labels=c_labels, C_COLORS=con_colors, XTHICK=xthick, YTHICK=ythick, $
        POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, T3D=t3d, CHARSIZE=charsize, $
        FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize, XTICKLEN=xticklen, YTICKLEN=yticklen, $
-       XTICKV=xtickv, XTICKS=xticks, YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip
+       XTICKV=xtickv, XTICKS=xticks, YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip, $
+       C_ANNOTATION=c_annotation
        
     ; If this is a filled contour plot, and the OUTLINE keyword is set, then draw the contour
     ; outlines over the top of the data. 

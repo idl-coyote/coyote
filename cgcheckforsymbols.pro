@@ -38,7 +38,13 @@
 ; The purpose of this funciton is to check a string for symbols, encased in escape
 ; characters, that should be revolved with cgSymbol. The cgSymbol name will appear
 ; with the characters "$\" prepended to the name, and the character "$" appended. All
-; Greek characters and other symbols supported by cgSymbol are allowed.
+; Greek characters and other symbols supported by cgSymbol are allowed. Also,
+; subscripts and superscripts are allowed::
+;     $\upTEXT$ : Raise the text in TEXT to superscript level and reduce character size by 62%.
+;     $\extTEXT$ : Raise the text in TEXT to superscript level and reduce character size by 44%.
+;     $\downTEXT$ : Lower the text in TEXT to subscript level and reduce character size by 62%.
+;     $\subTEXT$ : Lower the text in TEXT to subscript level and reduce character size by 44%.
+;     
 ;
 ; :Categories:
 ;    Utilities

@@ -244,8 +244,8 @@
 ;     ytitle: in, optional, type=string
 ;        Set this keyword to the Y title of the plot.
 ;     _ref_extra: in, optional, type=any
-;        Any keyword appropriate for the `IDL Contour command 
-;        <http://www.exelisvis.com/docs/CONTOUR_Procedure.html>` is allowed in the program.
+;        Any keyword appropriate for the `IDL Contour command <http://www.exelisvis.com/docs/CONTOUR_Procedure.html>` 
+;        is allowed in the program.
 ;
 ; :Examples:
 ;    Use as you would use the IDL CONTOUR command::
@@ -261,7 +261,7 @@
 ;       cgContour, data, /ONIMAGE
 ;          
 ;       
-;       See `Device Independent Contour Plots <http://www.idlcoyote.com/graphics_tips/cgcontour.html>' 
+;       See `Device Independent Contour Plots <http://www.idlcoyote.com/graphics_tips/cgcontour.html>` 
 ;       for additional examples.
 ;
 ; :Author:

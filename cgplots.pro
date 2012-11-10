@@ -87,8 +87,8 @@
 ;     window: in, optional, type=boolean, default=0
 ;         Set this keyword to add the command to the current cgWindow application.
 ;     _extra: in, optional, type=any
-;        Any keyword appropriate for the `IDL PlotS command 
-;        <http://www.exelisvis.com/docs/PLOTS_Procedure.html>` is allowed in the program.
+;        Any keyword appropriate for the `IDL PlotS command <http://www.exelisvis.com/docs/PLOTS_Procedure.html>` 
+;        is allowed in the program.
 ;         
 ; :Examples:
 ;    Use like the IDL PLOTS command::

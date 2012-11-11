@@ -247,7 +247,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
     IF N_Elements(background) EQ 0 THEN BEGIN
         background = d_background
         IF N_Elements(command) EQ 0 THEN eraseit = 1
-        IF (N_Elements(command) NE 0) && CoyoteGraphic(command) THEN eraseit = 1
+        IF (N_Elements(command) NE 0) && cgCoyoteGraphic(command) THEN eraseit = 1
     ENDIF ELSE BEGIN
         eraseit = 1
     ENDELSE

@@ -104,8 +104,8 @@
 ;     window: in, optional, type=boolean
 ;         Set this keyword to add the command to the in the current cgWindow application.
 ;     _ref_extra: in, optional
-;        Any keyword appropriate for the `IDL XYOutS command <http://www.exelisvis.com/docs/XYOUTS_Procedure.html>` 
-;        is allowed in the program.
+;        Any `IDL XYOutS keyword <http://www.exelisvis.com/docs/XYOUTS_Procedure.html>` 
+;        not defined here is allowed in the program.
 ;     
 ;          
 ; :Examples:

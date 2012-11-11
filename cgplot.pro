@@ -161,7 +161,8 @@
 ;     ytitle: in, optional, type=string
 ;         The Y title of the plot.
 ;     _ref_extra: in, optional, type=any
-;        Any keyword appropriate for the `IDL Plot command <http://www.exelisvis.com/docs/PLOT_Procedure.html>` is allowed in the program.
+;        Any `IDL Plot keyword <http://www.exelisvis.com/docs/PLOT_Procedure.html>` 
+;        not defined here is allowed in the program.
 ;
 ; :Examples:
 ;    Use as you would use the IDL PLOT command::

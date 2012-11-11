@@ -76,7 +76,7 @@
 ;     psym: in, optional, type=integer
 ;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
 ;        routine cgSYMCAT. An integer between 0 and 46. May also be specified as a
-;        symbol names. See cgSymCat for details.
+;        symbol names. See `cgSymCat` for details.
 ;     symcolor: in, optional, type=string/integer/vector, default=COLOR
 ;        If this keyword is a string, the name of the symbol color. By default, same as COLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -87,8 +87,8 @@
 ;     window: in, optional, type=boolean, default=0
 ;         Set this keyword to add the command to the current cgWindow application.
 ;     _extra: in, optional, type=any
-;        Any keyword appropriate for the `IDL PlotS command <http://www.exelisvis.com/docs/PLOTS_Procedure.html>` 
-;        is allowed in the program.
+;        Any `IDL PlotS keyword <http://www.exelisvis.com/docs/PLOTS_Procedure.html>` 
+;        not defined here is allowed in the program.
 ;         
 ; :Examples:
 ;    Use like the IDL PLOTS command::

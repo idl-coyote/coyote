@@ -120,6 +120,7 @@
 ;        I added a new method, ReplaceEscapeSequences, that can evaluate escape sequences in
 ;             string parameters and keywords to call the appropriate cgSymbol value at run-time.
 ;             This eliminates the need for alternate keywords. 27 July 2012. DWF.
+;        Added WDestroyObjects keyword to destroy objects parameters, if needed. 11 November 2012. DWF.
 ;-
 
 
@@ -214,6 +215,9 @@
 ;       The aspect ratio is calculated as (ysize/xsize). Must be a float value.
 ;       If this keyword is set, the window will maintain this aspect ratio,
 ;       even when it is resized.
+;    wdestroyobjects: in, optional, type=boolean, default=0
+;       If this keyword is set, and any of the input parameters p1-p4 is an object,
+;       the object parameter will be destroyed when the window is destroyed.
 ;    wheel_events: in, optional, type=boolean
 ;       Set this keyword to turn wheel events on for the draw widget.
 ;    wtitle: in, optional, type=string, default='Resizeable Graphics Window'
@@ -261,6 +265,7 @@ FUNCTION cgCmdWindow::Init, parent, $
    Storage=storage, $               ; A storage pointer location. Used like a user value in a widget.
    Tracking_Events=tracking_events, $ ; Set this keyword to allow tracking events in the draw widget.
    WAspect = waspect, $             ; Set the window aspect ratio to this value.
+   WDestroyObjects=wdestroyobjects, $ ; Set this keyword to destroy object parameters upon exit.
    Wheel_Events=wheel_events, $     ; Set this keyword to allow wheel events in the draw widget.
    WTitle = title, $                ; The window title.
    WXPos = xpos, $                  ; The X offset of the window on the display. The window is centered if not set.
@@ -356,7 +361,9 @@ FUNCTION cgCmdWindow::Init, parent, $
     ; Add a command, if you have one. Otherwise, just make the window.
     IF (N_Elements(command) NE 0) THEN BEGIN
         thisCommand = Obj_New('cgWindow_Command', COMMAND=command, $
-                P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, TYPE=method, ALTPS_KEYWORDS=altps_Keywords, ALTPS_PARAMS=altps_Params)
+                P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, TYPE=method, $
+                ALTPS_KEYWORDS=altps_Keywords, ALTPS_PARAMS=altps_Params, $
+                DESTROYOBJECTS=Keyword_Set(wdestroyobjects))
         IF Obj_Valid(thisCommand) THEN self.cmds -> Add, thisCommand ELSE Message, 'Failed to make command object.'
     ENDIF 
     
@@ -506,6 +513,7 @@ FUNCTION cgCmdWindow::Init, parent, $
     IF N_Elements(yomargin) NE 0 THEN self.yomargin = yomargin ELSE self.yomargin = d_yomargin
     self.adjustsize = d_adjustsize
     self.createParent = createParent
+    self.destroyObjects = Keyword_Set(wdestroyobjects)
     self.im_transparent = d_im_transparent
     self.im_density = d_im_density
     self.im_options = d_im_options
@@ -609,7 +617,7 @@ PRO cgCmdWindow::Cleanup
         void = Error_Message()
         RETURN
     ENDIF
-
+    
     ; Free any pointers.
     Ptr_Free, self.background
     Ptr_Free, self.r
@@ -702,21 +710,36 @@ FUNCTION cgWindow_Command::Copy
     IF Ptr_Valid(self.keywords) THEN BEGIN
     
         CASE self.nparams OF
-           0: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, KEYWORDS=*self.keywords, TYPE=self.type)
-           1: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, KEYWORDS=*self.keywords, TYPE=self.type)
-           2: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, KEYWORDS=*self.keywords, TYPE=self.type)
-           3: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, P3=*self.p3, KEYWORDS=*self.keywords, TYPE=self.type)
-           4: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, P3=*self.p3, P4=*self.p4, KEYWORDS=*self.keywords, TYPE=self.type)
+           0: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, $
+                KEYWORDS=*self.keywords, TYPE=self.type, $
+                DESTROYOBECTS=self.destroyObjects)
+           1: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, $
+                KEYWORDS=*self.keywords, TYPE=self.type, $
+                DESTROYOBECTS=self.destroyObjects)
+           2: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, $
+                KEYWORDS=*self.keywords, TYPE=self.type, $
+                DESTROYOBECTS=self.destroyObjects)
+           3: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, $
+                P3=*self.p3, KEYWORDS=*self.keywords, TYPE=self.type, $
+                DESTROYOBECTS=self.destroyObjects)
+           4: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, $
+                P3=*self.p3, P4=*self.p4, KEYWORDS=*self.keywords, TYPE=self.type, $
+                DESTROYOBECTS=self.destroyObjects)
         ENDCASE
         
     ENDIF ELSE BEGIN
     
         CASE self.nparams OF
-           0: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, TYPE=self.type)
-           1: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, TYPE=self.type)
-           2: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, TYPE=self.type)
-           3: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, p2=*self.p2, P3=*self.p3, TYPE=self.type)
-           4: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, p2=*self.p2, P3=*self.p3, P4=*self.p4, TYPE=self.type)
+           0: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, $
+                TYPE=self.type, DESTROYOBECTS=self.destroyObjects)
+           1: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, $
+                 TYPE=self.type, DESTROYOBECTS=self.destroyObjects)
+           2: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, $
+                 TYPE=self.type, DESTROYOBECTS=self.destroyObjects)
+           3: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, p2=*self.p2, P3=*self.p3, $
+                 TYPE=self.type, DESTROYOBECTS=self.destroyObjects)
+           4: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, p2=*self.p2, P3=*self.p3, P4=*self.p4, $
+                 TYPE=self.type, DESTROYOBECTS=self.destroyObjects)
         ENDCASE
     
     ENDELSE
@@ -1087,6 +1110,14 @@ END ;---------------------------------------------------------------------------
 ; The clean-up routine for the command object.
 ;-
 PRO cgWindow_Command::Cleanup
+
+    ; Need to destroy parameter objects?
+    IF self.destroyobjects THEN BEGIN
+       IF Ptr_Valid(self.p1) && Obj_Valid(*self.p1) THEN Obj_Destroy, *self.p1
+       IF Ptr_Valid(self.p2) && Obj_Valid(*self.p2) THEN Obj_Destroy, *self.p2
+       IF Ptr_Valid(self.p3) && Obj_Valid(*self.p3) THEN Obj_Destroy, *self.p3
+       IF Ptr_Valid(self.p4) && Obj_Valid(*self.p4) THEN Obj_Destroy, *self.p4
+    ENDIF
     Ptr_Free, self.p1
     Ptr_Free, self.p2
     Ptr_Free, self.p3
@@ -1109,6 +1140,9 @@ END ;---------------------------------------------------------------------------
 ;       when the PostScript device is the current graphics device.
 ;   command: in, required, type=string
 ;       The command that is being stored in the command object.
+;   destroyobjects: in, optional, type=boolean, default=0
+;       If this keyword is set, and any of the input parameters p1-p4 is an object,
+;       the object parameter will be destroyed when the window is destroyed.
 ;   keywords: in, optional, type=structure
 ;       A structure containing keyword:value pairs to be executed
 ;       with the command.
@@ -1131,6 +1165,7 @@ FUNCTION cgWindow_Command::INIT, $
     ALTPS_KEYWORDS=altps_keywords, $
     ALTPS_PARAMS=altps_params, $
     COMMAND=command, $
+    DESTROYOBJECTS=destroyObjects, $
     KEYWORDS=keywords, $
     P1=p1, P2=p2, P3=p3, P4=p4, $
     TYPE=type
@@ -1153,6 +1188,7 @@ FUNCTION cgWindow_Command::INIT, $
     IF N_Elements(keywords) NE 0 THEN self.keywords = Ptr_New(keywords)
     IF N_Elements(altps_keywords) NE 0 THEN self.altps_keywords = Ptr_New(altps_keywords)
     IF N_Elements(altps_params) NE 0 THEN self.altps_params = Ptr_New(altps_params)
+    self.destroyobjects = Keyword_Set(destroyObjects)
     self.type = Keyword_Set(type)
     self.nparams = (N_Elements(p1) NE 0) + (N_Elements(p2) NE 0) + (N_Elements(p3) NE 0) + (N_Elements(p4) NE 0)
     RETURN, 1
@@ -1196,6 +1232,7 @@ PRO cgWindow_Command__Define
               p4: Ptr_New(), $           ; The fourth parameter.
               nparams: 0, $              ; The number of parameters.
               keywords: Ptr_New(), $     ; The command keywords.
+              destroyobjects: 0B, $      ; A flag to destroy parameter objects upon exit.
               altps_keywords: Ptr_New(), $ ; Structure of keywords to evaluate at run-time.
               altps_params: Ptr_New(), $  ; Structure of parameters to evaluate at run-time.
               type: 0 $                  ; =0 call_procedure =1 call_method
@@ -2339,6 +2376,7 @@ FUNCTION cgCmdWindow::PackageCommand, command, p1, p2, p3, p4, $
    AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
    AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. 
    CmdIndex=cmdIndex, $             ; The location of the command in the command list.
+   DestroyObjects=destroyobjects, $ ; Set this keyword to destroy parameter objects on exit.
    Execute=execute, $               ; Execute the commands in the window, if this keyword set.
    Method=method, $                 ; A flag that indicates a method call.
    Multi=multi, $                   ; If you are replacing all commands, you may want to change the way they are displayed.
@@ -2357,7 +2395,7 @@ FUNCTION cgCmdWindow::PackageCommand, command, p1, p2, p3, p4, $
 
    newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
       P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
-      AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
+      AltPS_Params=altps_Params, TYPE=Keyword_Set(method), DESTROYOBECTS=Keyword_Set(destroyObjects))
                         
     ; Replace command? If the cmdIndex is undefined, ALL commands are replaced.
     IF Keyword_Set(replaceCmd) THEN self -> ReplaceCommand, newCommand, cmdIndex, Multi=multi
@@ -3069,6 +3107,7 @@ PRO cgCmdWindow__Define, class
               cmds: Obj_New(), $            ; A linkedlist object containing the graphics commands.
               wid: 0L, $                    ; The window index number of the graphics window.
               drawid: 0L, $                 ; The identifier of the draw widget.
+              destroyObjects: 0B, $         ; If set, destroy object parameters upon exit.
               event_handler: "", $          ; The name of an event handler that will receive draw widget events.
               storage: Ptr_New(), $         ; Holder for user information, like UVALUE.
               title: "", $                  ; The "title" of the object when it is stored.

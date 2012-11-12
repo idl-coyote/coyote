@@ -4,9 +4,8 @@
 ;   cgCoyoteGraphic
 ;
 ; PURPOSE:
-;   This simple just identifies a routine as a Coyote Graphic routine. It is written
-;   primarily so I can identify such routines before I assign a background color to
-;   a graphics window.
+;   This simply identifies a routine as a Coyote Graphic routine. It is written
+;   so I can identify such routines in cgWindow before I assign a background color.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -37,16 +36,15 @@
 ;******************************************************************************************;
 ;
 ;+
-;   This simple just identifies a routine as a Coyote Graphic routine. It is written
-;   primarily so I can identify such routines before I assign a background color to
-;   a graphics window.
+; This simply identifies a routine as a Coyote Graphics routine. It is written
+; so I can identify such routines in cgWindow before I assign a background color.
 ;
 ; :Categories:
 ;    Graphics
 ;    
 ; :Examples:
-;    Used in graphics programs::
-;       IDL> IF CoyoteGraphic() THEN background = 'white'
+;    Used in Coyote Graphics programs::
+;       IDL> IF cgCoyoteGraphic('cgDraw_ROI') THEN background = 'white'
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::

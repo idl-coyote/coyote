@@ -189,6 +189,9 @@
 ;    wbackground: in, optional, type=varies, default=!P.Background
 ;       The background color of the window. Specifying a background color 
 ;       automatically sets the WErase keyword.
+;    wdestroyobjects: in, optional, type=boolean, default=0
+;       If this keyword is set, and any of the input parameters p1-p4 is an object,
+;       the object parameter will be destroyed when the window is destroyed.
 ;    werase: in, optional, type=boolean, default=0
 ;       Set this keyword to cause the window to be erased before graphics commands 
 ;       are drawn. This may need to be set, for example, to display images.
@@ -295,6 +298,7 @@
 ;         Fixed a small type with the Outside Margin keywords that was preventing these from being used. 19 April 2012. DWF.
 ;         In decompling cgWindow from cgCmdWindow, I accidentally named the WASPECT keyword ASPECT. Restored
 ;             original name in this version. 13 July 2012. DWF.
+;         Added WDestroyObjects keyword to destroy objects parameters, if needed. 11 November 2012. DWF.
 ;-
 PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.
@@ -314,6 +318,7 @@ PRO cgWindow, $
    ReplaceCmd=replacecmd, $         ; Set this keyword to replace a command in the window.
    WAspect = waspect, $             ; Set the window aspect ratio to this value.
    WBackground = wbackground, $     ; The background color. Set to !P.Background by default.
+   WDestroyObjects=wdestroyobjects, $ ; Set this keyword to destroy object parameters upon exit.
    WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.
    WinID=winid, $                   ; Set this keyword to select an cgWindow.
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.   
@@ -335,6 +340,7 @@ PRO cgWindow, $
         void = Error_Message(Traceback=0)
         RETURN
     ENDIF
+    destroyObjects = Keyword_Set(wdestroyobjects)
 
     ; Did the user want to execute the commands in the window?
     IF N_Elements(executeCmd) NE 0 THEN BEGIN
@@ -455,7 +461,8 @@ PRO cgWindow, $
                         Message, 'The maximum number of positional command parameters allowed is four.'
                     newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
-                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
+                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method), $
+                        DESTROYOBECTS=destroyObjects)
                         
                     ; If the cmdIndex is undefined, ALL current commands in the window are replaced.
                     thisWindowStruct.windowObj -> ReplaceCommand, newCommand, cmdIndex, MULTI=wmulti
@@ -491,7 +498,8 @@ PRO cgWindow, $
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
-                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
+                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method), $
+                        DESTROYOBECTS=destroyObjects)
                     thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                 ENDIF ELSE BEGIN
                     Message, 'The cgWindow referred to does not exist.'
@@ -524,7 +532,8 @@ PRO cgWindow, $
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
-                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
+                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method), $
+                        DESTROYOBECTS=destroyObjects)
                     thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                     thisWindowStruct.windowObj -> ExecuteCommands
                 ENDIF ELSE BEGIN
@@ -553,6 +562,7 @@ PRO cgWindow, $
        OXMargin = woxMargin, $          ; The X outside margin.
        OYMargin = woymargin, $          ; The Y outside margin.
        WAspect = waspect, $             ; Set the window aspect ratio to this value.
+       WDestroyObjects=wdestroyobjects, $ ; Set this keyword to destroy object parameters upon exit.
        WXSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 400.
        WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 400.
        WTitle = wtitle, $               ; The window title.

@@ -181,6 +181,9 @@
 ;    wbackground: in, optional, type=varies, default=!P.Background
 ;       The background color of the window. Specifying a background color 
 ;       automatically sets the WErase keyword.
+;    wdestroyobjects: in, optional, type=boolean, default=0
+;       If this keyword is set, and any of the input parameters p1-p4 is an object,
+;       the object parameter will be destroyed when the window is destroyed.
 ;    werase: in, optional, type=boolean, default=0
 ;       Set this keyword to cause the window to be erased before graphics commands 
 ;       are drawn. This may need to be set, for example, to display images.
@@ -246,6 +249,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 7 February 2012, based on cgWindow, by David W. Fanning.
+;        Added WDESTROYOBJECTS keyword. 11 Nov 2012. DWF.
 ;-
 FUNCTION cgPixmap, $
    command, $                       ; The graphics "command" to execute.
@@ -265,6 +269,7 @@ FUNCTION cgPixmap, $
    ReplaceCmd=replacecmd, $         ; Set this keyword to replace a command in the window.
    WAspect = waspect, $             ; Set the window aspect ratio to this value.
    WBackground = wbackground, $     ; The background color. Set to !P.Background by default.
+   WDestroyObjects=wdestroyobjects, $ ; Set this keyword to destroy object parameters upon exit.
    WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.
    WinID=winid, $                   ; Set this keyword to select an cgPixmap.
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.   
@@ -406,7 +411,8 @@ FUNCTION cgPixmap, $
                         Message, 'The maximum number of positional command parameters allowed is four.'
                     newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
-                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
+                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method), $
+                        DESTROYOBJECTS=Keyword_Set(wdestroyObjects))
                         
                     ; If the cmdIndex is undefined, ALL current commands in the window are replaced.
                     thisWindowStruct.windowObj -> ReplaceCommand, newCommand, cmdIndex, MULTI=wmulti
@@ -442,7 +448,8 @@ FUNCTION cgPixmap, $
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
-                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
+                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method), $
+                        DESTROYOBJECTS=Keyword_Set(wdestroyObjects))
                     thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                 ENDIF ELSE BEGIN
                     Message, 'The cgPixmap referred to does not exist.'
@@ -475,7 +482,8 @@ FUNCTION cgPixmap, $
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
-                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method))
+                        AltPS_Params=altps_Params, TYPE=Keyword_Set(method), $
+                        DESTROYOBJECTS=Keyword_Set(wdestroyObjects))
                     thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                     thisWindowStruct.windowObj -> ExecuteCommands
                 ENDIF ELSE BEGIN
@@ -501,6 +509,7 @@ FUNCTION cgPixmap, $
        Background = wbackground, $      ; The background color. Not used unless set.
        Multi = wmulti, $                ; Set this in the same way !P.Multi is used.
        Erase = weraseit, $              ; Set this keyword to erase the display before executing the command.
+       WDestroyObjects=wdestroyobjects, $ ; Set this keyword to destroy object parameters upon exit.
        WXSize = wxsize, $               ; The X size of the cgPixmap graphics window in pixels. By default: 400.
        WYSize = wysize )                ; The Y size of the cgPixmap graphics window in pixels. By default: 400.
         

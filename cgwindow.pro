@@ -462,7 +462,7 @@ PRO cgWindow, $
                     newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
                         AltPS_Params=altps_Params, TYPE=Keyword_Set(method), $
-                        DESTROYOBECTS=destroyObjects)
+                        DESTROYOBJECTS=Keyword_Set(wdestroyObjects))
                         
                     ; If the cmdIndex is undefined, ALL current commands in the window are replaced.
                     thisWindowStruct.windowObj -> ReplaceCommand, newCommand, cmdIndex, MULTI=wmulti
@@ -499,7 +499,7 @@ PRO cgWindow, $
                     newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
                         AltPS_Params=altps_Params, TYPE=Keyword_Set(method), $
-                        DESTROYOBECTS=destroyObjects)
+                        DESTROYOBJECTS=Keyword_Set(wdestroyObjects))
                     thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                 ENDIF ELSE BEGIN
                     Message, 'The cgWindow referred to does not exist.'
@@ -533,7 +533,7 @@ PRO cgWindow, $
                     newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
                         AltPS_Params=altps_Params, TYPE=Keyword_Set(method), $
-                        DESTROYOBECTS=destroyObjects)
+                        DESTROYOBJECTS=Keyword_Set(wdestroyObjects))
                     thisWindowStruct.windowObj -> AddCommand, newCommand, INDEX=cmdIndex
                     thisWindowStruct.windowObj -> ExecuteCommands
                 ENDIF ELSE BEGIN

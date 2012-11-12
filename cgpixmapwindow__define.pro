@@ -63,6 +63,7 @@
 ;     Change History::
 ;        Created from cgCmdWindow, 7 February 2012. DWF.
 ;        Problem with the ASPECT keyword, which should have been named WASPECT. 7 Oct 2012. DWF.
+;        Added WDestroyObjects keyword to destroy objects parameters, if needed. 11 November 2012. DWF.
 ;-
 
 ;+
@@ -133,6 +134,9 @@
 ;       The aspect ratio is calculated as (ysize/xsize). Must be a float value.
 ;       If this keyword is set, the window will maintain this aspect ratio,
 ;       even when it is resized.
+;    wdestroyobjects: in, optional, type=boolean, default=0
+;       If this keyword is set, and any of the input parameters p1-p4 is an object,
+;       the object parameter will be destroyed when the window is destroyed.
 ;    wxsize: in, optional, type=integer, default=640
 ;       The x size in device coordinates of the graphics window.
 ;    wysize: in, optional, type=integer, default=512
@@ -159,6 +163,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
    Storage=storage, $               ; A storage pointer location. Used like a user value in a widget.
    Visible=visible, $               ; Set this keyword to make the pixmap visible.
    WAspect = waspect, $             ; Set the window aspect ratio to this value.
+   WDestroyObjects=wdestroyobjects, $ ; Set this keyword to destroy object parameters upon exit.
    WXSize = xsize, $                ; The X size of the cgWindow graphics window in pixels. By default: 400.
    WYSize = ysize, $                ; The Y size of the cgWindow graphics window in pixels. By default: 400.
    _Extra = extra                   ; Any extra keywords. Usually the "command" keywords.
@@ -260,7 +265,9 @@ FUNCTION cgPixmapWindow::INIT, parent, $
     ; Add a command, if you have one. Otherwise, just make the window.
     IF (N_Elements(command) NE 0) THEN BEGIN
         thisCommand = Obj_New('cgWindow_Command', COMMAND=command, $
-                P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, TYPE=method, ALTPS_KEYWORDS=altps_Keywords, ALTPS_PARAMS=altps_Params)
+                P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, TYPE=method, $
+                ALTPS_KEYWORDS=altps_Keywords, ALTPS_PARAMS=altps_Params, $
+                DESTROYOBJECTS=Keyword_Set(wdestroyobjects))
         IF Obj_Valid(thisCommand) THEN self.cmds -> Add, thisCommand ELSE Message, 'Failed to make command object.'
     ENDIF 
     
@@ -315,6 +322,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
     IF N_Elements(wxomargin) NE 0 THEN self.xomargin = xomargin ELSE self.xomargin = d_xomargin
     IF N_Elements(wyomargin) NE 0 THEN self.yomargin = yomargin ELSE self.yomargin = d_yomargin
     self.adjustsize = d_adjustsize
+    self.destroyObjects = Keyword_Set(wdestroyobjects)
     self.im_transparent = d_im_transparent
     self.im_density = d_im_density
     self.im_options = d_im_options

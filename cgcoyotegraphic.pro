@@ -76,6 +76,7 @@ FUNCTION cgCoyoteGraphic, routine
       'CGCONTOUR', $
       'CGDCBAR', $
       'CGDISPLAY', $
+      'CGDOTPLOT', $
       'CGDRAW_ROI', $
       'CGDRAWSHAPES', $
       'CGERASE', $

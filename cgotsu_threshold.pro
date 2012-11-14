@@ -103,7 +103,8 @@
 ;       The list of reverse indices returned from the HISTOGRAM command. (See HISTOGRAM documentation.)
 ;          
 ; :Examples:
-;    An example of ::
+;    I use the program to separate LandSat red band images into two groups of pixels::
+;         threshold = cgOTSU_Threshold(redBand)
 ;        
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -244,7 +245,7 @@ FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
    maxDC = omax
 
    ; Iterate through all possible thresholds and compute the interclass variance
-   ; at each level
+   ; at each level.
    cdf = Total(pdf, /DOUBLE, /CUMULATIVE)
    omega1 = cdf[0:N_Elements(pdf)-2]
    mu1 = Total(pdf * Indgen(maxDC), /DOUBLE, /CUMULATIVE) / cdf
@@ -253,12 +254,12 @@ FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
    interclassVariance = [0, omega1 * omega2 * (mu1 - mu2)^2]
 
    ; Determine the threshold by finding the level at which the maximum interclass
-   ; variance occurs
+   ; variance occurs.
    maximumVariance = Max(interclassVariance, threshold)
    threshold = threshold + minimumDC
 
    ; Clean up.
-   !Except = Except
+   !Except = except
    
    ; Return result.
    RETURN, threshold

@@ -1,3 +1,148 @@
+; docformat = 'rst'
+;
+; NAME:
+;   cgDotPlot
+;
+; PURPOSE:
+;   The purpose of cgDotPlot is to create a "dot plot" of the sort described on this web page:
+;   http://peltiertech.com/Utility/DotPlotUtility.html.
+;
+;******************************************************************************************;
+;                                                                                          ;
+;  Copyright (c) 2012, by Fanning Software Consulting, Inc. All rights reserved.           ;
+;                                                                                          ;
+;  Redistribution and use in source and binary forms, with or without                      ;
+;  modification, are permitted provided that the following conditions are met:             ;
+;                                                                                          ;
+;      * Redistributions of source code must retain the above copyright                    ;
+;        notice, this list of conditions and the following disclaimer.                     ;
+;      * Redistributions in binary form must reproduce the above copyright                 ;
+;        notice, this list of conditions and the following disclaimer in the               ;
+;        documentation and/or other materials provided with the distribution.              ;
+;      * Neither the name of Fanning Software Consulting, Inc. nor the names of its        ;
+;        contributors may be used to endorse or promote products derived from this         ;
+;        software without specific prior written permission.                               ;
+;                                                                                          ;
+;  THIS SOFTWARE IS PROVIDED BY FANNING SOFTWARE CONSULTING, INC. ''AS IS'' AND ANY        ;
+;  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES    ;
+;  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT     ;
+;  SHALL FANNING SOFTWARE CONSULTING, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,             ;
+;  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED    ;
+;  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;         ;
+;  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND             ;
+;  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
+;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
+;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
+;******************************************************************************************;
+;
+;+
+; The purpose of cgDotPlot is to create a "dot plot" of the sort described on this 
+; `web page <http://peltiertech.com/Utility/DotPlotUtility.html>`.
+;
+; :Categories:
+;    Graphics
+;    
+; :Params:
+;    labels: in, required, type=strarr
+;         A vector of string labels to be plotted along the left edge of the dot plot.
+;    values: in, required
+;         A vector of values associated with each label, representing the values to be 
+;         plotted on the dot plot.
+;       
+; :Keywords:
+;     addcmd: in, optional, type=boolean, default=0
+;        Set this keyword to add the command to the resizeable graphics window cgWindow.
+;     axiscolor: in, optional, type=string/integer, default='opposite'
+;        If this keyword is a string, the name of the axis color. 
+;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     background: in, optional, type=string/integer, default='WHITE'
+;        If this keyword is a string, the name of the background color. 
+;        Otherwise, the keyword is assumed to be a color index into the current color table.
+;     charsize: in, optional, type=float
+;        The character size for axes annotations. Uses cgDefCharSize to select default
+;        character size, unless !P.Charsize is set, in which case !P.Charsize is always used.
+;     color: in, optional, type=string/integer, default='BLACK'
+;        If this keyword is a string, the name of the data color. 
+;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
+;        to be a color index into the current color table.
+;     font: in, optional, type=integer, default=!P.Font
+;        The type of font desired for axis annotation.
+;     labelcharsize: in, optional, type=float
+;        The character size of the labels. The default is to use `Charsize`.
+;     labelcolor: in, optional, type=string
+;        The name of the color the labels should be drawn in. The default is the
+;        `AxisColor`.
+;     nogrid: in, optional, type=boolean, default=0
+;        Set this keyword to eliminate the background grid from the plot.
+;     noerase: in, optional, type=boolean, default=0
+;        Set this keyword to draw the plot without erasing the display first.
+;     output: in, optional, type=string, default=""
+;        Set this keyword to the name of an output file. The type of file is determined
+;        from the file's extension, as listed below. Normally, the file name is given in
+;        all lowercase letters::
+;            'ps'   - PostScript file
+;            'eps'  - Encapsulated PostScript file
+;            'pdf'  - PDF file
+;            'bmp'  - BMP raster file
+;            'gif'  - GIF raster file
+;            'jpg' - JPEG raster file
+;            'png'  - PNG raster file
+;            'tif' - TIFF raster file
+;        All raster file output is created through PostScript intermediate files (the
+;        PostScript files will be deleted), so ImageMagick and Ghostview MUST be installed 
+;        to produce anything other than PostScript output. (See cgPS2PDF and PS_END for 
+;        details.) And also note that you should NOT use this keyword when doing multiple 
+;        plots. The keyword is to be used as a convenient way to get PostScript or raster 
+;        output for a single graphics command. Output parameters can be set with `cgWindow_SetDefs`.
+;     position: in, optional, type=vector
+;        The usual four-element position vector for the Plot comamnd. Only monitored and
+;        possibly set if the `Aspect` keyword is used.
+;     psym: in, optional, type=integer
+;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
+;        routine cgSYMCAT. An integer between 0 and 46. This may also be set to the
+;        "name" of a symbol, such as returned from Print, cgSymCat(/Names).
+;     plotfillcolor: in, optional, type=string, default='BLK1'
+;        The name of the color that fills the area inside the axes on the plot.
+;     symsize: in, optional, type=float, default=1.0
+;        The symbol size.
+;     title: in, optional, type=string
+;         The title of the plot.
+;     window: in, optional, type=boolean, default=0
+;        Set this keyword to replace all the commands in a current cgWindow or to
+;        create a new cgWindow for displaying this command.
+;     xcharsize: in, optional, type=float
+;        The character size of the annotations on the X axis of the plot.
+;     xgridstyle: in, optional, type=integer, default=1
+;        The X line style of the grid lines used to draw the grid on the axis. By default, dots.
+;     xrange: in, optional
+;        A two-element array giving the X range of the plot.
+;     xstyle: in, optional
+;        A two-element array giving the X style of the plot. Normally, this is
+;        set to 1 to give exact axis ranges. Otherwise, not used.
+;     xtitle: in, optional, type=string
+;         The X title of the plot.
+;     ygridstyle: in, optional, type=integer, default=1
+;        The Y line style of the grid lines used to draw the grid on the axis. By default, dots.
+;
+; :Examples:
+;    There are several examples in a main-level program at the end of this program file.
+;       
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;        David W. Fanning 
+;        1645 Sheely Drive
+;        Fort Collins, CO 80526 USA
+;        Phone: 970-221-0438
+;        E-mail: david@idlcoyote.com
+;        Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Written, 12 November 2012. DWF.
+;         
+; :Copyright:
+;     Copyright (c) 2012, Fanning Software Consulting, Inc.
+;-
 PRO cgDotPlot, labels, values, $
     ADDCMD=addcmd, $
     AXISCOLOR=saxiscolor, $
@@ -7,7 +152,7 @@ PRO cgDotPlot, labels, values, $
     FONT=font, $
     LABELCHARSIZE=labelcharsize, $
     LABELCOLOR=slabelcolor, $
-    NODATA=nodata, $
+    NOGRID=nogrid, $
     NOERASE=noerase, $
     OUTPUT=output, $
     POSITION=position, $
@@ -16,9 +161,11 @@ PRO cgDotPlot, labels, values, $
     SYMSIZE=symsize, $
     TITLE=title, $
     XCHARSIZE=xcharsize, $
+    XGRIDSTYLE=xgridstyle, $
     XRANGE=xrange, $
     XSTYLE=xstyle, $
     XTITLE=xtitle, $
+    YGRIDSTYLE=ygridstyle, $
     WINDOW=window
     
     Catch, theError
@@ -69,7 +216,7 @@ PRO cgDotPlot, labels, values, $
             FONT=font, $
             LABELCHARSIZE=labelcharsize, $
             LABELCOLOR=slabelcolor, $
-            NODATA=nodata, $
+            NOGRID=nogrid, $
             NOERASE=noerase, $
             OUTPUT=output, $
             POSITION=position, $
@@ -78,9 +225,11 @@ PRO cgDotPlot, labels, values, $
             SYMSIZE=symsize, $
             TITLE=title, $
             XCHARSIZE=xcharsize, $
+            XGRIDSTYLE=xgridstyle, $
             XRANGE=xrange, $
             XSTYLE=xstyle, $
             XTITLE=xtitle, $
+            YGRIDSTYLE=ygridstyle, $
             ADDCMD=1
          RETURN
        ENDIF
@@ -96,7 +245,7 @@ PRO cgDotPlot, labels, values, $
             FONT=font, $
             LABELCHARSIZE=labelcharsize, $
             LABELCOLOR=slabelcolor, $
-            NODATA=nodata, $
+            NOGRID=nogrid, $
             NOERASE=noerase, $
             OUTPUT=output, $
             POSITION=position, $
@@ -105,9 +254,11 @@ PRO cgDotPlot, labels, values, $
             SYMSIZE=symsize, $
             TITLE=title, $
             XCHARSIZE=xcharsize, $
+            XGRIDSTYLE=xgridstyle, $
             XRANGE=xrange, $
             XSTYLE=xstyle, $
             XTITLE=xtitle, $
+            YGRIDSTYLE=ygridstyle, $
             REPLACECMD=replaceCmd
          RETURN
     ENDIF
@@ -229,9 +380,9 @@ PRO cgDotPlot, labels, values, $
     title = cgCheckForSymbols(title)
     xtitle = cgCheckForSymbols(xtitle)
     FOR j=0,N_Elements(labels)-1 DO labels[j] = cgCheckForSymbols(labels[j])
-    background = cgDefaultColor(sbackground, /BACKGROUND, MODE=currentState)
-    axisColor = cgDefaultColor(saxisColor, DEFAULT='opposite', MODE=currentState)
-    color = cgDefaultColor(sColor, DEFAULT=axisColor, MODE=currentState)
+    background = cgDefaultColor(sbackground, DEFAULT='white', /BACKGROUND, MODE=currentState)
+    axisColor = cgDefaultColor(saxisColor, DEFAULT='black', MODE=currentState)
+    color = cgDefaultColor(sColor, DEFAULT='black', MODE=currentState)
     plotfillcolor = cgDefaultColor(splotfillcolor, DEFAULT='blk1', MODE=currentState)
     labelcolor = cgDefaultColor(slabelcolor, DEFAULT=axisColor, MODE=currentState)
     IF N_Elements(font) EQ 0 THEN font = !P.Font
@@ -239,50 +390,9 @@ PRO cgDotPlot, labels, values, $
     IF N_Elements(labelcharsize) EQ 0 THEN labelcharsize = charsize
     IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
     IF N_Elements(psym) EQ 0 THEN psym = 9 ; Open circle
+    IF N_Elements(xgridstyle) EQ 0 THEN xgridstyle = 1 ; Dots
+    IF N_Elements(ygridstyle) EQ 0 THEN ygridstyle = 1 ; Dots
     
-    ; Do you need a PostScript background color? Lot's of problems here!
-    ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a
-    ; plot of any sort erases the background color. So, I have to draw a 
-    ; plot, store the new system variables, then draw my background, etc.
-    ; I have tried LOTS of options. This is the only one that worked.
-    IF !D.Name EQ 'PS' THEN BEGIN
-         IF ~noerase THEN BEGIN
-       
-           ; I only have to do this, if this is the first plot.
-           IF !P.MULTI[0] EQ 0 THEN BEGIN
-           
-;                IF Keyword_Set(overplot) NE 1 THEN BEGIN
-;                
-;                    ; Save the current system variables. Will need to restore later.
-;                    bangx = !X
-;                    bangy = !Y
-;                    bangp = !P
-;                    
-;                    ; Draw the plot that doesn't draw anything.
-;                    Plot, [1], POSITION=position, CHARSIZE=charsize, /NODATA, $
-;                        FONT=font, _STRICT_EXTRA=extra  
-;                    
-;                    ; Save the "after plot" system variables. Will use later. 
-;                    afterx = !X
-;                    aftery = !Y
-;                    afterp = !P     
-;                    
-;                    ; Draw the background color and set the variables you will need later.
-;                    PS_Background, background
-;                    psnodraw = 1
-;                    tempNoErase = 1
-;                    
-;                    ; Restore the original system variables so that it is as if you didn't
-;                    ; draw the invisible plot.
-;                    !X = bangx
-;                    !Y = bangy
-;                    !P = bangp
-;                
-;                ENDIF
-            ENDIF ELSE tempNoErase = noerase
-        ENDIF ELSE tempNoErase = noerase
-     ENDIF ELSE tempNoErase = noerase
- 
     ; Load the drawing colors. If needed create a window first, so the drawing
     ; colors are correct for the window you want to draw into.
     IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
@@ -302,45 +412,46 @@ PRO cgDotPlot, labels, values, $
         position = [0.125+maxLength, 0.125, 0.9, 0.9]
     ENDIF
     
-    ; Draw the plot axes.
+    ; Draw the plot axes. The first plot should not be seen, and it just to
+    ; establish plot location.
     numLabels = N_Elements(labels)
-    IF ((!D.Flags AND 256) NE 0) && (!P.Multi[0] EQ 0) && ~noerase THEN cgErase, background
     Plot, values, Indgen(numLabels)+1, /NoData, COLOR=axiscolor, $
       YRANGE=[0,numlabels+1], YSTYLE=9+4, YMINOR=1, YTICKS=numLabels+1, $
       POSITION=position, BACKGROUND=background, YTICKLEN=-0.025, XTICKLEN=-0.025, $
       XSTYLE=xstyle+8+4, XRANGE=xrange, NOERASE=noerase
+      
+    ; Fill the inside of the plot with a color.
     p = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
     PolyFill, [p[0],p[0],p[2],p[2],p[0]], [p[1],p[3],p[3],p[1],p[1]], /Normal, $
       Color=plotfillcolor
-    Plot, values, Indgen(numLabels)+1, /NoData, COLOR=cgColor('gray'), $
-      YRANGE=[0,numlabels+1], YSTYLE=9, YMINOR=1, YTICKS=numLabels+1, $
-      POSITION=position, YTICKLEN=1, XTICKLEN=1, XGRIDSTYLE=2, YGRIDSTYLE=2, $
-      XSTYLE=xstyle+8, /NoErase, XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', XMINOR=1, XRANGE=xrange
+      
+    ; Add grid lines to the plot, if needed.
+    IF ~Keyword_Set(nogrid) THEN BEGIN
+        Plot, values, Indgen(numLabels)+1, /NoData, COLOR=cgColor('gray'), $
+          YRANGE=[0,numlabels+1], YSTYLE=9, YMINOR=1, YTICKS=numLabels+1, $
+          POSITION=p, YTICKLEN=1, XTICKLEN=1, XGRIDSTYLE=xgridstyle, YGRIDSTYLE=ygridstyle, $
+          XSTYLE=xstyle+8, NoErase=1, XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', XMINOR=1, $
+          XRANGE=xrange
+    ENDIF
     
+    ; Draw the actual plot with normal annotations.
     Plot, values, Indgen(numLabels)+1, /NoData, COLOR=axiscolor, $
       YRANGE=[0,numlabels+1], YSTYLE=9, YMINOR=1, YTICKS=numLabels+1, $
-      POSITION=position, YTICKLEN=-0.025, XTICKLEN=-0.025, $
-      XSTYLE=xstyle+8, /NoErase, YTICKFORMAT='(A1)', XRANGE=xrange, TITLE=title, XTITLE=xtitle
+      POSITION=p, YTICKLEN=-0.025, XTICKLEN=-0.025, $
+      XSTYLE=xstyle+8, NoErase=1, YTICKFORMAT='(A1)', XRANGE=xrange, TITLE=title, XTITLE=xtitle
     Axis, YAXIS=1, COLOR=axiscolor, YMINOR=1, YTICKFORMAT='(A1)', YTICKLEN=0.0001, $
          YRANGE=[0,numlabels+1], YSTYLE=1
     Axis, XAXIS=1, COLOR=axiscolor, XRANGE=xrange, XTICKFORMAT='(A1)', XSTYLE=xstyle
     OPlot, values, Indgen(numLabels)+1, PSYM=cgSymCat(psym), COLOR=color, SYMSIZE=symsize
     
+    ; Add the plot labels.
     FOR j=0,N_Elements(labels)-1 DO BEGIN
        xloc = !X.Window[0] - 0.025
        yloc = !Y.Window[0] + ((j+1) * ((!Y.Window[1]-!Y.Window[0])/(N_Elements(labels)+1)))
-       skosh = 0.005
+       skosh = 0.01
        XYOUTS, xloc, yloc-skosh, labels[j], /Normal, $
           FONT=font, Charsize=labelCharsize, Alignment=1.0, COLOR=cgColor(labelColor)
     ENDFOR
-    
-    ; If this is the first plot in PS, then we have to make it appear that we have
-    ; drawn a plot, even though we haven't.
-    IF N_Elements(psnodraw) EQ 1 THEN BEGIN
-        !X = afterX
-        !Y = afterY
-        !P = afterP
-    ENDIF
     
     ; Are we producing output? If so, we need to clean up here.
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
@@ -399,28 +510,41 @@ labels = [ 'Exxon Mobil', $
            
 values = [ 100, 105, 125, 142, 170, 193, 247, 325, 367, 418]
 
-cgDisplay, WID=0, Title='Default Values'
-cgDotPlot, labels, values
-cgDisplay, WID=1, Title='Optional Values'
-cgDotPlot, labels, values, symsize=1.5, psym=16, $
-   Title='Fortune 500 Companies', XTitle='Millions in Revenue', $
-   Color='red', AXISCOLOR='navy',plotfillcolor='rose', XRANGE=[80,450], XSTYLE=1
+;cgDisplay, WID=0, Title='Default Values'
+;cgDotPlot, labels, values
+;cgDisplay, WID=1, Title='Optional Values'
+;cgDotPlot, labels, values, symsize=1.5, psym=16, $
+;   Title='Fortune 500 Companies', XTitle='Millions in Revenue', $
+;   Color='red', AXISCOLOR='navy',plotfillcolor='rose', XRANGE=[80,450], XSTYLE=1
   
  ; Resizeable graphics window. 
- cgDotPlot, labels, values, symsize=1.5, psym=16, $
-   Title='Fortune 500 Companies', XTitle='Millions in Revenue', $
-   Color='red', AXISCOLOR='navy',plotfillcolor='rose', XRANGE=[80,450], XSTYLE=1, $
-   /Window
+; cgDotPlot, labels, values, symsize=1.5, psym=16, $
+;   Title='Fortune 500 Companies', XTitle='Millions in Revenue', $
+;   Color='red', AXISCOLOR='navy',plotfillcolor='rose', XRANGE=[80,450], XSTYLE=1, $
+;   /Window
    
    
 ;cgDotPlot, labels, values, output='cgdotplot_test.png'
 
-PS_Start, 'test.ps'
+;PS_Start, 'cgdotplot_test.ps'
+;cgDisplay, WID=2, 1000, 500
+;cgDotPlot, labels, values, Title='RMSE', position=[0.25, 0.15, 0.45, 0.9]
+;cgDotPlot, Replicate("",N_Elements(labels)), values, TITLE='RMSE A', position=[0.50, 0.15, 0.70, 0.9], /Noerase
+;cgDotPlot, Replicate("",N_Elements(labels)), values, TITLE='R$\up2$', position=[0.75, 0.15, 0.95, 0.9], /Noerase
+;PS_END, /png
+
+;PS_Start, 'cgdotplot_test.ps'
+!p.Multi=[0,3,1]
 cgDisplay, WID=2, 1000, 500
-cgDotPlot, labels, values, Title='RMSE', position=[0.25, 0.15, 0.45, 0.9]
-cgDotPlot, Replicate("",N_Elements(labels)), values, TITLE='RMSE A', position=[0.50, 0.15, 0.70, 0.9], /Noerase
-cgDotPlot, Replicate("",N_Elements(labels)), values, TITLE='R$\up2$', position=[0.75, 0.15, 0.95, 0.9], /Noerase
-PS_END, /png
+!X.OMargin=[25,2]
+!Y.OMargin=[5, 5]
+!P.Charsize=1.5
+labelsize = 1.25
+cgDotPlot, labels, values, Title='RMSE', LabelCharSize=labelsize
+cgDotPlot, Replicate("",N_Elements(labels)), values, TITLE='RMSE A'
+cgDotPlot, Replicate("",N_Elements(labels)), values, TITLE='R$\up2$'
+!P.Multi=0
+;PS_END, /png
 END
 
            

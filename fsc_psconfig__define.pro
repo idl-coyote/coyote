@@ -1528,7 +1528,7 @@ ENDIF
 
    ; Center and realize the top-level base.
 
-FSC_PSConfig_CenterTLB, tlb
+cgCenterTLB, tlb
 Widget_Control, tlb, /Realize
 
 self.noblock = Keyword_Set(noblock)
@@ -1589,7 +1589,7 @@ IF XRegistered('fsc_psconfig_help') GT 0 THEN RETURN
 base = Widget_Base(Column=1, Group_Leader=self.acceptID)
 textID = Widget_Text(base, Value=helptext, Scr_XSize=500, YSize=textsize)
 IF NOT Widget_Info(self.tlb, /Modal) THEN button = Widget_Button(base, Value='Dismiss')
-FSC_PSConfig_CenterTLB, base
+cgCenterTLB, base
 Widget_Control, base, /Realize
 XManager, 'fsc_psconfig_help', base, /Just_Reg
 END ;--------------------------------------------------------------------------------

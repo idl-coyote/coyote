@@ -39,6 +39,8 @@
 ; The purpose of cgDotPlot is to create a "dot plot" of the sort described on this 
 ; `web page <http://peltiertech.com/Utility/DotPlotUtility.html>`.
 ;
+;  .. image:: cgdotplot.png
+;
 ; :Categories:
 ;    Graphics
 ;    
@@ -94,6 +96,10 @@
 ;        details.) And also note that you should NOT use this keyword when doing multiple 
 ;        plots. The keyword is to be used as a convenient way to get PostScript or raster 
 ;        output for a single graphics command. Output parameters can be set with `cgWindow_SetDefs`.
+;     overplot: in, optional, type=boolean, default=0
+;        Set this keyword if you wish to overplot data on an already exisiting set of
+;        cgDotPlot axes. Note that labels will have to be passed, but they will not be
+;        drawn again in the overplotting.
 ;     position: in, optional, type=vector
 ;        The usual four-element position vector for the Plot comamnd. Only monitored and
 ;        possibly set if the `Aspect` keyword is used.
@@ -138,7 +144,8 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 12 November 2012. DWF.
+;        Written, 12 November 2012, by David W. Fanning and donated to the IDL community 
+;            by Marta Yebra of CSIRO, Australia.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -155,6 +162,7 @@ PRO cgDotPlot, labels, values, $
     NOGRID=nogrid, $
     NOERASE=noerase, $
     OUTPUT=output, $
+    OVERPLOT=overplot, $
     POSITION=position, $
     PSYM=psymIn, $
     PLOTFILLCOLOR=splotFillColor, $
@@ -207,30 +215,31 @@ PRO cgDotPlot, labels, values, $
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
         ; Special treatment for overplotting or adding a command.
-        IF Keyword_Set(addcmd) THEN BEGIN
-        cgWindow, 'cgDotPlot', labels, values, $
-            AXISCOLOR=saxiscolor, $
-            BACKGROUND=sbackground, $
-            CHARSIZE=charsize, $
-            COLOR=scolor, $
-            FONT=font, $
-            LABELCHARSIZE=labelcharsize, $
-            LABELCOLOR=slabelcolor, $
-            NOGRID=nogrid, $
-            NOERASE=noerase, $
-            OUTPUT=output, $
-            POSITION=position, $
-            PSYM=psymIn, $
-            PLOTFILLCOLOR=splotFillColor, $
-            SYMSIZE=symsize, $
-            TITLE=title, $
-            XCHARSIZE=xcharsize, $
-            XGRIDSTYLE=xgridstyle, $
-            XRANGE=xrange, $
-            XSTYLE=xstyle, $
-            XTITLE=xtitle, $
-            YGRIDSTYLE=ygridstyle, $
-            ADDCMD=1
+        IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
+            cgWindow, 'cgDotPlot', labels, values, $
+                AXISCOLOR=saxiscolor, $
+                BACKGROUND=sbackground, $
+                CHARSIZE=charsize, $
+                COLOR=scolor, $
+                FONT=font, $
+                LABELCHARSIZE=labelcharsize, $
+                LABELCOLOR=slabelcolor, $
+                NOGRID=nogrid, $
+                NOERASE=noerase, $
+                OUTPUT=output, $
+                OVERPLOT=overplot, $
+                POSITION=position, $
+                PSYM=psymIn, $
+                PLOTFILLCOLOR=splotFillColor, $
+                SYMSIZE=symsize, $
+                TITLE=title, $
+                XCHARSIZE=xcharsize, $
+                XGRIDSTYLE=xgridstyle, $
+                XRANGE=xrange, $
+                XSTYLE=xstyle, $
+                XTITLE=xtitle, $
+                YGRIDSTYLE=ygridstyle, $
+                ADDCMD=1
          RETURN
        ENDIF
         
@@ -248,6 +257,7 @@ PRO cgDotPlot, labels, values, $
             NOGRID=nogrid, $
             NOERASE=noerase, $
             OUTPUT=output, $
+            OVERPLOT=overplot, $
             POSITION=position, $
             PSYM=psymIn, $
             PLOTFILLCOLOR=splotFillColor, $
@@ -415,18 +425,23 @@ PRO cgDotPlot, labels, values, $
     ; Draw the plot axes. The first plot should not be seen, and it just to
     ; establish plot location.
     numLabels = N_Elements(labels)
-    Plot, values, Indgen(numLabels)+1, /NoData, COLOR=axiscolor, $
-      YRANGE=[0,numlabels+1], YSTYLE=9+4, YMINOR=1, YTICKS=numLabels+1, $
-      POSITION=position, BACKGROUND=background, YTICKLEN=-0.025, XTICKLEN=-0.025, $
-      XSTYLE=xstyle+8+4, XRANGE=xrange, NOERASE=noerase
-      
+    IF ~Keyword_Set(overplot) THEN BEGIN
+        Plot, values, Indgen(numLabels)+1, /NoData, COLOR=axiscolor, $
+          YRANGE=[0,numlabels+1], YSTYLE=9+4, YMINOR=1, YTICKS=numLabels+1, $
+          POSITION=position, BACKGROUND=background, YTICKLEN=-0.025, XTICKLEN=-0.025, $
+          XSTYLE=xstyle+8+4, XRANGE=xrange, NOERASE=noerase
+    ENDIF
+    
     ; Fill the inside of the plot with a color.
     p = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
-    PolyFill, [p[0],p[0],p[2],p[2],p[0]], [p[1],p[3],p[3],p[1],p[1]], /Normal, $
-      Color=plotfillcolor
-      
+    
+    IF ~Keyword_Set(overplot) THEN BEGIN
+        PolyFill, [p[0],p[0],p[2],p[2],p[0]], [p[1],p[3],p[3],p[1],p[1]], /Normal, $
+          Color=plotfillcolor
+    ENDIF
+    
     ; Add grid lines to the plot, if needed.
-    IF ~Keyword_Set(nogrid) THEN BEGIN
+    IF ~Keyword_Set(nogrid) && ~Keyword_Set(overplot) THEN BEGIN      
         Plot, values, Indgen(numLabels)+1, /NoData, COLOR=cgColor('gray'), $
           YRANGE=[0,numlabels+1], YSTYLE=9, YMINOR=1, YTICKS=numLabels+1, $
           POSITION=p, YTICKLEN=1, XTICKLEN=1, XGRIDSTYLE=xgridstyle, YGRIDSTYLE=ygridstyle, $
@@ -435,23 +450,29 @@ PRO cgDotPlot, labels, values, $
     ENDIF
     
     ; Draw the actual plot with normal annotations.
-    Plot, values, Indgen(numLabels)+1, /NoData, COLOR=axiscolor, $
-      YRANGE=[0,numlabels+1], YSTYLE=9, YMINOR=1, YTICKS=numLabels+1, $
-      POSITION=p, YTICKLEN=-0.025, XTICKLEN=-0.025, $
-      XSTYLE=xstyle+8, NoErase=1, YTICKFORMAT='(A1)', XRANGE=xrange, TITLE=title, XTITLE=xtitle
-    Axis, YAXIS=1, COLOR=axiscolor, YMINOR=1, YTICKFORMAT='(A1)', YTICKLEN=0.0001, $
-         YRANGE=[0,numlabels+1], YSTYLE=1
-    Axis, XAXIS=1, COLOR=axiscolor, XRANGE=xrange, XTICKFORMAT='(A1)', XSTYLE=xstyle
-    OPlot, values, Indgen(numLabels)+1, PSYM=cgSymCat(psym), COLOR=color, SYMSIZE=symsize
+    IF Keyword_Set(overplot) THEN BEGIN
+       OPlot, values, Indgen(numLabels)+1, PSYM=cgSymCat(psym), COLOR=color, SYMSIZE=symsize 
+    ENDIF ELSE BEGIN
+        Plot, values, Indgen(numLabels)+1, /NoData, COLOR=axiscolor, $
+          YRANGE=[0,numlabels+1], YSTYLE=9, YMINOR=1, YTICKS=numLabels+1, $
+          POSITION=p, YTICKLEN=-0.025, XTICKLEN=-0.025, $
+          XSTYLE=xstyle+8, NoErase=1, YTICKFORMAT='(A1)', XRANGE=xrange, TITLE=title, XTITLE=xtitle
+        Axis, YAXIS=1, COLOR=axiscolor, YMINOR=1, YTICKFORMAT='(A1)', YTICKLEN=0.0001, $
+             YRANGE=[0,numlabels+1], YSTYLE=1
+        Axis, XAXIS=1, COLOR=axiscolor, XRANGE=xrange, XTICKFORMAT='(A1)', XSTYLE=xstyle
+        OPlot, values, Indgen(numLabels)+1, PSYM=cgSymCat(psym), COLOR=color, SYMSIZE=symsize
+    ENDELSE
     
     ; Add the plot labels.
-    FOR j=0,N_Elements(labels)-1 DO BEGIN
-       xloc = !X.Window[0] - 0.025
-       yloc = !Y.Window[0] + ((j+1) * ((!Y.Window[1]-!Y.Window[0])/(N_Elements(labels)+1)))
-       skosh = 0.01
-       XYOUTS, xloc, yloc-skosh, labels[j], /Normal, $
-          FONT=font, Charsize=labelCharsize, Alignment=1.0, COLOR=cgColor(labelColor)
-    ENDFOR
+    IF ~Keyword_Set(overplot) THEN BEGIN
+      FOR j=0,N_Elements(labels)-1 DO BEGIN
+         xloc = !X.Window[0] - 0.025
+         yloc = !Y.Window[0] + ((j+1) * ((!Y.Window[1]-!Y.Window[0])/(N_Elements(labels)+1)))
+         skosh = 0.01
+         XYOUTS, xloc, yloc-skosh, labels[j], /Normal, $
+            FONT=font, Charsize=labelCharsize, Alignment=1.0, COLOR=cgColor(labelColor)
+      ENDFOR
+    ENDIF
     
     ; Are we producing output? If so, we need to clean up here.
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
@@ -497,6 +518,9 @@ PRO cgDotPlot, labels, values, $
         
 END
 
+
+; Examples of how you might use the cgDotPlot program.
+
 labels = [ 'Exxon Mobil', $
            'Wal-Mart', $
            'Chevron', $           
@@ -508,10 +532,13 @@ labels = [ 'Exxon Mobil', $
            'Hewlett-Packard', $
            'Bank of America' ]
            
-values = [ 100, 105, 125, 142, 170, 193, 247, 325, 367, 418]
+values = [ 120, 135, 139, 142, 170, 193, 247, 325, 367, 418]
 
-;cgDisplay, WID=0, Title='Default Values'
-;cgDotPlot, labels, values
+cgDisplay, WID=0, Title='Default Values'
+cgDotPlot, labels, values, Color='blue', XTitle='Billions of Dollars', PSYM=16, Symsize=1.5, plotfill='rose'
+;cgDotPlot, labels, values+25, /Overplot, Color='red'
+
+
 ;cgDisplay, WID=1, Title='Optional Values'
 ;cgDotPlot, labels, values, symsize=1.5, psym=16, $
 ;   Title='Fortune 500 Companies', XTitle='Millions in Revenue', $
@@ -534,16 +561,16 @@ values = [ 100, 105, 125, 142, 170, 193, 247, 325, 367, 418]
 ;PS_END, /png
 
 ;PS_Start, 'cgdotplot_test.ps'
-!p.Multi=[0,3,1]
-cgDisplay, WID=2, 1000, 500
-!X.OMargin=[25,2]
-!Y.OMargin=[5, 5]
-!P.Charsize=1.5
-labelsize = 1.25
-cgDotPlot, labels, values, Title='RMSE', LabelCharSize=labelsize
-cgDotPlot, Replicate("",N_Elements(labels)), values, TITLE='RMSE A'
-cgDotPlot, Replicate("",N_Elements(labels)), values, TITLE='R$\up2$'
-!P.Multi=0
+;!p.Multi=[0,3,1]
+;cgDisplay, WID=2, 1000, 500
+;!X.OMargin=[25,2]
+;!Y.OMargin=[5, 5]
+;!P.Charsize=1.5
+;labelsize = 1.25
+;cgDotPlot, labels, values, Title='RMSE', LabelCharSize=labelsize
+;cgDotPlot, Replicate("",N_Elements(labels)), values, TITLE='RMSE A'
+;cgDotPlot, Replicate("",N_Elements(labels)), values, TITLE='R$\up2$'
+;!P.Multi=0
 ;PS_END, /png
 END
 

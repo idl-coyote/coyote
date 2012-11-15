@@ -305,32 +305,32 @@ PRO cgPlot, x, y, $
         
         ; Special treatment for overplotting or adding a command.
         IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
-        cgWindow, 'cgPlot', x, y, $
-            ASPECT=aspect, $
-            AXISCOLOR=saxiscolor, $
-            AXESCOLOR=saxescolor, $
-            BACKGROUND=sbackground, $
-            CHARSIZE=charsize, $
-            COLOR=scolor, $
-            FONT=font, $
-            ISOTROPIC=isotropic, $
-            LABEL=label, $
-            LAYOUT=layout, $
-            LEGENDS=legends, $
-            NODATA=nodata, $
-            NOERASE=noerase, $
-            OPLOTS=oplots, $
-            OVERPLOT=overplot, $
-            POSITION=position, $
-            PSYM=psym, $
-            SYMCOLOR=ssymcolor, $
-            SYMSIZE=symsize, $
-            TITLE=title, $
-            TRADITIONAL=traditional, $
-            XTITLE=xtitle, $
-            YTITLE=ytitle, $
-            ADDCMD=1, $
-            _Extra=extra
+            cgWindow, 'cgPlot', x, y, $
+                ASPECT=aspect, $
+                AXISCOLOR=saxiscolor, $
+                AXESCOLOR=saxescolor, $
+                BACKGROUND=sbackground, $
+                CHARSIZE=charsize, $
+                COLOR=scolor, $
+                FONT=font, $
+                ISOTROPIC=isotropic, $
+                LABEL=label, $
+                LAYOUT=layout, $
+                LEGENDS=legends, $
+                NODATA=nodata, $
+                NOERASE=noerase, $
+                OPLOTS=oplots, $
+                OVERPLOT=overplot, $
+                POSITION=position, $
+                PSYM=psym, $
+                SYMCOLOR=ssymcolor, $
+                SYMSIZE=symsize, $
+                TITLE=title, $
+                TRADITIONAL=traditional, $
+                XTITLE=xtitle, $
+                YTITLE=ytitle, $
+                ADDCMD=1, $
+                _Extra=extra
              RETURN
        ENDIF
         

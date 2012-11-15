@@ -75,16 +75,12 @@
 ;       the default 32-bit integers.
 ;    locations: out, optional
 ;       Starting locations of each bin. (See the HISTOGRAM documentation for details.)
-;    maxinput: in, optional
+;    max: in, optional
 ;       The maximum value to use in calculating input histogram. Equivalent to the MAX keyword
 ;       in the HISTOGRAM documentation.
-;    max_value: in, optional
-;       The maximum Y data value to represent on graphics plot. Default: Max(data) * 1.05.
-;    mininput: in, optional
+;    min: in, optional
 ;       The minimum value to use in calculating input histogram. Equivalent to the MIN keyword
 ;       in the HISTOGRAM documentation.
-;    min_value: in, optional
-;       The minimum Y data value to represent on graphics plot. Default: 0.
 ;    missing: in, optional
 ;       The value that should be represented as "missing" and not used in the histogram.
 ;       Be aware that if the input data is not of type "float" or "double" that the input

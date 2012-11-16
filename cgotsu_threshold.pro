@@ -99,7 +99,7 @@
 ;       The list of reverse indices returned from the HISTOGRAM command. (See HISTOGRAM documentation.)
 ;          
 ; :Examples:
-;    I use the program to separate LandSat red band images into two groups of pixels::
+;    I use the program to separate satellite bimodal images into two groups of pixels::
 ;         threshold = cgOTSU_Threshold(redBand)
 ;        
 ; :Author:

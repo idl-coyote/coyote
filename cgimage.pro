@@ -190,7 +190,8 @@
 ;       Added a FILENAME keyword so that files of known format (GeoTIFF, JPEG, PNG, etc.) can be read to supply an
 ;          image for display. 18 October 2012. DWF.
 ;       Fixed a problem that prevented transparent images from be displayed with !P.Multi. 20 Oct 2012. DWF.
-;          
+;       Provided a fix to allow transparent images in versions of IDL from IDL 6.4 and earlier. 18 Nov 2012. DWF.
+;       
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
@@ -378,13 +379,6 @@ FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
     ; Exit now.
     IF Keyword_Set(tv) THEN RETURN, aImage[*,*,0:2]
     
-    ; If this version of IDL is 6.4 or older, we can't do this.
-    thisRelease = Float(!Version.Release)
-    IF thisRelease LT 6.5 THEN BEGIN
-       Message, 'IDL 6.5 or higher required to correctly display alpha images.', /INFORMATIONAL
-       RETURN, aImage[*,*,0:2]
-    ENDIF
-                           
     ; Now we have an alpha channel.
     alpha_channel = (alpha_channel / 255.0) * 1.0
     foregndImage = aImage[*,*,0:2]
@@ -411,14 +405,34 @@ FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
       ELSE: Message, 'Unexpected dimensions of the background image.'
     ENDCASE
     
+    ; I need a 24-bit image to work with. This is most easily done
+    ; in the Z-Graphics buffer, set to work in 24-bit mode. Unfortunately,
+    ; this mode was introduced in IDL 7, so I can't use it with IDL 6.4
+    ; or earlier versions. I can, however, TRY to use a pixmap in earlier
+    ; versions. I have reports that this works fine. So, I am modifying this
+    ; section of code to get the 24-bit image I need out of a pixmap for versions
+    ; of IDL before IDL 7.0. 
+    thisRelease = Float(!Version.Release)
+
     ; Now that we have a background image, display that in
-    ; the Z-Graphics buffer.
+    ; the Z-Graphics buffer or in a pixmap if IDL 6.4 or earlier.
     sb = Size(bImage, /DIMENSIONS)
     sf = Size(foregndImage, /DIMENSIONS)
-    thisDevice = !D.Name
-    Set_Plot, 'Z'
-    Device, Get_Decomposed=theState
-    Device, Set_Resolution=sb[0:1], Decomposed=1, Set_Pixel_Depth=24
+    IF thisRelease GE 6.5 THEN BEGIN                       
+       thisDevice = !D.Name
+       Set_Plot, 'Z'
+       Device, Get_Decomposed=theState
+       Device, Set_Resolution=sb[0:1], Decomposed=1, Set_Pixel_Depth=24
+    ENDIF ELSE BEGIN
+       thisDevice = !D.Name
+       IF (thisDevice EQ 'PS') OR (thisDevice EQ 'Z') THEN BEGIN
+          IF StrUpCase(!Version.OS_Family) EQ 'WINDOWS' THEN setToDev = 'WIN' ELSE setToDev = 'X'
+       ENDIF
+       currentWindow = !D.Window
+       IF N_Elements(setToDev) NE 0 THEN Set_Plot, setToDev
+       cgDisplay, /FREE, /PIXMAP, sb[0], sb[1]
+       pixmap = !D.Window
+    ENDELSE
 
     ; Turn off !P.MULTI handling for this part.
     multi = !P.Multi
@@ -442,8 +456,16 @@ FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
             
     ; Get the size of the snapshot.
     sb = Size(bsnap, /DIMENSIONS)
-    Device, Decomposed=theState
-    Set_Plot, thisDevice
+    
+    ; Clean-up
+    IF thisRelease GE 6.5 THEN BEGIN 
+       Device, Decomposed=theState
+       Set_Plot, thisDevice
+    ENDIF ELSE BEGIN
+       WDelete, pixmap
+       IF N_Elements(setToDev) NE 0 THEN Set_Plot, thisDevice
+       IF (currentWindow LE 0) AND ((!D.Flags AND 256) NE 0) THEN WSet, currentWindow
+    ENDELSE
             
      ; Make the foreground image the right size.
      foregndImage = cgResizeImage(foregndImage, cols, rows)

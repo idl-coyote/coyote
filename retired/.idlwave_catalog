@@ -1,7 +1,7 @@
 ;;
 ;; IDLWAVE catalog for library coyote
 ;; Automatically Generated -- do not edit.
-;; Created by idlwave_catalog on Tue Oct 23 11:51:59 2012
+;; Created by idlwave_catalog on Sun Nov 18 08:20:04 2012
 ;;
 (setq idlwave-library-catalog-libname "coyote")
 (setq idlwave-library-catalog-routines
@@ -11,8 +11,10 @@
    ("BoxPlot_Draw" pro nil (lib "boxplot.pro" nil "coyote") "%s, thisdata" (nil ("BOXCOLOR") ("COLOR") ("FILLBOXES") ("STATS") ("WIDTH") ("XLOCATION")))
    ("BoxPlot" pro nil (lib "boxplot.pro" nil "coyote") "%s, data" (nil ("_EXTRA") ("ADDCMD") ("AXES_COLOR") ("BACKGROUND_COLOR") ("BOXCOLOR") ("CHARSIZE") ("COLOR") ("FILLBOXES") ("LABELS") ("LAYOUT") ("MISSING_DATA_VALUE") ("OVERPLOT") ("ROTATE") ("STATS") ("WINDOW") ("XCHARSIZE") ("XTHICK")))
    ("CanConnect" fun nil (lib "canconnect.pro" nil "coyote") "Result = %s" (nil))
+   ("CenterTLB" pro nil (lib "centertlb.pro" nil "coyote") "%s, tlb, x, y" (nil ("CenterOnTLB") ("Device") ("NoCenter")))
    ("COLOR24" fun nil (lib "color24.pro" nil "coyote") "Result = %s(color)" (nil))
    ("COLORBAR" pro nil (lib "colorbar.pro" nil "coyote") "%s" (nil ("_EXTRA") ("ANNOTATECOLOR") ("BOTTOM") ("CHARSIZE") ("COLOR") ("DIVISIONS") ("FONT") ("FORMAT") ("INVERTCOLORS") ("MAXRANGE") ("MINOR") ("MINRANGE") ("NCOLORS") ("NODISPLAY") ("POSITION") ("RANGE") ("REVERSE") ("RIGHT") ("TICKLEN") ("TICKNAMES") ("TITLE") ("TOP") ("VERTICAL") ("XLOG") ("YLOG")))
+   ("CoyoteGraphic" fun nil (lib "coyotegraphic.pro" nil "coyote") "Result = %s(routine)" (nil))
    ("CTLOAD" pro nil (lib "ctload.pro" nil "coyote") "%s, table" (nil ("BOTTOM") ("BREWER") ("CLIP") ("FILE") ("GET_NAMES") ("NCOLORS") ("REVERSE") ("RGB_TABLE") ("ROW") ("SILENT") ("WINDOW") ("WINID")))
    ("DCBar" pro nil (lib "dcbar.pro" nil "coyote") "%s, colors" (nil ("ADDCMD") ("BARCOLOR") ("BOTTOM") ("CHARSIZE") ("COLOR") ("FILE") ("FONT") ("LABELS") ("NCOLORS") ("POSITION") ("ROTATE") ("SPACING") ("TCHARSIZE") ("TITLE") ("VERTICAL") ("WINDOW")))
    ("Refresh" pro "DrawColors" (lib "drawcolors__define.pro" nil "coyote") "Obj ->[%s::]%s" (nil))
@@ -223,6 +225,7 @@
    ("Cleanup" pro "MPI_PlotConfig" (lib "mpi_plotconfig__define.pro" nil "coyote") "Obj ->[%s::]%s" (nil))
    ("MPI_PlotConfig__Define" pro nil (lib "mpi_plotconfig__define.pro" nil "coyote") "%s" (nil))
    ("MS_FileTime" fun nil (lib "ms_filetime.pro" nil "coyote") "Result = %s(fileTime)" (nil ("AS_STRING")))
+   ("Number_Formatter" fun nil (lib "number_formatter.pro" nil "coyote") "Result = %s(number)" (nil ("DECIMALS")))
    ("Object_Shade_Surf_Cleanup" pro nil (lib "object_shade_surf.pro" nil "coyote") "%s, tlb" (nil))
    ("Object_Shade_Surf_Draw_Events" pro nil (lib "object_shade_surf.pro" nil "coyote") "%s, event" (nil))
    ("Object_Shade_Surf_Resize" pro nil (lib "object_shade_surf.pro" nil "coyote") "%s, event" (nil))

@@ -410,11 +410,16 @@ FUNCTION cgColor, theColour, colorIndex, $
     
     ; Get the pixel value of the "opposite" color. This is the pixel color
     ; opposite the pixel color in the upper right corner of the display.
-    ; Because some LINUX versions of IDL report their window size incorrectly,
-    ; I back off from the corner pixel a bit to get the value I am looking for
-    ; on UNIX machines.
+    ; Because Windows versions of IDL (through at least IDL 8.2.1) report
+    ; the size of draw widget windows inaccurately until you make them the
+    ; current graphics window, I back off from the very corner pixel by two
+    ; pixels to read Windows windows.
     IF ((!D.Window GE 0) && ((!D.Flags AND 256) NE 0)) || (!D.Name EQ 'Z') THEN BEGIN
-       opixel = cgSnapshot(!D.X_Size-3, !D.Y_Size-3, 1, 1)
+       IF StrUpCase(!Version.OS_Family) EQ 'WINDOWS' THEN BEGIN
+          opixel = cgSnapshot(!D.X_Size-3, !D.Y_Size-3, 1, 1)
+       ENDIF ELSE BEGIN
+          opixel = cgSnapshot(!D.X_Size-1, !D.Y_Size-1, 1, 1)
+       ENDELSE
        IF N_Elements(opixel) NE 3 THEN BEGIN
             IF (!D.Name NE 'NULL') THEN TVLCT, rrr, ggg, bbb, /Get
             opixel = [rrr[opixel], ggg[opixel], bbb[opixel]]

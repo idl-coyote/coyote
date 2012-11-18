@@ -159,7 +159,7 @@
 ;        Renamed TVRead to cgSnapshot and retired TVRead. 20 February 2011. DWF.
 ;        Added the ability to get the file type from the file name extension. 26 Dec 2011. DWF.
 ;        Added a POSITION keyword to select a position inside the window for capture. 20 October 2012. DWF.
-;
+;        Fixed a problem with not setting back to incoming decomposed state on an error. 20 Nov 2012. DWF.
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
@@ -193,6 +193,11 @@ FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
        ok = Error_Message()
        IF N_Elements(thisWindow) EQ 0 THEN RETURN, -1
        IF thisWindow GE 0 THEN WSet, thisWindow
+       
+       ; Need to set color decomposition back?
+       IF (N_Elements(theDecomposedState) NE 0) && (theDepth GT 0) THEN BEGIN
+           Device, Decomposed=theDecomposedState
+       ENDIF
        RETURN, -1
     ENDIF
     

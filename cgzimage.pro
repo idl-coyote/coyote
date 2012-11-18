@@ -68,6 +68,7 @@
 ;        Changes to allow this to work with very large images. Can now zoom to actual pixel values.
 ;           Also fixed a problem that left zoom windows lying around unused if scroll bars were 
 ;           needed. 18 October 2012. DWF.
+;        The color palette was not always being included when images were zoomed. Fixed. 17 Nov 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -659,14 +660,14 @@ PRO cgZImage_DrawEvents, event
              (*info).zoomWindowID = windowID
              (*info).zoomTLB = zoomTLB
              WSet, windowID
-             IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage
+             IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage, PALETTE=*(*info).palette
      
           ENDIF ELSE BEGIN
          
          ; Zoomed window exists. Make it correct size and load image.
          Widget_Control, (*info).zoomDrawID, XSize=zoomXSize, YSize=zoomYSize
          WSet, (*info).zoomWindowID
-         IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage
+         IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage, PALETTE=*(*info).palette
          
          ENDELSE
       ENDIF ELSE BEGIN
@@ -705,7 +706,7 @@ PRO cgZImage_DrawEvents, event
          (*info).zoomWindowID = windowID
          (*info).zoomTLB = zoomTLB
          WSet, windowID
-         IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage
+         IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage, PALETTE=*(*info).palette
          
       ENDELSE
 

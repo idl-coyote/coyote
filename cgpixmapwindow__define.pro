@@ -217,6 +217,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
        IM_Raster = d_im_raster, $                        ; Create raster files via ImageMagick.
        IM_Resize = d_im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
        IM_Options = d_im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+       IM_Width = d_im_width, $                          ; Set the width of ImageMagick output.
        
        ; PostScript properties.
        PS_Decomposed = d_ps_decomposed, $                ; Sets the PostScript color mode.
@@ -328,6 +329,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
     self.im_options = d_im_options
     self.im_raster = d_im_raster
     self.im_resize = d_im_resize
+    self.im_width = d_im_width
     self.msysvar = Ptr_New(/Allocate_Heap)
     self.pdf_unix_convert_cmd = d_pdf_unix_convert_cmd
     self.pdf_path = d_pdf_path

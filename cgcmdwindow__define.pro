@@ -121,6 +121,7 @@
 ;             string parameters and keywords to call the appropriate cgSymbol value at run-time.
 ;             This eliminates the need for alternate keywords. 27 July 2012. DWF.
 ;        Added WDestroyObjects keyword to destroy objects parameters, if needed. 11 November 2012. DWF.
+;        Not adding IM_WIDTH parameter from cgWindow_GetDefs. 19 November 2012. DWF.
 ;-
 
 
@@ -313,7 +314,8 @@ FUNCTION cgCmdWindow::Init, parent, $
        IM_Raster = d_im_raster, $                        ; Create raster files via ImageMagick.
        IM_Resize = d_im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
        IM_Options = d_im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
-       
+       IM_Width = d_im_width, $                          ; The width of the raster file output.
+        
        ; PostScript properties.
        PS_Decomposed = d_ps_decomposed, $                ; Sets the PostScript color mode.
        PS_Delete = d_ps_delete, $                        ; Delete PS file when making IM raster.
@@ -519,6 +521,7 @@ FUNCTION cgCmdWindow::Init, parent, $
     self.im_options = d_im_options
     self.im_raster = d_im_raster
     self.im_resize = d_im_resize
+    self.im_width = d_im_width
     self.msysvar = Ptr_New(/Allocate_Heap)
     self.pdf_unix_convert_cmd = d_pdf_unix_convert_cmd
     self.pdf_path = d_pdf_path
@@ -1442,7 +1445,7 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
            
            ; Draw the graphics.
            self -> ExecuteCommands
-           
+
            ; Close the file and convert to proper file type.
            CASE filetype OF
                 'BMP':  PS_END, /BMP, DELETE_PS=self.ps_delete, $

@@ -6,7 +6,7 @@
 ; PURPOSE:
 ;   The purpose of this function is to find an optimal threshold for separating
 ;   a bimodal distribution of pixels in an image histogram. The Otsu Threshold method
-;   is used: http://en.wikipedia.org/wiki/Otsu's_method.
+;   is explained here: http://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -39,7 +39,8 @@
 ;+
 ; The purpose of this function is to find an optimal threshold for separating
 ; a bimodal distribution of pixels in an image histogram. The algorithm used is the
-; `Otsu Method <http://en.wikipedia.org/wiki/Otsu's_method>`. 
+; "faster approach" algorithm explained 
+; `on this web page <http://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html>`.
 ;
 ; :Categories:
 ;    Utility
@@ -56,6 +57,8 @@
 ;       The binsize of the histogram. By default, Scott's Choice of bin size for histograms is used::
 ;                         
 ;           binsize = (3.5 * StdDev(data)) / N_Elements(data)^(0.3333)
+;           
+;       unless the data is byte type. Then a BINSIZE of 1 is used by default
 ;                            
 ;       If BINSIZE in not defined, and NBINS is defined, the BINSIZE is calcuated as::
 ;                         
@@ -68,6 +71,9 @@
 ;       level that I have done it for every situation. If you see something that "just don't
 ;       look right", I would check first to see if your data types match. That might solve
 ;       all your problems.
+;    example: in, optional, type=boolean, default=0
+;       Set this keyword if you wish to use the example data from the 
+;       `reference documentation <http://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html>`.
 ;    histdata: out, optional
 ;       The output value of the internal HISTOGRAM command.
 ;    l64: in, optional, type=boolean, default=0                       
@@ -95,12 +101,14 @@
 ;       The maximum output value used to construct the histogram. (See HISTOGRAM documentation.)
 ;    omin: out, optional
 ;       The minimum output value used to construct the histogram. (See HISTOGRAM documentation.)
+;    plotit: in, optional, type=boolean, default=0
+;       If this keyword is set, a histogram of the data is plotted along with a plot of the
+;       between class variance to show the selected threshold.
 ;    reverse_indices: out, optional
 ;       The list of reverse indices returned from the HISTOGRAM command. (See HISTOGRAM documentation.)
 ;          
 ; :Examples:
-;    I use the program to separate satellite bimodal images into two groups of pixels::
-;         threshold = cgOTSU_Threshold(redBand)
+;    Set the `Example` keyword to use the data from the reference page.
 ;        
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -115,6 +123,9 @@
 ;    Change History::
 ;       Written by:  David W. Fanning, 13 November 2012, from a program named OTSU_THRESHOLD by Carl Salvaggio and
 ;           modified by Gianguido Cianci.
+;       The OTSU_THRESHOLD algorithm used previously made many assumptions about the data. The algorithm used here
+;           has been completely rewritten to comply with the values in the reference page and to avoid making 
+;           assumptions about the data used to create the histogram. 21 November 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -122,6 +133,7 @@
 FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
    data, $                          ; The data to threshold.
    BINSIZE=binsize, $               ; The histogram bin size.
+   EXAMPLE=example, $               ; Set this keyword to see the reference page example.
    HISTDATA=histdata, $             ; The output of the HISTOGRAM command.
    L64=l64, $                       ; Input for HISTOGRAM.
    LOCATIONS=locations, $           ; The histogram bin locations.
@@ -130,9 +142,10 @@ FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
    MISSING=missing, $               ; The value that indicates "missing" data to be excluded from the histgram.
    NAN=nan, $                       ; Check for NAN.
    NBINS=nbins, $                   ; The number of bins to display.
-   OMAX=omax, $
-   OMIN=omin, $
-   REVERSE_INDICES=ri
+   OMAX=omax, $                     ; The maximum value of the histogram on output.
+   OMIN=omin, $                     ; The minimum value of the histogram on output.
+   PLOTIT=plotit, $                 ; Set this keyword to see the results of the thresholding algorithm.
+   REVERSE_INDICES=ri               ; The reverse indices of the histogram.
     
    Compile_Opt idl2
 
@@ -151,8 +164,26 @@ FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
       RETURN, -9999
    ENDIF
    
-   ; What kind of data are we doing a HISTOGRAM on?
+   ; Need data or the EXAMPLE keyword to continue.
+   IF N_Elements(data) EQ 0 && ~Keyword_Set(example) THEN BEGIN
+       Message, 'Data values to threshold are required.'
+   ENDIF
+   
+   ; Are we doing an example? Use the data from the reference page at
+   ; http://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html.
+   IF Keyword_Set(example) THEN BEGIN
+      data = [Replicate(0,8), Replicate(1,7), Replicate(2,2), Replicate(3,6), Replicate(4,9), Replicate(5,4)]
+      binsize = 1
+   ENDIF
+   
+   ; Get the data type. Important to match data type with binsize type. Otherwise
+   ; strange things occur in the Histogram command.
    dataType = Size(data, /TYPE)
+   
+   ; If this is byte data, then use a BINSIZE of 1, unless instructed otherwise.
+   IF dataType EQ 1 THEN BEGIN
+      IF (N_Elements(binsize) EQ 0) && (N_Elements(nbins) EQ 0) THEN binsize = 1B
+   ENDIF
       
    ; Check the data for NANs and alert the user if the NAN keyword is not set.
    IF dataType EQ 4 OR datatype EQ 5 THEN BEGIN
@@ -233,27 +264,71 @@ FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
    ; Lot's of bad things can happen next. Let's pretend we don't know about them.
    except = !Except
    !Except = 0
+   
+   ; The threshold values to evaluate.
+   thresholds = Lindgen(N_Elements(histdata)) * binsize + oMin
+   
+   ; Create a cumulative distribution to calculate the weighting factors.
+   ; Subscripting of the background weights and addition of a 0 value
+   ; is necessary to conform with the outputs in the reference documenation.
+   ; I presume it is because the first threshold should be on the near side
+   ; of the first bin, rather than on the far side.
+   cdf = Total(histdata, /DOUBLE, /CUMULATIVE)
+   reverseCDF = Total(Reverse(histdata), /DOUBLE, /CUMULATIVE)
+   Wb = [0,cdf[0:N_Elements(cdf)-2]] / Total(histdata)
+   Wf = Reverse(reverseCDF / Total(histdata))
+   
+   ; Find the means. 
+   mu_b = Total(histdata * thresholds, /DOUBLE, /CUMULATIVE) / cdf
+   mu_b = [0, mu_b[0:N_Elements(mu_b)-2]]
+   mu_f = Reverse(Total(Reverse(histdata) * Reverse(thresholds), /DOUBLE, /CUMULATIVE) / reverseCDF)
+   
+   ; Calculate the Between-Class variance.
+   betweenClassVariance = Wb * Wf * (mu_b - mu_f)^2
+   
+   ; The threshold is found by locating the maximum value and
+   ; obtaining the index into the array.
+   maximumVariance = Max(betweenClassVariance, thresholdIndex)
+   threshold = thresholdIndex*binsize + oMin
 
-   ; Compute the probability denisty function
-   pdf = histdata / Total(histdata, /DOUBLE)
-   reversedPDF = Reverse(pdf)
-   minimumDC = min
-   maxDC = omax
-
-   ; Iterate through all possible thresholds and compute the interclass variance
-   ; at each level.
-   cdf = Total(pdf, /DOUBLE, /CUMULATIVE)
-   omega1 = cdf[0:N_Elements(pdf)-2]
-   mu1 = Total(pdf * Indgen(maxDC), /DOUBLE, /CUMULATIVE) / cdf
-   omega2 = (Reverse(Total(reversedPDF, /DOUBLE, /CUMULATIVE)))[1:*]
-   mu2 = Reverse(Total( reversedPDF * (maxDC - Indgen(maxDC)), /DOUBLE, /CUMULATIVE)) / omega2
-   interclassVariance = [0, omega1 * omega2 * (mu1 - mu2)^2]
-
-   ; Determine the threshold by finding the level at which the maximum interclass
-   ; variance occurs.
-   maximumVariance = Max(interclassVariance, threshold)
-   threshold = threshold + minimumDC
-
+   ; Useful printouts if we are doing the example.
+   IF Keyword_Set(example) THEN BEGIN
+       Print, 'Wb:        ', Wb
+       Print, 'Wf:        ', Wf
+       Print, 'Mu_b:      ', mu_b
+       Print, 'Mu_f:      ', mu_f
+       Print, 'Variance:  ', betweenClassVariance
+       Print, 'Threshold: ', threshold
+       
+       cgDisplay, Title='Example OTSU Threshold Method'
+       !P.Multi = [0,1,2]
+       cgHistoplot, _data, Binsize=binsize, /Fill
+       cgPlots, [threshold, threshold], !Y.CRange, Color='blue', Thick=2
+       cgPlot, betweenClassVariance, Title='Between Class Variance'
+       cgPlots, [threshold, threshold], !Y.CRange, Color='blue', Thick=2
+       cgText, 0.23, 2.60, 'Threshold: ' + String(threshold, Format='(I0)'), Color='blue', Font=0
+       !P.Multi = 0
+   ENDIF
+   
+   ; Need a plot?
+   IF Keyword_Set(plotit) THEN BEGIN
+       cgDisplay, Title='OTSU Threshold Results'
+       !P.Multi = [0,1,2]
+       cgHistoplot, _data, $
+          BINSIZE=binsize, $
+          L64=l64, $
+          LOCATIONS=locations, $
+          MAXINPUT=max, $
+          MININPUT=min, $
+          NAN=nan, $
+          /Fill
+       cgPlots, [threshold, threshold], !Y.CRange, Color='blue', Thick=2
+       cgPlot, locations, betweenClassVariance, Title='Between Class Variance Threshold: ' + $
+           String(threshold,Format='(F0.2)')
+       cgPlots, [threshold, threshold], !Y.CRange, Color='blue', Thick=2
+       !P.Multi = 0
+   ENDIF
+   
    ; Clean up.
    !Except = except
    

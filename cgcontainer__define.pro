@@ -205,6 +205,8 @@ END
 ;   values can also be obtained.
 ;   
 ; :Keywords:
+;      count: out, optional, type=integer
+;         Use the keyword to return the number of objects in the container.
 ;      name: out, optional, type=string
 ;         Use this keyword to name the object. Names are often used to select objects in 
 ;         program code. 

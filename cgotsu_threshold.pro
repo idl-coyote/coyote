@@ -78,7 +78,8 @@
 ;       The output value of the internal HISTOGRAM command.
 ;    l64: in, optional, type=boolean, default=0                       
 ;       If set, the return value of HISTOGRAM are 64-bit integers, rather than
-;       the default 32-bit integers.
+;       the default 32-bit integers. Set by default for data types greater than or
+;       equal to 12.
 ;    locations: out, optional
 ;       Starting locations of each bin. (See the HISTOGRAM documentation for details.)
 ;    max: in, optional
@@ -126,6 +127,7 @@
 ;       The OTSU_THRESHOLD algorithm used previously made many assumptions about the data. The algorithm used here
 ;           has been completely rewritten to comply with the values in the reference page and to avoid making 
 ;           assumptions about the data used to create the histogram. 21 November 2012. DWF.
+;       Modified to set L64 keyword if data type GE 12 (suggested by user). 22 November 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -184,6 +186,10 @@ FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
    IF dataType EQ 1 THEN BEGIN
       IF (N_Elements(binsize) EQ 0) && (N_Elements(nbins) EQ 0) THEN binsize = 1B
    ENDIF
+   
+   ; If the data type is 12 or above, set the L64 keyword. Necessary to give enough
+   ; precision in the Otsu calculations.
+   IF dataType GE 12 THEN L64 = 1
       
    ; Check the data for NANs and alert the user if the NAN keyword is not set.
    IF dataType EQ 4 OR datatype EQ 5 THEN BEGIN

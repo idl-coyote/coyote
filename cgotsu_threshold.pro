@@ -127,7 +127,9 @@
 ;       The OTSU_THRESHOLD algorithm used previously made many assumptions about the data. The algorithm used here
 ;           has been completely rewritten to comply with the values in the reference page and to avoid making 
 ;           assumptions about the data used to create the histogram. 21 November 2012. DWF.
-;       Modified to set L64 keyword if data type GE 12 (suggested by user). 22 November 2012. DWF.
+;       Modified to set L64 keyword if data type GE 14 (suggested by user). 22 November 2012. DWF.
+;       Modified the threshold value to use DIndGen instead of IndGen, which was causing incorrect
+;           results with integer data. 24 November 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -187,9 +189,9 @@ FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
       IF (N_Elements(binsize) EQ 0) && (N_Elements(nbins) EQ 0) THEN binsize = 1B
    ENDIF
    
-   ; If the data type is 12 or above, set the L64 keyword. Necessary to give enough
+   ; If the data type is 14 or above, set the L64 keyword. Necessary to give enough
    ; precision in the Otsu calculations.
-   IF dataType GE 12 THEN L64 = 1
+   IF dataType GE 14 THEN L64 = 1
       
    ; Check the data for NANs and alert the user if the NAN keyword is not set.
    IF dataType EQ 4 OR datatype EQ 5 THEN BEGIN
@@ -272,7 +274,7 @@ FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
    !Except = 0
    
    ; The threshold values to evaluate.
-   thresholds = Lindgen(N_Elements(histdata)) * binsize + oMin
+   thresholds = DIndGen(N_Elements(histdata)) * binsize + oMin
    
    ; Create a cumulative distribution to calculate the weighting factors.
    ; Subscripting of the background weights and addition of a 0 value
@@ -288,7 +290,7 @@ FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
    mu_b = Total(histdata * thresholds, /DOUBLE, /CUMULATIVE) / cdf
    mu_b = [0, mu_b[0:N_Elements(mu_b)-2]]
    mu_f = Reverse(Total(Reverse(histdata) * Reverse(thresholds), /DOUBLE, /CUMULATIVE) / reverseCDF)
-   
+
    ; Calculate the Between-Class variance.
    betweenClassVariance = Wb * Wf * (mu_b - mu_f)^2
    
@@ -306,7 +308,7 @@ FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
        Print, 'Variance:  ', betweenClassVariance
        Print, 'Threshold: ', threshold
        
-       cgDisplay, Title='Example OTSU Threshold Method'
+       cgDisplay, Title='Example OTSU Threshold Method', /Free
        !P.Multi = [0,1,2]
        cgHistoplot, _data, Binsize=binsize, /Fill
        cgPlots, [threshold, threshold], !Y.CRange, Color='blue', Thick=2
@@ -318,7 +320,7 @@ FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
    
    ; Need a plot?
    IF Keyword_Set(plotit) THEN BEGIN
-       cgDisplay, Title='OTSU Threshold Results'
+       cgDisplay, Title='OTSU Threshold Results', /Free
        !P.Multi = [0,1,2]
        cgHistoplot, _data, $
           BINSIZE=binsize, $

@@ -98,6 +98,7 @@
 ;        Written by: David W. Fanning, 2 September 2011. 
 ;        Added plus-minus symbol. 2 Nov 2011. DWF.
 ;        Added "up", "down", "exp" "sub" and "n" symbols for subscripting and superscripting. 9 Nov 2012. DWF.
+;        Added "division" and "times" signs. 24 Nov 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -281,6 +282,8 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
             'exp':     retSymbol = '!E'
             'sub':     retSymbol = '!I'
             'n':       retSymbol = '!N'
+            'div':     retSymbol = '!Z(00F7)'
+            'times':   retSymbol = '!Z(00D7)'
             ELSE: Message, 'The symbol ' + symbol + ' is unrecognized.'
        ENDCASE
            
@@ -342,6 +345,8 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
             'exp':     retSymbol = '!E'
             'sub':     retSymbol = '!I'
             'n':       retSymbol = '!N'
+            'div':     retSymbol = '!9' + String("270B) + '!X'
+            'times':   retSymbol = '!9' + String("264B) + '!X'
            ELSE: Message, 'The symbol ' + symbol + ' is unrecognized.'
         ENDCASE
     
@@ -389,6 +394,8 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
             'exp':     retSymbol = '!E'
             'sub':     retSymbol = '!I'
             'n':       retSymbol = '!N'
+            'div':     retSymbol = '!9' + String("57B) + '!X'
+            'times':   retSymbol = '!9' + String("130B) + '!X'
             ELSE: Message, 'The symbol ' + symbol + ' is unrecognized.'      
         ENDCASE
         

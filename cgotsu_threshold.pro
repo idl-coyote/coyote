@@ -332,7 +332,7 @@ FUNCTION cgOTSU_THRESHOLD, $        ; The program name.
           /Fill
        cgPlots, [threshold, threshold], !Y.CRange, Color='blue', Thick=2
        cgPlot, locations, betweenClassVariance, Title='Between Class Variance Threshold: ' + $
-           String(threshold,Format='(F0.2)')
+           String(threshold,Format='(F0.2)'), XStyle=1
        cgPlots, [threshold, threshold], !Y.CRange, Color='blue', Thick=2
        !P.Multi = 0
    ENDIF

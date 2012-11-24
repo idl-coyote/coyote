@@ -122,6 +122,7 @@
 ;             This eliminates the need for alternate keywords. 27 July 2012. DWF.
 ;        Added WDestroyObjects keyword to destroy objects parameters, if needed. 11 November 2012. DWF.
 ;        Not adding IM_WIDTH parameter from cgWindow_GetDefs. 19 November 2012. DWF.
+;        Modified ReplaceEscapeSequence method to use cgCheckForSymbols. 24 November 2012. DWF.
 ;-
 
 
@@ -1082,23 +1083,8 @@ FUNCTION cgWindow_Command::ReplaceEscapeSequences, aString
     
         FOR j=0,N_Elements(aString)-1 DO BEGIN
             thisString = aString[j]
-            
-            ; Can you find an escape sequence (i.e., "{\") in this string?
-            locstart = StrPos(thisString, '$\')
-            IF locStart NE -1 THEN BEGIN
-            
-               finalLoc = StrPos(StrMid(thisString, locstart+2), '$')
-               IF finalLoc NE -1 THEN BEGIN
-                  token = StrMid(thisString, locStart+2, finalLoc)
-                  strToReplace = StrMid(thisString, locStart, finalLoc+3)
-                  newString = StrMid(thisString, 0, locstart) + cgSymbol(token) + StrMid(thisString, locstart+3+StrLen(token))
-                  thisString = self -> ReplaceEscapeSequences(newString)
-               ENDIF
-               
-            ENDIF
-            
+            thisString = cgCheckForSymbols(thisString)
             aString[j] = thisString
-         
         ENDFOR
         
         RETURN, aString

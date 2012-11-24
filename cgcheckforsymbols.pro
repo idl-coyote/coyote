@@ -62,7 +62,13 @@
 ;    the Angstrom squared symbol on the Y axis::
 ;    
 ;       cgPlot, cgDemoData(1), XTitle='Length ($\mu$M)', YTitle='Distance ($\Angstrom$$\up2$)'
-
+;
+;    The program has been modified to accept TexToIDL tokens. They must be preceed by
+;    a "\tex" prefix. For example, to draw a right arrow between 5 and 3, you would
+;    construct the embedded string like this::
+;
+;         aString = '5 $\tex\rightarrow$ 3'
+;         cgText, 0.5, 0.5, /Normal, Align=0.5, Charsize=3.0, aString
 ;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -77,6 +83,8 @@
 ;     Change History::
 ;        Written by David W. Fanning, 27 July 2012.
 ;        Modified to check for superscript and subscript codes. 9 November 2012. DWF.
+;        Modified to allow the user to use the TexToIDL program from embedded codes.
+;            To use a right arrow, for example, aString = '5 $\tex\rightarrow$ 3'
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -134,6 +142,11 @@ FUNCTION cgCheckForSymbols, aString
                          newString = StrMid(thisString, 0, locstart) + replaceStr + StrMid(thisString, locstart+3+StrLen(token))
                          END
 
+                      ; Provide a mechanism whereby people can use TexToIDL.
+                      StrUpCase(StrMid(strToReplace, 2, 3)) EQ 'TEX': BEGIN
+                         replaceStr = Call_Function('TexToIDL', StrMid(token,3), FONT=!P.FONT)
+                         newString = StrMid(thisString, 0, locstart) + replaceStr + StrMid(thisString, locstart+3+StrLen(token))
+                         END
                      ELSE: newString = StrMid(thisString, 0, locstart) + cgSymbol(token) + StrMid(thisString, locstart+3+StrLen(token))
 
                   ENDCASE

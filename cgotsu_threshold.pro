@@ -42,6 +42,8 @@
 ; "faster approach" algorithm explained 
 ; `on this web page <http://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html>`.
 ;
+; .. image:: cgotsu_threshold.png
+; 
 ; :Categories:
 ;    Utility
 ;    

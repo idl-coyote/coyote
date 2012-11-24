@@ -384,7 +384,7 @@ PRO NCDF_DATA::Browse, $
    self.minysize = self.geoDisplay.scr_ysize
    
    ; Position the application and realize it.
-   IF (xoffset LT 0 AND yoffset LT 0) THEN CenterTLB, self.tlb ELSE CenterTLB, self.tlb, xoffset, yoffset, /DEVICE, /NOCENTER
+   IF (xoffset LT 0 AND yoffset LT 0) THEN cgCenterTLB, self.tlb ELSE cgCenterTLB, self.tlb, xoffset, yoffset, /DEVICE, /NOCENTER
    Widget_Control, self.tlb, /REALIZE
    self.theTree = theTree
    XManager, 'ncdf_data', self.tlb, /NO_BLOCK, EVENT_HANDLER='NCDF_DATA_WIDGET_EVENTS', $

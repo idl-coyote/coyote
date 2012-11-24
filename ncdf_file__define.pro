@@ -69,7 +69,7 @@
 ;              http://www.idlcoyote.com/programs/ncdf_variable__define.pro
 ;              http://www.idlcoyote.com/programs/errorlogger__define.pro
 ;              http://www.idlcoyote.com/programs/error_message.pro
-;              http://www.idlcoyote.com/programs/centertlb.pro
+;              http://www.idlcoyote.com/programs/cgcentertlb.pro
 ;              http://www.idlcoyote.com/programs/undefine.pro
 ;              http://www.idlcoyote.com/programs/textbox.pro
 ;              http://www.idlcoyote.com/programs/cgrootname.pro

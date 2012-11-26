@@ -53,6 +53,9 @@
 ;               window is possible. A normal IDL graphics window is
 ;               always created.
 ;
+;  SIZEFRAC:    Make the window this fraction of the screen dimensions.
+;               A number between 0.0 and 1.0
+;  
 ;  TITLE:       The title string that is displayed on the window.
 ;
 ;  WID:         The window index number. If supplied as an IDL variable,
@@ -72,6 +75,8 @@
 ;  YSIZE:       The same as the ysize argument. Provided so ScrollWindow
 ;               can be a drop-in replacement for the Window command.
 ;
+;
+;
 ; EXAMPLE:
 ;
 ;  ScrollWindow, XSIZE=800, YSIZE=400   ; Produces normal IDL graphics window.
@@ -80,10 +85,11 @@
 ; MODIFICATION HISTORY:
 ;
 ;  Written by: David W. Fanning, 25 March 2009
+;  Added SIZEFRACTION keyword, Mats Löfdahl, 25 November 2012.
 ;-
 ;
 ;******************************************************************************************;
-;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
+;  Copyright (c) 2009-2012, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -110,14 +116,15 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 PRO ScrollWindow, xsize, ysize, $
-    FREE=free, $
-    PIXMAP=pixmap, $
-    TITLE=title, $
-    WID=wid, $
-    XPOS=xpos, $
-    XSIZE=xs, $
-    YSIZE=ys, $
-    YPOS=ypos
+                  FREE=free, $
+                  PIXMAP=pixmap, $
+                  SIZEFRACTION = sizefraction, $
+                  TITLE=title, $
+                  WID=wid, $
+                  XPOS=xpos, $
+                  XSIZE=xs, $
+                  YSIZE=ys, $
+                  YPOS=ypos
 
     ; Get default values. Easier to pass sizes as parameters, but
     ; I want this to be a drop-in replacement for WINDOW, too.
@@ -146,19 +153,27 @@ PRO ScrollWindow, xsize, ysize, $
     s = Get_Screen_Size()
     IF s[0] GT 2000 THEN s[0] = s[0] / 2
     
-    ; Need different fudge factors for different operating systems.
+    ;; Need different fudge factors for different operating systems.
     IF StrUpCase(!Version.OS_FAMILY) EQ 'WINDOWS' THEN BEGIN
-        retain = 1
-        xfudge = 25
-        yfudge = 80
+          retain = 1
+          xfudge = 25
+          yfudge = 80
     ENDIF ELSE BEGIN
-        retain = 2
-        xfudge = 40
-        yfudge = 100
+          retain = 2
+          xfudge = 40
+          yfudge = 100
     ENDELSE
+    maxxsize = s[0] - xfudge
+    maxysize = s[1] - yfudge
     
-    ; Either make a window, or made a scrollable window.
-    IF (xsize LT (s[0] - xfudge)) AND (ysize LT (s[1]- yfudge)) THEN BEGIN
+    ; Do you have a size fraction to consider?
+    IF N_Elements(sizefraction) NE 0 THEN BEGIN
+       maxxsize = Round(maxxsize * sizefraction)
+       maxysize = Round(maxysize * sizefraction)
+    ENDIF 
+    
+        ; Either make a window, or made a scrollable window.
+    IF (xsize LT maxxsize) AND (ysize LT maxysize) THEN BEGIN
         IF Keyword_Set(free) THEN BEGIN
             Window, XSIZE=xsize, YSIZE=ysize, TITLE=title, $
                 XPOS=xpos, YPOS=ypos, RETAIN=retain, FREE=1
@@ -169,7 +184,7 @@ PRO ScrollWindow, xsize, ysize, $
         wid = !D.Window
     ENDIF ELSE BEGIN
         tlb = Widget_Base(TITLE=title, XOFFSET=xpos, YOFFSET=ypos, $
-            X_SCROLL_SIZE=xsize < (s[0]-xfudge), Y_SCROLL_SIZE=ysize < (s[1]-yfudge))
+            X_SCROLL_SIZE=xsize < maxxsize, Y_SCROLL_SIZE=ysize < maxysize)
         draw = Widget_Draw(tlb, XSIZE=xsize, YSIZE=ysize, RETAIN=retain)
         Widget_Control, tlb, /Realize
         Widget_Control, draw, Get_Value=wid

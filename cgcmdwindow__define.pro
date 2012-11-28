@@ -1311,7 +1311,7 @@ PRO cgCmdWindow::AutoPostScriptFile, filename
     self -> ExecuteCommands
     
     ; Clean up.
-    PS_End
+    PS_End, NOMESSAGE=self.ps_quiet
 
     ; Set the window index number back.
     IF WindowAvailable(currentWindow) THEN WSet, currentWindow ELSE WSet, -1
@@ -1433,32 +1433,32 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
            self -> ExecuteCommands
 
            ; Close the file and convert to proper file type.
-           CASE filetype OF
+            CASE filetype OF
                 'BMP':  PS_END, /BMP, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width
+                            WIDTH=self.im_width, NOMESSAGE=self.ps_quiet
                 'GIF':  PS_END, /GIF, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width
+                            WIDTH=self.im_width, NOMESSAGE=self.ps_quiet
                 'JPEG': PS_END, /JPEG, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width
+                            WIDTH=self.im_width, NOMESSAGE=self.ps_quiet
                 'PNG':  PS_END, /PNG,  DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width
+                            WIDTH=self.im_width, NOMESSAGE=self.ps_quiet
                 'TIFF': PS_END, /TIFF, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width
+                            WIDTH=self.im_width, NOMESSAGE=self.ps_quiet
            ENDCASE
            IF ~self.ps_quiet THEN Print, 'Output file is located here: ' + outfilename
            END

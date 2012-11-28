@@ -861,6 +861,19 @@ END ; ----------------------------------------------------------------------
 ;         If the SCALE keyword is set, the image is scaled before display so that all 
 ;         displayed pixels have values greater than or equal to BOTTOM and less than 
 ;         or equal to TOP. Available only with 2D images.
+;    zoomfactor: in, optional, type=string, default=3
+;         Use this keyword to set the starting zoom factor. The values you can use are as follows::
+;              0: 'Actual'
+;              1: '2x'
+;              2: '3x'
+;              3: '4x'
+;              4: '5x'
+;              5: '6x'
+;              6: '7x'
+;              7: '8x'
+;              8: '12x'
+;              9: '16x'
+;
 ;-
 PRO cgZImage, image, $
    BETA=beta, $
@@ -888,7 +901,8 @@ PRO cgZImage, image, $
    SIGMA=sigma, $
    STRETCH=stretch, $
    TITLE=title, $
-   TOP=top
+   TOP=top, $
+   ZOOMFACTOR=zoomfactor
     
     Compile_Opt idl2
     
@@ -937,11 +951,11 @@ PRO cgZImage, image, $
     
     ; Check for keywords. 
     IF N_Elements(sboxcolor) EQ 0 THEN boxcolor = 'gold' ELSE boxcolor = sboxcolor
-    IF N_Elements(factor) EQ 0 THEN factor = 4
     IF N_Elements(stretch) EQ 0 THEN BEGIN
        maxValue = Max(image, MIN=minValue)
        IF (minValue LT 0) || (maxValue GT 255) THEN stretch=1
     ENDIF
+    IF N_Elements(zoomfactor) EQ 0 THEN zoomfactor = 3 ELSE zoomfactor = 0 > zoomfactor < 9
     
     ; Calculate a window size. Maximum window size is 600.
      aspect = Float(ixsize)/iysize
@@ -997,7 +1011,7 @@ PRO cgZImage, image, $
     controlID = Widget_Base(tlb, Map=0, Column=1)
     factorString = ['Actual', '2x', '3x', '4x', '5x', '6x', '7x', '8x', '12x', '16x']
     factors = [Indgen(8) + 1, 12, 16]
-    zoomfactor = Widget_DropList(controlID, Value=factorString, $
+    zoomfactorID = Widget_DropList(controlID, Value=factorString, $
        Event_Pro='cgZImage_Factor', UValue=factors, Title='Zoom Factor')
     IF trueindex EQ -1 THEN BEGIN
         colors = Widget_Button(controlID, Value='Load Image Colors', Event_Pro='cgZImage_LoadColors')
@@ -1016,7 +1030,7 @@ PRO cgZImage, image, $
     Widget_Control, tlb, /Realize
     
     ; Set the initial default zoom factor.
-    Widget_Control, zoomfactor, SET_DROPLIST_SELECT=3
+    Widget_Control, zoomfactorID, SET_DROPLIST_SELECT=zoomfactor
     
     ; Get the window index number of the draw widget.
     ; Make the draw widget the current graphics window
@@ -1051,6 +1065,9 @@ PRO cgZImage, image, $
         Widget_Control, tlb, TLB_Set_Title='Full Size Image (' + StrTrim(drawIndex,2) + ') -- ' + $
            'Right Click for Controls.'
     ENDIF
+    
+    ; Set the current zoom factor
+    factor = factors[zoomfactor]
 
     ; Create a pixmap window the same size as the draw widget window.
     ; Store its window index number in a local variable. Display the

@@ -63,6 +63,10 @@
 ;         The boundary will be in XY coordinates (projected meters).
 ;     outmap: out, optional, type=object
 ;         An output map coordinate object (cgMap) that describes the output image.
+;     outposition: out, optional, type=intarr
+;         A four-element array containing the pixel locations of the output image
+;         in the input image pixel coordinate system: [x0,y0,x1,y1]. In other words,
+;         these are the values used to subset the input image.
 ;         
 ; :Author:
 ;     FANNING SOFTWARE CONSULTING::
@@ -79,6 +83,7 @@
 ;        If the absolute value of the maximum of the boundary is LE 360, assume you need to convert
 ;           from lat/lon space to projected meter space. 23 Aug 2012. DWF.
 ;        Added MAPOUT and LATLONBOX keywords. 1 Nov 2012. DWF.
+;        Added OUTPOSITION keywords. 29 Nov 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -87,7 +92,8 @@ FUNCTION cgCliptoMap, imageIn, boundary, $
     LATLONBOX=latlonbox, $
     MAP=map, $
     OUTBOUNDARY=outboundary, $
-    OUTMAP=outmap
+    OUTMAP=outmap, $
+    OUTPOSITION=outposition
 
    Compile_Opt idl2
    
@@ -134,6 +140,7 @@ FUNCTION cgCliptoMap, imageIn, boundary, $
    
    ; Output boundary.
    outboundary = [ xvec[xsubs[0]], yvec[ysubs[0]], xvec[xsubs[1]], yvec[ysubs[1]] ]
+   outposition = [ xsubs[0], ysubs[0], xsubs[1], ysubs[1] ]
 
    ; Clip the image.
    IF trueIndex NE -1 THEN BEGIN

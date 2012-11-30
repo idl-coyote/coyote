@@ -1,55 +1,14 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;       DBLTOSTR
+;   cgDBLTOSTR
 ;
 ; PURPOSE:
-;
-;       This is a program for converting a double precision numerical value
-;       to a string. It was originally offered by BioPhys on the IDL newsgroup.
-;
-; AUTHOR:
-;
-;       FANNING SOFTWARE CONSULTING
-;       David Fanning,  Ph.D.
-;       1645 Sheely Drive
-;       Fort Collins,  CO 80526 USA
-;       Phone: 970-221-0438
-;       E-mail: david@idlcoyote.com
-;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-;
-; CATEGORY:
-;
-;       Utility
-;
-; CALLING SEQUENCE:
-;
-;       stringValue  =  DblToStr(value)
-;
-; INPUTS:
-;
-;       value - A double-precision or floating point value to be converted to a string.
-;
-; OUTPUTS:
-;
-;       stringValue - The converted string value.
-;
-; KEYWORDS:
-;
-;       None.
-;
-; RESTRICTIONS:
-;
-;       Assumes 14 significant digits of precision.
-;
-; MODIFICATION HISTORY:
-;
-;       Written by BioPhys and offered to the IDL newsgroup,  7 November 2005.
-;       Slightly modified and renamed by David Fanning,  30 November,  2005.
-;-
-;
+;    This is a program for converting a double precision numerical value
+;    to a string that maintains the 14 double-precision significant digits.
 ;******************************************************************************************;
-;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2005-2012, by Fanning Software Consulting, Inc. All rights reserved.      ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -74,7 +33,44 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-FUNCTION DBLTOSTR,  value
+;+
+; This is a program for converting a double precision numerical value
+; to a string that maintains the 14 double-precision significant digits.
+;
+; :Categories:
+;    Utilities
+;    
+; :Returns:
+;    A string value with the appropriate number of significant digits is returned.
+;    
+; :Params:
+;    value: in, required
+;         A double-precision or floating point value that is to be converted to a string.
+;       
+; :Examples:
+;    Here is how to use this program::
+;       IDL> Print, cgDblToStr(54.84392095433821d)
+;            54.843920954338
+;       
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning 
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;    Change History::
+;       Written by BioPhys and offered to the IDL newsgroup,  7 November 2005.
+;       Slightly modified and renamed by David Fanning,  30 November,  2005.
+;       Retired as DblToStr and reincarnated it as cgDblToStr. 30 November, 2012. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2005-2012, Fanning Software Consulting, Inc.
+;-
+FUNCTION cgDBLTOSTR,  value
 
    ; Error handling.
    On_Error,  2
@@ -90,7 +86,7 @@ FUNCTION DBLTOSTR,  value
    ; Data extension.
    typeExt = theType EQ 4 ? 'e' : 'd'
 
-   ; Create a string, using the full-widtet G format.
+   ; Create a string, using the full-width G format.
    rawstr = StrTrim(String(value, Format = '(g)'), 2)
 
    ; Extract the sign from the string and remove it for the moment.
@@ -126,6 +122,7 @@ FUNCTION DBLTOSTR,  value
 
    ; Reconstruct the string.
    saux = aux NE 0 ? '1' : ''
+   IF indx EQ "" THEN typeExt = ""
    outstr = sign + saux + StrJoin(outstr[0:ii]) + typeExt + indx
 
    ; Return it.

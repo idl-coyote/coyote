@@ -131,8 +131,8 @@
 ;
 ; RESTRICTIONS:
 ;
-;   Requires DBLTOSTR from the Coyote Library:
-;      http://www.idlcoyote.com/programs/dbltostr.pro
+;   Requires cgDblToStr from the Coyote Library:
+;      http://www.idlcoyote.com/programs/cgdbltostr.pro
 ;
 ; EVENT STRUCTURE:
 ;
@@ -560,7 +560,7 @@ ENDCASE
 self.dataType = dataType
 self.gentype = genType
 
-IF self.gentype EQ 'DOUBLE' THEN theText = DblToStr(value) ELSE theText = StrTrim(value,2)
+IF self.gentype EQ 'DOUBLE' THEN theText = cgDblToStr(value) ELSE theText = StrTrim(value,2)
 theText = self->Validate(theText)
 
    ; Load the value in the widget.
@@ -1371,7 +1371,7 @@ IF Keyword_Set(column) THEN row = 0 ELSE row = 1
 
    ; Validate the input value.
 
-IF self.gentype EQ 'DOUBLE' THEN value = DblToStr(value) ELSE value = StrTrim(value,2)
+IF self.gentype EQ 'DOUBLE' THEN value = cgDblToStr(value) ELSE value = StrTrim(value,2)
 value = self->Validate(value)
 self.theText = value
 

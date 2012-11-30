@@ -123,6 +123,7 @@
 ;        Added WDestroyObjects keyword to destroy objects parameters, if needed. 11 November 2012. DWF.
 ;        Not adding IM_WIDTH parameter from cgWindow_GetDefs. 19 November 2012. DWF.
 ;        Modified ReplaceEscapeSequence method to use cgCheckForSymbols. 24 November 2012. DWF.
+;        Modified to allow keywords to turn off messages from PS_START and PS_END with keywords. 27 November 2012. DWF.
 ;-
 
 

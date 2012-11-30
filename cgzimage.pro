@@ -69,6 +69,7 @@
 ;           Also fixed a problem that left zoom windows lying around unused if scroll bars were 
 ;           needed. 18 October 2012. DWF.
 ;        The color palette was not always being included when images were zoomed. Fixed. 17 Nov 2012. DWF.
+;        Added ZoomFactor keyword to allow the zoom factor to be set on start-up. 28 Nov 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.

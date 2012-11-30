@@ -38,6 +38,9 @@
 ;
 ;  NORESULT:       Set this keyword to a value that will be returned from the function
 ;                  if no intersection between the two sets of numbers is found. By default, -1.
+;                  
+;  POSITIONS:      And output keyword that will return the positions or locations in A where the values
+;                  in B appear.
 ;
 ;  SUCCESS:        An output keyword that is set to 1 if an intersection was found, and to 0 otherwise.
 ;
@@ -64,6 +67,7 @@
 ;     newsgroup by Research Systems software engineers.
 ;  Yikes, bug in original code only allowed positive integers. Fixed now. 2 Nov 2009. DWF.
 ;  Fixed a problem when one or both of the sets was a scalar value. 18 Nov 2009. DWF.
+;  Added a POSITIONS keyword. 30 Nov 2012. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -94,6 +98,7 @@
 ;******************************************************************************************;
 FUNCTION SetIntersection, set_a, set_b, $
     NORESULT=noresult, $
+    POSITIONS=positions, $
     SUCCESS=success
     
     Compile_Opt StrictArr, DefInt32
@@ -139,7 +144,7 @@ FUNCTION SetIntersection, set_a, set_b, $
     ENDIF
     
     ; Find the intersection.
-    r = Where((Histogram(set_a, Min=minab, Max=maxab) NE 0) AND  $
+    r = Where((Histogram(set_a, Min=minab, Max=maxab, REVERSE_INDICES=ri) NE 0) AND  $
               (Histogram(set_b, Min=minab, Max=maxab) NE 0), count)
               
     ; Was there an intersection? If not, leave now.
@@ -147,6 +152,18 @@ FUNCTION SetIntersection, set_a, set_b, $
         success = 0
         RETURN, noresult 
     ENDIF 
+    
+    ; Do you want the positions in A where B is found?
+    IF Arg_Present(positions) THEN BEGIN
+        FOR j=0,N_Elements(r)-1 DO BEGIN
+           IF N_Elements(thesePositions) EQ 0 THEN BEGIN
+               thesePositions = [ReverseIndices(ri, r[j])]
+           ENDIF ELSE BEGIN
+               thesePositions = [thesePositions, ReverseIndices(ri, r[j])]
+           ENDELSE
+        ENDFOR
+        positions = thesePositions
+    ENDIF
     
     ; Here is the result.
     result = Temporary(r) + minab

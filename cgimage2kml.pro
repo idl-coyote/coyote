@@ -180,6 +180,7 @@
 ;        Written, 30 October 2012 by David W. Fanning.
 ;        Added DRAWORDER keyword and fixed a typo concerning MISSING_VALUE. 31 Oct 2012. DWF.
 ;        Fixed a problem that was causing floating underflow warnings to be thrown. 5 Nov 2012. DWF.
+;        Images with values between 0 and 255 were not getting scaled properly. Fixed. 30 Nov 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -211,6 +212,9 @@ PRO cgImage2KML, image, mapCoord, $
        void = Error_Message()
        RETURN
    ENDIF
+   
+   ; If the user sets either the MIN_VALUE or MAX_VALUE keyword, then you should scale the image.
+   IF (N_Elements(min_value) GT 0) || (N_Elements(max_value)  GT 0) THEN scaleit = 1 ELSE scaleit = 0
    
    ; Has the GEOTIFF keyword been used to obtain program variables?
    IF N_Elements(geotiff) NE 0 THEN BEGIN
@@ -290,12 +294,12 @@ PRO cgImage2KML, image, mapCoord, $
       IF (imgType NE 'FLOAT') && (imgType NE 'DOUBLE') THEN warped = Float(warped)
       missing = Where(warped EQ missing_value, count)
       IF count GT 0 THEN warped[missing] = !Values.F_NAN
-      IF (Min(warped, /NAN) LT 0) || (Max(warped, /NAN) GT 255) THEN BEGIN
+      IF (Min(warped, /NAN) LT 0) || (Max(warped, /NAN) GT 255) || scaleIt THEN BEGIN
          warped = BytScl(warped, MIN=min_value, MAX=max_value, /NAN, TOP=254) + 1B
       ENDIF
       IF count GT 0 THEN warped[missing] = 0B
    ENDIF ELSE BEGIN
-      IF (Min(warped) LT 0) || (Max(warped) GT 255) THEN BEGIN
+      IF (Min(warped) LT 0) || (Max(warped) GT 255) || scaleIt THEN BEGIN
          warped = BytScl(warped, MIN=min_value, MAX=max_value, /NAN)
       ENDIF
    ENDELSE

@@ -35,6 +35,8 @@
 ;   set_b:         A vector of integers.
 ;
 ; KEYWORDRS:
+; 
+;  COUNT:          An output variable that contains the number of elements in the intersection vector.
 ;
 ;  NORESULT:       Set this keyword to a value that will be returned from the function
 ;                  if no intersection between the two sets of numbers is found. By default, -1.
@@ -68,6 +70,7 @@
 ;  Yikes, bug in original code only allowed positive integers. Fixed now. 2 Nov 2009. DWF.
 ;  Fixed a problem when one or both of the sets was a scalar value. 18 Nov 2009. DWF.
 ;  Added a POSITIONS keyword. 30 Nov 2012. DWF.
+;  Added a COUNT keyword 3 Dec 2012. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -97,6 +100,7 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 FUNCTION SetIntersection, set_a, set_b, $
+    COUNT=count, $
     NORESULT=noresult, $
     POSITIONS=positions, $
     SUCCESS=success
@@ -130,6 +134,7 @@ FUNCTION SetIntersection, set_a, set_b, $
 
     ; Assume success.
     success = 1
+    count = 0
    
     ; Find the intersection of the ranges.
     mina = Min(set_a, Max=maxa) 

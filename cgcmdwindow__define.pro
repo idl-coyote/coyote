@@ -124,6 +124,7 @@
 ;        Not adding IM_WIDTH parameter from cgWindow_GetDefs. 19 November 2012. DWF.
 ;        Modified ReplaceEscapeSequence method to use cgCheckForSymbols. 24 November 2012. DWF.
 ;        Modified to allow keywords to turn off messages from PS_START and PS_END with keywords. 27 November 2012. DWF.
+;        The output filename was not specified correctly when making PDF file automatically. Fixed. 2 Dec 2012. DWF.
 ;-
 
 
@@ -1371,8 +1372,8 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
         ; PDF File.
        -1: BEGIN
        
-           thisname = outname + '.ps'
-           outname = outname + '.pdf'
+           thisname = outputFilename + '.ps'
+           outname = outputFilename + '.pdf'
            PS_Start, $
                 DECOMPOSED=self.ps_decomposed, $
                 FILENAME=thisname, $

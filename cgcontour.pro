@@ -350,6 +350,7 @@
 ;        Added an ASPECT keyword to maintain the program aspect ratio. 12 July 2012. DWF.
 ;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;        Added C_ANNOTATION keyword. 10 Nov 2012. DWF.
+;        Modified the way default colors are selected when the background color is "white". 4 Dec 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -823,9 +824,15 @@ PRO cgContour, data, x, y, $
     
     ; Check the color keywords.
     background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional, MODE=currentState)
-    IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
-    axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
-    color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
+    IF Size(background, /TNAME) EQ 'STRING' && (StrUpCase(background[0]) EQ 'WHITE') THEN BEGIN
+       IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
+       axisColor = cgDefaultColor(saxisColor, DEFAULT='black', TRADITIONAL=traditional, MODE=currentState)
+       color = cgDefaultColor(sColor, DEFAULT='black', TRADITIONAL=traditional, MODE=currentState)
+    ENDIF ELSE BEGIN
+       IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
+       axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
+       color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
+    ENDELSE
 
     ; If color is the same as background, do something. Since this precludes drawing the the
     ; background color (perhaps you want to "erase" something), I offer an exception. If the

@@ -228,6 +228,7 @@
 ;         Added the ability to specify a symbol name with the PSYM keyword. 19 Juyl 2012. DWF.
 ;         Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;         Fixed an interaction with the LABEL keyword that prevented a Title from appearing. 2 Oct 2012. DWF.
+;         Modified the way default colors are selected when the background color is "white". 4 Dec 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -527,10 +528,16 @@ PRO cgPlot, x, y, $
     IF (N_Elements(label) NE 0) && (label NE "") THEN title = ""
     traditional = Keyword_Set(traditional)
     background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional, MODE=currentState)
-    IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
-    axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
-    color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
-    
+    IF Size(background, /TNAME) EQ 'STRING' && (StrUpCase(background[0]) EQ 'WHITE') THEN BEGIN
+       IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
+       axisColor = cgDefaultColor(saxisColor, DEFAULT='black', TRADITIONAL=traditional, MODE=currentState)
+       color = cgDefaultColor(sColor, DEFAULT='black', TRADITIONAL=traditional, MODE=currentState)
+    ENDIF ELSE BEGIN
+       IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
+       axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
+       color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
+    ENDELSE
+
     ; If color is the same as background, do something. Since this precludes drawing the the
     ; background color (perhaps you want to "erase" something), I offer an exception. If the
     ; COLOR is "Background", I am going to assume you know what you are doing!

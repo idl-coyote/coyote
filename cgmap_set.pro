@@ -101,6 +101,8 @@
 ;     Written by David W. Fanning, 7 November 2011.
 ;     Added ONIMAGE keyword to allow the position to be specified at the last
 ;        image position from cgImage. 3 March 2012. DWF.
+;     Several MAP_CONTINENTS keywords seem to have gone missing. Added COASTS,
+;        COUNTRIES, FILL_CONTINENTS, and RIVERS. 4 Dec 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -116,16 +118,19 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
       CENTRAL_AZIMUTH=cent_azim, $
       CHARSIZE = charsize, $
       CLIP=clip, $
+      COASTS=coasts, $
       COLOR=color, $
       CON_COLOR=con_color, $
       CONIC = conic, $
       CONTINENTS = continents, $
+      COUNTRIES=countries, $
       CYLINDRICAL = cylindrical, $
       E_CONTINENTS=econt, $ 
       E_HORIZON=ehorizon, $
       E_GRID=egrid, $      
       ELLIPSOID = ellips, $
       ERASE=erase, $
+      FILL_CONTINENTS=fill_continents, $
       GLINESTYLE=glinestyle, $
       GLINETHICK=glinethick, $
       GRID=grid, $
@@ -155,7 +160,8 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
       ONIMAGE=onimage, $
       ORTHOGRAPHIC = orthographic, $
       POSITION = position, $
-      PROJECTION=proj, $              
+      PROJECTION=proj, $   
+      RIVERS=rivers, $           
       REVERSE=reverse, $   
       ROBINSON = robinson, $         
       SAT_P = Sat_p, $ 
@@ -196,16 +202,19 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
           CENTRAL_AZIMUTH=cent_azim, $
           CHARSIZE = charsize, $
           CLIP=clip, $
+          COASTS=coasts, $
           COLOR=color, $
           CON_COLOR=con_color, $
           CONIC = conic, $
           CONTINENTS = continents, $
+          COUNTRIES=countries, $
           CYLINDRICAL = cylindrical, $
           E_CONTINENTS=econt, $ 
           E_HORIZON=ehorizon, $
           E_GRID=egrid, $      
           ELLIPSOID = ellips, $
           ERASE=erase, $
+          FILL_CONTINENTS=fill_continenets, $
           GLINESTYLE=glinestyle, $
           GLINETHICK=glinethick, $
           GRID=grid, $
@@ -235,7 +244,8 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
           ONIMAGE=onimage, $
           ORTHOGRAPHIC = orthographic, $
           POSITION = position, $
-          PROJECTION=proj, $              
+          PROJECTION=proj, $    
+          RIVERS=rivers, $          
           REVERSE=reverse, $   
           ROBINSON = robinson, $         
           SAT_P = Sat_p, $ 
@@ -276,15 +286,18 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
           CHARSIZE = charsize, $
           CLIP=clip, $
           COLOR=color, $
+          COASTS=coasts, $
           CON_COLOR=con_color, $
           CONIC = conic, $
           CONTINENTS = continents, $
+          COUNTRIES=countries, $
           CYLINDRICAL = cylindrical, $
           E_CONTINENTS=econt, $ 
           E_HORIZON=ehorizon, $
           E_GRID=egrid, $      
           ELLIPSOID = ellips, $
           ERASE=erase, $
+          FILL_CONTINENTS=fill_continents, $
           GLINESTYLE=glinestyle, $
           GLINETHICK=glinethick, $
           GRID=grid, $
@@ -314,7 +327,8 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
           ONIMAGE=onimage, $
           ORTHOGRAPHIC = orthographic, $
           POSITION = position, $
-          PROJECTION=proj, $              
+          PROJECTION=proj, $  
+          RIVERS=rivers, $            
           REVERSE=reverse, $   
           ROBINSON = robinson, $         
           SAT_P = Sat_p, $ 
@@ -482,18 +496,18 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
        cgMap_Continents, $
          COASTS=kcoasts, $
          COLOR=con_color, $
-         CONTINENTS = kcont, $
-         COUNTRIES=kcountries, $
-         FILL_CONTINENTS=kfill_continents, $
-         HIRES=khires, $
+         CONTINENTS = continents, $
+         COUNTRIES=countries, $
+         FILL_CONTINENTS=fill_continents, $
+         HIRES=hires, $
          LIMITS = lim_u, $
          MAP_STRUCTURE=mapStructure, $
          ORIENTATION=orientation, $
-         RIVERS=krivers, $
+         RIVERS=rivers, $
          SPACING=spacing, $
          T3D=T3D, $
          THICK=thick, $
-         USA = kusa, $
+         USA = usa, $
          ZVALUE=zvalue, $
          _EXTRA=e_cont
        

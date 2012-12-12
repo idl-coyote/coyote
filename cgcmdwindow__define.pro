@@ -1205,7 +1205,7 @@ END ;---------------------------------------------------------------------------
 ;-
 PRO cgCmdWindow_Cleanup, tlb
     Widget_Control, tlb, Get_UValue=self
-    Obj_Destroy, self
+    IF Obj_Valid(self) THEN Obj_Destroy, self
 END ;----------------------------------------------------------------------------------------------------------------
 
 
@@ -1462,7 +1462,7 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
                             WIDTH=self.im_width, NOMESSAGE=self.ps_quiet
            ENDCASE
-           IF ~self.ps_quiet THEN Print, 'Output file is located here: ' + outfilename
+           ;IF ~self.ps_quiet THEN Print, 'Output file is located here: ' + outfilename
            END
     
     ENDCASE

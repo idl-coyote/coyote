@@ -131,12 +131,30 @@ FUNCTION cgQuery, $
     thisWindow = !D.Window
     FOR j=0,count-1 DO BEGIN
         thisItem = list -> Get_Item(j, /DEREFERENCE)
-        widgetID[j] = thisItem.tlb
+        
+        ; Make sure this is a valid widget.
+        IF Widget_Info(thisItem.tlb, /VALID_ID) THEN BEGIN
+           widgetID[j] = thisItem.tlb
+        ENDIF ELSE BEGIN
+           widgetID[j] = -1
+           CONTINUE
+        ENDELSE
         objectRef[j] = thisItem.windowobj
         title[j] = thisItem.title
         windowIndex[j] = thisItem.wid
         dimensions[*,j] = [!D.X_Size, !D.Y_Size]
     ENDFOR
+    
+    ; IF you have bad indices, clean things up.
+    badIndices = Where(widgetID EQ -1, badCount, COMPLEMENT=goodIndices, NCOMPLEMENT=count)
+    IF badCount GT 0 THEN BEGIN
+       widgetID = widgetID[goodIndices]
+       objectRef[j] = objectRef[goodIndices]
+       title[j] =  title[goodIndices]
+       windowIndex[j] =  windowIndex[goodIndices]
+       dimensions[*,j] =  dimensions[*,goodIndices]
+       FOR k=0,badCount-1 DO list -> Destroy, badIndices[k], /Destroy
+    ENDIF
     IF (thisWindow GE 0) && WindowAvailable(thisWindow) THEN WSet, thisWindow ELSE WSet, -1
     
     ; Return just the current values if the CURRENT keyword is set.

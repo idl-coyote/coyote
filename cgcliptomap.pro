@@ -84,6 +84,9 @@
 ;           from lat/lon space to projected meter space. 23 Aug 2012. DWF.
 ;        Added MAPOUT and LATLONBOX keywords. 1 Nov 2012. DWF.
 ;        Added OUTPOSITION keywords. 29 Nov 2012. DWF.
+;        I have reason to believe the way I was creating the location vectors and
+;           and image subset in this program was causing me to be 1 pixel off in
+;           creating the image subset. The algorithm has been tweaked to correct this. 12 Dec 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -106,7 +109,7 @@ FUNCTION cgCliptoMap, imageIn, boundary, $
    ; have of a GeoTiff file for which you can gather the map
    ; projection information.
    IF Size(imageIn, /TNAME) EQ 'STRING' THEN BEGIN
-      map = cgGeoMap(imageIn, Image=image)
+      map = cgGeoMap(imageIn, Image=image, GeoTiff=geotiff, Palette=pal)
    ENDIF ELSE image = imageIn
    
    ; You need a boundary at this point.
@@ -131,8 +134,8 @@ FUNCTION cgCliptoMap, imageIn, boundary, $
    map -> GetProperty, XRange=xr, YRange=yr
    
    ; Create image vectors.
-   xvec = Scale_Vector(DIndgen(dims[0]), xr[0], xr[1])
-   yvec = Scale_Vector(DIndgen(dims[1]), yr[0], yr[1])
+   xvec = Scale_Vector(DIndgen(dims[0]+1), xr[0], xr[1])
+   yvec = Scale_Vector(DIndgen(dims[1]+1), yr[0], yr[1])
    
    ; Clip to get new image subscripts.
    xsubs = 0 > Value_Locate(xvec, [thisBoundary[0],thisBoundary[2]]) < (dims[0]-1)
@@ -145,11 +148,11 @@ FUNCTION cgCliptoMap, imageIn, boundary, $
    ; Clip the image.
    IF trueIndex NE -1 THEN BEGIN
       imageType = Size(image, /TYPE)
-      subimage = Make_Array(xsubs[1]-xsubs[0]+1, ysubs[1]-ysubs[0]+1, 3, Type=imageType)
-      subimage[*,*,0] = image[xsubs[0]:xsubs[1], ysubs[0]:ysubs[1], 0]
-      subimage[*,*,1] = image[xsubs[0]:xsubs[1], ysubs[0]:ysubs[1], 1]
-      subimage[*,*,2] = image[xsubs[0]:xsubs[1], ysubs[0]:ysubs[1], 2]   
-   ENDIF ELSE subimage = image[xsubs[0]:xsubs[1], ysubs[0]:ysubs[1]]
+      subimage = Make_Array(xsubs[1]-xsubs[0], ysubs[1]-ysubs[0], 3, Type=imageType)
+      subimage[*,*,0] = image[xsubs[0]:xsubs[1]-1, ysubs[0]:ysubs[1]-1, 0]
+      subimage[*,*,1] = image[xsubs[0]:xsubs[1]-1, ysubs[0]:ysubs[1]-1, 1]
+      subimage[*,*,2] = image[xsubs[0]:xsubs[1]-1, ysubs[0]:ysubs[1]-1, 2]   
+   ENDIF ELSE subimage = image[xsubs[0]:xsubs[1]-1, ysubs[0]:ysubs[1]-1]
    
    ; Create an output map coordinate object.
    map -> GetProperty, MAP_PROJECTION=projection, ELLIPSOID=ellipsoid, ZONE=zone

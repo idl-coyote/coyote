@@ -36,8 +36,7 @@
 ;
 ;+
 ;   This program implements the KML abstract OVERLAY class. For 
-;   reference, see  the `Google KML Reference Documentation 
-;   <https://developers.google.com/kml/documentation/kmlreference#overlay>`.
+;   reference, see  the `Google KML Reference Documentation <https://developers.google.com/kml/documentation/kmlreference#overlay>`.
 ;   An Overlay object is a basic KML class, and should be inherited by,
 ;   for example, a cgKML_GroundOverlay object, which extends and implements 
 ;   this KML abstract class.

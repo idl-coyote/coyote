@@ -36,8 +36,7 @@
 ;
 ;+
 ;   This program implements the KML abstract FEATURE class. For 
-;   reference, see  the `Google KML Reference Documentation 
-;   <https://developers.google.com/kml/documentation/kmlreference#feature>`.
+;   reference, see  the `Google KML Reference Documentation <https://developers.google.com/kml/documentation/kmlreference#feature>`.
 ;   A Feature object extends a KML Object, and both should be inherited by,
 ;   for example, a KML Overlay object, which further extends this KML abstract
 ;   class.

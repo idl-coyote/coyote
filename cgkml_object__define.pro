@@ -36,8 +36,7 @@
 ;
 ;+
 ;   This program implements the KML abstract OBJECT class. For 
-;   reference, see  the `Google KML Reference Documentation 
-;   <https://developers.google.com/kml/documentation/kmlreference#object>`.
+;   reference, see  the `Google KML Reference Documentation <https://developers.google.com/kml/documentation/kmlreference#object>`.
 ;   A Object object is a basic KML class, and should be inherited by,
 ;   for example, a cgKML_Feature object, which extends this KML abstract
 ;   class.

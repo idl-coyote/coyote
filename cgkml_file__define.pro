@@ -37,8 +37,7 @@
 ;+
 ;   This program creates a KML file that can be displayed with Google Earth.
 ;   It implements some (not all) of the objects or elements allowed in KML files. For 
-;   reference, see  the `Google KML Reference Documentation 
-;   <https://developers.google.com/kml/documentation/kmlreference>`.
+;   reference, see  the `Google KML Reference Documentation <https://developers.google.com/kml/documentation/kmlreference>`.
 ;
 ; :Categories:
 ;    Graphics, FileIO

@@ -37,8 +37,7 @@
 ;
 ;+
 ;   This program implements the KML GroundOverlay element. For 
-;   reference, see  the `Google KML Reference Documentation 
-;   <https://developers.google.com/kml/documentation/kmlreference#groundoverlay>`.
+;   reference, see  the `Google KML Reference Documentation <https://developers.google.com/kml/documentation/kmlreference#groundoverlay>`.
 ;   A GroundOverlay element draws an image overlay draped onto the terrain
 ;   of a Google Earth display.
 ;

@@ -37,8 +37,7 @@
 ;
 ;+
 ;   This program implements the KML ScreenOverlay element. For 
-;   reference, see  the `Google KML Reference Documentation 
-;   <https://developers.google.com/kml/documentation/kmlreference#ScreenOverlay>`.
+;   reference, see  the `Google KML Reference Documentation <https://developers.google.com/kml/documentation/kmlreference#ScreenOverlay>`.
 ;   A ScreenOverlay element draws an image onto the Google Earth display or screen.
 ;
 ; :Categories:

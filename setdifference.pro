@@ -38,9 +38,14 @@
 ;
 ; KEYWORDRS:
 ;
+;  COUNT:          An output variable that contains the number of elements in the difference vector.
+;
 ;  NORESULT:       Set this keyword to a value that will be returned from the function
 ;                  if no difference between the two sets of numbers is found. By default, set_a.
 ;                  
+;  POSITIONS:      An output keyword that will return the positions or locations in A of the values
+;                  not found in B.
+;                 
 ;  SUCCESS:        An output keyword that is set to 1 if a difference was found, and to 0 otherwise.
 ;   
 ; EXAMPLE:
@@ -64,6 +69,7 @@
 ;
 ;  Written by: David W. Fanning, November 25, 2009, from code originally supplied to the IDL
 ;     newsgroup by Research Systems software engineers.
+;  Added COUNT and POSITIONS keywords. Liam Steele, 13 Dec 2012.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -93,7 +99,9 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 FUNCTION SetDifference, set_a, set_b, $
+    COUNT=count, $
     NORESULT=noresult, $
+    POSITIONS=positions, $
     SUCCESS=success
     
     Compile_Opt StrictArr, DefInt32
@@ -125,6 +133,7 @@ FUNCTION SetDifference, set_a, set_b, $
 
     ; Assume success.
     success = 1
+    count = 0
   
     ; Find the set ranges.
     mina = Min(set_a, Max=maxa)
@@ -135,10 +144,22 @@ FUNCTION SetDifference, set_a, set_b, $
         success = 0
         RETURN, noresult 
     ENDIF
-
+    
     ; Otherwise find the indices in A that are not in B.
-    r = Where((Histogram(set_a, Min=mina, Max=maxa) NE 0) AND $
+    r = Where((Histogram(set_a, Min=mina, Max=maxa, REVERSE_INDICES=ra) NE 0) AND $
              ( Histogram(set_b, Min=mina, Max=maxa) EQ 0), count)
+
+    ; Do you want the positions in A not found in B?
+    IF Arg_Present(positions) THEN BEGIN
+        FOR j=0,N_Elements(r)-1 DO BEGIN
+           IF N_Elements(thesePositions) EQ 0 THEN BEGIN
+               thesePositions = [ReverseIndices(ra, r[j])]
+           ENDIF ELSE BEGIN
+               thesePositions = [thesePositions, ReverseIndices(ra, r[j])]
+           ENDELSE
+        ENDFOR
+        positions = thesePositions
+    ENDIF
              
     ; Return the result.
     IF count EQ 0 THEN BEGIN

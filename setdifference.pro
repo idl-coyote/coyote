@@ -70,6 +70,7 @@
 ;  Written by: David W. Fanning, November 25, 2009, from code originally supplied to the IDL
 ;     newsgroup by Research Systems software engineers.
 ;  Added COUNT and POSITIONS keywords. Liam Steele, 13 Dec 2012.
+;  Defined values for COUNT and POSITIONS when there is no overlap in the vectors. 14 Dec 2012. LS.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -142,6 +143,8 @@ FUNCTION SetDifference, set_a, set_b, $
     ; If no overlap, return no result.
     IF (minb GT maxa) OR (maxb LT mina) THEN BEGIN
         success = 0
+        count = N_Elements(set_a)
+        positions = Lindgen(count)
         RETURN, noresult 
     ENDIF
     

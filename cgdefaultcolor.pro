@@ -97,6 +97,9 @@
 ;        Made FOR loop counter a LONG integer. 3 July 2012. DWF.
 ;        More work on getting the MODE correct to handle LONG integers properly. Now, in PostScript, we get
 ;            the current mode, except if we have been told what mode to be in. 21 July 2012. DWF.
+;        For numerical values less than 256, in indexed color state, I now return the values
+;              directly to the user. This should significantly speed up many Coyote Graphics
+;              processes. 14 December 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -175,11 +178,19 @@ FUNCTION cgDefaultColor, inputColour, $
     ; integer if the MODE is 0, or indexed color, and the value is 
     ; between 0 and 255. If it is a string, we can return it directly.
     thisType = Size(inputcolor, /TNAME)
-    IF thisType EQ 'LONG' && thisMode THEN BEGIN
+    IF (thisType EQ 'BYTE') && (thisMode EQ 0) THEN BEGIN
+        RETURN, inputColor 
+    ENDIF 
+    IF (thisType EQ 'INT') && (thisMode EQ 0) THEN BEGIN
+        RETURN, inputColor 
+    ENDIF 
+    IF thisType EQ 'LONG' && (thisMode EQ 0) THEN BEGIN
+        RETURN, inputColor 
+    ENDIF
+    IF thisType EQ 'LONG' && (thisMode EQ 1) THEN BEGIN
         theColors = LonArr(N_Elements(inputColor))    
-    ENDIF ELSE BEGIN
-        theColors = StrArr(N_Elements(inputColor))
-    ENDELSE
+    ENDIF 
+    IF N_Elements(theColors) EQ 0 THEN theColors = StrArr(N_Elements(inputColor))
 
     ; Fill the color return array.
     FOR j=0L,N_Elements(theColors)-1 DO BEGIN

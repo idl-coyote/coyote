@@ -716,10 +716,10 @@ PRO cgColorbar, $
     IF N_Elements(tickInterval) NE 0 THEN divisions = 0
         
     ; Annotate the color bar.
-    annotateColor = cgDefaultColor(annotateColor, DEFAULT=color, MODE=currentState)
+    annotateColor = cgDefaultColor(annotateColor, DEFAULT=color)
     
     ; If color is undefined, use the annotate color.
-    color = cgDefaultColor(color, DEFAULT=annotateColor, MODE=currentState)
+    color = cgDefaultColor(color, DEFAULT=annotateColor)
     
     IF Size(annotateColor, /TNAME) EQ 'STRING' THEN annotateColor = cgColor(annotateColor)
     IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)

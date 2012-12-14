@@ -529,11 +529,11 @@ PRO cgSurf, data, x, y, $
     TVLCT, rr, gg, bb, /GET
     
     ; Check the color keywords.
-    background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional, MODE=currentState)
+    background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional)
     IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
-    axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
-    color = cgDefaultColor(sColor, DEFAULT='BLU6', TRADITIONAL=traditional, MODE=currentState)
-    bottom = cgDefaultColor(sbottom, DEFAULT=color, TRADITIONAL=traditional, MODE=currentState)
+    axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional)
+    color = cgDefaultColor(sColor, DEFAULT='BLU6', TRADITIONAL=traditional)
+    bottom = cgDefaultColor(sbottom, DEFAULT=color, TRADITIONAL=traditionale)
     
     ; If color is the same as background, do something. Since this precludes drawing the the
     ; background color (perhaps you want to "erase" something), I offer an exception. If the

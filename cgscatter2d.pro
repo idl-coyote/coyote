@@ -513,12 +513,12 @@ PRO cgScatter2D, x, y, $
 
     ; Check the color keywords.
     traditional = Keyword_Set(traditional)
-    background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional, MODE=currentState)
+    background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional)
     IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
-    axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
-    color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
-    fcolor = cgDefaultColor(sfColor, DEFAULT='red', TRADITIONAL=traditional, MODE=currentState)
-    gcolor = cgDefaultColor(sgColor, DEFAULT='gray', TRADITIONAL=traditional, MODE=currentState)
+    axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional)
+    color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional)
+    fcolor = cgDefaultColor(sfColor, DEFAULT='red', TRADITIONAL=traditional)
+    gcolor = cgDefaultColor(sgColor, DEFAULT='gray', TRADITIONAL=traditional)
     
     ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font

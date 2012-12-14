@@ -230,7 +230,7 @@ PRO cgAxis, xloc, yloc, zloc, $
     TVLCT, rr, gg, bb, /Get
 
     ; Choose a color.
-    color = cgDefaultColor(scolor, MODE=currentState)
+    color = cgDefaultColor(scolor)
      
     ; Draw the axis.
     IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = cgColor(color) ELSE thisColor = color

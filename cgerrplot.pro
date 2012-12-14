@@ -192,7 +192,7 @@ PRO cgErrPlot, indep, low, high, $
     SetDecomposedState, 1, CurrentState=currentState
     
     ; Choose a color.
-    color = cgDefaultColor(sColor, DEFAULT='OPPOSITE', MODE=currentState)
+    color = cgDefaultColor(sColor, DEFAULT='OPPOSITE')
     IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
     
     ; Check parameters and keywords.

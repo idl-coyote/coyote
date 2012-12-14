@@ -182,16 +182,13 @@ PRO cgPolygon, x, y, z, $
     
   ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
-    
-    ; Do this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
-    
+       
     ; Need a color?
-    thisColor = cgDefaultColor(color, DEFAULT='rose', MODE=currentState)
+    thisColor = cgDefaultColor(color, DEFAULT='rose')
     IF N_Elements(fColor) EQ 0 THEN BEGIN
        fillColor = thisColor 
     ENDIF ELSE BEGIN
-       fillColor = cgDefaultColor(fcolor, MODE=currentState)
+       fillColor = cgDefaultColor(fcolor)
     ENDELSE
     
     ; Get the current color vectors.
@@ -234,7 +231,6 @@ PRO cgPolygon, x, y, z, $
     ENDCASE
     
     ; Clean up.
-    SetDecomposedState, currentState
     IF !D.Name NE 'Z' THEN TVLCT, rr, gg, bb
    
 END

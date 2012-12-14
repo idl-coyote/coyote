@@ -183,7 +183,7 @@ PRO cgDraw_ROI, roi, $
     SetDecomposedState, 1, CURRENTSTATE=currentState
     
     ; Need a color?
-    thisColor = cgDefaultColor(color, DEFAULT='opposite', MODE=currentState)
+    thisColor = cgDefaultColor(color, DEFAULT='opposite')
     
     ; Get the current color vectors.
     TVLCT, rr, gg, bb, /Get

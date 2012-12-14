@@ -165,8 +165,8 @@ FUNCTION cgOverPlot::INIT, x, y, $
     
     ; Default colors.
     SetDecomposedState, 1, CURRENTSTATE=currentState
-    color = cgDefaultColor(color, DEFAULT="opposite", MODE=currentState)
-    symcolor = cgDefaultColor(symcolor, DEFAULT=color, MODE=currentState)
+    color = cgDefaultColor(color, DEFAULT="opposite")
+    symcolor = cgDefaultColor(symcolor, DEFAULT=color)
 
     ; Other parameter defaults.
     IF N_Elements(linestyle) EQ 0 THEN linestyle = 0

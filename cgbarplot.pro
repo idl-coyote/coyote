@@ -492,9 +492,9 @@ PRO cgBarPlot, values, $
     ENDIF
 
     ; Check the keywords.
-    background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional, MODE=currentState)
-    axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
-    color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
+    background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional)
+    axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional)
+    color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional)
         
     ; Load the drawing colors. If needed create a window first, so the drawing
     ; colors are correct for the window you want to draw into.
@@ -520,7 +520,7 @@ PRO cgBarPlot, values, $
     IF N_Elements(scolors) EQ 0 THEN BEGIN
         scolors=String(Byte((256.0/nbars)*(Indgen(nbars)+0.5)), FORMAT='(i0)')
     ENDIF
-    colors = cgDefaultColor(scolors, MODE=currentState)
+    colors = cgDefaultColor(scolors)
     IF N_Elements(colors) EQ 1 THEN colors = Replicate(colors, nbars)
     IF N_Elements(colors) NE nbars THEN $
        Message, 'There is a mismatch between the number of bars and number of bar colors.'

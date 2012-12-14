@@ -390,11 +390,11 @@ PRO cgDotPlot, labels, values, $
     title = cgCheckForSymbols(title)
     xtitle = cgCheckForSymbols(xtitle)
     FOR j=0,N_Elements(labels)-1 DO labels[j] = cgCheckForSymbols(labels[j])
-    background = cgDefaultColor(sbackground, DEFAULT='white', /BACKGROUND, MODE=currentState)
-    axisColor = cgDefaultColor(saxisColor, DEFAULT='black', MODE=currentState)
-    color = cgDefaultColor(sColor, DEFAULT='black', MODE=currentState)
-    plotfillcolor = cgDefaultColor(splotfillcolor, DEFAULT='blk1', MODE=currentState)
-    labelcolor = cgDefaultColor(slabelcolor, DEFAULT=axisColor, MODE=currentState)
+    background = cgDefaultColor(sbackground, DEFAULT='white', /BACKGROUND)
+    axisColor = cgDefaultColor(saxisColor, DEFAULT='black')
+    color = cgDefaultColor(sColor, DEFAULT='black')
+    plotfillcolor = cgDefaultColor(splotfillcolor, DEFAULT='blk1')
+    labelcolor = cgDefaultColor(slabelcolor, DEFAULT=axisColor)
     IF N_Elements(font) EQ 0 THEN font = !P.Font
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     IF N_Elements(labelcharsize) EQ 0 THEN labelcharsize = charsize

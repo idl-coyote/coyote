@@ -119,7 +119,10 @@
 ;        Added Compile Opt id2 to all file modules. 22 July 2012. DWF.
 ;        Added "opposite" and "background" colors to Brewer colors. 14 August 2012. DWF.
 ;        Some versions of IDL report the size of widget windows incorrectly, so instead of
-;        smampling the very top-right pixel, I now back off a little. 1 Nov 2012. DWF.
+;              sampling the very top-right pixel, I now back off a little. 1 Nov 2012. DWF.
+;        For numerical values less than 256, in indexed color state, I now return the values
+;              directly to the user. This should significantly speed up many Coyote Graphics
+;              processes. 14 December 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2009-2012, Fanning Software Consulting, Inc.
@@ -330,6 +333,10 @@ FUNCTION cgColor, theColour, colorIndex, $
        RETURN, !P.Color
     ENDIF
     
+    ; Get the current color state. This will help you determine what to 
+    ; do with the input color.
+    colorState = GetDecomposedState()
+    
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
@@ -363,15 +370,18 @@ FUNCTION cgColor, theColour, colorIndex, $
         IF Size(theColor, /TNAME) NE 'STRING' THEN BEGIN
         
           ; We can assume that any number that is a byte or short integer must
-          ; be an index into the color table.
-          IF (Size(theColor, /TYPE) LE 2) THEN theColor = StrTrim(Fix(theColor),2)
+          ; be an index into the color table. Return that value directly, if
+          ; you are currently in an indexed color state.
+          IF (Size(theColor, /TYPE) LE 2) THEN BEGIN
+             IF (colorState EQ 1) THEN theColor = StrTrim(Fix(theColor),2) ELSE RETURN, theColor
+          ENDIF 
           
           ; Long integers are problematic. If the current color mode is INDEXED, then
           ; we will treat long integers as color indices. If it is DECOMPOSED, then if
           ; there is just one value, we can handle this as a color triple.
           IF (Size(theColor, /TYPE) EQ 3) THEN BEGIN
              
-               IF GetDecomposedState() THEN BEGIN
+               IF (colorState EQ 1) THEN BEGIN
                    IF N_Elements(theColor) EQ 1 THEN BEGIN
                       usercolor = [theColor MOD 2L^8, (theColor MOD 2L^16)/2L^8, theColor/2L^16]
                       theColor = 'USERDEF'
@@ -379,7 +389,7 @@ FUNCTION cgColor, theColour, colorIndex, $
                ENDIF ELSE BEGIN
                    IF N_Elements(theColor) EQ 1 THEN BEGIN
                       IF theColor LE 255 THEN BEGIN
-                          theColor = StrTrim(Fix(theColor),2)
+                          RETURN, theColor
                       ENDIF ELSE Message, 'Long integer ' + StrTrim(theColor,2) + ' is out of indexed color range.'
                    ENDIF ELSE Message, 'Do not know how to handle a vector of LONG integers!
                ENDELSE
@@ -388,7 +398,11 @@ FUNCTION cgColor, theColour, colorIndex, $
           
           ; Anything that is not an BYTE, INTEGER, LONG, or STRING causes problems.
           IF (Size(theColor, /TYPE) GT 4) && (Size(theColor, /TNAME) NE 'STRING') THEN BEGIN
-             Message, 'Use BYTE, INTEGER, or STRING data to specify a color.'
+             IF (colorstate EQ 0) AND (theColor LE 255) THEN BEGIN
+                RETURN, theColor
+             ENDIF ELSE BEGIN
+                Message, 'Use BYTE, INTEGER, or STRING data to specify a color.'
+             ENDELSE
           ENDIF
         ENDIF
      ENDIF

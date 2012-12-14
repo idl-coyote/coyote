@@ -98,6 +98,7 @@
 ;        Added WINDOW keyword. 24 Jan 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
+;        Removed the requirement that this has to be done in decomposed color. 14 Dec 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -141,11 +142,8 @@ PRO cgColorFill, x, y, z, $
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
-    ; Do this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
-    
     ; Need a color?
-    thisColor = cgDefaultColor(color, DEFAULT='rose', MODE=currentState)
+    thisColor = cgDefaultColor(color, DEFAULT='rose')
 
     ; Get the current color vectors.
     TVLCT, rr, gg, bb, /Get
@@ -158,7 +156,6 @@ PRO cgColorFill, x, y, z, $
     ENDCASE
     
     ; Clean up.
-    SetDecomposedState, currentState
     IF !D.Name NE 'Z' THEN TVLCT, rr, gg, bb
    
 END

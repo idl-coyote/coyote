@@ -823,15 +823,15 @@ PRO cgContour, data, x, y, $
     ENDIF
     
     ; Check the color keywords.
-    background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional, MODE=currentState)
+    background = cgDefaultColor(sbackground, /BACKGROUND, TRADITIONAL=traditional)
     IF Size(background, /TNAME) EQ 'STRING' && (StrUpCase(background[0]) EQ 'WHITE') THEN BEGIN
        IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
-       axisColor = cgDefaultColor(saxisColor, DEFAULT='black', TRADITIONAL=traditional, MODE=currentState)
-       color = cgDefaultColor(sColor, DEFAULT='black', TRADITIONAL=traditional, MODE=currentState)
+       axisColor = cgDefaultColor(saxisColor, DEFAULT='black', TRADITIONAL=traditional)
+       color = cgDefaultColor(sColor, DEFAULT='black', TRADITIONAL=traditional)
     ENDIF ELSE BEGIN
        IF (N_Elements(saxisColor) EQ 0) && (N_Elements(saxesColor) NE 0) THEN saxisColor = saxesColor
-       axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional, MODE=currentState)
-       color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional, MODE=currentState)
+       axisColor = cgDefaultColor(saxisColor, TRADITIONAL=traditional)
+       color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional)
     ENDELSE
 
     ; If color is the same as background, do something. Since this precludes drawing the the

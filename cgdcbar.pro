@@ -283,9 +283,9 @@ PRO cgDCBar, colors, $
     ; see if I can do this in 24-bit color.
     SetDecomposedState, 1, CURRENT=currentState
     
-    cbar_colors = cgDefaultColor(cbar_colors, MODE=currentState)
-    color = cgDefaultColor(color, MODE=currentState, DEFAULT='opposite')
-    barcolor = cgDefaultColor(color, MODE=currentState, DEFAULT=color)
+    cbar_colors = cgDefaultColor(cbar_colors)
+    color = cgDefaultColor(color, DEFAULT='opposite')
+    barcolor = cgDefaultColor(color, DEFAULT=color)
     IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color, FILE=file)
     IF Size(barcolor, /TNAME) EQ 'STRING' THEN barcolor = cgColor(barcolor, FILE=file)
     IF Size(cbar_colors, /TNAME) EQ 'STRING' THEN cbar_colors = cgColor(cbar_colors, FILE=file)

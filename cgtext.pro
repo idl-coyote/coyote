@@ -316,7 +316,7 @@ PRO cgText, xloc, yloc, text, $
     IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
 
     ; Choose a color.
-    color = cgDefaultColor(scolor, MODE=currentState, DEFAULT='OPPOSITE')
+    color = cgDefaultColor(scolor, DEFAULT='OPPOSITE')
     IF Size(color, /TNAME) EQ 'STRING' THEN thisColor = cgColor(color) ELSE thisColor = color
     
     ; Do you have a map obect? If so, you need both an X and a Y vector.

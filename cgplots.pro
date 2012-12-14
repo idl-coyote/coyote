@@ -202,8 +202,8 @@ PRO cgPlotS, x, y, z, $
     SetDecomposedState, 1, CurrentState=currentState
     
     ; Choose a color.
-    color = cgDefaultColor(sColor, DEFAULT='OPPOSITE', MODE=currentState)
-    symcolor = cgDefaultColor(ssymcolor, DEFAULT=color, MODE=currentState)
+    color = cgDefaultColor(sColor, DEFAULT='OPPOSITE')
+    symcolor = cgDefaultColor(ssymcolor, DEFAULT=color)
     
     ; Check parameters and keywords.
     IF N_Elements(psym) EQ 0 THEN psym = 0

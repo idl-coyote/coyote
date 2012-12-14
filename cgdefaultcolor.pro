@@ -188,7 +188,7 @@ FUNCTION cgDefaultColor, inputColour, $
         ncolors = N_Elements(inputColor)
         colors = LonArr(ncolors)
         FOR j=0,ncolors-1 DO colors[j] = cgColor24([r[inputColor[j]], g[inputColor[j]], b[inputColor[j]]]) 
-        RETURN, colors
+        IF N_Elements(colors) EQ 1 THEN RETURN, colors[0] ELSE RETURN, colors
     ENDIF 
     IF (thisType EQ 'INT') && (thisMode EQ 0) THEN BEGIN
         RETURN, inputColor 
@@ -197,7 +197,7 @@ FUNCTION cgDefaultColor, inputColour, $
         ncolors = N_Elements(inputColor)
         colors = LonArr(ncolors)
         FOR j=0,ncolors-1 DO colors[j] = cgColor24([r[inputColor[j]], g[inputColor[j]], b[inputColor[j]]]) 
-        RETURN, colors
+        IF N_Elements(colors) EQ 1 THEN RETURN, colors[0] ELSE RETURN, colors
     ENDIF 
     IF thisType EQ 'LONG' && (thisMode EQ 0) THEN BEGIN
         RETURN, inputColor 

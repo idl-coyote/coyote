@@ -100,6 +100,8 @@
 ;        For numerical values less than 256, in indexed color state, I now return the values
 ;              directly to the user. This should significantly speed up many Coyote Graphics
 ;              processes. 14 December 2012. DWF.
+;        Modified to return byte and integer values as LONG decomposed integers, if decomposed
+;              mode is currently in effect. 14 December 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -178,11 +180,24 @@ FUNCTION cgDefaultColor, inputColour, $
     ; integer if the MODE is 0, or indexed color, and the value is 
     ; between 0 and 255. If it is a string, we can return it directly.
     thisType = Size(inputcolor, /TNAME)
+    TVLCT, r, g, b, /GET
     IF (thisType EQ 'BYTE') && (thisMode EQ 0) THEN BEGIN
         RETURN, inputColor 
     ENDIF 
+    IF (thisType EQ 'BYTE') && (thisMode EQ 1) THEN BEGIN
+        ncolors = N_Elements(inputColor)
+        colors = LonArr(ncolors)
+        FOR j=0,ncolors-1 DO colors[j] = cgColor24([r[inputColor[j]], g[inputColor[j]], b[inputColor[j]]]) 
+        RETURN, colors
+    ENDIF 
     IF (thisType EQ 'INT') && (thisMode EQ 0) THEN BEGIN
         RETURN, inputColor 
+    ENDIF 
+    IF (thisType EQ 'INT') && (thisMode EQ 1) THEN BEGIN
+        ncolors = N_Elements(inputColor)
+        colors = LonArr(ncolors)
+        FOR j=0,ncolors-1 DO colors[j] = cgColor24([r[inputColor[j]], g[inputColor[j]], b[inputColor[j]]]) 
+        RETURN, colors
     ENDIF 
     IF thisType EQ 'LONG' && (thisMode EQ 0) THEN BEGIN
         RETURN, inputColor 
@@ -198,8 +213,6 @@ FUNCTION cgDefaultColor, inputColour, $
         CASE thisType OF
         
             'STRING': theColors[j] = StrTrim(thisColor,2)
-            'BYTE': theColors[j] = StrTrim(Fix(thisColor), 2)
-            'INT': theColors[j] = StrTrim(thisColor, 2)
             'LONG': BEGIN
                 IF (thisMode EQ 0) && ( (thisColor GE 0) && (thisColor LT 256) ) THEN BEGIN
                     theColors[j] = StrTrim(thisColor, 2)

@@ -60,7 +60,7 @@
 ;         connected. Z must contain at least three elements.
 ;
 ; :Keywords:
-;     color: in, optional, type=string/integer/long, default='rose'
+;     color: in, optional, type=string/byte/integer/long, default='rose'
 ;         The name of the fill color. Color names are those used with cgColor. 
 ;         This value can also be a long integer or an index into the current color
 ;         table.
@@ -80,13 +80,13 @@
 ;                 /NORMAL, COLOR='blue'
 ;       
 ; :Author:
-;       FANNING SOFTWARE CONSULTING::
-;           David W. Fanning 
-;           1645 Sheely Drive
-;           Fort Collins, CO 80526 USA
-;           Phone: 970-221-0438
-;           E-mail: david@idlcoyote.com
-;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning 
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; :History:
 ;     Change History::
@@ -98,10 +98,9 @@
 ;        Added WINDOW keyword. 24 Jan 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
-;        Removed the requirement that this has to be done in decomposed color. 14 Dec 2012. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2010, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
 ;-
 PRO cgColorFill, x, y, z, $
     COLOR=color, $
@@ -142,6 +141,9 @@ PRO cgColorFill, x, y, z, $
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
+    ; We are going to draw in decomposed color, if possible.
+    SetDecomposedState, 1, Current=currentState
+
     ; Need a color?
     thisColor = cgDefaultColor(color, DEFAULT='rose')
 
@@ -156,6 +158,7 @@ PRO cgColorFill, x, y, z, $
     ENDCASE
     
     ; Clean up.
+    SetDecomposedState, currentState
     IF !D.Name NE 'Z' THEN TVLCT, rr, gg, bb
    
 END

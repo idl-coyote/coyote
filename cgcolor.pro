@@ -310,7 +310,7 @@ FUNCTION cgColor, theColour, colorIndex, $
    ColorStructure=colorStructure, $
    Cancel=cancelled, $
    Decomposed=decomposedState, $
-    Filename=filename, $
+   Filename=filename, $
    Names=names, $
    NColors=ncolors, $
    NoDisplay=nodisplay, $ ; This keyword is completely ignored.
@@ -335,7 +335,7 @@ FUNCTION cgColor, theColour, colorIndex, $
     
     ; Get the current color state. This will help you determine what to 
     ; do with the input color.
-    colorState = GetDecomposedState()
+    IF N_Elements(decomposedState) NE 0 THEN colorState = Keyword_Set(decomposedState) ELSE colorState = GetDecomposedState()
     
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8

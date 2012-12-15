@@ -180,8 +180,11 @@ PRO cgPolygon, x, y, z, $
          ENDELSE
     ENDIF
     
-  ; Set up PostScript device for working with colors.
+    ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
+    ; We are going to draw in decomposed color, if possible.
+    SetDecomposedState, 1, Current=currentState
        
     ; Need a color?
     thisColor = cgDefaultColor(color, DEFAULT='rose')
@@ -231,6 +234,7 @@ PRO cgPolygon, x, y, z, $
     ENDCASE
     
     ; Clean up.
+    SetDecomposedState, currentState
     IF !D.Name NE 'Z' THEN TVLCT, rr, gg, bb
    
 END

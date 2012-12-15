@@ -152,13 +152,19 @@
 ;       by a triangle on the right or top of the color bar. If the color is
 ;       a string byte value (e.g., "215"), then this color in the current color
 ;       table is used. The color can also be a three-element color triple 
-;       (e.g., [240, 200, 65]).
+;       (e.g., [240, 200, 65]). Note, you can CANNOT use a long integer as
+;       a color table index number with this keyword. If you want to use a 
+;       color table index number, be sure the number is a short integer, byte
+;       value, or a string (e.g, OOB_HIGH=200S, OOB_HIGH=200B, or OOB_HIGH='200').
 ;    oob_low: in, optional, type=string
 ;       The name of an out-of-bounds low color. This color will be represented
 ;       by a triangle on the left or bottom of the color bar. If the color is
 ;       a string byte value (e.g., "215"), then this color in the current color
 ;       table is used. The color can also be a three-element color triple 
-;       (e.g., [240, 200, 65]).
+;       (e.g., [240, 200, 65]). Note, you can CANNOT use a long integer as
+;       a color table index number with this keyword. If you want to use a 
+;       color table index number, be sure the number is a short integer, byte
+;       value, or a string (e.g, OOB_HIGH=200S, OOB_HIGH=200B, or OOB_HIGH='200').
 ;    palette: in, optional, type=byte
 ;       A color palette containing the RGB color vectors to use for the color
 ;       bar. The program will sample NCOLORS from the color palette. 

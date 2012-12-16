@@ -102,6 +102,7 @@
 ;              processes. 14 December 2012. DWF.
 ;        Modified to return byte and integer values as LONG decomposed integers, if decomposed
 ;              mode is currently in effect. 14 December 2012. DWF.
+;        Now setting all background colors to WHITE, not BACKGROUND. 16 Dec 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -149,7 +150,7 @@ FUNCTION cgDefaultColor, inputColour, $
               CASE thisDevice OF
                  'PS': inputColor = 'WHITE'
                  'Z': inputColor = 'WHITE'
-                 ELSE: inputColor = 'BACKGROUND'
+                 ELSE: inputColor = 'WHITE'
              ENDCASE
           ENDELSE
        
@@ -159,13 +160,13 @@ FUNCTION cgDefaultColor, inputColour, $
               CASE thisDevice OF
                  'PS': inputColor = 'BLACK'
                  'Z': inputColor = 'WHITE'
-                 ELSE: inputColor = 'OPPOSITE'
+                 ELSE: inputColor = 'WHITE'
              ENDCASE
           ENDIF ELSE BEGIN
               CASE thisDevice OF
                  'PS': inputColor = 'BLACK'
                  'Z': inputColor = 'BLACK'
-                 ELSE: inputColor = 'OPPOSITE'
+                 ELSE: inputColor = 'BLACK'
              ENDCASE
           ENDELSE
 

@@ -241,11 +241,9 @@ PRO cgText, xloc, yloc, text, $
             wid = cgQuery(DIMENSIONS=dims, /CURRENT, OBJECTREF=thisObject)
             WSet, wid
             thisObject -> GetProperty, Background=bcolor
-;            Window, /PIXMAP, XSIZE=dims[0], YSIZE=dims[1], /FREE
             IF N_Elements(font) EQ 0 THEN font = !P.FONT
             IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
             XYOUTS, xloc, yloc, text, /NORMAL, WIDTH=width, CHARSIZE=charsize, COLOR=cgColor(bcolor)
-;            WDelete, !D.Window
          ENDIF
             
          RETURN

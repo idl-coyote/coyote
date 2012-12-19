@@ -124,7 +124,7 @@
 ;    Here is how to use this program to display line plots::
 ;    
 ;        cgDisplay, WID=0
-;        pos = cgLocator([2,2])
+;        pos = cgLayout([2,2])
 ;        FOR j=0,3 DO BEGIN
 ;          cgPlot, cgDemoData(17), NoErase=j NE 0, Position=pos[*,j], Title='Plot ' + StrTrim(j+1,2)
 ;        ENDFOR
@@ -134,7 +134,7 @@
 ;    
 ;        cgDisplay, WID=1
 ;        cgLoadCT, 22, /Brewer, /Reverse
-;        pos = cgLocator([2,2], OXMargin=[5,5], OYMargin=[5,12], XGap=3, YGap=10)
+;        pos = cgLayout([2,2], OXMargin=[5,5], OYMargin=[5,12], XGap=3, YGap=10)
 ;        FOR j=0,3 DO BEGIN
 ;          p = pos[*,j]
 ;          cgImage, cgDemoData(18), NoErase=j NE 0, Position=p
@@ -146,7 +146,7 @@
 ;    
 ;        PS_Start, 'cglayout_example.ps'
 ;        cgDisplay
-;        pos = cgLocator([2,2], Aspect=1.0)
+;        pos = cgLayout([2,2], Aspect=1.0)
 ;        FOR j=0,3 DO BEGIN
 ;          cgPlot, cgDemoData(17), NoErase=j NE 0, Position=pos[*,j], Title='Plot ' + StrTrim(j+1,2)
 ;        ENDFOR

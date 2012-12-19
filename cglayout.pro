@@ -169,7 +169,7 @@
 ;
 ; :History:
 ;    Change History::
-;       Written, 19 December 2012 by David W. Fanning.
+;       Written, 19 December 2012 by David W. Fanning, from suggestions from Matthew Argall.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.

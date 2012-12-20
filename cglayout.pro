@@ -41,7 +41,8 @@
 ; The purpose of this program is to return the normalized position coordinates for 
 ; a line plot, contour plot, or image plot with a specific "layout" in the current
 ; graphics window. A "layout" has a specified grid of columns and rows organized 
-; inside a graphics display window.
+; inside a graphics display window. This is similar, but more flexible, to the positions
+; calculated by !P.Multi.
 ; 
 ; A grid position is a combination of the number of columns and rows desired, plus
 ; the application of inside and outside margins, as well as a desired aspect ratio.
@@ -91,26 +92,26 @@
 ;         would set the Aspect keyword to 1.0/2.0 or 0.5. If you wish your positions to
 ;         have a square aspect ratio, you would set the Aspect keyword to 1.0.
 ;         
-;    ixmargin: in, optional, type=integer, default=[0,0]
+;    ixmargin: in, optional, type=integer
 ;         This keyword is a two-element vector that sets the right and left, respectively, inside
-;         X margin for the grid position. Units are multiples of !D.X_CH_SIZE.
+;         X margin for the grid position. Units are multiples of !D.X_CH_SIZE. Default = [0,0].
 ;         
-;    iymargin: in, optional, type=integer, default=[0,0]
+;    iymargin: in, optional, type=integer
 ;         This keyword is a two-element vector that sets the bottom and top, respectively, inside
-;         Y margin for the grid position. Units are multiples of !D.Y_CH_SIZE.
+;         Y margin for the grid position. Units are multiples of !D.Y_CH_SIZE. Default = [0,0].
 ;         
-;    oxmargin: in, optional, type=integer, default=[10,4]
+;    oxmargin: in, optional, type=integer
 ;         This keyword is a two-element vector that sets the right and left, respectively, inside
 ;         X margin for the grid position. The default OXMargins are suitable for displaying line
 ;         plots. If you are displaying image plots, you may wish to make the OXMargins the same on
 ;         both sides of the graphics display window (e.g, OXMargin=[5,5]). Units are multiples of 
-;         !D.X_CH_SIZE.
+;         !D.X_CH_SIZE. Default = [10,4].
 ;         
-;    oymargin: in, optional, type=integer, default=[6,8]
+;    oymargin: in, optional, type=integer
 ;         This keyword is a two-element vector that sets the bottom and top, respectively, inside
 ;         Y margin for the grid position. The default OYMargins are suitable for displaying line
 ;         plots. There is a little additional room at the top of the plot in the defaults for adding 
-;         a title to a multiple plot set-up. Units are multiples of !D.Y_CH_SIZE.
+;         a title to a multiple plot set-up. Units are multiples of !D.Y_CH_SIZE. Default = [6,8].
 ;         
 ;    xgap: in, optional, type=integer, default=14
 ;         This keywords sets the distance between plots in the X dimension. Units are multiples
@@ -142,6 +143,8 @@
 ;        ENDFOR
 ;        cgText, 0.5, 0.925, /Normal, 'Example Image Layout', Alignment=0.5, Charsize=cgDefCharsize()*1.25
 ;        
+;    .. image:: cglayout.png
+;    
 ;    Here is how to display square plots in a PostScript file::
 ;    
 ;        PS_Start, 'cglayout_example.ps'

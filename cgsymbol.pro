@@ -213,6 +213,9 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
     ; Return to caller on error.
     ON_Error, 2
     
+    ; A common block to communicate with PS_Start.
+    COMMON _$FSC_PS_START_, ps_struct
+    
     ; Do you wish to see an example?
     IF Keyword_Set(example) THEN BEGIN
         cgSymbol_Example, UNICODE=unicode, PS=ps
@@ -331,11 +334,15 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
             'prime':   retSymbol = '!9' + String("242B) + '!X'
             'angstrom':retSymbol = '!3' + String("305B) + '!X'
             'sun':     BEGIN
-                       thisDevice = !D.Name
-                       Set_Plot, 'PS'
-                       Device, /AVANTGARDE, ISOLATIN1=0, /BOOK, FONT_INDEX = 20
-                       retSymbol = '!20!S!DO!R!I ' + string(183b) + '!X!N'
-                       Set_Plot, thisDevice
+                       IF (ps_struct.font EQ 1) && (StrUpCase(ps_struct.tt_font) EQ 'DEJAVUSANS') THEN BEGIN
+                          retSymbol = '!Z(2609)'
+                       ENDIF ELSE BEGIN
+                         thisDevice = !D.Name
+                         Set_Plot, 'PS'
+                         Device, /AVANTGARDE, ISOLATIN1=0, /BOOK, FONT_INDEX = 20
+                         retSymbol = '!20!S!DO!R!I ' + string(183b) + '!X!N'
+                         Set_Plot, thisDevice
+                       ENDELSE
                        END
             'varphi':  retSymbol = '!9' + String("152B) + '!X'
             'infinity':retSymbol = '!9' + String("245B) + '!X'

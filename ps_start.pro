@@ -98,6 +98,10 @@
 ;         their original values by `PS_End`. A system variable is set to this value only if it 
 ;         currently contains the IDL default value of 0.0. If it is set to anything else, this 
 ;         default thickness value is ignored.
+;     dejavusans: in, optional, type=boolean, default=0
+;         Set this keyword to select the DejaVuSans true-type font for PostScript output.
+;         This option is ONLY available in IDL 8.2 or higher and/or you have installed the
+;         DejaVuSans true-type font in your font directory.
 ;     filename: in, optional, type=string, default='idl.ps'
 ;         The name of the PostScript file created. An alternative, and older, way of setting
 ;         the `filename` parameter.
@@ -171,7 +175,8 @@
 ;       Created a DEFAULT_THICKNESS keyword to set the default thicknesses of PostScript 
 ;           system variables. 14 Dec 2011. DWF.
 ;       Moved the true-type font set-up to *after* changing the graphics device to PostScript. 10 Jan 2012. DWF.
-;
+;       Added DejaVuSans keyword to allow this true-type font to be used in PostScript Output. 21 Dec 2012. DWF.
+;       
 ; :Copyright:
 ;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
 ;-
@@ -179,6 +184,7 @@ PRO PS_START, filename, $
     CANCEL=cancelled, $
     CHARSIZE=charsize, $
     DEFAULT_THICKNESS=default_thickness, $
+    DEJAVUSANS=dejavusans, $
     FILENAME=ps_filename, $
     FONT=font , $
     ENCAPSULATED=encapsulated, $
@@ -197,11 +203,22 @@ PRO PS_START, filename, $
    IF N_Elements(filename) EQ 0 THEN filename = 'idl.ps'
    IF N_Elements(ps_filename) EQ 0 THEN ps_filename = filename 
    
+   ; Need DejaVuSans fonts?
+   IF Keyword_Set(dejavusans) && (Float(!Version.Release) GE 8.2) THEN BEGIN
+      tt_font = 'DejaVuSans'
+      font = 1
+   ENDIF
+   
+   ; Define the PS structure.
+   IF N_Elements(ps_struct) EQ 0 THEN ps_struct = {FSC_PS_SETUP}
+   
    ; PostScript hardware fonts by default.
    SetDefaultValue, font, 0
+   ps_struct.font = font
    
    ; Use Helvetica True-Type font by default.
-   IF (font EQ 1) THEN SetDefaultValue, tt_font, 'Helvetica'
+   SetDefaultValue, tt_font, 'Helvetica'
+   ps_struct.tt_font = tt_font
    
    gui = Keyword_Set(gui)
    quiet = Keyword_Set(quiet)
@@ -213,9 +230,6 @@ PRO PS_START, filename, $
    IF encapsulated THEN landscape = 0
    SetDefaultValue, scale_factor, 1
 
-   ; Define the PS structure.
-   IF N_Elements(ps_struct) EQ 0 THEN ps_struct = {FSC_PS_SETUP}
-   
    ; If the setup flag is on, then we have to close the previous
    ; start command before we can continue.
    IF ps_struct.setup EQ 1 THEN PS_END, /NoFix, /NoMessage

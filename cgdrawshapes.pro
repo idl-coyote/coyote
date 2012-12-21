@@ -69,7 +69,7 @@
 ;    Example using cgMap_Set to set up the map projection space::
 ;       shapefile = Filepath(subdir=['examples','data'], 'states.shp')
 ;       cgDisplay, 800, 700
-;       cgMap_Set, 37.5, -117.5, /Albers, /IsoTropic, Limit=[30, -125, 45, -108], $
+;       cgMap_Set, 40.0, -117.5, /Albers, /IsoTropic, Limit=[30, -125, 50, -108], $
 ;           Position=[0.05, 0.05, 0.95, 0.95]
 ;       cgDrawShapes, shapefile, AttrName='STATE_ABBR', $
 ;           AttrValues=['CA', 'OR', 'WA', 'AZ', 'UT', 'ID', 'NV'], Thick=1, $
@@ -81,15 +81,14 @@
 ;
 ;       shapefile = Filepath(subdir=['examples','data'], 'states.shp')
 ;       cgDisplay, 800, 700, WID=1
-;       mapCoord = Obj_New('cgMap', 'Albers Equal Area', LIMIT=[30, -125, 45, -108], $
-;                  Position=[0.05, 0.05, 0.95, 0.95], CENTER_LATITUDE=37.5, $
+;       mapCoord = Obj_New('cgMap', 'Albers Equal Area', Limit=[30, -125, 50, -108], $
+;                  Position=[0.2, 0.05, 0.8, 0.95], CENTER_LATITUDE=40.0, $
 ;                  CENTER_LONGITUDE=-117, STANDARD_PAR1=40, STANDARD_PAR2=-39)
 ;       cgDrawShapes, shapefile, AttrName='STATE_ABBR', $
 ;           AttrValues=['CA', 'OR', 'WA', 'AZ', 'UT', 'ID', 'NV'], Thick=1, $
 ;           FColors=['firebrick', 'grn4', 'pur4', 'tan4', 'steel blue', 'org4', 'yellow'], $
-;           Fill = Replicate(1, 7), Colors='charcoal', MapCoord=mapCoord
-;       cgMap_Grid, LatDel = 2.0, LonDel = 2.0, /Box_Axes, Color=cgColor('charcoal'), $
-;            Map_Structure=mapCoord
+;           Fill = Replicate(1, 7), Colors='charcoal', MapCoord=mapCoord, /USELIMIT
+;       cgMap_Grid,  /Box_Axes, Color='charcoal', Map_Structure=mapCoord
 ;
 ;    Example drawing the states.shp file automatically, without a map projection::
 ;  

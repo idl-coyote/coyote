@@ -448,7 +448,7 @@ FUNCTION cgMap::INIT, map_projection, $
    self._cg_overlays = Obj_New('cgContainer')
    
       ; Need ranges?
-   IF N_Elements(xrange) EQ 0 THEN BEGIN
+   IF N_Elements(xrange) EQ 0 THEN BEGIN 
       IF N_Elements(limit) EQ 0 THEN BEGIN
           xrange = [-180, 180]
           latlon_ranges = 1

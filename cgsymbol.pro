@@ -46,8 +46,10 @@
 ; hardware fonts (!P.Font=0) or True-Type fonts (!P.Font=1).
 ; 
 ; `Greek Symbols <http://www.idlcoyote.com/ps_tips/greeksym.html>` are created by
-; calling the Coyote Library routine `Greek <http://www.idlcoyote.com/programs/greek.pro>' 
+; calling the Coyote Library routine `cgGreek <http://www.idlcoyote.com/programs/cggreek.pro>' 
 ; from this program.
+; 
+; .. image:: cgsymbol.png 
 ; 
 ; Normally, rather than calling cgSymbol, the symbols are embedded in Coyote Graphics
 ; text that are used for axis annotation and so forth. See `Embedding Symbols in Coyote

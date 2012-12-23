@@ -99,6 +99,7 @@
 ;        Added plus-minus symbol. 2 Nov 2011. DWF.
 ;        Added "up", "down", "exp" "sub" and "n" symbols for subscripting and superscripting. 9 Nov 2012. DWF.
 ;        Added "division" and "times" signs. 24 Nov 2012. DWF.
+;        Updated UNICODE values to display capital letters correctly. 23 Dec 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -243,36 +244,37 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
     IF firstLetter EQ StrUpCase(firstLetter) THEN capital = 1
     
     IF Keyword_Set(unicode) THEN BEGIN
-    
+
         CASE StrLowCase(symbol) OF
-            'alpha':   retSymbol = Greek(symbol, /UNICODE)
-            'beta':    retSymbol = Greek(symbol, /UNICODE)
-            'gamma':   retSymbol = Greek(symbol, /UNICODE)
-            'delta':   retSymbol = Greek(symbol, /UNICODE)
-            'epsilon': retSymbol = Greek(symbol, /UNICODE)
-            'zeta':    retSymbol = Greek(symbol, /UNICODE)
-            'eta':     retSymbol = Greek(symbol, /UNICODE)
-            'theta':   retSymbol = Greek(symbol, /UNICODE)
-            'iota':    retSymbol = Greek(symbol, /UNICODE)
-            'kappa':   retSymbol = Greek(symbol, /UNICODE)
-            'lambda':  retSymbol = Greek(symbol, /UNICODE)
-            'mu':      retSymbol = Greek(symbol, /UNICODE)
-            'nu':      retSymbol = Greek(symbol, /UNICODE)
-            'xi':      retSymbol = Greek(symbol, /UNICODE)
-            'omicron': retSymbol = Greek(symbol, /UNICODE)
-            'pi':      retSymbol = Greek(symbol, /UNICODE)
-            'rho':     retSymbol = Greek(symbol, /UNICODE)
-            'sigma':   retSymbol = Greek(symbol, /UNICODE)
-            'tau':     retSymbol = Greek(symbol, /UNICODE)
-            'upsilon': retSymbol = Greek(symbol, /UNICODE)
-            'phi':     retSymbol = Greek(symbol, /UNICODE)
-            'chi':     retSymbol = Greek(symbol, /UNICODE)
-            'psi':     retSymbol = Greek(symbol, /UNICODE)
-            'omega':   retSymbol = Greek(symbol, /UNICODE)
+            'alpha':   retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'beta':    retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'gamma':   retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'delta':   retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'epsilon': retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'zeta':    retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'eta':     retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'theta':   retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'iota':    retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'kappa':   retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'lambda':  retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'mu':      retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'nu':      retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'xi':      retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'omicron': retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'pi':      retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'rho':     retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'sigma':   retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'tau':     retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'upsilon': retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'phi':     retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'chi':     retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'psi':     retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
+            'omega':   retSymbol = cgGreek(symbol, /UNICODE, CAPITAL=capital)
             'leq':     retSymbol = '!Z(2266)'
             'geq':     retSymbol = '!Z(2267)'
-            'neg':     retSymbol = '!Z(2260)'
+            'neq':     retSymbol = '!Z(2260)'
             'deg':     retSymbol = '!Z(00B0)'
+            '+-':      retSymbol = '!Z(00B1)'
             'equiv':   retSymbol = '!Z(2261)'
             'prime':   retSymbol = '!Z(2232)'
             'angstrom':retSymbol = '!Z(00C5)'
@@ -301,30 +303,30 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
         IF (!D.Name EQ 'PS') THEN DEVICE, /ISOLATIN1
         
         CASE StrLowCase(symbol) OF
-            'alpha':   retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'beta':    retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'gamma':   retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'delta':   retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'epsilon': retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'zeta':    retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'eta':     retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'theta':   retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'iota':    retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'kappa':   retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'lambda':  retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'mu':      retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'nu':      retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'xi':      retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'omicron': retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'pi':      retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'rho':     retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'sigma':   retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'tau':     retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'upsilon': retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'phi':     retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'chi':     retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'psi':     retSymbol = Greek(symbol, CAPITAL=capital, /PS)
-            'omega':   retSymbol = Greek(symbol, CAPITAL=capital, /PS)
+            'alpha':   retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'beta':    retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'gamma':   retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'delta':   retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'epsilon': retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'zeta':    retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'eta':     retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'theta':   retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'iota':    retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'kappa':   retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'lambda':  retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'mu':      retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'nu':      retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'xi':      retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'omicron': retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'pi':      retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'rho':     retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'sigma':   retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'tau':     retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'upsilon': retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'phi':     retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'chi':     retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'psi':     retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
+            'omega':   retSymbol = cgGreek(symbol, CAPITAL=capital, /PS)
             'leq':     retSymbol = '!9' + String("243B) + '!X'
             'geq':     retSymbol = '!9' + String("263B) + '!X'
             'neq':     retSymbol = '!9' + String("271B) + '!X' 
@@ -360,30 +362,30 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
     ENDIF ELSE BEGIN
     
         CASE StrLowCase(symbol) OF
-            'alpha':   retSymbol = Greek(symbol, CAPITAL=capital)
-            'beta':    retSymbol = Greek(symbol, CAPITAL=capital)
-            'gamma':   retSymbol = Greek(symbol, CAPITAL=capital)
-            'delta':   retSymbol = Greek(symbol, CAPITAL=capital)
-            'epsilon': retSymbol = Greek(symbol, CAPITAL=capital)
-            'zeta':    retSymbol = Greek(symbol, CAPITAL=capital)
-            'eta':     retSymbol = Greek(symbol, CAPITAL=capital)
-            'theta':   retSymbol = Greek(symbol, CAPITAL=capital)
-            'iota':    retSymbol = Greek(symbol, CAPITAL=capital)
-            'kappa':   retSymbol = Greek(symbol, CAPITAL=capital)
-            'lambda':  retSymbol = Greek(symbol, CAPITAL=capital)
-            'mu':      retSymbol = Greek(symbol, CAPITAL=capital)
-            'nu':      retSymbol = Greek(symbol, CAPITAL=capital)
-            'xi':      retSymbol = Greek(symbol, CAPITAL=capital)
-            'omicron': retSymbol = Greek(symbol, CAPITAL=capital)
-            'pi':      retSymbol = Greek(symbol, CAPITAL=capital)
-            'rho':     retSymbol = Greek(symbol, CAPITAL=capital)
-            'sigma':   retSymbol = Greek(symbol, CAPITAL=capital)
-            'tau':     retSymbol = Greek(symbol, CAPITAL=capital)
-            'upsilon': retSymbol = Greek(symbol, CAPITAL=capital)
-            'phi':     retSymbol = Greek(symbol, CAPITAL=capital)
-            'chi':     retSymbol = Greek(symbol, CAPITAL=capital)
-            'psi':     retSymbol = Greek(symbol, CAPITAL=capital)
-            'omega':   retSymbol = Greek(symbol, CAPITAL=capital)
+            'alpha':   retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'beta':    retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'gamma':   retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'delta':   retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'epsilon': retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'zeta':    retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'eta':     retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'theta':   retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'iota':    retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'kappa':   retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'lambda':  retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'mu':      retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'nu':      retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'xi':      retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'omicron': retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'pi':      retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'rho':     retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'sigma':   retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'tau':     retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'upsilon': retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'phi':     retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'chi':     retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'psi':     retSymbol = cgGreek(symbol, CAPITAL=capital)
+            'omega':   retSymbol = cgGreek(symbol, CAPITAL=capital)
             'leq':     retSymbol = '!9' + String("154B) + '!X'
             'geq':     retSymbol = '!9' + String("142B) + '!X'
             'neq':     retSymbol = '!9' + String("75B) + '!X' 

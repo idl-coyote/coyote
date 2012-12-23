@@ -178,7 +178,7 @@
 ;       Added DejaVuSans keyword to allow this true-type font to be used in PostScript Output. 21 Dec 2012. DWF.
 ;       
 ; :Copyright:
-;     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
 ;-
 PRO PS_START, filename, $
     CANCEL=cancelled, $
@@ -202,7 +202,7 @@ PRO PS_START, filename, $
    ; Handle the filename parameter and keywords.
    IF N_Elements(filename) EQ 0 THEN filename = 'idl.ps'
    IF N_Elements(ps_filename) EQ 0 THEN ps_filename = filename 
-   
+      
    ; Need DejaVuSans fonts?
    IF Keyword_Set(dejavusans) && (Float(!Version.Release) GE 8.2) THEN BEGIN
       tt_font = 'DejaVuSans'

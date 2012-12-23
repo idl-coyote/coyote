@@ -230,8 +230,8 @@
 ;    Example using different keyword parameters for the display and PostScript output::
 ;    
 ;       pixmap = cgPixmap('cgPlot', cgDemoData(1), $
-;             THICK=1.0, XTITLE='Distance (' + Greek('mu') + 'm)', $
-;             ALTPS_KEYWORDS={THICK:4.0, XTITLE:'Distance (' + Greek('mu', /PS) + 'm)'})
+;             THICK=1.0, XTITLE='Distance (' + cgGreek('mu') + 'm)', $
+;             ALTPS_KEYWORDS={THICK:4.0, XTITLE:'Distance (' + cgGreek('mu', /PS) + 'm)'})
 ;           
 ;    Example using different positional parameters::
 ;    

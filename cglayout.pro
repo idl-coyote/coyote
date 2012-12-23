@@ -7,7 +7,8 @@
 ;   The purpose of this program is to return the normalized position coordinates for 
 ;   a line plot, contour plot, or image plot with a specific "layout" in the current
 ;   graphics window. A "layout" has a specified grid of columns and rows organized 
-;   inside a graphics display window.
+;   inside a graphics display window. This is similar to the positions calculated by 
+;   !P.Multi, although a great deal more flexible. 
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -41,8 +42,12 @@
 ; The purpose of this program is to return the normalized position coordinates for 
 ; a line plot, contour plot, or image plot with a specific "layout" in the current
 ; graphics window. A "layout" has a specified grid of columns and rows organized 
-; inside a graphics display window. This is similar, but more flexible, to the positions
-; calculated by !P.Multi.
+; inside a graphics display window. This is similar to the positions calculated by 
+; !P.Multi, although a great deal more flexible. Of course, with additional flexibility 
+; and power comes more responsibility. You will be required to use the NoErase keyword
+; correctly and you will be responsible for setting the character size on your plots.
+; These jobs are normally handled by !P.Multi. Some users will find this liberating, some 
+; will find it a pain in the keister. There is always !P.Multi to go back to.
 ; 
 ; A grid position is a combination of the number of columns and rows desired, plus
 ; the application of inside and outside margins, as well as a desired aspect ratio.

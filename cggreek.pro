@@ -161,10 +161,10 @@ PRO cgGreek_Example, UNICODE=unicode, PS=ps
     ; Output the letters.
     FOR j=0,11 DO BEGIN
         cgText, x[0], y[j], letter[j] + ': ' + $
-            Greek(letter[j], UNICODE=unicode) + Greek(letter[j], /CAPITAL, UNICODE=unicode), $
+            cgGreek(letter[j], UNICODE=unicode) + cgGreek(letter[j], /CAPITAL, UNICODE=unicode), $
             /NORMAL, CHARSIZE=1.5
         cgText, x[1], y[j], letter[j+12] + ': ' + $
-            Greek(letter[j+12], UNICODE=unicode) + Greek(letter[j+12], /CAPITAL, UNICODE=unicode), $
+            cgGreek(letter[j+12], UNICODE=unicode) + cgGreek(letter[j+12], /CAPITAL, UNICODE=unicode), $
             /NORMAL, CHARSIZE=1.5
     ENDFOR
     

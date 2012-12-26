@@ -229,6 +229,7 @@
 ;         Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;         Fixed an interaction with the LABEL keyword that prevented a Title from appearing. 2 Oct 2012. DWF.
 ;         Modified the way default colors are selected when the background color is "white". 4 Dec 2012. DWF.
+;         Still trying to accommodate users who incorrectly specify LONG integers while using INDEXED color. 26 Dec 2012. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
@@ -504,6 +505,15 @@ PRO cgPlot, x, y, $
     
     ; Going to do this in decomposed color, if possible.
     SetDecomposedState, 1, CURRENTSTATE=currentState
+    
+    ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
+    IF (currentState EQ 0) THEN BEGIN
+      IF Size(sbackground, /TNAME) EQ 'LONG' THEN sbackground = Fix(sbackground)
+      IF Size(saxiscolor, /TNAME) EQ 'LONG' THEN saxiscolor = Fix(saxiscolor)
+      IF Size(saxescolor, /TNAME) EQ 'LONG' THEN saxescolor = Fix(saxescolor)
+      IF Size(scolor, /TNAME) EQ 'LONG' THEN scolor = Fix(scolor)
+      IF Size(ssymcolor, /TNAME) EQ 'LONG' THEN ssymcolor = Fix(ssymcolor)
+    ENDIF
     
     ; Set up the layout, if necessary.
     IF N_Elements(layout) NE 0 THEN BEGIN

@@ -700,6 +700,14 @@ PRO cgContour, data, x, y, $
     ; Going to have to do all of this in decomposed color, if possible.
     SetDecomposedState, 1, CURRENTSTATE=currentState
     
+    ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
+    IF (currentState EQ 0) THEN BEGIN
+      IF Size(sbackground, /TNAME) EQ 'LONG' THEN sbackground = Fix(sbackground)
+      IF Size(saxiscolor, /TNAME) EQ 'LONG' THEN saxiscolor = Fix(saxiscolor)
+      IF Size(saxescolor, /TNAME) EQ 'LONG' THEN saxescolor = Fix(saxescolor)
+      IF Size(scolor, /TNAME) EQ 'LONG' THEN scolor = Fix(scolor)
+    ENDIF
+    
     ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
     ; done BEFORE checking the LAYOUT properties.
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)

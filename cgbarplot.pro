@@ -478,6 +478,13 @@ PRO cgBarPlot, values, $
     ; Going to do this in decomposed color, if possible.
     SetDecomposedState, 1, CURRENTSTATE=currentState
     
+    ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
+    IF (currentState EQ 0) THEN BEGIN
+      IF Size(sbackground, /TNAME) EQ 'LONG' THEN sbackground = Fix(sbackground)
+      IF Size(saxiscolor, /TNAME) EQ 'LONG' THEN saxiscolor = Fix(saxiscolor)
+      IF Size(scolors, /TNAME) EQ 'LONG' THEN scolors = Fix(scolors)
+    ENDIF
+    
     ; Set up the layout, if necessary.
     IF N_Elements(layout) NE 0 THEN BEGIN
        thisMulti = !P.Multi

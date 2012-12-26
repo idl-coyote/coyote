@@ -486,6 +486,12 @@ PRO cgSurf, data, x, y, $
        SetDecomposedState, 1, CURRENTSTATE=currentState
     ENDELSE
 
+    ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
+    IF (currentState EQ 0) THEN BEGIN
+      IF Size(sbackground, /TNAME) EQ 'LONG' THEN sbackground = Fix(sbackground)
+      IF Size(scolor, /TNAME) EQ 'LONG' THEN scolor = Fix(scolor)
+    ENDIF
+    
     ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
     ; done BEFORE checking the LAYOUT properties.
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)

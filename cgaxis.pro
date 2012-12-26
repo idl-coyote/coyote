@@ -226,6 +226,11 @@ PRO cgAxis, xloc, yloc, zloc, $
     ; Draw the axis. Do this in Decomposed color, if possible.
     SetDecomposedState, 1, CURRENTSTATE=currentState
 
+    ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
+    IF (currentState EQ 0) THEN BEGIN
+      IF Size(scolor, /TNAME) EQ 'LONG' THEN scolor = Fix(scolor)
+    ENDIF
+    
     ; Get the input color table.
     TVLCT, rr, gg, bb, /Get
 

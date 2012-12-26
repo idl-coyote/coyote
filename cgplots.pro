@@ -201,6 +201,12 @@ PRO cgPlotS, x, y, z, $
     ; Going to draw the lines in decomposed color, if possible
     SetDecomposedState, 1, CurrentState=currentState
     
+    ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
+    IF (currentState EQ 0) THEN BEGIN
+      IF Size(scolor, /TNAME) EQ 'LONG' THEN scolor = Fix(scolor)
+      IF Size(ssymcolor, /TNAME) EQ 'LONG' THEN ssymcolor = Fix(ssymcolor)
+    ENDIF
+    
     ; Choose a color.
     color = cgDefaultColor(sColor, DEFAULT='OPPOSITE')
     symcolor = cgDefaultColor(ssymcolor, DEFAULT=color)

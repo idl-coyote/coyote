@@ -186,6 +186,12 @@ PRO cgPolygon, x, y, z, $
     ; We are going to draw in decomposed color, if possible.
     SetDecomposedState, 1, Current=currentState
        
+    ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
+    IF (currentState EQ 0) THEN BEGIN
+      IF Size(color, /TNAME) EQ 'LONG' THEN color = Fix(color)
+      IF Size(fcolor, /TNAME) EQ 'LONG' THEN fcolor = Fix(fcolor)
+    ENDIF
+    
     ; Need a color?
     thisColor = cgDefaultColor(color, DEFAULT='rose')
     IF N_Elements(fColor) EQ 0 THEN BEGIN

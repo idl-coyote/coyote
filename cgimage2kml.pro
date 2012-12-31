@@ -101,7 +101,7 @@
 ;        in KML file, so that when the KML file is open, it "flies to" the location represented
 ;        here. Longitude must be in the range -180 to 180. Latitude must be in the range -90 to 90.
 ;        And elevation is a number in kilometers. If I two-element array [longitude, latitude] is
-;        passed in, the default value for elevation is 500 km above the surface of the Earth.
+;        passed in, the default value for elevation is 11000 km above the surface of the Earth.
 ;         
 ;    latlonbox: out, optional, type=array
 ;        A four-element array giving the boundaries of the map projection in the
@@ -257,7 +257,7 @@ PRO cgImage2KML, image, mapCoord, $
    ; Handle the flyTo values.
    IF N_Elements(flyTo) NE 0 THEN BEGIN
        IF N_Elements(flyTo) LT 2 THEN Message, 'FlyTo keyword should be 2- or 3-element array.'
-       IF N_Elements(flyTo) EQ 2 THEN flyTo = [flyTo, 500]
+       IF N_Elements(flyTo) EQ 2 THEN flyTo = [flyTo, 11000]
        IF N_Elements(flyTo) GT 3 THEN Message, 'FlyTo keyword should be 2- or 3-element array.'
        lookAtObj = Obj_New('cgKML_LookAt', LONGITUDE=flyTo[0], LATITUDE=flyTo[1], HEIGHT=flyTo[2])
    ENDIF

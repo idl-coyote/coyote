@@ -94,6 +94,14 @@
 ;        The name of the KML file that will be created. The image file will have the same name,
 ;        but with a *.png file extension. The KML file and the image file will be created in the
 ;        same directory.
+;        
+;    flyto: in, optional, type=fltarr(3)
+;        A three-element array that gives the coordinates [longitude, latitude, elevation] where
+;        the "eye" should be located with respect to the Earth. This implements a LookAt element
+;        in KML file, so that when the KML file is open, it "flies to" the location represented
+;        here. Longitude must be in the range -180 to 180. Latitude must be in the range -90 to 90.
+;        And elevation is a number in kilometers. If I two-element array [longitude, latitude] is
+;        passed in, the default value for elevation is 500 km above the surface of the Earth.
 ;         
 ;    latlonbox: out, optional, type=array
 ;        A four-element array giving the boundaries of the map projection in the
@@ -181,6 +189,7 @@
 ;        Added DRAWORDER keyword and fixed a typo concerning MISSING_VALUE. 31 Oct 2012. DWF.
 ;        Fixed a problem that was causing floating underflow warnings to be thrown. 5 Nov 2012. DWF.
 ;        Images with values between 0 and 255 were not getting scaled properly. Fixed. 30 Nov 2012. DWF.
+;        Added a FlyTo keyword to allow the user to fly to a particular location on the Earth. 31 Dec 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -193,6 +202,7 @@ PRO cgImage2KML, image, mapCoord, $
    DRAWORDER=draworder, $
    GEOTIFF=geotiff, $
    FILENAME=filename, $
+   FLYTO=flyto, $
    LATLONBOX=latlonbox, $
    MAX_VALUE=max_value, $
    MIN_VALUE=min_value, $
@@ -242,6 +252,14 @@ PRO cgImage2KML, image, mapCoord, $
    IF N_Elements(order) EQ 0 THEN order = 0
    IF (N_Elements(missing_value) NE 0) && (N_Elements(transparent) EQ 0) THEN BEGIN
       transparent = 0
+   ENDIF
+   
+   ; Handle the flyTo values.
+   IF N_Elements(flyTo) NE 0 THEN BEGIN
+       IF N_Elements(flyTo) LT 2 THEN Message, 'FlyTo keyword should be 2- or 3-element array.'
+       IF N_Elements(flyTo) EQ 2 THEN flyTo = [flyTo, 500]
+       IF N_Elements(flyTo) GT 3 THEN Message, 'FlyTo keyword should be 2- or 3-element array.'
+       lookAtObj = Obj_New('cgKML_LookAt', LONGITUDE=flyTo[0], LATITUDE=flyTo[1], HEIGHT=flyTo[2])
    ENDIF
    
    ; Need a filename?
@@ -336,6 +354,9 @@ PRO cgImage2KML, image, mapCoord, $
           PLACENAME=placename, $
           DRAWORDER=draworder)
        addToFile -> Add, overlay
+       
+       ; Do you have a lookAt object?
+       IF Obj_Valid(lookAtObj) THEN addToFile -> Add, lookAtObj
    
    ENDIF ELSE BEGIN
    
@@ -351,6 +372,10 @@ PRO cgImage2KML, image, mapCoord, $
        PLACENAME=placename, $
        DRAWORDER=draworder)
      kmlFile -> Add, overlay
+
+     ; Do you have a lookAt object?
+     IF Obj_Valid(lookAtObj) THEN kmlFile -> Add, lookAtObj
+     
      kmlFile -> Save
      kmlFile -> Destroy
      

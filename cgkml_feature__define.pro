@@ -68,7 +68,7 @@
 
 
 ;+
-; The purpose of this method is to establish an abstract KML Object class. For reference, see
+; The purpose of this method is to establish a KML Feature object class. For reference, see
 ; https://developers.google.com/kml/documentation/kmlreference#feature.
 ;
 ; :Keywords:
@@ -244,9 +244,7 @@ END
 
 
 ;+
-; This BUILD method is an abstract method that should be overridden by any
-; object that you intend to add to a KML file. It is used to build the
-; actual KML code for the element in question.
+; This method builds the feature in a KML file.
 ; 
 ; :Keywords:
 ;     lun: in, required, type=integer

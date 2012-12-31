@@ -1,3 +1,39 @@
+; docformat = 'rst'
+;
+; NAME:
+;   cgKML_LookAt
+;
+; PURPOSE:
+;   This program implements the KML abstract LOOKAT class.
+;
+;******************************************************************************************;
+;                                                                                          ;
+;  Copyright (c) 2012, by Fanning Software Consulting, Inc. All rights reserved.           ;
+;                                                                                          ;
+;  Redistribution and use in source and binary forms, with or without                      ;
+;  modification, are permitted provided that the following conditions are met:             ;
+;                                                                                          ;
+;      * Redistributions of source code must retain the above copyright                    ;
+;        notice, this list of conditions and the following disclaimer.                     ;
+;      * Redistributions in binary form must reproduce the above copyright                 ;
+;        notice, this list of conditions and the following disclaimer in the               ;
+;        documentation and/or other materials provided with the distribution.              ;
+;      * Neither the name of Fanning Software Consulting, Inc. nor the names of its        ;
+;        contributors may be used to endorse or promote products derived from this         ;
+;        software without specific prior written permission.                               ;
+;                                                                                          ;
+;  THIS SOFTWARE IS PROVIDED BY FANNING SOFTWARE CONSULTING, INC. ''AS IS'' AND ANY        ;
+;  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES    ;
+;  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT     ;
+;  SHALL FANNING SOFTWARE CONSULTING, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,             ;
+;  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED    ;
+;  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;         ;
+;  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND             ;
+;  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT              ;
+;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
+;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
+;******************************************************************************************;
+;
 ;+
 ;   This program implements the KML abstract LookAt class. For 
 ;   reference, see  the `Google KML Reference Documentation <https://developers.google.com/kml/documentation/kmlreference#lookat>`.
@@ -39,7 +75,7 @@
 ;         and "absolute".
 ;    heading: in, optional, type=float, default=0.0
 ;         The angle of the view. Valid values 0 to 360.
-;    height: in, optional, type=double, default=500.0
+;    height: in, optional, type=double, default=11000.0
 ;         The altitude (in km) of the eye with respect to the lat/lon point of the eye.
 ;         Called "altitude" in the KML documentation, but called "height" here to differentiate
 ;         keyword from "altitudeMode".  Positive values in kilometers.
@@ -77,7 +113,7 @@ FUNCTION cgKML_LookAt::INIT, $
   IF N_Elements(altitudeMode) EQ 0 THEN altitudeMode = "relativeToGround"
   IF N_Elements(heading) EQ 0 THEN heading = 0.0
   heading = 0.0 > heading < 360.0
-  IF N_Elements(height) EQ 0 THEN height = 500 
+  IF N_Elements(height) EQ 0 THEN height = 11000 
   height = height * 1000.0
   IF N_Elements(latitude) EQ 0 THEN latitude = 0.0
   latitude = -90.0 > latitude < 90.0

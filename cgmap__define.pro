@@ -69,7 +69,7 @@
 ;        I am convinced that the map structure returned by Map_Proj_Init, when there
 ;           is a LIMIT used in the call contains a uv_box with incorrect latitude values.
 ;           This is important because other routines (e.g., cgMapGrid) depend on these values.
-;           I've created a fix wherein, I fixed the uv_box latitude values to correspond
+;           I've created a fix wherein I fixed the uv_box latitude values to correspond
 ;           to the LIMIT of the map projection. 6 April 2012. DWF.
 ;        Set the default CENTER_LATITUDE and CENTER_LONGITUDE to 0.0. 9 April 2012. DWF.
 ;        Added NOFORWARDFIX keyword to allow skipping of the "fix" in the FORWARD method,
@@ -128,9 +128,11 @@
 ;     draw: in, optional, type=boolean, default=0
 ;        Set this keyword if you wish to immediately call the DRAW method after the
 ;        object has been completely initialized.
-;     ellipsoid: in, optional, type=string/integer, default='Sphere'
+;     ellipsoid: in, optional, type=string/integer
 ;        Set this to the name or index number of the ellopsoid or datum you wish to use
-;        for the map projection. The value is passed directly to Map_Proj_Init.
+;        for the map projection. The value is passed directly to Map_Proj_Init. The
+;        default is a sphere for those projections that only support a sphere, otherwise
+;        a Clark projection is used to conform to Map_Proj_Init defaults.
 ;     fill: in, optional, type=boolean, default=0
 ;        Set this keyword to display filled continents, if the keyword CONTINENTS is set.
 ;     erase: in, optional, type=boolean, default=0
@@ -287,7 +289,6 @@ FUNCTION cgMap::INIT, map_projection, $
    ; Default map projection.
    IF N_Elements(map_projection) EQ 0 THEN BEGIN
         this_map_projection = 'Equirectangular'
-        IF (N_Elements(datum) EQ 0) && (N_Elements(ellipsoid) EQ 0) THEN datum = 'SPHERE'
         map_projection = 117
         limit = [-90, -180, 90, 180]
    ENDIF
@@ -383,6 +384,10 @@ FUNCTION cgMap::INIT, map_projection, $
        
    ENDIF
    
+   ; Need a datum?
+   IF (N_Elements(datum) EQ 0) && (N_Elements(ellipsoid) EQ 0) THEN BEGIN
+      IF this_map_projection.sphereOnly EQ 1 THEN datum = 19 ELSE datum = 0
+   ENDIF
    IF (N_Elements(datum) EQ 0) && (N_Elements(ellipsoid) NE 0) THEN datum = ellipsoid
    IF N_Elements(datum) EQ 0 THEN BEGIN
         thisDatum = theDatums[19] 
@@ -447,36 +452,25 @@ FUNCTION cgMap::INIT, map_projection, $
    self._cg_zone = zone
    self._cg_overlays = Obj_New('cgContainer')
    
-      ; Need ranges?
-   IF N_Elements(xrange) EQ 0 THEN BEGIN 
-      IF N_Elements(limit) EQ 0 THEN BEGIN
-          xrange = [-180, 180]
-          latlon_ranges = 1
-      ENDIF ELSE BEGIN
-          xrange = [limit[1], limit[3]]
-          latlon_ranges = 1
-      ENDELSE
-   ENDIF
-   IF N_Elements(yrange) EQ 0 THEN BEGIN
-      IF N_Elements(limit) EQ 0 THEN BEGIN
-          yrange = [-90, 90]
-          latlon_ranges = 1
-      ENDIF ELSE BEGIN
-          yrange = [limit[0], limit[2]]
-          latlon_ranges = 1
-      ENDELSE
-   ENDIF
+   ; Do you have a limit?
+   IF N_Elements(limit) NE 0 $
+      THEN self._cg_limit = Ptr_New(Double(limit)) $
+      ELSE self._cg_limit = Ptr_New(/ALLOCATE_HEAP)
    
-   ; Set the limit if it hasn't been set yet.
-   IF N_Elements(limit) NE 0 THEN BEGIN
-       self._cg_limit = Ptr_New(limit) 
-   ENDIF ELSE BEGIN
-       self._cg_limit = Ptr_New([Min(yrange), Min(xrange), Max(yrange), Max(xrange)])
-   ENDELSE
-      
    ; Get the map structure.
    mapStruct = self -> SetMapProjection()
    
+   ; Do you need to set the data ranges? If so, these should be set from
+   ; the UV_BOX of the map structure.
+   IF N_Elements(xrange) EQ 0 THEN BEGIN 
+      xrange = mapStruct.uv_box[[0,2]]
+      latlon_ranges = 0
+   ENDIF
+   IF N_Elements(yrange) EQ 0 THEN BEGIN 
+      yrange = mapStruct.uv_box[[1,3]]
+      latlon_ranges = 0
+   ENDIF
+         
    ; Are the ranges in lat/lon space?
    IF Keyword_Set(latlon_ranges) THEN BEGIN
       uvcoords = self -> Forward(xrange, yrange)
@@ -1121,7 +1115,7 @@ PRO cgMap::LatLonLabels, $
 
     ; Convert the longitudes to 0 to 360. Otherwise, I have
     ; problems near the date line.
-;    longitudes = (longitudes + 360.0) MOD 360.0
+    longitudes = (longitudes + 360.0) MOD 360.0
     
     lon_min = Min(longitudes, MAX=lon_max, /NAN)
     lat_min = Min(latitudes, MAX=lat_max, /NAN)
@@ -1159,7 +1153,7 @@ PRO cgMap::LatLonLabels, $
     ; Make sure we don't have a center latitude at either pole. If we
     ; do, then lons are calulated differently.
     IF (center_lat GT (90.-0.05)) && (center_lat LT (90.0 + 0.05)) THEN BEGIN
-       lats = Scale_Vector(Findgen(5), 0 > lat_min < 80) 
+       lats = Scale_Vector(Findgen(5), 0 > Round(lat_min) < 80, 80) 
        latsdone = 1 
        IF lonstep GT 40 THEN BEGIN
           lons = Findgen(11) * 36 
@@ -1167,7 +1161,7 @@ PRO cgMap::LatLonLabels, $
        ENDIF      
     ENDIF ELSE BEGIN
        IF (center_lat LT (-90.+0.05)) && (center_lat GT (-90.0 - 0.05)) THEN BEGIN
-           lats = Scale_Vector(Findgen(5), -80, 0 < lat_max)  
+           lats = Scale_Vector(Findgen(5), -80, 0 < Round(lat_max))  
            latsdone = 1    
            IF lonstep GT 40 THEN BEGIN
               lons = Findgen(11) * 36 
@@ -1872,27 +1866,12 @@ FUNCTION cgMap::SetMapProjection, map_projection, $
         ENDCASE
    ENDELSE
 
-   ; If the mapStruct.uv_box is suppose to be the "range" of the map projection
-   ; in UV or projected XY coordinates, then it should be coincident with the LIMIT
-   ; of the map projection. It is not as it returns from Map_Proj_Init. At least,
-   ; the number are not the same as if you forward projected the limits of the
-   ; map projection. (One or the other of these must be wrong!!) Here, if you have
-   ; specified a limit, we try to match the uv_box with the limit of the map projection.
-   ; Note that LIMIT=[latmin, lonmin, latmax, lonmax], whereas 
-   ;          UV_BOX=[lonmin, latmin, lonmax, latmax].
-   ;         
-   ; Unfortunately, this code doesn't work unless the limits are quite small,
-   ; say less than 90 degrees.
-   IF N_Elements(limit) NE 0 THEN BEGIN
-      IF  ((limit[2]-limit[0]) LE 90.0) && ((limit[3]-limit[1]) LE 90.0) THEN BEGIN
-          xy = self -> Forward(limit[[1,3]], limit[[0,2]], mapStruct)
-          mapStruct.uv_box[[0,2]] = Reform(xy[0,*]) ; lons
-          mapStruct.uv_box[[1,3]] = Reform(xy[1,*]) ; lats
-      ENDIF
-   ENDIF
-
-   ; Correct the UV_BOX for projections in which limit is undefined or set to the
-   ; full representation of the map.
+   ; The UV_BOX created in Map_Proj_Init will return the wrong values if the CENTER_LON is
+   ; not equal to zero and the range is the full 360 degrees. In this case, UV_BOX[0] is
+   ; equal to UV_BOX[2]. While this is technically correct, it doesn't work for displaying
+   ; grids on maps set up with a projected XY coordinate system. In this grid system, these
+   ; two points are not coincident, but are far apart on the plot. This code tries to fix
+   ; the UV_BOX in this case.
    IF N_Elements(center_lon) NE 0 THEN BEGIN
        IF (center_lon NE 0.0) && $
            ( (N_Elements(limit) EQ 0) || (limit[2]-limit[0] EQ 180) || (limit[3]-limit[1] EQ 360) ) THEN BEGIN

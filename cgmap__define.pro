@@ -83,6 +83,10 @@
 ;        Added LATLONBOX keyword to the GetProperty method to allow me to obtain
 ;            the map boundary in the Google Map preferred notation of [north, south, east, west]
 ;            in degrees. 30 Oct 2012.
+;        I was calculating the default X and Y range incorrectly for non-UTM map projections.
+;            I have now gone back to my original method of using the UV_BOX of the map structure
+;            to do this. However, there is still a problem with the UV_BOX when the center latitude
+;            is not zero. I still attempt to fix this problem in the code (SetMapProjection method). 3 Jan 2012. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.

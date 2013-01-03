@@ -67,9 +67,14 @@
 ;        Fixed a problem with grid labeling when values were passed with LATS or LONS keyword. 6 April 2012. DWF.
 ;        Modified slightly to allow a three-element byte array to be used as the COLOR. 18 April 2012. DWF.
 ;        If a Map object is available, I make sure to call DRAW method before drawing graphics. 12 Sept 2012. DWF.
-;        
+;        Added cgGRID keyword to allow the cgMap object to create latitude and longitude grid in its
+;            LatLonLabels method. Previously used by default, but it doesn't work well with global
+;            map projections. It works best with small map areas in UTM projection space. 3 Jan 2013. DWF.
+;        Removed some old code that was used to correct latitude and longitude values. No longer needed,
+;            I hope, with the new cgGRID keyword. 3 Jan 2013. 
+;            
 ; :Copyright:
-;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
 ;---------------------------------------------------------------------------
 ;
 ;
@@ -253,6 +258,13 @@ end
 ;        The name of the color to draw box axes with.
 ;     box_axes: optional, type=boolean, default=0
 ;        Set this keyword to draw box axes on the map projection.
+;     cggrid: in, optional, type=boolean, default=0
+;        Set this keyword to allow the latitude and longitude values to be set by
+;        the LatLon_Labels method in the cgMap object. Previously this was used by
+;        default, but it caused a lot of problems with global or near global map projections.
+;        This really should be used ONLY if you are mapping a very small region of the Earth,
+;        and maybe if you are using a UTM map projection. Othersize, it is probably not 
+;        needed, so I have made it an optional choice.
 ;     charsize: in, optional, type=float
 ;        The character size for the labels. Default is cgDefCharSize()*0.75.
 ;     clip_text: in, optional, type=boolean, default=1
@@ -385,6 +397,7 @@ PRO cgMap_Grid, $
    ADDCMD=addcmd, $
    BCOLOR=bcolor, $
    BOX_AXES=box_axes, $
+   CGGRID=cggrid, $
    CHARSIZE=charsize, $
    CLIP_TEXT=clip_text, $
    COLOR=scolor, $
@@ -418,14 +431,13 @@ PRO cgMap_Grid, $
 
     Compile_Opt strictarr
 
-;    Catch, theError
-;    IF theError NE 0 THEN BEGIN
-;        Catch, /CANCEL
-;
-;        void = Error_Message()
-;        IF N_Elements(thisState) NE 0 THEN SetDecomposedState, thisState
-;        RETURN
-;    ENDIF
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = Error_Message()
+        IF N_Elements(thisState) NE 0 THEN SetDecomposedState, thisState
+        RETURN
+    ENDIF
 
     ; Should this be added to a resizeable graphics window?
     IF (Keyword_Set(addcmd)) && ((!D.Flags && 256) NE 0) THEN BEGIN
@@ -433,6 +445,7 @@ PRO cgMap_Grid, $
         cgWindow, 'cgMap_Grid', $
                BOX_AXES=box_axes, $
                CHARSIZE=charsize, $
+               CGGRID=cgGrid, $
                CLIP_TEXT=clip_text, $
                COLOR=scolor, $
                FILL_HORIZON=fill_horizon, $
@@ -516,17 +529,19 @@ PRO cgMap_Grid, $
          ; I've taken this out for now, as it is not working as well as I hoped
          ; it would. I may have to revisit this. Or, perhaps, modify the cgMap_Grid_INCR
          ; routine.
-         mapObj -> LatLonLabels, LATS=mlats, LATLAB=mlatlab, LATDELTA=latdelta, LATNAMES=mlatnames, $
-                                 LONS=mlons, LONLAB=mlonlab, LONDELTA=londelta, LONNAMES=mlonnames
-         IF N_Elements(lats) EQ 0 THEN BEGIN
-            lats = mlats
-            IF (N_Elements(latnames) EQ 0) THEN latnames = mlatnames
-            IF N_Elements(latlab) EQ 0 THEN latlab = mlatlab
-         ENDIF
-         IF N_Elements(lons) EQ 0 THEN BEGIN
-            lons = mlons
-            IF (N_Elements(lonnames) EQ 0) THEN lonnames = mlonnames
-            IF N_Elements(lonlab) EQ 0 THEN lonlab = mlonlab
+         IF Keyword_Set(cgGrid) THEN BEGIN
+             mapObj -> LatLonLabels, LATS=mlats, LATLAB=mlatlab, LATDELTA=latdelta, LATNAMES=mlatnames, $
+                                     LONS=mlons, LONLAB=mlonlab, LONDELTA=londelta, LONNAMES=mlonnames
+             IF N_Elements(lats) EQ 0 THEN BEGIN
+                lats = mlats
+                IF (N_Elements(latnames) EQ 0) THEN latnames = mlatnames
+                IF N_Elements(latlab) EQ 0 THEN latlab = mlatlab
+             ENDIF
+             IF N_Elements(lons) EQ 0 THEN BEGIN
+                lons = mlons
+                IF (N_Elements(lonnames) EQ 0) THEN lonnames = mlonnames
+                IF N_Elements(lonlab) EQ 0 THEN lonlab = mlonlab
+             ENDIF
          ENDIF
          
       ENDIF ELSE BEGIN
@@ -954,20 +969,21 @@ PRO cgMap_Grid, $
               polylines = -1
               IF (hasMapObj) THEN BEGIN
               
-                     ; Added this because if there is not a point in the longitude vector
-                     ; that is inside our actual data range, then the line can be drawn
-                     ; at the wrong place. I don't really understand why. It may have something
-                     ; to do with a stale map structure.
-                     mapObj -> GetProperty, XRANGE=xrange, YRANGE=yrange
-                     thisMapStructure = mapObj -> GetMapStruct()
-                     ll = Map_Proj_Inverse(xrange, yrange, MAP_STRUCTURE=thisMapStructure)
-                     lonii = Reform(ll[0,*])
-                     uv = MAP_PROJ_FORWARD(lonii, REPLICATE(lat, N_ELEMENTS(lonii)), $
-                          MAP_STRUCTURE=thisMapStruct)
-              ENDIF ELSE BEGIN
+;                     ; Added this because if there is not a point in the longitude vector
+;                     ; that is inside our actual data range, then the line can be drawn
+;                     ; at the wrong place. I don't really understand why. It may have something
+;                     ; to do with a stale map structure.
+;                     mapObj -> GetProperty, XRANGE=xrange, YRANGE=yrange
+;                     thisMapStructure = mapObj -> GetMapStruct()
+;                     ll = Map_Proj_Inverse(xrange, yrange, MAP_STRUCTURE=thisMapStructure)
+;                     lonii = Reform(ll[0,*])
+;                     uv = MAP_PROJ_FORWARD(lonii, REPLICATE(lat, N_ELEMENTS(lonii)), $
+;                          MAP_STRUCTURE=thisMapStruct)
+;              ENDIF ELSE BEGIN
                        uv = MAP_PROJ_FORWARD(loni, REPLICATE(lat, N_ELEMENTS(loni)), $
                           MAP_STRUCTURE=thisMapStruct)
-              ENDELSE
+;              ENDELSE
+              ENDIF
               ; This line has been modified by DWF to fix a bug in MAP_PROJ_FORWARD that
               ; screws up lines near the poles.
               polylines = [N_Elements(loni), Indgen(N_Elements(loni))]

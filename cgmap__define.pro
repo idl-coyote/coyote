@@ -87,9 +87,10 @@
 ;            I have now gone back to my original method of using the UV_BOX of the map structure
 ;            to do this. However, there is still a problem with the UV_BOX when the center latitude
 ;            is not zero. I still attempt to fix this problem in the code (SetMapProjection method). 3 Jan 2012. DWF.
+;        I added ASPECT and ISOTROPIC keywords to allow the setting of the aspect ratio of the map. 3 Jan 2012. DWF.
 ;        
 ; :Copyright:
-;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
 ;---------------------------------------------------------------------------
 ;
 ;+--------------------------------------------------------------------------
@@ -106,6 +107,11 @@
 ;     addcmd: in, optional, type=boolean, default=0
 ;        If this keyword is set, the object is added to the resizeable graphics
 ;        window, cgWindow. The DRAW method of the object is called in cgWindow.
+;     aspect: in, optional, type=float, default=none
+;        Set this keyword to a floating point ratio that represents the aspect ratio 
+;        (ysize/xsize) of the resulting map projection. Note that `Aspect` cannot be 
+;        used when plotting with !P.MULTI. Consider using cgLayout instead for multiple
+;        plots.
 ;     background: in, optional, type=string, default='white'
 ;        The name of the background color. Used only if the map object erases
 ;        the display when it draws its contents.
@@ -151,6 +157,11 @@
 ;     hires: in, optional, type=boolean, default=0
 ;        Set this keyword if you wish to use high resolution continental outlines.
 ;        Passed to the MapContinents object if one is requested.
+;     isotropic: in, optional, type=boolean, default=0
+;        Set this keyword to set the `Aspect` keyword to a value that correctly represents
+;        the same map unit length in both the X and Y directions. In other words, a map
+;        unit measured in the X direction is the same physical length as a map unit measured
+;        in the Y direction.
 ;     land_color: in, optional, type=string
 ;        The name of the drawing color for filled continents, if the keyword CONTINENTS 
 ;        is set. Passed directly to the cgMapContinents object.
@@ -225,6 +236,7 @@
 ;---------------------------------------------------------------------------
 FUNCTION cgMap::INIT, map_projection, $
     ADDCMD=addcmd, $
+    ASPECT=aspect, $
     BACKGROUND=background, $
     BCOLOR=bcolor, $
     BOX_AXES=box_axes, $
@@ -242,6 +254,7 @@ FUNCTION cgMap::INIT, map_projection, $
     GCOLOR=gcolor, $
     GRID=grid, $
     HIRES=hires, $
+    ISOTROPIC=isotropic, $
     LAND_COLOR=land_color, $
     LATLON_RANGES=latlon_ranges, $
     LCOLOR=lcolor, $
@@ -436,6 +449,10 @@ FUNCTION cgMap::INIT, map_projection, $
    IF N_Elements(extraKeywords) NE 0 $
         THEN self._cg_map_projection_keywords = Ptr_New(extraKeywords) $
         ELSE self._cg_map_projection_keywords = Ptr_New(/ALLOCATE_HEAP)
+   
+   ; Are ISOTROPIC or ASPECT keywords used?
+   IF Keyword_Set(isotropic) THEN self._cg_isotropic = 1
+   IF N_Elements(aspect) NE 0 THEN self._cg_aspect = aspect
    
    ; Load the object.
    self._cg_background = background
@@ -694,18 +711,56 @@ PRO cgMap::Draw, ERASE=erase, NOGRAPHICS=nographics, _EXTRA=extra
         self -> SetProperty, POSITION=_cgimage_position
     ENDIF
     
+    ; Did you set the isotropic keyword:
+    IF self._cg_isotropic THEN BEGIN
+        self -> GetProperty, XRANGE=xr, YRANGE=yr
+        self._cg_aspect = Double(Abs(yr[1]-yr[0]))/Abs(xr[1]-xr[0])
+    ENDIF
+    
+    ; Do you need an aspect ratio?
+    IF (self._cg_aspect NE 0.0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
+        
+      position = self._cg_position
+       
+      trial_position = Aspect(self._cg_aspect, margin=0.)
+      trial_width = trial_position[2]-trial_position[0]
+      trial_height = trial_position[3]-trial_position[1]
+      pos_width = position[2]-position[0]
+      pos_height = position[3]-position[1]
+    
+      ; Same logic as cgImage: try to fit image width, then if you can't get the right aspect
+      ; ratio, fit the image height instead.
+      fit_ratio = pos_width / trial_width
+      IF trial_height * fit_ratio GT pos_height THEN $
+      fit_ratio = pos_height / trial_height
+    
+      ; new width and height
+      trial_width *= fit_ratio
+      trial_height *= fit_ratio
+    
+      ; calculate position vector based on trial_width and trial_height
+      position[0] += 0.5*(pos_width - trial_width)
+      position[2] -= 0.5*(pos_width - trial_width)
+      position[1] += 0.5*(pos_height - trial_height)
+      position[3] -= 0.5*(pos_height - trial_height)
+            
+    ENDIF ELSE position = self._cg_position
+    
     ; Do you need to erase in the background color? Don't do this if you
     ; are just drawing the coordinate system.
     IF ~Keyword_Set(nographics) THEN BEGIN
         IF N_Elements(erase) EQ 0 THEN erase = self._cg_erase
-        self -> GetProperty, POSITION=p
+        p = position
         IF erase THEN cgColorFill, [p[0],p[0],p[2],p[2],p[0]], NORMAL=1, $
                                    [p[1],p[3],p[3],p[1],p[1]], COLOR=self._cg_background
     ENDIF
     
    ; Draw the map data coordinate system.
     mapStruct = self -> SetMapProjection()
+    temp_position = self._cg_position
+    self._cg_position = position
     self -> cgCoord::Draw, _EXTRA=extra
+    self._cg_position = temp_position
     
     ; Draw overlays?
     count = self._cg_overlays -> Count()
@@ -720,14 +775,14 @@ PRO cgMap::Draw, ERASE=erase, NOGRAPHICS=nographics, _EXTRA=extra
     
     ; Draw a border around the map?
     IF ~Keyword_Set(self._cg_noborder) && displayGraphics THEN BEGIN
-        p = self._cg_position
+        p = position
         cgPlots, [p[0],p[0],p[2],p[2],p[0]], [p[1],p[3],p[3],p[1],p[1]], $
             /NORMAL, COLOR=self._cg_color
     ENDIF
     
     ; Draw a title?
     IF (self._cg_title NE "") && displayGraphics THEN BEGIN
-       p = self._cg_position
+       p = position
        px = (p[2]-p[0])/2.0 + p[0]
        py = (p[3] + 0.05) < 0.975
        cgText, px, py, /Normal, Alignment=0.5, self._cg_title, Charsize=cgDefCharsize()*1.25
@@ -1938,6 +1993,8 @@ PRO cgMap__Define, class
    mapStruct =   { cgMap_PROJECTION, name:"", index:0, sphereOnly:0 }
 
    class = { cgMap, $
+             _cg_isotropic: 0B, $
+             _cg_aspect: 0.0D, $
              _cg_background: "", $                      ; The background color for erasing the display.
              _cg_center_latitude: 0.0D, $               ; The latitude at the center of the map projection.
              _cg_center_longitude:0.0D, $               ; The lontigude at the center of the map projection.

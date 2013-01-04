@@ -105,6 +105,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 30 October 2012 by David W. Fanning.
+;        Fixed a problem with a TRANSPOSE command for true-color images. Bad logic. 4 Jan 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -121,11 +122,7 @@ FUNCTION cgChangeMapProjection, image, mapIn, $
    Compile_Opt idl2
    
    ; Error handling.
-   Catch, theError
-   IF theError NE 0 THEN BEGIN
-       Catch, /CANCEL
-       void = Error_Message()
-   ENDIF
+   ON_Error, 2
    
    ; An image and an input map coordinate object are required.
    IF N_Elements(image) EQ 0 THEN Message, 'An input image is required.'
@@ -148,8 +145,7 @@ FUNCTION cgChangeMapProjection, image, mapIn, $
       mapOut -> SetProperty, XRANGE=xyrange[[0,2]], YRANGE=xyrange[[1,3]]
       mapOut -> GetProperty, LATLONBOX=latlonbox, BOUNDARY=boundary
    ENDIF ELSE BEGIN
-      img = image
-      IF trueIndex GT 0 THEN img = Transpose(img, [xindex, yindex, trueindex])
+      IF trueIndex LT 2 THEN img = Transpose(image, [xindex, yindex, trueindex])
       frames = alphachannel ? 4 : 3
       warped = Make_Array(xsize, ysize, frames, TYPE=Size(image, /TYPE))
       warped[*,*,0] = Map_Proj_Image(img[*,*,0], boundary, Image_Structure=mapIn->GetMapStruct(), $

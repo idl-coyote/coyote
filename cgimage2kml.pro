@@ -302,7 +302,7 @@ PRO cgImage2KML, image, mapCoord, $
    ; image has to be warped into the correct map projection.
    IF (StrUpCase(map_projection) NE 'EQUIRECTANGULAR') || (StrUpCase(StrCompress(ellipsoid, /REMOVE_ALL)) NE 'WGS84') THEN BEGIN
       googleMapCoord = Obj_New('cgMap', 'Equirectangular', Ellipsoid='WGS 84')
-       warped = cgChangeMapProjection(warped, mapCoord, MAPOUT=googleMapCoord, $
+      warped = cgChangeMapProjection(warped, mapCoord, MAPOUT=googleMapCoord, $
           LATLONBOX=latlonbox)
    ENDIF 
    

@@ -1930,7 +1930,7 @@ FUNCTION cgMap::SetMapProjection, map_projection, $
    ; equal to UV_BOX[2]. While this is technically correct, it doesn't work for displaying
    ; grids on maps set up with a projected XY coordinate system. In this grid system, these
    ; two points are not coincident, but are far apart on the plot. This code tries to fix
-   ; the UV_BOX in this case.
+   ; the UV_BOX in this case. See http://www.idlcoyote.com/map_tips/uvrange.php for details.
    IF N_Elements(center_lon) NE 0 THEN BEGIN
        IF (center_lon NE 0.0) && $
            ( (N_Elements(limit) EQ 0) || (limit[2]-limit[0] EQ 180) || (limit[3]-limit[1] EQ 360) ) THEN BEGIN

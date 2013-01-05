@@ -55,6 +55,17 @@
 ; correspond to the colors in the current color table in effect at
 ; the time the `cgColor` program is called.
 ; 
+; Please note that all Coyote Graphics routines use cgColor internally to specify
+; their colors in a color-model independent way. It is not necessary to call
+; cgColor yourself unless you are using it with a traditional IDL command (e.g., Plot).
+; For example::
+;  
+;     Plot, data, Color=cgColor('dodger blue')
+;     
+; But, it is not needed with Coyote Graphics commands::
+; 
+;     cgPlot, data, Color='dodger blue'
+; 
 ; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
 ; to be installed on your machine.
 ;
@@ -93,13 +104,13 @@
 ; .. image:: cgpickcolorname.png
 ;
 ; :Author:
-;       FANNING SOFTWARE CONSULTING::
-;           David W. Fanning 
-;           1645 Sheely Drive
-;           Fort Collins, CO 80526 USA
-;           Phone: 970-221-0438
-;           E-mail: david@idlcoyote.com
-;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning 
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; :History:
 ;     Change History::
@@ -123,46 +134,15 @@
 ;        For numerical values less than 256, in indexed color state, I now return the values
 ;              directly to the user. This should significantly speed up many Coyote Graphics
 ;              processes. 14 December 2012. DWF.
+;        Removed cgColor_Color24 module in favor of using Coyote Library routine cgColor24. 5 Jan 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2009-2012, Fanning Software Consulting, Inc.
 ;-
 ;
 ;+
-;+
-; This function accepts a [red, green, blue] triple that
-; describes a particular color and returns a 24-bit long
-; integer that is equivalent to (can be decomposed into)
-; that color. 
-; 
-; :Params:
-;    color: in, required, type=byte
-;       A three-element byte array containing the color
-;       triple. The triple can be either a row or column
-;       vector of three elements or it can be an N-by-3 array of
-;       color triples.
-;-
-FUNCTION cgColor_Color24, color
-
-    Compile_Opt idl2
-
-    ON_ERROR, 2
-    
-    s = Size(color)
-    
-    IF s[0] EQ 1 THEN BEGIN
-       IF s[1] NE 3 THEN Message, 'Input color parameter must be a 3-element vector.'
-       RETURN, color[0] + (color[1] * 2L^8) + (color[2] * 2L^16)
-    ENDIF ELSE BEGIN
-       IF s[2] GT 3 THEN Message, 'Input color parameter must be an N-by-3 array.'
-       RETURN, color[*,0] + (color[*,1] * 2L^8) + (color[*,2] * 2L^16)
-    ENDELSE
-
-END ;--------------------------------------------------------------------------------------------
-
-;+
 ; The purpose of this function is to obtain drawing colors
-; by name and in a device/decomposition independent way.
+; by name and in a device and color model independent way.
 ; 
 ; :Returns:
 ;     The return value depends on the color mode in effect at the time
@@ -304,20 +284,20 @@ END ;---------------------------------------------------------------------------
 ;
 ;-
 FUNCTION cgColor, theColour, colorIndex, $
-   AllColors=allcolors, $
-   Brewer=brewer, $ ; This keyword is no longer used.
-   Check_Connection=check_connection, $ ; This keyword is completely ignored.
-   ColorStructure=colorStructure, $
-   Cancel=cancelled, $
-   Decomposed=decomposedState, $
-   Filename=filename, $
-   Names=names, $
-   NColors=ncolors, $
-   NoDisplay=nodisplay, $ ; This keyword is completely ignored.
-   Row=row, $
-   SelectColor=selectcolor, $
-   Triple=triple, $
-  _Ref_Extra=extra
+   ALLCOLORS=allcolors, $
+   BREWER=brewer, $ ; This keyword is no longer used.
+   CHECK_CONNECTION=check_connection, $ ; This keyword is completely ignored.
+   COLORSTRUCTURE=colorStructure, $
+   CANCEL=cancelled, $
+   DECOMPOSED=decomposedState, $
+   FILENAME=filename, $
+   NAMES=names, $
+   NCOLORS=ncolors, $
+   NODISPLAY=nodisplay, $ ; This keyword is completely ignored.
+   ROW=row, $
+   SELECTCOLOR=selectcolor, $
+   TRIPLE=triple, $
+  _REF_EXTRA=extra
   
     Compile_Opt idl2
    
@@ -328,7 +308,7 @@ FUNCTION cgColor, theColour, colorIndex, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
-       ok = Error_Message(/Traceback)
+       ok = Error_Message()
        cancelled = 1
        RETURN, !P.Color
     ENDIF
@@ -869,15 +849,15 @@ FUNCTION cgColor, theColour, colorIndex, $
     
        ; Need a color structure?
        IF Arg_Present(colorStructure) THEN BEGIN
-          theColors = cgColor_Color24([[rvalue], [gvalue], [bvalue]])
+          theColors = cgColor24([[rvalue], [gvalue], [bvalue]])
           colorStructure = Create_Struct(theNames[0], theColors[0])
           FOR j=1, ncolors-1 DO colorStructure = Create_Struct(colorStructure, theNames[j], theColors[j])
        ENDIF
     
        IF Keyword_Set(allcolors) THEN BEGIN
-          RETURN, cgColor_Color24([[rvalue], [gvalue], [bvalue]])
+          RETURN, cgColor24([[rvalue], [gvalue], [bvalue]])
        ENDIF ELSE BEGIN
-          RETURN, cgColor_Color24([r, g, b])
+          RETURN, cgColor24([r, g, b])
        ENDELSE
     
     ENDIF ELSE BEGIN

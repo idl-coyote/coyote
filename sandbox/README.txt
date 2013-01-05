@@ -1,1 +1,0 @@
-This is a folder for work in progress. I can play with programs and ideas before they are finally committed to the Coyote Library.

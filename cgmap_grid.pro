@@ -72,6 +72,7 @@
 ;            map projections. It works best with small map areas in UTM projection space. 3 Jan 2013. DWF.
 ;        Removed some old code that was used to correct latitude and longitude values. No longer needed,
 ;            I hope, with the new cgGRID keyword. 3 Jan 2013. 
+;        Corrected bug in variable spelling that affect LONDELTA and LATDELTA keywords. 6 Jan 2013. DWF.
 ;            
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -585,7 +586,7 @@ PRO cgMap_Grid, $
   ;
   ;  1) an array of lats and/or lons
   ;  2) a single lats or lons which is taken to be the center
-  ;     or 'for sure' lat or lon with gridlines every latdel or londel from it
+  ;     or 'for sure' lat or lon with gridlines every latdelta or londelta from it
   ;  3) automatically calculated if lats or lons are not specified.
   ;
   ;
@@ -624,15 +625,15 @@ PRO cgMap_Grid, $
   IF lonmax le lonmin THEN lonmax = lonmax + 360.
   
             ;Default grid spacings...
-  IF n_elements(latdel) eq 0 THEN begin
-      latdel = cgMap_Grid_incr(latmax - latmin)
+  IF n_elements(latdelta) eq 0 THEN begin
+      latdelta = cgMap_Grid_incr(latmax - latmin)
       latd = 1
-  endif else latd = latdel
+  endif else latd = latdelta
   
-  IF n_elements(londel) eq 0 THEN begin
-      londel = cgMap_Grid_incr(lonmax - lonmin)
+  IF n_elements(londelta) eq 0 THEN begin
+      londelta = cgMap_Grid_incr(lonmax - lonmin)
       lond = 1
-  endif else lond = londel
+  endif else lond = londelta
   
   ; IF the deltas are < 1,
   ; do not convert the limits into integers
@@ -689,13 +690,13 @@ PRO cgMap_Grid, $
   ; Determine the number of lons and the lon array
   ;
   if n_elements(lons) eq 0 then begin
-      n_lons = 1+fix((lonmax-lonmin) / londel)
-      longitudes = lonmin - (lonmin mod londel) + findgen(n_lons) * londel
+      n_lons = 1+fix((lonmax-lonmin) / latdelta)
+      longitudes = lonmin - (lonmin mod latdelta) + findgen(n_lons) * latdelta
   endif else if n_elements(lons) eq 1 then begin
-      i0 = ceil((lonmin - lons[0]) / float(londel)) ;First tick
-      i1 = floor((lonmax - lons[0]) / float(londel)) ;Last tick
+      i0 = ceil((lonmin - lons[0]) / float(latdelta)) ;First tick
+      i1 = floor((lonmax - lons[0]) / float(latdelta)) ;Last tick
       n_lons = i1 - i0 + 1 > 1
-      longitudes = (findgen(n_lons) + i0) * londel + lons[0]
+      longitudes = (findgen(n_lons) + i0) * latdelta + lons[0]
   endif else begin
       n_lons=n_elements(lons)
       longitudes=lons
@@ -705,14 +706,14 @@ PRO cgMap_Grid, $
   ; Determine the number of lats and the lat array
   ;
   if n_elements(lats) eq 0 then begin
-      lat0 = latmin - (latmin mod float(latdel)) ;1st lat for grid
-      n_lats = 1 + fix((latmax-lat0)/float(latdel))
-      latitudes = lat0 + findgen(n_lats)*latdel
+      lat0 = latmin - (latmin mod float(latdelta)) ;1st lat for grid
+      n_lats = 1 + fix((latmax-lat0)/float(latdelta))
+      latitudes = lat0 + findgen(n_lats)*latdelta
   endif else if n_elements(lats) eq 1 then begin
-      i0 = ceil((latmin - lats[0]) / float(latdel)) ;First tick
-      i1 = floor((latmax - lats[0]) / float(latdel)) ;Last tick
+      i0 = ceil((latmin - lats[0]) / float(latdelta)) ;First tick
+      i1 = floor((latmax - lats[0]) / float(latdelta)) ;Last tick
       n_lats = i1 - i0 + 1 > 1
-      latitudes = (findgen(n_lats) + i0) * latdel + lats[0]
+      latitudes = (findgen(n_lats) + i0) * latdelta + lats[0]
   endif else begin
       n_lats=n_elements(lats)
       latitudes=lats

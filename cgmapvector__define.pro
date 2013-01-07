@@ -55,11 +55,14 @@
 ;     Change History::
 ;        Written by David W. Fanning, 21 November 2011.
 ;        Tested and bugs fixed. 17 Sept 2012. DWF.
+;        Bug fix in draw method when passing lat/lon vectors. 6 Jan 2013. DWF.
+;        Added PALETTE keyword to allow the vectors to be drawn in colors scaled
+;           to vector magnitude. 6 Jan 2012. DWF.
 ;                
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
-;---------------------------------------------------------------------------
-;;+--------------------------------------------------------------------------
+;-
+;+--------------------------------------------------------------------------
 ;   The initialization method for the object.
 ;
 ; :Params:
@@ -78,10 +81,10 @@
 ;        respectively. The default clipping rectangle is the plot window set
 ;        up by the cgMap object. 
 ;     color: in, optional, type=string, default="opposite"
-;        The name of the color to draw the grid lines in. 
+;        The name of the color to draw the arrows lines in. 
 ;     hsize: in, optional, type=float, default=0.35
 ;        The value of this keyword sets the length of the arrowhead. See the documenation
-;        for the ARROW command ind IDL for further explanation.
+;        for the ARROW command in IDL for further explanation.
 ;     lats: in, optional, type=float
 ;        The latitude values where the vector is to be drawn.
 ;     length, in, optional, type=float
@@ -96,6 +99,11 @@
 ;        The longitude values where the vector is to be drawn.
 ;     noclip: in, optional, type=boolean, default=0
 ;        Set this keyword to supress clipping of the plot.
+;     palette: in, optional, type=byte
+;        A (256x3) color palette containing the RGB color vectors to use for coloring the vectors
+;        according to the magitude of the vectors. If the color palette is not 256 colors in length
+;        then the magitude is scaled into the number of colors available. If a color palette is
+;        used, then the `Color` keyword is ignored.
 ;     t3d: in, optional, type=boolean, default=0
 ;        Set this graphics keyword if you wish to draw using the T3D transformation matrix.
 ;     thick: in, optional, type=integer, default=1
@@ -123,6 +131,7 @@ FUNCTION cgMapVector::INIT, mapCoord, $
     LINESTYLE=linestyle, $
     LONS=lons, $
     NOCLIP=noclip, $
+    PALETTE=palette, $
     SOLID=solid, $
     T3d=t3d, $
     THICK=thick, $
@@ -189,9 +198,27 @@ FUNCTION cgMapVector::INIT, mapCoord, $
     ; Store the map object. 
     self.mapCoord = mapCoord
         
+    ; Do you have a color palette?
+    IF N_Elements(palette) NE 0 THEN BEGIN
+       self.color = ""
+       s = Size(palette, /DIMENSIONS)
+       IF s[1] GT s[0] THEN palette = Transpose(palette)
+       s = Size(palette, /DIMENSIONS)
+       ncolors = s[0]
+       self.palette = Ptr_New(palette)
+       self.magcolors = Ptr_New(BytScl(Sqrt((*self.v)^2 + (*self.u)^2), TOP=ncolors-1))
+    ENDIF
+
     ; Need to add this command to a resizeable cgWindow?
-    IF Keyword_Set(addcmd) THEN self -> AddCmd
-    
+    IF Keyword_Set(addcmd) THEN BEGIN
+       window = cgQuery(/Current, OBJECT=winObject)
+       IF Obj_Valid(winObject) THEN BEGIN
+           cgWindow, 'Draw', self, /Method, /AddCmd
+       ENDIF ELSE BEGIN
+          cgWindow, 'Draw', self, /Method
+       ENDELSE
+       
+    ENDIF
     RETURN, 1
     
 END 
@@ -206,6 +233,16 @@ END
 ; 
 ;   Copyright (c) 1993-2004, Research Systems, Inc.  All rights reserved.
 ;   
+; :Params:
+;     x0: in, required, type=float
+;         The X value at the butt end of the arrow.
+;     x1: in, required, type=float
+;         The X value at the tip end of the arrow.
+;     y0: in, required, type=float
+;         The Y value at the butt end of the arrow.
+;     y1: in, required, type=float
+;         The Y value at the tip end of the arrow.
+;
 ; :Keywords:
 ;     color: in, optional, type=string, default="opposite"
 ;        The name of the color to draw the grid lines in. 
@@ -347,6 +384,7 @@ PRO cgMapVector::Draw
     IF N_Elements(*self.lons) NE N_Elements(*self.v) THEN BEGIN
         Message, 'The number of elements in the lon, lat, u, and v arrays must be the same.'
     ENDIF
+   
     
     ; Find a map structure, IF you can.
     IF Obj_Valid(self.mapCoord) THEN BEGIN
@@ -392,16 +430,21 @@ PRO cgMapVector::Draw
         ELSE clip = self.clip
         
     ; Calculate the endpoint of the arrow and draw it.
+    IF Ptr_Valid(self.palette) THEN BEGIN
+        TVLCT, r, g, b, /Get
+        TVLCT, *self.palette
+    ENDIF
     FOR j=0L,N_Elements(*self.u)-1 DO BEGIN
-        x0 = (*self.lons)[j]
-        y0 = (*self.lats)[j]
+        x0 = lon[j]
+        y0 = lat[j]
         x1 = x0 + uscaled[j]
         y1 = y0 + vscaled[j]
+        IF self.color EQ "" THEN color = (*self.magcolors)[j] ELSE color = self.color
         self -> DrawArrow, x0, y0, x1, y1, HSIZE=self.hsize, CLIP=clip, THICK=self.thick, $
-           HTHICK=self.thick, LENGTH=length, COLOR=self.color, SOLID=self.solid, $
+           HTHICK=self.thick, LENGTH=length, COLOR=color, SOLID=self.solid, $
            _EXTRA=extrakeywords, /DATA, LINESTYLE=self.linestyle
     ENDFOR
-
+    IF Ptr_Valid(self.palette) THEN TVLCT, r, g, b
 END 
 
     
@@ -538,6 +581,11 @@ END
 ;        Set this keyword to supress clipping of the plot.
 ;     mapcoord: in, optional, type=object
 ;        The map coordinate for the object.
+;     palette: in, optional, type=byte
+;        A (256x3) color palette containing the RGB color vectors to use for coloring the vectors
+;        according to the magitude of the vectors. If the color palette is not 256 colors in length
+;        then the magitude is scaled into the number of colors available. If a color palette is
+;        used, then the `Color` keyword is ignored.
 ;     t3d: in, optional, type=boolean, default=0
 ;        Set this graphics keyword if you wish to draw using the T3D transformation matrix.
 ;     thick: in, optional, type=integer, default=1
@@ -566,6 +614,7 @@ PRO cgMapVector::SetProperty, $
     LONS=lons, $
     MAPCOORD=mapCoord, $
     NOCLIP=noclip, $
+    PALETTE=palette, $
     SOLID=solid, $
     T3D=t3d, $
     THICK=thick, $
@@ -610,6 +659,19 @@ PRO cgMapVector::SetProperty, $
     IF N_Elements(t3d) NE 0 THEN self.t3d = t3d
     IF N_Elements(thick) NE 0 THEN self.thick = thick
     IF N_Elements(zvalue) NE 0 THEN self.zvalue = zvalue
+    
+    ; Do you have a color palette?
+    IF N_Elements(palette) NE 0 THEN BEGIN
+       Ptr_Free, self.palette
+       Ptr_Free, self.magcolors
+       self.color = ""
+       s = Size(palette, /DIMENSIONS)
+       IF s[1] GT s[0] THEN palette = Transpose(palette)
+       s = Size(palette, /DIMENSIONS)
+       ncolors = s[0]
+       self.palette = Ptr_New(palette)
+       self.magcolors = Ptr_New(BytScl(Sqrt((*self.v)^2 + (*self.u)^2), TOP=ncolors-1))
+    ENDIF
 
     IF N_Elements(extra) NE 0 THEN self -> cgContainer::SetProperty, _EXTRA=extra
 
@@ -625,6 +687,8 @@ PRO cgMapVector::CLEANUP
     Ptr_Free, self.lats
     Ptr_Free, self.u
     Ptr_Free, self.v
+    Ptr_Free, self.palette
+    Ptr_Free, self.magcolors
     
     self -> cgContainer::CLEANUP
 END
@@ -650,7 +714,9 @@ PRO cgMapVector__DEFINE, class
               color: "", $
               hsize: 0.0, $
               linestyle: 0, $
+              magcolors: Ptr_New(), $
               noclip: 0B, $
+              palette: Ptr_New(), $
               solid: 0, $
               t3d: 0B, $
               thick: 0, $

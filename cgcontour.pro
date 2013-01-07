@@ -351,6 +351,7 @@
 ;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;        Added C_ANNOTATION keyword. 10 Nov 2012. DWF.
 ;        Modified the way default colors are selected when the background color is "white". 4 Dec 2012. DWF.
+;        Making more effort to set the CELL_FILL keyword instead of FILL if filling contours on maps. 7 Jan 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -864,6 +865,12 @@ PRO cgContour, data, x, y, $
     
     ; Default values for keywords.
     fill = Keyword_Set(fill)
+    
+    ; Really need CELL_FILL instead of FILL if you are overplotting onto a map projection.
+    IF fill && ((N_Elements(map_object) NE 0) || (!X.Type EQ 3)) && Keyword_Set(overplot) THEN BEGIN
+        fill = 0
+        cell_fill = 1
+    ENDIF
     cell_fill = Keyword_Set(cell_fill)
     irregular = Keyword_Set(irregular)
     SetDefaultValue, label, 1

@@ -127,9 +127,10 @@
 ;        Made sure the map coordinate system is established before drawing if a map object is passed
 ;             into the program. 26 June 2012. DWF.
 ;        Added the ability to specify the PSYM keyword as a string. 20 July 2012. DWF.
+;        Added a check for a window to draw into, if needed. 8 July 2013. DWF.
 ;        
 ; :Copyright:
-;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
 ;-
 PRO cgPlotS, x, y, z, $
     ADDCMD=addcmd, $
@@ -182,6 +183,9 @@ PRO cgPlotS, x, y, z, $
             
          RETURN
     ENDIF
+    
+    ; Need a window?
+    IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
     
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8

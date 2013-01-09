@@ -188,7 +188,7 @@ FUNCTION cgGreek, letter, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unico
     
     ; Do you wish to see an example?
     IF Keyword_Set(example) THEN BEGIN
-        Greek_Example, UNICODE=unicode, PS=ps
+        cgGreek_Example, UNICODE=unicode, PS=ps
         RETURN, ""
     ENDIF
 

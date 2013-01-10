@@ -14,7 +14,7 @@ this routine, refer to the IDL Online Help Navigator
 or type: <P>
 <PRE>     ? mk_html_help</PRE><P>
 at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Sun Nov 18 08:20:04 2012.<P>
+<STRONG>Last modified: </STRONG>Wed Jan 09 21:11:52 2013.<P>
  
 <HR>
  
@@ -39,7 +39,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#CONTRASTZOOM">CONTRASTZOOM</A>
 <LI><A HREF="#CONVERT_TO_TYPE">CONVERT_TO_TYPE</A>
 <LI><A HREF="#CW_DRAWCOLOR">CW_DRAWCOLOR</A>
-<LI><A HREF="#DBLTOSTR">DBLTOSTR</A>
 <LI><A HREF="#DECOMPOSEDCOLOR">DECOMPOSEDCOLOR</A>
 <LI><A HREF="#DIRPATH">DIRPATH</A>
 <LI><A HREF="#ERRORLOGGER__DEFINE">ERRORLOGGER__DEFINE</A>
@@ -68,8 +67,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#GETPRIMARYSCREENSIZE">GETPRIMARYSCREENSIZE</A>
 <LI><A HREF="#GET_OBJECT_ID">GET_OBJECT_ID</A>
 <LI><A HREF="#GMASCL">GMASCL</A>
-<LI><A HREF="#GREEK">GREEK</A>
-<LI><A HREF="#GRIDPOSITIONS">GRIDPOSITIONS</A>
 <LI><A HREF="#HCOLORBAR">HCOLORBAR</A>
 <LI><A HREF="#HELP_VAR">HELP_VAR</A>
 <LI><A HREF="#HISTOMATCH">HISTOMATCH</A>
@@ -78,7 +75,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#IMAGE_DIMENSIONS">IMAGE_DIMENSIONS</A>
 <LI><A HREF="#INSIDE">INSIDE</A>
 <LI><A HREF="#JD2TIME">JD2TIME</A>
-<LI><A HREF="#JN2TIME">JN2TIME</A>
 <LI><A HREF="#LEFTJUSTIFY">LEFTJUSTIFY</A>
 <LI><A HREF="#LINKEDLIST">LINKEDLIST</A>
 <LI><A HREF="#LIST_SELECTOR">LIST_SELECTOR</A>
@@ -1422,7 +1418,7 @@ at the IDL command line prompt.<P>
 <A NAME="CW_DRAWCOLOR">
 <H2>CW_DRAWCOLOR</H2></A>
 <A HREF="#CONVERT_TO_TYPE">[Previous Routine]</A>
-<A HREF="#DBLTOSTR">[Next Routine]</A>
+<A HREF="#DECOMPOSEDCOLOR">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -1510,65 +1506,9 @@ at the IDL command line prompt.<P>
 <STRONG>(See cw_drawcolor.pro)</STRONG><P>
 <HR>
  
-<A NAME="DBLTOSTR">
-<H2>DBLTOSTR</H2></A>
-<A HREF="#CW_DRAWCOLOR">[Previous Routine]</A>
-<A HREF="#DECOMPOSEDCOLOR">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-       DBLTOSTR
-
- PURPOSE:
-
-       This is a program for converting a double precision numerical value
-       to a string. It was originally offered by BioPhys on the IDL newsgroup.
-
- AUTHOR:
-
-       FANNING SOFTWARE CONSULTING
-       David Fanning,  Ph.D.
-       1645 Sheely Drive
-       Fort Collins,  CO 80526 USA
-       Phone: 970-221-0438
-       E-mail: david@idlcoyote.com
-       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- CATEGORY:
-
-       Utility
-
- CALLING SEQUENCE:
-
-       stringValue  =  DblToStr(value)
-
- INPUTS:
-
-       value - A double-precision or floating point value to be converted to a string.
-
- OUTPUTS:
-
-       stringValue - The converted string value.
-
- KEYWORDS:
-
-       None.
-
- RESTRICTIONS:
-
-       Assumes 14 significant digits of precision.
-
- MODIFICATION HISTORY:
-
-       Written by BioPhys and offered to the IDL newsgroup,  7 November 2005.
-       Slightly modified and renamed by David Fanning,  30 November,  2005.
-</PRE><P>
-<STRONG>(See dbltostr.pro)</STRONG><P>
-<HR>
- 
 <A NAME="DECOMPOSEDCOLOR">
 <H2>DECOMPOSEDCOLOR</H2></A>
-<A HREF="#DBLTOSTR">[Previous Routine]</A>
+<A HREF="#CW_DRAWCOLOR">[Previous Routine]</A>
 <A HREF="#DIRPATH">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -3234,8 +3174,8 @@ OUTPUTS:
 
  RESTRICTIONS:
 
-   Requires DBLTOSTR from the Coyote Library:
-      http://www.idlcoyote.com/programs/dbltostr.pro
+   Requires cgDblToStr from the Coyote Library:
+      http://www.idlcoyote.com/programs/cgdbltostr.pro
 
  EVENT STRUCTURE:
 
@@ -3936,8 +3876,8 @@ OUTPUTS:
 
  DEPENDENCIES:
 
-   Requires DBLTOSTR from the Coyote Library:
-     http://www.idlcoyote.com/programs/dbltostr.pro
+   Requires cgDblToStr from the Coyote Library:
+     http://www.idlcoyote.com/programs/cgdbltostr.pro
 
  MODIFICATION HISTORY:
 
@@ -4726,7 +4666,7 @@ OUTPUTS:
 <A NAME="GMASCL">
 <H2>GMASCL</H2></A>
 <A HREF="#GET_OBJECT_ID">[Previous Routine]</A>
-<A HREF="#GREEK">[Next Routine]</A>
+<A HREF="#HCOLORBAR">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -4818,283 +4758,9 @@ OUTPUTS:
 <STRONG>(See gmascl.pro)</STRONG><P>
 <HR>
  
-<A NAME="GREEK">
-<H2>GREEK</H2></A>
-<A HREF="#GMASCL">[Previous Routine]</A>
-<A HREF="#GRIDPOSITIONS">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-  GREEK
-
- PURPOSE:
-
-   This function provides a device-independent way to ask for a Greek letter as
-   a string that can be included, for example, in a plot title. It uses the Greek
-   simplex font (!4) when used with Hershey fonts, and the Symbol font (!9) when
-   used with PostScript or True-Type fonts. Selects the type of Greek character to 
-   return based on value of !P.FONT. Updated now to return the UNICODE values for 
-   Greek characters for those fonts that support them (Macintosh?).
-   
- AUTHOR:
-
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: david@idlcoyote.com
-   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-
- CATEGORY:
-
-   Graphics, Utilities
-
- CALLING SEQUENCE:
-
-   greekString = Greek(greekLetter)
-
- RETURN VALUE:
-
-   greekString    A string that represents the Greek letter.
-
- ARGUMENTS:
-
-  greekLetter:    The name of the Greek letter desired. A string. Default: 'alpha'.
-                  Valid string names are the 24 characters of the Greek alphabet.
-                     alpha        nu
-                     beta         xi
-                     gamma        omicron
-                     delta        pi
-                     epsilon      rho
-                     zeta         sigma
-                     eta          tau
-                     theta        upsilon
-                     iota         phi
-                     kappa        chi
-                     lambda       psi
-                     mu           omega
-                    
-                   Note that if the first letter of the name is capitalized, this is
-                   the equivalent of setting the CAPITAL keyword. 
-
- KEYWORDRS:
-
-  CAPTIAL:        If this keyword is set, the captial Greek letter is returned rather 
-                  than the lowercase Greek letter. An alternative way of capitalizing
-                  the letter is to make the first letter of the name an uppercase letter.
-                  
-  EXAMPLE:        If this keyword is set, the names of the Greek characters and their
-                  symbols are written out in the current graphics window.
-                  
-  PS:             Normally, the PostScript version of the greek letter is returned if
-                  the current device is PostScript and !P.Font is 0 or 1. But, the 
-                  PostScript version of the greek letter can be obtained at any time
-                  and in any device, by setting this keyword.
-                                    
-  UNICODE:        If this keyword is set, the function returns the Unicode for the Greek
-                  letter.
-
- EXAMPLE:
-
-  Lowercase PSI:
-  
-     IDL> Plot, findgen(11), XTitle='This title contains ' + $
-           Greek('psi') + ' as a Greek letter' 
-
-  Uppercase PSI:
-  
-     IDL> Plot, findgen(11), XTitle='This title contains ' + $
-           Greek('Psi') + ' as a Greek letter' 
- NOTES:
- 
-  See the following article for additional information: 
-  
-       http://www.idlcoyote.com/ps_tips/greeksym.html
-       
- RESTRICTIONS:
- 
-  For this program to work correctly on your graphics display, you should be using
-  Hershey fonts (!P.Font=-1). It will work correctly in PostScript with either 
-  hardware fonts (!P.Font=0) or True-Type fonts (!P.Font=1).
-  
- MODIFICATION HISTORY:
-
-  Written by: David W. Fanning, 9 January 2010.
-  An alternative way to get an uppercase letter is to make the first letter of
-     the Greek name uppercase. (Maarten Sneep's suggestion!) 11 Jan 2010. DWF
-  Had the wrong value for the PostScript version of Phi. 26 January 2010. DWF
-  Added UNICODE keyword and values for Greek characters. 11 June 2010. DWF.
-  Changed the branching from !D.NAME EQ 'PS' to !P.FONT NE -1. (This is actually
-      what the documentation says, and what I intended.) 13 Dec 2010. DWF.
-  I don't think the last change did quite want I wanted. More tweaking to make
-      this more responsive to being in a PostScript file. 31 July 2011. DWF.
-  Added PS keyword so the return value is the PostScript file. This is for
-      convenience only, as the return value will be the PostScript value if
-      the current graphics device is PS and FONT is not equal to -1. 30 Aug 2011. DWF.
-</PRE><P>
-<STRONG>(See greek.pro)</STRONG><P>
-<HR>
- 
-<A NAME="GRIDPOSITIONS">
-<H2>GRIDPOSITIONS</H2></A>
-<A HREF="#GREEK">[Previous Routine]</A>
-<A HREF="#HCOLORBAR">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-       GRIDPOSITIONS
-
- PURPOSE:
-
-       Sets up a column-row grid in the current graphics window in a fashion
-       similar to !P.MULTI, except that the grid can be confined to a portion
-       of the window, leaving room for color bars and other annotations.
-
- AUTHOR:
-
-       FANNING SOFTWARE CONSULTING
-       David Fanning, Ph.D.
-       1645 Sheely Drive
-       Fort Collins, CO 80526 USA
-       Phone: 970-221-0438
-       E-mail: david@idlcoyote.com
-       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- CATEGORY:
-
-       Graphics
-
- CALLING SEQUENCE:
-
-       positions = GridPositions(columns, rows)
-
- INPUT_PARAMETERS:
-
-       columns:         The number of columns in the grid.
-
-       rows             The number of rows in the grid.
-
- OUTPUT_PARAMETERS:
-
-      positions:        A 4xN array, where N=(columns*rows), giving the positions of the grid in
-                        normalized coordinates.
-
- KEYWORDS:
-
-     INCHES:           If calculating the position in the PostScript device, indicates whether 
-                       the window size is given in centimeters (the default) or in inches. Set
-                       this keyword to 1 to indicate inches. Ignored for other devices.
-
-     LANDSCAPE:        If calculating the position in the PostScript device, set this keyword to
-                       indicate a landscript page. Ignored for other devices.
-
-     ORDER:            If this keyword is set to 0, the positions are calculated in row order. If
-                       set to 1, the positions are calculated in column order.
-                       
-     PS_KEYWORDS:      Rather than specifying individual PostScript keywords (e.g., XSIZE, YSIZE,
-                       LANDSCAPE, etc), it is much easier to pass a structure of PostScript keywords
-                       as collected by PSConfig or PS_Start. This keyword allows you to pass such
-                       a structure of PostScript keywords. For example, like this:
-                       
-                           PS_Start, 'myfile.ps', Keywords=keywordStruct
-                           positions = GridPositions(PS_Keywords=keywordStruct)
-
-     XEXTENT:          A one or two element array, with values from 0 to 1, giving the extent of
-                       the grid in the X direction. For example XEXTENT=[.2, .8] will position
-                       the X portion of the grid from 0.2 to 0.8 (normalized coordinates) in the
-                       window. If a scalar value, the XEXTENT will be assumed to be [0, value].
-
-     XMARGIN:          A one or two element array, giving the plot margin outside the grid position.
-                       That is to say, the normal grid position will be reduced by this margin. This
-                       corresponds to a plot margin, and as such is expressed in character units. See
-                       the on-line help for graphics keywords for additional information. If a scalar,
-                       the margin is taken from both the left and right sides of the position. In other
-                       words, XMARGIN=[value, value]. By default, [0.05,0.05], which will cause grid 
-                       positions to have just a bit of space between them.
-
-     XSIZE:            The X size of the window the positions are being calculated for. By
-                       default, !D.X_SIZE.
-
-     XEXTENT:          A one or two element array, with values from 0 to 1, giving the extent of
-                       the grid in the X direction. For example XEXTENT=[.2, .8] will position
-                       the X portion of the grid from 0.2 to 0.8 (normalized coordinates) in the
-                       window. If a scalar value, the XEXTENT will be assumed to be [0, value].
-
-     XMARGIN:          A one or two element array, giving the plot margin outside the grid position.
-                       That is to say, the normal grid position will be reduced by this margin. This
-                       corresponds to a plot margin, and as such is expressed in character units. See
-                       the on-line help for graphics keywords for additional information. If a scalar,
-                       the margin is taken from both the left and right sides of the position. In other
-                       words, XMARGIN=[value, value]. By default, [0,0], which will cause grid 
-                       positions to abut one another.
-
-     XSIZE:            The X size of the window the positions are being calculated for. By
-                       default, !D.X_SIZE.
-
-     YEXTENT:          A one or two element array, with values from 0 to 1, giving the extent of
-                       the grid in the X direction. For example YEXTENT=[.2, .8] will position
-                       the Y portion of the grid from 0.2 to 0.8 (normalized coordinates) in the
-                       window. If a scalar value, the YEXTENT will be assumed to be [0, value].
-
-     YMARGIN:          A one or two element array, giving the plot margin outside the grid position.
-                       That is to say, the normal grid position will be reduced by this margin. This
-                       corresponds to a plot margin, and as such is expressed in character units. See
-                       the on-line help for graphics keywords for additional information. If a scalar,
-                       the margin is taken from both the bottom and top sides of the position. In other
-                       words, YMARGIN=[value, value]. By default, [0,0], which will cause grid 
-                       positions to abut one another.
-
-     YSIZE:            The Y size of the window the positions are being calculated for. By
-                       default, !D.Y_SIZE.
-
- EXAMPLE:
-
-       To display four images, scaled differently, in the center of the display, with room
-       for a color bar:
-
-           positions = GridPositions(2, 2, YEXTENT=[0.15,0.85], XEXTENT=[0.2,0.8])
-           image = cgDemoData(11)
-           cgErase, 'rose'
-           cgLoadCt, 25, /Brewer
-           cgImage, image, POSITION=positions[*,0]
-           cgImage, BytScl(Sobel(image)), POSITION=positions[*,1], /NoErase
-           cgImage, BytScl(Hist_Equal(image)), POSITION=positions[*,2], /NoErase
-           cgImage, BytScl(Median(image,7)), POSITION=positions[*,3], /NoErase
-
-       To do the same thing in a PostScript file:
-       
-           PS_Start, 'test.ps', Keywords=psStruct
-           positions = GridPositions(2, 2, YEXTENT=[0.15,0.85], $
-              XEXTENT=[0.2,0.8], PS_KEYWORDS=psStruct)
-           image = cgDemoData(11)
-           cgErase, 'rose'
-           cgLoadCt, 25, /Brewer
-           cgImage, image, POSITION=positions[*,0]
-           cgImage, BytScl(Sobel(image)), POSITION=positions[*,1], /NoErase
-           cgImage, BytScl(Hist_Equal(image)), POSITION=positions[*,2], /NoErase
-           cgImage, BytScl(Median(image,7)), POSITION=positions[*,3], /NoErase
-           PS_End ; /PNG, WIDTH=600
-
- MODIFICATION HISTORY:
-
-       Written by David W. Fanning, 17 March 2009.
-       Fixed problems in calculating default window sizes in the Z and PS devices. 25 June 2011. DWF.
-       Fixed the example code to work with Coyote Graphics routines. 27 June 2011.
-       Although GridPositions was not intended to be used to configure the PostScript
-          device, I find that people are using it to do just that. To that end, I am now
-          allowing PostScript device keywords to be collected and passed along to the
-          PostScript device through the GridPositions interface. This is strictly a 
-          convenience, and not the way I would recommend using the program, to be truthful. 
-          29 Aug 2011. DWF
-       Added PS_Keywords keyword to allow use of PSConfig and PS_Start with the program. 24 Apr 2012. DWF.
-</PRE><P>
-<STRONG>(See gridpositions.pro)</STRONG><P>
-<HR>
- 
 <A NAME="HCOLORBAR">
 <H2>HCOLORBAR</H2></A>
-<A HREF="#GRIDPOSITIONS">[Previous Routine]</A>
+<A HREF="#GMASCL">[Previous Routine]</A>
 <A HREF="#HELP_VAR">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -5806,7 +5472,7 @@ OUTPUTS:
 <A NAME="JD2TIME">
 <H2>JD2TIME</H2></A>
 <A HREF="#INSIDE">[Previous Routine]</A>
-<A HREF="#JN2TIME">[Next Routine]</A>
+<A HREF="#LEFTJUSTIFY">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  The purpose of this function is to convert a Julian day number into
@@ -5858,67 +5524,9 @@ OUTPUTS:
 <STRONG>(See jd2time.pro)</STRONG><P>
 <HR>
  
-<A NAME="JN2TIME">
-<H2>JN2TIME</H2></A>
-<A HREF="#JD2TIME">[Previous Routine]</A>
-<A HREF="#LEFTJUSTIFY">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-    JN2TIME
-
- PURPOSE:
-
-    The purpose of this function is to convert a Julian number into
-    a time string of the form "16 Mar 2009 15:34:26."
-
- AUTHOR:
-
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: david@idlcoyote.com
-   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-
- CATEGORY:
-
-    Utility.
-
- CALLING SEQUENCE:
-
-    result = JN2TIME(jnumber)
-
- INPUTS:
-
-    jnumber:   A Julian number or array of Julian numbers. If absent,
-                today's current local time is returned.
-
- OUTPUTS:
-
-    result:     A scalar or vector of time strings of the form "16 Mar 2009 15:34:26".
-
- KEYWORDS:
-
-    SHORT:      Set this keyword to return just the day, month, year portion of the string.
-    
- DEPENDENCIES:
- 
-    Requires THEMONTHS from the Coyote Library.
-    
-         http://www.idlcoyote.com/programs/themonths.pro
-
- MODIFICATION HISTORY:
-
-    Written by: David W. Fanning, 25 June 2009.
-</PRE><P>
-<STRONG>(See jn2time.pro)</STRONG><P>
-<HR>
- 
 <A NAME="LEFTJUSTIFY">
 <H2>LEFTJUSTIFY</H2></A>
-<A HREF="#JN2TIME">[Previous Routine]</A>
+<A HREF="#JD2TIME">[Previous Routine]</A>
 <A HREF="#LINKEDLIST">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -7303,7 +6911,7 @@ OUTPUTS:
               http://www.idlcoyote.com/programs/ncdf_variable__define.pro
               http://www.idlcoyote.com/programs/errorlogger__define.pro
               http://www.idlcoyote.com/programs/error_message.pro
-              http://www.idlcoyote.com/programs/centertlb.pro
+              http://www.idlcoyote.com/programs/cgcentertlb.pro
               http://www.idlcoyote.com/programs/undefine.pro
               http://www.idlcoyote.com/programs/textbox.pro
               http://www.idlcoyote.com/programs/cgrootname.pro
@@ -8599,6 +8207,10 @@ OUTPUTS:
          their original values by `PS_End`. A system variable is set to this value only if it 
          currently contains the IDL default value of 0.0. If it is set to anything else, this 
          default thickness value is ignored.
+     dejavusans: in, optional, type=boolean, default=0
+         Set this keyword to select the DejaVuSans true-type font for PostScript output.
+         This option is ONLY available in IDL 8.2 or higher and/or you have installed the
+         DejaVuSans true-type font in your font directory.
      filename: in, optional, type=string, default='idl.ps'
          The name of the PostScript file created. An alternative, and older, way of setting
          the `filename` parameter.
@@ -8672,9 +8284,10 @@ OUTPUTS:
        Created a DEFAULT_THICKNESS keyword to set the default thicknesses of PostScript 
            system variables. 14 Dec 2011. DWF.
        Moved the true-type font set-up to *after* changing the graphics device to PostScript. 10 Jan 2012. DWF.
-
+       Added DejaVuSans keyword to allow this true-type font to be used in PostScript Output. 21 Dec 2012. DWF.
+       
  :Copyright:
-     Copyright (c) 2008-2011, Fanning Software Consulting, Inc.
+     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
 </PRE><P>
 <STRONG>(See ps_start.pro)</STRONG><P>
 <HR>
@@ -9376,6 +8989,9 @@ OUTPUTS:
                window is possible. A normal IDL graphics window is
                always created.
 
+  SIZEFRAC:    Make the window this fraction of the screen dimensions.
+               A number between 0.0 and 1.0
+  
   TITLE:       The title string that is displayed on the window.
 
   WID:         The window index number. If supplied as an IDL variable,
@@ -9395,6 +9011,8 @@ OUTPUTS:
   YSIZE:       The same as the ysize argument. Provided so ScrollWindow
                can be a drop-in replacement for the Window command.
 
+
+
  EXAMPLE:
 
   ScrollWindow, XSIZE=800, YSIZE=400   ; Produces normal IDL graphics window.
@@ -9403,6 +9021,7 @@ OUTPUTS:
  MODIFICATION HISTORY:
 
   Written by: David W. Fanning, 25 March 2009
+  Added SIZEFRACTION keyword, Mats Löfdahl, 25 November 2012.
 </PRE><P>
 <STRONG>(See scrollwindow.pro)</STRONG><P>
 <HR>
@@ -9757,9 +9376,14 @@ OUTPUTS:
 
  KEYWORDRS:
 
+  COUNT:          An output variable that contains the number of elements in the difference vector.
+
   NORESULT:       Set this keyword to a value that will be returned from the function
                   if no difference between the two sets of numbers is found. By default, set_a.
                   
+  POSITIONS:      An output keyword that will return the positions or locations in A of the values
+                  not found in B.
+                 
   SUCCESS:        An output keyword that is set to 1 if a difference was found, and to 0 otherwise.
    
  EXAMPLE:
@@ -9783,6 +9407,8 @@ OUTPUTS:
 
   Written by: David W. Fanning, November 25, 2009, from code originally supplied to the IDL
      newsgroup by Research Systems software engineers.
+  Added COUNT and POSITIONS keywords. Liam Steele, 13 Dec 2012.
+  Defined values for COUNT and POSITIONS when there is no overlap in the vectors. 14 Dec 2012. LS.
 </PRE><P>
 <STRONG>(See setdifference.pro)</STRONG><P>
 <HR>
@@ -9829,9 +9455,21 @@ OUTPUTS:
    set_b:         A vector of integers.
 
  KEYWORDRS:
+ 
+  COUNT:          An output variable that contains the number of elements in the intersection vector.
 
   NORESULT:       Set this keyword to a value that will be returned from the function
                   if no intersection between the two sets of numbers is found. By default, -1.
+                  
+  POSITIONS:      And output keyword that will return the positions or locations in A where the values
+                  in B appear.
+                  
+  INDICIES_A:     The indices in vector A where the intersected values appear. Note, this is identical
+                  to POSITIONS *only* if the intersected points are unique in each vector. The POSITIONS 
+                  keyword will return ALL the positions of the match, even if there are non-unique matches.
+  
+  INDICIES_B:     The indices in vector B where the intersected values appear. This assumes that
+                  the intersected points are represented uniquely in the A and B vectors.
 
   SUCCESS:        An output keyword that is set to 1 if an intersection was found, and to 0 otherwise.
 
@@ -9858,6 +9496,9 @@ OUTPUTS:
      newsgroup by Research Systems software engineers.
   Yikes, bug in original code only allowed positive integers. Fixed now. 2 Nov 2009. DWF.
   Fixed a problem when one or both of the sets was a scalar value. 18 Nov 2009. DWF.
+  Added a POSITIONS keyword. 30 Nov 2012. DWF.
+  Added a COUNT keyword 3 Dec 2012. DWF.
+  Added INDICES_A and INDICES_B keywords at R.G. Stockwell's suggestion. 13 Dec 2012. DWF.
 </PRE><P>
 <STRONG>(See setintersection.pro)</STRONG><P>
 <HR>

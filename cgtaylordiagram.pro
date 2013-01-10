@@ -498,7 +498,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
   cgPlotS, data_x, data_y, PSYM=symbol, COLOR=c_symbol, SymSize=symsize
   xy = Convert_Coord(data_x, data_y, /DATA, /TO_NORMAL)
   squib = 0.0075
-  cgText, xy[0,*] - squib, xy[1,*] + 2*squib, labels, /NORMAL, FONT=0, ALIGNMENT=0.5
+  cgText, xy[0,*], xy[1,*] + 2*squib, labels, /NORMAL, FONT=0, ALIGNMENT=0.5
   
   ; Are we producing output? If so, we need to clean up here.
   IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
@@ -550,6 +550,6 @@ END
       correlation = [0.8, 0.9, 0.65, 0.74, 0.91, 0.98, 0.85, 0.35] ; Correlations
       ref_std = 1.0                                                ; Reference standard (observed)
       stddev_max = 1.5                                             ; Standard Deviation maximum
-      cgTaylorDiagram, stddev, correlation, REF_STDDEV=ref_std, STDDEV_MAX=stddev_max, LABELS=labels, /Window
+      cgTaylorDiagram, stddev, correlation, REF_STDDEV=ref_std, STDDEV_MAX=stddev_max, LABELS=labels, /WINDOW
 
 END

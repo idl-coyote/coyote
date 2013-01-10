@@ -498,7 +498,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
   cgPlotS, data_x, data_y, PSYM=symbol, COLOR=c_symbol, SymSize=symsize
   xy = Convert_Coord(data_x, data_y, /DATA, /TO_NORMAL)
   squib = 0.0075
-  cgText, xy[0,*] - squib, xy[1,*] + 2*squib, labels, /NORMAL, FONT=0
+  cgText, xy[0,*] - squib, xy[1,*] + 2*squib, labels, /NORMAL, FONT=0, ALIGNMENT=0.5
   
   ; Are we producing output? If so, we need to clean up here.
   IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN

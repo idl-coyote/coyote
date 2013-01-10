@@ -1,63 +1,15 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;       TheMonths
+;   cgMonths
 ;
 ; PURPOSE:
-;
-;       This is a utility program for obtaining the months of the
-;       year in various string formats. Primarily used for graphic
-;       labeling and the like.
-;
-; AUTHOR:
-;       FANNING SOFTWARE CONSULTING
-;       David Fanning, Ph.D.
-;       1645 Sheely Drive
-;       Fort Collins, CO 80526 USA
-;       Phone: 970-221-0438
-;       E-mail: david@idlcoyote.com
-;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-;
-; CATEGORY:
-;
-;       Utilites
-;
-; CALLING SEQUENCE:
-;
-;       listOfMonths = theMonths()
-;
-; RETURN VALUE:
-;
-;       listOfMonths: The list of months as a string or string array,
-;                     depending upon which keywords are set.
-;
-; INPUTS:
-;
-;       index:        The index of the month you are interested in
-;                     returning. Integer from 1 to 12.
-;
-;  KEYWORDS:
-;
-;       ABBREVIATION: Set this keyword if you wish to return the months
-;                     as a three letter abbreviation.
-;
-;       ALLCAPS:      Set this keyword if you wish to return the months
-;                     in all capital letters. (Default is first letter
-;                     capitalized.)
-;
-;       FIRSTLETTER:  Set this keyword to return just the first letter
-;                     of the months.
-;
-;       LOWCASE:      Set this keyword to return all lowercase letters.
-;
-;
-; MODIFICATION HISTORY:
-;
-;       Written by David W. Fanning, 8 Nov 2007.
-;
+;   This is a utility program for obtaining the months of the year in various string formats. 
+;   It is primarily used for labeling axes on graphics plots.
 ;
 ;******************************************************************************************;
-;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2013, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -82,7 +34,59 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-FUNCTION TheMonths, index, $
+;
+;+
+; This is a utility program for obtaining the months of the year in various string formats. 
+; It is primarily used for labeling axes on graphics plots.
+;
+; :Categories:
+;    Utilities
+;    
+; :Returns:
+;    The program returns a list of months as a string or string array, depending upon 
+;    which keywords are set.
+;    
+; :Params:
+;    index: in, required, type=integer
+;         The index of the month you are interested in returning. An integer or
+;         integer array from 1 to 12.
+;       
+; :Keywords:
+;    abbreviation: in, optional, type=boolean, default=0
+;          Set this keyword if you wish to return the month as a three letter abbreviation,
+;          for example, "aug". Keywords may be used in conjunction with other keywords.
+;    allcaps: in, optional, type=boolean, default=0
+;          Set this keyword if you wish to return the month in all capital letters,
+;          for example, "AUGUST". Keywords may be used in conjunction with other keywords.
+;    firstletter: in, optional, type=boolean, default=0
+;          Set this keyword if you wish to return the month as with its first letter capitalized,
+;          for example, "August". Keywords may be used in conjunction with other keywords.
+;    lowcase: in, optional, type=boolean, default=0
+;          Set this keyword if you wish to return the month in all lower case letters,
+;          for example, "august". Keywords may be used in conjunction with other keywords.
+;         
+; :Examples:
+;    Here is how to use this program::
+;       IDL> Print, cgMonths([2,4,6], /FirstLetter, /Abbreviation)
+;            Feb Apr Jun
+;            
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning 
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Written, 8 Nov 2007 by David W. Fanning.
+;
+; :Copyright:
+;     Copyright (c) 2007-2013, Fanning Software Consulting, Inc.
+;-
+FUNCTION cgMonths, index, $
    FIRSTLETTER=firstletter, $
    ALLCAPS=allcaps, $
    ABBREVIATION=abbreviation, $

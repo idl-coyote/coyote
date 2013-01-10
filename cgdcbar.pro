@@ -134,7 +134,7 @@
 ;       
 ;          cgDisplay
 ;          cgLoadCT, 5, NCOLORS=12, BOTTOM=1
-;          cgDCBar, NCOLORS=12, BOTTOM=1, LABELS=theMonths(/Abbreviation)
+;          cgDCBar, NCOLORS=12, BOTTOM=1, LABELS=cgMonths(/Abbreviation)
 ;       
 ;       To load a 5 color vertical color bar, with the labels rotated 45 degrees::
 ;

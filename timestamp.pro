@@ -142,9 +142,9 @@ FUNCTION TimeStamp, format, $
         2:  timestamp = date + '_' + String(m, FORMAT='(I2.2)') + '_' + year + '_' + stamp
         3:  timestamp = date + String(m, FORMAT='(I2.2)') + year + '_' + stamp
         4:  timestamp = date + String(m, FORMAT='(I2.2)') + year
-        5:  timestamp = date + TheMonths(m, /ABBREVIATION) + year + '_' + stamp
-        6:  timestamp = date + TheMonths(m, /ABBREVIATION, /LOWCASE) + year + '_' + stamp
-        7:  timestamp = date + TheMonths(m, /ABBREVIATION, /ALLCAPS) + year + '_' + stamp
+        5:  timestamp = date + cgMonths(m, /ABBREVIATION) + year + '_' + stamp
+        6:  timestamp = date + cgMonths(m, /ABBREVIATION, /LOWCASE) + year + '_' + stamp
+        7:  timestamp = date + cgMonths(m, /ABBREVIATION, /ALLCAPS) + year + '_' + stamp
         8:  timestamp = String(m, FORMAT='(I2.2)') + '_' + date + '_' + year + '_' + stamp
         9:  timestamp = String(m, FORMAT='(I2.2)') + date + year + '_' + stamp        
         10: timestamp = String(m, FORMAT='(I2.2)') + date + year

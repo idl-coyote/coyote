@@ -228,7 +228,7 @@ PRO NCDF_File_Examples
         data = sObj -> GetVarData('data', COUNT=[xsize, ysize, 1], OFFSET=[0,0,j])
         cgImage, data, /KEEP, /NOINTERP
         CalDat, time[j], month, day, year
-        theDate = StrTrim(day,2) + ' ' + theMonths(month) + ' ' + StrTrim(year,2)
+        theDate = StrTrim(day,2) + ' ' + cgMonths(month) + ' ' + StrTrim(year,2)
         cgText, 0.1, 0.05, /NORMAL, 'Date: ' + theDate, COLOR='black', FONT=0
         XInterAnimate, FRAME=j, WINDOW=!D.Window
     ENDFOR

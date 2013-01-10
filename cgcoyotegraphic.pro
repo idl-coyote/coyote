@@ -92,6 +92,7 @@ FUNCTION cgCoyoteGraphic, routine
       'CGSTRETCH', $
       'CGSURF', $
       'CGSURFACE', $
+      'CGTAYLORDIAGRAM', $
       'CGTEXT', $
       'CGCONTROL', $
       'CGDELETE', $

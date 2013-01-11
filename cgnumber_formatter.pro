@@ -84,6 +84,8 @@
 ; :History:
 ;     Change History::
 ;        Written, 8 November 2012 by David W. Fanning from the retired Number_Formatter program.
+;        The algorithm I was using for numbers between 0 and 1 used a LT in the Where function to
+;            find an index. It appears this should have been a LE, instead. 11 Jan 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -122,7 +124,7 @@ FUNCTION cgNumber_Formatter, number, DECIMALS=decimals
       IF (Abs(number[j]) GT 0.0001) && (Abs(number[j]) LT 1.0) THEN BEGIN
           savedecimals = decimals
           exponents = 1. / 10.^Indgen(12)
-          index = Where(exponents LT Abs(number[j]), count)
+          index = Where(exponents LE Abs(number[j]), count)
           IF count EQ 0 THEN thisIndex = 11 ELSE thisindex = index[0]
           decimals = ((thisindex-1) + decimals)
       ENDIF

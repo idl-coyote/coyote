@@ -191,6 +191,8 @@
 ;          image for display. 18 October 2012. DWF.
 ;       Fixed a problem that prevented transparent images from be displayed with !P.Multi. 20 Oct 2012. DWF.
 ;       Provided a fix to allow transparent images in versions of IDL from IDL 6.4 and earlier. 18 Nov 2012. DWF.
+;       When reading a GeoTiff file, the map object created should be named mapCoord, not map, so that
+;          the image data ranges can be set automatically. 11 January 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -1226,7 +1228,7 @@ PRO cgImage, image, x, y, $
     IF N_Elements(filename) NE 0 THEN BEGIN
         check = Query_Tiff(filename, GEOTIFF=geo)
         IF (check EQ 1) && (Size(geo, /TNAME) EQ 'STRUCT') THEN BEGIN
-           map = cgGeoMap(filename, IMAGE=image, Palette=palette)
+           mapCoord = cgGeoMap(filename, IMAGE=image, Palette=palette)
         ENDIF ELSE BEGIN
            image = Read_Image(filename, r, g, b)
            IF N_Elements(r) NE 0 THEN palette = [[r],[g],[b]]

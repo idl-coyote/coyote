@@ -64,6 +64,9 @@
 ; 
 ; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
 ; to be installed on your machine.
+; 
+; To learn more about transparent images and cgImage see the article
+; `Working with Transparent Images and cgImage <http://www.idlcoyote.com/cg_tips/transimage.php>`. 
 ;
 ; :Categories:
 ;    Graphics
@@ -1427,17 +1430,18 @@ PRO cgImage, image, x, y, $
     
     ; If the missing_value (or missing_color) and noerase keywords are set, then 
     ; the transparent keyword should be defined and set to zero transparency.
-    IF ((Keyword_Set(noerase) && ( (N_Elements(missing_value) NE 0)) || $
-       (N_Elements(missing_color) NE 0) ) && (N_Elements(transparent) EQ 0)) THEN transparent = 0
+    IF ((N_Elements(missing_value) NE 0) || ( N_Elements(missing_color) NE 0) ) $
+      && (N_Elements(transparent) EQ 0) && (N_Elements(missing_index) EQ 0) THEN transparent = 0
 
     ; If transparent is turned on, and you are not overplotting, and you have a position in the window, then
     ; you have to adjust alphafgpos and position.
-;    IF (N_Elements(transparent) NE 0) && ~Keyword_Set(overplot) && (N_Elements(position) NE 0) THEN BEGIN
-;        IF N_Elements(alphafgpos) EQ 0 THEN BEGIN
-;             alphafgpos = position
-;             position = [0,0,1,1]
-;        ENDIF
-;    ENDIF
+    IF (N_Elements(transparent) NE 0) && ~Keyword_Set(overplot) && (N_Elements(position) NE 0) THEN BEGIN
+        IF N_Elements(alphafgpos) EQ 0 THEN BEGIN
+             alphafgpos = position
+             position = [0,0,1,1]
+             Message, 'POSITION keyword value switched to ALPHAFGPOS because TRANSPARENT keyword is set.', /Informational
+        ENDIF
+    ENDIF
     
     ; Load the color palette if you are using one.
     IF N_Elements(palette) NE 0 THEN BEGIN
@@ -1491,10 +1495,10 @@ PRO cgImage, image, x, y, $
                 IF !D.Name NE "PS" THEN BEGIN
                    alphabackgroundimage = cgSnapshot(POSITION=[0,0,1,1])
                 ENDIF ELSE Message, 'An AlphaBackgroundImage is required to create transparent images in PostScript.'
-            ENDIF 
+            ENDIF
             IF N_Elements(alphabgpos) EQ 0 THEN alphabgpos = [0,0,1,1]
             IF N_Elements(alphafgpos) EQ 0 THEN alphafgpos = [0,0,1,1]
-            IF N_Elements(position) EQ 0 THEN position=_cgimage_position
+            IF N_Elements(position) EQ 0 THEN position= [0,0,1,1]
             noerase = 1
         ENDIF ELSE BEGIN
             image = oldImage
@@ -1692,8 +1696,7 @@ PRO cgImage, image, x, y, $
        IF N_Elements(stretch) EQ 0 THEN stretch = 1
     ENDIF 
     
-    ; If you are setting the transparent keyword, then don't define an alphaFGPosition.
-    ; Use the Postion for this, later, after it has been determined.
+    ; Set default values.
     SetDefaultValue, alphafgpos, [0.0, 0.0, 1.0, 1.0]
     SetDefaultValue, alphabgpos, [0.0, 0.0, 1.0, 1.0]
     SetDefaultValue, beta, 3.0
@@ -1953,6 +1956,14 @@ PRO cgImage, image, x, y, $
                 y0 = !Y.S[1]*plotyrange[0] + !Y.S[0]
                 y1 = !Y.S[1]*plotyrange[1] + !Y.S[0]
                 position = [x0, y0, x1, y1]
+
+                IF (x0 LT 0.0) || (x1 GT 1.0) || (y0 LT 0.0) || (y1 GT 1.0) THEN BEGIN
+                    Message, 'Range of overplotted image is outside the currently established range.', /Informational
+                ENDIF
+                
+                ; Make sure the position is inside of normalized coordinates.
+                position = 0.0 > [x0, y0, x1, y1] < 1.0
+                
              ENDIF ELSE position = Float(position)
              IF N_Elements(transparent) NE 0 THEN BEGIN
                 alphafgpos = position

@@ -193,6 +193,7 @@
 ;       Provided a fix to allow transparent images in versions of IDL from IDL 6.4 and earlier. 18 Nov 2012. DWF.
 ;       When reading a GeoTiff file, the map object created should be named mapCoord, not map, so that
 ;          the image data ranges can be set automatically. 11 January 2013. DWF.
+;       Additional work to allow overplotting of transparent images. 12 Jan 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -1044,6 +1045,9 @@ END
 ;         last graphics command. If the XRange and YRange keywords are also
 ;         used, the image position is adjusted with respect to the current axes
 ;         range.  Setting this keyword also sets the NoErase keyword, if it is not currently set.
+;         It is assumed that the overplotted images fits entirely inside or is coincident with the
+;         position or range of the previous image. If not, an informational error is generated and
+;         the position is forced into the range of 0 to 1.
 ;    palette: in, optional, type=byte
 ;         Set this keyword to a 3x256 or 256x3 byte array containing the RGB color 
 ;         vectors to be loaded before the image is displayed. Such vectors can be 
@@ -1409,11 +1413,31 @@ PRO cgImage, image, x, y, $
              RETURN
     ENDIF
     
+    ; Obtain information about the size of the image.
+    void = Image_Dimensions(image, XSIZE=imgXSize, YSIZE=imgYSize)
+    
     ; Did you specify a color table index?
     TVLCT, r_start, g_start, b_start, /Get
     IF N_Elements(ctindex) NE 0 THEN BEGIN
         cgLoadCT, ctindex, Reverse=reverse, Brewer=brewer, RGB_TABLE=palette
     ENDIF
+    
+    ; If you are overplotting, the transparent keyword should be defined and set to zero transparency.
+    IF Keyword_Set(overplot) && (N_Elements(transparent) EQ 0) THEN transparent = 0
+    
+    ; If the missing_value (or missing_color) and noerase keywords are set, then 
+    ; the transparent keyword should be defined and set to zero transparency.
+    IF ((Keyword_Set(noerase) && ( (N_Elements(missing_value) NE 0)) || $
+       (N_Elements(missing_color) NE 0) ) && (N_Elements(transparent) EQ 0)) THEN transparent = 0
+
+    ; If transparent is turned on, and you are not overplotting, and you have a position in the window, then
+    ; you have to adjust alphafgpos and position.
+;    IF (N_Elements(transparent) NE 0) && ~Keyword_Set(overplot) && (N_Elements(position) NE 0) THEN BEGIN
+;        IF N_Elements(alphafgpos) EQ 0 THEN BEGIN
+;             alphafgpos = position
+;             position = [0,0,1,1]
+;        ENDIF
+;    ENDIF
     
     ; Load the color palette if you are using one.
     IF N_Elements(palette) NE 0 THEN BEGIN
@@ -1465,12 +1489,12 @@ PRO cgImage, image, x, y, $
             image = transImage
             IF (N_Elements(alphabackgroundimage) EQ 0) THEN BEGIN
                 IF !D.Name NE "PS" THEN BEGIN
-                   alphabackgroundimage = cgSnapshot(POSITION=_cgimage_position)
+                   alphabackgroundimage = cgSnapshot(POSITION=[0,0,1,1])
                 ENDIF ELSE Message, 'An AlphaBackgroundImage is required to create transparent images in PostScript.'
             ENDIF 
-            alphabgpos = [0,0,1,1]
+            IF N_Elements(alphabgpos) EQ 0 THEN alphabgpos = [0,0,1,1]
             IF N_Elements(alphafgpos) EQ 0 THEN alphafgpos = [0,0,1,1]
-            position=_cgimage_position
+            IF N_Elements(position) EQ 0 THEN position=_cgimage_position
             noerase = 1
         ENDIF ELSE BEGIN
             image = oldImage
@@ -1485,12 +1509,14 @@ PRO cgImage, image, x, y, $
              mapCoord -> GetProperty, XRANGE=plotxrange 
              save = 1
        ENDIF 
+       IF N_Elements(plotxrange) EQ 0 THEN plotxrange = [0, imgXSize]
     ENDIF
     IF N_Elements(plotyrange) EQ 0 THEN BEGIN
        IF Obj_Valid(mapCoord) THEN BEGIN
             mapCoord -> GetProperty, YRANGE=plotyrange 
             save = 1
        ENDIF 
+       IF N_Elements(plotyrange) EQ 0 THEN plotyrange = [0, imgYSize]
     ENDIF 
     
     ; Are we doing some kind of output?
@@ -1708,7 +1734,7 @@ PRO cgImage, image, x, y, $
     IF N_Elements(minusOne) EQ 0 THEN minusOne = 0
     minusOne = Keyword_Set(minusOne)
         
-    IF N_Elements(background) EQ 0 THEN background = 'background'
+    IF N_Elements(background) EQ 0 THEN background = 'white'
     IF Size(background, /TNAME) EQ 'STRING' THEN BEGIN
         IF StrUpCase(background) EQ 'BACKGROUND' THEN BEGIN
            IF N_Elements(acolorname) EQ 0 THEN acolorname = 'opposite'
@@ -1878,12 +1904,21 @@ PRO cgImage, image, x, y, $
           TVLCT, rr, gg, bb
        ENDIF ELSE BEGIN
           IF Keyword_Set(overplot) THEN BEGIN
+          
              IF (N_Elements(plotxrange) NE 0) && (N_Elements(plotyrange) NE 0) THEN BEGIN
                 x0 = !X.S[1]*plotxrange[0] + !X.S[0]
                 x1 = !X.S[1]*plotxrange[1] + !X.S[0]
                 y0 = !Y.S[1]*plotyrange[0] + !Y.S[0]
                 y1 = !Y.S[1]*plotyrange[1] + !Y.S[0]
                 position = [x0, y0, x1, y1]
+                
+                IF (x0 LT 0.0) || (x1 GT 1.0) || (y0 LT 0.0) || (y1 GT 1.0) THEN BEGIN
+                    Message, 'Range of overplotted image is outside the currently established range.', /Informational
+                ENDIF
+                
+                ; Make sure the position is inside of normalized coordinates.
+                position = 0.0 > [x0, y0, x1, y1] < 1.0
+                
              ENDIF ELSE BEGIN
                 position = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
              ENDELSE
@@ -1919,6 +1954,10 @@ PRO cgImage, image, x, y, $
                 y1 = !Y.S[1]*plotyrange[1] + !Y.S[0]
                 position = [x0, y0, x1, y1]
              ENDIF ELSE position = Float(position)
+             IF N_Elements(transparent) NE 0 THEN BEGIN
+                alphafgpos = position
+                position = [0,0,1,1]
+             ENDIF
           ENDIF
        ENDELSE
     ENDELSE

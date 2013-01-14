@@ -232,6 +232,7 @@
 ;        PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2001. DWF.
 ;        Now allowing the user to draw in the "background" color, if the COLOR or AXISCOLOR is "BACKGROUND". 19 March 2012. DWF.
 ;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
+;        Lost the XTitle and YTitle keywords when doing shaded surfaces. 15 December 2012. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010, Fanning Software Consulting, Inc.
@@ -770,7 +771,8 @@ PRO cgSurf, data, x, y, $
         ENDELSE
         Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
             /NODATA, /NOERASE, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
-            FONT=font, CHARSIZE=charsize, SKIRT=skirt, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz 
+            FONT=font, CHARSIZE=charsize, SKIRT=skirt, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz, $
+            XTitle=xtitle, YTitle=ytitle
             
         ; Have to repair the title, too.
         IF N_Elements(title) NE 0 THEN BEGIN

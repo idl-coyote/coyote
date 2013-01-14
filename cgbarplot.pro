@@ -231,9 +231,10 @@
 ;         Small problem with setting range keywords and with extraneous marks on the bar plot axis fixed. 6 Feb 2012. DWF.
 ;         Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;         Fixed a typo that was interfering with the YTITLE keyword. 3 Oct 2012. DWF.
+;         Fixed a bug in the interaction of the NOERASE and OVERPLOT keywords. 14 Jan 2013. DWF.
 ;         
 ; :Copyright:
-;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
 ;-
 PRO cgBarPlot, values, $
     ADDCMD=addcmd, $
@@ -575,9 +576,9 @@ PRO cgBarPlot, values, $
     ENDELSE
 
    ; If you are creating your own plot, do it here without data.
-    IF (overplot EQ 0) THEN BEGIN              ;Create new plot, no data
+    IF (overplot EQ 0) || (noerase EQ 1) THEN BEGIN  ;Create new plot, no data
         cgPlot,[values],/nodata,title=title,xtitle=xtitle,ytitle=ytitle, $
-           noerase=overplot,xrange=xrange,yrange=yrange,xticks=xticks, $
+           noerase=noerase,xrange=xrange,yrange=yrange,xticks=xticks, $
            xtickname=xtickname,yticks=yticks,ytickname=ytickname, $
            xstyle=xstyle,ystyle=ystyle,/data,position=position, $
            background=background, axiscolor=axiscolor,_strict_extra=extra, $

@@ -418,10 +418,11 @@ PRO cgTaylorDiagram, stddev, correlation, $
 
   angles = FltArr(nticks)
   text_ang = FltArr(nticks)
-  ;Plotting TICKS:
+  
+  ; Plotting correlation lines and ticks.
   FOR i=0,nticks-1 DO BEGIN
-    
-    cgPlotS, [long_x_right[i], long_x_left[i]], [long_y_right[i], long_y_left[i]], COLOR=c_correlation
+    cgPlotS, [long_x_right[i], long_x_left[i]], [long_y_right[i], long_y_left[i]], $
+        COLOR=((i EQ 0) ? 'black' : c_correlation)
     cgPlotS, [select_outerx[i], select_shortx[i]], [select_outery[i], select_shorty[i]]
     
     ;the following IF statement is here because for i=0,long_x_right[i]=0.0
@@ -445,7 +446,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
   cgText, select_outerx[nticks-1], select_outery[nticks-1], ' 0.95', ORIENTATION=short_last_ang, $
        CLIP=0, COLOR=c_correlation, CHARSIZE=cgDefCharsize()*0.85
 
-  cgText, stddev_max, y[-1], ' 1.0', CHARSIZE=cgDefCharsize()*0.85, CLIP=0, COLOR=c_correlation
+  cgText, stddev_max, y[N_Elements(y)-1], ' 1.0', CHARSIZE=cgDefCharsize()*0.85, CLIP=0, COLOR=c_correlation
   
   
   ;Extra ticks between correlation values 0.9 and 1:

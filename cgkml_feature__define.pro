@@ -61,6 +61,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 28 October 2012 by David W. Fanning.
+;        Fixed typo in spelling of N_Elements. 16 Jan 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -159,7 +160,7 @@ FUNCTION cgKML_Feature::INIT, $
   IF N_Elements(phonenumber) NE 0 THEN self.phonenumber = phonenumber
   IF N_Elements(placename) NE 0 THEN self.placename = placename
   IF N_Elements(snippet) NE 0 THEN BEGIN
-     CASE N_Elemetns(snippet) OF
+     CASE N_Elements(snippet) OF
         1: self.snippet[0] = snippet
         2: self.snippet = snippet
         ELSE: Message, 'The SNIPPET attribute is restricted to two lines of input.'

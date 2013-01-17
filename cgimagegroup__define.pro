@@ -31,7 +31,7 @@ FUNCTION cgImageGroup::Init, image, FILENAME=filename, REVERSE=reverse
    ; Is the parameter a string?
    IF Size(image, /TNAME) EQ 'STRING' THEN BEGIN
        filename = image
-       Udefine, image
+       Undefine, image
        ok = Query_Image(filename, info)
        IF ~ok THEN Message, 'Image file cannot be read with READ_IMAGE.'
        channels = info.channels

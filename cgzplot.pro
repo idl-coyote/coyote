@@ -37,13 +37,37 @@
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
 ;+
-;   This program creates a "zoomable" line plot in an interactive window. The user can
-;   zoom into or out of the plot. Once a plot is zoomed, the user can then pan the plot
-;   in both the X and Y directions. See the operating instructions for how to interact
-;   with the line plot.
+;  This program creates a "zoomable" line plot in an interactive window. The user can
+;  zoom into or out of the plot. Once a plot is zoomed, the user can then pan the plot
+;  in both the X and Y directions. See the operating instructions for how to interact
+;  with the line plot.
 ;   
 ; .. image:: cgzplot.png
 ; 
+;  Operating Instructions--
+;  
+;  Use the LEFT mouse button to zoom the plot and the RIGHT mouse button to pan the plot.
+;  
+;  If you click and drag inside the plot axes, you will create a rubber band box. Select the
+;  portion of data you wish to zoom into. The zoom will occur in both the X and Y directions.
+;  If you wish to zoom the plot all the way back out, simply click and release the LEFT mouse
+;  button inside the plot axes without moving the mouse.
+;  
+;  Once you are zoomed into a plot, you can adjust the zoom by clicking the LEFT mouse button
+;  outside the plot axes. If you click the mouse below the plot, you will cause the X axis to
+;  zoom out of the plot by the zoomFactor amount (normally 5% of the current range of the axis).
+;  If you wish to zoom the X axis into the plot, simply click above in the region of the window
+;  above the plot. Click below the plot to zoom out, above the plot to zoom in. Similarly, you 
+;  can adjust the zoom on the Y axis. Clicking to the left of the plot zooms the Y axis out, 
+;  while clicking to the right of the plot zooms the Y axis in.
+;  
+;  If you are zoomed into the plot, you can pan to different locations in the plot by using
+;  the RIGHT mouse button. Hold and drag the RIGHT mouse button inside the plot axes. The
+;  entire plot will pan in both the X and Y directions.
+;  
+;  File output requires that ImageMagick and GhostScript be installed on your machine. Note
+;  that exact axis scaling is always in effect.
+;
 ; :Params:
 ;    x: in, required, type=any
 ;         If X is provided without Y, a vector representing the dependent values to be 

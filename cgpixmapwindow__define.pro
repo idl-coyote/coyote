@@ -64,6 +64,8 @@
 ;        Created from cgCmdWindow, 7 February 2012. DWF.
 ;        Problem with the ASPECT keyword, which should have been named WASPECT. 7 Oct 2012. DWF.
 ;        Added WDestroyObjects keyword to destroy objects parameters, if needed. 11 November 2012. DWF.
+;        Confusion trying to change WBackground keyword to Background. Changed it back. Identical to ASPECT
+;           problem described above. 18 Jan 2013. DWF.
 ;-
 
 ;+
@@ -86,9 +88,6 @@
 ;       to the names "P1", "P2", "P3" and "P4"to correspond to the equivalent positional
 ;       parameter. See http://www.idlcoyote.com/cg_tips/kwexpressions.php and the 
 ;       examples below for details on how to use this keyword.
-;    background: in, optional, type=varies, default=!P.Background
-;       The background color of the window. Specifying a background color 
-;       automatically sets the WErase keyword.
 ;    command: in, required, type=string
 ;       The graphics procedure command to be executed. This parameter
 ;       must be a string and the the command must be a procedure. Examples
@@ -134,6 +133,9 @@
 ;       The aspect ratio is calculated as (ysize/xsize). Must be a float value.
 ;       If this keyword is set, the window will maintain this aspect ratio,
 ;       even when it is resized.
+;    wbackground: in, optional, type=varies, default=!P.Background
+;       The background color of the window. Specifying a background color 
+;       automatically sets the WErase keyword.
 ;    wdestroyobjects: in, optional, type=boolean, default=0
 ;       If this keyword is set, and any of the input parameters p1-p4 is an object,
 ;       the object parameter will be destroyed when the window is destroyed.
@@ -147,7 +149,6 @@
 FUNCTION cgPixmapWindow::INIT, parent, $
    AltPS_Keywords=altps_Keywords, $ ; A structure of PostScript alternative keywords and values.
    AltPS_Params=altps_Params, $     ; A structure of PostScript alternative parameters and values. 
-   Background = background, $       ; The background color. Set to !P.Background by default.
    Command=command, $               ; The graphics "command" to execute.
    EraseIt = eraseit, $             ; Set this keyword to erase the display before executing the command.
    Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
@@ -163,6 +164,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
    Storage=storage, $               ; A storage pointer location. Used like a user value in a widget.
    Visible=visible, $               ; Set this keyword to make the pixmap visible.
    WAspect = waspect, $             ; Set the window aspect ratio to this value.
+   WBackground = wbackground, $     ; The background color. Set to !P.Background by default.
    WDestroyObjects=wdestroyobjects, $ ; Set this keyword to destroy object parameters upon exit.
    WXSize = xsize, $                ; The X size of the cgWindow graphics window in pixels. By default: 400.
    WYSize = ysize, $                ; The Y size of the cgWindow graphics window in pixels. By default: 400.
@@ -250,8 +252,8 @@ FUNCTION cgPixmapWindow::INIT, parent, $
     SetDefaultValue, waspect, d_aspect 
     SetDefaultValue, wheel_events, 0, /Boolean
     IF N_Elements(storage) NE 0 THEN self.storage = Ptr_New(storage)
-    IF N_Elements(background) EQ 0 THEN BEGIN
-        background = d_background
+    IF N_Elements(wbackground) EQ 0 THEN BEGIN
+        wbackground = d_background
         IF N_Elements(command) EQ 0 THEN eraseit = 1
         IF (N_Elements(command) NE 0) && cgCoyoteGraphic(command) THEN eraseit = 1
     ENDIF ELSE BEGIN
@@ -314,7 +316,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
     !P.Color = Temporary(tempColor)
     
     ; Load object properties.
-    self.background = Ptr_New(background)
+    self.background = Ptr_New(wbackground)
     IF N_Elements(cmdDelay) NE 0 THEN self.delay = cmdDelay ELSE self.delay = d_delay
     self.eraseIt = eraseIt
     IF N_Elements(multi) NE 0 THEN BEGIN
@@ -350,14 +352,14 @@ FUNCTION cgPixmapWindow::INIT, parent, $
        WSet, currentWindow
     ENDIF ELSE WSet, -1
     
+    ; Make the pixmap visible, if needed.
+    IF visible THEN Widget_Control, self.tlb, MAP=1
     Widget_Control, self.tlb, /Realize, Set_UValue=self
     XManager, 'cgwindow', self.tlb, /No_Block, $
             Event_Handler='cgCmdWindow_Dispatch_Events', $
             Cleanup = 'cgCmdWindow_Cleanup', $
             Group_Leader=group_leader
  
-    ; Make the pixmap visible, if needed.
-    IF visible THEN Widget_Control, self.tlb, MAP=1
     RETURN, 1
 END
   

@@ -310,6 +310,7 @@
 ;        Added COLOR keyword. 19 Sept 2012. DWF.
 ;        Now restoring previous plot parameters after drawing cumulative probability axis, so as not
 ;           to interfere with subsequent overplotting. 27 Sept 2012. DWF.
+;        Changed the way the "ystart" variable is set on log plots. 21 Jan 2013. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
@@ -821,7 +822,7 @@ PRO cgHistoplot, $                  ; The program name.
 
    ; Calculate the range of the plot output.
    IF N_Elements(min_value) EQ 0 THEN BEGIN
-      IF Keyword_Set(log) THEN min_value = 1 ELSE min_value = 0
+      IF Keyword_Set(log) THEN min_value = 1e-3 ELSE min_value = 0
    ENDIF
    IF N_Elements(max_value) EQ 0 THEN BEGIN
       IF Keyword_Set(log) $
@@ -960,14 +961,14 @@ PRO cgHistoplot, $                  ; The program name.
             IF Keyword_Set(rotate) THEN BEGIN
                y = [start, start, endpt, endpt, start]
                IF log THEN BEGIN
-                   x = [1, histdata[j], histdata[j], 1, 1]
+                   x = [!X.CRange[0], histdata[j], histdata[j], !X.CRange[0], !X.CRange[0]]
                ENDIF ELSE BEGIN
                    x = [0, histdata[j], histdata[j], 0, 0]
                ENDELSE
             ENDIF ELSE BEGIN
                x = [start, start, endpt, endpt, start]
                IF log THEN BEGIN
-                  y = [1, histdata[j], histdata[j], 1, 1]
+                  y = [!Y.CRange[0], histdata[j], histdata[j], !Y.CRange[0], !Y.CRange[0]]
                ENDIF ELSE BEGIN
                   y = [0, histdata[j], histdata[j], 0, 0]
                ENDELSE
@@ -1083,7 +1084,9 @@ PRO cgHistoplot, $                  ; The program name.
         start = xrange[0] + binsize
     ENDELSE
     endpt = start + binsize
-    If log THEN ystart = 1 ELSE ystart = 0
+    IF log THEN BEGIN
+       IF Keyword_Set(rotate) THEN ystart = 10^!X.CRange[0] ELSE ystart = 10^!Y.CRange[0] 
+    ENDIF ELSE ystart = 0
     jend = N_Elements(histdata)-1
     FOR j=0,jend DO BEGIN
         IF Keyword_Set(outline) THEN BEGIN

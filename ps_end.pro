@@ -183,6 +183,7 @@
 ;            two places. 15 Oct 2012. DWF.
 ;        Added a check for ImageMagick and an informational message for raster operations. 4 Nov 2012. DWF.
 ;        Fixed a problem in which the NOMESSAGE keyword was not getting passed along to cgPS2Raster. 5 Nov 2012. DWF.
+;        Fixed a problem where I was not passing the PORTRAIT keyword to cgPS2Raster properly. 22 Jan 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -248,7 +249,8 @@ PRO PS_END, $
             cgFixPS, ps_struct.filename, PAGETYPE=ps_struct.pagetype, SUCCESS=success, QUIET=1
             IF success EQ 0 THEN Print, 'Encountered problem fixing landscape PostScript file. Proceeding...'
         ENDIF
-   ENDIF
+        portrait = 0
+   ENDIF ELSE portrait = 1
    
    ; Need to convert the PostScript to a raster file?
    needRaster = 0

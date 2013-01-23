@@ -79,9 +79,10 @@
 ;       Added new JPEG, DICOM, TIFF, and PGN images. 30 Oct 2002. DWF.
 ;       Modified old program units to work with IDL strict arrays. 29 June 2003. DWF
 ;       Yikes! Somehow lost the event handler for the CANCEL button! Fixed. 1 Jan 2012. DWF.
+;       Added 2D Combined Gaussian data set. Renamed utility routines. 22 Jan 2013. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
 ;-
 ;
 ; NAME:
@@ -125,11 +126,11 @@
 ;    help: in, optional, type=boolean, default=0
 ;        Set this keyword to print function syntax help.
 ;-
-    function smooth2, i, w, help=hlp
+    function cgdemodata_smooth2, i, w, help=hlp
 
     if (n_params(0) lt 2) or keyword_set(hlp)  then begin
       print,' Do multiple smoothing. Gives near Gaussian smoothing.'
-      print,' b = smooth2(a, w)'
+      print,' b = cgdemodata_smooth2(a, w)'
       print,'   a = array to smooth (1,2, or 3-d).  in'
       print,'   w = smoothing window size.          in'
       print,'   b = smoothed array.                 out'
@@ -202,10 +203,10 @@
 ;    seed: in, optional
 ;        Sets the random seed for repeatable results.
 ;-
-    function makez, nx, ny, w, help=hlp, lastseed=lseed, periodic=per, seed=seed0
+    function cgdemodata_makez, nx, ny, w, help=hlp, lastseed=lseed, periodic=per, seed=seed0
       
 
-        common makez_com, seed
+        common cgdemodata_makez_com, seed
     ;-----------------------------------------------------------------
     ;   Must store seed in common otherwise it is undefined
     ;   on entry each time and gets set by the clock but only
@@ -214,7 +215,7 @@
 
     if keyword_set(hlp) then begin
       print,' Make simulated 2-d data.  Useful for software development.'
-      print,' data = makez( nx, ny, w)'
+      print,' data = cgdemodata_makez( nx, ny, w)'
       print,'   nx, ny = size of 2-d array to make.                   in'
       print,'   w = smoothing window size (def = 5% of sqrt(nx*ny)).  in'
       print,'   data = resulting data array (def = undef).            out'
@@ -248,7 +249,7 @@
       r[ntx-2*lo,0] = r[0:2*lo-1,*] ; Copy part of random data.
       r[0,nty-2*lo] = r[*,0:2*lo-1]
     endif
-    s = smooth2(r,w)        ; Smooth.
+    s = cgdemodata_smooth2(r,w)        ; Smooth.
     s = s[lo:hix, lo:hiy]       ; Trim edge effects.
     s = s - min(s)          ; Normalize.
     s = s/max(s)
@@ -314,10 +315,10 @@
 ;    seed: in, optional
 ;        Sets the random seed for repeatable results.
 ;-
-    function makey, n, w, seed=seed0, lastseed=lseed, $
+    function cgdemodata_makey, n, w, seed=seed0, lastseed=lseed, $
       periodic=per, help=hlp
 
-        common makey_com, seed
+        common cgdemodata_makey_com, seed
     ;-----------------------------------------------------------------
     ;   Must store seed in common otherwise it is undefined
     ;   on entry each time and gets set by the clock but only
@@ -326,7 +327,7 @@
 
     if keyword_set(hlp) then begin
       print,' Make simulated data.  Useful for software development.'
-      print,' data = makey( n, w)'
+      print,' data = cgdemodata_makey( n, w)'
       print,'   n = number of data values to make.                in'
       print,'   w = smoothing window size (def = 5% of n).        in'
       print,'   data = resulting data array (def = undef).        out'
@@ -357,7 +358,7 @@
     if keyword_set(per) then begin  ; Want periodic data.
       r[nt-2*lo] = r[0:2*lo-1]  ; Copy part of random data.
     endif
-    s = smooth2(r,w)        ; Smooth.
+    s = cgdemodata_smooth2(r,w)        ; Smooth.
     s = s[lo:hi]            ; Trim edge effects.
     s = s - min(s)          ; Normalize.
     s = s/max(s)
@@ -366,6 +367,72 @@
 
     return, s
     end
+
+;
+; NAME: 
+;  gauss2d
+; PURPOSE: 
+;  Compute a two dimensional gaussian within an array.
+; DESCRIPTION:
+; CATEGORY:
+;  Mathematical
+; CALLING SEQUENCE:
+;  pro gauss2d,nx,ny,x,y,fwhm,array
+; INPUTS:
+;  nx   - X size of output array
+;  ny   - Y size of output array
+;  x    - X location of gaussian in array
+;  y    - Y location of gaussian in array
+;  fwhm - Full width at half-maximum of gaussian.
+; OPTIONAL INPUT PARAMETERS:
+; KEYWORD INPUT PARAMETERS:
+; OUTPUTS:
+;  array - Result array with gaussian inserted.
+; KEYWORD OUTPUT PARAMETERS:
+; COMMON BLOCKS:
+; SIDE EFFECTS:
+; RESTRICTIONS:
+; PROCEDURE:
+; MODIFICATION HISTORY:
+;  94/04/07, Written by Marc W. Buie, Lowell Observatory
+;
+;+
+; Creates a two-dimensions Gaussian data set.
+;
+; :Params:
+;     nx: in, required, type=integer
+;        The X size of the output array.
+;     ny: in, required, type=integer
+;        The Y size of the output array.
+;     x: in, required, type=integer
+;        The X location of the Gaussian in the array.   
+;     y: in, required, type=integer
+;        The Y location of the Gaussian in the array.   
+;     fwhm: in, required, type=float
+;        The full width at half-maximum of Gaussian.
+;     array: out, optional, type=float
+;        The output array containing the Gaussian.
+;-
+pro cgdemodata_gauss2d,nx,ny,x,y,fwhm,array
+
+   ehwd = fwhm/2.0/sqrt(alog(2.0))
+
+   ix = findgen(nx)
+   iy = findgen(ny)
+   onex = replicate(1.0,nx)
+   oney = replicate(1.0,ny)
+
+   xarr = ((ix-x)/ehwd)^2 # oney
+   yarr = onex # ((iy-y)/ehwd)^2
+
+   rsq = xarr + yarr
+   array = fltarr(nx,ny)
+
+   ; Protection against underflow in exp call.
+   big = where(rsq le 87.3, count)
+   if count ne 0 then array[big] = exp(-rsq[big])
+
+end
 
 
 ;+
@@ -402,15 +469,15 @@ ENDIF
 CASE number OF
 
    0: BEGIN
-      data = MAKEY(101, 5, Seed=1L) * 30.0
+      data = cgdemodata_makey(101, 5, Seed=1L) * 30.0
       END
 
    1: BEGIN
-      data = MAKEZ(41, 41, 8, Seed=-2L)  * 1550
+      data = cgdemodata_makez(41, 41, 8, Seed=-2L)  * 1550
       END
 
    2: BEGIN
-      data = MAKEZ(41, 41, 10, Seed=-5L)
+      data = cgdemodata_makez(41, 41, 10, Seed=-5L)
       data = Scale_Vector(data, 0, 60)
       END
 
@@ -542,14 +609,14 @@ CASE number OF
         ; Random 1D vector of 101 elements.
 
      scale = RandomU(seed, 1) * 100
-     data = Scale_Vector(MAKEY(101, 5, Seed=seed) * scale[0], 0, 100)
+     data = Scale_Vector(cgdemodata_makey(101, 5, Seed=seed) * scale[0], 0, 100)
      END
 
  17: BEGIN
 
         ; Random 401 by 401 array.
 
-     data = MAKEZ(401, 401, 41, Seed=seed)
+     data = cgdemodata_makez(401, 401, 41, Seed=seed)
      data = Hist_Equal(data)
      data = BytScl(data, Top=!D.Table_Size-1)
 
@@ -592,6 +659,13 @@ CASE number OF
      file = FILEPATH(SUBDIR=['examples', 'data'], 'mineral.png')
      data = Read_PNG(file)
      END
+     
+25: BEGIN ; 2D Gaussian.
+    cgDemoData_Gauss2D, 101, 101, 70, 70, 20., array1
+    cgDemoData_Gauss2D, 101, 101, 20, 20, 90., array2
+    data = (array1 + array2) * 10.
+    END
+
 
 ELSE: ok = Dialog_Message("No data set with that index number. Sorry.")
 
@@ -659,7 +733,7 @@ IF N_Params() EQ 1 THEN BEGIN
    IF type EQ 0 THEN Message, 'Supplied argument is undefined.'
    IF type GT 5 THEN Message, 'Supplied argument must be a number.'
    selection = selection - 1
-   selection = 0 > selection < 24
+   selection = 0 > selection < 25
    data = cgDemoData_ReadData(selection)
    RETURN, data
 ENDIF
@@ -711,12 +785,11 @@ ENDIF ELSE BEGIN
             '22. Muscle (JPEG 652-by-444 2D BYTE array)', $
             '23. River Delta (TIFF 786-by-512 2D BYTE array)', $
             '24. MRI of Knee (DICOM 256-by-256 2D INT array)', $
-            '25. Mineral Micrograph (PNG 288-by-216 2D BYTE array)']
+            '25. Mineral Micrograph (PNG 288-by-216 2D BYTE array)', $
+            '26. 2D Combined Gaussian (101-by-101 FLOAT array)']
 
-
-
-   indexValue = IndGen(25)
-   listsize = 25
+   indexValue = IndGen(N_Elements(value))
+   listsize = N_Elements(value)
    title = 'Select Data Set...'
 ENDELSE
 

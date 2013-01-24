@@ -68,6 +68,10 @@
 ;         Set to indicate the polygon vertices are in device coordinates.
 ;     normal: in, optional, type=boolean, default=0
 ;         Set to indicate the polygon vertices are in normalized coordinates.
+;     position: in, optional, type=float
+;         Set to the normal four-element normalized position array for locating 
+;         a rectangular region in a graphics window. If this keyword is used, the
+;         x and y parameters are constructed from this position.
 ;     window: in, optional, type=boolean, default=0
 ;         Set this keyword to add the command to the current cgWindow application.
 ;     _ref_extra: in, optional, type=appropriate
@@ -98,14 +102,16 @@
 ;        Added WINDOW keyword. 24 Jan 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
+;        Added a POSITION keyword to allow setting the color position in a graphics window. 24 Jan 2013. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
 ;-
 PRO cgColorFill, x, y, z, $
     COLOR=color, $
     NORMAL=normal, $
     DEVICE=device, $
+    POSITION=position, $
     WINDOW=window, $
      _REF_EXTRA=extra
 
@@ -120,7 +126,7 @@ PRO cgColorFill, x, y, z, $
     ENDIF
 
     ; Did user pass parameters?
-    IF N_Params() EQ 0 THEN BEGIN
+    IF (N_Params() EQ 0) && (N_Elements(position) EQ 0) THEN BEGIN
         Print, 'USE SYNTAX: cgColorFill, x, y, [z]'
         RETURN
     ENDIF
@@ -132,6 +138,7 @@ PRO cgColorFill, x, y, z, $
             COLOR=color, $
             NORMAL=normal, $
             DEVICE=device, $
+            POSITION=position, $
             ADDCMD=1, $
             _EXTRA=extra
             
@@ -144,6 +151,14 @@ PRO cgColorFill, x, y, z, $
     ; We are going to draw in decomposed color, if possible.
     SetDecomposedState, 1, Current=currentState
 
+    ; Use position to set up vectors?
+    IF N_Elements(position) NE 0 THEN BEGIN
+       p = position
+       x = [p[0], p[0], p[2], p[2], p[0]]
+       y = [p[1], p[3], p[3], p[1], p[1]]
+       normal = 1
+    ENDIF
+    
     ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
     IF (currentState EQ 0) THEN BEGIN
        IF Size(color, /TNAME) EQ 'LONG' THEN color = Fix(color)

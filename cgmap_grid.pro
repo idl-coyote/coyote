@@ -73,6 +73,7 @@
 ;        Removed some old code that was used to correct latitude and longitude values. No longer needed,
 ;            I hope, with the new cgGRID keyword. 3 Jan 2013. 
 ;        Corrected bug in variable spelling that affect LONDELTA and LATDELTA keywords. 6 Jan 2013. DWF.
+;        Lost a piece of code that allows longitude box axes. Added back in. 23 Jan 2013. DWF.
 ;            
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -970,21 +971,21 @@ PRO cgMap_Grid, $
               polylines = -1
               IF (hasMapObj) THEN BEGIN
               
-;                     ; Added this because if there is not a point in the longitude vector
-;                     ; that is inside our actual data range, then the line can be drawn
-;                     ; at the wrong place. I don't really understand why. It may have something
-;                     ; to do with a stale map structure.
-;                     mapObj -> GetProperty, XRANGE=xrange, YRANGE=yrange
-;                     thisMapStructure = mapObj -> GetMapStruct()
-;                     ll = Map_Proj_Inverse(xrange, yrange, MAP_STRUCTURE=thisMapStructure)
-;                     lonii = Reform(ll[0,*])
-;                     uv = MAP_PROJ_FORWARD(lonii, REPLICATE(lat, N_ELEMENTS(lonii)), $
-;                          MAP_STRUCTURE=thisMapStruct)
-;              ENDIF ELSE BEGIN
+                     ; Added this because if there is not a point in the longitude vector
+                     ; that is inside our actual data range, then the line can be drawn
+                     ; at the wrong place. I don't really understand why. It may have something
+                     ; to do with a stale map structure.
+                     mapObj -> GetProperty, XRANGE=xrange, YRANGE=yrange
+                     thisMapStructure = mapObj -> GetMapStruct()
+                     ll = Map_Proj_Inverse(xrange, yrange, MAP_STRUCTURE=thisMapStructure)
+                     lonii = Reform(ll[0,*])
+                     uv = MAP_PROJ_FORWARD(lonii, REPLICATE(lat, N_ELEMENTS(lonii)), $
+                          MAP_STRUCTURE=thisMapStruct)
+              ENDIF ELSE BEGIN
                        uv = MAP_PROJ_FORWARD(loni, REPLICATE(lat, N_ELEMENTS(loni)), $
                           MAP_STRUCTURE=thisMapStruct)
-;              ENDELSE
-              ENDIF
+              ENDELSE
+
               ; This line has been modified by DWF to fix a bug in MAP_PROJ_FORWARD that
               ; screws up lines near the poles.
               polylines = [N_Elements(loni), Indgen(N_Elements(loni))]

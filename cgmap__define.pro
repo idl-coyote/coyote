@@ -1328,6 +1328,7 @@ PRO cgMap::LatLonLabels, $
     ; The values might need to be sorted.
     lats = lats[Sort(lats)]
     lons = lons[Sort(lons)]
+    lons = lons - (LONG(lons )/180)*360.0
     
     ; Labels should be near the center.
     index = N_Elements(lons) / 2

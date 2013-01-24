@@ -690,13 +690,13 @@ PRO cgMap_Grid, $
   ; Determine the number of lons and the lon array
   ;
   if n_elements(lons) eq 0 then begin
-      n_lons = 1+fix((lonmax-lonmin) / latdelta)
-      longitudes = lonmin - (lonmin mod latdelta) + findgen(n_lons) * latdelta
+      n_lons = 1+fix((lonmax-lonmin) / londelta)
+      longitudes = lonmin - (lonmin mod londelta) + findgen(n_lons) * londelta
   endif else if n_elements(lons) eq 1 then begin
-      i0 = ceil((lonmin - lons[0]) / float(latdelta)) ;First tick
-      i1 = floor((lonmax - lons[0]) / float(latdelta)) ;Last tick
+      i0 = ceil((lonmin - lons[0]) / float(londelta)) ;First tick
+      i1 = floor((lonmax - lons[0]) / float(londelta)) ;Last tick
       n_lons = i1 - i0 + 1 > 1
-      longitudes = (findgen(n_lons) + i0) * latdelta + lons[0]
+      longitudes = (findgen(n_lons) + i0) * londelta + lons[0]
   endif else begin
       n_lons=n_elements(lons)
       longitudes=lons

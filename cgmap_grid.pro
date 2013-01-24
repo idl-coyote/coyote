@@ -101,7 +101,7 @@ function cgMap_Grid_Incr, span
     WHILE t lt 5 DO BEGIN 
        t = t * 10 & ipow = ipow +1 
     ENDWHILE
-    increments = [ 1., 2., 4., 5., 10., 15., 30., 45.]
+    increments = [ 0.1, 1., 2., 4., 5., 10., 15., 30., 45.]
     i = 0
     WHILE t gt (increments[i] * 10) DO i = i + 1
     t = increments[i] / 10^ipow
@@ -1017,7 +1017,7 @@ PRO cgMap_Grid, $
               k = 0
               dx = (xw[1] - xw[0]) * 0.01
               while ~finite(boxpos[i,j,1]) && abs(k) lt 3 do begin
-                  boxpos[i, j, 1] = cgMap_Grid_solve( $
+                  boxpos[i, j, 1] = cgMap_Grid_Solve( $
                       [xw[j]+dx*k, yww[0]], $
                       [xw[j]+dx*k, yww[1]], 1, lat, $
                       MAP_STRUCTURE=thisMapStruct)

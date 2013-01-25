@@ -4,7 +4,7 @@
 ;   cgGoogleMapWidget
 ;
 ; PURPOSE:
-;   This is the driver for the cgGoggleMapWidget object, which is a compound widget
+;   This is the driver for the cgGoogleMapWidget object, which is a compound widget
 ;   object that obtains a Google static map from Google Maps and displays it in the
 ;   program's draw widget window. It can be used either as a stand-alone program or
 ;   to create a map image in draw widget in a larger widget program.
@@ -38,7 +38,7 @@
 ;******************************************************************************************;
 ;
 ;+
-; This is the driver for the cgGoggleMapWidget object, which is a compound widget
+; This is the driver for the cgGoogleMapWidget object, which is a compound widget
 ; object that obtains a Google static map from Google Maps and displays it in the
 ; program's draw widget window. It can be used either as a stand-alone program or
 ; to create a map image in draw widget in a larger widget program.
@@ -47,7 +47,7 @@
 ; more detail here: https://developers.google.com/maps/documentation/staticmaps/. The 
 ; program works by building a URL for a map image. A connection to the Internet is 
 ; required to then request a map image (in GIF, JPEG or PNG format) to be returned from
-; Goggle Maps. The returned image is then read and loaded into a draw widget window
+; Google Maps. The returned image is then read and loaded into a draw widget window
 ; of the right size for the returned map image. The default is to delete the image file
 ; that is created, but the user can also set keywords to retain the image that is downloaded
 ; from Google Maps. Users are able to control button and motion events in the resulting
@@ -127,14 +127,14 @@
 ;         The zoom level of the requested Google map. Should be an integer between 0 and 21.
 ;
 ; :Returns:
-;    The return value is an instance of a cgGoggleMapWidget object.
+;    The return value is an instance of a cgGoogleMapWidget object.
 ;    
 ; :Examples:
 ;    Used to put two markers on a map of Fort Collins, Colorado, in a stand-alone window::
-;        PRO cgGoggleMapWidget_Test
+;        PRO cgGoogleMapWidget_Test
 ;            marker1 = {cgGOOGLEMAPMARKER, 'normal', 'dodger blue', 'A', Ptr_New(40.600), Ptr_New(-105.100)}
 ;            marker2 = {cgGOOGLEMAPMARKER, 'normal', 'purple',      'B', Ptr_New(40.605), Ptr_New(-105.105)}
-;            googleObject = cgGoggleMapWidget(MARKERS=[marker1, marker2], MAPTYPE='Terrain')
+;            googleObject = cgGoogleMapWidget(MARKERS=[marker1, marker2], MAPTYPE='Terrain')
 ;        END
 ;       
 ; :Author:

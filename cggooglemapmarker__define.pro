@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   cgGoggleMapMarker
+;   cgGoogleMapMarker
 ;
 ; PURPOSE:
 ; 
@@ -44,7 +44,7 @@
 ;    
 ; :Examples:
 ;    Create a variety of map markers::
-;       marker1 = {cgGoggleMapMarker, 'normal', 'dodger blue', 'A', $
+;       marker1 = {cgGoogleMapMarker, 'normal', 'dodger blue', 'A', $
 ;            Ptr_New(40.600), Ptr_New(-105.100)}
 ;
 ; :Author:

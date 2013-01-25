@@ -233,9 +233,11 @@
 ;        Now allowing the user to draw in the "background" color, if the COLOR or AXISCOLOR is "BACKGROUND". 19 March 2012. DWF.
 ;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;        Lost the XTitle and YTitle keywords when doing shaded surfaces. 15 December 2012. DWF.
+;        Still had some color issues with shaded surfaces having to be done in indexed color to sort out.
+;            This appears to work now both on the display and in PostScript. 25 Jan 2013. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2010, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
 ;-
 PRO cgSurf, data, x, y, $
     ADDCMD=addcmd, $
@@ -481,11 +483,7 @@ PRO cgSurf, data, x, y, $
     ENDIF
    
     ; Going to draw in decomposed color, if possible to avoid dirtying the color table.
-    IF Keyword_Set(shaded) && (!D.Name EQ 'PS') THEN BEGIN
-       SetDecomposedState, 0, CURRENTSTATE=currentState
-    ENDIF ELSE BEGIN
-       SetDecomposedState, 1, CURRENTSTATE=currentState
-    ENDELSE
+    SetDecomposedState, 1, CURRENTSTATE=currentState
 
     ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
     IF (currentState EQ 0) THEN BEGIN
@@ -620,9 +618,6 @@ PRO cgSurf, data, x, y, $
         IF N_Elements(shades) EQ 0 THEN shades = BytScl(data, /NAN)
     ENDIF
     
-    ; Going to draw the axes in decomposed color if we can.
-    IF currentState THEN SetDecomposedState,1
-    
     ; Do you need a PostScript background color? Lot's of problems here!
     ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a
     ; plot of any sort erases the background color. So, I have to draw a 
@@ -678,7 +673,7 @@ PRO cgSurf, data, x, y, $
     bangz = !Z
     bangp = !P
 
-    ; Draw the surface axes.
+    ; Draw the surface axes, but no data.
     Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
         /NODATA, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
         FONT=font, CHARSIZE=charsize, NOERASE=tempNoErase, _STRICT_EXTRA=extra, $
@@ -727,48 +722,45 @@ PRO cgSurf, data, x, y, $
     ; color mode.
     IF Keyword_Set(shaded) THEN BEGIN
     
-        ; All shaded surfaces have to be done in indexed color mode.
-        SetDecomposedState, 0
-        
         ; We have to get the background color out of the surface color
         ; range to do this in a device independent way.
-        Set_Shading, VALUES=[0,253]
+        Set_Shading, VALUES=[1,253]
         
-        ; Depending upon the original background color, load the color
-        ; in color table index 254.
-        IF Size(originalbg, /TNAME) EQ 'STRING' $
-            THEN orignalbg = cgColor(originalBg, 254) $
-            ELSE TVLCT, Reform(origialbg), 254
+;        ; Depending upon the original background color, load the color
+;        ; in color table index 254.
+;        IF Size(originalbg, /TNAME) EQ 'STRING' $
+;            THEN orignalbg = cgColor(originalBg, 254) $
+;            ELSE TVLCT, Reform(origialbg), 254
             
-        ; Restrict the current color table vectors to the range 0-253.
+        ; Restrict the current color table vectors to the range 1-254.
+        LoadCT, 0
         IF N_Elements(palette) NE 0 THEN BEGIN
-            TVLCT, Congrid(palette[*,0],254), Congrid(palette[*,1],254), Congrid(palette[*,2],254)
+            TVLCT, Congrid(palette[*,0],253), Congrid(palette[*,1],253), Congrid(palette[*,2],253), 1
         ENDIF ELSE BEGIN
-            TVLCT, Congrid(rr,254), Congrid(gg,254), Congrid(bb,254)
+            TVLCT, Congrid(rr,253), Congrid(gg,253), Congrid(bb,253), 1
         ENDELSE
         
         ; If shades is defined, then we have to make sure the values there
-        ; are in the range 0-253.
+        ; are in the range 1-254.
         IF N_Elements(shades) NE 0 THEN BEGIN
             IF Max(shades,/NAN) GT 253 $
-                THEN checkShades = BytScl(shades, TOP=253) $
+                THEN checkShades = BytScl(shades, TOP=253) + 1B $
                 ELSE checkShades = shades
         ENDIF
         
-        ; Shaded surface plot.
-         Shade_Surf, data, x, y, /NOERASE, COLOR=color, BOTTOM=bottom, SHADES=checkShades, $
+         ; All shaded surfaces have to be done in indexed color mode.
+        SetDecomposedState, 0
+        
+        ; Shaded surface plot. Should be no axes here at all.
+         Shade_Surf, data, x, y, /NOERASE, SHADES=checkShades, $
             XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, _STRICT_EXTRA=extra, $
             BACKGROUND=shadebackground, AX=rotx, AZ=rotz, CHARSIZE=charsize, $
-            XTITLE=xtitle, YTITLE=ytitle, ZTITLE=ztitle  
+            XTITLE=xtitle, YTITLE=ytitle, ZTITLE=ztitle;;;;;, COLOR=color, BOTTOM=bottom  
+            
+        SetDecomposedState, 1
             
         ; Have to repair the axes. Do this in decomposed color mode, if possible.
-        ; If its not possible, you have to reload the color table that has the drawing
-        ; colors in it.
-        IF currentState THEN BEGIN
-            SetDecomposedState, 1 
-        ENDIF ELSE BEGIN
-            IF N_Elements(palette) NE 0 THEN TVLCT, palette ELSE TVLCT, rl, gl, bl
-        ENDELSE
+        TVLCT, rl, gl, bl ; Color table after colors are loaded.
         Surface, data, x, y, COLOR=axiscolor, BACKGROUND=background, BOTTOM=bottom, $
             /NODATA, /NOERASE, XSTYLE=xstyle, YSTYLE=ystyle, ZSTYLE=zstyle, $
             FONT=font, CHARSIZE=charsize, SKIRT=skirt, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz, $
@@ -794,7 +786,7 @@ PRO cgSurf, data, x, y, $
         ; were when I came into the program. Here I just set them back
         ; to their default values.
         Set_Shading, VALUES=[0,255]
-            
+                    
     ENDIF ELSE BEGIN
     
         
@@ -802,19 +794,16 @@ PRO cgSurf, data, x, y, $
         ; keyword is being used. Then we have to use indexed color mode.         
         IF N_Elements(shades) NE 0 THEN BEGIN
             SetDecomposedState, 0
-            IF N_Elements(palette) NE 0 THEN TVLCT, palette ELSE TVLCT, rr, gg, bb
+            TVLCT, rl, gl, bl ; Color table after colors are loaded.
             Surface, data, x, y, NOERASE=1, SHADES=shades, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
                 FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz , $
-                XTITLE=xtitle, YTITLE=ytitle, ZTITLE=ztitle       
+                XTITLE=xtitle, YTITLE=ytitle, ZTITLE=ztitle    
+             SetDecomposedState, 1    
         ENDIF ELSE BEGIN
-            IF currentState THEN BEGIN
-                SetDecomposedState, 1 
-            ENDIF ELSE BEGIN
-                IF N_Elements(palette) NE 0 THEN TVLCT, palette ELSE TVLCT, rl, gl, bl
-            ENDELSE
+            TVLCT, rl, gl, bl ; Color table after colors are loaded.
             Surface, data, x, y, NOERASE=1, COLOR=color, BOTTOM=bottom, $
-                BACKGROUND=background, SHADES=shades, SKIRT=skirt, $
+                BACKGROUND=background, SKIRT=skirt, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
                 FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz , $
                 XTITLE=xtitle, YTITLE=ytitle, ZTITLE=ztitle

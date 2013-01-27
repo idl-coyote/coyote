@@ -197,6 +197,10 @@
 ;       When reading a GeoTiff file, the map object created should be named mapCoord, not map, so that
 ;          the image data ranges can be set automatically. 11 January 2013. DWF.
 ;       Additional work to allow overplotting of transparent images. 12 Jan 2013. DWF.
+;       For some reason I thought I had to have transparency ON when overplotting. This turns out to be wrong
+;           and gets in the way of outputting to PostScript and working with some map projected images. I've
+;           removed this requirement in the code. I also fixed a problem in which the OUTPUT position changes
+;           if the TRANSPARENT keyword is used. 27 January 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -1426,7 +1430,8 @@ PRO cgImage, image, x, y, $
     ENDIF
     
     ; If you are overplotting, the transparent keyword should be defined and set to zero transparency.
-    IF Keyword_Set(overplot) && (N_Elements(transparent) EQ 0) THEN transparent = 0
+    ;IF Keyword_Set(overplot) && (N_Elements(transparent) EQ 0) THEN transparent = 0
+    ; This is 
     
     ; If the missing_value (or missing_color) and noerase keywords are set, then 
     ; the transparent keyword should be defined and set to zero transparency.
@@ -1437,6 +1442,7 @@ PRO cgImage, image, x, y, $
     ; you have to adjust alphafgpos and position.
     IF (N_Elements(transparent) NE 0) && ~Keyword_Set(overplot) && (N_Elements(position) NE 0) THEN BEGIN
         IF N_Elements(alphafgpos) EQ 0 THEN BEGIN
+             restorePosition = position
              alphafgpos = position
              position = [0,0,1,1]
              Message, 'POSITION keyword value switched to ALPHAFGPOS because TRANSPARENT keyword is set.', /Informational
@@ -1914,6 +1920,7 @@ PRO cgImage, image, x, y, $
                 y0 = !Y.S[1]*plotyrange[0] + !Y.S[0]
                 y1 = !Y.S[1]*plotyrange[1] + !Y.S[0]
                 position = [x0, y0, x1, y1]
+                IF N_Elements(restorePosition) NE 0 THEN restorePosition = position
                 
                 IF (x0 LT 0.0) || (x1 GT 1.0) || (y0 LT 0.0) || (y1 GT 1.0) THEN BEGIN
                     Message, 'Range of overplotted image is outside the currently established range.', /Informational
@@ -1963,9 +1970,11 @@ PRO cgImage, image, x, y, $
                 
                 ; Make sure the position is inside of normalized coordinates.
                 position = 0.0 > [x0, y0, x1, y1] < 1.0
+                IF N_Elements(restorePosition) NE 0 THEN restorePosition = position
                 
              ENDIF ELSE position = Float(position)
              IF N_Elements(transparent) NE 0 THEN BEGIN
+                restorePosition = position
                 alphafgpos = position
                 position = [0,0,1,1]
              ENDIF
@@ -2186,9 +2195,6 @@ PRO cgImage, image, x, y, $
     
     ENDIF
     
-    ; Set the output position.
-    oposition = position
-    
     ; Calculate the image size and start locations. The plus and minus
     ; factor values are designed to keep the image completely inside the axes.
     ; In other words, if you draw the axes first, then put the image in
@@ -2406,6 +2412,12 @@ PRO cgImage, image, x, y, $
     bangx = !X
     bangy = !Y
      
+    ; If you changed the position, restore it.
+    IF N_Elements(restorePosition) NE 0 THEN position = RestorePosition
+    
+    ; Set the output position.
+    oposition = position
+    
     ; Need a data range?
     IF N_Elements(plotxrange) EQ 0 THEN BEGIN
        IF Obj_Valid(mapCoord) THEN BEGIN

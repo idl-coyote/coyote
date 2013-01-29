@@ -529,7 +529,7 @@ PRO cgColorbar, $
     ; You can't have a format set *and* use ticknames.
     IF N_ELEMENTS(ticknames) NE 0 THEN format = ""
     
-    ; If the format is NOT null and is is the name of a tick formating function, then we have
+    ; If the format is NOT null and it is the name of a tick formating function, then we have
     ; to handle things differently.
     IF (format NE "") && (StrPos(format, '(') EQ -1) THEN BEGIN
     

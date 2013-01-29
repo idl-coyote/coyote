@@ -196,16 +196,16 @@
 ;       Set this keyword to cause the window to be erased before graphics commands 
 ;       are drawn. This may need to be set, for example, to display images.
 ;    winid: in, optional, type=integer
-;       Use this keyword to select the window cgWindow identifier (the number between
-;       the parentheses in the title bar of cgWindow). The AddCmd, ReplaceCmd, ListCmd,
-;       and DeleteCmd keywords will all apply to the commands in the last cgWindow
-;       created unless this keyword is used to select another cgWindow to apply the 
+;       Use this keyword to select a previously open and existing cgWindow identifier 
+;       (the number between the parentheses in the title bar of cgWindow). The AddCmd, 
+;       ReplaceCmd, ListCmd, and DeleteCmd keywords all apply to the "current" cgWindow
+;       unless this keyword is used to select another existing cgWindow to apply the 
 ;       commands to.
 ;    wmulti: in, optional, type=intarr(5)
 ;        Set this keyword in exactly the same way you would set the !P.Multi keyword.
 ;        It will allow you to display multi-plots in the cgWindow graphics window.
 ;    wobject: out, optional, type=object
-;       cgWindow creates a FSC_CmdWindow object. This object reference is returned
+;       cgWindow creates a cgCmdWindow object. This object reference is returned
 ;       if this keyword is present.
 ;    woxmargin: in, optional, type=float
 ;       A two-element array indicating the left and right X outside margins for the
@@ -322,7 +322,7 @@ PRO cgWindow, $
    WErase = weraseit, $             ; Set this keyword to erase the display before executing the command.
    WinID=winid, $                   ; Set this keyword to select an cgWindow.
    WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.   
-   WObject=wobject, $               ; The FSC_CMDWindow object. A return value.
+   WObject=wobject, $               ; The cgCMDWindow object. A return value.
    WOXMargin = woxmargin, $         ; Set the !X.OMargin. A two element array.
    WOYMargin = woymargin, $         ; Set the !Y.OMargin. A two element array
    WXPos = wxpos, $                 ; The X offset of the window on the display. The window is tiled if not set.

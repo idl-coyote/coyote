@@ -352,9 +352,10 @@
 ;        Added C_ANNOTATION keyword. 10 Nov 2012. DWF.
 ;        Modified the way default colors are selected when the background color is "white". 4 Dec 2012. DWF.
 ;        Making more effort to set the CELL_FILL keyword instead of FILL if filling contours on maps. 7 Jan 2013. DWF.
+;        Added C_ORIENTATION and C_SPACING keywords and modified the program to allow line filling. 28 Jan 2013. DWF.
 ;        
 ; :Copyright:
-;     Copyright (c) 2010, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
 ;-
 PRO cgContour, data, x, y, $
     ADDCMD=addcmd, $
@@ -366,6 +367,8 @@ PRO cgContour, data, x, y, $
     C_CHARSIZE=c_charsize, $
     C_COLORS=c_colors, $
     C_LABELS=c_labels, $
+    C_ORIENTATION=c_orientation, $
+    C_SPACING=c_spacing, $
     CELL_FILL=cell_fill, $
     CHARSIZE=charsize, $
     COLOR=scolor, $
@@ -453,6 +456,8 @@ PRO cgContour, data, x, y, $
                 C_CHARSIZE=c_charsize, $
                 C_COLORS=c_colors, $
                 C_LABELS=c_labels, $
+                C_ORIENTATION=c_orientation, $
+                C_SPACING=c_spacing, $
                 CELL_FILL=cell_fill, $
                 CHARSIZE=charsize, $
                 COLOR=scolor, $
@@ -507,6 +512,8 @@ PRO cgContour, data, x, y, $
             C_CHARSIZE=c_charsize, $
             C_COLORS=c_colors, $
             C_LABELS=c_labels, $
+            C_ORIENTATION=c_orientation, $
+            C_SPACING=c_spacing, $
             CELL_FILL=cell_fill, $
             CHARSIZE=charsize, $
             COLOR=scolor, $
@@ -955,7 +962,7 @@ PRO cgContour, data, x, y, $
         IF Size(con_colors, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN con_colors = Byte(con_colors)
         IF Size(con_colors, /TYPE) LE 2 THEN con_colors = StrTrim(Fix(c_colors),2)
     ENDELSE
-
+    
     ; Set up the appropriate contour labeling. Only can do if C_LABELS not passed in.
     IF N_Elements(c_labels) EQ 0 THEN BEGIN
         indices = Indgen(N_Elements(levels))
@@ -1032,17 +1039,31 @@ PRO cgContour, data, x, y, $
     bangp = !P
     
     ; If you are not overploting, draw the contour plot now. Only the axes are
-    ; drawn here, no data.
+    ; drawn here, no data. There is a special case of filling with lines instead
+    ; of colors, which is indicated by the "normalFill" keyword being set to 0.
+    normalFill = 1
     IF Keyword_Set(overplot) EQ 0 THEN BEGIN
 
-        Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
-            BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
-            POSITION=position, _STRICT_EXTRA=extra, T3D=t3d, /NODATA, NOERASE=tempNoErase, $
-            XTHICK=xthick, YTHICK=ythick, FONT=font, C_CHARSIZE=c_charsize, $
-            XTICKLEN=xticklen, YTICKLEN=yticklen, XTICKV=xtickv, XTICKS=xticks, $
-            YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip, $
-            TITLE=title, XTITLE=xtitle, YTITLE=ytitle
-                    
+        IF N_Elements(c_orientation) NE 0 THEN BEGIN
+          Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
+              BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
+              POSITION=position, _STRICT_EXTRA=extra, T3D=t3d, C_COLORS=con_colors,  $
+              XTHICK=xthick, YTHICK=ythick, FONT=font, C_CHARSIZE=c_charsize, $
+              XTICKLEN=xticklen, YTICKLEN=yticklen, XTICKV=xtickv, XTICKS=xticks, $
+              YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip, $
+              TITLE=title, XTITLE=xtitle, YTITLE=ytitle, $
+              C_ORIENTATION=c_orientation, C_SPACING=c_spacing
+           normalFill = 0
+        ENDIF ELSE BEGIN
+          Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
+              BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
+              POSITION=position, _STRICT_EXTRA=extra, T3D=t3d, /NODATA, NOERASE=tempNoErase, $
+              XTHICK=xthick, YTHICK=ythick, FONT=font, C_CHARSIZE=c_charsize, $
+              XTICKLEN=xticklen, YTICKLEN=yticklen, XTICKV=xtickv, XTICKS=xticks, $
+              YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip, $
+              TITLE=title, XTITLE=xtitle, YTITLE=ytitle
+           
+        ENDELSE            
     ENDIF
     
     ; This is where we actually draw the data. Check to see if we have a map object and need to
@@ -1084,22 +1105,27 @@ PRO cgContour, data, x, y, $
     olevels = levels
     
     ; Draw the data on the axes.
-    Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
-       LEVELS=levels, C_Labels=c_labels, C_COLORS=con_colors, XTHICK=xthick, YTHICK=ythick, $
-       POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, T3D=t3d, CHARSIZE=charsize, $
-       FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize, XTICKLEN=xticklen, YTICKLEN=yticklen, $
-       XTICKV=xtickv, XTICKS=xticks, YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip, $
-       C_ANNOTATION=c_annotation
-       
+
+    IF normalFill THEN BEGIN
+        Contour, contourData, xgrid, ygrid, FILL=fill, CELL_FILL=cell_fill, COLOR=color, $
+           LEVELS=levels, C_Labels=c_labels, C_COLORS=con_colors, XTHICK=xthick, YTHICK=ythick, $
+           POSITION=position, XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra, T3D=t3d, CHARSIZE=charsize, $
+           FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize, XTICKLEN=xticklen, YTICKLEN=yticklen, $
+           XTICKV=xtickv, XTICKS=xticks, YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip, $
+           C_ANNOTATION=c_annotation, C_ORIENTATION=c_orientation, C_SPACING=c_spacing, $
+           NOERASE=(N_Elements(c_orientation) NE 0) ? 1 : 0
+    ENDIF
+        
     ; If this is a filled contour plot, and the OUTLINE keyword is set, then draw the contour
     ; outlines over the top of the data. 
     IF (fill || cell_fill) && outline THEN BEGIN
         Contour, contourData, xgrid, ygrid, COLOR=cgColor(outcolor), $
            LEVELS=levels, C_Labels=c_labels, XTHICK=xthick, YTHICK=ythick, $
-           _STRICT_EXTRA=extra, T3D=t3d, CHARSIZE=charsize, $
+           _STRICT_EXTRA=extra, T3D=t3d, CHARSIZE=charsize, C_ORIENTATION=c_orientation, $
            FONT=font, /OVERPLOT, C_CHARSIZE=c_charsize, XTICKLEN=xticklen, YTICKLEN=yticklen, $
            XTICKV=xtickv, XTICKS=xticks, YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip
     ENDIF
+
         
     ; If this is the first plot in PS, then we have to make it appear that we have
     ; drawn a plot, even though we haven't.
@@ -1123,7 +1149,7 @@ PRO cgContour, data, x, y, $
         ENDIF
         Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $
             BACKGROUND=background, LEVELS=levels, XSTYLE=xstyle, YSTYLE=ystyle, $
-            POSITION=position, _STRICT_EXTRA=extra, T3D=t3d, /NODATA, $
+            POSITION=position, _STRICT_EXTRA=extra, T3D=t3d, /NODATA, C_ORIENTATION=c_orientation, $
             XTHICK=xthick, YTHICK=ythick, FONT=font, C_CHARSIZE=c_charsize, $
             XTICKLEN=xticklen, YTICKLEN=yticklen, XTICKV=xtickv, XTICKS=xticks, $
             YTICKV=ytickv, YTICKS=yticks, ZVALUE=zvalue, NOCLIP=noclip, /NOERASE

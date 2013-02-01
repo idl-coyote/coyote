@@ -71,6 +71,9 @@
 ;             15: January 9, 1951
 ;             16: January 9, 1951 08:21:10
 ;             17: January 9, 1951 08h 21m 10s
+;             18: 01091951
+;             19: 09011951
+;             20: 19510109
 ;         
 ; :Examples:
 ;    IDL> jnumber = Julday(8, 9, 1951, 8, 21, 10)
@@ -89,6 +92,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 9 January 2013 by David W. Fanning.
+;        Added formats 18 through 20. 1 Feb 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2013, Fanning Software Consulting, Inc.
@@ -159,7 +163,11 @@ FUNCTION cgJulian2Date, jnumber, FORMAT=format
                 String(minute, Format='(I2.2)')  + ':' + String(second, Format='(I2.2)')       
         17:  date = cgMonths(month) +  ' ' + String(day, Format='(I0.2)') + ', ' + $
                 String(year, Format='(I4)') + ' ' + String(hour, Format='(I2.2)')  + 'h ' + $
-                String(minute, Format='(I2.2)')  + 'm ' + String(second, Format='(I2.2)') + 's'       
+                String(minute, Format='(I2.2)')  + 'm ' + String(second, Format='(I2.2)') + 's'   
+        18:  date = String(day, Format='(I2.2)') + String(month, Format='(I2.2)')  + String(year, Format='(I4)')
+        19:  date = String(month, Format='(I2.2)') + String(day, Format='(I2.2)')  + String(year, Format='(I4)')
+        20:  date = String(year, Format='(I4)') + String(month, Format='(I2.2)') + String(day, Format='(I2.2)') 
+        
     ENDCASE
      
     ; Make sure you return a scalar, if needed.

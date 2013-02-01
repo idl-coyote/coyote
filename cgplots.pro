@@ -127,7 +127,8 @@
 ;        Made sure the map coordinate system is established before drawing if a map object is passed
 ;             into the program. 26 June 2012. DWF.
 ;        Added the ability to specify the PSYM keyword as a string. 20 July 2012. DWF.
-;        Added a check for a window to draw into, if needed. 8 July 2013. DWF.
+;        Added a check for a window to draw into, if needed. 8 July 2012. DWF.
+;        Loop counter didn't assume someone would pass in 2D array of XY pairs. Fixed. 31 Jan 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
@@ -301,7 +302,7 @@ PRO cgPlotS, x, y, z, $
     ; Draw the symbol, if required.
     IF Abs(psym) GT 0 THEN BEGIN
       
-       FOR j=0,N_Elements(x)-1 DO BEGIN
+       FOR j=0,xsize-1 DO BEGIN
       
           ; Get information about the symbol you are drawing.
           IF N_Elements(symcolor) GT 1 THEN thisColor = symcolor[j] ELSE thisColor = symcolor

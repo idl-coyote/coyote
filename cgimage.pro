@@ -201,6 +201,10 @@
 ;           and gets in the way of outputting to PostScript and working with some map projected images. I've
 ;           removed this requirement in the code. I also fixed a problem in which the OUTPUT position changes
 ;           if the TRANSPARENT keyword is used. 27 January 2013. DWF.
+;       I had some code dealing with XRANGE and YRANGE properties of the image when a map coodinate object
+;           was used with cgImage. This was inadvertently setting the XRANGE and YRANGE properties of the
+;           image, which was in turn causing the range values to be SAVED in the plotting system variables.
+;           This interferred with backward compatibility with the TV command, so I have removed it. 31 Jan 2013. DWF. 
 ;       
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -1429,10 +1433,6 @@ PRO cgImage, image, x, y, $
         cgLoadCT, ctindex, Reverse=reverse, Brewer=brewer, RGB_TABLE=palette
     ENDIF
     
-    ; If you are overplotting, the transparent keyword should be defined and set to zero transparency.
-    ;IF Keyword_Set(overplot) && (N_Elements(transparent) EQ 0) THEN transparent = 0
-    ; This is 
-    
     ; If the missing_value (or missing_color) and noerase keywords are set, then 
     ; the transparent keyword should be defined and set to zero transparency.
     IF ((N_Elements(missing_value) NE 0) || ( N_Elements(missing_color) NE 0) ) $
@@ -1519,15 +1519,13 @@ PRO cgImage, image, x, y, $
              mapCoord -> GetProperty, XRANGE=plotxrange 
              save = 1
        ENDIF 
-       IF N_Elements(plotxrange) EQ 0 THEN plotxrange = [0, imgXSize]
-    ENDIF
+    ENDIF ELSE save = 1
     IF N_Elements(plotyrange) EQ 0 THEN BEGIN
        IF Obj_Valid(mapCoord) THEN BEGIN
             mapCoord -> GetProperty, YRANGE=plotyrange 
             save = 1
        ENDIF 
-       IF N_Elements(plotyrange) EQ 0 THEN plotyrange = [0, imgYSize]
-    ENDIF 
+    ENDIF ELSE save = 1
     
     ; Are we doing some kind of output?
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
@@ -1729,8 +1727,8 @@ PRO cgImage, image, x, y, $
     IF Keyword_Set(axis) THEN axes = 1    
     axes = Keyword_Set(axes)
     
-    ; If you want axes, then save the coordinate system, unless s
-    ; pecifically asked not to.
+    ; If you want axes, then save the coordinate system, unless 
+    ; specifically asked not to.
     IF axes THEN IF N_Elements(save) EQ 0 THEN save = 1
     
     ; If axes are set and MARGIN and POSITION are NOT set and you are NOT
@@ -2423,13 +2421,13 @@ PRO cgImage, image, x, y, $
        IF Obj_Valid(mapCoord) THEN BEGIN
              mapCoord -> GetProperty, XRANGE=plotxrange 
              save = 1
-       ENDIF ELSE plotxrange = [0, imgXsize]
+       ENDIF 
     ENDIF ELSE save = 1
     IF N_Elements(plotyrange) EQ 0 THEN BEGIN
        IF Obj_Valid(mapCoord) THEN BEGIN
             mapCoord -> GetProperty, YRANGE=plotyrange 
             save = 1
-       ENDIF ELSE plotyrange = [0, imgYsize]
+       ENDIF 
     ENDIF ELSE save = 1
     
     ; Check title for cgSymbols.

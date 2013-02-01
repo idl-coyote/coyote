@@ -83,7 +83,7 @@
 ;       with a spherical datum will be used. The XRANGE and YRANGE properties of the map object
 ;       will be set by the program in the course of doing the gridding if the `SetRange` keyword is
 ;       set.
-;    missing: in, optional, type=numberical
+;    missing: in, optional, type=varies
 ;       Missing data in the gridding process will be set to this value.
 ;    nearest_neighbor: in, optional, type=boolean, default=0
 ;       If this keyword is set, the nearest neighbor algorithm will be used to create the output
@@ -218,7 +218,6 @@ FUNCTION cgWarpToMap, data, lons, lats, $
        s = Size(data, /DIMENSIONS)
        lattemp = Rebin(Reform(lats, 1, s[1]), s[0], s[1])
        lontemp = Rebin(lons, s[0], s[1])
-       help, lontemp, lattemp
        xy = map -> Forward(lontemp, lattemp)
    ENDIF ELSE BEGIN
        xy = map -> Forward(lons, lats)

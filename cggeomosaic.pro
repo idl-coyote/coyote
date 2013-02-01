@@ -5,6 +5,7 @@
 ;
 ; PURPOSE:
 ;   Creates a mosaic or combination image, given the names of two GeoTiff image files.
+;   The images must be 2D images.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -36,6 +37,7 @@
 ;
 ;+
 ; Creates a mosaic or combination image, given the names of two GeoTiff image files.
+; The images must be 2D images.
 ; 
 ; :Categories:
 ;    Map Utilities
@@ -54,17 +56,16 @@
 ;         The name of the output GeoTiff file. If not provided, the user will
 ;         be asked to create a name. If provided, the user will not be prompted
 ;         and this name will be used.
-;     histomatch: in, optional, type=boolean, default=0
-;         Set this keyword to use the histogram of the first image to adjust
-;         the image values of the second image before creating the mosaic.
 ;     imageout: out, optional, type=varies
 ;         The final image mosaic.
 ;     mapout: out, optional, type=object
 ;         A map coordinate object (cgMap) that geolocates the new image mosaic.
 ;     missing: in, optional, type=varies
-;         The missing value in the input images. Missing values are set to zero
-;         to create the mosaic. This assumes that valid values in the images are
-;         not zero, which may be a weakness in the current algorithm.
+;         The missing value in the input images. If scalar value, the same value is used
+;         for both images, but may be a two-element array. 
+;     miss_out, in, optional, type=varies
+;         The missing value of the output image. If undefined, missing[0] is used. If
+;         missing[0] is undefined, the value 0B is used.
 ;     success: out, optional, type=boolean
 ;         This keyword is set to 1 if the function completed successfully. And to
 ;         0 otherwise.
@@ -83,16 +84,18 @@
 ;        Written, 18 August 2012. DWF. 
 ;        Added SUCCESS keyword 4 September 2012. DWF.
 ;        Now blending overlap regions using 50% of pixel values from the two images. 14 Sept 2012. DWF.
+;        Revamp of algorithm's handing of missing values.  Added MISS_OUT keyword and removed HISTOMATCH
+;           keyword because it only works for BYTE data. Restricted mosaicking to 2D images. 29 Jan 2013. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2012-2013, Fanning Software Consulting, Inc.
 ;-
 FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
    FILENAME=filename, $
-   HISTOMATCH=histomatch, $
    IMAGEOUT=newImage, $
    MAPOUT=mapout, $
    MISSING=missing, $
+   MISS_OUT=miss_out, $
    SUCCESS=success
 
     Compile_Opt idl2
@@ -117,22 +120,21 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
     ; Assume success.
     success = 1
     
-    IF N_Elements(missing) EQ 0 THEN missing = 0B
+    ; Make sure the missing values are in two-element array, if needed.
+    IF N_Elements(missing) NE 0 THEN BEGIN
+       IF N_Elements(missing) EQ 1 THEN missing = [missing, missing]
+    ENDIF
+    IF N_Elements(miss_out) EQ 0 THEN BEGIN
+       IF N_Elements(missing) NE 0 THEN miss_out = missing[0] ELSE miss_out = 0B
+    ENDIF
     
-    ; Create map coordinate objects for the two files. Missing values should
-    ; be set to 0 for the algorithm to work correctly.
-    m1 = cgGeoMap(geofile_1, IMAGE=image_1, PALETTE=palette_1, SUCCESS=success)
+    ; Let's read the images and get the bounaries of the map projection.
+    m1 = cgGeoMap(geofile_1, IMAGE=image_1, PALETTE=pal_1, BOUNDARY=b1, $
+        GEOTIFF=geo1, SUCCESS=success)
     IF ~success THEN RETURN, ""
-    missingIndices_1 = Where(image_1 EQ missing, missingCnt_1)
-    IF missingCnt_1 GT 0 THEN image_1[missingIndices_1] = 0
-    m2 = cgGeoMap(geofile_2, IMAGE=image_2, PALETTE=palette_2, SUCCESS=success)
+    m2 = cgGeoMap(geofile_2, IMAGE=image_2, PALETTE=pal_2, BOUNDARY=b2, $
+        GEOTIFF=geo2, SUCCESS=success)
     IF ~success THEN RETURN, ""
-    missingIndices_2 = Where(image_2 EQ missing, missingCnt_2)
-    IF missingCnt_2 GT 0 THEN image_2[missingIndices_2] = 0
-
-    ; The images must have the same number of dimensions
-    IF Size(image_1, /N_DIMENSIONS) NE Size(image_2, /N_DIMENSIONS) THEN $
-       Message, 'The images do not have the same number of dimensions'
     
     ; Check to be sure projection and ellipsoid are the same.
     m1 -> GetProperty, Map_Projection=projection_1, Ellipsoid=ellipsoid_1
@@ -141,30 +143,35 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
        Message, 'The map projections of the two files are not the same.'
     IF ellipsoid_1 NE ellipsoid_2 THEN $
        Message, 'The map projection ellipsoids of the two files are not the same.'
-       
-    ; Get the file information and geotiff structure.
-    IF Query_Tiff(geofile_1, info_1, GEOTIFF=geo_1) NE 1 THEN $
-          Message, 'Not a geoTiff file: ' + geofile_1
-    IF Query_Tiff(geofile_2, info_2, GEOTIFF=geo_2) NE 1 THEN $
-          Message, 'Not a geoTiff file: ' + geofile_2
-          
+    
     ; If the projected coordinate system is not the same, we have problems.
-    IF geo_1.PROJECTEDCSTYPEGEOKEY NE geo_2.PROJECTEDCSTYPEGEOKEY THEN BEGIN
+    IF geo1.PROJECTEDCSTYPEGEOKEY NE geo2.PROJECTEDCSTYPEGEOKEY THEN BEGIN
         Print, 'File 1: ', geofile_1
         Print, 'File 2: ', geofile_2
         Message, 'The projected coordinate systems of the two files are not the same: ' + $
-          StrTrim(geo_1.PROJECTEDCSTYPEGEOKEY, 2) + ' and ' + StrTrim(geo_2.PROJECTEDCSTYPEGEOKEY,2)
+          StrTrim(geo1.PROJECTEDCSTYPEGEOKEY, 2) + ' and ' + StrTrim(geo2.PROJECTEDCSTYPEGEOKEY,2)
     ENDIF
-              
+    
+    ; Match histograms? Taken out because it only works for Byte images currently.
+    ;IF Keyword_Set(histomatch) THEN image_2 = Histomatch(Temporary(image_2), image_1)
+         
     ; The scales can be off by a little. We will use the smaller of the two
     ; to make sure we can accommodate both images in the mosaic.
-    xscale_1 = geo_1.ModelPixelScaleTag[0]
-    yscale_1 = geo_1.ModelPixelScaleTag[1]
-    xscale_2 = geo_2.ModelPixelScaleTag[0]
-    yscale_2 = geo_2.ModelPixelScaleTag[1]
+    xscale_1 = geo1.ModelPixelScaleTag[0]
+    yscale_1 = geo1.ModelPixelScaleTag[1]
+    xscale_2 = geo2.ModelPixelScaleTag[0]
+    yscale_2 = geo2.ModelPixelScaleTag[1]
     xscale = xscale_1 < xscale_2
     yscale = yscale_1 < yscale_2
     
+    ; Check for missing values.
+    IF N_Elements(missing) NE 0 THEN BEGIN
+      missingIndices_1 = Where(image_1 EQ missing[0], missingCnt_1)
+      IF missingCnt_1 GT 0 THEN image_1[missingIndices_1] = miss_out
+      missingIndices_2 = Where(image_2 EQ missing[1], missingCnt_2)
+      IF missingCnt_2 GT 0 THEN image_2[missingIndices_2] = miss_out
+    ENDIF
+
     ; Get the image map ranges and create a mosaic image of the proper size.
     m1 -> GetProperty, XRange=xr_1, YRange=yr_1
     m2 -> GetProperty, XRange=xr_2, YRange=yr_2
@@ -175,78 +182,45 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
     xNumPixels = Ceil((xr[1] - xr[0]) / xscale)
     yNumPixels = Ceil((yr[1] - yr[0]) / yscale)
     
-    ; If necessary, make sure these images are band interleaved.
-    void = Image_Dimensions(image_1, TRUEINDEX=trueIndex, XINDEX=xindex, YINDEX=yindex, $
-       XSIZE=xsize_1, YSIZE=ysize_1)
-    IF (trueIndex NE -1) && (trueIndex NE 2) THEN image_1 = Transpose(image_1, [xindex, yindex, trueindex])
-    void = Image_Dimensions(image_2, TRUEINDEX=trueIndex, XINDEX=xindex, YINDEX=yindex, $
-       XSIZE=xsize_2, YSIZE=ysize_2)
-    IF (trueIndex NE -1) && (trueIndex NE 2) THEN image_2 = Transpose(image_2, [xindex, yindex, trueindex])
-    
     ; Create a new image of the proper size. 
     imageType = Size(image_1, /Type)
-    IF trueIndex NE -1 THEN BEGIN
-       newImage = Make_Array( xnumPixels, ynumPixels, 3, TYPE=imageType, VALUE=0)
-    ENDIF ELSE BEGIN
-       newImage = Make_Array( xnumPixels, ynumPixels, TYPE=imageType, VALUE=0)
-    ENDELSE
+    newImage = Make_Array( xnumPixels, ynumPixels, TYPE=imageType, VALUE=miss_out)
+    
+    ; Make a copy of this image. This will be the final image.
+    finalImage = newImage
     
     ; Create image extent vectors.
     xvec = Scale_Vector(DIndgen(xnumPixels), xr[0], xr[1])
     yvec = Scale_Vector(DIndgen(ynumPixels), yr[0], yr[1])
+    
+    ; Locate the position of the first image and position it in the final image.
+    xloc = 0 > Value_Locate(xvec, [xr_1[0], xr_1[1]])
+    yloc = 0 > Value_Locate(yvec, [yr_1[0], yr_1[1]])
+    xsize = xloc[1]-xloc[0]+1
+    ysize = yloc[1]-yloc[0]+1 
+    finalImage[xloc[0]:xloc[1], yloc[0]:yloc[1]] = Congrid(image_1, xsize, ysize)
+    
+    ; Locate the position of the second image and position it in the new image.
+    xloc = 0 > Value_Locate(xvec, [xr_2[0], xr_2[1]])
+    yloc = 0 > Value_Locate(yvec, [yr_2[0], yr_2[1]]) 
+    xsize = xloc[1]-xloc[0]+1
+    ysize = yloc[1]-yloc[0]+1 
+    newImage[xloc[0]:xloc[1], yloc[0]:yloc[1]] = Congrid(image_2, xsize, ysize)
+    
+    ; Where the final image is missing, and the new image is not missing, move
+    ; newImage pixels over to final image.
+    movingPixels = Where((finalImage EQ miss_out) AND (newimage NE miss_out), movingCount)
+    
+    ; If there are overlapping pixels, then take the average value.
+    overlap =  Where((finalImage NE miss_out) AND (newimage NE miss_out), count)
+    finalImage[overlap] = Convert_to_Type(Float(finalImage[overlap])*0.5 + Float(newImage[overlap])*0.5, Size(image_1, /Type))
 
-    ; Match histograms?
-    IF Keyword_Set(histomatch) THEN image_2 = Histomatch(Temporary(image_2), image_1)
+    ; Move the pixels over.
+    IF movingCount GT 0 THEN finalImage[movingPixels] = newImage[movingPixels]
     
-    IF trueIndex NE -1 THEN BEGIN
-       FOR j=0,2 DO BEGIN
-           temp1 = image_1[*,*,j]
-           xloc = 0 > Value_Locate(xvec, [xr_1[0], xr_1[1]])
-           yloc = 0 > Value_Locate(yvec, [yr_1[0], yr_1[1]])
-           xsize = xloc[1]-xloc[0]+1
-           ysize = yloc[1]-yloc[0]+1 
-           newImage[xloc[0]:xloc[1], yloc[0]:yloc[1], j] = Congrid(temp1, xsize, ysize)
-           Undefine, temp1
-           temp2 = image_2[*,*,j]
-           xloc = 0 > Value_Locate(xvec, [xr_2[0], xr_2[1]])
-           yloc = 0 > Value_Locate(yvec, [yr_2[0], yr_2[1]]) 
-           xsize = xloc[1]-xloc[0]+1
-           ysize = yloc[1]-yloc[0]+1 
-           temp = Make_Array(xnumPixels, ynumPixels, TYPE=imageType, VALUE=0)
-           temp[xloc[0]:xloc[1], yloc[0]:yloc[1]] = Congrid(temp2, xsize, ysize)
-           overlap = Where((temp NE 0) AND (temp2 NE 0), count)
-           temp[overlap] = Byte(Float(temp[overlap])*0.5 + Float(temp2[overlap])*0.5)
-           zeros = Where(temp EQ 0)
-           temp[zeros] = temps2[zeros]
-           temp2 = Temporary(temp)
-           newImage[*,*,j] = Temporary(temp2)
-       ENDFOR
-    ENDIF ELSE BEGIN
-        xloc = 0 > Value_Locate(xvec, [xr_1[0], xr_1[1]])
-        yloc = 0 > Value_Locate(yvec, [yr_1[0], yr_1[1]])
-        xsize = xloc[1]-xloc[0]+1
-        ysize = yloc[1]-yloc[0]+1 
-        newImage[xloc[0]:xloc[1], yloc[0]:yloc[1]] = Congrid(image_1, xsize, ysize)
-        xloc = 0 > Value_Locate(xvec, [xr_2[0], xr_2[1]])
-        yloc = 0 > Value_Locate(yvec, [yr_2[0], yr_2[1]]) 
-        xsize = xloc[1]-xloc[0]+1
-        ysize = yloc[1]-yloc[0]+1 
-        temp = Make_Array(xnumPixels, ynumPixels, TYPE=imageType, VALUE=0)
-        temp[xloc[0]:xloc[1], yloc[0]:yloc[1]] = Congrid(image_2, xsize, ysize)
-        overlap = Where((temp NE 0) AND (newimage NE 0), count)
-        temp[overlap] = Byte(Float(temp[overlap])*0.5 + Float(newimage[overlap])*0.5)
-        zeros = Where(temp EQ 0)
-        temp[zeros] = newimage[zeros]
-        newImage = Temporary(temp)
-    ENDELSE
-    
-    ; Set all zero values in the new image to the missing value. This
-    ; can only really be done for 2D image. In 3D images, missing values
-    ; will be black [0,0,0].
-    IF Size(newImage, /N_DIMENSIONS) EQ 2 THEN BEGIN
-        missingIndices = Where(newImage EQ 0, zeroCnt)
-        IF zeroCnt GT 0 THEN newImage[missingIndices] = missing
-    ENDIF
+    ; Cleanup
+    Undefine, newImage
+    newImage = Temporary(finalImage)
     
     ; Clean up objects created in the program.
     Obj_Destroy, m1
@@ -259,7 +233,7 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
     ENDIF    
     
     ; Update the GeoTiff structure for the new file and write the file.
-    newGeo = geo_1
+    newGeo = geo1
     newGeo.ModelTiePointTag[3:4] = [xr[0], yr[1]]
     newGeo.ModelPixelScaleTag[0] = xscale
     newGeo.ModelPixelScaleTag[1] = yscale

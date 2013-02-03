@@ -190,6 +190,8 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
    ENDIF
 
    ; ImageMagick parameters. Assume we will convert to PNG file, unless told otherwise
+   IF Total( Keyword_Set(bmp) + Keyword_Set(gif) + Keyword_Set(pdf) + Keyword_Set(png) + $
+       Keyword_Set(jpeg) + Keyword_Set(tiff) ) EQ 0 THEN png = 1
    IF N_Elements(filetype) EQ 0 THEN filetype = ""
    CASE StrUpCase(filetype) OF
        'BMP': bmp = 1

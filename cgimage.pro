@@ -2418,16 +2418,10 @@ PRO cgImage, image, x, y, $
     
     ; Need a data range?
     IF N_Elements(plotxrange) EQ 0 THEN BEGIN
-       IF Obj_Valid(mapCoord) THEN BEGIN
-             mapCoord -> GetProperty, XRANGE=plotxrange 
-             save = 1
-       ENDIF 
+        plotxrange = [0, imgXSize]
     ENDIF ELSE save = 1
     IF N_Elements(plotyrange) EQ 0 THEN BEGIN
-       IF Obj_Valid(mapCoord) THEN BEGIN
-            mapCoord -> GetProperty, YRANGE=plotyrange 
-            save = 1
-       ENDIF 
+        plotxrange = [0, imgXSize]
     ENDIF ELSE save = 1
     
     ; Check title for cgSymbols.

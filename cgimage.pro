@@ -205,6 +205,7 @@
 ;           was used with cgImage. This was inadvertently setting the XRANGE and YRANGE properties of the
 ;           image, which was in turn causing the range values to be SAVED in the plotting system variables.
 ;           This interferred with backward compatibility with the TV command, so I have removed it. 31 Jan 2013. DWF. 
+;       Whoops! Typo in my last fix. Getting too old, I guess. 6 Feb 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -2421,7 +2422,7 @@ PRO cgImage, image, x, y, $
         plotxrange = [0, imgXSize]
     ENDIF ELSE save = 1
     IF N_Elements(plotyrange) EQ 0 THEN BEGIN
-        plotxrange = [0, imgXSize]
+        plotyrange = [0, imgYSize]
     ENDIF ELSE save = 1
     
     ; Check title for cgSymbols.

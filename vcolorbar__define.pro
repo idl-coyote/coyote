@@ -105,12 +105,6 @@
 ;       the model that is selected in a selection event, since the SELECT_TARGET
 ;       keyword is set for the model.
 ;
-; RESTRICTIONS:
-;
-;       Requires FSC_NORMALIZE from Coyote Library:
-;
-;         http://www.idlcoyote.com/programs/fsc_normalize.pro
-;
 ; EXAMPLE:
 ;
 ;       To create a colorbar object and add it to a plot view object, type:
@@ -148,6 +142,7 @@
 ;       Fixed a problem with POSITION keyword in SetProperty method. 23 May 2003. DWF.
 ;       Removed NORMALIZE from source code. 29 Nov 2005. DWF.
 ;       Font sizes have changed. Now using a 12 point font. 6 May 2011. DWF.
+;       Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -247,8 +242,8 @@ ysize = s[1]
     ; Create the colorbar image object. Add palette to it.
 
 thisImage = Obj_New('IDLgrImage', bar, Palette=self.palette)
-xs = FSC_Normalize([0,xsize], Position=[0,1.])
-ys = FSC_Normalize([0,ysize], Position=[0,1.])
+xs = cgNormalize([0,xsize], Position=[0,1.])
+ys = cgNormalize([0,ysize], Position=[0,1.])
 thisImage->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
    ; Create a polygon object. Add the image as a texture map. We do
@@ -260,14 +255,14 @@ self.thisPolygon = thisPolygon
 
     ; Scale the polygon into the correct position.
 
-xs = FSC_Normalize([0,1], Position=[self.position[0], self.position[2]])
-ys = FSC_Normalize([0,1], Position=[self.position[1], self.position[3]])
+xs = cgNormalize([0,1], Position=[self.position[0], self.position[2]])
+ys = cgNormalize([0,1], Position=[self.position[1], self.position[3]])
 thispolygon->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
     ; Create scale factors to position the axes.
 
-longScale = FSC_Normalize(self.range, Position=[self.position[1], self.position[3]])
-shortScale = FSC_Normalize([0,1], Position=[self.position[0], self.position[2]])
+longScale = cgNormalize(self.range, Position=[self.position[1], self.position[3]])
+shortScale = cgNormalize([0,1], Position=[self.position[0], self.position[2]])
 
     ; Create the colorbar axes. 1000 indicates this location ignored.
 
@@ -377,15 +372,15 @@ IF N_Elements(position) NE 0 THEN BEGIN
 
         ; Move the image polygon into its new positon.
 
-    xs = FSC_Normalize([0,1], Position=[position[0], position[2]])
-    ys = FSC_Normalize([0,1], Position=[position[1], position[3]])
+    xs = cgNormalize([0,1], Position=[position[0], position[2]])
+    ys = cgNormalize([0,1], Position=[position[1], position[3]])
     self.thisPolygon->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
         ; Create new scale factors to position the axes.
 
-    longScale = FSC_Normalize(self.range, $
+    longScale = cgNormalize(self.range, $
        Position=[self.position[1], self.position[3]])
-    shortScale = FSC_Normalize([0,1], $
+    shortScale = cgNormalize([0,1], $
        Position=[self.position[0], self.position[2]])
 
         ; Position the axes. 1000 indicates this position ignored.
@@ -418,7 +413,7 @@ IF N_Elements(minor) NE 0 THEN BEGIN
 END
 IF N_Elements(range) NE 0 THEN BEGIN
     self.range = range
-    longScale = FSC_Normalize(range, $
+    longScale = cgNormalize(range, $
        Position=[self.position[1], self.position[3]])
     self.textAxis->SetProperty, Range=range, YCoord_Conv=longScale
     self.longAxis2->SetProperty, Range=range, YCoord_Conv=longScale

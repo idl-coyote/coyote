@@ -75,6 +75,7 @@
 ; MODIFICATION HISTORY:
 ;
 ;  Written by: David Fanning, October 2001.
+;  Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -232,13 +233,13 @@ CASE buttonValue OF
       info.xAxis->GetProperty, CRange=range
       info.xstatus = 1-info.xstatus
       IF info.xstatus THEN BEGIN
-         xs = FSC_Normalize(range, Position=[-0.5,0.5])
+         xs = cgNormalize(range, Position=[-0.5,0.5])
          info.thisSurface->SetProperty, XCoord_Conv=xs
          info.xAxis->SetProperty, XCoord_Conv=xs, TextBaseline=[1, 0, 0]
          info.fillLight->SetProperty, XCoord_Conv=zs
          info.rotatingLight->SetProperty, XCoord_Conv=zs
       ENDIF ELSE BEGIN
-         xs = FSC_Normalize(Reverse(range), Position=[-0.5,0.5])
+         xs = cgNormalize(Reverse(range), Position=[-0.5,0.5])
          info.thisSurface->SetProperty, XCoord_Conv=xs
          info.xAxis->SetProperty, XCoord_Conv=xs, TextBaseline=[-1, 0, 0]
          info.fillLight->SetProperty, XCoord_Conv=zs
@@ -250,13 +251,13 @@ CASE buttonValue OF
       info.yAxis->GetProperty, CRange=range
       info.ystatus = 1-info.ystatus
       IF info.ystatus THEN BEGIN
-         ys = FSC_Normalize(range, Position=[-0.5,0.5])
+         ys = cgNormalize(range, Position=[-0.5,0.5])
          info.thisSurface->SetProperty, YCoord_Conv=ys
          info.yAxis->SetProperty, YCoord_Conv=ys, TextUpDir=[0, 1, 0]
          info.fillLight->SetProperty, YCoord_Conv=zs
          info.rotatingLight->SetProperty, YCoord_Conv=zs
       ENDIF ELSE BEGIN
-         ys = FSC_Normalize(Reverse(range), Position=[-0.5,0.5])
+         ys = cgNormalize(Reverse(range), Position=[-0.5,0.5])
          info.thisSurface->SetProperty, YCoord_Conv=ys
          info.yAxis->SetProperty, YCoord_Conv=ys, TextUpDir=[0, -1, 0]
          info.fillLight->SetProperty, YCoord_Conv=zs
@@ -268,13 +269,13 @@ CASE buttonValue OF
       info.zAxis->GetProperty, CRange=range
       info.zstatus = 1-info.zstatus
       IF info.zstatus THEN BEGIN
-         zs = FSC_Normalize(range, Position=[-0.5,0.5])
+         zs = cgNormalize(range, Position=[-0.5,0.5])
          info.thisSurface->SetProperty, ZCoord_Conv=zs
          info.zAxis->SetProperty, ZCoord_Conv=zs, TextUpDir=[0, 0, 1]
          info.fillLight->SetProperty, ZCoord_Conv=zs
          info.rotatingLight->SetProperty, ZCoord_Conv=zs
       ENDIF ELSE BEGIN
-         zs = FSC_Normalize(Reverse(range), Position=[-0.5,0.5])
+         zs = cgNormalize(Reverse(range), Position=[-0.5,0.5])
          info.thisSurface->SetProperty, ZCoord_Conv=zs
          info.zAxis->SetProperty, ZCoord_Conv=zs, TextUpDir=[0, 0, -1]
          info.fillLight->SetProperty, ZCoord_Conv=zs
@@ -582,9 +583,9 @@ zAxis->GetProperty, CRange=zrange
     ; surface is rotated we don't have to worry about translations. In
     ; other words, the rotations occur about the point (0,0,0).
 
-xs = FSC_Normalize(xrange, Position=[-0.5,0.5])
-ys = FSC_Normalize(yrange, Position=[-0.5,0.5])
-zs = FSC_Normalize(zrange, Position=[-0.5,0.5])
+xs = cgNormalize(xrange, Position=[-0.5,0.5])
+ys = cgNormalize(yrange, Position=[-0.5,0.5])
+zs = cgNormalize(zrange, Position=[-0.5,0.5])
 
     ; Scale the axes and place them in the coordinate space.
     ; Note that not all values in the Location keyword are

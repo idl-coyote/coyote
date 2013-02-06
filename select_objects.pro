@@ -45,6 +45,7 @@
 ; MODIFICATION HISTORY:
 ;       Written by David Fanning, 21 September 98.
 ;       Added the ability to shrink and expand the objects. 27 Sept 98. DWF.
+;       Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -263,8 +264,8 @@ thisPalette->LoadCT, 5
 
 thisImage = Obj_New('IDLgrImage', image, Palette=thisPalette)
 thisImage->GetProperty, XRange=xrange, YRange=yrange
-xs = FSC_Normalize(xrange, Position=[0.2, 0.9])
-ys = FSC_Normalize(yrange, Position=[0.1, 0.8])
+xs = cgNormalize(xrange, Position=[0.2, 0.9])
+ys = cgNormalize(yrange, Position=[0.1, 0.8])
 thisImage->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
 thisColorbar = Obj_New('VColorbar', Palette=thisPalette, $

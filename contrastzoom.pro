@@ -85,6 +85,7 @@
 ;       Written by David Fanning, 18 November 2001.
 ;       Added second colorbar to show the relationship of the clamped
 ;          colors to the overall image values. 19 November 2001. DWF.
+;       Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -184,8 +185,8 @@ ysize = s[1]
     ; Create the colorbar image object. Add palette to it.
 
 thisImage = Obj_New('IDLgrImage', bar, Palette=self.palette)
-xs = FSC_Normalize([0,xsize], Position=[0,1.])
-ys = FSC_Normalize([0,ysize], Position=[0,1.])
+xs = cgNormalize([0,xsize], Position=[0,1.])
+ys = cgNormalize([0,ysize], Position=[0,1.])
 thisImage->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
    ; Create a polygon object. Add the image as a texture map. We do
@@ -196,14 +197,14 @@ thisPolygon = Obj_New('IDLgrPolygon', [0, 1, 1, 0], [0, 0, 1, 1], [0,0,0,0], $
 
     ; Scale the polygon into the correct position.
 
-xs = FSC_Normalize([0,1], Position=[self.position(0), self.position(2)])
-ys = FSC_Normalize([0,1], Position=[self.position(1), self.position(3)])
+xs = cgNormalize([0,1], Position=[self.position(0), self.position(2)])
+ys = cgNormalize([0,1], Position=[self.position(1), self.position(3)])
 thispolygon->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
     ; Create scale factors to position the axes.
 
-longScale = FSC_Normalize(self.range, Position=[self.position(1), self.position(3)])
-shortScale = FSC_Normalize([0,1], Position=[self.position(0), self.position(2)])
+longScale = cgNormalize(self.range, Position=[self.position(1), self.position(3)])
+shortScale = cgNormalize([0,1], Position=[self.position(0), self.position(2)])
 
     ; Create the colorbar axes. 1000 indicates this location ignored.
 
@@ -317,15 +318,15 @@ IF N_Elements(position) NE 0 THEN BEGIN
     s = Size(image)
     xsize = s(1)
     ysize = s(2)
-    xs = FSC_Normalize([0,xsize], Position=[position(0), position(2)])
-    ys = FSC_Normalize([0,ysize], Position=[position(1), position(3)])
+    xs = cgNormalize([0,xsize], Position=[position(0), position(2)])
+    ys = cgNormalize([0,ysize], Position=[position(1), position(3)])
     self.thisImage->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
         ; Create new scale factors to position the axes.
 
-    longScale = FSC_Normalize(self.range, $
+    longScale = cgNormalize(self.range, $
        Position=[self.position(1), self.position(3)])
-    shortScale = FSC_Normalize([0,1], $
+    shortScale = cgNormalize([0,1], $
        Position=[self.position(0), self.position(2)])
 
         ; Position the axes. 1000 indicates this position ignored.
@@ -358,7 +359,7 @@ IF N_Elements(minor) NE 0 THEN BEGIN
 END
 IF N_Elements(range) NE 0 THEN BEGIN
     self.range = range
-    longScale = FSC_Normalize(range, $
+    longScale = cgNormalize(range, $
        Position=[self.position(1), self.position(3)])
     self.textAxis->SetProperty, Range=range, YCoord_Conv=longScale
     self.longAxis2->SetProperty, Range=range, YCoord_Conv=longScale
@@ -490,8 +491,8 @@ info.theWindow->GetProperty, Dimensions=dims
 windowAspect = (450./info.window_ysize * dims[1]) / (300./info.window_xsize * dims[0])
 pos = ContrastZoom_Aspect(imageAspect, WindowAspect=windowAspect, Margin=0)
 info.zoomImage->GetProperty, XRange=xrange, YRange=yrange
-xs = FSC_Normalize(xrange, Position=[pos(0), pos(2)])
-ys = FSC_Normalize(yrange, Position=[pos(1), pos(3)])
+xs = cgNormalize(xrange, Position=[pos(0), pos(2)])
+ys = cgNormalize(yrange, Position=[pos(1), pos(3)])
 info.zoomImage->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 info.theBox->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
@@ -501,8 +502,8 @@ info.theWindow->GetProperty, Dimensions=dims
 windowAspect = (450./info.window_ysize * dims[1]) / (300./info.window_xsize * dims[0])
 pos = ContrastZoom_Aspect(imageAspect, WindowAspect=windowAspect, Margin=0)
 info.contrastImage->GetProperty, XRange=xrange, YRange=yrange
-xs = FSC_Normalize(xrange, Position=[pos(0), pos(2)])
-ys = FSC_Normalize(yrange, Position=[pos(1), pos(3)])
+xs = cgNormalize(xrange, Position=[pos(0), pos(2)])
+ys = cgNormalize(yrange, Position=[pos(1), pos(3)])
 info.contrastImage->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 
    ; Draw the scene.
@@ -675,8 +676,8 @@ CASE selectWindow OF
               windowAspect = (450./info.window_ysize * dims[1]) / (300./info.window_xsize * dims[0])
               pos = ContrastZoom_Aspect(imageAspect, WindowAspect=windowAspect, Margin=0)
               info.zoomImage->GetProperty, XRange=xrange, YRange=yrange
-              xs = FSC_Normalize(xrange, Position=[pos(0), pos(2)])
-              ys = FSC_Normalize(yrange, Position=[pos(1), pos(3)])
+              xs = cgNormalize(xrange, Position=[pos(0), pos(2)])
+              ys = cgNormalize(yrange, Position=[pos(1), pos(3)])
 
               info.zoomImage->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
               info.theBox->SetProperty, Hide=1, XCoord_Conv=xs, YCoord_Conv=ys
@@ -738,8 +739,8 @@ CASE selectWindow OF
            windowAspect = (450./info.window_ysize * dims[1]) / (300./info.window_xsize * dims[0])
            pos = ContrastZoom_Aspect(imageAspect, WindowAspect=windowAspect, Margin=0)
            info.zoomImage->GetProperty, XRange=xrange, YRange=yrange
-           xs = FSC_Normalize(xrange, Position=[pos(0), pos(2)])
-           ys = FSC_Normalize(yrange, Position=[pos(1), pos(3)])
+           xs = cgNormalize(xrange, Position=[pos(0), pos(2)])
+           ys = cgNormalize(yrange, Position=[pos(1), pos(3)])
            info.zoomImage->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
            info.theBox->SetProperty, Hide=1, XCoord_Conv=xs, YCoord_Conv=ys
 
@@ -1073,9 +1074,8 @@ s = Size(image, /Dimensions)
 imageAspect = Float(s[1]) / s[0]
 windowAspect = Float(450) / 300
 pos = ContrastZoom_Aspect(imageAspect, WindowAspect=windowAspect, Margin=0)
-xs = FSC_Normalize(xrange, Position=[pos(0), pos(2)])
-ys = FSC_Normalize(yrange, Position=[pos(1), pos(3)])
-print, 'pos: ', pos
+xs = cgNormalize(xrange, Position=[pos(0), pos(2)])
+ys = cgNormalize(yrange, Position=[pos(1), pos(3)])
 zoomImage->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 contrastImage->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys
 theBox->SetProperty, XCoord_Conv=xs, YCoord_Conv=ys

@@ -111,7 +111,7 @@
 ;        along with # referencing.
 ;    timeprimitive: in, optional, type=object
 ;        Associates this feature with a period of time (cgKML_Timespan object) or a point in time
-;        (cgKML_Timestamp object).
+;        (KML_Timestamp object).
 ;    visibility: in, optional, type=boolean, default=1
 ;       This keyword specifies whether the feature is drawn in the 3D viewer when it is initially loaded. In 
 ;       order for a feature to be visible, the <visibility> tag of all its ancestors must also be 
@@ -310,7 +310,7 @@ END
 ;        along with # referencing.
 ;    timeprimitive: out, optional, type=object
 ;        Associates this feature with a period of time (cgKML_Timespan object) or a point in time
-;        (cgKML_Timestamp object).
+;        (KML_Timestamp object).
 ;    visibility: out, optional, type=boolean, default=1
 ;       This keyword specifies whether the feature is drawn in the 3D viewer when it is initially loaded. In 
 ;       order for a feature to be visible, the <visibility> tag of all its ancestors must also be 
@@ -397,7 +397,7 @@ END
 ;        along with # referencing.
 ;    timeprimitive: in, optional, type=object
 ;        Associates this feature with a period of time (cgKML_Timespan object) or a point in time
-;        (cgKML_Timestamp object).
+;        (KML_Timestamp object).
 ;    visibility: in, optional, type=boolean, default=1
 ;       This keyword specifies whether the feature is drawn in the 3D viewer when it is initially loaded. In 
 ;       order for a feature to be visible, the <visibility> tag of all its ancestors must also be 

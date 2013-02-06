@@ -89,6 +89,7 @@
 ;            these warnings. 26 Aug 2011. DWF
 ;        Added TRANSFORM keyword to allow the initial surface to be rotated to user 
 ;            specifications. 26 Sept 2011. DWF.
+;        Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010-2011, Fanning Software Consulting, Inc.
@@ -1696,9 +1697,9 @@ PRO cgSurface, data, x, y, $
     ; is scaled into the range -0.5 to 0.5. We do this so that when the
     ; surface is rotated we don't have to worry about translations. In
     ; other words, the rotations occur about the point (0,0,0).
-    xs = FSC_Normalize(xrange, Position=[pos[0], pos[1]])
-    ys = FSC_Normalize(yrange, Position=[pos[2], pos[3]])
-    zs = FSC_Normalize(zrange, Position=[pos[4], pos[5]] * zscale)
+    xs = cgNormalize(xrange, Position=[pos[0], pos[1]])
+    ys = cgNormalize(yrange, Position=[pos[2], pos[3]])
+    zs = cgNormalize(zrange, Position=[pos[4], pos[5]] * zscale)
     
     ; Scale the axes and place them in the coordinate space.
     ; Note that not all values in the Location keyword are

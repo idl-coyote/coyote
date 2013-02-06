@@ -98,7 +98,7 @@
 ;          DELETE_ON_DESTROY and NOTRACEBACK keywords to the INIT and SetProperty
 ;          methods. 28 Jan 2010. DWF.
 ;        Modified default filenames so that I am now guaranteed to get unique file names 
-;           by using Timestamp program from the Coyote Library. 8 Feb 2010. DWF.
+;           by using cgTimestamp program from the Coyote Library. 8 Feb 2010. DWF.
 ;        Added NOCLUTTER keyword. 15 February 2010. DWF.
 ;        Added PRINT keyword to AddText method to allow users to log statements that should
 ;           also be printed easily to a file. 17 February 2010. DWF.
@@ -109,6 +109,7 @@
 ;            will immediately flush the log information to disk when log information is
 ;            added to the object. This will prevent missing information that is buffered
 ;            when a program crashes. Matt Savoie suggestion. DWF, 10 Sept 2010.
+;        Now calling cgTimeStamp rather than TimeStamp to avoid problems with IDL code. 6 Feb 2013. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -909,7 +910,7 @@ FUNCTION ErrorLogger::INIT, filename, $
     IF N_Elements(filename) EQ 0 THEN BEGIN
        CD, CURRENT=currentDir
        logFilename = FilePath(ROOT_DIR=currentDir, 'logger' + $
-            Timestamp(RANDOM_DIGITS=6, /VALID) + '.log')
+            cgTimestamp(RANDOM_DIGITS=6, /VALID) + '.log')
        filename = logFilename
        timestamp = 0
     ENDIF
@@ -926,7 +927,7 @@ FUNCTION ErrorLogger::INIT, filename, $
        basename = cgRootName(logFilename, EXTENSION=ext, DIRECTORY=dir)
        time = Systime(1)
        randomdigits =  StrMid(StrTrim(time - Long(time),2), 2)
-       logFilename = Filepath(ROOT_DIR=dir, basename +  Timestamp(RANDOM_DIGITS=6, /VALID))
+       logFilename = Filepath(ROOT_DIR=dir, basename +  cgTimestamp(RANDOM_DIGITS=6, /VALID))
        IF ext NE "" THEN logFilename = logFilename + '.' + ext
     END
 

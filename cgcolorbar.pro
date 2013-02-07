@@ -293,9 +293,10 @@
 ;          the `Divisions` keyword to 0. 16 Oct 2012. DWF.
 ;       Added CTINDEX, and BREWER keywords to make loading a color table palette easier. 20 October 2012. DWF.
 ;       Fixed a strange interaction between TickInterval and the Format keywords. 5 Nov 2012. DWF.
+;       Changes to support a tick formatting function when a log axis is used. 7 February 2013. DWF.
 ;       
 ; :Copyright:
-;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
 ;-
 PRO cgColorbar, $
     ADDCMD=addcmd, $
@@ -534,8 +535,13 @@ PRO cgColorbar, $
     IF (format NE "") && (StrPos(format, '(') EQ -1) THEN BEGIN
     
        IF minrange LT maxrange THEN BEGIN
-           step = (maxrange - minrange) / divisions
+           IF (xlog OR ylog) THEN BEGIN
+              step = (ALog10(maxrange) - ALog10(minrange)) / divisions
+           ENDIF ELSE BEGIN
+              step = (maxrange - minrange) / divisions
+           ENDELSE
            levels = minrange > (Indgen(divisions+1) * step + minrange) < maxrange
+           IF (xlog OR ylog) THEN levels = 10^levels
            nlevels = N_Elements(levels)
            ticknames = StrArr(nlevels)
            FOR j=0,nlevels-1 DO BEGIN
@@ -543,9 +549,15 @@ PRO cgColorbar, $
            ENDFOR
            format = "" ; No formats allowed in PLOT call now that we have ticknames.
         ENDIF ELSE BEGIN
-           step = (minrange - maxrange) / divisions
+           IF (xlog OR ylog) THEN BEGIN
+               step = (ALog10(minrange) - ALog10(maxrange)) / divisions
+           ENDIF ELSE BEGIN
+               step = (minrange - maxrange) / divisions
+           ENDELSE
+           
            levels = maxrange > (Indgen(divisions+1) * step + maxrange) < minrange
            levels = Reverse(levels)
+           IF (xlog OR ylog) THEN levels = 10^levels
            nlevels = N_Elements(levels)
            ticknames = StrArr(nlevels)
            FOR j=0,nlevels-1 DO BEGIN

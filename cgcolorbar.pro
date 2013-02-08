@@ -216,12 +216,16 @@
 ;       Set this keyword to use logarithmic scaling for the colorbar data range.
 ;    xtickinterval: in, optional, type=float
 ;       This keyword is trapped, but unused. Please use the`TickInterval` keyword instead.
+;    xticklayout: in, optional, type=integer, default=0
+;       See the Plot graphics kewyords for an example. Used here only to track this keyword.
 ;    xtitle: in, optional, type=string
 ;        This keyword is ignored. Use the `Title` keyword to set a title for the color bar.
 ;    ylog: in, optional, type=boolean, default=0
 ;       Set this keyword to use logarithmic scaling for the colorbar data range.
 ;    ytickinterval: in, optional, type=float
 ;       This keyword is trapped, but unused. Please use the`TickInterval` keyword instead.
+;    yticklayout: in, optional, type=integer, default=0
+;       See the Plot graphics kewyords for an example. Used here only to track this keyword.
 ;    ytitle: in, optional, type=string
 ;        This keyword is ignored. Use the `Title` keyword to set a title for the color bar.
 ;    _ref_extra: in, optional
@@ -294,6 +298,7 @@
 ;       Added CTINDEX, and BREWER keywords to make loading a color table palette easier. 20 October 2012. DWF.
 ;       Fixed a strange interaction between TickInterval and the Format keywords. 5 Nov 2012. DWF.
 ;       Changes to support a tick formatting function when a log axis is used. 7 February 2013. DWF.
+;       Added XTICKLAYOUT and YTICKLAYOUT keywords. 8 February 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
@@ -338,9 +343,11 @@ PRO cgColorbar, $
     VERTICAL=vertical, $
     XLOG=xlog, $
     XTICKINTERVAL=xtickinterval, $
+    XTICKLAYOUT=xticklayout, $
     XTITLE=xtitle, $ ; Ignored.
     YLOG=ylog, $
     YTICKINTERVAL=ytickinterval, $
+    YTICKLAYOUT=yticklayout, $
     YTITLE=ytitle, $ ; Ignored
     WINDOW=window, $
     _REF_EXTRA=extra
@@ -394,6 +401,7 @@ PRO cgColorbar, $
             TLOCATION=tlocation, $
             TCHARSIZE=tcharsize, $
             TICKINTERVAL=tickinterval, $
+            XTICKLAYOUT=xticklayout, $
             TICKLEN=ticklen, $
             TICKNAMES=ticknames, $
             TITLE=title, $
@@ -404,6 +412,7 @@ PRO cgColorbar, $
             XTITLE=xtitle, $ ; Ignored.
             YLOG=ylog, $
             YTICKINTERVAL=ytickinterval, $
+            YTICKLAYOUT=yticklayout, $
             YTITLE=ytitle, $
             REPLACECMD=Keyword_Set(window), $
             ADDCMD=Keyword_Set(addcmd), $
@@ -751,12 +760,13 @@ PRO cgColorbar, $
                  YTICKS=divisions, XSTYLE=1, YSTYLE=9, XTITLE="", YTITLE="", $
                  POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
                  XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', YMINOR=minor, _STRICT_EXTRA=extra, $
-                 YTICKNAME=ticknames, FONT=font, YLOG=ylog, YTICKINTERVAL=tickinterval
+                 YTICKNAME=ticknames, FONT=font, YLOG=ylog, YTICKINTERVAL=tickinterval, $
+                 YTICKLAYOUT=yticklayout, XTICKLAYOUT=xticklayout
     
               AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
                  YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
                  FONT=font, YTITLE="", _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, $
-                 YLOG=ylog, YTICKINTERVAL=tickinterval, YTICK_GET=ticks
+                 YLOG=ylog, YTICKINTERVAL=tickinterval, YTICK_GET=ticks, YTICKLAYOUT=yticklayout
                  
               truecharsize = Float(!D.X_CH_SIZE * tcharsize) / !D.X_SIZE
               yloc = (position[3] - position[1]) / 2.0 + position[1]
@@ -768,12 +778,13 @@ PRO cgColorbar, $
                  YTICKS=divisions, XSTYLE=1, YSTYLE=9, XTITLE="", YTITLE="", $
                  POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
                  XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', YMINOR=minor, _STRICT_EXTRA=extra, $
-                 YTICKNAME=ticknames, FONT=font, YLOG=ylog, YTICKINTERVAL=tickinterval
+                 YTICKNAME=ticknames, FONT=font, YLOG=ylog, YTICKINTERVAL=tickinterval, $
+                 YTICKLAYOUT=yticklayout, XTICKLAYOUT=xticklayout
     
               AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
                  YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
                  FONT=font, YTITLE=title, _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, $
-                 YLOG=ylog, YTICKINTERVAL=tickinterval, YTICK_GET=ticks
+                 YLOG=ylog, YTICKINTERVAL=tickinterval, YTICK_GET=ticks, YTICKLAYOUT=yticklayout
           ENDELSE
 
        ENDIF ELSE BEGIN
@@ -784,12 +795,12 @@ PRO cgColorbar, $
                  POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
                  XTICKFORMAT='(A1)', YTICKFORMAT=format, YMinor=minor, _STRICT_EXTRA=extra, $
                  YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font, XTITLE="", $
-                 YTICKINTERVAL=tickinterval
+                 YTICKINTERVAL=tickinterval, YTICKLAYOUT=yticklayout, XTICKLAYOUT=xticklayout
     
               AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT='(A1)', YTICKS=divisions, $
                  YTICKLEN=0.001, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
                  FONT=font, YTITLE="", _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME="", YLOG=ylog, $
-                 YTICKINTERVAL=tickinterval
+                 YTICKINTERVAL=tickinterval, YTICKLAYOUT=yticklayout
                  
               truecharsize = Float(!D.X_CH_SIZE * tcharsize) / !D.X_SIZE
               yloc = (position[3] - position[1]) / 2.0 + position[1]
@@ -802,12 +813,12 @@ PRO cgColorbar, $
                  POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
                  XTICKFORMAT='(A1)', YTICKFORMAT=format, YMinor=minor, _STRICT_EXTRA=extra, $
                  YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font, XTITLE="", $
-                 YTICKINTERVAL=tickinterval
+                 YTICKINTERVAL=tickinterval, YTICKLAYOUT=yticklayout, XTICKLAYOUT=xticklayout
     
               AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT='(A1)', YTICKS=divisions, $
                  YTICKLEN=0.001, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
                  FONT=font, YTITLE="", _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME="", YLOG=ylog, $
-                 YTICKINTERVAL=tickinterval
+                 YTICKINTERVAL=tickinterval, YTICKLAYOUT=yticklayout
           ENDELSE
 
        ENDELSE
@@ -821,12 +832,14 @@ PRO cgColorbar, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              YTICKFORMAT='(A1)', XTICKFORMAT='(A1)', XTICKLEN=0.01, $
              XRANGE=[minrange, maxrange], FONT=font, XMINOR=minor, _STRICT_EXTRA=extra, $
-             XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE="", XTICKINTERVAL=tickInterval
+             XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE="", XTICKINTERVAL=tickInterval, $
+             XTICKLAYOUT=xticklayout, YTICKLAYOUT=yticklayout
 
           AXIS, XTICKS=divisions, XSTYLE=1, COLOR=color, CHARSIZE=charsize, $
              XTICKFORMAT=format, XTICKLEN=ticklen, XRANGE=[minrange, maxrange], XAXIS=1, $
              FONT=font, XTITLE="", _STRICT_EXTRA=extra, XMINOR=minor, $
-             XTICKNAME=ticknames, XLOG=xlog, YTITLE="", XTICKINTERVAL=tickInterval
+             XTICKNAME=ticknames, XLOG=xlog, YTITLE="", XTICKINTERVAL=tickInterval, $
+             XTICKLAYOUT=xticklayout
              
           IF title NE "" THEN BEGIN
              xloc = (position[2] - position[0]) / 2.0 + position[0]
@@ -854,12 +867,13 @@ PRO cgColorbar, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              YTICKFORMAT='(A1)', XTICKFORMAT=format, XTICKLEN=ticklen, $
              XRANGE=[minrange, maxrange], FONT=font, XMinor=minor, _STRICT_EXTRA=extra, $
-             XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE="", XTICKINTERVAL=tickInterval
+             XTICKNAME=ticknames, XLOG=xlog, XTITLE="", YTITLE="", $
+             XTICKINTERVAL=tickInterval, XTICKLAYOUT=xticklayout, YTICKLAYOUT=yticklayout
 
           AXIS, XTICKS=divisions, XSTYLE=1, COLOR=color, CHARSIZE=charsize, $
              XTICKFORMAT='(A1)', XTICKLEN=0.001, XRANGE=[minrange, maxrange], XAXIS=1, $
              FONT=font, XTITLE="", XCHARSIZE=charsize, XMINOR=minor, $
-             XTICKNAME="", XLOG=xlog, YTITLE="", XTICKINTERVAL=tickInterval
+             XTICKNAME="", XLOG=xlog, YTITLE="", XTICKINTERVAL=tickInterval, XTICKLAYOUT=xticklayout
 
           IF title NE "" THEN BEGIN
              xloc = (position[2] - position[0]) / 2.0 + position[0]

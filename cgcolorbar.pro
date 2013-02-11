@@ -545,12 +545,11 @@ PRO cgColorbar, $
     
        IF minrange LT maxrange THEN BEGIN
            IF (xlog OR ylog) THEN BEGIN
-              step = (ALog10(maxrange) - ALog10(minrange)) / divisions
+                levels = Scale_Vector(Findgen(divisions+1), ALog10(minrange), ALog10(maxrange))
+                levels = 10^levels
            ENDIF ELSE BEGIN
-              step = (maxrange - minrange) / divisions
-           ENDELSE
-           levels = minrange > (Indgen(divisions+1) * step + minrange) < maxrange
-           IF (xlog OR ylog) THEN levels = 10^levels
+                levels = Scale_Vector(Findgen(divisions+1), minrange, maxrange)
+           ENDELSE          
            nlevels = N_Elements(levels)
            ticknames = StrArr(nlevels)
            FOR j=0,nlevels-1 DO BEGIN
@@ -559,14 +558,12 @@ PRO cgColorbar, $
            format = "" ; No formats allowed in PLOT call now that we have ticknames.
         ENDIF ELSE BEGIN
            IF (xlog OR ylog) THEN BEGIN
-               step = (ALog10(minrange) - ALog10(maxrange)) / divisions
+                levels = Scale_Vector(Findgen(divisions+1), ALog10(maxrange), ALog10(minrange))
+                levels = 10^levels
            ENDIF ELSE BEGIN
-               step = (minrange - maxrange) / divisions
-           ENDELSE
-           
-           levels = maxrange > (Indgen(divisions+1) * step + maxrange) < minrange
+                levels = Scale_Vector(Findgen(divisions+1), maxrange, minrange)
+           ENDELSE          
            levels = Reverse(levels)
-           IF (xlog OR ylog) THEN levels = 10^levels
            nlevels = N_Elements(levels)
            ticknames = StrArr(nlevels)
            FOR j=0,nlevels-1 DO BEGIN

@@ -66,8 +66,21 @@
 ;         the current graphics window as Float(!D.Y_VSize) / !D.X_VSize.
 ;         
 ; :Examples:
-;    Here is how to use this program::
-;       IDL> ...
+;    Here is how to use this program to display two differently sized images aligned at their tops::
+;        img1 = cgDemoData(7)
+;        img2 = congrid(img1, 360, 180)
+;        cgDisplay, 900, 450
+;        
+;        pos = cgLayout([2,1], OYMargin=[4, 11], OXMargin=[5, 8], XGap=6)
+;        pos1 = pos[*,0]
+;        img1pos = cgAspect(Position=pos1, Aspect=img1, Align='top')
+;        cgImage, img1, CTIndex=3, /AXES, POSITION=img1pos, OPOSITION=op
+;        cgColorbar, CTIndex=3, /Fit    
+;            
+;        pos2 = pos[*,1]
+;        img2pos = cgAspect(Position=pos2, Aspect=img2, Align='top')
+;        cgImage, img2, /AXES, POSITION=img2pos, CTIndex=2, /NoErase
+;        cgColorbar, CTIndex=2, /Fit  
 ;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -98,27 +111,27 @@ FUNCTION cgAspect, aspect_ratio, $
    ; Is there a 2D array to use to set the requested aspect_ratio?
    IF N_Elements(aspect) NE 0 THEN BEGIN
         dims = Size(aspect, /Dimensions)
-        aspect_ratio = Float(dims[1]) / dims[0]
+        aspect_ratio = Double(dims[1]) / dims[0]
    ENDIF
    
    ; Do you have an aspect ratio?
    IF N_Elements(aspect_ratio) EQ 0 THEN BEGIN
       Message, 'Calling Syntax:  position = cgAspect(aspect_ratio)', /Informational
       RETURN, Replicate(0.0,4)
-   ENDIF
+   ENDIF ELSE aspect_ratio = Double(aspect_ratio)
    
    ; Do we need a position in the window?
    IF N_Elements(position) EQ 0 THEN BEGIN
       IF Keyword_Set(single_plot) THEN BEGIN
-          position = [0.125, 0.125, 0.9, 0.9]
+          position = [0.125d, 0.125d, 0.9d, 0.9d]
       ENDIF ELSE BEGIN
-          position = [0.0, 0.0, 1.0, 1.0]
+          position = [0.0d, 0.0d, 1.0d, 1.0d]
       ENDELSE
    ENDIF
    
    ; Do we need a window aspect ratio?
    IF N_Elements(waspect) EQ 0 THEN BEGIN
-      waspect = Float(!D.Y_VSize) / !D.X_VSize
+      waspect = Double(!D.Y_VSize) / !D.X_VSize
    ENDIF
    
    ; Do you have an alignment?
@@ -172,7 +185,7 @@ FUNCTION cgAspect, aspect_ratio, $
           
        'CENTER': 
            
-        ELSE: Message, 'Do not understand this alignment parameter: ' + align
+        ELSE: Message, 'Unknown alignment parameter: ' + align
        
    ENDCASE
    

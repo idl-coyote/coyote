@@ -74,6 +74,7 @@
 ;            I hope, with the new cgGRID keyword. 3 Jan 2013. 
 ;        Corrected bug in variable spelling that affect LONDELTA and LATDELTA keywords. 6 Jan 2013. DWF.
 ;        Lost a piece of code that allows longitude box axes. Added back in. 23 Jan 2013. DWF.
+;        T3D keyword was not being applied. Fixed. 11 February 2013. DWF.
 ;            
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -575,6 +576,9 @@ PRO cgMap_Grid, $
   ; CLIP_TEXT (default value = 1) = 1 to clip text within the map area,
   ; 0 to not clip text.
   noclip = (N_ELEMENTS(clip_text) gt 0) ? ~KEYWORD_SET(clip_text) : 0
+  
+  ;   Append the graphics keywords:
+  if n_elements(t3d) then map_struct_append, extra,'T3D',t3d
   
   
   ;Orientation is reversed & conflicts w/box_axes

@@ -51,9 +51,8 @@
 ; 
 ; A grid position is a combination of the number of columns and rows desired, plus
 ; the application of inside and outside margins, as well as a desired aspect ratio.
-; Margins are specified in character size units. One unit in the X direction is
-; given as !D.X_CH_SIZE pixels. One unit in the Y direction is given as !D.Y_CH_SIZE
-; pixels. The outside margins locate the grid inside the graphics display window.
+; Margins are specified in units of one-third the !D.X_PX_CM value to be device independent. 
+; The outside margins locate the grid inside the graphics display window.
 ; (These are equivalent to !X.OMargin and !Y.OMargin system variable when displaying
 ; a grid with !P.Multi, for example.) Inside margins use the same units, but are
 ; used to modify the initial grid positions in the window. (These are equivalent
@@ -178,6 +177,9 @@
 ; :History:
 ;    Change History::
 ;       Written, 19 December 2012 by David W. Fanning, from suggestions from Matthew Argall.
+;       Changed the notion of one "unit" from the values of !D.X_CH_SIZE and !D.Y_CH_SIZE to
+;           1/3 of the value of !D.X_PX_CM. This gives me more consistent measurements on the
+;           display and in a PostScript file. 12 Feb 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -215,7 +217,7 @@ FUNCTION cgLayout, layout, $
    IF N_Elements(oymargin) EQ 0 THEN oymargin = [6,8]
    IF N_Elements(xgap) EQ 0 THEN xgap = 14
    IF N_Elements(ygap) EQ 0 THEN ygap = 8
- 
+   
    ; Get the size of the window. If the current device supports windows,
    ; a window has to be open.
    IF ((!D.FLAGS AND 256) NE 0) AND !D.Window LT 0 THEN BEGIN
@@ -232,12 +234,13 @@ FUNCTION cgLayout, layout, $
    nrows = layout[1]
    
    ; Set up the inside and outside margins and the gaps between positions.
-   xomargin = oxmargin * !D.X_CH_SIZE
-   yomargin = oymargin * !D.Y_CH_SIZE
-   ximargin = ixmargin * !D.X_CH_SIZE / xsize
-   yimargin = iymargin * !D.Y_CH_SIZE / ysize
-   gapx = xgap * !D.X_CH_SIZE
-   gapy = ygap * !D.Y_CH_SIZE
+   unit = !D.X_PX_CM / 3
+   xomargin = oxmargin * unit
+   yomargin = oymargin * unit
+   ximargin = ixmargin * unit / xsize
+   yimargin = iymargin * unit / ysize
+   gapx = xgap * unit
+   gapy = ygap * unit
    
    ; Calculate the window or drawing area inside the graphics window.
    winarea = [ xomargin[0], yomargin[0], xsize - xomargin[1], ysize - yomargin[1] ]   

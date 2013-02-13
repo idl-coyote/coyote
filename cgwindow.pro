@@ -299,6 +299,7 @@
 ;         In decompling cgWindow from cgCmdWindow, I accidentally named the WASPECT keyword ASPECT. Restored
 ;             original name in this version. 13 July 2012. DWF.
 ;         Added WDestroyObjects keyword to destroy objects parameters, if needed. 11 November 2012. DWF.
+;         Restored the WMULTI keyword win calling cgCmdWindow. 11 Feb 2013. DWF.
 ;-
 PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.
@@ -557,12 +558,12 @@ PRO cgWindow, $
        Group_Leader = group_leader, $   ; The group leader of the cgWindow program.
        Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
        Background = wbackground, $      ; The background color. Not used unless set.
-       Multi = wmulti, $                ; Set this in the same way !P.Multi is used.
        Erase = weraseit, $              ; Set this keyword to erase the display before executing the command.
        OXMargin = woxMargin, $          ; The X outside margin.
        OYMargin = woymargin, $          ; The Y outside margin.
        WAspect = waspect, $             ; Set the window aspect ratio to this value.
        WDestroyObjects=wdestroyobjects, $ ; Set this keyword to destroy object parameters upon exit.
+       WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
        WXSize = wxsize, $               ; The X size of the cgWindow graphics window in pixels. By default: 400.
        WYSize = wysize, $               ; The Y size of the cgWindow graphics window in pixels. By default: 400.
        WTitle = wtitle, $               ; The window title.

@@ -125,6 +125,7 @@
 ;        Modified ReplaceEscapeSequence method to use cgCheckForSymbols. 24 November 2012. DWF.
 ;        Modified to allow keywords to turn off messages from PS_START and PS_END with keywords. 27 November 2012. DWF.
 ;        The output filename was not specified correctly when making PDF file automatically. Fixed. 2 Dec 2012. DWF.
+;        Renamed the MULTI keyword to WMULTI, as it was suppose to be. 11 Feb 2013. DWF.
 ;-
 
 
@@ -187,9 +188,6 @@
 ;       must be present and must be a valid object reference.
 ;    motion_events: in, optional, type=boolean
 ;       Set this keyword to turn motion events on for the draw widget.
-;    multi: in, optional, type=intarr(5)
-;        Set this keyword in exactly the same way you would set the !P.Multi keyword.
-;        It will allow you to display multi-plots in the cgWindow graphics window.
 ;    oxmargin: in, optional, type=float
 ;       A two-element array indicating the left and right X outside margins for the
 ;       graphical display. Used only when doing multiple plots with `WMulti`.
@@ -224,6 +222,9 @@
 ;       the object parameter will be destroyed when the window is destroyed.
 ;    wheel_events: in, optional, type=boolean
 ;       Set this keyword to turn wheel events on for the draw widget.
+;    wmulti: in, optional, type=intarr(5)
+;        Set this keyword in exactly the same way you would set the !P.Multi keyword.
+;        It will allow you to display multi-plots in the cgWindow graphics window.
 ;    wtitle: in, optional, type=string, default='Resizeable Graphics Window'
 ;       The title of the graphics window if the program creates its own top-level
 ;       base widget. A window index number is appended to the title so multiple cgWindow 
@@ -258,7 +259,6 @@ FUNCTION cgCmdWindow::Init, parent, $
    Keyboard_Events=keyboard_events, $ ; Set this keyword to allow keyboard events in the draw widget.
    Method=method, $                 ; If set, will use CALL_METHOD instead of CALL_PROCEDURE to execute command.
    Motion_Events=motion_events, $   ; Set this keyword to allow motion events in the draw widget.
-   Multi = multi, $                 ; Set this in the same way !P.Multi is used.
    OXMargin = xomargin, $           ; Set the !X.OMargin. A two element array.
    OYMargin = yomargin, $           ; Set the !Y.OMargin. A two element array
    P1=p1, $                         ; The first postitional parameter in a graphics command loaded for display.
@@ -271,6 +271,7 @@ FUNCTION cgCmdWindow::Init, parent, $
    WAspect = waspect, $             ; Set the window aspect ratio to this value.
    WDestroyObjects=wdestroyobjects, $ ; Set this keyword to destroy object parameters upon exit.
    Wheel_Events=wheel_events, $     ; Set this keyword to allow wheel events in the draw widget.
+   WMulti = wmulti, $               ; Set this in the same way !P.Multi is used.
    WTitle = title, $                ; The window title.
    WXPos = xpos, $                  ; The X offset of the window on the display. The window is centered if not set.
    WXSize = xsize, $                ; The X size of the cgWindow graphics window in pixels. By default: 400.
@@ -511,8 +512,8 @@ FUNCTION cgCmdWindow::Init, parent, $
     self.background = Ptr_New(background)
     IF N_Elements(cmdDelay) NE 0 THEN self.delay = cmdDelay ELSE self.delay = d_delay
     self.eraseIt = eraseIt
-    IF N_Elements(multi) NE 0 THEN BEGIN
-       FOR j=0,N_Elements(multi)-1 DO self.pmulti[j] = multi[j]
+    IF N_Elements(wmulti) NE 0 THEN BEGIN
+       FOR j=0,N_Elements(wmulti)-1 DO self.pmulti[j] = wmulti[j]
     ENDIF ELSE self.pmulti = d_multi
     IF N_Elements(xomargin) NE 0 THEN self.xomargin = xomargin ELSE self.xomargin = d_xomargin
     IF N_Elements(yomargin) NE 0 THEN self.yomargin = yomargin ELSE self.yomargin = d_yomargin

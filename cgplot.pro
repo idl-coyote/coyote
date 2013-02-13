@@ -230,7 +230,9 @@
 ;         Fixed an interaction with the LABEL keyword that prevented a Title from appearing. 2 Oct 2012. DWF.
 ;         Modified the way default colors are selected when the background color is "white". 4 Dec 2012. DWF.
 ;         Still trying to accommodate users who incorrectly specify LONG integers while using INDEXED color. 26 Dec 2012. DWF.
-;         
+;         Modified code that checks to see if COLOR and AXISCOLOR keywords are the same as BACKGROUND and changes them.
+;              This precludes drawing in background color on non-white backgrounds. Now only change the
+;              colors if it is possible to draw a background color. 12 Feb 2013. DWF.
 ; :Copyright:
 ;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
 ;-
@@ -548,7 +550,7 @@ PRO cgPlot, x, y, $
        color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional)
     ENDELSE
 
-    ; If color is the same as background, do something. Since this precludes drawing the the
+    ; If color is the same as background, do something. Since this precludes drawing the 
     ; background color (perhaps you want to "erase" something), I offer an exception. If the
     ; COLOR is "Background", I am going to assume you know what you are doing!
     IF ColorsAreIdentical(background, color) THEN BEGIN
@@ -556,16 +558,24 @@ PRO cgPlot, x, y, $
            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
         ENDIF
         IF (Size(color, /TNAME) EQ 'STRING') THEN BEGIN
-            IF (StrUpCase(color) NE 'BACKGROUND') THEN color = 'OPPOSITE'
-        ENDIF ELSE color = 'OPPOSITE'
+            IF (StrUpCase(color) NE 'BACKGROUND') THEN BEGIN
+                IF ~noerase && ~Keyword_Set(overplot) THEN color = 'OPPOSITE'
+            ENDIF
+        ENDIF ELSE BEGIN
+            IF ~noerase && ~Keyword_Set(overplot) THEN color = 'OPPOSITE'
+        ENDELSE
     ENDIF
     IF ColorsAreIdentical(background, axiscolor) THEN BEGIN
         IF ((!D.Flags AND 256) NE 0) THEN BEGIN
            IF (!P.Multi[0] EQ 0) && (~Keyword_Set(overplot) && ~noerase) THEN cgErase, background
         ENDIF
         IF (Size(axiscolor, /TNAME) EQ 'STRING') THEN BEGIN
-           IF (StrUpCase(axiscolor) NE 'BACKGROUND') THEN axiscolor = 'OPPOSITE'
-        ENDIF ELSE axiscolor = 'OPPOSITE'
+           IF (StrUpCase(axiscolor) NE 'BACKGROUND') THEN BEGIN
+               IF ~noerase && ~Keyword_Set(overplot) THEN axiscolor = 'OPPOSITE'
+           ENDIF
+        ENDIF ELSE BEGIN
+             IF ~noerase && ~Keyword_Set(overplot) THEN axiscolor = 'OPPOSITE'
+        ENDELSE
     ENDIF
     symcolor = cgDefaultColor(ssymcolor, DEFAULT=color, TRADITIONAL=traditional)
     

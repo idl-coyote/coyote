@@ -202,13 +202,18 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 ;       The data to be draw as a box plot.
 ;       
 ;  :Keywords:
-;    boxcolor: in, optional, type='string', default='rose'
+;    boxcolor: in, optional, type=string, default='rose'
 ;       If FILLBOXES is set, the IQR box is filled with this color. 
-;    color: in, optional, type=string, default='charcoal'              
+;    color: in, optional, type=string, default='opposite'              
 ;       A string color name, as appropriate for the cgColor program. The boxplot 
 ;       will be drawn in this color.
 ;    fillboxes: in, optional, type=boolean, default=0
 ;       Set this keyword to fill the IQR box with a color, specified by BOXCOLOR.
+;    outliercolor, in, optional, type=string
+;       The name of the color the outliers are drawn in. By default, the `BoxColor`.
+;    outlinecolor: in, optional, type=string
+;       The color the box outlines are drawn in. By default, the `BoxColor` if `FillBoxes' is
+;       set and `Color` if not.
 ;    stats: in, optional
 ;       Set this to a named variable that will return an array of structures
 ;       for each of the columns of data. The statistics are calculated in this
@@ -223,6 +228,8 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
         BOXCOLOR=boxcolor, $
         COLOR=color, $
         FILLBOXES=fillboxes, $
+        OUTLIERCOLOR=outliercolor, $
+        OUTLINECOLOR=outlinecolor, $
         STATS=stats, $
         WIDTH=width, $
         XLOCATION=xlocation
@@ -231,8 +238,12 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 
       ; Check the parameters.
       IF N_Elements(thisdata) EQ 0 THEN Message, 'Data vector is undefined.'
-      IF N_Elements(boxcolor) EQ 0 THEN boxcolor = 'ROSE'
-      IF N_Elements(color) EQ 0 THEN color = 'WHITE'
+      IF N_Elements(boxcolor) EQ 0 THEN boxcolor = 'rose'
+      IF N_Elements(color) EQ 0 THEN color = 'opposite'
+      IF N_Elements(outliercolor) EQ 0 THEN outliercolor = color
+      IF N_Elements(outlinecolor) EQ 0 THEN BEGIN
+         IF Keyword_Set(fillboxes) THEN outlinecolor = boxcolor ELSE outlinecolor = color
+      ENDIF
       fillboxes = Keyword_Set(fillboxes)
       IF N_Elements(xlocation) EQ 0 THEN xlocation = (!X.CRange[1] - !X.Crange[0]) / 2 + Min(!X.CRange)
       IF N_Elements(width) EQ 0 THEN width = (!X.CRange[1] - !X.Crange[0]) * 0.05
@@ -306,8 +317,8 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
       y1 = quartile_25
       y2 = quartile_75
       IF fillboxes THEN POLYFILL, [x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], COLOR=cgColor(boxcolor)
-      PLOTS, [x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], COLOR=cgColor(color)
-      PLOTS, [x1, x2], [medianData, medianData], COLOR=cgColor(color)
+      PLOTS, [x1,x1,x2,x2,x1], [y1,y2,y2,y1,y1], COLOR=cgColor(outlinecolor)
+      PLOTS, [x1, x2], [medianData, medianData], COLOR=cgColor(outlinecolor)
       
       ; Are there any data greater than 1.5*iqr
       imax = Where(data GT quartile_75 + (1.5 * iqr), maxcount)
@@ -328,21 +339,21 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
       ENDELSE
       
       ; Draw the whiskers.
-      PLOTS, [xlocation, xlocation], [quartile_75, top], COLOR=cgColor(color)
-      PLOTS, [xlocation, xlocation], [quartile_25, bottom], COLOR=cgColor(color)
+      PLOTS, [xlocation, xlocation], [quartile_75, top], COLOR=cgColor(outlinecolor)
+      PLOTS, [xlocation, xlocation], [quartile_25, bottom], COLOR=cgColor(outlinecolor)
       PLOTS, [xlocation - (halfwidth*0.5), xlocation + (halfwidth*0.5)], $
-             [top, top], COLOR=cgColor(color)
+             [top, top], COLOR=cgColor(outlinecolor)
       PLOTS, [xlocation - (halfwidth*0.5), xlocation + (halfwidth*0.5)], $
-             [bottom, bottom], COLOR=cgColor(color)
+             [bottom, bottom], COLOR=cgColor(outlinecolor)
       
       ; Draw outliners if there are any.
       IF maxcount GT 0 THEN BEGIN
          FOR j=0,maxcount-1 DO PLOTS, xlocation, data[imax[j]], $
-            PSYM=cgSymCat(9), COLOR=cgColor(color), NOCLIP=0
+            PSYM=cgSymCat(9), COLOR=cgColor(outliercolor), NOCLIP=0
       ENDIF
       IF mincount GT 0 THEN BEGIN
          FOR j=0,mincount-1 DO PLOTS, xlocation, data[imin[j]], $
-            PSYM=cgSymCat(9), COLOR=cgColor(color), NOCLIP=0
+            PSYM=cgSymCat(9), COLOR=cgColor(outliercolor), NOCLIP=0
       ENDIF
       
       IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState
@@ -366,11 +377,11 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 ; :Keywords:
 ;    addcmd: in, optional, type=boolean, default=0
 ;       Set this keyword to add the command to the resizeable graphics window cgWindow.
-;    axes_color: in, optional, type=string
+;    axescolor: in, optional, type=string
 ;       A string color name, as appropriate for the cgCOLOR program.
 ;       By default, the same as the COLOR keyword. Used only if OVERPLOT 
 ;       keyword is not set.
-;    background_color: in, optional, type=string, default='background'     
+;    background_color: in, optional, type=string, default='white'     
 ;       A string color name, as appropriate for the cgColor program.
 ;       Used only if OVERPLOT keyword is not set.
 ;    boxcolor: in, optional, type='string', default='rose'
@@ -402,6 +413,11 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 ;       filename, unless this keyword is set to a non-null string. In that case, the
 ;       value of this keyword will be used as the filename and there will be no dialog
 ;       presented to the user.
+;    outliercolor, in, optional, type=string
+;       The name of the color the outliers are drawn in. By default, the `BoxColor`.
+;    outlinecolor: in, optional, type=string
+;       The color the box outlines are drawn in. By default, the `BoxColor` if `FillBoxes' is
+;       set and `Color` if not.
 ;    output: in, optional, type=string, default=""
 ;       Set this keyword to the type of output desired. Possible values are these::
 ;            
@@ -463,7 +479,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 ;-
    PRO cgBoxPlot, data, $
         ADDCMD=addcmd, $
-        AXES_COLOR=axes_color, $
+        AXISCOLOR=axiscolor, $
         BACKGROUND_COLOR=background_color, $
         BOXCOLOR=boxcolor, $
         CHARSIZE=charsize, $
@@ -473,6 +489,8 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
         LAYOUT=layout, $
         MISSING_DATA_VALUE=missing_data_value, $
         OUTFILENAME=outfilename, $
+        OUTLIERCOLOR=outliercolor, $
+        OUTLINECOLOR=outlinecolor, $
         OUTPUT=output, $
         OVERPLOT=overplot, $
         ROTATE=rotate, $
@@ -509,7 +527,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
             
         IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
             cgWindow, 'cgBoxPlot', data, $
-                AXES_COLOR=axes_color, $
+                AXISCOLOR=axiscolor, $
                 BACKGROUND_COLOR=background_color, $
                 BOXCOLOR=boxcolor, $
                 CHARSIZE=charsize, $
@@ -518,6 +536,8 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
                 LABELS=labels, $
                 MISSING_DATA_VALUE=missing_data_value, $
                 OVERPLOT=overplot, $
+                OUTLIERCOLOR=outliercolor, $
+                OUTLINECOLOR=outlinecolor, $
                 ROTATE=rotate, $
                 STATS=stats, $
                 XCHARSIZE=xcharsize, $
@@ -532,7 +552,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
         currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
         cgWindow, 'cgBoxPlot', data, $
-                AXES_COLOR=axes_color, $
+                AXISCOLOR=axiscolor, $
                 BACKGROUND_COLOR=background_color, $
                 BOXCOLOR=boxcolor, $
                 CHARSIZE=charsize, $
@@ -541,6 +561,8 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
                 LABELS=labels, $
                 MISSING_DATA_VALUE=missing_data_value, $
                 OVERPLOT=overplot, $
+                OUTLIERCOLOR=outliercolor, $
+                OUTLINECOLOR=outlinecolor, $
                 ROTATE=rotate, $
                 STATS=stats, $
                 XCHARSIZE=xcharsize, $
@@ -681,12 +703,16 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 
       ; Arguments and keywords.
       IF N_Elements(color) EQ 0 THEN color = 'opposite'
-      IF N_Elements(axes_color) EQ 0 THEN axes_color = color
-      IF N_Elements(background_color) EQ 0 THEN background_color = 'background'
+      IF N_Elements(axiscolor) EQ 0 THEN axiscolor = color
+      IF N_Elements(background_color) EQ 0 THEN background_color = 'white'
       IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharsize()
       IF N_Elements(xcharsize) EQ 0 THEN xcharsize = charsize * 0.75
       IF N_Elements(boxcolor) EQ 0 THEN boxcolor = 'rose'
       fillboxes = Keyword_Set(fillboxes)
+      IF N_Elements(outliercolor) EQ 0 THEN outliercolor = color
+      IF N_Elements(outlinecolor) EQ 0 THEN BEGIN
+          IF fillboxes THEN outlinecolor = boxcolor ELSE outlinecolor = color
+      ENDIF
       IF N_Elements(rotate) EQ 0 THEN rotate = 0
       rotate = -90 > Fix(rotate) < 90
       overplot = Keyword_Set(overplot)
@@ -740,7 +766,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
          IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
          Plot, xrange, yrange, /NODATA, _STRICT_EXTRA=extra, $
             XMINOR=1, XTICKS=numbox+1, YSTYLE=1, BACKGROUND=cgColor(background_color), $
-            COLOR=cgColor(axes_color), XTICK_GET=xloc, XTICKFORMAT='(A1)', $
+            COLOR=cgColor(axiscolor), XTICK_GET=xloc, XTICKFORMAT='(A1)', $
             XCHARSIZE=xcharsize, XTHICK=xthick, CHARSIZE=charsize
             
          ; Put the labels on the plots.
@@ -756,7 +782,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
              xy = Convert_Coord(xloc[j], !Y.CRange[0], /DATA, /TO_NORMAL)
              chary = !D.Y_CH_SIZE / Float(!D.Y_Size) * charsize
              XYOUTS, xy[0], xy[1] - (1.5 * chary), /NORMAL, plotlabels[j], $
-                ALIGNMENT=alignment, COLOR=cgColor(axes_color), $
+                ALIGNMENT=alignment, COLOR=cgColor(axiscolor), $
                 ORIENTATION=rotate, CHARSIZE=charsize, CHARTHICK=xthick
          ENDFOR
          IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState
@@ -777,7 +803,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
           ENDELSE
           IF N_Elements(xlocation) EQ 0 THEN location=j ELSE location = xlocation[j-1]
           cgBoxPlot_Draw, dataToBox, COLOR=color, BOXCOLOR=boxcolor, FILLBOXES=fillboxes, $
-             WIDTH=width, XLOCATION=location, STATS=s
+             OUTLINECOLOR=outlinecolor, OUTLIERCOLOR=outliercolor, WIDTH=width, XLOCATION=location, STATS=s
           IF Arg_Present(stats) THEN stats[j-1] = s
       ENDFOR
           

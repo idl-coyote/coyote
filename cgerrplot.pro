@@ -48,7 +48,7 @@
 ;     
 ;     cgErrPlot, high, low
 ;     
-; This is a really weird syntax, so be careful!
+; This is a really weird syntax (high and low reversed!), so be careful!
 ; 
 ; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
 ; to be installed on your machine.

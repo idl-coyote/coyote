@@ -75,6 +75,7 @@
 ;        Corrected bug in variable spelling that affect LONDELTA and LATDELTA keywords. 6 Jan 2013. DWF.
 ;        Lost a piece of code that allows longitude box axes. Added back in. 23 Jan 2013. DWF.
 ;        T3D keyword was not being applied. Fixed. 11 February 2013. DWF.
+;        Added NOCLIP keyword. 15 February 2013. DWF.
 ;            
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -383,6 +384,9 @@ end
 ;        created by Map_Proj_Init. In this version of the program, it can also
 ;        be used to pass in a cgMap object, from which the map structure and other
 ;        pertinent information for creating map grid lines can be obtained.
+;     noclip: in, optional, tyle=boolean, default=0
+;        Normally, output is clipped to the map projection boundaries. Set this keyword
+;        to be able to draw outside the map boundaries.
 ;     no_grid: in, optional, type=boolean, default=0
 ;        Set this keyword if you only want labels but not grid lines.
 ;     orientation: in, optional, type=float, default=0.0
@@ -425,6 +429,7 @@ PRO cgMap_Grid, $
    LONNAMES=lonnames, $
    LONS=lons, $
    MAP_STRUCTURE=mapStruct, $
+   NOCLIP=noclip, $
    NO_GRID=no_grid, $
    ORIENTATION=orientation, $
    T3D=t3d, $
@@ -471,6 +476,7 @@ PRO cgMap_Grid, $
                LONNAMES=lonnames, $
                LONS=lons, $
                MAP_STRUCTURE=mapStruct, $
+               NOCLIP=noclip, $
                NO_GRID=no_grid, $
                ORIENTATION=orientation, $
                T3D=t3d, $
@@ -486,6 +492,7 @@ PRO cgMap_Grid, $
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     SetDefaultValue, charsize, cgDefCharsize() * 0.75
     SetDefaultValue, bcolor, "opposite"
+    noclip = Keyword_Set(noclip)
     
     ; I want to use the more natural LINESTYLE and THICK keywords to this routine.
     IF (N_Elements(linestyle) EQ 0) && (N_Elements(glinestyle) NE 0) THEN BEGIN
@@ -575,7 +582,9 @@ PRO cgMap_Grid, $
   
   ; CLIP_TEXT (default value = 1) = 1 to clip text within the map area,
   ; 0 to not clip text.
-  noclip = (N_ELEMENTS(clip_text) gt 0) ? ~KEYWORD_SET(clip_text) : 0
+  IF ~noclip THEN BEGIN
+     noclip = (N_ELEMENTS(clip_text) gt 0) ? ~KEYWORD_SET(clip_text) : 0
+  ENDIF
   
   ;   Append the graphics keywords:
   if n_elements(t3d) then map_struct_append, extra,'T3D',t3d
@@ -853,14 +862,14 @@ PRO cgMap_Grid, $
                       indices = polylines[index + 1 : index + nline]
                       cgPlotS, REFORM(uv[0,indices]), REFORM(uv[1,indices]), $
                           zvalue, $
-                          NOCLIP=0, $
+                          NOCLIP=noclip, $
                           COLOR=color, LINESTYLE=linestyle, THICK=thick, $
                           _EXTRA=extra
                   endif
                   index += nline + 1
               endwhile
           endif else begin
-              cgPlotS, lon, lati, zvalue, NOCLIP=0, $
+              cgPlotS, lon, lati, zvalue, NOCLIP=noclip, $
                    COLOR=color, LINESTYLE=linestyle, THICK=thick, _EXTRA=extra
           endelse
       endif
@@ -1004,14 +1013,14 @@ PRO cgMap_Grid, $
                       indices = polylines[index + 1 : index + nline]
                       cgPLOTS, REFORM(uv[0,indices]), REFORM(uv[1,indices]), $
                           zvalue, $
-                          NOCLIP=0, $
+                          NOCLIP=noclip, $
                           COLOR=color, LINESTYLE=linestyle, THICK=thick, $
                           _EXTRA=extra
                   endif
                   index += nline + 1
               endwhile
           endif else $
-              cgPLOTS, loni, lat, zvalue, NOCLIP=0, $
+              cgPLOTS, loni, lat, zvalue, NOCLIP=noclip, $
                   COLOR=color, LINESTYLE=linestyle, THICK=thick, _EXTRA=extra
       endif
   

@@ -299,6 +299,7 @@
 ;       Fixed a strange interaction between TickInterval and the Format keywords. 5 Nov 2012. DWF.
 ;       Changes to support a tick formatting function when a log axis is used. 7 February 2013. DWF.
 ;       Added XTICKLAYOUT and YTICKLAYOUT keywords. 8 February 2013. DWF.
+;       Somehow the default AnnotateColor had gotten changed from "opposite". Restored. 18 Feb 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
@@ -740,7 +741,7 @@ PRO cgColorbar, $
     IF N_Elements(tickInterval) NE 0 THEN divisions = 0
         
     ; Annotate the color bar.
-    annotateColor = cgDefaultColor(annotateColor, DEFAULT=color)
+    annotateColor = cgDefaultColor(annotateColor, DEFAULT='opposite')
     
     ; If color is undefined, use the annotate color.
     color = cgDefaultColor(color, DEFAULT=annotateColor)

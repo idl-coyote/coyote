@@ -162,6 +162,7 @@
 ;           as the default if LANDSCAPE is not set. 13 Dec 2010. DWF.
 ;       Added ASPECTRATIO keyword to allow user-specified window aspect ratio. 13 Dec 2010. DWF.
 ;       Depreciated EUROPEAN keyword in favor of METRIC. 31 Jan 2011. DWF.
+;       Now setting LANDSCAPE=0 if aspect GT 1 and not set otherwise. 19 Feb 2013. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -267,7 +268,7 @@ FUNCTION PSWINDOW, $
     ENDIF
     IF N_Elements(landscape) EQ 0 THEN BEGIN
         IF N_Elements(aspectRatio) NE 0 THEN BEGIN
-            IF aspectRatio LT 1.0 THEN landscape = 1
+            IF aspectRatio LT 1.0 THEN landscape = 1 ELSE landscape = 0
         ENDIF ELSE BEGIN
             IF !D.Y_VSIZE LT !D.X_VSIZE THEN landscape = 1
         ENDELSE

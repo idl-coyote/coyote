@@ -311,6 +311,7 @@
 ;        Now restoring previous plot parameters after drawing cumulative probability axis, so as not
 ;           to interfere with subsequent overplotting. 27 Sept 2012. DWF.
 ;        Changed the way the "ystart" variable is set on log plots. 21 Jan 2013. DWF.
+;        Now taking into account the MININPUT and MAXINPUT values when calculating a default bin size. 19 Feb 2013. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
@@ -700,11 +701,15 @@ PRO cgHistoplot, $                  ; The program name.
       ENDELSE
    ENDIF
    
+   ; Define minimum and maximum input values, if not defined otherwise.
+   IF N_Elements(minInput) EQ 0 THEN minInput = Min(_data, NAN=nan)
+   IF N_Elements(maxInput) EQ 0 THEN maxInput = Max(_data, NAN=nan)
+
    ; Check for histogram keywords.
    IF N_Elements(binsize) EQ 0 THEN BEGIN
-      range = Max(_data, /NAN) - Min(_data, /NAN)
+      range = Max(_data < maxInput, /NAN) - Min(_data > minInput, /NAN)
       IF N_Elements(nbins) EQ 0 THEN BEGIN  ; Scott's Choice
-         binsize = (3.5D * StdDev(_data, /NAN))/N_Elements(_data)^(1./3.0D) 
+         binsize = (3.5D * StdDev(minInput > _data < maxInput, /NAN))/N_Elements(_data)^(1./3.0D) 
          IF (dataType LE 3) OR (dataType GE 12) THEN binsize = Round(binsize) > 1
          binsize = Convert_To_Type(binsize, dataType)
       ENDIF ELSE BEGIN
@@ -718,7 +723,7 @@ PRO cgHistoplot, $                  ; The program name.
           binsize = Convert_To_Type(binsize, dataType)
        ENDIF
    ENDELSE
-
+print, binsize
    ; Check for keywords.
    IF N_Elements(backColorName) EQ 0 THEN backColorName = "background"
    IF N_Elements(dataColorName) EQ 0 THEN dataColorName = "Indian Red"
@@ -752,8 +757,6 @@ PRO cgHistoplot, $                  ; The program name.
       IF N_Elements(orientation) EQ 0 THEN orientation = 0
       IF N_Elements(spacing) EQ 0 THEN spacing = 0
    ENDIF
-   IF N_Elements(mininput) EQ 0 THEN mininput = Min(_data, NAN=nan)
-   IF N_Elements(maxinput) EQ 0 THEN maxinput = Max(_data, NAN=nan)
    IF N_Elements(thick) EQ 0 THEN thick = 1.0
 
    ; Do this in decomposed color, if possible.

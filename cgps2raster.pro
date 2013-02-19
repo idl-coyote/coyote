@@ -145,6 +145,7 @@
 ;       Added FILETYPE keyword. 13 October 2012. DWF.
 ;       Apparently Macs can't handle the version number, so I have removed the version number
 ;           check for Macs. 13 October 2012. DWF.
+;       Worked on getting the WIDTH keyword to work correctly with Portrait mode files. 19 February 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -287,19 +288,20 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
           ; has been specified.
           IF (N_Elements(width) EQ 0) || (width LE 0) THEN BEGIN
                resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
-           ENDIF ELSE BEGIN
+          ENDIF ELSE BEGIN
                 
-           ; Getting the width correct has to be done in an extremely non-intuitive way.
-           ; I wonder if this will be changed in different versions of ImageMagick?
-           height = Ceil(width*ysize/Float(xsize))
-           IF ~portrait THEN BEGIN
-                resize_cmd = ' -resize ' + StrCompress(height, /REMOVE_ALL) + 'x' + StrCompress(width, /REMOVE_ALL)                   
-           ENDIF ELSE BEGIN
-                resize_cmd = ' -resize ' + StrCompress(width, /REMOVE_ALL) + 'x' + StrCompress(height, /REMOVE_ALL)
-                     ENDELSE
-           ENDELSE
-                
-          ; Start ImageMagick convert command.
+          ; Getting the width correct has to be done in an extremely non-intuitive way.
+          ; I wonder if this will be changed in different versions of ImageMagick?
+          IF portrait THEN BEGIN
+               height = Ceil(Float(xsize)*width/ysize)
+               resize_cmd = ' -resize ' + StrCompress(width, /REMOVE_ALL) + 'x' + StrCompress(height, /REMOVE_ALL)
+          ENDIF ELSE BEGIN
+               height = Ceil(width*ysize/Float(xsize))
+               resize_cmd = ' -resize ' + StrCompress(height, /REMOVE_ALL) + 'x' + StrCompress(width, /REMOVE_ALL)
+          ENDELSE
+          ENDELSE
+ 
+           ; Start ImageMagick convert command.
           cmd = 'convert'
                 
           ; Add various command options.

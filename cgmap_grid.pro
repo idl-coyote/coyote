@@ -76,6 +76,10 @@
 ;        Lost a piece of code that allows longitude box axes. Added back in. 23 Jan 2013. DWF.
 ;        T3D keyword was not being applied. Fixed. 11 February 2013. DWF.
 ;        Added NOCLIP keyword. 15 February 2013. DWF.
+;        Sometimes a longitude line is draw incorrectly due to the fact that the longitude vector does not
+;           have a point in the XRANGE of the projection. A fix to that problem has failed to work in all
+;           circumstances, so I have done more work on that algorithm to see if I can solve the problem is
+;           a better way. Now usine Value_Locate to test for point. 19 February 2013. DWF.
 ;            
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -536,9 +540,7 @@ PRO cgMap_Grid, $
          mapObj -> Draw, /NoGraphics
          thisMapStruct = mapObj -> GetMapStruct()
          
-         ; I've taken this out for now, as it is not working as well as I hoped
-         ; it would. I may have to revisit this. Or, perhaps, modify the cgMap_Grid_INCR
-         ; routine.
+         ; This routine is here because Map_Grid does not select good line for small areas.
          IF Keyword_Set(cgGrid) THEN BEGIN
              mapObj -> LatLonLabels, LATS=mlats, LATLAB=mlatlab, LATDELTA=latdelta, LATNAMES=mlatnames, $
                                      LONS=mlons, LONLAB=mlonlab, LONDELTA=londelta, LONNAMES=mlonnames
@@ -986,17 +988,30 @@ PRO cgMap_Grid, $
               
                      ; Added this because if there is not a point in the longitude vector
                      ; that is inside our actual data range, then the line can be drawn
-                     ; at the wrong place. I don't really understand why. It may have something
-                     ; to do with a stale map structure.
+                     ; at the wrong place. I don't really understand why. But this is a 
+                     ; check to be sure there is a point inside the data range.
                      mapObj -> GetProperty, XRANGE=xrange, YRANGE=yrange
-                     thisMapStructure = mapObj -> GetMapStruct()
-                     ll = Map_Proj_Inverse(xrange, yrange, MAP_STRUCTURE=thisMapStructure)
-                     lonii = Reform(ll[0,*])
-                     uv = MAP_PROJ_FORWARD(lonii, REPLICATE(lat, N_ELEMENTS(lonii)), $
-                          MAP_STRUCTURE=thisMapStruct)
+                     index = Value_Locate(xrange, loni)
+                     
+                     ; If there is a zero in index vector than there is a point inside range
+                     ; and we continue normally. Otherwise, we try to construct a vector that
+                     ; has a point in the data range.
+                     void = Where(index EQ 0, count) 
+                     IF count EQ 0 THEN BEGIN ; No point inside range, so construct one.
+                         thisMapStructure = mapObj -> GetMapStruct()
+                         ll = Map_Proj_Inverse(xrange, yrange, MAP_STRUCTURE=thisMapStructure)
+                         lonii = Reform(ll[0,*])
+                         lonii = Scale_Vector(Findgen(N_Elements(loni)), lonii[0], lonii[1])
+                         uv = MAP_PROJ_FORWARD(lonii, REPLICATE(lat, N_ELEMENTS(lonii)), $
+                              MAP_STRUCTURE=thisMapStruct)
+                         loni = lonii
+                     ENDIF ELSE BEGIN
+                        uv = MAP_PROJ_FORWARD(loni, REPLICATE(lat, N_ELEMENTS(loni)), $
+                             MAP_STRUCTURE=thisMapStruct)                     
+                     ENDELSE
               ENDIF ELSE BEGIN
-                       uv = MAP_PROJ_FORWARD(loni, REPLICATE(lat, N_ELEMENTS(loni)), $
-                          MAP_STRUCTURE=thisMapStruct)
+                  uv = MAP_PROJ_FORWARD(loni, REPLICATE(lat, N_ELEMENTS(loni)), $
+                       MAP_STRUCTURE=thisMapStruct)
               ENDELSE
 
               ; This line has been modified by DWF to fix a bug in MAP_PROJ_FORWARD that

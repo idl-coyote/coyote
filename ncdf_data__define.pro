@@ -2146,40 +2146,43 @@ FUNCTION NCDF_DATA::ReadVariable, theVariable, $
        
        ; Does this variable contain "missing" values. If so, identify and return
        ; the missing data indices so they can be identified after scaling.
-       index = Where(StrUpCase(varAttNames) EQ 'MISSING_VALUE', count)
-       IF count GT 0 THEN BEGIN
-           varAttName = (varAttNames[index])[0]
-           NCDF_AttGet, fileID, varID, varAttName, missingValue
-           missingIndices = Where(data EQ missingValue, missingCount)
-       ENDIF
-       index = Where(StrUpCase(varAttNames) EQ '_FILLVALUE', count)
-       IF count GT 0 THEN BEGIN
-           varAttName = (varAttNames[index])[0]
-           NCDF_AttGet, fileID, varID, varAttName, missingValue
-           missingIndices = Where(data EQ missingValue, missingCount)
-       ENDIF
-    
-       ; Is there a scale_factor attribute? If so, get and scale the data.
        IF N_Elements(varAttNames) NE 0 THEN BEGIN
-           index = Where(StrUpCase(varAttNames) EQ 'SCALE_FACTOR', count)
+           index = Where(StrUpCase(varAttNames) EQ 'MISSING_VALUE', count)
            IF count GT 0 THEN BEGIN
                varAttName = (varAttNames[index])[0]
-               NCDF_AttGet, fileID, varID, varAttName, scale_factor
-               IF scale_factor NE 1.0 THEN data = Temporary(data) * scale_factor
+               NCDF_AttGet, fileID, varID, varAttName, missingValue
+               missingIndices = Where(data EQ missingValue, missingCount)
+           ENDIF
+           index = Where(StrUpCase(varAttNames) EQ '_FILLVALUE', count)
+           IF count GT 0 THEN BEGIN
+               varAttName = (varAttNames[index])[0]
+               NCDF_AttGet, fileID, varID, varAttName, missingValue
+               missingIndices = Where(data EQ missingValue, missingCount)
+           ENDIF
+        
+           ; Is there a scale_factor attribute? If so, get and scale the data.
+           IF N_Elements(varAttNames) NE 0 THEN BEGIN
+               index = Where(StrUpCase(varAttNames) EQ 'SCALE_FACTOR', count)
+               IF count GT 0 THEN BEGIN
+                   varAttName = (varAttNames[index])[0]
+                   NCDF_AttGet, fileID, varID, varAttName, scale_factor
+                   IF scale_factor NE 1.0 THEN data = Temporary(data) * scale_factor
+               ENDIF
+               
+               ; Is there an add_offset attribute? If so, get and add to the data.
+               index = Where(StrUpCase(varAttNames) EQ 'ADD_OFFSET', count)
+               IF count GT 0 THEN BEGIN
+                   varAttName = (varAttNames[index])[0]
+                   NCDF_AttGet, fileID, varID, varAttName, add_offset
+                   data = Temporary(data) + add_offset
+               ENDIF
            ENDIF
            
-           ; Is there an add_offset attribute? If so, get and add to the data.
-           index = Where(StrUpCase(varAttNames) EQ 'ADD_OFFSET', count)
-           IF count GT 0 THEN BEGIN
-               varAttName = (varAttNames[index])[0]
-               NCDF_AttGet, fileID, varID, varAttName, add_offset
-               data = Temporary(data) + add_offset
+           ; If there was missing data, restore it.
+           IF (N_Elements(missingIndices) NE 0) THEN BEGIN
+                IF missingCount GT 0 THEN data[missingIndices] = missingValue
            ENDIF
-       ENDIF
-       
-       ; If there was missing data, restore it.
-       IF (N_Elements(missingIndices) NE 0) THEN BEGIN
-            IF missingCount GT 0 THEN data[missingIndices] = missingValue
+           
        ENDIF
        
        ; Is this a CHAR data type? If so, convert it to a string.

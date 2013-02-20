@@ -607,9 +607,9 @@ PRO cgColorbar, $
        IF Keyword_Set(invertcolors) THEN bar = Reverse(bar, 2)
        IF N_ELEMENTS(position) EQ 0 THEN BEGIN
           IF Keyword_Set(right) THEN BEGIN
-             position = [0.83, 0.1, 0.90, 0.9]
+             position = [0.83, 0.125, 0.90, 0.9]
           ENDIF ELSE BEGIN
-             position = [0.88, 0.1, 0.95, 0.9]
+             position = [0.88, 0.125, 0.95, 0.9]
           ENDELSE
        ENDIF ELSE BEGIN
           IF position[2]-position[0] GT position[3]-position[1] THEN BEGIN
@@ -638,9 +638,9 @@ PRO cgColorbar, $
        IF Keyword_Set(invertcolors) THEN bar = Reverse(bar, 1)
        IF N_ELEMENTS(position) EQ 0 THEN BEGIN
           IF Keyword_Set(top) THEN BEGIN
-             position = [0.1, 0.82, 0.9, 0.90]
+             position = [0.125, 0.82, 0.925, 0.90]
           ENDIF ELSE BEGIN
-             position = [0.1, 0.88, 0.9, 0.95]
+             position = [0.125, 0.88, 0.925, 0.95]
           ENDELSE
        ENDIF ELSE BEGIN
           IF position[3]-position[1] GT position[2]-position[0] THEN BEGIN

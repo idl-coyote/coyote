@@ -170,7 +170,7 @@ FUNCTION cgSymCat, theInSymbol, COLOR=color, NAMES=names, THICK=thick
          'Open Down Triangle', $
          'Open Right Triangle', $
          'Open Left Triangle', $
-         'Filled Diamod', $
+         'Filled Diamond', $
          'Filled Square', $
          'Filled Circle', $
          'Filled Up Triangle', $

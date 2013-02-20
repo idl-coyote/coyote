@@ -615,6 +615,12 @@ PRO cgPlot, x, y, $
         ENDIF ELSE position=Aspect(aspect)   ; if position isn't set, just use output of Aspect
         
     ENDIF
+    
+    ; If you get here with no position defined, and no layout, and no !P.Multi and no nothing,
+    ; then for God's sake, define a reasonable position in the window!
+    IF (N_Elements(position) EQ 0) && (Total(!P.Position) EQ 0) && (N_Elements(layout) EQ 0) && (Total(!P.Multi) LE 0) THEN BEGIN
+        position = [0.125, 0.125, 0.925, 0.9] 
+    ENDIF
            
     ; Do you need a PostScript background color? Lot's of problems here!
     ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a

@@ -1734,8 +1734,8 @@ PRO cgImage, image, x, y, $
     
     ; If axes are set and MARGIN and POSITION are NOT set and you are NOT
     ; doing multiplots, then set a normal "plot" margin.
-    IF Keyword_Set(axes) AND ((N_Elements(margin) EQ 0) AND (N_Elements(position) EQ 0) $
-        AND (multi EQ 0)) THEN margin = 0.1
+    IF Keyword_Set(axes) && ((N_Elements(margin) EQ 0) && (N_Elements(position) EQ 0) $
+        && (multi EQ 0)) THEN position=[0.125, 0.125, 0.925, 0.9]
     
     ; Check other keywords.
     interp = Keyword_Set(interp)

@@ -106,6 +106,8 @@
 ;     Change History::
 ;        Written, 30 October 2012 by David W. Fanning.
 ;        Fixed a problem with a TRANSPOSE command for true-color images. Bad logic. 4 Jan 2012. DWF.
+;        Fixed a problem in which Map_Proj_Image was not handling true-color image warping correctly
+;           and also a problem with handling missing values passed from cgImage2KML correctly. 20 Feb 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -135,27 +137,53 @@ FUNCTION cgChangeMapProjection, image, mapIn, $
       mapOut = Obj_New('cgMap', 'Equirectangular', Ellipsoid='WGS 84')
    ENDIF
    
+   ; If the missing value is a color, change it to a color triple for true-color images.
+   IF N_Elements(missing) NE 0 THEN BEGIN
+     
+     IF (Size(image, /N_Dimensions) GT 2) THEN BEGIN
+         IF Size(missing, /TNAME) EQ 'STRING' THEN missing = Reform(cgColor(missing, /Triple))
+     ENDIF
+    
+   ENDIF
+   
    ; Gather information about the input image. Do this differently if this is a 2D
    ; image as opposed to a true-color image.
    dims = Image_Dimensions(image, XIndex=xindex, YIndex=yindex, TRUEINDEX=trueindex, $
        XSize=xsize, YSize=ysize, ALPHACHANNEL=alphachannel)
    IF trueindex EQ -1 THEN BEGIN
       warped = Map_Proj_Image(image, boundary, Image_Structure=mapIn->GetMapStruct(), $
-        Map_Structure=mapOut->GetMapStruct(), UVRANGE=xyrange, Missing=missing, MASK=mask)
+        Map_Structure=mapOut->GetMapStruct(), UVRANGE=xyrange, Missing=missing[0], MASK=mask)
+
+      ; Update the range values in the output map coordinate object.
       mapOut -> SetProperty, XRANGE=xyrange[[0,2]], YRANGE=xyrange[[1,3]]
+        
+      ; Return information of interest to user.
       mapOut -> GetProperty, LATLONBOX=latlonbox, BOUNDARY=boundary
    ENDIF ELSE BEGIN
       IF trueIndex LT 2 THEN img = Transpose(image, [xindex, yindex, trueindex])
       frames = alphachannel ? 4 : 3
       warped = Make_Array(xsize, ysize, frames, TYPE=Size(image, /TYPE))
-      warped[*,*,0] = Map_Proj_Image(img[*,*,0], boundary, Image_Structure=mapIn->GetMapStruct(), $
-        Map_Structure=mapOut->GetMapStruct(), UVRANGE=xyrange, Missing=missing, MASK=mask, $
-        XINDEX=xindices, YINDEX=yindices)
-      mapOut -> SetProperty, XRANGE=xyrange[[0,2]], YRANGE=xyrange[[1,3]]
-      mapOut -> GetProperty, LATLONBOX=latlonbox, BOUNDARY=boundary
-      FOR j=1,frames-1 DO BEGIN
-         warped[*,*,j] = Map_Proj_Image(img[*,*,j], XINDEX=xindices, YINDEX=yindices)
+      mapInStruct = mapIn->GetMapStruct()
+      mapOutStruct = mapOut->GetMapStruct()
+      
+      ; Warp the three image planes separately.
+      FOR j=0,frames-1 DO BEGIN
+         warped[*,*,j] = Map_Proj_Image(img[*,*,j], boundary, Image_Structure=mapInStruct, $
+            Map_Structure=mapOutStruct, UVRANGE=xyrange, Missing=missing[j], Mask=mask)
       ENDFOR
+      
+      ; Handle alpha channel separately.
+      IF frames EQ 4 THEN BEGIN
+         warped[*,*,3] = Map_Proj_Image(img[*,*,3], boundary, Image_Structure=mapInStruct, $
+             Map_Structure=mapOutStruct, UVRANGE=xyrange)
+        
+      ENDIF
+      
+      ; Update the range values in the output map coordinate object.
+      mapOut -> SetProperty, XRANGE=xyrange[[0,2]], YRANGE=xyrange[[1,3]]
+      
+      ; Return information of interest to user.
+      mapOut -> GetProperty, LATLONBOX=latlonbox, BOUNDARY=boundary
    
    ENDELSE
    

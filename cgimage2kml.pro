@@ -190,7 +190,8 @@
 ;        Fixed a problem that was causing floating underflow warnings to be thrown. 5 Nov 2012. DWF.
 ;        Images with values between 0 and 255 were not getting scaled properly. Fixed. 30 Nov 2012. DWF.
 ;        Added a FlyTo keyword to allow the user to fly to a particular location on the Earth. 31 Dec 2012. DWF.
-;
+;        Was not handling 24- or 32-bit images correctly, nor was the MISSING_COLOR keyword being
+;            interpreted correctly when expressed as a color string. 20 Feb 2013. DWF.
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
@@ -302,20 +303,26 @@ PRO cgImage2KML, image, mapCoord, $
    ; image has to be warped into the correct map projection.
    IF (StrUpCase(map_projection) NE 'EQUIRECTANGULAR') || (StrUpCase(StrCompress(ellipsoid, /REMOVE_ALL)) NE 'WGS84') THEN BEGIN
       googleMapCoord = Obj_New('cgMap', 'Equirectangular', Ellipsoid='WGS 84')
+      ndims = Size(warped, /N_Dimensions)
+      IF ndims EQ 2 THEN thisMissingValue = 0 ELSE thisMissingValue=missing_value
       warped = cgChangeMapProjection(warped, mapCoord, MAPOUT=googleMapCoord, $
-          LATLONBOX=latlonbox)
+          LATLONBOX=latlonbox, MISSING=thisMissingValue)
    ENDIF 
    
    ; Byte scale the image.
-   IF N_Elements(missing_value) NE 0 THEN BEGIN
-      imgType = Size(warped, /TNAME)
-      IF (imgType NE 'FLOAT') && (imgType NE 'DOUBLE') THEN warped = Float(warped)
-      missing = Where(warped EQ missing_value, count)
-      IF count GT 0 THEN warped[missing] = !Values.F_NAN
-      IF (Min(warped, /NAN) LT 0) || (Max(warped, /NAN) GT 255) || scaleIt THEN BEGIN
-         warped = BytScl(warped, MIN=min_value, MAX=max_value, /NAN, TOP=254) + 1B
+   ndims = Size(warped, /N_Dimensions)
+   IF (N_Elements(missing_value) NE 0) THEN BEGIN
+      IF ndims EQ 2 THEN BEGIN
+          imgType = Size(warped, /TNAME)
+          IF (imgType NE 'FLOAT') && (imgType NE 'DOUBLE') THEN warped = Float(warped)
+          missing = Where(warped EQ missing_value, count)
+          IF count GT 0 THEN warped[missing] = !Values.F_NAN
+          IF (Min(warped, /NAN) LT 0) || (Max(warped, /NAN) GT 255) || scaleIt THEN BEGIN
+             warped = BytScl(warped, MIN=min_value, MAX=max_value, /NAN, TOP=254) + 1B
+          ENDIF
+          IF count GT 0 THEN warped[missing] = 0B
+          missing_value = 0
       ENDIF
-      IF count GT 0 THEN warped[missing] = 0B
    ENDIF ELSE BEGIN
       IF (Min(warped) LT 0) || (Max(warped) GT 255) || scaleIt THEN BEGIN
          warped = BytScl(warped, MIN=min_value, MAX=max_value, /NAN)
@@ -332,7 +339,7 @@ PRO cgImage2KML, image, mapCoord, $
    
    ; Do we need transparency?
    IF N_Elements(transparent) NE 0 THEN BEGIN
-       warped = cgTransparentImage(warped, TRANSPARENT=transparent, MISSING_VALUE=[r[0],g[0],b[0]])
+       warped = cgTransparentImage(warped, TRANSPARENT=transparent, MISSING_VALUE=missing_value)
    ENDIF
    
    ; Save the image as a PNG file.

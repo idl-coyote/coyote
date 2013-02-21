@@ -293,6 +293,9 @@ PRO cgImage2KML, image, mapCoord, $
    ; Otherwise, let's use gray-scale colors for the image.
    IF N_Elements(palette) EQ 0 THEN cgLoadCT, 0, RGB_TABLE=palette
    
+   ; How many dimensions does this image have?
+   ndims = Size(image, /N_Dimensions)
+   
    ; Should the image be reduced in size before displaying it?
    IF N_Elements(resize_factor) NE 0 THEN BEGIN
         dims = Image_Dimensions(image, XSIZE=xsize, YSIZE=ysize)
@@ -310,7 +313,6 @@ PRO cgImage2KML, image, mapCoord, $
    ENDIF 
    
    ; Byte scale the image.
-   ndims = Size(warped, /N_Dimensions)
    IF (N_Elements(missing_value) NE 0) THEN BEGIN
       IF ndims EQ 2 THEN BEGIN
           imgType = Size(warped, /TNAME)
@@ -321,7 +323,6 @@ PRO cgImage2KML, image, mapCoord, $
              warped = BytScl(warped, MIN=min_value, MAX=max_value, /NAN, TOP=254) + 1B
           ENDIF
           IF count GT 0 THEN warped[missing] = 0B
-          missing_value = 0
       ENDIF
    ENDIF ELSE BEGIN
       IF (Min(warped) LT 0) || (Max(warped) GT 255) || scaleIt THEN BEGIN
@@ -333,13 +334,15 @@ PRO cgImage2KML, image, mapCoord, $
    r = Reform(palette[*,0])
    g = Reform(palette[*,1])
    b = Reform(palette[*,2])
-   IF (Size(warped, /N_Dimensions) EQ 2) THEN BEGIN
-      warped = [ [[r[warped]]], [[g[warped]]], [[b[warped]]]]
-   ENDIF
+   IF (ndims EQ 2) THEN warped = [ [[r[warped]]], [[g[warped]]], [[b[warped]]]]
    
    ; Do we need transparency?
    IF N_Elements(transparent) NE 0 THEN BEGIN
-       warped = cgTransparentImage(warped, TRANSPARENT=transparent, MISSING_VALUE=missing_value)
+       IF (ndims EQ 2) THEN BEGIN
+          warped = cgTransparentImage(warped, TRANSPARENT=transparent, MISSING_VALUE=[r[0],g[0],b[0]])
+       ENDIF ELSE BEGIN
+          warped = cgTransparentImage(warped, TRANSPARENT=transparent, MISSING_VALUE=missing_value)
+       ENDELSE
    ENDIF
    
    ; Save the image as a PNG file.

@@ -1096,13 +1096,13 @@ PRO cgHistoplot, $                  ; The program name.
              XTickformat=xtickformat, $               ; Y Tickformat
              YTickformat=ytickformat, $
              XTITLE=xtitle, $                 ; The X title.
-             XTICKNAMES=xticknames, $
+             XTICKNAME=xticknames, $
              XTICKS=xticks, $
-             XTICKVALUES=xtickvalues, $
+             XTICKV=xtickvalues, $
              YTITLE=ytitle, $                 ; The Y title.
-             YTICKNAMES=yticknames, $
+             YTICKNAME=yticknames, $
              YTICKS=yticks, $
-             YTICKVALUES=ytickvalues, $
+             YTICKV=ytickvalues, $
              NoErase=1, $
              XTicklen=-0.025, $
              _Strict_Extra=extra                      ; Pass any extra PLOT keywords.

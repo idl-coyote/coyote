@@ -199,9 +199,25 @@
 ;    window: in, optional, type=boolean, default=0
 ;        Set this keyword to replace all the commands in the current cgWindow or to
 ;        create a new cgWindow, if one doesn't currenly exist, for displaying this command.
-;        To create a new cgWindow if one currenly exists, use the `cgWindow` command
+;        To create a new cgWindow if one currenly exists, use the `cgWindow` command.
+;    xticknames: in, optional, type=string
+;        An array of tick names for the axis.
+;    xtickformat: in, optional, type=string
+;        As tick format or name of tick formatting function for the axis.
+;    xticks: in, optional, type=integer
+;        The number of major tick spaces for the axis.
+;    xtickvalues: in, optional
+;        A vector of tick values that should be labelled on the axis.
 ;    xtitle: in, optional, type=string, default="Relative Frequency"
 ;        The X title of the histogram plot.
+;    yticknames: in, optional, type=string
+;        An array of tick names for the axis.
+;    ytickformat: in, optional, type=string
+;        As tick format or name of tick formatting function for the axis.
+;    yticks: in, optional, type=integer
+;        The number of major tick spaces for the axis.
+;    ytickvalues: in, optional
+;        A vector of tick values that should be labelled on the axis.
 ;    ytitle: in, optional, type=string, default="Histogram Density"
 ;        The Y title of the histogram plot.
 ;    _ref_extra: in, optional
@@ -312,9 +328,10 @@
 ;           to interfere with subsequent overplotting. 27 Sept 2012. DWF.
 ;        Changed the way the "ystart" variable is set on log plots. 21 Jan 2013. DWF.
 ;        Now taking into account the MININPUT and MAXINPUT values when calculating a default bin size. 19 Feb 2013. DWF.
-;         
+;        Added [XY]TickNames, [XY]Tickformat, [XY]TickS, and [XY]TickValues keywords. 21 Feb 2013. DWF.
+;        
 ; :Copyright:
-;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2007-2013, Fanning Software Consulting, Inc.
 ;-
 PRO cgHistoplot, $                  ; The program name.
    data, $                          ; The data to draw a histogram of.
@@ -363,7 +380,15 @@ PRO cgHistoplot, $                  ; The program name.
    THICK=thick, $                   ; Set to draw thicker lines and axes.
    TITLE=title, $                   ; The plot title.
    WINDOW=window, $                 ; Display this in an cgWindow.
+   XTICKNAMES=xticknames, $
+   XTICKFORMAT=xtickformat, $
+   XTICKS=xticks, $
+   XTICKVALUES=xtickvalues, $
    XTITLE=xtitle, $                 ; The X title.
+   YTICKNAMES=yticknames, $
+   YTICKFORMAT=ytickformat, $
+   YTICKS=yticks, $
+   YTICKVALUES=ytickvalues, $
    YTITLE=ytitle, $                 ; The Y title.
     _REF_EXTRA=extra                ; For passing extra keywords.
     
@@ -420,9 +445,17 @@ PRO cgHistoplot, $                  ; The program name.
                SMOOTH=smooth, $
                THICK=thick, $                   ; Set to draw thicker lines and axes.
                TITLE=title, $
-               XTITLE=xtitle, $
+               XTITLE=xtitle, $                 ; The X title.
+               XTICKNAMES=xticknames, $
+               XTICKFORMAT=xtickformat, $
+               XTICKS=xticks, $
+               XTICKVALUES=xtickvalues, $
                YTITLE=ytitle, $                 ; The Y title.
-               ;
+               YTICKNAMES=yticknames, $
+               YTICKFORMAT=ytickformat, $
+               YTICKS=yticks, $
+               YTICKVALUES=ytickvalues, $
+                           ;
                ; POLYFILL KEYWORDS
                ;
                FILLPOLYGON=fillpolygon, $       ; Set if you want filled polygons
@@ -482,9 +515,17 @@ PRO cgHistoplot, $                  ; The program name.
                SMOOTH=smooth, $
                THICK=thick, $                   ; Set to draw thicker lines and axes.
                TITLE=title, $
-               XTITLE=xtitle, $
+               XTITLE=xtitle, $                 ; The X title.
+               XTICKNAMES=xticknames, $
+               XTICKFORMAT=xtickformat, $
+               XTICKS=xticks, $
+               XTICKVALUES=xtickvalues, $
                YTITLE=ytitle, $                 ; The Y title.
-               ;
+               YTICKNAMES=yticknames, $
+               YTICKFORMAT=ytickformat, $
+               YTICKS=yticks, $
+               YTICKVALUES=ytickvalues, $
+                            ;
                ; POLYFILL KEYWORDS
                ;
                FILLPOLYGON=fillpolygon, $       ; Set if you want filled polygons
@@ -723,7 +764,7 @@ PRO cgHistoplot, $                  ; The program name.
           binsize = Convert_To_Type(binsize, dataType)
        ENDIF
    ENDELSE
-print, binsize
+
    ; Check for keywords.
    IF N_Elements(backColorName) EQ 0 THEN backColorName = "background"
    IF N_Elements(dataColorName) EQ 0 THEN dataColorName = "Indian Red"
@@ -778,18 +819,18 @@ print, binsize
    IF frequency THEN BEGIN
       IF Keyword_Set(rotate) THEN BEGIN
           IF N_Elements(xtitle) EQ 0 THEN xtitle = 'Relative Frequency'
-          xtickformat = '(F6.4)'
+          IF (N_Elements(xtickformat) EQ 0) && (N_Elements(xticknames) EQ 0) THEN xtickformat = '(F6.4)'
       ENDIF ELSE BEGIN
           IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Relative Frequency'
-          ytickformat = '(F6.4)'
+          IF (N_Elements(ytickformat) EQ 0) && (N_Elements(yticknames) EQ 0) THEN ytickformat = '(F6.4)'
       ENDELSE
    ENDIF ELSE BEGIN
       IF Keyword_Set(rotate) THEN BEGIN
           IF N_Elements(xtitle) EQ 0 THEN xtitle = 'Histogram Density'
-          xtickformat = '(I)'
+          IF (N_Elements(xtickformat) EQ 0) && (N_Elements(xticknames) EQ 0) THEN xtickformat = '(I)'
       ENDIF ELSE BEGIN
           IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Histogram Density'
-          ytickformat = '(I)'
+          IF (N_Elements(ytickformat) EQ 0) && (N_Elements(yticknames) EQ 0) THEN ytickformat = '(I)'
       ENDELSE
    ENDELSE
    
@@ -1028,10 +1069,14 @@ print, binsize
              XStyle=xstyle, $                              ; Exact axis scaling. No autoscaled axes.
              XTickformat=xtickformat, $               ; Y Tickformat
              YTickformat=ytickformat, $
-             XTickV=tickV, $
-             XTicks = ticks, $
-             XTitle=xtitle, $                         ; Y Title
-             YTitle=ytitle, $
+             XTITLE=xtitle, $                 ; The X title.
+             XTICKNAMES=xticknames, $
+             XTICKS=xticks, $
+             XTICKVALUES=xtickvalues, $
+             YTITLE=ytitle, $                 ; The Y title.
+             YTICKNAMES=yticknames, $
+             YTICKS=yticks, $
+             YTICKVALUES=ytickvalues, $
              NoErase=1, $
              YTicklen=-0.025, $
              _Strict_Extra=extra                      ; Pass any extra PLOT keywords.
@@ -1050,10 +1095,14 @@ print, binsize
              YStyle=ystyle, $                              ; Exact axis scaling. No autoscaled axes.
              XTickformat=xtickformat, $               ; Y Tickformat
              YTickformat=ytickformat, $
-             YTickV=tickv, $
-             YTicks = ticks, $
-             XTitle=xtitle, $                         ; Y Title
-             YTitle=ytitle, $
+             XTITLE=xtitle, $                 ; The X title.
+             XTICKNAMES=xticknames, $
+             XTICKS=xticks, $
+             XTICKVALUES=xtickvalues, $
+             YTITLE=ytitle, $                 ; The Y title.
+             YTICKNAMES=yticknames, $
+             YTICKS=yticks, $
+             YTICKVALUES=ytickvalues, $
              NoErase=1, $
              XTicklen=-0.025, $
              _Strict_Extra=extra                      ; Pass any extra PLOT keywords.

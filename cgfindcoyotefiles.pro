@@ -56,6 +56,7 @@
 ;
 ; :History:
 ;     Written, 11 July 2012 by David W. Fanning.
+;     Now looking for PS_Start and PS_End, too. 21 Feb 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -78,6 +79,7 @@ PRO cgFindCoyoteFiles
    ; you feel confident about and report them.
    coyoteDirs = BytArr(numDirs)
    
+   
    FOR j=0,numDirs-1 DO BEGIN
       foundFiles = 0
       thisDir = directories[j]
@@ -85,11 +87,19 @@ PRO cgFindCoyoteFiles
       IF count GT 0 THEN foundFiles = 1
       IF foundFiles THEN BEGIN
           coyoteDirs[j] = 1
-          CONTINUE
-      ENDIF
+       ENDIF
+       
+      ; Look for "cg" programs.
       files = File_Search(Filepath(Root_Dir=thisdir, 'cg*.pro'), COUNT=count)
       afile = File_Search(Filepath(Root_Dir=thisdir, 'cgcolor.pro'), COUNT=acount)
-      IF (count GT 10) || (acount EQ 1) THEN BEGIN
+      IF (count GT 10) || (acount GT 0) THEN BEGIN
+         coyoteDirs[j] = 1
+      ENDIF
+      
+      ; There are also problems with PS_Start and PS_End.
+      files = File_Search(Filepath(Root_Dir=thisdir, 'ps_start.pro'), COUNT=count)
+      afile = File_Search(Filepath(Root_Dir=thisdir, 'ps_end.pro'), COUNT=acount)
+      IF (count GT 0) || (acount GT 0) THEN BEGIN
          coyoteDirs[j] = 1
       ENDIF
    ENDFOR

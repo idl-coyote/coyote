@@ -126,6 +126,7 @@
 ;        Modified to allow keywords to turn off messages from PS_START and PS_END with keywords. 27 November 2012. DWF.
 ;        The output filename was not specified correctly when making PDF file automatically. Fixed. 2 Dec 2012. DWF.
 ;        Renamed the MULTI keyword to WMULTI, as it was suppose to be. 11 Feb 2013. DWF.
+;        Misspelled keyword in PackageCommand method. 21 February 2013. DWF.
 ;-
 
 
@@ -2387,7 +2388,7 @@ FUNCTION cgCmdWindow::PackageCommand, command, p1, p2, p3, p4, $
 
    newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
       P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
-      AltPS_Params=altps_Params, TYPE=Keyword_Set(method), DESTROYOBECTS=Keyword_Set(destroyObjects))
+      AltPS_Params=altps_Params, TYPE=Keyword_Set(method), DESTROYOBJECTS=Keyword_Set(destroyObjects))
                         
     ; Replace command? If the cmdIndex is undefined, ALL commands are replaced.
     IF Keyword_Set(replaceCmd) THEN self -> ReplaceCommand, newCommand, cmdIndex, Multi=multi

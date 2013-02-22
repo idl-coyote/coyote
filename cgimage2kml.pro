@@ -100,9 +100,13 @@
 ;        the "eye" should be located with respect to the Earth. This implements a LookAt element
 ;        in KML file, so that when the KML file is open, it "flies to" the location represented
 ;        here. Longitude must be in the range -180 to 180. Latitude must be in the range -90 to 90.
-;        And elevation is a number in kilometers. If I two-element array [longitude, latitude] is
+;        And elevation is a number in kilometers. If a two-element array [longitude, latitude] is
 ;        passed in, the default value for elevation is 11000 km above the surface of the Earth.
 ;         
+;    kmz: in, optional, type=boolean, default=0
+;        Set this keyword to move the KML file and support files to a KMZ compressed file.
+;        Note that this capability is ONLY available in versions of IDL starting with version 8.0.
+;
 ;    latlonbox: out, optional, type=array
 ;        A four-element array giving the boundaries of the map projection in the
 ;        Google Map form of [north, south, east, west]. Normally, this information
@@ -192,6 +196,9 @@
 ;        Added a FlyTo keyword to allow the user to fly to a particular location on the Earth. 31 Dec 2012. DWF.
 ;        Was not handling 24- or 32-bit images correctly, nor was the MISSING_COLOR keyword being
 ;            interpreted correctly when expressed as a color string. 20 Feb 2013. DWF.
+;        Have been writing the absolute path to the image file into the KML file, when I should
+;            have been using a relative path. 22 Feb 2013. DWF.
+;            
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
@@ -204,6 +211,7 @@ PRO cgImage2KML, image, mapCoord, $
    GEOTIFF=geotiff, $
    FILENAME=filename, $
    FLYTO=flyto, $
+   KMZ=kmz, $
    LATLONBOX=latlonbox, $
    MAX_VALUE=max_value, $
    MIN_VALUE=min_value, $
@@ -222,6 +230,14 @@ PRO cgImage2KML, image, mapCoord, $
        Catch, /CANCEL
        void = Error_Message()
        RETURN
+   ENDIF
+   
+   ; If the KMZ keyword is set, make sure this version of IDL supports it.
+   IF Keyword_Set(kmz) THEN BEGIN
+     IF Float(!Version.Release) LT 8.0 THEN BEGIN
+        Message, 'The KMZ keyword is not supported in this version of IDL.', /Informational
+        kmz = 0
+     ENDIF
    ENDIF
    
    ; If the user sets either the MIN_VALUE or MAX_VALUE keyword, then you should scale the image.
@@ -358,7 +374,7 @@ PRO cgImage2KML, image, mapCoord, $
      ; Write the image file.
      Write_PNG, imageFilename, warped
       overlay = Obj_New('cgKML_GroundOverlay', $
-          HREF=imageFilename, $
+          HREF=File_BaseName(imageFilename), $
           DESCRIPTION=description, $
           LATLONBOX=latlonBox, $
           PLACENAME=placename, $
@@ -376,7 +392,7 @@ PRO cgImage2KML, image, mapCoord, $
      ; Write the KML file.
      kmlFile = Obj_New('cgKML_File', filename)
      overlay = Obj_New('cgKML_GroundOverlay', $
-       HREF=imageFilename, $
+       HREF=File_BaseName(imageFilename), $
        DESCRIPTION=description, $
        LATLONBOX=latlonBox, $
        PLACENAME=placename, $
@@ -386,8 +402,10 @@ PRO cgImage2KML, image, mapCoord, $
      ; Do you have a lookAt object?
      IF Obj_Valid(lookAtObj) THEN kmlFile -> Add, lookAtObj
      
-     kmlFile -> Save
+     kmlFile -> Save, KMZ=Keyword_Set(kmz)
      kmlFile -> Destroy
      
+     
    ENDELSE
+   
 END

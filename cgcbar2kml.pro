@@ -118,6 +118,9 @@
 ;       
 ;           cgColorbar, Range=[18,125], Position=[0.1, 0.8, 0.9, 0.85]
 ;           cgColorbar, Range=[18,125], Position=[0.1, 0.7, 0.9, 0.75], Divisions=0
+;    kmz: in, optional, type=boolean, default=0
+;        Set this keyword to move the KML file and support files to a KMZ compressed file.
+;        Note that this capability is ONLY available in versions of IDL starting with version 8.0.
 ;    location: in, optional, type=intarr
 ;       A two-element array giving the location of the top-left corner of the
 ;       color bar in normalized coordinates from the upper-left of the Google Earth
@@ -247,9 +250,11 @@
 ;     Change History::
 ;        Written, 30 October 2012 by David W. Fanning.
 ;        Added DRAWORDER keyword and fixed a typo concerning MISSING_VALUE. 31 Oct 2012. DWF.
+;        Have been writing the absolute path to the image file into the KML file, when I should
+;            have been using a relative path. 22 Feb 2013. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2012-2013, Fanning Software Consulting, Inc.
 ;-
 PRO cgCBar2KML, $
     ADDTOFILE=addtofile, $
@@ -267,6 +272,7 @@ PRO cgCBar2KML, $
     DRAWORDER=draworder, $
     FILENAME=filename, $
     FORMAT=format, $
+    KMZ=kmz, $
     LOCATION=location, $
     MAXRANGE=maxrange, $
     MINOR=minor, $
@@ -312,6 +318,14 @@ PRO cgCBar2KML, $
     ENDIF ELSE BEGIN
         position = [0.1, 0.525, 0.9, 0.875]
     ENDELSE
+    
+    ; If the KMZ keyword is set, make sure this version of IDL supports it.
+    IF Keyword_Set(kmz) THEN BEGIN
+        IF Float(!Version.Release) LT 8.0 THEN BEGIN
+            Message, 'The KMZ keyword is not supported in this version of IDL.', /Informational
+            kmz = 0
+        ENDIF
+    ENDIF
     
     ; Need a filename?
     IF N_Elements(filename) EQ 0 THEN BEGIN
@@ -370,7 +384,7 @@ PRO cgCBar2KML, $
      ; Create the screen overlay object if a raster file was created.
      IF File_Test(imageFilename) THEN BEGIN
        overlay = Obj_New('cgKML_ScreenOverlay', $
-            HREF=imageFilename, $
+            HREF=File_Basename(imageFilename), $
             DESCRIPTION=description, $
             DRAWORDER=draworder, $
             SCREEN_XY=location, $
@@ -423,14 +437,14 @@ PRO cgCBar2KML, $
      ; Create the screen overlay object if a raster file was created.
      IF File_Test(imageFilename) THEN BEGIN
        overlay = Obj_New('cgKML_ScreenOverlay', $
-            HREF=imageFilename, $
+            HREF=File_Basename(imageFilename), $
             DESCRIPTION=description, $
             DRAWORDER=draworder, $
             SCREEN_XY=location, $
             PLACENAME=placename)
         kmlFile -> Add, overlay
       ENDIF
-     kmlFile -> Save
+     kmlFile -> Save, KMZ=Keyword_Set(kmz)
      kmlFile -> Destroy
      
    ENDELSE

@@ -251,36 +251,17 @@ END
 
 
 ;+
-; This method converts a KML file to a KMZ file.
-; 
-;-
-PRO cgKML_File::KML2KMZ
-
-  Compile_Opt idl2
-  
-  Catch, theError
-  IF theError NE 0 THEN BEGIN
-     Catch, /CANCEL
-     void = Error_Message()
-     RETURN
-  ENDIF
-  
-  Message, 'The KML2KMZ method has not yet been implemented.'
- 
-END
-
-
-;+
 ; This method saves the KML file and writes it to disk.
 ; 
 ; :Keywords:
-;     include: in, optional, type=strarr
-;         A string array of files and/or directories that should be included in the KMZ file
-;         along with the KML file.
+;     supportfiles: in, optional, type=string
+;         A string array of files that should be included in the KMZ file
+;         along with the KML file. Will search for files, in not included.
 ;     kmz: in, required, type=boolean, default=0
-;         If this keyword is set, the KML file is zipped into a KMZ.
+;         If this keyword is set, the KML file is zipped into a KMZ. Only available for IDL 8.0
+;         and higher.
 ;-
-PRO cgKML_File::Save, INCLUDE=include, KMZ=kmz
+PRO cgKML_File::Save, KMZ=kmz, SupportFiles=supportFiles
 
   Compile_Opt idl2
   
@@ -303,8 +284,8 @@ PRO cgKML_File::Save, INCLUDE=include, KMZ=kmz
   ; Free up the logical unit number
   Free_Lun, lun
   
-  ; Need to convert this to a KMZ file?
-  IF Keyword_Set(kmz) THEN self -> KML2KMZ, include
+  ; Need to move this file and support files to a KMZ file?
+  IF Keyword_Set(kmz) THEN cgKML2KMZ, self.filename, supportFiles
   
 END
 

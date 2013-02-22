@@ -388,7 +388,7 @@ end
 ;        created by Map_Proj_Init. In this version of the program, it can also
 ;        be used to pass in a cgMap object, from which the map structure and other
 ;        pertinent information for creating map grid lines can be obtained.
-;     noclip: in, optional, tyle=boolean, default=0
+;     noclip: in, optional, type=boolean, default=0
 ;        Normally, output is clipped to the map projection boundaries. Set this keyword
 ;        to be able to draw outside the map boundaries.
 ;     no_grid: in, optional, type=boolean, default=0

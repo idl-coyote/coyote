@@ -377,7 +377,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 ; :Keywords:
 ;    addcmd: in, optional, type=boolean, default=0
 ;       Set this keyword to add the command to the resizeable graphics window cgWindow.
-;    axescolor: in, optional, type=string
+;    axiscolor: in, optional, type=string
 ;       A string color name, as appropriate for the cgCOLOR program.
 ;       By default, the same as the COLOR keyword. Used only if OVERPLOT 
 ;       keyword is not set.

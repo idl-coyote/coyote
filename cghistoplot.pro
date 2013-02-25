@@ -232,7 +232,7 @@
 ;       
 ;    Additional examples can be found here::
 ;    
-;        http://www.idlcoyote.com/graphics_tips/histoplot.php
+;        http://www.idlcoyote.com/gallery/index.html
 ;        
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::

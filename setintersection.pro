@@ -182,18 +182,18 @@ FUNCTION SetIntersection, set_a, set_b, $
     
     ; Do you want the indices of the matches? Code provided by
     ; R.G. Stockwell.
-    IF Arg_Present(indices_a) || Arg_Present(indices_b) THEN BEGIN
-    
-        aindices = LonArr(count)
-        bindices = LonArr(count)
-        FOR matchCounter=0,count-1 DO BEGIN
-            j = r[matchCounter]
-            aindices[matchcounter] = ra[ra[j]:ra[j+1]-1]
-            bindices[matchcounter] = rb[rb[j]:rb[j+1]-1]
-        ENDFOR
-        indices_a = Temporary(aindices)
-        indices_b = Temporary(bindices)
-    ENDIF
+;    IF Arg_Present(indices_a) || Arg_Present(indices_b) THEN BEGIN
+;    
+;        aindices = LonArr(count)
+;        bindices = LonArr(count)
+;        FOR matchCounter=0,count-1 DO BEGIN
+;            j = r[matchCounter]
+;            aindices[matchcounter] = ra[ra[j]:ra[j+1]-1]
+;            bindices[matchcounter] = rb[rb[j]:rb[j+1]-1]
+;        ENDFOR
+;        indices_a = Temporary(aindices)
+;        indices_b = Temporary(bindices)
+;    ENDIF
     
     ; Here is the result.
     result = Temporary(r) + minab

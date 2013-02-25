@@ -44,8 +44,8 @@
 ;  POSITIONS:      And output keyword that will return the positions or locations in A where the values
 ;                  in B appear.
 ;                  
-;  INDICIES_A:     The indices in vector A where the intersected values appear. Note, this is identical
-;                  to POSITIONS *only* if the intersected points are unique in each vector. The POSITIONS 
+;  INDICIES_A:     The indices in vector A where the intersected values appear. Note, this requires
+;                  the intersected points be unique in each vector. The POSITIONS 
 ;                  keyword will return ALL the positions of the match, even if there are non-unique matches.
 ;  
 ;  INDICIES_B:     The indices in vector B where the intersected values appear. This assumes that
@@ -181,19 +181,20 @@ FUNCTION SetIntersection, set_a, set_b, $
     ENDIF
     
     ; Do you want the indices of the matches? Code provided by
-    ; R.G. Stockwell.
-;    IF Arg_Present(indices_a) || Arg_Present(indices_b) THEN BEGIN
-;    
-;        aindices = LonArr(count)
-;        bindices = LonArr(count)
-;        FOR matchCounter=0,count-1 DO BEGIN
-;            j = r[matchCounter]
-;            aindices[matchcounter] = ra[ra[j]:ra[j+1]-1]
-;            bindices[matchcounter] = rb[rb[j]:rb[j+1]-1]
-;        ENDFOR
-;        indices_a = Temporary(aindices)
-;        indices_b = Temporary(bindices)
-;    ENDIF
+    ; R.G. Stockwell. Note that if you ask for indices, the sets
+    ; may NOT have duplicate values in them. Each value in both sets
+    ; must be unique.
+    IF Arg_Present(indices_a) || Arg_Present(indices_b) THEN BEGIN
+        aindices = LonArr(count)
+        bindices = LonArr(count)
+        FOR matchCounter=0,count-1 DO BEGIN
+            j = r[matchCounter]
+            aindices[matchcounter] = ra[ra[j]:ra[j+1]-1]
+            bindices[matchcounter] = rb[rb[j]:rb[j+1]-1]
+        ENDFOR
+        indices_a = Temporary(aindices)
+        indices_b = Temporary(bindices)
+    ENDIF
     
     ; Here is the result.
     result = Temporary(r) + minab

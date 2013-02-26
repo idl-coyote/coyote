@@ -137,8 +137,6 @@ FUNCTION Find_Boundary_Outline, mask, darray, boundaryPts, ptIndex, $
    xsize, ysize, from_direction
 
 On_Error, 2
-Catch, theError
-IF theError NE 0 THEN stop
 
 FOR j=1,7 DO BEGIN
 

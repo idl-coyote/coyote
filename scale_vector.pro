@@ -1,98 +1,15 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;       SCALE_VECTOR
+;   Scale_Vector
 ;
 ; PURPOSE:
+;   This is a utility routine to scale the elements of a vector or an array into a 
+;   given data range. 
 ;
-;       This is a utility routine to scale the elements of a vector
-;       (or an array) into a given data range. The processed vector
-;       [MINVALUE > vector < MAXVECTOR] is scaled into the data range
-;       given by MINRANGE and MAXRANGE.
-;
-; AUTHOR:
-;
-;       FANNING SOFTWARE CONSULTING
-;       David Fanning, Ph.D.
-;       1645 Sheely Drive
-;       Fort Collins, CO 80526 USA
-;       Phone: 970-221-0438
-;       E-mail: david@idlcoyote.com
-;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-;
-; CATEGORY:
-;
-;       Utilities
-;
-; CALLING SEQUENCE:
-;
-;       scaledVector = SCALE_VECTOR(vector, [minRange], [maxRange], [MINVALUE=minvalue], [MAXVALUE=maxvalue])
-;
-; INPUT POSITIONAL PARAMETERS:
-;
-;       vector:   The vector (or array) to be scaled. Required.
-;       minRange: The minimum value of the scaled vector. Set to 0 by default. Optional.
-;       maxRange: The maximum value of the scaled vector. Set to 1 by default. Optional.
-
-;       Note that it is the processed vector [MINVALUE > vector < MAXVALUE] that is
-;       scaled between minRange and maxRange. See the MINVALUE and MAXVALUE keywords below.
-;
-; INPUT KEYWORD PARAMETERS:
-;
-;       DOUBLE:        Set this keyword to perform scaling in double precision.
-;                      Otherwise, scaling is done in floating point precision.
-;
-;       MAXVALUE:      MAXVALUE is set equal to (vector < MAXVALUE) prior to scaling.
-;                      The default value is MAXVALUE = Max(vector).
-;
-;       MINVALUE:      MINVALUE is set equal to (vector > MAXVALUE) prior to scaling.
-;                      The default value is MINXVALUE = Min(vector).
-;
-;       NAN:           Set this keyword to enable not-a-number checking. NANs
-;                      in vector will be ignored.
-;
-;       PRESERVE_TYPE: Set this keyword to preserve the input data type in the output.
-;
-; RETURN VALUE:
-;
-;       scaledVector: The vector (or array) values scaled into the data range.
-;
-; COMMON BLOCKS:
-;       None.
-;
-; EXAMPLES:
-;
-;       x = [3, 5, 0, 10]
-;       xscaled = SCALE_VECTOR(x, -50, 50)
-;       Print, xscaled
-;          -20.0000     0.000000     -50.0000      50.0000
-
-;       Suppose your image has a minimum value of -1.7 and a maximum value = 2.5.
-;       You wish to scale this data into the range 0 to 255, but you want to use
-;       a diverging color table. Thus, you want to make sure value 0.0 is scaled to 128.
-;       You proceed like this:
-;
-;       scaledImage = SCALE_VECTOR(image, 0, 255, MINVALUE=-2.5, MAXVALUE=2.5)
-;
-; RESTRICTIONS:
-;
-;     Requires the following programs from the Coyote Library:
-;
-;        http://www.idlcoyote.com/programs/convert_to_type.pro
-;        http://www.idlcoyote.com/programs/fpufix.pro
-;
-; MODIFICATION HISTORY:
-;
-;       Written by:  David W. Fanning, 12 Dec 1998.
-;       Added MAXVALUE and MINVALUE keywords. 5 Dec 1999. DWF.
-;       Added NAN keyword. 18 Sept 2000. DWF.
-;       Removed check that made minRange less than maxRange to allow ranges to be
-;          reversed on axes, etc. 28 Dec 2003. DWF.
-;       Added PRESERVE_TYPE and DOUBLE keywords. 19 February 2006. DWF.
-;       Added FPUFIX to cut down on floating underflow errors. 11 March 2006. DWF.
-;-
 ;******************************************************************************************;
-;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 1998-2013, by Fanning Software Consulting, Inc. All rights reserved.      ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -117,12 +34,87 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-FUNCTION Scale_Vector, vector, minRange, maxRange, $
-   MAXVALUE=vectorMax, MINVALUE=vectorMin, NAN=nan, $
-   PRESERVE_TYPE=preserve_type, DOUBLE=double
+;
+;+
+; This is a utility routine to scale the elements of a vector or an array into a 
+; given data range. 
+;
+; :Categories:
+;    Utilities
+;    
+; :Returns:
+;     A vector or array of the same size as the input, scaled into the data range given
+;     by `minRange` and `maxRange'. The input vector is confined to the data range set
+;     by `MinValue` and `MaxValue` before scaling occurs.
+;
+; :Params:
+;    maxRange: in, optional, type=varies, default=1
+;       The maximum output value of the scaled vector. Set to 1 by default.
+;    minRange: in, optional, type=varies, default=0
+;       The minimum output value of the scaled vector. Set to 0 by default.
+;    vector: in, required
+;       The input vector or array to be scaled.
+;
+; :Keywords:
+;    double: in, optional, type=boolean, default=0
+;         Set this keyword to perform scaling in double precision. Otherwise, scaling 
+;         is done in floating point precision.
+;     maxvalue: in, optional
+;         Set this value to the maximum value of the vector, before scaling (vector < maxvalue).
+;         The default value is Max(vector).
+;     minvalue: in, optional
+;         Set this value to the mimimum value of the vector, before scaling (minvalue < vector).
+;         The default value is Min(vector).
+;     nan: in, optional, type=boolean, default=0
+;         Set this keyword to enable not-a-number checking. NANs in vector will be ignored.
+;     preserve_type: in, optional, type=boolean, default=0
+;         Set this keyword to preserve the input data type in the output.
+;
+; :Examples:
+;       Simple example of scaling a vector::
+;       
+;          IDL> x = [3, 5, 0, 10]
+;          IDL> xscaled = Scale_Vector(x, -50, 50)
+;          IDL> Print, xscaled
+;               -20.0000     0.000000     -50.0000      50.0000
 
-   ; Return to caller on error.
-   ;On_Error, 2
+;       Suppose your image has a minimum value of -1.7 and a maximum value = 2.5.
+;       You wish to scale this data into the range 0 to 255, but you want to use
+;       a diverging color table. Thus, you want to make sure value 0.0 is scaled to 128.
+;       You proceed like this::
+;
+;          scaledImage = Scale_Vector(image, 0, 255, MINVALUE=-2.5, MAXVALUE=2.5)
+;
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;         Written by:  David W. Fanning, 12 Dec 1998.
+;         Added MAXVALUE and MINVALUE keywords. 5 Dec 1999. DWF.
+;         Added NAN keyword. 18 Sept 2000. DWF.
+;         Removed check that made minRange less than maxRange to allow ranges to be
+;            reversed on axes, etc. 28 Dec 2003. DWF.
+;         Added PRESERVE_TYPE and DOUBLE keywords. 19 February 2006. DWF.
+;         Added FPUFIX to cut down on floating underflow errors. 11 March 2006. DWF.
+;
+; :Copyright:
+;     Copyright (c) 1998-2013, Fanning Software Consulting, Inc.
+;-
+FUNCTION Scale_Vector, vector, minRange, maxRange, $
+   DOUBLE=double, $
+   MAXVALUE=vectorMax, $
+   MINVALUE=vectorMin, $
+   NAN=nan, $
+   PRESERVE_TYPE=preserve_type
+
+   ; Error handling.
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
@@ -196,4 +188,4 @@ FUNCTION Scale_Vector, vector, minRange, maxRange, $
       RETURN, FPUFIX(trimVector * scaleFactor[1] + scaleFactor[0])
    ENDELSE
 
-END ;-------------------------------------------------------------------------
+END

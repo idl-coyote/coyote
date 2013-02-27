@@ -94,13 +94,9 @@
 ;         Set this keyword to configure certain properties of the color bar to make
 ;         discrete color blocks for the color bar. This works best if you are using
 ;         a handful of colors in the color bar (e.g, 8-16).
-;    divisions: in, optional, type=integer
-;         The number of divisions to divide the bar into. There will
-;         be (divisions + 1) annotations. The default is 0 if using the
-;         default color bar formatting, which allows the plot command to 
-;         determine how many divisions to make. Otherwise, if you are specifying
-;         some other format for the tick labels, the default number of divisions
-;         is six.
+;    divisions: in, optional, type=integer, default=0
+;         The number of divisions to divide the bar into. There will be (divisions + 1) annotations. 
+;         When set to 0 (the default), the IDL Plot command detemines the number of divisions used.
 ;    fit: in, optional, type=boolean, default=0
 ;       If this keyword is set, the colorbar "fits" itself to the normalized
 ;       coordinates of the last graphics command executed. In other words, for
@@ -112,15 +108,8 @@
 ;    font: in, optional, type=integer, default=!P.Font
 ;       Sets the font of the annotation. Hershey: -1, Hardware:0, True-Type: 1.
 ;    format: in, optional, type=string, default=""
-;       The format of the color bar annotations. Default is "". Note that the
-;       formatting behaviour can change, depending up values for the keywords
-;       `RANGE` and `DIVISIONS`. If you prefer to let the IDL Plot command determine
-;       how the color bar labels are formatted, set the format to a null string and
-;       set the `DIVISIONS` keyword to 0. Note the difference in these two commands::
-;       
-;           cgColorbar, Range=[18,125], Position=[0.1, 0.8, 0.9, 0.85]
-;           cgColorbar, Range=[18,125], Position=[0.1, 0.7, 0.9, 0.75], Divisions=0
-;           
+;       The format of the color bar annotations. The dfault is to let the IDL Plot command 
+;       determine how the color bar labels are formatted.
 ;    invertcolors: in, optional, type=boolean, default=0
 ;       Setting this keyword inverts the colors in the color bar.
 ;    maxrange: in, optional
@@ -192,7 +181,8 @@
 ;       greater will result in minor tick mark lengths being set to 0.01, which is almost 
 ;       too small to be seen. All direct graphics tick marks act in this (strange!) way.
 ;    ticknames: in, optional, type=string                 
-;       A string array of names or values for the color bar tick marks.
+;       A string array of names or values for the color bar tick marks. There should be
+;       `divisions` + 1 tick names in the array.
 ;    title: in, optional, type=string, default=""
 ;       This is title for the color bar. The default is to have no title.
 ;    tcharsize: in, optional, type=float
@@ -300,6 +290,10 @@
 ;       Changes to support a tick formatting function when a log axis is used. 7 February 2013. DWF.
 ;       Added XTICKLAYOUT and YTICKLAYOUT keywords. 8 February 2013. DWF.
 ;       Somehow the default AnnotateColor had gotten changed from "opposite". Restored. 18 Feb 2013. DWF.
+;       Greatly simplified the code and turned over the responsibility of doing tick formatting and setting
+;          the number of divisions, etc. to the PLOT command. I do this with some trepidation, because it
+;          is a big change, but I think it will lead to better results in the long run and won't affect
+;          current IDL programs much, if at all. 27 Feb 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
@@ -448,8 +442,6 @@ PRO cgColorbar, $
             npalColors = dims[1]
         ENDIF ELSE npalColors = dims[0]
         IF N_Elements(ncolors) EQ 0 THEN ncolors = npalColors
-;        IF ncolors NE npalColors THEN $
-;           Message, 'The number of colors in the color palette does not match NCOLORS.'
         TVLCT, palette
         TVLCT, rr, gg, bb, /Get
     ENDIF
@@ -472,10 +464,11 @@ PRO cgColorbar, $
 
     ; Check and define keywords.
     SetDefaultValue, ncolors, 256
+    SetDefaultValue, divisions, 0 ; Let the PLOT command decide.
     SetDefaultValue, bottom, 0B
     SetDefaultValue, charsize, cgDefCharsize() * charPercent
     SetDefaultValue, tcharsize, charsize
-    SetDefaultValue, format, ""
+    SetDefaultValue, format, "" ; Let the PLOT command decide.
     IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
     minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange[0])
     maxrange = (N_ELEMENTS(maxrange) EQ 0) ? Float(ncolors) : Float(maxrange[0])
@@ -505,30 +498,14 @@ PRO cgColorbar, $
        ENDIF
     ENDELSE
     
-    ; Now handle DIVISIONS properly.
-    IF N_Elements(divisions) EQ 0 THEN BEGIN
-       IF (format EQ "") THEN BEGIN
-           IF N_Elements(range) NE 0 THEN BEGIN
-              IF N_Elements(tickInterval) NE 0 $
-                  THEN divisions = Abs(maxrange - minrange) / tickInterval $
-                  ELSE divisions = 6
-           ENDIF ELSE divisions = 0 
-       ENDIF ELSE BEGIN
-           ; You can't have both DIVISONS and a tick interval at the same time,
-           ; so the following value will be disgarded soon if you have a tick interval
-           ; defined.
-           IF N_Elements(tickInterval) NE 0 $
-               THEN divisions = Abs(maxrange - minrange) / tickInterval $
-               ELSE divisions = 6
-       ENDELSE
-    ENDIF
-    divisions = divisions < 59 ; Limit to the PLOT command.
+    ; A plot command limitation restricts the number of divisions to 59.
+    divisions = divisions < 59 
     
     ; If needed create a window first, so the drawing
     ; colors are correct for the window you want to draw into.
     IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
     
-    ; If the user asked for discrete colors, set some keywwords appropriately.
+    ; If the user asked for discrete colors, set some keywords appropriately.
     ; This really should not be used for more than 16 or colors, but I don't
     ; want to limit it for the user. The maximum value is 59.
     IF Keyword_Set(discrete) THEN BEGIN
@@ -540,68 +517,7 @@ PRO cgColorbar, $
     ; You can't have a format set *and* use ticknames.
     IF N_ELEMENTS(ticknames) NE 0 THEN format = ""
     
-    ; If the format is NOT null and it is the name of a tick formating function, then we have
-    ; to handle things differently.
-    IF (format NE "") && (StrPos(format, '(') EQ -1) THEN BEGIN
-    
-       IF minrange LT maxrange THEN BEGIN
-           IF (xlog OR ylog) THEN BEGIN
-                levels = Scale_Vector(Findgen(divisions+1), ALog10(minrange), ALog10(maxrange))
-                levels = 10^levels
-           ENDIF ELSE BEGIN
-                levels = Scale_Vector(Findgen(divisions+1), minrange, maxrange)
-           ENDELSE          
-           nlevels = N_Elements(levels)
-           ticknames = StrArr(nlevels)
-           FOR j=0,nlevels-1 DO BEGIN
-               ticknames[j] = Call_Function(format, 0, j, levels[j])
-           ENDFOR
-           format = "" ; No formats allowed in PLOT call now that we have ticknames.
-        ENDIF ELSE BEGIN
-           IF (xlog OR ylog) THEN BEGIN
-                levels = Scale_Vector(Findgen(divisions+1), ALog10(maxrange), ALog10(minrange))
-                levels = 10^levels
-           ENDIF ELSE BEGIN
-                levels = Scale_Vector(Findgen(divisions+1), maxrange, minrange)
-           ENDELSE          
-           levels = Reverse(levels)
-           nlevels = N_Elements(levels)
-           ticknames = StrArr(nlevels)
-           FOR j=0,nlevels-1 DO BEGIN
-               ticknames[j] = Call_Function(format, 0, j, levels[j])
-           ENDFOR
-           format = "" ; No formats allowed in PLOT call now that we have ticknames.
-       ENDELSE
-    
-    ENDIF ELSE BEGIN
-
-        ; If the format is NOT null, then format the ticknames yourself.
-        ; Can't assume minrange is less than maxrange.
-        IF (xlog XOR ylog) EQ 0 THEN BEGIN
-            IF format NE "" THEN BEGIN
-               IF minrange LT maxrange THEN BEGIN
-                   IF N_Elements(tickinterval) EQ 0 THEN BEGIN
-                      step = (maxrange - minrange) / divisions
-                      levels = minrange > (Indgen(divisions+1) * step + minrange) < maxrange
-                      IF StrPos(StrLowCase(format), 'i') NE -1 THEN levels = Round(levels)
-                      ticknames = String(levels, Format=format)
-                      format = "" ; No formats allowed in PLOT call now that we have ticknames.
-                   ENDIF
-               ENDIF ELSE BEGIN
-                   IF N_Elements(tickinterval) EQ 0 THEN BEGIN
-                       step = (minrange - maxrange) / divisions
-                       levels = maxrange > (Indgen(divisions+1) * step + maxrange) < minrange
-                       levels = Reverse(levels)
-                       IF StrPos(StrLowCase(format), 'i') NE -1 THEN levels = Round(levels)
-                       ticknames = String(levels, Format=format)
-                       format = "" ; No formats allowed in PLOT call now that we have ticknames.
-                   ENDIF
-               ENDELSE
-            ENDIF
-        ENDIF
-        
-    ENDELSE
-    
+    ; Determine the position of the color bar in the window.
     IF KEYWORD_SET(vertical) THEN BEGIN
        bar = REPLICATE(1B,20) # BINDGEN(ncolors)
        IF Keyword_Set(invertcolors) THEN bar = Reverse(bar, 2)
@@ -679,8 +595,8 @@ PRO cgColorbar, $
      IF N_Elements(clamp) NE 0 THEN BEGIN
         IF N_Elements(clamp) NE 2 THEN Message, 'The CLAMP keyword must be a two-element array.'
         byterange = BytScl(clamp, minrange, maxrange)
-        tempbar = BYTSCL(bar, TOP=(ncolors-1) < (255-bottom)) + bottom   
-        bar = BYTSCL(bar, TOP=(ncolors-1) < (255-bottom), MIN=byterange[0], MAX=byterange[1]) + bottom 
+        tempbar = BytScl(bar, TOP=(ncolors-1) < (255-bottom)) + bottom   
+        bar = BytScl(bar, TOP=(ncolors-1) < (255-bottom), MIN=byterange[0], MAX=byterange[1]) + bottom 
         IF N_Elements(neutralIndex) EQ 0 THEN BEGIN
             neutralBottom = (ncolors-1) < (255-bottom)
             neutralTop = bottom
@@ -692,10 +608,8 @@ PRO cgColorbar, $
         IF count GT 0 THEN bar[i] = neutralBottom
         i = Where(tempbar GT byterange[1], count)
         IF count GT 0 THEN bar[i] = neutralTop
-        
-         
      ENDIF ELSE BEGIN
-        bar = BYTSCL(bar, TOP=(ncolors-1) < (255-bottom)) + bottom
+        bar = BytScl(bar, TOP=(ncolors-1) < (255-bottom)) + bottom
      ENDELSE
 
      IF Keyword_Set(reverse) THEN BEGIN

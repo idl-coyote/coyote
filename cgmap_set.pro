@@ -104,6 +104,7 @@
 ;     Several MAP_CONTINENTS keywords seem to have gone missing. Added COASTS,
 ;        COUNTRIES, FILL_CONTINENTS, and RIVERS. 4 Dec 2012. DWF.
 ;     Forgot to pass the "extra" information in (e.g., E_HORIZON keyword) to Map_Set. 18 Jan 2013. DWF.
+;     HORIZON keyword not being passed along to Map_Set. 28 Feb 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -465,7 +466,8 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
         ELLIPSOID = ellips, $
         GOODESHOMOLOSINE = goodes, $  
         GNOMIC = gnomic, $
-        HAMMER = hammer, $            
+        HAMMER = hammer, $   
+        HORIZON=horizon, $         
         ISOTROPIC = iso, $,             
         LAMBERT = lambert, $
         LIMIT = limit, $           

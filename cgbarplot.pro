@@ -73,6 +73,8 @@
 ;        A scalar that specifies, in units of "nominal bar width", the spacing between bars.  
 ;        For example, if BARSPACE is 1.0, then all bars will have one bar-width of space 
 ;        between them. If not specified, the bars are spaced apart by 20% of the bar width.
+;     barthick: in, optional, type=float, default=1.0
+;        A scalar that specifies the thickness of the bar outlines. 
 ;     barwidth: in, optional, type=float
 ;         A floating-point value that specifies the width of the bars in units of "nominal bar 
 ;         width".  The nominal bar width is computed so that all the bars (and the space 
@@ -232,6 +234,7 @@
 ;         Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;         Fixed a typo that was interfering with the YTITLE keyword. 3 Oct 2012. DWF.
 ;         Fixed a bug in the interaction of the NOERASE and OVERPLOT keywords. 14 Jan 2013. DWF.
+;         Added a BARTHICK keyword to change the thickness of the bar outlines. 28 Feb 2013. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -244,6 +247,7 @@ PRO cgBarPlot, values, $
     BARNAMES=barnamesIn, $
     BAROFFSET=baroffsetIn, $
     BARSPACE=barspaceIn, $
+    BARTHICK=barthickIn, $
     BARWIDTH=barwidthIn, $
     BASELINES=baselines, $
     BASERANGE=baserange, $
@@ -307,6 +311,7 @@ PRO cgBarPlot, values, $
                 BARNAMES=barnamesIn, $
                 BAROFFSET=baroffsetIn, $
                 BARSPACE=barspaceIn, $
+                BARTHICK=barthickIn, $
                 BARWIDTH=barwidthIn, $
                 BASELINES=baselines, $
                 BASERANGE=baserange, $
@@ -337,6 +342,7 @@ PRO cgBarPlot, values, $
                 BARNAMES=barnamesIn, $
                 BAROFFSET=baroffsetIn, $
                 BARSPACE=barspaceIn, $
+                BARTHICK=barthickIn, $
                 BARWIDTH=barwidthIn, $
                 BASELINES=baselines, $
                 BASERANGE=baserange, $
@@ -521,6 +527,7 @@ PRO cgBarPlot, values, $
     barnames = (N_Elements(barnamesIn) EQ 0) ? StrArr(nbars) + ' ' : barnamesIn
     IF N_Elements(barnames) NE nbars THEN Message, 'Number of bar names does not equal the number of bars.'
     barspace = (N_Elements(barspaceIn) EQ 0) ? 0.2 : Float(barspaceIn)
+    barthick = (N_Elements(barthickIn) EQ 0) ? 1.0 : Float(barthickIn)
     barwidth = (N_Elements(barwidthIn) EQ 0) ? 1.0 - barspace - (barspace / nbars) : barwidthIn    
     baroffset = (N_Elements(baroffsetIn) EQ 0) ? barspace/barwidth*1.5 : baroffsetIn
     IF N_Elements(baselines) EQ 0 THEN baselines = IntArr(nbars)
@@ -617,7 +624,7 @@ PRO cgBarPlot, values, $
           y = length                       ; Y-axis is "length" axis
        ENDELSE
        cgColorFill, x, y, COLOR=colors[i], /NORMAL                    ; Polyfill with color
-       IF (outline) THEN cgPlots, x, y, /NORMAL, COLOR=OplotColors[i] ; Outline using !p.color
+       IF (outline) THEN cgPlots, x, y, /NORMAL, COLOR=OplotColors[i], THICK=barThick ; Outline using !p.color
     ENDFOR
     
     tickv = (tickv-tick_scal_fact[0])/tick_scal_fact[1]  ; Locations of the ticks

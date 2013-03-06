@@ -191,6 +191,8 @@
 ;       the opposite side of the color bar from the color bar labels. This is a consequence
 ;       of being upable to determine the length of color bar labels programmatically in this
 ;       orientation.
+;    textthick: in, optional, type=float, default=1.0
+;        Sets the thickness of the textual annotations on the color bar.
 ;    tlocation: in, optional, type=string
 ;       The title location, which allows the user to set the title location independently 
 ;       of the colorbar labels. May be "TOP" or "BOTTOM" for horizontal color bars, and
@@ -294,6 +296,7 @@
 ;          the number of divisions, etc. to the PLOT command. I do this with some trepidation, because it
 ;          is a big change, but I think it will lead to better results in the long run and won't affect
 ;          current IDL programs much, if at all. 27 Feb 2013. DWF.
+;       Added TEXTTHICK keyword to change the thickness of the textual annotations. 28 Feb 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
@@ -328,8 +331,9 @@ PRO cgColorbar, $
     RANGE=range, $
     REVERSE=reverse, $
     RIGHT=right, $
-    TLOCATION=tlocation, $
     TCHARSIZE=tcharsize, $
+    TEXTTHICK=textthick, $
+    TLOCATION=tlocation, $
     TICKINTERVAL=tickinterval, $
     TICKLEN=ticklen, $
     TICKNAMES=ticknames, $
@@ -393,8 +397,9 @@ PRO cgColorbar, $
             RANGE=range, $
             REVERSE=reverse, $
             RIGHT=right, $
-            TLOCATION=tlocation, $
             TCHARSIZE=tcharsize, $
+            TEXTTHICK=textthick, $
+            TLOCATION=tlocation, $
             TICKINTERVAL=tickinterval, $
             XTICKLAYOUT=xticklayout, $
             TICKLEN=ticklen, $
@@ -468,6 +473,7 @@ PRO cgColorbar, $
     SetDefaultValue, bottom, 0B
     SetDefaultValue, charsize, cgDefCharsize() * charPercent
     SetDefaultValue, tcharsize, charsize
+    SetDefaultValue, textthick, 1.0
     SetDefaultValue, format, "" ; Let the PLOT command decide.
     IF N_Elements(nodisplay) EQ 0 THEN nodisplay = 1
     minrange = (N_ELEMENTS(minrange) EQ 0) ? 0. : Float(minrange[0])
@@ -673,7 +679,7 @@ PRO cgColorbar, $
                  POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
                  XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', YMINOR=minor, _STRICT_EXTRA=extra, $
                  YTICKNAME=ticknames, FONT=font, YLOG=ylog, YTICKINTERVAL=tickinterval, $
-                 YTICKLAYOUT=yticklayout, XTICKLAYOUT=xticklayout
+                 YTICKLAYOUT=yticklayout, XTICKLAYOUT=xticklayout, CHARTHICK=textthick
     
               AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
                  YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
@@ -683,7 +689,7 @@ PRO cgColorbar, $
               truecharsize = Float(!D.X_CH_SIZE * tcharsize) / !D.X_SIZE
               yloc = (position[3] - position[1]) / 2.0 + position[1]
               xloc = position[0] - (1.5 * truecharsize)
-              XYOUTS, xloc, yloc, title, /NORMAL, COLOR=color, $
+              XYOUTS, xloc, yloc, title, /NORMAL, COLOR=color, CHARTHICK=textthick, $
                 ALIGNMENT=0.5, FONT=font, CHARSIZE=tcharsize, ORIENTATION=-270
           ENDIF ELSE BEGIN
               PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1, $
@@ -691,7 +697,7 @@ PRO cgColorbar, $
                  POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
                  XTICKFORMAT='(A1)', YTICKFORMAT='(A1)', YMINOR=minor, _STRICT_EXTRA=extra, $
                  YTICKNAME=ticknames, FONT=font, YLOG=ylog, YTICKINTERVAL=tickinterval, $
-                 YTICKLAYOUT=yticklayout, XTICKLAYOUT=xticklayout
+                 YTICKLAYOUT=yticklayout, XTICKLAYOUT=xticklayout, CHARTHICK=textthick
     
               AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
                  YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
@@ -703,7 +709,7 @@ PRO cgColorbar, $
 
           IF StrUpCase(tlocation) EQ 'RIGHT' THEN BEGIN
               PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1,  $
-                 YTICKS=divisions, YSTYLE=9, XSTYLE=1, YTITLE="", $
+                 YTICKS=divisions, YSTYLE=9, XSTYLE=1, YTITLE="", CHARTHICK=textthick, $
                  POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
                  XTICKFORMAT='(A1)', YTICKFORMAT=format, YMinor=minor, _STRICT_EXTRA=extra, $
                  YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font, XTITLE="", $
@@ -717,11 +723,11 @@ PRO cgColorbar, $
               truecharsize = Float(!D.X_CH_SIZE * tcharsize) / !D.X_SIZE
               yloc = (position[3] - position[1]) / 2.0 + position[1]
               xloc = position[2] + (2.0 * truecharsize)
-              XYOUTS, xloc, yloc, title, /NORMAL, COLOR=color, $
+              XYOUTS, xloc, yloc, title, /NORMAL, COLOR=color, CHARTHICK=textthick, $
                 ALIGNMENT=0.5, FONT=font, CHARSIZE=tcharsize, ORIENTATION=-270
           ENDIF ELSE BEGIN
               PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=1,  $
-                 YTICKS=divisions, YSTYLE=9, XSTYLE=1, YTITLE=title, $
+                 YTICKS=divisions, YSTYLE=9, XSTYLE=1, YTITLE=title, CHARTHICK=textthick, $$
                  POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
                  XTICKFORMAT='(A1)', YTICKFORMAT=format, YMinor=minor, _STRICT_EXTRA=extra, $
                  YTICKNAME=ticknames, YLOG=ylog, YTICKLEN=ticklen, FONT=font, XTITLE="", $
@@ -740,7 +746,7 @@ PRO cgColorbar, $
        IF KEYWORD_SET(top) THEN BEGIN
 
           PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=divisions, $
-             YTICKS=1, XSTYLE=9, YSTYLE=1, $
+             YTICKS=1, XSTYLE=9, YSTYLE=1, CHARTHICK=textthick, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              YTICKFORMAT='(A1)', XTICKFORMAT='(A1)', XTICKLEN=0.01, $
              XRANGE=[minrange, maxrange], FONT=font, XMINOR=minor, _STRICT_EXTRA=extra, $
@@ -768,14 +774,14 @@ PRO cgColorbar, $
                 'LEFT': Message, 'Illegal specification for title position: ' + StrUpCase(tlocation)
                 ELSE: Message, 'Illegal specification for title position: ' + StrUpCase(tlocation)
              ENDCASE
-             XYOUTS, xloc, yloc, title, /NORMAL, COLOR=color, $
+             XYOUTS, xloc, yloc, title, /NORMAL, COLOR=color, CHARTHICK=textthick, $
                 ALIGNMENT=0.5, FONT=font, CHARSIZE=tcharsize
           ENDIF
 
        ENDIF ELSE BEGIN
 
           PLOT, [minrange,maxrange], [minrange,maxrange], /NODATA, XTICKS=divisions, $
-             YTICKS=1, XSTYLE=9, YSTYLE=1, TITLE="", $
+             YTICKS=1, XSTYLE=9, YSTYLE=1, TITLE="", CHARTHICK=textthick, $
              POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
              YTICKFORMAT='(A1)', XTICKFORMAT=format, XTICKLEN=ticklen, $
              XRANGE=[minrange, maxrange], FONT=font, XMinor=minor, _STRICT_EXTRA=extra, $
@@ -803,7 +809,7 @@ PRO cgColorbar, $
                 'LEFT': Message, 'Illegal specification for title position: ' + StrUpCase(tlocation)
                ELSE: Message, 'Illegal specification for title position: ' + StrUpCase(tlocation)
              ENDCASE
-             XYOUTS, xloc, yloc, title, /NORMAL, COLOR=color, $
+             XYOUTS, xloc, yloc, title, /NORMAL, COLOR=color, CHARTHICK=textthick, $
                 ALIGNMENT=0.5, FONT=font, CHARSIZE=tcharsize
           ENDIF
 

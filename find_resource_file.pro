@@ -7,11 +7,12 @@
 ;  This function is designed to search for and return the fully qualified
 ;  path to a resource file. The order of search is as follows:
 ;
-;    1. In the same directory as this file is found in.
-;    2. In the directories rooted at the IDL resource directory (IDL_DIR/resource).
-;    3. In the directories rooted at a resource directory found in the same directory this file is in.
-;    4. In the directories rooted at a resource directory found in the a directory one above the directory this file is in.
-;    5. Anywhere in the IDL PATH. Note that a *.pro file *must* be in a directory for the directory to be on
+;    1. In the current directory.
+;    2. In the same directory as this file is found in.
+;    3. In the directories rooted at the IDL resource directory (IDL_DIR/resource).
+;    4. In the directories rooted at a resource directory found in the same directory this file is in.
+;    5. In the directories rooted at a resource directory found in the a directory one above the directory this file is in.
+;    6. Anywhere in the IDL PATH. Note that a *.pro file *must* be in a directory for the directory to be on
 ;       the IDL PATH.
 ; 
 ;
@@ -72,10 +73,11 @@
 ;  The file will also look in the directory of the caller of this program. 21 April 2010. DWF.
 ;  Fixed a problem when File_Search finds several files with the same name. Always takes the
 ;      first file found now. 4 June 2010. DWF.
+;  Modified to look in the current directory first. 5 March 2013. DWF.
 ;-
 ;
 ;******************************************************************************************;
-;  Copyright (c) 2008-2009, by Fanning Software Consulting, Inc.                           ;
+;  Copyright (c) 2008-2013, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -121,6 +123,16 @@ Function Find_Resource_File, filename, SUCCESS=success, VERBOSE=verbose
     ; Require the name of a file resource.
     IF N_Elements(filename) EQ 0 THEN Message, 'The base name of the resource file is required.'
     filename = File_BaseName(filename)
+    
+    ; Look in the current directory first.
+    CD, Current=thisDir
+    resourceName = Filepath(ROOT_DIR=thisDir, filename)
+    resourceName = resourceName[0]
+    IF File_Test(resourceName, /REGULAR, /READ) THEN BEGIN
+        success = 1
+        IF verbose THEN Print, 'Resource File Found: ', resourceName
+        RETURN, resourceName
+    ENDIF    
     
     ; Look in the same directory this program is found in.
     thisDir = ProgramRootDir()

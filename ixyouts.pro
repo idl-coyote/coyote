@@ -85,6 +85,10 @@
 ;
 ;      Written by: David W. Fanning, 31 August 2007, from suggestions made
 ;         by Mike Galloy and Ken Bowman on the IDL newsgroup.
+;      It is reported to me that this program no longer works in IDL 8. Since this was 
+;         written for the last "new" graphics system and we are on to the next "new" graphics
+;         system (or is it the one after that?), I've just decided to retire the darn thing
+;         and not worry about it anymore. 7 March 2013. DWF.
 ;-
 ;
 ;******************************************************************************************;

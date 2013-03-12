@@ -169,6 +169,7 @@
 ;       Modified the global attribute structure so that the "filename" field, which holds the
 ;           name of the netCDF of HDF file is now named "ncdf_filename" or "hdf_filename". This
 ;           will avoid conflicts with global attributes with "filename". 20 January 2011. DWF.
+;       Typo in the section reading calibration data fixed. 12 March 2013. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -2478,7 +2479,7 @@ FUNCTION NCDF_DATA::ReadVariableWithAttr, theVariable, SUCCESS=success
             ENDFOR
             IF calData.cal EQ 0 $
                 THEN varStruct = Create_Struct(varStruct, '_calibration_data', 'Not Present in File') $
-                ELSE varStruct = Create_Struct(varStruct, '_calibration_data', catData)
+                ELSE varStruct = Create_Struct(varStruct, '_calibration_data', calData)
        ENDIF
        
        ; Add dimension informatio to the structure.

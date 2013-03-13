@@ -112,6 +112,8 @@
 ;        Added a LABEL keyword to add a label instead of a title to a plot. 13 July 2012. DWF.
 ;        Added the ability to include overplot objects in the zoom window. 17 July 2012. DWF.
 ;        Added a Destroy method and now remove widget GUI in CLEANUP method. 2 Oct 2012. DWF.
+;        I had the GetProperty and SetProperty keyword inheritance mechanism screwed up. Sorted
+;           now. 13 March 2013. DWF.
 ;-
 
 ;+
@@ -1056,7 +1058,7 @@ PRO cgZPlot::GetProperty, $
         YLOG=ylog, $
         YNOZERO=ynozero, $
         ZOOMFACTOR=zoomfactor, $
-        _EXTRA=extra
+        _REF_EXTRA=extra
         
     Compile_Opt idl2
     
@@ -1087,7 +1089,7 @@ PRO cgZPlot::GetProperty, $
     IF Arg_Present(zoomfactor) NE 0 THEN zoomfactor = self.zoomfactor
     
     ; Get superclass properties.
-    IF N_Elements(extra) NE 0 THEN self -> cgGraphicsKeywords::GetProperty, _REF_STRICT_EXTRA=extra
+    IF N_Elements(extra) NE 0 THEN self -> cgGraphicsKeywords::GetProperty, _STRICT_EXTRA=extra
 END
 
 ;+

@@ -1040,7 +1040,7 @@ END
 ;         Set if this property of the plot is set.
 ;     zoomfactor: out, optional, type=float
 ;         Set to the current zoom factor.
-;     _extra: out, optional, type=any
+;     _ref_extra: out, optional, type=any
 ;        Any keyword appropriate for the IDL Plot or Coyote Graphic cgPlot command is 
 ;        allowed in the program.
 ;-

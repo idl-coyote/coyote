@@ -60,6 +60,8 @@
 ;         device coordinates.
 ;       
 ; :Keywords:
+;     addcmd: in, optional, type=boolean, default=0
+;         An alternative way to set the `Window` keyword.
 ;     color: in, optional, type=string/integer/long, default='white'
 ;         An alternative way to specify the color to use in erasing the graphics window.
 ;         Color names are those used with cgColor. This parameter is used in
@@ -102,11 +104,13 @@
 ;        Written, 23 November 2010. DWF. Based on old Arrow routine in IDL.
 ;        Added Window keyword 24 January 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
-;
+;        Added the ADDCMD keyword to make the interface more consistent with other Coyote Grapics routines. 18 April 2013. DWF.
+;        
 ; :Copyright:
-;     Copyright (c) 2010, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
 ;-
 PRO cgArrow, x0, y0, x1, y1, $
+    ADDCMD=addcmd, $
     COLOR = scolor, $
     DATA = data, $
     HSIZE = hsize, $
@@ -128,6 +132,9 @@ PRO cgArrow, x0, y0, x1, y1, $
         IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         RETURN
     ENDIF
+    
+    ; Use ADDCMD as an alternative way to set the WINDOW keyword.
+    IF Keyword_Set(addcmd) THEN window = 1
     
     ; Should this be added to a resizeable graphics window?
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN

@@ -150,6 +150,7 @@ PRO cgArrow, x0, y0, x1, y1, $
             NORMAL = normal, $
             SOLID = solid, $
             THICK = thick, $
+            ADDCMD=1, $
             _EXTRA=extra
             
          RETURN

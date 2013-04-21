@@ -86,6 +86,17 @@
 ;        IDL> cgPlot, findgen(11), XTitle='H$\sub2$O'
 ;        IDL> cgPlot, findgen(11), XTitle='H$\upSuper$MT $\Omega$$\subSubscript$', Charsize=2.0
 ;        
+;     It is possible to use Greek characters as superscripts and subscripts. Do so by
+;     prepending the Greek character with "\\" inside the normal superscript or subscript
+;     notation. For example, to use lambda as an exponent to the Greek character Omega, you
+;     can type this::
+;
+;        IDL> cgPlot, cgDemoData(1), XTitle='$\Omega$$\exp\\lambda$', Charsize=2.0
+;
+;     To use lambda as a subscript, type this:
+;
+;         IDL> cgPlot, cgDemoData(1), XTitle='$\Omega$$\sub\\lambda$', Charsize=2.0
+;
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
 ;           David W. Fanning 

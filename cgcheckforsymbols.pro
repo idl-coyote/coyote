@@ -62,6 +62,17 @@
 ;    the Angstrom squared symbol on the Y axis::
 ;    
 ;       cgPlot, cgDemoData(1), XTitle='Length ($\mu$M)', YTitle='Distance ($\Angstrom$$\up2$)'
+;       
+;    It is possible to use Greek characters as superscripts and subscripts. Do so by
+;    prepending the Greek character with "\\" inside the normal superscript or subscript
+;    notation. For example, to use lambda as an exponent to the Greek character Omega, you
+;    can type this::
+;    
+;       cgPlot, cgDemoData(1), XTitle='$\Omega$$\exp\\lambda$', Charsize=2.0
+;       
+;    To use lambda as a subscript, type this:
+;    
+;        cgPlot, cgDemoData(1), XTitle='$\Omega$$\sub\\lambda$', Charsize=2.0
 ;
 ;    The program has been modified to accept TexToIDL tokens. They must be preceed by
 ;    a "\tex" prefix. For example, to draw a right arrow between 5 and 3, you would
@@ -85,6 +96,8 @@
 ;        Modified to check for superscript and subscript codes. 9 November 2012. DWF.
 ;        Modified to allow the user to use the TexToIDL program from embedded codes.
 ;            To use a right arrow, for example, aString = '5 $\tex\rightarrow$ 3'
+;        Added the ability to use Greek letters as subscripts and superscripts. See
+;            the examples for details. 21 April 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -123,22 +136,47 @@ FUNCTION cgCheckForSymbols, aString
                   token = StrMid(thisString, locStart+2, finalLoc)
                   strToReplace = StrMid(thisString, locStart, finalLoc+3)
                   
-                  ; Special handling for superscripts and subscripts.
+                  ; Special handling for superscripts and subscripts. Check to see if there are embedded
+                  ; special strings within the superscripts and subscripts. These are identified by "\\".
                   CASE 1 OF
+                    
                       StrUpCase(StrMid(strToReplace, 2, 2)) EQ 'UP': BEGIN
-                         replaceStr = '!U' + StrMid(strToReplace,4,StrLen(strToReplace)-5) + '!N'
+                         check = StrPos(thisString, '\\')
+                         IF check NE -1 THEN BEGIN
+                            replaceStr = '!U' + cgCheckForSymbols('$\' + StrMid(strToReplace,6,StrLen(strToReplace)-5)) + '!N'
+                         ENDIF ELSE BEGIN
+                            replaceStr = '!U' + StrMid(strToReplace,4,StrLen(strToReplace)-5) + '!N'
+                         ENDELSE
                          newString = StrMid(thisString, 0, locstart) + replaceStr + StrMid(thisString, locstart+3+StrLen(token))
                          END
+                         
                       StrUpCase(StrMid(strToReplace, 2, 4)) EQ 'DOWN': BEGIN
-                         replaceStr = '!D' + StrMid(strToReplace,6,StrLen(strToReplace)-7) + '!N'
+                         check = StrPos(thisString, '\\')
+                         IF check NE -1 THEN BEGIN
+                            replaceStr = '!D' + cgCheckForSymbols('$\' + StrMid(strToReplace,8,StrLen(strToReplace)-7)) + '!N'
+                         ENDIF ELSE BEGIN
+                            replaceStr = '!D' + StrMid(strToReplace,6,StrLen(strToReplace)-7) + '!N'
+                         ENDELSE
                          newString = StrMid(thisString, 0, locstart) + replaceStr + StrMid(thisString, locstart+3+StrLen(token))
                          END
+                         
                       StrUpCase(StrMid(strToReplace, 2, 3)) EQ 'EXP': BEGIN
-                         replaceStr = '!E' + StrMid(strToReplace,5,StrLen(strToReplace)-6) + '!N'
+                         check = StrPos(thisString, '\\')
+                         IF check NE -1 THEN BEGIN
+                            replaceStr = '!E' + cgCheckForSymbols('$\' + StrMid(strToReplace,7,StrLen(strToReplace)-6)) + '!N'
+                         ENDIF ELSE BEGIN
+                            replaceStr = '!E' + StrMid(strToReplace,5,StrLen(strToReplace)-6) + '!N'
+                         ENDELSE
                          newString = StrMid(thisString, 0, locstart) + replaceStr + StrMid(thisString, locstart+3+StrLen(token))
                          END
+                         
                       StrUpCase(StrMid(strToReplace, 2, 3)) EQ 'SUB': BEGIN
-                         replaceStr = '!I' + StrMid(strToReplace,5,StrLen(strToReplace)-6) + '!N'
+                         check = StrPos(thisString, '\\')
+                         IF check NE -1 THEN BEGIN
+                            replaceStr = '!I' + cgCheckForSymbols('$\' + StrMid(strToReplace,7,StrLen(strToReplace)-6)) + '!N'
+                         ENDIF ELSE BEGIN
+                            replaceStr = '!I' + StrMid(strToReplace,5,StrLen(strToReplace)-6) + '!N'
+                         ENDELSE
                          newString = StrMid(thisString, 0, locstart) + replaceStr + StrMid(thisString, locstart+3+StrLen(token))
                          END
 

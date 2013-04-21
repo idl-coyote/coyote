@@ -49,6 +49,8 @@
 ;    An example of how to use the program can be found in the
 ;    `Coyote Plot Gallery <http://www.idlcoyote.com/gallery.index#WINDROSE>`.
 ;
+; .. image:: cgwindrose.png
+; 
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
 ;       David W. Fanning

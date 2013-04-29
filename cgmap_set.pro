@@ -106,6 +106,7 @@
 ;     Forgot to pass the "extra" information in (e.g., E_HORIZON keyword) to Map_Set. 18 Jan 2013. DWF.
 ;     HORIZON keyword not being passed along to Map_Set. 28 Feb 2013. DWF.
 ;     Forgot to look at !P.Multi before setting a POSITION. Fixed. 11 March 2013. DWF.
+;     Modified the E_GRID and E_HORIZON structure code to allow color names. 29 April 2013. Joe Sapp.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -128,9 +129,9 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
       CONTINENTS = continents, $
       COUNTRIES=countries, $
       CYLINDRICAL = cylindrical, $
-      E_CONTINENTS=econt, $ 
-      E_HORIZON=ehorizon, $
-      E_GRID=egrid, $      
+      E_CONTINENTS=_econt, $ 
+      E_HORIZON=_ehorizon, $
+      E_GRID=_egrid, $      
       ELLIPSOID = ellips, $
       ERASE=erase, $
       FILL_CONTINENTS=fill_continents, $
@@ -212,12 +213,12 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
           CONTINENTS = continents, $
           COUNTRIES=countries, $
           CYLINDRICAL = cylindrical, $
-          E_CONTINENTS=econt, $ 
-          E_HORIZON=ehorizon, $
-          E_GRID=egrid, $      
+          E_CONTINENTS=_econt, $ 
+          E_HORIZON=_ehorizon, $
+          E_GRID=_egrid, $      
           ELLIPSOID = ellips, $
           ERASE=erase, $
-          FILL_CONTINENTS=fill_continenets, $
+          FILL_CONTINENTS=fill_continents, $
           GLINESTYLE=glinestyle, $
           GLINETHICK=glinethick, $
           GRID=grid, $
@@ -295,9 +296,9 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
           CONTINENTS = continents, $
           COUNTRIES=countries, $
           CYLINDRICAL = cylindrical, $
-          E_CONTINENTS=econt, $ 
-          E_HORIZON=ehorizon, $
-          E_GRID=egrid, $      
+          E_CONTINENTS=_econt, $ 
+          E_HORIZON=_ehorizon, $
+          E_GRID=_egrid, $      
           ELLIPSOID = ellips, $
           ERASE=erase, $
           FILL_CONTINENTS=fill_continents, $
@@ -392,12 +393,70 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
         ENDCASE
     ENDIF ELSE BEGIN
        IF Keyword_Set(continents) THEN BEGIN
-          IF (N_Elements(econt) NE 0) THEN BEGIN
-             index = Where(Tag_Names(econt) EQ 'COLOR')
-             IF index LT 0 THEN con_color = color
+          IF (N_Elements(_econt) NE 0) THEN BEGIN
+             tagnames = Tag_Names(_econt)
+             index = Where(tagnames EQ 'COLOR')
+             IF index LT 0 THEN BEGIN
+                econt = _econt
+                con_color = color
+             ENDIF $
+             ELSE BEGIN
+                ; Create a copy of _econt to be passed on with an
+                ; appropriate color.
+                IF index EQ 0 then econt = {COLOR: 0L} $
+                ELSE econt = Create_Struct(tagnames[0], _econt.(0))
+
+                FOR j=1L,N_Elements(tagnames)-1 DO BEGIN
+                   value = (j NE index) ? _econt.(j) : 0L
+                   econt = Create_Struct(econt, $
+                      tagnames[j], value)
+                ENDFOR
+                econt.color = cgColor(_econt.color)
+             ENDELSE
           ENDIF ELSE con_color = color
        ENDIF 
     ENDELSE
+
+    ; Fix color passed on to MAP_GRID, if needed.
+    IF N_Elements(_egrid) NE 0 THEN BEGIN
+       tagnames = Tag_Names(_egrid)
+       index = Where(Tag_Names(_egrid) EQ 'COLOR')
+       IF index LT 0 THEN egrid = _egrid $
+       ELSE BEGIN
+          ; Create a copy of _egrid to be passed on with an
+          ; appropriate color.
+          IF index EQ 0 then egrid = {COLOR: 0L} $
+          ELSE egrid = Create_Struct(tagnames[0], _egrid.(0))
+
+          FOR j=1L,N_Elements(tagnames)-1 DO BEGIN
+             value = (j NE index) ? _egrid.(j) : 0L
+             egrid = Create_Struct(egrid, $
+                tagnames[j], value)
+          ENDFOR
+          egrid.color = cgColor(_egrid.color)
+       ENDELSE
+    ENDIF
+
+    ; Fix color passed on to the HORIZON keyword, if needed.
+    IF N_Elements(_ehorizon) NE 0 THEN BEGIN
+       tagnames = Tag_Names(_ehorizon)
+       index = Where(Tag_Names(_ehorizon) EQ 'COLOR')
+       IF index LT 0 THEN ehorizon = _ehorizon $
+       ELSE BEGIN
+          ; Create a copy of _ehorizon to be passed on with an
+          ; appropriate color.
+          IF index EQ 0 then ehorizon = {COLOR: 0L} $
+          ELSE ehorizon = Create_Struct(tagnames[0], _ehorizon.(0))
+
+          FOR j=1L,N_Elements(tagnames)-1 DO BEGIN
+             value = (j NE index) ? _ehorizon.(j) : 0L
+             ehorizon = Create_Struct(ehorizon, $
+                tagnames[j], value)
+          ENDFOR
+          ehorizon.color = cgColor(_ehorizon.color)
+       ENDELSE
+    ENDIF
+
     IF N_Elements(position) EQ 0 THEN BEGIN
     
         ; Are you putting this on an image? If so, get the position from
@@ -535,7 +594,7 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
           (N_Elements(egrid) NE 0) && (N_Elements(ehorizon) NE 0): BEGIN
               extra = egrid
               tagnames = Tag_Names(ehorizon)
-              FOR j=0,tagnames-1 DO BEGIN
+              FOR j=0L,N_Elements(tagnames)-1 DO BEGIN
                  extra = Create_Struct(extra, tagnames[j], ehorizon.(j))
               ENDFOR
               END        

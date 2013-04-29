@@ -58,6 +58,7 @@
 ;        Bug fix in draw method when passing lat/lon vectors. 6 Jan 2013. DWF.
 ;        Added PALETTE keyword to allow the vectors to be drawn in colors scaled
 ;           to vector magnitude. 6 Jan 2012. DWF.
+;        The CLIP keyword was not working correctly and was fixed 29 April 2013. DWF.
 ;                
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -261,6 +262,7 @@ END
 ;        Any keywords appropriate PlotS or PolyFill.
 ;-
 PRO cgMapVector::DrawArrow, x0, y0, x1, y1, $
+   CLIP=clip, $
    COLOR = color, $
    DATA = data, $
    HSIZE = hsize, $
@@ -305,10 +307,19 @@ PRO cgMapVector::DrawArrow, x0, y0, x1, y1, $
     SetDecomposedState, 1, CURRENT=currentState
     
     FOR i = 0L, N_Elements(x0)-1 DO BEGIN   ;Each vector
+
+       ; Clip the vectors.
+       IF ~Keyword_Set(noclip) THEN BEGIN
+           IF (x0 LT clip[0]) || (x0 GT clip[2]) || (y0 LT clip[1]) || (y0 GT clip[3]) THEN Continue
+           x1 = clip[0] > x1 < clip[2]
+           y1 = clip[1] > y1 < clip[3] 
+       ENDIF
+       
+       ; Convert to DEVICE coordinates.
        IF Keyword_Set(data) THEN $   ;Convert?
-           p = Convert_Coord([x0[i],x1[i]],[y0[i],y1[i]], /data, /to_dev) $
+           p = Convert_Coord([x0[i],x1[i]],[y0[i],y1[i]], /DATA, /TO_DEVICE) $
        ELSE IF Keyword_Set(norm) THEN $
-           p = Convert_Coord([x0[i],x1[i]],[y0[i],y1[i]], /norm, /to_dev) $
+           p = Convert_Coord([x0[i],x1[i]],[y0[i],y1[i]], /NORMAL, /TO_DEVICE) $
        ELSE p = [[x0[i], y0[i]],[x1[i], y1[i]]]
     
        xp0 = p[0,0]

@@ -88,6 +88,7 @@
 ;            to do this. However, there is still a problem with the UV_BOX when the center latitude
 ;            is not zero. I still attempt to fix this problem in the code (SetMapProjection method). 3 Jan 2012. DWF.
 ;        I added ASPECT and ISOTROPIC keywords to allow the setting of the aspect ratio of the map. 3 Jan 2012. DWF.
+;        Added zone to the information returned with MapInfo method if projection is UTM. 25 April 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -1389,6 +1390,10 @@ FUNCTION cgMap::MapInfo
       'y_tie_point_projected_xy_upper_left', self._cg_yrange[1], $      
       'xrange',  self._cg_xrange, 'yrange', self._cg_yrange, $
       'position', self._cg_position, 'map_title', self._cg_title)
+      
+   IF StrUpCase(self._cg_thisProjection.name) EQ 'UTM' THEN BEGIN
+       map_keywords = Create_Struct(map_keywords, 'zone', self._cg_zone)
+   ENDIF
  
    RETURN, map_keywords
    

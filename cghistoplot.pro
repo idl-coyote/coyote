@@ -221,7 +221,7 @@
 ;    ytitle: in, optional, type=string, default="Histogram Density"
 ;        The Y title of the histogram plot.
 ;    _ref_extra: in, optional
-;         Any additional PLOT commands are passed via keyword inheritance.
+;         Any additional PLOT keywords are passed via keyword inheritance.
 ;          
 ; :Examples:
 ;    Some of the ways cgHistogram can be used::
@@ -329,6 +329,7 @@
 ;        Changed the way the "ystart" variable is set on log plots. 21 Jan 2013. DWF.
 ;        Now taking into account the MININPUT and MAXINPUT values when calculating a default bin size. 19 Feb 2013. DWF.
 ;        Added [XY]TickNames, [XY]Tickformat, [XY]TickS, and [XY]TickValues keywords. 21 Feb 2013. DWF.
+;        Now choosing the default tick format of '(F)' when LOG is set. 28 April 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2007-2013, Fanning Software Consulting, Inc.
@@ -827,10 +828,14 @@ PRO cgHistoplot, $                  ; The program name.
    ENDIF ELSE BEGIN
       IF Keyword_Set(rotate) THEN BEGIN
           IF N_Elements(xtitle) EQ 0 THEN xtitle = 'Histogram Density'
-          IF (N_Elements(xtickformat) EQ 0) && (N_Elements(xticknames) EQ 0) THEN xtickformat = '(I)'
+          IF (N_Elements(xtickformat) EQ 0) && (N_Elements(xticknames) EQ 0) THEN BEGIN
+            IF Keyword_Set(log) THEN xtickformat = '(F)' ELSE xtickformat = '(I)'
+          ENDIF
       ENDIF ELSE BEGIN
           IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Histogram Density'
-          IF (N_Elements(ytickformat) EQ 0) && (N_Elements(yticknames) EQ 0) THEN ytickformat = '(I)'
+          IF (N_Elements(ytickformat) EQ 0) && (N_Elements(yticknames) EQ 0) THEN BEGIN
+            IF Keyword_Set(log) THEN ytickformat = '(F)' ELSE ytickformat = '(I)'
+          ENDIF
       ENDELSE
    ENDELSE
    

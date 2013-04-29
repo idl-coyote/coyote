@@ -104,6 +104,7 @@
 ;              mode is currently in effect. 14 December 2012. DWF.
 ;        Now setting all background colors to WHITE, not BACKGROUND. 16 Dec 2012. DWF.
 ;        Whoops! Forgot one of the background colors in the Traditional section. 11 Jan 2013. DWF.
+;        Made the counters in the loops long integers to accommodate large color vectors. 29 Apr 2013. Joe Sapp.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -189,7 +190,7 @@ FUNCTION cgDefaultColor, inputColour, $
     IF (thisType EQ 'BYTE') && (thisMode EQ 1) THEN BEGIN
         ncolors = N_Elements(inputColor)
         colors = LonArr(ncolors)
-        FOR j=0,ncolors-1 DO colors[j] = cgColor24([r[inputColor[j]], g[inputColor[j]], b[inputColor[j]]]) 
+        FOR j=0L,ncolors-1 DO colors[j] = cgColor24([r[inputColor[j]], g[inputColor[j]], b[inputColor[j]]]) 
         IF N_Elements(colors) EQ 1 THEN RETURN, colors[0] ELSE RETURN, colors
     ENDIF 
     IF (thisType EQ 'INT') && (thisMode EQ 0) THEN BEGIN
@@ -198,7 +199,7 @@ FUNCTION cgDefaultColor, inputColour, $
     IF (thisType EQ 'INT') && (thisMode EQ 1) THEN BEGIN
         ncolors = N_Elements(inputColor)
         colors = LonArr(ncolors)
-        FOR j=0,ncolors-1 DO colors[j] = cgColor24([r[inputColor[j]], g[inputColor[j]], b[inputColor[j]]]) 
+        FOR j=0L,ncolors-1 DO colors[j] = cgColor24([r[inputColor[j]], g[inputColor[j]], b[inputColor[j]]]) 
         IF N_Elements(colors) EQ 1 THEN RETURN, colors[0] ELSE RETURN, colors
     ENDIF 
     IF thisType EQ 'LONG' && (thisMode EQ 0) THEN BEGIN

@@ -206,9 +206,13 @@
 ;           image, which was in turn causing the range values to be SAVED in the plotting system variables.
 ;           This interferred with backward compatibility with the TV command, so I have removed it. 31 Jan 2013. DWF. 
 ;       Whoops! Typo in my last fix. Getting too old, I guess. 6 Feb 2013. DWF.
+;       Setting any of the MISSING_*** keywords while doing multiple plots resulted in the value
+;           of !P.Multi being ignored for the image. This is fixed for now, but just a warning. Setting
+;           these keywords creates transparent images, and makes things MUCH more complicated. So, just
+;           a warning. I'm probably at the limit of what is possible now. :-) 30 April 2013. DWF.
 ;       
 ; :Copyright:
-;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
 ;-
 ;
 ;+
@@ -1428,6 +1432,9 @@ PRO cgImage, image, x, y, $
     ; Obtain information about the size of the image.
     void = Image_Dimensions(image, XSIZE=imgXSize, YSIZE=imgYSize)
     
+    ; Doing multiple plots?
+    IF Total(!P.Multi) GT 0 THEN multi = 1 ELSE multi = 0
+    
     ; Did you specify a color table index?
     TVLCT, r_start, g_start, b_start, /Get
     IF N_Elements(ctindex) NE 0 THEN BEGIN
@@ -1442,7 +1449,7 @@ PRO cgImage, image, x, y, $
     ; If transparent is turned on, and you are not overplotting, and you have a position in the window, then
     ; you have to adjust alphafgpos and position.
     IF (N_Elements(transparent) NE 0) && ~Keyword_Set(overplot) && (N_Elements(position) NE 0) THEN BEGIN
-        IF N_Elements(alphafgpos) EQ 0 THEN BEGIN
+        IF (N_Elements(alphafgpos) EQ 0) THEN BEGIN
              restorePosition = position
              alphafgpos = position
              position = [0,0,1,1]
@@ -1503,9 +1510,9 @@ PRO cgImage, image, x, y, $
                    alphabackgroundimage = cgSnapshot(POSITION=[0,0,1,1])
                 ENDIF ELSE Message, 'An AlphaBackgroundImage is required to create transparent images in PostScript.'
             ENDIF
-            IF N_Elements(alphabgpos) EQ 0 THEN alphabgpos = [0,0,1,1]
-            IF N_Elements(alphafgpos) EQ 0 THEN alphafgpos = [0,0,1,1]
-            IF N_Elements(position) EQ 0 THEN position= [0,0,1,1]
+            IF ~multi THEN IF N_Elements(alphabgpos) EQ 0 THEN alphabgpos = [0,0,1,1]
+            IF ~multi THEN IF N_Elements(alphafgpos) EQ 0 THEN alphafgpos = [0,0,1,1]
+            IF ~multi THEN IF N_Elements(position) EQ 0 THEN position= [0,0,1,1]
             noerase = 1
         ENDIF ELSE BEGIN
             image = oldImage
@@ -1673,9 +1680,6 @@ PRO cgImage, image, x, y, $
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     IF N_Elements(color) EQ 0 THEN acolorname = 'opposite' ELSE acolorname = color
     interp = Keyword_Set(interp)
-    
-    ; Doing multiple plots?
-    IF Total(!P.Multi) GT 0 THEN multi = 1 ELSE multi = 0
     
     ; Check for image parameter and keywords.
     IF N_Elements(image) EQ 0 THEN MESSAGE, 'You must pass a valid image argument.'

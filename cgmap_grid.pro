@@ -696,6 +696,7 @@ PRO cgMap_Grid, $
   
   
   ;Compute longit distance between points for latitude lines.
+  IF lonmin EQ lonmax THEN lonmax = lonmin + 360.
   step = 4 < (lonmax - lonmin)/10. ;At most 4 degrees
   len = (lonmax-lonmin)/step + 1
   loni = findgen(len) * step + lonmin
@@ -1003,20 +1004,26 @@ PRO cgMap_Grid, $
                          lonii = Reform(ll[0,*])
                          lonii = Scale_Vector(Findgen(N_Elements(loni)), lonii[0], lonii[1])
                          uv = MAP_PROJ_FORWARD(lonii, REPLICATE(lat, N_ELEMENTS(lonii)), $
-                              MAP_STRUCTURE=thisMapStruct)
+                              MAP_STRUCTURE=thisMapStruct, POLYLINES=polylines)
+;                          uv = MAP_PROJ_FORWARD(lonii, REPLICATE(lat, N_ELEMENTS(lonii)), $
+;                              MAP_STRUCTURE=thisMapStruct) ;;; Screws up near the poles, I think.
+;                          polylines = [N_Elements(loni), Indgen(N_Elements(loni))]
                          loni = lonii
                      ENDIF ELSE BEGIN
                         uv = MAP_PROJ_FORWARD(loni, REPLICATE(lat, N_ELEMENTS(loni)), $
-                             MAP_STRUCTURE=thisMapStruct)                     
+                             MAP_STRUCTURE=thisMapStruct, POLYLINES=polylines)  
+;                            uv = MAP_PROJ_FORWARD(loni, REPLICATE(lat, N_ELEMENTS(loni)), $
+;                               MAP_STRUCTURE=thisMapStruct) ;;; Screws up near the poles, I think.
+;                            polylines = [N_Elements(loni), Indgen(N_Elements(loni))]                   
                      ENDELSE
               ENDIF ELSE BEGIN
                   uv = MAP_PROJ_FORWARD(loni, REPLICATE(lat, N_ELEMENTS(loni)), $
-                       MAP_STRUCTURE=thisMapStruct)
+                       MAP_STRUCTURE=thisMapStruct, POLYLINES=polylines)
+                   ;   uv = MAP_PROJ_FORWARD(loni, REPLICATE(lat, N_ELEMENTS(lonii)), $
+                   ;      MAP_STRUCTURE=thisMapStruct) ;;; Screws up near the poles, I think.
+                   ;  polylines = [N_Elements(loni), Indgen(N_Elements(loni))]
               ENDELSE
 
-              ; This line has been modified by DWF to fix a bug in MAP_PROJ_FORWARD that
-              ; screws up lines near the poles.
-              polylines = [N_Elements(loni), Indgen(N_Elements(loni))]
               index = 0L
               npoly = N_ELEMENTS(polylines)
               ; Loop thru our polylines connectivity array.

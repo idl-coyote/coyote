@@ -233,8 +233,10 @@
 ;         Modified code that checks to see if COLOR and AXISCOLOR keywords are the same as BACKGROUND and changes them.
 ;              This precludes drawing in background color on non-white backgrounds. Now only change the
 ;              colors if it is possible to draw a background color. 12 Feb 2013. DWF.
+;         Problem using symbol names (e.g., 'opencircle') in cgWindows is fixed. 10 May 2013. DWF.
+;         
 ; :Copyright:
-;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
 ;-
 PRO cgPlot, x, y, $
     ADDCMD=addcmd, $
@@ -287,15 +289,6 @@ PRO cgPlot, x, y, $
         RETURN
     ENDIF
     
-    ; Check to see if psymIn is a string. If so, covert it here.
-    IF N_Elements(psymIn) NE 0 THEN BEGIN
-        IF Size(psymIn, /TNAME) EQ 'STRING' THEN BEGIN
-              names = cgSymCat(/Names) 
-              index = Where(STRUPCASE(StrCompress(names, /REMOVE_ALL)) EQ STRUPCASE(StrCompress(psymIN, /REMOVE_ALL)), count)
-              IF count GT 0 THEN psym = index[0] ELSE Message, 'Cannot resolve the PSYM value: ' + psymIn
-        ENDIF ELSE psym = psymIn
-    ENDIF
-    
     ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
     ; done BEFORE checking the LAYOUT properties.
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
@@ -326,7 +319,7 @@ PRO cgPlot, x, y, $
                 OPLOTS=oplots, $
                 OVERPLOT=overplot, $
                 POSITION=position, $
-                PSYM=psym, $
+                PSYM=psymIn, $
                 SYMCOLOR=ssymcolor, $
                 SYMSIZE=symsize, $
                 TITLE=title, $
@@ -358,7 +351,7 @@ PRO cgPlot, x, y, $
             OPLOTS=oplots, $
             OVERPLOT=overplot, $
             POSITION=position, $
-            PSYM=psym, $
+            PSYM=psymIn, $
             SYMCOLOR=ssymcolor, $
             SYMSIZE=symsize, $
             TITLE=title, $
@@ -390,6 +383,15 @@ PRO cgPlot, x, y, $
     IF N_Elements(dep) EQ 1 THEN dep = [dep]
     IF N_Elements(indep) EQ 1 THEN indep = [indep]
     
+    
+    ; Check to see if psymIn is a string. If so, covert it here.
+    IF N_Elements(psymIn) NE 0 THEN BEGIN
+        IF Size(psymIn, /TNAME) EQ 'STRING' THEN BEGIN
+            names = cgSymCat(/Names)
+            index = Where(STRUPCASE(StrCompress(names, /REMOVE_ALL)) EQ STRUPCASE(StrCompress(psymIN, /REMOVE_ALL)), count)
+            IF count GT 0 THEN psym = index[0] ELSE Message, 'Cannot resolve the PSYM value: ' + psymIn
+        ENDIF ELSE psym = psymIn
+    ENDIF
     
     ; Are we doing some kind of output?
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN

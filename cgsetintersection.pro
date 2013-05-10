@@ -1,88 +1,14 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;  SETINTERSECTION
+;   cgSETINTERSECTION
 ;
 ; PURPOSE:
-;
 ;   This function is used to find the intersection between two sets of integers.
 ;
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: david@idlcoyote.com
-;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CATEGORY:
-;
-;   Utilities
-;
-; CALLING SEQUENCE:
-;
-;   intersection = SetIntersection(set_a, set_b)
-;
-; RETURN VALUE:
-;
-;   intersection:  A vector of values that are found in both set_a and set_b.
-;
-; ARGUMENTS:
-;
-;   set_a:         A vector of integers.
-;   
-;   set_b:         A vector of integers.
-;
-; KEYWORDRS:
-; 
-;  COUNT:          An output variable that contains the number of elements in the intersection vector.
-;
-;  NORESULT:       Set this keyword to a value that will be returned from the function
-;                  if no intersection between the two sets of numbers is found. By default, -1.
-;                  
-;  POSITIONS:      And output keyword that will return the positions or locations in A where the values
-;                  in B appear.
-;                  
-;  INDICIES_A:     The indices in vector A where the intersected values appear. Note, this requires
-;                  the intersected points be unique in each vector. The POSITIONS 
-;                  keyword will return ALL the positions of the match, even if there are non-unique matches.
-;  
-;  INDICIES_B:     The indices in vector B where the intersected values appear. This assumes that
-;                  the intersected points are represented uniquely in the A and B vectors.
-;
-;  SUCCESS:        An output keyword that is set to 1 if an intersection was found, and to 0 otherwise.
-;
-; EXAMPLE:
-;
-;  IDL> set_a = [1,2,3,4,5]
-;  IDL> set_b = [4,5,6,7,8,9,10,11]
-;  IDL> Print, SetIntersection(set_a, set_b)
-;          4   5
-;
-;  See http://www.idlcoyote.com/tips/set_operations.html for other types of set operations.
-;  
-; NOTES:
-; 
-;  If you read the Set Operations article pointed to above, you will see quite a lot of
-;  discussion about what kinds of algorithms are faster than others. The Histogram 
-;  algorithms implemented here are sometimes NOT the fastest algorithms, especially 
-;  for sparse arrays. If this is a concern in your application, please be sure to read
-;  that article.
-;  
-; MODIFICATION HISTORY:
-;
-;  Written by: David W. Fanning, October 31, 2009, from code originally supplied to the IDL
-;     newsgroup by Research Systems software engineers.
-;  Yikes, bug in original code only allowed positive integers. Fixed now. 2 Nov 2009. DWF.
-;  Fixed a problem when one or both of the sets was a scalar value. 18 Nov 2009. DWF.
-;  Added a POSITIONS keyword. 30 Nov 2012. DWF.
-;  Added a COUNT keyword 3 Dec 2012. DWF.
-;  Added INDICES_A and INDICES_B keywords at R.G. Stockwell's suggestion. 13 Dec 2012. DWF.
-;-
 ;******************************************************************************************;
-;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2013, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -107,7 +33,73 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-FUNCTION SetIntersection, set_a, set_b, $
+;
+;+
+; This function is used to find the intersection between two sets of integers.
+;
+; :Categories:
+;    Utilities
+;    
+; :Returns:
+;    A vector of values that are found in both set_a and set_b.
+;
+; :Params:
+;    set_a: in, required, type=integer
+;       A vector of integers.
+;    set_b: in, required, type=integer
+;       A vector of integers.
+;
+; :Keywords:
+;    count: out, optional, type=integer
+;         This keyword contains the number of elements in the intersection vector.
+;    indices_a: out, optional, type=integer
+;         The indices in vector A where the intersected values appear. Note, this requires
+;         the intersected points be unique in each vector. The `Positions` keyword will 
+;         return ALL the positions of the match, even if there are non-unique matches.
+;    indices_b: out, optional, type=integer
+;         The indices in vector B where the intersected values appear. This assumes that
+;         the intersected points are represented uniquely in the A and B vectors.
+;    noresult: in, optional
+;         Set this keyword to a value that will be returned from the function
+;         if no intersection between the two sets of numbers is found. By default, -1.
+;    positions: out, optional, type=integer
+;         This keyword returns the positions or locations in A where the values
+;         in B appear.
+;    success: out, optional, type=boolean
+;         This keyword is set to 1 if an intersection was found, and to 0 otherwise.
+;
+; :Examples:
+;    Here is how to use this program::
+;      IDL> set_a = [1,2,3,4,5]
+;      IDL> set_b = [4,5,6,7,8,9,10,11]
+;      IDL> Print, cgSetIntersection(set_a, set_b)
+;           4   5
+;
+;  See http://www.idlcoyote.com/tips/set_operations.html for other types of set operations.
+;
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Written by: David W. Fanning, October 31, 2009, from code originally supplied to the IDL
+;           newsgroup by Research Systems software engineers.
+;        Yikes, bug in original code only allowed positive integers. Fixed now. 2 Nov 2009. DWF.
+;        Fixed a problem when one or both of the sets was a scalar value. 18 Nov 2009. DWF.
+;        Added a POSITIONS keyword. 30 Nov 2012. DWF.
+;        Added a COUNT keyword 3 Dec 2012. DWF.
+;        Added INDICES_A and INDICES_B keywords at R.G. Stockwell's suggestion. 13 Dec 2012. DWF.
+;
+; :Copyright:
+;     Copyright (c) 2009-2013, Fanning Software Consulting, Inc.
+;-
+FUNCTION cgSetIntersection, set_a, set_b, $
     COUNT=count, $
     INDICES_A=indices_a, $
     INDICES_B=indices_b, $

@@ -1,73 +1,14 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;  SETUNION
+;   cgSETUNION
 ;
 ; PURPOSE:
-;
 ;   This function is used to find the union between two sets of integers.
 ;
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: david@idlcoyote.com
-;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CATEGORY:
-;
-;   Utilities
-;
-; CALLING SEQUENCE:
-;
-;   union = SetUnion(set_a, set_b)
-;
-; RETURN VALUE:
-;
-;   union:  A vector of values that are found in the combined integer sets.
-;
-; ARGUMENTS:
-;
-;   set_a:         A vector of integers.
-;   
-;   set_b:         A vector of integers.
-;
-; KEYWORDRS:
-;
-;    None.
-;    
-; EXAMPLE:
-;
-;  IDL> set_a = [1,2,3,4,5]
-;  IDL> set_b = [4,5,6,7,8,9,10,11]
-;  IDL> Print, SetUnion(set_a, set_b)
-;          1  2  3  4  5  6  7  8  9  10  11
-;
-;  See http://www.idlcoyote.com/tips/set_operations.html for other types of set operations.
-;  
-; NOTES:
-; 
-;  If you read the Set Operations article pointed to above, you will see quite a lot of
-;  discussion about what kinds of algorithms are faster than others. The Histogram 
-;  algorithms implemented here are sometimes NOT the fastest algorithms, especially 
-;  for sparse arrays. If this is a concern in your application, please be sure to read
-;  that article.
-;  
-;  One alternative for the SetUnion algorithm, provided by Maarten Sneep, is simply this:
-;  
-;      superset = [set_a, set_b]
-;      union = superset[Uniq(superset, Sort(superset))]
-;  
-; MODIFICATION HISTORY:
-;
-;  Written by: David W. Fanning, November 25, 2009, from code originally supplied to the IDL
-;     newsgroup by Research Systems software engineers.
-;-
 ;******************************************************************************************;
-;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2013, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -92,7 +33,52 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-FUNCTION SetUnion, set_a, set_b
+;
+;+
+; This function is used to find the union between two sets of integers.
+;
+;  One alternative for the cgSetUnion algorithm, provided by Maarten Sneep, is simply this::
+;      superset = [set_a, set_b]
+;      union = superset[Uniq(superset, Sort(superset))]
+;
+; :Categories:
+;    Utilities
+;    
+; :Returns:
+;    A vector of values that are found in the combined integer sets.
+;
+; :Params:
+;    set_a: in, required, type=integer
+;       A vector of integers.
+;    set_b: in, required, type=integer
+;       A vector of integers.
+;
+; :Examples:
+;     IDL> set_a = [1,2,3,4,5]
+;     IDL> set_b = [4,5,6,7,8,9,10,11]
+;     IDL> Print, cgSetUnion(set_a, set_b)
+;          1  2  3  4  5  6  7  8  9  10  11
+;
+;     See http://www.idlcoyote.com/tips/set_operations.html for other types of set operations.
+;
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;         Written by: David W. Fanning, November 25, 2009, from code originally supplied to the IDL
+;             newsgroup by Research Systems software engineers.
+;
+; :Copyright:
+;     Copyright (c) 2009-2013, Fanning Software Consulting, Inc.
+;-
+FUNCTION cgSetUnion, set_a, set_b
     
     Compile_Opt StrictArr, DefInt32
     

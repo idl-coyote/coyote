@@ -1,80 +1,16 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;  SETDIFFERENCE
+;   cgSETDIFFERENCE
 ;
 ; PURPOSE:
-;
 ;   This function is used to find the difference between two sets of integers.
 ;   In other words, the function will find the values that are in Set A but
 ;   are missing in Set B.
 ;
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: david@idlcoyote.com
-;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CATEGORY:
-;
-;   Utilities
-;
-; CALLING SEQUENCE:
-;
-;   difference = SetDifference(set_a, set_b)
-;
-; RETURN VALUE:
-;
-;   difference:  A vector of values that are found in set_a but are missing in set_b.
-;
-; ARGUMENTS:
-;
-;   set_a:         A vector of integers.
-;   
-;   set_b:         A vector of integers.
-;
-; KEYWORDRS:
-;
-;  COUNT:          An output variable that contains the number of elements in the difference vector.
-;
-;  NORESULT:       Set this keyword to a value that will be returned from the function
-;                  if no difference between the two sets of numbers is found. By default, set_a.
-;                  
-;  POSITIONS:      An output keyword that will return the positions or locations in A of the values
-;                  not found in B.
-;                 
-;  SUCCESS:        An output keyword that is set to 1 if a difference was found, and to 0 otherwise.
-;   
-; EXAMPLE:
-;
-;  IDL> set_a = [1,2,3,4,5]
-;  IDL> set_b = [4,5,6,7,8,9,10,11]
-;  IDL> Print, SetDifference(set_a, set_b)
-;          1  2  3 
-;
-;  See http://www.idlcoyote.com/tips/set_operations.html for other types of set operations.
-;  
-; NOTES:
-; 
-;  If you read the Set Operations article pointed to above, you will see quite a lot of
-;  discussion about what kinds of algorithms are faster than others. The Histogram 
-;  algorithms implemented here are sometimes NOT the fastest algorithms, especially 
-;  for sparse arrays. If this is a concern in your application, please be sure to read
-;  that article.
-;  
-; MODIFICATION HISTORY:
-;
-;  Written by: David W. Fanning, November 25, 2009, from code originally supplied to the IDL
-;     newsgroup by Research Systems software engineers.
-;  Added COUNT and POSITIONS keywords. Liam Steele, 13 Dec 2012.
-;  Defined values for COUNT and POSITIONS when there is no overlap in the vectors. 14 Dec 2012. LS.
-;-
 ;******************************************************************************************;
-;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2013, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -99,7 +35,63 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-FUNCTION SetDifference, set_a, set_b, $
+;
+;+
+; This function is used to find the difference between two sets of integers.
+; In other words, the function will find the values that are in Set A but
+; are missing in Set B.
+;
+; :Categories:
+;    Utilities
+;
+; :Returns:
+;    A vector of values that are found in set_a but are missing in set_b.
+;
+; :Params:
+;    set_a: in, required, type=integer
+;       A vector of integers.
+;    set_b: in, required, type=integer
+;       A vector of integers.
+;
+; :Keywords:
+;    count: out, optional, type=integer
+;         This keyword contains the number of elements in the difference vector.
+;    noresult: in, optional
+;         Set this keyword to a value that will be returned from the function
+;         if no difference between the two sets of numbers is found. By default, set_a.
+;    positions: out, optional, type=integer
+;         An output keyword that will return the positions or locations in A of the values
+;         not found in B.
+;    success: out, optional, type=boolean
+;         This keyword is set to 1 if an difference was found, and to 0 otherwise.
+;
+; :Examples:
+;    Here is how to use this program::
+;      IDL> set_a = [1,2,3,4,5]
+;      IDL> set_b = [4,5,6,7,8,9,10,11]
+;      IDL> Print, cgSetDifference(set_a, set_b)
+;          1  2  3 
+;
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Written by: David W. Fanning, November 25, 2009, from code originally supplied to the IDL
+;           newsgroup by Research Systems software engineers.
+;        Added COUNT and POSITIONS keywords. Liam Steele, 13 Dec 2012.
+;        Defined values for COUNT and POSITIONS when there is no overlap in the vectors. 14 Dec 2012. LS.
+;
+; :Copyright:
+;     Copyright (c) 2009-2013, Fanning Software Consulting, Inc.
+;-
+FUNCTION cgSetDifference, set_a, set_b, $
     COUNT=count, $
     NORESULT=noresult, $
     POSITIONS=positions, $

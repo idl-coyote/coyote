@@ -71,6 +71,9 @@
 ;     im_resize: in, optional, type=integer, default=25
 ;         Set this keyword to percentage that the raster image file created my ImageMagick
 ;         from PostScript output should be resized.
+;     im_tiff_depth: in, optional, type=integer, default=8
+;         Set this keyword to the number of bits per channel in TIFF file output. Allowed values
+;         are 8, 16, and 32.
 ;     im_transparent: in, optional, type=boolean, default=0
 ;         Set this keyword to allow ImageMagick to create transparent backgrounds when it
 ;         makes raster image files from PostScript output.
@@ -158,6 +161,7 @@
 ;        Added PDF_UNIX_CONVERT_CMD and PDF_PATH keywords. 7 Dec 2011. DWF.
 ;        Added IM_WIDTH keyword. 3 April 2012. DWF.
 ;        Added IM_PNG8 keyword. 3 April 2012. DWF.
+;        Added IM_TIFF_DEPTH keyowrd. 14 May 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -173,6 +177,7 @@ PRO cgWindow_SetDefs, $
    IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
    IM_Raster = im_raster, $                        ; Sets thee raster via ImageMagick setting.
    IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+   IM_TIFF_Depth = im_tiff_depth, $                ; Set the channel depth of TIFF files on ImageMagick convert command.
    IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
    IM_Width=im_width, $                            ; Set the width of raster file output from PostScript files.
    Multi = multi, $                                ; Set this in the same way !P.Multi is used.   
@@ -228,6 +233,7 @@ PRO cgWindow_SetDefs, $
             IF cgHasImageMagick() THEN im_raster = 1 ELSE im_raster = 0
         ENDIF
         IF N_Elements(im_resize) EQ 0 THEN im_resize = 25
+        IF N_Elements(im_tiff_depth) EQ 0 THEN im_tiff_depth = 8
         IF N_Elements(im_transparent) EQ 0 THEN im_transparent = 0
         IF N_Elements(im_width) EQ 0 THEN im_width = 0
         IF N_Elements(pdf_unix_convert_cmd) EQ 0 THEN pdf_unix_convert_cmd = ""
@@ -263,6 +269,7 @@ PRO cgWindow_SetDefs, $
            IM_Options:im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
            IM_Raster:im_raster, $                        ; Sets the raster via ImageMagick setting.
            IM_Resize:im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+           IM_TIFF_Depth:im_tiff_depth, $                ; Sets the channel depth of TIFF files on ImageMagick convert command.
            IM_Transparent:im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
            IM_Width:im_width, $                          ; Sets the width of raster output on raster files created with ImageMagick.
            PDF_UNIX_Convert_Cmd: pdf_unix_convert_cmd, $ ; Sets the PDF alternative conversion command.
@@ -303,6 +310,7 @@ PRO cgWindow_SetDefs, $
         IF N_Elements(im_options) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_options = im_options
         IF N_Elements(im_raster) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_raster = im_raster
         IF N_Elements(im_resize) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_resize = im_resize
+        IF N_Elements(im_tiff_depth) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_tiff_depth = im_tiff_depth
         IF N_Elements(im_transparent) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_transparent = Keyword_Set(im_transparent)
         IF N_Elements(im_width) NE 0 THEN !FSC_WINDOW_DEFAULTS.im_width = im_width
         IF N_Elements(raster_im) NE 0 then !FSC_WINDOW_DEFAULTS.raster_im = raster_im

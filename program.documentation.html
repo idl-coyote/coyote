@@ -14,7 +14,7 @@ this routine, refer to the IDL Online Help Navigator
 or type: <P>
 <PRE>     ? mk_html_help</PRE><P>
 at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Wed Jan 09 21:11:52 2013.<P>
+<STRONG>Last modified: </STRONG>Thu May 16 11:14:42 2013.<P>
  
 <HR>
  
@@ -57,7 +57,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#FSC_FIELD">FSC_FIELD</A>
 <LI><A HREF="#FSC_FILESELECT">FSC_FILESELECT</A>
 <LI><A HREF="#FSC_INPUTFIELD">FSC_INPUTFIELD</A>
-<LI><A HREF="#FSC_NORMALIZE">FSC_NORMALIZE</A>
 <LI><A HREF="#FSC_PLOTWINDOW">FSC_PLOTWINDOW</A>
 <LI><A HREF="#FSC_PSCONFIG__DEFINE">FSC_PSCONFIG__DEFINE</A>
 <LI><A HREF="#FSC_PS_SETUP__DEFINE">FSC_PS_SETUP__DEFINE</A>
@@ -106,7 +105,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#RANGEOF">RANGEOF</A>
 <LI><A HREF="#REPMAT">REPMAT</A>
 <LI><A HREF="#RESOLVE_OBJECT">RESOLVE_OBJECT</A>
-<LI><A HREF="#REVERSEINDICES">REVERSEINDICES</A>
 <LI><A HREF="#REVERSE_AXES">REVERSE_AXES</A>
 <LI><A HREF="#SAVETOMAIN">SAVETOMAIN</A>
 <LI><A HREF="#SCALEMODIS">SCALEMODIS</A>
@@ -116,9 +114,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#SELECT_OBJECTS">SELECT_OBJECTS</A>
 <LI><A HREF="#SETDECOMPOSEDSTATE">SETDECOMPOSEDSTATE</A>
 <LI><A HREF="#SETDEFAULTVALUE">SETDEFAULTVALUE</A>
-<LI><A HREF="#SETDIFFERENCE">SETDIFFERENCE</A>
-<LI><A HREF="#SETINTERSECTION">SETINTERSECTION</A>
-<LI><A HREF="#SETUNION">SETUNION</A>
 <LI><A HREF="#SHARPEN">SHARPEN</A>
 <LI><A HREF="#SORT_ND">SORT_ND</A>
 <LI><A HREF="#STATIONPLOT">STATIONPLOT</A>
@@ -404,9 +399,9 @@ at the IDL command line prompt.<P>
 
  RESTRICTIONS:
 
-     Requires SCALE_VECTOR from the Coyote Library:
+     Requires cgScaleVector from the Coyote Library:
 
-        http://www.idlcoyote.com/programs/scale_vector.pro
+        http://www.idlcoyote.com/programs/cgScaleVector.pro
 
      Incorporates ASINH from the NASA Astronomy Library and renamed ASINHSCL_ASINH.
 
@@ -497,6 +492,7 @@ at the IDL command line prompt.<P>
        Added better error checking, 18 Feb 1997, DWF.
        Added WindowAspect keyword. 10 Feb 2000. DWF
        Added double precision tolerance for aspectRatio. 9 NOV 2001 BT
+       Officially retired in favor of cgAspect. 11 February 2013. DWF.
 </PRE><P>
 <STRONG>(See aspect.pro)</STRONG><P>
 <HR>
@@ -1118,9 +1114,9 @@ at the IDL command line prompt.<P>
 
  RESTRICTIONS:
 
-     Requires SCALE_VECTOR from the Coyote Library:
+     Requires cgScaleVector from the Coyote Library:
 
-        http://www.idlcoyote.com/programs/scale_vector.pro
+        http://www.idlcoyote.com/programs/cgScaleVector.pro
 
  MODIFICATION HISTORY:
 
@@ -1346,6 +1342,7 @@ at the IDL command line prompt.<P>
        Written by David Fanning, 18 November 2001.
        Added second colorbar to show the relationship of the clamped
           colors to the overall image values. 19 November 2001. DWF.
+       Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 </PRE><P>
 <STRONG>(See contrastzoom.pro)</STRONG><P>
 <HR>
@@ -1740,7 +1737,7 @@ at the IDL command line prompt.<P>
           DELETE_ON_DESTROY and NOTRACEBACK keywords to the INIT and SetProperty
           methods. 28 Jan 2010. DWF.
         Modified default filenames so that I am now guaranteed to get unique file names 
-           by using Timestamp program from the Coyote Library. 8 Feb 2010. DWF.
+           by using cgTimestamp program from the Coyote Library. 8 Feb 2010. DWF.
         Added NOCLUTTER keyword. 15 February 2010. DWF.
         Added PRINT keyword to AddText method to allow users to log statements that should
            also be printed easily to a file. 17 February 2010. DWF.
@@ -1751,6 +1748,7 @@ at the IDL command line prompt.<P>
             will immediately flush the log information to disk when log information is
             added to the object. This will prevent missing information that is buffered
             when a program crashes. Matt Savoie suggestion. DWF, 10 Sept 2010.
+        Now calling cgTimeStamp rather than TimeStamp to avoid problems with IDL code. 6 Feb 2013. DWF.
 </PRE><P>
 <STRONG>(See errorlogger__define.pro)</STRONG><P>
 <HR>
@@ -2009,11 +2007,12 @@ at the IDL command line prompt.<P>
   This function is designed to search for and return the fully qualified
   path to a resource file. The order of search is as follows:
 
-    1. In the same directory as this file is found in.
-    2. In the directories rooted at the IDL resource directory (IDL_DIR/resource).
-    3. In the directories rooted at a resource directory found in the same directory this file is in.
-    4. In the directories rooted at a resource directory found in the a directory one above the directory this file is in.
-    5. Anywhere in the IDL PATH. Note that a *.pro file *must* be in a directory for the directory to be on
+    1. In the current directory.
+    2. In the same directory as this file is found in.
+    3. In the directories rooted at the IDL resource directory (IDL_DIR/resource).
+    4. In the directories rooted at a resource directory found in the same directory this file is in.
+    5. In the directories rooted at a resource directory found in the a directory one above the directory this file is in.
+    6. Anywhere in the IDL PATH. Note that a *.pro file *must* be in a directory for the directory to be on
        the IDL PATH.
  
 
@@ -2074,6 +2073,7 @@ at the IDL command line prompt.<P>
   The file will also look in the directory of the caller of this program. 21 April 2010. DWF.
   Fixed a problem when File_Search finds several files with the same name. Always takes the
       first file found now. 4 June 2010. DWF.
+  Modified to look in the current directory first. 5 March 2013. DWF.
 </PRE><P>
 <STRONG>(See find_resource_file.pro)</STRONG><P>
 <HR>
@@ -3631,7 +3631,7 @@ OUTPUTS:
 <A NAME="FSC_INPUTFIELD">
 <H2>FSC_INPUTFIELD</H2></A>
 <A HREF="#FSC_FILESELECT">[Previous Routine]</A>
-<A HREF="#FSC_NORMALIZE">[Next Routine]</A>
+<A HREF="#FSC_PLOTWINDOW">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -3920,81 +3920,9 @@ OUTPUTS:
 <STRONG>(See fsc_inputfield.pro)</STRONG><P>
 <HR>
  
-<A NAME="FSC_NORMALIZE">
-<H2>FSC_NORMALIZE</H2></A>
-<A HREF="#FSC_INPUTFIELD">[Previous Routine]</A>
-<A HREF="#FSC_PLOTWINDOW">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-       FSC_NORMALIZE
-
- PURPOSE:
-
-       This is a utility routine to calculate the scaling vector
-       required to position a graphics primitive of specified range
-       at a specific position in an arbitray coordinate system. The
-       scaling vector is given as a two-element array like this:
-
-          scalingVector = [translationFactor, scalingFactor]
-
-       The scaling vector should be used with the [XYZ]COORD_CONV
-       keywords of a graphics object or model. For example, if you
-       wanted to scale an X axis into the coordinate range of -0.5 to 0.5,
-       you might type something like this:
-
-          xAxis->GetProperty, Range=xRange
-          xScale = FSC_Normalize(xRange, Position=[-0.5, 0.5])
-          xAxis, XCoord_Conv=xScale
-
- AUTHOR:
-
-       FANNING SOFTWARE CONSULTING
-       David Fanning, Ph.D.
-       1645 Sheely Drive
-       Fort Collins, CO 80526 USA
-       Phone: 970-221-0438
-       E-mail: david@idlcoyote.com
-       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- CATEGORY:
-
-       Object Graphics
-
- CALLING SEQUENCE:
- 
-       xscaling = FSC_NORMALIZE(xrange, POSITION=position)
-
- INPUTS:
- 
-       XRANGE: A two-element vector specifying the data range.
-
- KEYWORD PARAMETERS:
- 
-       POSITION: A two-element vector specifying the location
-       in the coordinate system you are scaling into. The vector [0,1]
-       is used by default if POSITION is not specified.
-
- COMMON BLOCKS:
- 
-       None.
-
- EXAMPLE:
- 
-       See above.
-
- MODIFICATION HISTORY:
-       Written by:  David W. Fanning, OCT 1997.
-       Fixed a problem with illegal divide by zero. 21 April 2005. DWF.
-       Fixed a problem when range[0] is greater than range[1]. 11 July 2006. DWF.
-       Renamed to FSC_Normalize to avoid conflicts with 10,000 other programs named NORMALIZE. 17 October 2008. DWF.
-</PRE><P>
-<STRONG>(See fsc_normalize.pro)</STRONG><P>
-<HR>
- 
 <A NAME="FSC_PLOTWINDOW">
 <H2>FSC_PLOTWINDOW</H2></A>
-<A HREF="#FSC_NORMALIZE">[Previous Routine]</A>
+<A HREF="#FSC_INPUTFIELD">[Previous Routine]</A>
 <A HREF="#FSC_PSCONFIG__DEFINE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -4368,9 +4296,9 @@ OUTPUTS:
 
  RESTRICTIONS:
 
-     Requires SCALE_VECTOR from the Coyote Library:
+     Requires cgScaleVector from the Coyote Library:
 
-        http://www.idlcoyote.com/programs/scale_vector.pro
+        http://www.idlcoyote.com/programs/cgScaleVector.pro
 
  MODIFICATION HISTORY:
 
@@ -4745,9 +4673,9 @@ OUTPUTS:
 
  RESTRICTIONS:
 
-     Requires SCALE_VECTOR from the Coyote Library:
+     Requires cgScaleVector from the Coyote Library:
 
-        http://www.idlcoyote.com/programs/scale_vector.pro
+        http://www.idlcoyote.com/programs/cgScaleVector.pro
 
  MODIFICATION HISTORY:
 
@@ -4875,12 +4803,6 @@ OUTPUTS:
        the model that is selected in a selection event, since the SELECT_TARGET
        keyword is set for the model.
 
- RESTRICTIONS:
-
-       Requires FSC_NORMALIZE from Coyote Library:
-
-         http://www.idlcoyote.com/programs/fsc_normalize.pro
-
  EXAMPLE:
 
        To create a colorbar object and add it to a plot view object, type:
@@ -4909,6 +4831,7 @@ OUTPUTS:
        Fixed a problem with setting RANGE keyword in SetProperty method. 6 Sept 2003. DWF.
        Removed NORMALIZE from source code. 19 November 2005. DWF.
        Font sizes have changed. Now using a 12 point font. 6 May 2011. DWF.
+       Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 </PRE><P>
 <STRONG>(See hcolorbar__define.pro)</STRONG><P>
 <HR>
@@ -6107,9 +6030,9 @@ OUTPUTS:
 
  RESTRICTIONS:
 
-     Requires SCALE_VECTOR from the Coyote Library:
+     Requires cgScaleVector from the Coyote Library:
 
-        http://www.idlcoyote.com/programs/scale_vector.pro
+        http://www.idlcoyote.com/programs/cgScaleVector.pro
 
  MODIFICATION HISTORY:
 
@@ -6766,6 +6689,7 @@ OUTPUTS:
        Modified the global attribute structure so that the "filename" field, which holds the
            name of the netCDF of HDF file is now named "ncdf_filename" or "hdf_filename". This
            will avoid conflicts with global attributes with "filename". 20 January 2011. DWF.
+       Typo in the section reading calibration data fixed. 12 March 2013. DWF.
 </PRE><P>
 <STRONG>(See ncdf_data__define.pro)</STRONG><P>
 <HR>
@@ -7223,7 +7147,7 @@ OUTPUTS:
 
  CATEGORY:
 
-       Graphics, Color Specification. See related program FSC_COLOR.
+       Graphics, Color Specification. See related program cgCOLOR.
 
  CALLING SEQUENCE:
 
@@ -7243,7 +7167,7 @@ OUTPUTS:
 
        IF the NAMES keyword is set, the return value of the function is
        the "name" of the selected color. This would be appropriate for
-       passing to the FSC_COLOR program, for example.
+       passing to the cgCOLOR program, for example.
 
  OPTIONAL INPUT POSITIONAL PARAMETERS:
 
@@ -7311,14 +7235,15 @@ OUTPUTS:
         To obtain the name of the selected color to pass to GetColor:
 
           selectedColor = PickColor(/Name)
-          axisColor = FSC_Color(selectedColor, !D.Table_Size-4)
+          axisColor = cgColor(selectedColor, !D.Table_Size-4)
 
  MODIFICATION HISTORY:
        Written by: David Fanning, 28 Oct 99.
        Added NAME keyword. 18 March 2000, DWF.
        Fixed a small bug when choosing a colorindex less than !D.Table_Size-17. 20 April 2000. DWF.
        Added actual color names to label when NAMES keyword selected. 12 May 2000. DWF.
-       Modified to use 88 colors and FSC_COLOR instead of 16 colors and GETCOLOR. 4 Dec 2000. DWF.
+       Modified to use 88 colors and cgCOLOR instead of 16 colors and GETCOLOR. 4 Dec 2000. DWF.
+       Changed FSC_Color to cgColor everywhere. 16 Jan 2013. DWF.
 </PRE><P>
 <STRONG>(See pickcolor.pro)</STRONG><P>
 <HR>
@@ -7934,6 +7859,7 @@ OUTPUTS:
            as the default if LANDSCAPE is not set. 13 Dec 2010. DWF.
        Added ASPECTRATIO keyword to allow user-specified window aspect ratio. 13 Dec 2010. DWF.
        Depreciated EUROPEAN keyword in favor of METRIC. 31 Jan 2011. DWF.
+       Now setting LANDSCAPE=0 if aspect GT 1 and not set otherwise. 19 Feb 2013. DWF.
 </PRE><P>
 <STRONG>(See pswindow.pro)</STRONG><P>
 <HR>
@@ -8132,6 +8058,7 @@ OUTPUTS:
             two places. 15 Oct 2012. DWF.
         Added a check for ImageMagick and an informational message for raster operations. 4 Nov 2012. DWF.
         Fixed a problem in which the NOMESSAGE keyword was not getting passed along to cgPS2Raster. 5 Nov 2012. DWF.
+        Fixed a problem where I was not passing the PORTRAIT keyword to cgPS2Raster properly. 22 Jan 2013. DWF.
 
  :Copyright:
      Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
@@ -8489,7 +8416,7 @@ OUTPUTS:
 <A NAME="RESOLVE_OBJECT">
 <H2>RESOLVE_OBJECT</H2></A>
 <A HREF="#REPMAT">[Previous Routine]</A>
-<A HREF="#REVERSEINDICES">[Next Routine]</A>
+<A HREF="#REVERSE_AXES">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -8547,70 +8474,9 @@ OUTPUTS:
 <STRONG>(See resolve_object.pro)</STRONG><P>
 <HR>
  
-<A NAME="REVERSEINDICES">
-<H2>REVERSEINDICES</H2></A>
-<A HREF="#RESOLVE_OBJECT">[Previous Routine]</A>
-<A HREF="#REVERSE_AXES">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- :Description:
-   Provides a simple way to obtain the data indices from a Histogram REVERSE_INDICES
-   vector. Returns a -1 if no indices are available. Check the COUNT keyword for the
-   number of indices returned.
-
- :Categories:
-    Utilities
-    
- :Params:
-    reverse_indices: in, required, type=integer
-         The REVERSE_INDICES vector that is returned from the HISTOGRAM command.
-    index: in, required, type=integer
-         The zero-based index into the REVERSE_INDICES vector from which to obtain
-         the indices. For example, and index value of 4 will return the indices in
-         the 5th bin (zero based counting) of the histogram. 
-       
- :Keywords:
-     count: out, optional, type=Long
-         The number of indices returned by the function.
-         
- :Return Value:
-      indices:
-         The indices that were put into the indexth bin of the histogram. A -1
-         is returned if no indices are in that particular bin.
-          
- :Examples:
-    Used with the HISTOGRAM command::
-       IDL> image = cgDemoData(7)
-       IDL> h = Histogram(image, REVERSE_INDICES=ri)
-       IDL> indices = ReverseIndices(ri, 4, COUNT=cnt)
-       IDL> Help, indices, cnt, h[4]
-       INDICES         LONG      = Array[948]
-       CNT             LONG      =          948
-       <Expression>    LONG      =          948
-       IDL> image[indices] = 0
-
-       
- :Author:
-       FANNING SOFTWARE CONSULTING::
-           David W. Fanning 
-           1645 Sheely Drive
-           Fort Collins, CO 80526 USA
-           Phone: 970-221-0438
-           E-mail: david@idlcoyote.com
-           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- :History:
-     Written by David W. Fanning at suggestion of Ben Tupper. 7 January 2011.
-     
- :Copyright:
-     Copyright (c) 2011, Fanning Software Consulting, Inc.
-</PRE><P>
-<STRONG>(See reverseindices.pro)</STRONG><P>
-<HR>
- 
 <A NAME="REVERSE_AXES">
 <H2>REVERSE_AXES</H2></A>
-<A HREF="#REVERSEINDICES">[Previous Routine]</A>
+<A HREF="#RESOLVE_OBJECT">[Previous Routine]</A>
 <A HREF="#SAVETOMAIN">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -8690,6 +8556,7 @@ OUTPUTS:
  MODIFICATION HISTORY:
 
   Written by: David Fanning, October 2001.
+  Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 </PRE><P>
 <STRONG>(See reverse_axes.pro)</STRONG><P>
 <HR>
@@ -8835,96 +8702,77 @@ OUTPUTS:
 <A HREF="#SCROLLWINDOW">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
- NAME:
-       SCALE_VECTOR
+ This is a utility routine to scale the elements of a vector or an array into a 
+ given data range. 
 
- PURPOSE:
+ :Categories:
+    Utilities
+    
+ :Returns:
+     A vector or array of the same size as the input, scaled into the data range given
+     by `minRange` and `maxRange'. The input vector is confined to the data range set
+     by `MinValue` and `MaxValue` before scaling occurs.
 
-       This is a utility routine to scale the elements of a vector
-       (or an array) into a given data range. The processed vector
-       [MINVALUE > vector < MAXVECTOR] is scaled into the data range
-       given by MINRANGE and MAXRANGE.
+ :Params:
+    maxRange: in, optional, type=varies, default=1
+       The maximum output value of the scaled vector. Set to 1 by default.
+    minRange: in, optional, type=varies, default=0
+       The minimum output value of the scaled vector. Set to 0 by default.
+    vector: in, required
+       The input vector or array to be scaled.
 
- AUTHOR:
+ :Keywords:
+    double: in, optional, type=boolean, default=0
+         Set this keyword to perform scaling in double precision. Otherwise, scaling 
+         is done in floating point precision.
+     maxvalue: in, optional
+         Set this value to the maximum value of the vector, before scaling (vector < maxvalue).
+         The default value is Max(vector).
+     minvalue: in, optional
+         Set this value to the mimimum value of the vector, before scaling (minvalue < vector).
+         The default value is Min(vector).
+     nan: in, optional, type=boolean, default=0
+         Set this keyword to enable not-a-number checking. NANs in vector will be ignored.
+     preserve_type: in, optional, type=boolean, default=0
+         Set this keyword to preserve the input data type in the output.
 
-       FANNING SOFTWARE CONSULTING
-       David Fanning, Ph.D.
+ :Examples:
+       Simple example of scaling a vector::
+       
+          IDL> x = [3, 5, 0, 10]
+          IDL> xscaled = Scale_Vector(x, -50, 50)
+          IDL> Print, xscaled
+               -20.0000     0.000000     -50.0000      50.0000
+
+       Suppose your image has a minimum value of -1.7 and a maximum value = 2.5.
+       You wish to scale this data into the range 0 to 255, but you want to use
+       a diverging color table. Thus, you want to make sure value 0.0 is scaled to 128.
+       You proceed like this::
+
+          scaledImage = Scale_Vector(image, 0, 255, MINVALUE=-2.5, MAXVALUE=2.5)
+
+ :Author:
+    FANNING SOFTWARE CONSULTING::
+       David W. Fanning
        1645 Sheely Drive
        Fort Collins, CO 80526 USA
        Phone: 970-221-0438
        E-mail: david@idlcoyote.com
        Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
- CATEGORY:
+ :History:
+     Change History::
+         Written by:  David W. Fanning, 12 Dec 1998.
+         Added MAXVALUE and MINVALUE keywords. 5 Dec 1999. DWF.
+         Added NAN keyword. 18 Sept 2000. DWF.
+         Removed check that made minRange less than maxRange to allow ranges to be
+            reversed on axes, etc. 28 Dec 2003. DWF.
+         Added PRESERVE_TYPE and DOUBLE keywords. 19 February 2006. DWF.
+         Added FPUFIX to cut down on floating underflow errors. 11 March 2006. DWF.
+         This routine is being depreciated in favor of cgScaleVector. 16 May 2013. DWF.
 
-       Utilities
-
- CALLING SEQUENCE:
-
-       scaledVector = SCALE_VECTOR(vector, [minRange], [maxRange], [MINVALUE=minvalue], [MAXVALUE=maxvalue])
-
- INPUT POSITIONAL PARAMETERS:
-
-       vector:   The vector (or array) to be scaled. Required.
-       minRange: The minimum value of the scaled vector. Set to 0 by default. Optional.
-       maxRange: The maximum value of the scaled vector. Set to 1 by default. Optional.
-
-       Note that it is the processed vector [MINVALUE > vector < MAXVALUE] that is
-       scaled between minRange and maxRange. See the MINVALUE and MAXVALUE keywords below.
-
- INPUT KEYWORD PARAMETERS:
-
-       DOUBLE:        Set this keyword to perform scaling in double precision.
-                      Otherwise, scaling is done in floating point precision.
-
-       MAXVALUE:      MAXVALUE is set equal to (vector < MAXVALUE) prior to scaling.
-                      The default value is MAXVALUE = Max(vector).
-
-       MINVALUE:      MINVALUE is set equal to (vector > MAXVALUE) prior to scaling.
-                      The default value is MINXVALUE = Min(vector).
-
-       NAN:           Set this keyword to enable not-a-number checking. NANs
-                      in vector will be ignored.
-
-       PRESERVE_TYPE: Set this keyword to preserve the input data type in the output.
-
- RETURN VALUE:
-
-       scaledVector: The vector (or array) values scaled into the data range.
-
- COMMON BLOCKS:
-       None.
-
- EXAMPLES:
-
-       x = [3, 5, 0, 10]
-       xscaled = SCALE_VECTOR(x, -50, 50)
-       Print, xscaled
-          -20.0000     0.000000     -50.0000      50.0000
-
-       Suppose your image has a minimum value of -1.7 and a maximum value = 2.5.
-       You wish to scale this data into the range 0 to 255, but you want to use
-       a diverging color table. Thus, you want to make sure value 0.0 is scaled to 128.
-       You proceed like this:
-
-       scaledImage = SCALE_VECTOR(image, 0, 255, MINVALUE=-2.5, MAXVALUE=2.5)
-
- RESTRICTIONS:
-
-     Requires the following programs from the Coyote Library:
-
-        http://www.idlcoyote.com/programs/convert_to_type.pro
-        http://www.idlcoyote.com/programs/fpufix.pro
-
- MODIFICATION HISTORY:
-
-       Written by:  David W. Fanning, 12 Dec 1998.
-       Added MAXVALUE and MINVALUE keywords. 5 Dec 1999. DWF.
-       Added NAN keyword. 18 Sept 2000. DWF.
-       Removed check that made minRange less than maxRange to allow ranges to be
-          reversed on axes, etc. 28 Dec 2003. DWF.
-       Added PRESERVE_TYPE and DOUBLE keywords. 19 February 2006. DWF.
-       Added FPUFIX to cut down on floating underflow errors. 11 March 2006. DWF.
+ :Copyright:
+     Copyright (c) 1998-2013, Fanning Software Consulting, Inc.
 </PRE><P>
 <STRONG>(See scale_vector.pro)</STRONG><P>
 <HR>
@@ -9150,6 +8998,7 @@ OUTPUTS:
  MODIFICATION HISTORY:
        Written by David Fanning, 21 September 98.
        Added the ability to shrink and expand the objects. 27 Sept 98. DWF.
+       Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 </PRE><P>
 <STRONG>(See select_objects.pro)</STRONG><P>
 <HR>
@@ -9265,7 +9114,7 @@ OUTPUTS:
 <A NAME="SETDEFAULTVALUE">
 <H2>SETDEFAULTVALUE</H2></A>
 <A HREF="#SETDECOMPOSEDSTATE">[Previous Routine]</A>
-<A HREF="#SETDIFFERENCE">[Next Routine]</A>
+<A HREF="#SHARPEN">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -9331,256 +9180,9 @@ OUTPUTS:
 <STRONG>(See setdefaultvalue.pro)</STRONG><P>
 <HR>
  
-<A NAME="SETDIFFERENCE">
-<H2>SETDIFFERENCE</H2></A>
-<A HREF="#SETDEFAULTVALUE">[Previous Routine]</A>
-<A HREF="#SETINTERSECTION">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-  SETDIFFERENCE
-
- PURPOSE:
-
-   This function is used to find the difference between two sets of integers.
-   In other words, the function will find the values that are in Set A but
-   are missing in Set B.
-
- AUTHOR:
-
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: david@idlcoyote.com
-   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-
- CATEGORY:
-
-   Utilities
-
- CALLING SEQUENCE:
-
-   difference = SetDifference(set_a, set_b)
-
- RETURN VALUE:
-
-   difference:  A vector of values that are found in set_a but are missing in set_b.
-
- ARGUMENTS:
-
-   set_a:         A vector of integers.
-   
-   set_b:         A vector of integers.
-
- KEYWORDRS:
-
-  COUNT:          An output variable that contains the number of elements in the difference vector.
-
-  NORESULT:       Set this keyword to a value that will be returned from the function
-                  if no difference between the two sets of numbers is found. By default, set_a.
-                  
-  POSITIONS:      An output keyword that will return the positions or locations in A of the values
-                  not found in B.
-                 
-  SUCCESS:        An output keyword that is set to 1 if a difference was found, and to 0 otherwise.
-   
- EXAMPLE:
-
-  IDL> set_a = [1,2,3,4,5]
-  IDL> set_b = [4,5,6,7,8,9,10,11]
-  IDL> Print, SetDifference(set_a, set_b)
-          1  2  3 
-
-  See http://www.idlcoyote.com/tips/set_operations.html for other types of set operations.
-  
- NOTES:
- 
-  If you read the Set Operations article pointed to above, you will see quite a lot of
-  discussion about what kinds of algorithms are faster than others. The Histogram 
-  algorithms implemented here are sometimes NOT the fastest algorithms, especially 
-  for sparse arrays. If this is a concern in your application, please be sure to read
-  that article.
-  
- MODIFICATION HISTORY:
-
-  Written by: David W. Fanning, November 25, 2009, from code originally supplied to the IDL
-     newsgroup by Research Systems software engineers.
-  Added COUNT and POSITIONS keywords. Liam Steele, 13 Dec 2012.
-  Defined values for COUNT and POSITIONS when there is no overlap in the vectors. 14 Dec 2012. LS.
-</PRE><P>
-<STRONG>(See setdifference.pro)</STRONG><P>
-<HR>
- 
-<A NAME="SETINTERSECTION">
-<H2>SETINTERSECTION</H2></A>
-<A HREF="#SETDIFFERENCE">[Previous Routine]</A>
-<A HREF="#SETUNION">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-  SETINTERSECTION
-
- PURPOSE:
-
-   This function is used to find the intersection between two sets of integers.
-
- AUTHOR:
-
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: david@idlcoyote.com
-   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-
- CATEGORY:
-
-   Utilities
-
- CALLING SEQUENCE:
-
-   intersection = SetIntersection(set_a, set_b)
-
- RETURN VALUE:
-
-   intersection:  A vector of values that are found in both set_a and set_b.
-
- ARGUMENTS:
-
-   set_a:         A vector of integers.
-   
-   set_b:         A vector of integers.
-
- KEYWORDRS:
- 
-  COUNT:          An output variable that contains the number of elements in the intersection vector.
-
-  NORESULT:       Set this keyword to a value that will be returned from the function
-                  if no intersection between the two sets of numbers is found. By default, -1.
-                  
-  POSITIONS:      And output keyword that will return the positions or locations in A where the values
-                  in B appear.
-                  
-  INDICIES_A:     The indices in vector A where the intersected values appear. Note, this is identical
-                  to POSITIONS *only* if the intersected points are unique in each vector. The POSITIONS 
-                  keyword will return ALL the positions of the match, even if there are non-unique matches.
-  
-  INDICIES_B:     The indices in vector B where the intersected values appear. This assumes that
-                  the intersected points are represented uniquely in the A and B vectors.
-
-  SUCCESS:        An output keyword that is set to 1 if an intersection was found, and to 0 otherwise.
-
- EXAMPLE:
-
-  IDL> set_a = [1,2,3,4,5]
-  IDL> set_b = [4,5,6,7,8,9,10,11]
-  IDL> Print, SetIntersection(set_a, set_b)
-          4   5
-
-  See http://www.idlcoyote.com/tips/set_operations.html for other types of set operations.
-  
- NOTES:
- 
-  If you read the Set Operations article pointed to above, you will see quite a lot of
-  discussion about what kinds of algorithms are faster than others. The Histogram 
-  algorithms implemented here are sometimes NOT the fastest algorithms, especially 
-  for sparse arrays. If this is a concern in your application, please be sure to read
-  that article.
-  
- MODIFICATION HISTORY:
-
-  Written by: David W. Fanning, October 31, 2009, from code originally supplied to the IDL
-     newsgroup by Research Systems software engineers.
-  Yikes, bug in original code only allowed positive integers. Fixed now. 2 Nov 2009. DWF.
-  Fixed a problem when one or both of the sets was a scalar value. 18 Nov 2009. DWF.
-  Added a POSITIONS keyword. 30 Nov 2012. DWF.
-  Added a COUNT keyword 3 Dec 2012. DWF.
-  Added INDICES_A and INDICES_B keywords at R.G. Stockwell's suggestion. 13 Dec 2012. DWF.
-</PRE><P>
-<STRONG>(See setintersection.pro)</STRONG><P>
-<HR>
- 
-<A NAME="SETUNION">
-<H2>SETUNION</H2></A>
-<A HREF="#SETINTERSECTION">[Previous Routine]</A>
-<A HREF="#SHARPEN">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-  SETUNION
-
- PURPOSE:
-
-   This function is used to find the union between two sets of integers.
-
- AUTHOR:
-
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: david@idlcoyote.com
-   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-
- CATEGORY:
-
-   Utilities
-
- CALLING SEQUENCE:
-
-   union = SetUnion(set_a, set_b)
-
- RETURN VALUE:
-
-   union:  A vector of values that are found in the combined integer sets.
-
- ARGUMENTS:
-
-   set_a:         A vector of integers.
-   
-   set_b:         A vector of integers.
-
- KEYWORDRS:
-
-    None.
-    
- EXAMPLE:
-
-  IDL> set_a = [1,2,3,4,5]
-  IDL> set_b = [4,5,6,7,8,9,10,11]
-  IDL> Print, SetUnion(set_a, set_b)
-          1  2  3  4  5  6  7  8  9  10  11
-
-  See http://www.idlcoyote.com/tips/set_operations.html for other types of set operations.
-  
- NOTES:
- 
-  If you read the Set Operations article pointed to above, you will see quite a lot of
-  discussion about what kinds of algorithms are faster than others. The Histogram 
-  algorithms implemented here are sometimes NOT the fastest algorithms, especially 
-  for sparse arrays. If this is a concern in your application, please be sure to read
-  that article.
-  
-  One alternative for the SetUnion algorithm, provided by Maarten Sneep, is simply this:
-  
-      superset = [set_a, set_b]
-      union = superset[Uniq(superset, Sort(superset))]
-  
- MODIFICATION HISTORY:
-
-  Written by: David W. Fanning, November 25, 2009, from code originally supplied to the IDL
-     newsgroup by Research Systems software engineers.
-</PRE><P>
-<STRONG>(See setunion.pro)</STRONG><P>
-<HR>
- 
 <A NAME="SHARPEN">
 <H2>SHARPEN</H2></A>
-<A HREF="#SETUNION">[Previous Routine]</A>
+<A HREF="#SETDEFAULTVALUE">[Previous Routine]</A>
 <A HREF="#SORT_ND">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -10137,6 +9739,7 @@ OUTPUTS:
           positioning images. BORDERCOLOR keyword added. DWF. 4 Nov 2001.
        The surface now maintains the same X/Y aspect ratio as the surface data. DWF. 8 April 2002.
        Added ZSCALE keyword. DWF. 8 April 2002.
+       Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 </PRE><P>
 <STRONG>(See texture_surface.pro)</STRONG><P>
 <HR>
@@ -10402,12 +10005,6 @@ OUTPUTS:
        the model that is selected in a selection event, since the SELECT_TARGET
        keyword is set for the model.
 
- RESTRICTIONS:
-
-       Requires FSC_NORMALIZE from Coyote Library:
-
-         http://www.idlcoyote.com/programs/fsc_normalize.pro
-
  EXAMPLE:
 
        To create a colorbar object and add it to a plot view object, type:
@@ -10445,6 +10042,7 @@ OUTPUTS:
        Fixed a problem with POSITION keyword in SetProperty method. 23 May 2003. DWF.
        Removed NORMALIZE from source code. 29 Nov 2005. DWF.
        Font sizes have changed. Now using a 12 point font. 6 May 2011. DWF.
+       Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 </PRE><P>
 <STRONG>(See vcolorbar__define.pro)</STRONG><P>
 <HR>

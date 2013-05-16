@@ -104,7 +104,7 @@ FUNCTION cgLogGen, numpts, $
     f = ALog10(finish)
     
     ; Create a vector of exponent values between these two end points.
-    exponents = Scale_Vector(Findgen(numpts), s, f, Double=double)
+    exponents = cgScaleVector(Findgen(numpts), s, f, Double=double)
     
     ; Return the actual values.
     RETURN, 10.^exponents

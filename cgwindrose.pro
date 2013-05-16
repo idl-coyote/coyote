@@ -94,7 +94,7 @@ FUNCTION cgWindRoseArc, xcenter, ycenter, radius, angle1, angle2
     IF N_Elements(angle2) EQ 0 THEN angle2 = 360.0
     
     ; Scale 100 points between the first and second angle.
-    points = Scale_Vector(Findgen(100), angle1, angle2)
+    points = cgScaleVector(Findgen(100), angle1, angle2)
     
     
     ; Calculate the X and Y values of these points. Do this so

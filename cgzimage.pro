@@ -99,8 +99,8 @@ PRO cgZImage_ZoomWindow_Events, event
     Widget_Control, tlb, Get_UValue=info
     
     ; Create the proper vectors to locate the cursor in the image.
-    xvec = Scale_Vector(Findgen((*info).zxsize), (*info).xrange[0], (*info).xrange[1])
-    yvec = Scale_Vector(Findgen((*info).zysize), (*info).yrange[0], (*info).yrange[1])
+    xvec = cgScaleVector(Findgen((*info).zxsize), (*info).xrange[0], (*info).xrange[1])
+    yvec = cgScaleVector(Findgen((*info).zysize), (*info).yrange[0], (*info).yrange[1])
     xloc = 0 > Round(xvec[event.x]) < ((*info).xsize-1)
     yloc = 0 > Round(yvec[event.y]) < ((*info).ysize-1)
     
@@ -126,8 +126,8 @@ PRO cgZImage_ZoomWindow_Events, event
     ; Create the text for the statusbar widget and update the status bar.
     IF Obj_Valid(*(*info).map) THEN BEGIN
         *(*info).map -> GetProperty, XRANGE=xrange, YRANGE=yrange
-        xvec = Scale_Vector(Findgen((*info).xsize), xrange[0], xrange[1])
-        yvec = Scale_Vector(Findgen((*info).ysize), yrange[0], yrange[1])
+        xvec = cgScaleVector(Findgen((*info).xsize), xrange[0], xrange[1])
+        yvec = cgScaleVector(Findgen((*info).ysize), yrange[0], yrange[1])
         ll = *(*info).map -> Inverse(xvec[xloc], yvec[yloc])
         loctext = 'Lat: ' + String(ll[1], Format='(F0.3)') + '  Lon: ' + String(ll[0], Format='(F0.3)')
     ENDIF ELSE BEGIN
@@ -147,8 +147,8 @@ PRO cgZImage_ZoomWindow_Events, event
     ; larger image.
     WSet, (*info).drawIndex
     Device, Copy=[0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).pixIndex]    
-    xvec = Scale_Vector(Findgen(!D.X_Size), 0, (*info).xsize)
-    yvec = Scale_Vector(Findgen(!D.Y_Size), 0, (*info).ysize)
+    xvec = cgScaleVector(Findgen(!D.X_Size), 0, (*info).xsize)
+    yvec = cgScaleVector(Findgen(!D.Y_Size), 0, (*info).ysize)
     xdloc = Value_Locate(xvec, xloc)
     ydloc = Value_Locate(yvec, yloc)
     cgPlotS, [(*info).xs, (*info).xs, (*info).xd, (*info).xd, (*info).xs], $
@@ -589,8 +589,8 @@ PRO cgZImage_DrawEvents, event
       
       ; Make sure these are in image pixel coordinates, not just
       ; window pixel coordinates.
-      xvec = Scale_Vector(Indgen((*info).xsize), 0, !D.X_Size-1)
-      yvec = Scale_Vector(Indgen((*info).ysize), 0, !D.Y_Size-1)
+      xvec = cgScaleVector(Indgen((*info).xsize), 0, !D.X_Size-1)
+      yvec = cgScaleVector(Indgen((*info).ysize), 0, !D.Y_Size-1)
       x = Value_Locate(xvec, x)
       y = Value_Locate(yvec, y)
       (*info).xrange = x

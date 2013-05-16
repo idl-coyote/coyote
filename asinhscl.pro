@@ -86,9 +86,9 @@
 ;
 ; RESTRICTIONS:
 ;
-;     Requires SCALE_VECTOR from the Coyote Library:
+;     Requires cgScaleVector from the Coyote Library:
 ;
-;        http://www.idlcoyote.com/programs/scale_vector.pro
+;        http://www.idlcoyote.com/programs/cgScaleVector.pro
 ;
 ;     Incorporates ASINH from the NASA Astronomy Library and renamed ASINHSCL_ASINH.
 ;
@@ -201,7 +201,7 @@ FUNCTION ASinhScl_ASinh, x
    !Except = 0
 
    ; Perform initial scaling of the image into 0 to 1.0.
-   output = Scale_Vector(Temporary(output), 0.0, 1.0, MaxValue=maxValue, $
+   output = cgScaleVector(Temporary(output), 0.0, 1.0, MaxValue=maxValue, $
       MinValue=minValue, /NAN, Double=1)
 
    ; Check keywords.
@@ -215,11 +215,11 @@ FUNCTION ASinhScl_ASinh, x
    nonlinearity = 1.0D/(scaled_beta > 1e-12)
 
   ; Find out where 0 and 1 map in ASINH, then set these as MINVALUE and MAXVALUE
-   ; in next SCALE_VECTOR call. This is necessary to preserve proper scaling.
+   ; in next cgScaleVector call. This is necessary to preserve proper scaling.
    extrema = ASinhScl_ASinh([0, 1.0D] * nonlinearity)
 
    ; Inverse hyperbolic sine scaling.
-   output = Scale_Vector(ASinhScl_ASinh(Temporary(output)*nonlinearity), $
+   output = cgScaleVector(ASinhScl_ASinh(Temporary(output)*nonlinearity), $
       minOut, maxOut, /NAN, Double=1, MinValue=extrema[0], MaxValue=extrema[1])
 
    ; Clear math errors.

@@ -1002,7 +1002,7 @@ PRO cgMap_Grid, $
                          thisMapStructure = mapObj -> GetMapStruct()
                          ll = Map_Proj_Inverse(xrange, yrange, MAP_STRUCTURE=thisMapStructure)
                          lonii = Reform(ll[0,*])
-                         lonii = Scale_Vector(Findgen(N_Elements(loni)), lonii[0], lonii[1])
+                         lonii = cgScaleVector(Findgen(N_Elements(loni)), lonii[0], lonii[1])
                          uv = MAP_PROJ_FORWARD(lonii, REPLICATE(lat, N_ELEMENTS(lonii)), $
                               MAP_STRUCTURE=thisMapStruct, POLYLINES=polylines)
 ;                          uv = MAP_PROJ_FORWARD(lonii, REPLICATE(lat, N_ELEMENTS(lonii)), $

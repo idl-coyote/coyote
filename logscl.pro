@@ -74,9 +74,9 @@
 ;
 ; RESTRICTIONS:
 ;
-;     Requires SCALE_VECTOR from the Coyote Library:
+;     Requires cgScaleVector from the Coyote Library:
 ;
-;        http://www.idlcoyote.com/programs/scale_vector.pro
+;        http://www.idlcoyote.com/programs/cgScaleVector.pro
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -152,7 +152,7 @@ FUNCTION LogScl, image, $
    exponent = 1.0e-6 > exponent
 
    ; Perform initial scaling of the image into 0 to 1.
-   output = Scale_Vector(Temporary(output), 0.0D, 1.0D, MaxValue=maxValue, $
+   output = cgScaleVector(Temporary(output), 0.0D, 1.0D, MaxValue=maxValue, $
       MinValue=minValue, /NAN, Double=1)
 
    ; Too damn many floating underflow warnings, no matter WHAT I do! :-(
@@ -163,7 +163,7 @@ FUNCTION LogScl, image, $
    output = 1.0D / ((1.0D + (mean / (Temporary(output) > 1e-16))^exponent) > (1e-16))
 
    ; Scale to image coordinates.
-   output = Scale_Vector(Temporary(output), minOut, maxOut, MinValue=0.0D, MaxValue=1.0D, /NAN, Double=1)
+   output = cgScaleVector(Temporary(output), minOut, maxOut, MinValue=0.0D, MaxValue=1.0D, /NAN, Double=1)
 
    ; Clear math errors.
    void = Check_Math()

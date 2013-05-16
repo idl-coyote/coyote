@@ -155,7 +155,7 @@ FUNCTION SDevScl, image, $
    threshold = [minThresh, maxThresh]
 
    ; Scale the data.
-   output = Scale_Vector(Temporary(output), MIN=threshold[0], MAX=threshold [1], minOut, maxOut)
+   output = cgScaleVector(Temporary(output), MIN=threshold[0], MAX=threshold [1], minOut, maxOut)
 
    IF Keyword_Set(negative) THEN RETURN, 0B > (maxout - Byte(output) + minOut) < 255B $
       ELSE RETURN, Byte(output)

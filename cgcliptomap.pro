@@ -134,8 +134,8 @@ FUNCTION cgCliptoMap, imageIn, boundary, $
    map -> GetProperty, XRange=xr, YRange=yr
    
    ; Create image vectors.
-   xvec = Scale_Vector(DIndgen(dims[0]+1), xr[0], xr[1])
-   yvec = Scale_Vector(DIndgen(dims[1]+1), yr[0], yr[1])
+   xvec = cgScaleVector(DIndgen(dims[0]+1), xr[0], xr[1])
+   yvec = cgScaleVector(DIndgen(dims[1]+1), yr[0], yr[1])
    
    ; Clip to get new image subscripts.
    xsubs = 0 > Value_Locate(xvec, [thisBoundary[0],thisBoundary[2]]) < (dims[0]-1)

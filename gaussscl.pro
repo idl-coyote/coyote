@@ -64,9 +64,9 @@
 ;
 ; RESTRICTIONS:
 ;
-;     Requires SCALE_VECTOR from the Coyote Library:
+;     Requires cgScaleVector from the Coyote Library:
 ;
-;        http://www.idlcoyote.com/programs/scale_vector.pro
+;        http://www.idlcoyote.com/programs/cgScaleVector.pro
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -139,12 +139,12 @@ FUNCTION GaussScl, image, $
    IF N_Elements(sigma) EQ 0 THEN sigma = 1 ELSE sigma = sigma > 0.25
 
    ; Perform initial scaling of the image.
-   output = Scale_Vector(Temporary(output), 0.0D, 1.0D, MinValue=imageMin, MaxValue=imageMax, /NAN, Double=1)
+   output = cgScaleVector(Temporary(output), 0.0D, 1.0D, MinValue=imageMin, MaxValue=imageMax, /NAN, Double=1)
 
    ; Perform Gaussian scaling.
-   output = Scale_Vector(Temporary(output), -!pi, !pi)
+   output = cgScaleVector(Temporary(output), -!pi, !pi)
    f = (1/(sigma*sqrt(2*!dpi)))*Exp(-(Temporary(output)^2/(2*sigma^2)))
-   output = Scale_Vector(Temporary(f), minOut, maxOut)
+   output = cgScaleVector(Temporary(f), minOut, maxOut)
 
    ; Does the user want the negative result?
    IF Keyword_Set(negative) THEN RETURN, BYTE(0B > (maxout - Round(output) + minOut) < 255B) $

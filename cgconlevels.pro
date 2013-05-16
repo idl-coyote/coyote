@@ -97,7 +97,7 @@
 ;    Here is the normal way a contour plot might be created::
 ;
 ;        cgDisplay, WID=0
-;        data = Scale_Vector(cgDemoData(2), 0.1, 4534.5)
+;        data = cgScaleVector(cgDemoData(2), 0.1, 4534.5)
 ;        cgLoadCT, 33, NColors=10, Bottom=1
 ;        cgContour, data, NLevels=10, /Fill, /Outline, $
 ;           Position=[0.1, 0.1, 0.9, 0.75], C_Colors=Indgen(10)+1
@@ -108,7 +108,7 @@
 ;    to produce contour levels at 500 step intervals::
 ;    
 ;        cgDisplay, WID=1
-;        data = Scale_Vector(cgDemoData(2), 0.1, 4534.5)
+;        data = cgScaleVector(cgDemoData(2), 0.1, 4534.5)
 ;        cgLoadCT, 33, NColors=10, Bottom=1
 ;        levels = cgConLevels(data, Factor=100, MINVALUE=0)
 ;        cgContour, data, Levels=levels, /Fill, /Outline, $
@@ -120,7 +120,7 @@
 ;    The levels have been chosen so they round in the third decimal place::
 ;    
 ;        cgDisplay, WID=2
-;        data = Scale_Vector(cgDemoData(2), 0.153, 0.986)
+;        data = cgScaleVector(cgDemoData(2), 0.153, 0.986)
 ;        cgLoadCT, 33, NColors=10, Bottom=1
 ;        levels = cgConLevels(data)
 ;        cgContour, data, Levels=levels, /Fill, /Outline, $
@@ -132,7 +132,7 @@
 ;    the nearest 0.05 value. This can be done with the `Factor` keyword::
 ;     
 ;        cgDisplay, WID=3
-;        data = Scale_Vector(cgDemoData(2), 0.153, 0.986)
+;        data = cgScaleVector(cgDemoData(2), 0.153, 0.986)
 ;        cgLoadCT, 33, NColors=10, Bottom=1
 ;        levels = cgConLevels(data, Factor=0.05)
 ;        cgContour, data, Levels=levels, /Fill, /Outline, $

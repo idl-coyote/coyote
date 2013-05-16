@@ -103,6 +103,7 @@
 ;            reversed on axes, etc. 28 Dec 2003. DWF.
 ;         Added PRESERVE_TYPE and DOUBLE keywords. 19 February 2006. DWF.
 ;         Added FPUFIX to cut down on floating underflow errors. 11 March 2006. DWF.
+;         This routine is being depreciated in favor of cgScaleVector. 16 May 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 1998-2013, Fanning Software Consulting, Inc.

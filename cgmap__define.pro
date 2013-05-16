@@ -1213,7 +1213,7 @@ PRO cgMap::LatLonLabels, $
     ; Make sure we don't have a center latitude at either pole. If we
     ; do, then lons are calulated differently.
     IF (center_lat GT (90.-0.05)) && (center_lat LT (90.0 + 0.05)) THEN BEGIN
-       lats = Scale_Vector(Findgen(5), 0 > Round(lat_min) < 80, 80) 
+       lats = cgScaleVector(Findgen(5), 0 > Round(lat_min) < 80, 80) 
        latsdone = 1 
        IF lonstep GT 40 THEN BEGIN
           lons = Findgen(11) * 36 
@@ -1221,7 +1221,7 @@ PRO cgMap::LatLonLabels, $
        ENDIF      
     ENDIF ELSE BEGIN
        IF (center_lat LT (-90.+0.05)) && (center_lat GT (-90.0 - 0.05)) THEN BEGIN
-           lats = Scale_Vector(Findgen(5), -80, 0 < Round(lat_max))  
+           lats = cgScaleVector(Findgen(5), -80, 0 < Round(lat_max))  
            latsdone = 1    
            IF lonstep GT 40 THEN BEGIN
               lons = Findgen(11) * 36 

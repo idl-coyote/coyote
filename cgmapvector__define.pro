@@ -432,8 +432,8 @@ PRO cgMapVector::Draw
     ENDIF ELSE length = self.length
     
     ; Scale the U and V values by the length.
-    uscaled = *self.u * length ;Scale_Vector(*self.u, 0, length)
-    vscaled = *self.v * length ;Scale_Vector(*self.v, 0, length)
+    uscaled = *self.u * length ;cgScaleVector(*self.u, 0, length)
+    vscaled = *self.v * length ;cgScaleVector(*self.v, 0, length)
     
     ; If clip is not defined, then set it here.
     IF Total(self.clip) EQ 0 $

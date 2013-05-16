@@ -486,76 +486,76 @@ PRO cgSTRETCH_DRAWLINES, minThresh, maxThresh, info
 
       'LINEAR': BEGIN
             line = BytScl(Findgen(101))
-            line = Scale_Vector(line, 0.0, !Y.CRange[1])
-            x = Scale_Vector(Findgen(101), minThresh, maxThresh)
+            line = cgScaleVector(line, 0.0, !Y.CRange[1])
+            x = cgScaleVector(Findgen(101), minThresh, maxThresh)
             OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'LINEAR 2%': BEGIN
             line = BytScl(Findgen(101))
-            line = Scale_Vector(line, 0.0, !Y.CRange[1])
-            x = Scale_Vector(Findgen(101), minThresh, maxThresh)
+            line = cgScaleVector(line, 0.0, !Y.CRange[1])
+            x = cgScaleVector(Findgen(101), minThresh, maxThresh)
             OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'ADAPTIVE EQUALIZATION': BEGIN
             line = BytScl(Findgen(101))
-            line = Scale_Vector(line, 0.0, !Y.CRange[1])
-            x = Scale_Vector(Findgen(101), minThresh, maxThresh)
+            line = cgScaleVector(line, 0.0, !Y.CRange[1])
+            x = cgScaleVector(Findgen(101), minThresh, maxThresh)
             OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'EQUALIZATION': BEGIN
             line = BytScl(Findgen(101))
-            line = Scale_Vector(line, 0.0, !Y.CRange[1])
-            x = Scale_Vector(Findgen(101), minThresh, maxThresh)
+            line = cgScaleVector(line, 0.0, !Y.CRange[1])
+            x = cgScaleVector(Findgen(101), minThresh, maxThresh)
             OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'LOG': BEGIN
             line = LogScl(Findgen(101), Mean=info.mean, Exponent=info.exponent)
-            line = Scale_Vector(line, 0.0, !Y.CRange[1])
-            x = Scale_Vector(Findgen(101), minThresh, maxThresh)
+            line = cgScaleVector(line, 0.0, !Y.CRange[1])
+            x = cgScaleVector(Findgen(101), minThresh, maxThresh)
             OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'GAMMA': BEGIN
             ; Draw the gamma function.
-            line = Scale_Vector(Findgen(101), 0.0, 1.0)
+            line = cgScaleVector(Findgen(101), 0.0, 1.0)
             line = Double(line)^info.gamma
-            line = Scale_Vector(line, 0.0, !Y.CRange[1])
-            x = Scale_Vector(Findgen(101), minThresh, maxThresh)
+            line = cgScaleVector(line, 0.0, !Y.CRange[1])
+            x = cgScaleVector(Findgen(101), minThresh, maxThresh)
             OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'GAUSSIAN': BEGIN
             ; Draw the gaussian function.
-            line = Scale_Vector(Findgen(101), -!PI, !PI)
+            line = cgScaleVector(Findgen(101), -!PI, !PI)
             line = (1/(2*!PI*info.sigma^2))*EXP(-(line^2/(2*info.sigma^2)))
-            line = Scale_Vector(line, 0, !Y.CRange[1])
-            x = Scale_Vector(Findgen(101), minThresh, maxThresh)
+            line = cgScaleVector(line, 0, !Y.CRange[1])
+            x = cgScaleVector(Findgen(101), minThresh, maxThresh)
             OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'SQUARE ROOT': BEGIN
             line = BytScl(Findgen(101))
-            line = Scale_Vector(line, 0.0, !Y.CRange[1])
-            x = Scale_Vector(Findgen(101), minThresh, maxThresh)
+            line = cgScaleVector(line, 0.0, !Y.CRange[1])
+            x = cgScaleVector(Findgen(101), minThresh, maxThresh)
             OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'ASINH': BEGIN
             ; Draw the asinh function.
             line = ASinhScl(Findgen(101), BETA=info.beta)
-            line = Scale_Vector(line, 0.0, !Y.CRange[1])
-             x = Scale_Vector(Findgen(101), minThresh, maxThresh)
+            line = cgScaleVector(line, 0.0, !Y.CRange[1])
+             x = cgScaleVector(Findgen(101), minThresh, maxThresh)
             OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 
       'STDDEV': BEGIN
             line = BytScl(Findgen(101))
-            line = Scale_Vector(line, 0.0, !Y.CRange[1])
-            x = Scale_Vector(Findgen(101), minThresh, maxThresh)
+            line = cgScaleVector(line, 0.0, !Y.CRange[1])
+            x = cgScaleVector(Findgen(101), minThresh, maxThresh)
             OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2
          END
 

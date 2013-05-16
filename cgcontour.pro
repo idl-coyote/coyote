@@ -750,8 +750,8 @@ PRO cgContour, data, x, y, $
            IF N_Elements(x) EQ 0 THEN BEGIN
                IF Keyword_Set(onImage) THEN BEGIN
                    CASE !X.TYPE OF
-                      0: xgrid = Scale_Vector(Indgen(s[0]), !X.CRange[0], !X.CRange[1])
-                      1: xgrid = Scale_Vector(Indgen(s[0]), 10^!X.CRange[0], 10^!X.CRange[1])
+                      0: xgrid = cgScaleVector(Indgen(s[0]), !X.CRange[0], !X.CRange[1])
+                      1: xgrid = cgScaleVector(Indgen(s[0]), 10^!X.CRange[0], 10^!X.CRange[1])
                       3: Message, 'Must supply LONGITUDE vector when overplotting on map projections'
                    ENDCASE
                ENDIF ELSE BEGIN
@@ -761,8 +761,8 @@ PRO cgContour, data, x, y, $
            IF N_Elements(y) EQ 0 THEN BEGIN
                IF Keyword_Set(onImage) THEN BEGIN
                    CASE !Y.TYPE OF
-                      0: ygrid = Scale_Vector(Indgen(s[1]), !Y.CRange[0], !Y.CRange[1])
-                      1: ygrid = Scale_Vector(Indgen(s[1]), 10^!Y.CRange[0], 10^!Y.CRange[1])
+                      0: ygrid = cgScaleVector(Indgen(s[1]), !Y.CRange[0], !Y.CRange[1])
+                      1: ygrid = cgScaleVector(Indgen(s[1]), 10^!Y.CRange[0], 10^!Y.CRange[1])
                       3: Message, 'Must supply LATITUDE vector when overplotting on map projections'
                    ENDCASE
                ENDIF ELSE BEGIN
@@ -774,8 +774,8 @@ PRO cgContour, data, x, y, $
            IF N_Elements(x) EQ 0 THEN BEGIN
                IF Keyword_Set(onImage) THEN BEGIN
                    CASE !X.TYPE OF
-                      0: xgrid = Scale_Vector(Indgen(s[0]), !X.CRange[0], !X.CRange[1])
-                      1: xgrid = Scale_Vector(Indgen(s[0]), 10^!X.CRange[0], 10^!X.CRange[1])
+                      0: xgrid = cgScaleVector(Indgen(s[0]), !X.CRange[0], !X.CRange[1])
+                      1: xgrid = cgScaleVector(Indgen(s[0]), 10^!X.CRange[0], 10^!X.CRange[1])
                       3: Message, 'Must supply LONGITUDE vector when overplotting on map projections'
                    ENDCASE
                ENDIF ELSE BEGIN
@@ -785,8 +785,8 @@ PRO cgContour, data, x, y, $
            IF N_Elements(y) EQ 0 THEN BEGIN
                IF Keyword_Set(onImage) THEN BEGIN
                    CASE !Y.TYPE OF
-                      0: ygrid = Scale_Vector(Indgen(s[1]), !Y.CRange[0], !Y.CRange[1])
-                      1: ygrid = Scale_Vector(Indgen(s[1]), 10^!Y.CRange[0], 10^!Y.CRange[1])
+                      0: ygrid = cgScaleVector(Indgen(s[1]), !Y.CRange[0], !Y.CRange[1])
+                      1: ygrid = cgScaleVector(Indgen(s[1]), 10^!Y.CRange[0], 10^!Y.CRange[1])
                       3: Message, 'Must supply LATITUDE vector when overplotting on map projections'
                    ENDCASE
                ENDIF ELSE BEGIN

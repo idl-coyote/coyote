@@ -478,7 +478,7 @@ CASE number OF
 
    2: BEGIN
       data = cgdemodata_makez(41, 41, 10, Seed=-5L)
-      data = Scale_Vector(data, 0, 60)
+      data = cgScaleVector(data, 0, 60)
       END
 
    3: BEGIN
@@ -609,7 +609,7 @@ CASE number OF
         ; Random 1D vector of 101 elements.
 
      scale = RandomU(seed, 1) * 100
-     data = Scale_Vector(cgdemodata_makey(101, 5, Seed=seed) * scale[0], 0, 100)
+     data = cgScaleVector(cgdemodata_makey(101, 5, Seed=seed) * scale[0], 0, 100)
      END
 
  17: BEGIN

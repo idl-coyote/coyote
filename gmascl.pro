@@ -75,9 +75,9 @@
 ;
 ; RESTRICTIONS:
 ;
-;     Requires SCALE_VECTOR from the Coyote Library:
+;     Requires cgScaleVector from the Coyote Library:
 ;
-;        http://www.idlcoyote.com/programs/scale_vector.pro
+;        http://www.idlcoyote.com/programs/cgScaleVector.pro
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -153,11 +153,11 @@ FUNCTION GmaScl, image, $
    IF N_Elements(gamma) EQ 0 THEN gamma = 1.0D ELSE gamma = 1.0e-6 > Double(gamma)
 
    ; Perform initial scaling of the image.
-   output = Scale_Vector(Temporary(output), 0.0D, 1.0D, MinValue=imageMin, MaxValue=imageMax, /NAN, Double=1)
+   output = cgScaleVector(Temporary(output), 0.0D, 1.0D, MinValue=imageMin, MaxValue=imageMax, /NAN, Double=1)
 
    ; For gamma, we need positive values. Make sure we have them
    IF Min(output, /NAN) LT 0.0D THEN output = output + Abs(Min(output, /NAN))
-   output = Scale_Vector(output^gamma, minOut, maxOut, MinValue=0.0D, MaxValue=1.0D, /NAN, Double=1)
+   output = cgScaleVector(output^gamma, minOut, maxOut, MinValue=0.0D, MaxValue=1.0D, /NAN, Double=1)
 
    ; Does the user want the negative result?
    IF Keyword_Set(negative) THEN RETURN, BYTE(0B > (maxout - Round(output) + minOut) < 255B) $

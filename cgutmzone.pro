@@ -91,7 +91,7 @@ FUNCTION cgUTMZone, longitude, latitude, FORMAL=formal
     
     ; Set up the latitudes.
     latnotes = ['AB', 'C','D','E','F','G','H','J','K','L','M','N','P','Q','R','S','T','U','V','W','X','YZ' ]
-    latbands  = [-90, Scale_Vector(Findgen(21), -80, 80), 90] ; Zones every 8 degrees, except for poles.
+    latbands  = [-90, cgScaleVector(Findgen(21), -80, 80), 90] ; Zones every 8 degrees, except for poles.
     latbands[20] = 84 ; Last zone extended 4 degrees.
     
     ; Find the latitude band.
@@ -108,7 +108,7 @@ FUNCTION cgUTMZone, longitude, latitude, FORMAL=formal
     IF longitude GT 180 THEN longitude = longitude - (Long(longitude)/180)*360.0
     
     ; Find the zone, with exceptions.
-    lonbands = Scale_Vector(Findgen(61),-180, 180)
+    lonbands = cgScaleVector(Findgen(61),-180, 180)
     IF latBand EQ 'V' THEN lonbands[32] = 9.00
    
     ; Find the zone.

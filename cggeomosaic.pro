@@ -190,8 +190,8 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
     finalImage = newImage
     
     ; Create image extent vectors.
-    xvec = Scale_Vector(DIndgen(xnumPixels), xr[0], xr[1])
-    yvec = Scale_Vector(DIndgen(ynumPixels), yr[0], yr[1])
+    xvec = cgScaleVector(DIndgen(xnumPixels), xr[0], xr[1])
+    yvec = cgScaleVector(DIndgen(ynumPixels), yr[0], yr[1])
     
     ; Locate the position of the first image and position it in the final image.
     xloc = 0 > Value_Locate(xvec, [xr_1[0], xr_1[1]])

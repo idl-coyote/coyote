@@ -37,7 +37,7 @@
 ;
 ;+
 ; This is a utility routine to scale the elements of a vector or an array into a 
-; given data range. 
+; given data range. The routine is now depreciated in favor of cgScaleVector.
 ;
 ; :Categories:
 ;    Utilities

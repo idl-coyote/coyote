@@ -127,8 +127,8 @@
 ;         If set, informational messages are not set. 
 ;     scale_factor: in, optional, type=float, default=1.0
 ;         Set this to the PostScript scale factor. By default: 1.
-;     tt_font: in, optional, type=string, default="Helvetica"
-;         The name of a true-type font to use if FONT=1.
+;     tt_font: in, optional, type=string
+;         The name of a true-type font to use. Using this keyword sets `Font` to 1.
 ;     _ref_extra: in, optional
 ;         Any keyword appropriate for the PostScript configuration program PSConfig, from
 ;         the Coyote Library can be used with PS_Start.
@@ -176,9 +176,10 @@
 ;           system variables. 14 Dec 2011. DWF.
 ;       Moved the true-type font set-up to *after* changing the graphics device to PostScript. 10 Jan 2012. DWF.
 ;       Added DejaVuSans keyword to allow this true-type font to be used in PostScript Output. 21 Dec 2012. DWF.
+;       Modified to use cgSet_TTFont to set the True-Type fonts for Coyote Graphics output. 21 May 2013. DWF.
 ;       
 ; :Copyright:
-;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
 ;-
 PRO PS_START, filename, $
     CANCEL=cancelled, $
@@ -216,19 +217,22 @@ PRO PS_START, filename, $
    SetDefaultValue, font, 0
    ps_struct.font = font
    
-   ; Use Helvetica True-Type font by default.
-   SetDefaultValue, tt_font, 'Helvetica'
-   ps_struct.tt_font = tt_font
+   ; Store the current true-type font.
+   IF N_Elements(tt_font) NE 0 THEN BEGIN
+        ps_struct.tt_font = tt_font
+        font = 1
+   ENDIF
    
    gui = Keyword_Set(gui)
    quiet = Keyword_Set(quiet)
    
-   ; Handle encapsulated and landscape keywords appropriately.
+   ; Handle keywords appropriately.
    SetDefaultValue, default_thickness, 3
    encapsulated = Keyword_Set(encapsulated)
    landscape = Keyword_Set(landscape)
    IF encapsulated THEN landscape = 0
    SetDefaultValue, scale_factor, 1
+   IF N_Elements(tt_font) NE 0 THEN cgSet_TTFont, tt_font
 
    ; If the setup flag is on, then we have to close the previous
    ; start command before we can continue.
@@ -258,12 +262,11 @@ PRO PS_START, filename, $
    
    ; Set the true-type font.
    thisWindow = !D.Window
-   IF thisWindow EQ -1 AND ((!D.Flags AND 256) NE 0)THEN BEGIN
+   IF thisWindow EQ -1 AND ((!D.Flags AND 256) NE 0) THEN BEGIN
         Window, /FREE, /PIXMAP
         pixmap = !D.Window
    ENDIF
    !P.Font = font 
-   Device, Set_Font=tt_font, /TT_FONT
    IF N_Elements(pixmap) NE 0 THEN WDelete, pixmap
 
    ; Configure the PostScript Device
@@ -288,7 +291,6 @@ PRO PS_START, filename, $
    IF ~quiet THEN Print, 'PostScript output will be created here: ', keywords.filename
    
    Set_Plot, 'PS'
-   Device, Set_Font=tt_font, /TT_FONT
    Device, _EXTRA=keywords, SCALE_FACTOR=scale_factor
    
    ; Store filename and other pertinent information.
@@ -297,5 +299,5 @@ PRO PS_START, filename, $
    ps_struct.landscape = Fix(keywords.landscape)
    ps_struct.pagetype = keywords.pagetype
    ps_struct.quiet = Fix(quiet)
-   
+ 
 END

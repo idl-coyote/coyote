@@ -184,6 +184,7 @@
 ;        Added a check for ImageMagick and an informational message for raster operations. 4 Nov 2012. DWF.
 ;        Fixed a problem in which the NOMESSAGE keyword was not getting passed along to cgPS2Raster. 5 Nov 2012. DWF.
 ;        Fixed a problem where I was not passing the PORTRAIT keyword to cgPS2Raster properly. 22 Jan 2013. DWF.
+;        Modified to restore the input True-Type font for PostScript devices. 22 May 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.

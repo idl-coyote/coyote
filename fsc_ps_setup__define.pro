@@ -38,10 +38,11 @@
 ;       Added PAGETYPE field to structure. 8 August 2009. DWF.
 ;       Changes to handle inability to create raster files from PS encapsulated files in 
 ;           landscape mode. Added "encapsulated" field to structure. 26 Aug 2011. DWF.
+;       Modified to keep track of the "input" True-Type font for PostScript devices. 22 May 2013. DWF.
 ;-
 ;
 ;******************************************************************************************;
-;  Copyright (c) 2008 - 2011, by Fanning Software Consulting, Inc.                         ;
+;  Copyright (c) 2008 - 2013, by Fanning Software Consulting, Inc.                         ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;

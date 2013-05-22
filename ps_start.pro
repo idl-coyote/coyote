@@ -176,7 +176,8 @@
 ;           system variables. 14 Dec 2011. DWF.
 ;       Moved the true-type font set-up to *after* changing the graphics device to PostScript. 10 Jan 2012. DWF.
 ;       Added DejaVuSans keyword to allow this true-type font to be used in PostScript Output. 21 Dec 2012. DWF.
-;       Modified to use cgSet_TTFont to set the True-Type fonts for Coyote Graphics output. 21 May 2013. DWF.
+;       Modified so that the PostScript device can keep a consistent interface when using True-Type
+;          fonts. Requires using cgSet_TTFont to select True-Type fonts. 22 May 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.

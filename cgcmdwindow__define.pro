@@ -127,6 +127,8 @@
 ;        The output filename was not specified correctly when making PDF file automatically. Fixed. 2 Dec 2012. DWF.
 ;        Renamed the MULTI keyword to WMULTI, as it was suppose to be. 11 Feb 2013. DWF.
 ;        Misspelled keyword in PackageCommand method. 21 February 2013. DWF.
+;        Modified GUI so there is only one Raster Image File choice, depending on if ImageMagick is
+;           installed. 21 May 2013. DWF.
 ;-
 
 
@@ -407,24 +409,24 @@ FUNCTION cgCmdWindow::Init, parent, $
         saveID = Widget_Button(fileID, Value='Save Window As...', /MENU)
         button = Widget_Button(saveID, Value='PostScript File', UNAME='POSTSCRIPT')
         button = Widget_Button(saveID, Value='PDF File', UNAME='PDF')
-        raster = Widget_Button(saveID, Value='Raster Image File', /MENU)
-        
-        button = Widget_Button(raster, Value='BMP', UNAME='RASTER_BMP')
-        button = Widget_Button(raster, Value='GIF', UNAME='RASTER_GIF')
-        button = Widget_Button(raster, Value='JPEG', UNAME='RASTER_JPEG')
-        button = Widget_Button(raster, Value='PNG', UNAME='RASTER_PNG')
-        button = Widget_Button(raster, Value='TIFF', UNAME='RASTER_TIFF')
         
         ; If you can find ImageMagick on this machine, you can convert to better
         ; looking raster files.
         IF cgHasImageMagick() EQ 1 THEN BEGIN
-            imraster = Widget_Button(saveID, Value='Raster Image File via ImageMagick', /MENU)
+            imraster = Widget_Button(saveID, Value='Raster Image File', /MENU)
             button = Widget_Button(imraster, Value='BMP', UNAME='IMAGEMAGICK_BMP')
             button = Widget_Button(imraster, Value='GIF', UNAME='IMAGEMAGICK_GIF')
             button = Widget_Button(imraster, Value='JPEG', UNAME='IMAGEMAGICK_JPEG')
             button = Widget_Button(imraster, Value='PNG', UNAME='IMAGEMAGICK_PNG')
             button = Widget_Button(imraster, Value='TIFF', UNAME='IMAGEMAGICK_TIFF')
-        ENDIF
+        ENDIF ELSE BEGIN
+            raster = Widget_Button(saveID, Value='Raster Image File', /MENU)
+            button = Widget_Button(raster, Value='BMP', UNAME='RASTER_BMP')
+            button = Widget_Button(raster, Value='GIF', UNAME='RASTER_GIF')
+            button = Widget_Button(raster, Value='JPEG', UNAME='RASTER_JPEG')
+            button = Widget_Button(raster, Value='PNG', UNAME='RASTER_PNG')
+            button = Widget_Button(raster, Value='TIFF', UNAME='RASTER_TIFF')
+        ENDELSE
         
         button = Widget_Button(fileID, Value='Save Current Visualization', /Separator, UNAME='SAVECOMMANDS')
         button = Widget_Button(fileID, Value='Restore Visualization', UNAME='RESTORECOMMANDS')

@@ -89,7 +89,11 @@
 ;        The name of an output file to write the Taylor Diagram to. The type of file is taken from
 ;        the file extension. For example, OUTPUT='mydiagram.png'. It is assumed that Ghostscript and
 ;        ImageMagick have been installed properly for all raster file output. If the Output keyword is
-;        used, nothing is drawn on the display.
+;        used, nothing is drawn on the display. This keyword cannot be used with the Overplot keyword.
+;    overplot: in, optional, type=boolean, default=0
+;        Set this keyword to overplot onto an already existing Taylor Diagram. Many keywords are
+;        ignored if this keyword is set. Only the data is drawn. The Output keyword cannot be used
+;        if overplotting.
 ;    position: in, optional, type=float
 ;        A four-element, normalized array giving the position of the plot in the display window: [x0,y0,x1,y1].
 ;    ref_stddev: in, optional, type=float, default=1.0
@@ -130,6 +134,7 @@
 ;            Fernando did *all* of the hard work writing the program for the IDL 8 function
 ;            graphics routine. I simply copied most of his code and adapted it for non-IDL 8 
 ;            users. I also added a couple of features I though were missing from the original code.
+;        Added OVERPLOT keyword. 21 May 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2013, Fanning Software Consulting, Inc.
@@ -142,6 +147,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
     C_SYMBOL=c_symbol, $
     LABELS=labels, $
     OUTPUT=output, $
+    OVERPLOT=overplot, $
     POSITION=position, $
     REF_STDDEV=ref_stddev, $
     STDDEV_MAX=stddev_max, $
@@ -159,9 +165,11 @@ PRO cgTaylorDiagram, stddev, correlation, $
       IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
       RETURN
   ENDIF
+  
+  overplot = Keyword_Set(overplot)
 
   ; Are we doing some kind of output?
-  IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
+  IF (N_Elements(output) NE 0) && (output NE "") && ~overplot THEN BEGIN
     
        ; Determine the type of file from the filename extension.
        root_name = cgRootName(output, DIRECTORY=theDir, EXTENSION=ext)
@@ -274,6 +282,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
                 C_SYMBOL=c_symbol, $
                 LABELS=labels, $
                 OUTPUT=output, $
+                OVERPLOT=overplot, $
                 POSITION=position, $
                 REF_STDDEV=ref_stddev, $
                 STDDEV_MAX=stddev_max, $
@@ -293,6 +302,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
                 C_SYMBOL=c_symbol, $
                 LABELS=labels, $
                 OUTPUT=output, $
+                OVERPLOT=overplot, $
                 POSITION=position, $
                 REF_STDDEV=ref_stddev, $
                 STDDEV_MAX=stddev_max, $
@@ -320,6 +330,9 @@ PRO cgTaylorDiagram, stddev, correlation, $
   SetDefaultValue, symsize, 1.5
   SetDefaultValue, ref_stddev, 1.0
   SetDefaultValue, stddev_max, Round((Max(stddev) * 1.25) * 10)/ 10.0
+  
+  ; Skip all this if you are overplotting
+  IF overplot THEN GOTO, overplotComeHere
     
   ; Construction of the diagram.
   
@@ -493,6 +506,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
   cgText, ref_max, stddev_max * 0.05, 'Observed', ALIGNMENT=0.5, COLOR='pur7'
   
   ; PART III: Plotting the Input Data Points
+  overplotComeHere:
   dataangle = ACos( correlation )            
   data_x = stddev * Cos( dataangle )     
   data_y = stddev * Sin( dataangle )  
@@ -500,10 +514,12 @@ PRO cgTaylorDiagram, stddev, correlation, $
   cgPlotS, data_x, data_y, PSYM=symbol, COLOR=c_symbol, SymSize=symsize
   xy = Convert_Coord(data_x, data_y, /DATA, /TO_NORMAL)
   squib = 0.0075
-  cgText, xy[0,*], xy[1,*] + 2*squib, labels, /NORMAL, FONT=0, ALIGNMENT=0.5
+  IF N_Elements(labels) NE 0 THEN BEGIN
+      cgText, xy[0,*], xy[1,*] + 2*squib, labels, /NORMAL, FONT=0, ALIGNMENT=0.5
+  ENDIF
   
   ; Are we producing output? If so, we need to clean up here.
-  IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
+  IF (N_Elements(output) NE 0) && (output NE "") && (~overplot) THEN BEGIN
     
        ; Get the output default values.
        cgWindow_GetDefs, $
@@ -554,4 +570,8 @@ END
       stddev_max = 1.5                                             ; Standard Deviation maximum
       cgTaylorDiagram, stddev, correlation, REF_STDDEV=ref_std, STDDEV_MAX=stddev_max, LABELS=labels, /WINDOW
 
+      labels = ['I',  'J', 'K', 'L',  'M', 'N', 'O',   'P']                 ; Point labels.
+      stddev = [1.25, 0.7, 1.1, 0.86, 1.5, 1.21, 0.78, 0.52]                ; Standard Deviations
+      correlation = Reverse([0.8, 0.9, 0.65, 0.74, 0.91, 0.98, 0.85, 0.35]) ; Correlations
+      cgTaylorDiagram, stddev, correlation, /OVERPLOT, LABELS=labels, /ADDCMD, C_SYMBOL='blue'
 END

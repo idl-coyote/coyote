@@ -166,6 +166,7 @@
 ;       Added a bunch of new IDL 8.0 and 8.1 keyword to the WriteVarDef method to allow
 ;           access to these keywords in NCDF_VarDef. Also modified the NETCDF4_FORMAT keyword
 ;           to apply only in IDL versions 8.0 and higher. 21 Feb 2012. DWF.
+;       Small typo fixed in setting CHAR datatype for IDL 8.1 and higher. 22 May 2013. DWF.
 ;       
 ;-
 ;******************************************************************************************;
@@ -2651,7 +2652,7 @@ PRO NCDF_File::WriteVarDef, varName, dimNames, $
                     LONG=tlong, $
                     SHORT=tshort, $
                     SHUFFLE=shuffle, $
-                    STRING=tchar, $
+                    STRING=tstring, $
                     UBYTE=tubyte, $
                     UINT64=tuint64, $
                     ULONG=tulong, $
@@ -2700,7 +2701,7 @@ PRO NCDF_File::WriteVarDef, varName, dimNames, $
                     LONG=tlong, $
                     SHORT=tshort, $
                     SHUFFLE=shuffle, $
-                    STRING=tchar, $
+                    STRING=tstring, $
                     UBYTE=tubyte, $
                     UINT64=tuint64, $
                     ULONG=tulong, $

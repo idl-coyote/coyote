@@ -213,6 +213,11 @@ PRO PS_START, filename, $
    ; Define the PS structure.
    IF N_Elements(ps_struct) EQ 0 THEN ps_struct = {FSC_PS_SETUP}
    
+   ; Save the current True-Type font before entering the PostScript device.
+   ; Necessary for restoring it later.
+   cgWindow_GetDefs, PS_TT_FONT=ps_tt_font
+   ps_struct.tt_font_old = ps_tt_font
+   
    ; PostScript hardware fonts by default.
    SetDefaultValue, font, 0
    ps_struct.font = font
@@ -232,7 +237,6 @@ PRO PS_START, filename, $
    landscape = Keyword_Set(landscape)
    IF encapsulated THEN landscape = 0
    SetDefaultValue, scale_factor, 1
-   IF N_Elements(tt_font) NE 0 THEN cgSet_TTFont, tt_font
 
    ; If the setup flag is on, then we have to close the previous
    ; start command before we can continue.
@@ -292,6 +296,7 @@ PRO PS_START, filename, $
    
    Set_Plot, 'PS'
    Device, _EXTRA=keywords, SCALE_FACTOR=scale_factor
+   IF N_Elements(tt_font) NE 0 THEN Device, Set_Font=tt_font, /TT_Font
    
    ; Store filename and other pertinent information.
    ps_struct.filename = keywords.filename

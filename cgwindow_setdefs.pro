@@ -192,7 +192,7 @@ PRO cgWindow_SetDefs, $
    PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.
    PS_QUIET=ps_quiet, $                            ; Select the QUIET keyword for PS_START.
    PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
-   PS_TT_FONT=ps_tt_font, $                           ; Select the true-type font to use for PostScript output.
+   PS_TT_FONT=ps_tt_font, $                        ; Select the true-type font to use for PostScript output.
    Reset=reset, $                                  ; Reset to original values. 
    XOMargin = xomargin, $                          ; Set the !X.OMargin. A two element array.
    YOMargin = yomargin, $                          ; Set the !Y.OMargin. A two element array

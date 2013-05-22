@@ -312,6 +312,10 @@ PRO PS_END, $
        ENDELSE
    ENDIF
    
+   ; Restore the previous True-Type font state for the PostScript device.
+   IF !D.Name EQ 'PS' THEN Device, Set_Font=ps_struct.tt_font_old, /TT_Font
+
+   
    ; Clean up.
    IF ps_struct.currentDevice NE "" THEN Set_Plot, ps_struct.currentDevice
    !P = ps_struct.p
@@ -323,6 +327,7 @@ PRO PS_END, $
    ps_struct.filename = ""
    ps_struct.convert = ""
 
+   
 END ;---------------------------------------------------------------
 
 

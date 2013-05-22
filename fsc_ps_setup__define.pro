@@ -79,6 +79,7 @@ PRO FSC_PS_SETUP__DEFINE
                quiet: 0, $            ; Flag to indicate if messages should be suppressed.
                pagetype: "", $        ; The type of page used. (Letter, A4, Legal, Ledger).
                tt_font:"", $          ; The name of the True-Type font in effect.
+               tt_font_old:"", $      ; The name of the  True-Type font in effect before entering PostScript device.
                font: 0, $             ; The type of font being used. -1 Hershey, 0 PostScript, 1 True-type
                p: !P, $               ; The plotting system variable.
                x: !X, $               ; The X axis system variable.

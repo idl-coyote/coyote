@@ -63,6 +63,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 7 March 2013 by David W. Fanning.
+;        Fixed error in which I was assuming some calm winds. 23 May 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2013, Fanning Software Consulting, Inc.
@@ -274,7 +275,10 @@ PRO cgWindRose, speed, direction, $
    IF count GT 0 THEN BEGIN
       speed_final = speed[winds]
       direction_final = direction[winds]
-   ENDIF
+   ENDIF ELSE BEGIN
+       speed_final = speed
+       direction_final = direction
+   ENDELSE
    
    maxSpeed = Round(Max(speed)/10.)*10
 

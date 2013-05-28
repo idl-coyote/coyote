@@ -812,6 +812,7 @@ PRO cgSurf, data, x, y, $
     ; Draw the title, if you have one.
     T3D, /RESET
     IF N_Elements(title) NE 0 THEN BEGIN
+        SetDecomposedState, 1, Current=currentState
         IF N_Elements(tsize) EQ 0 THEN BEGIN
             IF (!P.Charsize EQ 0) AND (N_Elements(charsize) EQ 0) THEN BEGIN
                 titleSize = 1.10
@@ -833,6 +834,7 @@ PRO cgSurf, data, x, y, $
             XYOutS, titleLocation[0],  titleLocation[1], /NORMAL, ALIGNMENT=0.5, CHARSIZE=titleSize, $
                 title, FONT=font, COLOR=axiscolor
         ENDELSE
+        SetDecomposedState, currentState
     ENDIF
     
 

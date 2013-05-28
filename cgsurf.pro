@@ -150,6 +150,10 @@
 ;     traditional: in, optional, type=boolean, default=0
 ;         If this keyword is set, the traditional color scheme of a black background for
 ;         graphics windows on the display is used and PostScript files always use a white background.
+;     tlocation: in, optional, type=float, default=[0.5,0.9]
+;         A one or two element array in normalized coordinates that gives the location of the
+;         plot title. The plot is centered on this location. If one element, the X location is taken
+;         as 0.5 and the element is used as the Y location. Othersize, use [x,y].
 ;     tsize: in, optional, type=float
 ;        The character size for the title. Normally, the title character size is 1.1 times
 ;        the character size of the surface annotation.
@@ -157,6 +161,7 @@
 ;        The title Y spacing. This should be a number, between 0 and 1 that is the fraction 
 ;        of the distance between !Y.Window[1] and !Y.Window[0] to locate the title above 
 ;        !Y.Window[1]. When Total(!P.MULTI) EQ 0, the default is 0.005, and it is 0.0025 otherwise.
+;        Now depreciated in favor of `TLocation`.
 ;     window: in, optional, type=boolean, default=0
 ;        Set this keyword to replace all the commands in the current cgWindow or to
 ;        create a new cgWindow, if one doesn't currenly exist, for displaying this command.
@@ -235,6 +240,7 @@
 ;        Lost the XTitle and YTitle keywords when doing shaded surfaces. 15 December 2012. DWF.
 ;        Still had some color issues with shaded surfaces having to be done in indexed color to sort out.
 ;            This appears to work now both on the display and in PostScript. 25 Jan 2013. DWF.
+;        Added the TLOCATION keyword and depreciated the TSPACE keyword. 27 May 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
@@ -261,6 +267,7 @@ PRO cgSurf, data, x, y, $
     SKIRT=skirt, $
     TITLE=title, $
     TRADITIONAL=traditional, $
+    TLOCATION=tlocation, $
     TSIZE=tsize, $
     TSPACE=tspace, $
     WINDOW=window, $
@@ -323,6 +330,7 @@ PRO cgSurf, data, x, y, $
                 SKIRT=skirt, $
                 TITLE=title, $
                 TRADITIONAL=traditional, $
+                TLOCATION=tlocation, $
                 TSIZE=tsize, $
                 TSPACE=tspace, $
                 XSTYLE=xstyle, $
@@ -357,6 +365,7 @@ PRO cgSurf, data, x, y, $
             SKIRT=skirt, $
             TITLE=title, $
             TRADITIONAL=traditional, $
+            TLOCATION=tlocation, $
             TSIZE=tsize, $
             TSPACE=tspace, $
             XSTYLE=xstyle, $
@@ -679,24 +688,6 @@ PRO cgSurf, data, x, y, $
         FONT=font, CHARSIZE=charsize, NOERASE=tempNoErase, _STRICT_EXTRA=extra, $
         AX=rotx, AZ=rotz, XTITLE=xtitle, YTITLE=ytitle, ZTITLE=ztitle
         
-    ; Draw the title, if you have one.
-    IF N_Elements(title) NE 0 THEN BEGIN
-       IF N_Elements(tsize) EQ 0 THEN BEGIN
-           IF (!P.Charsize EQ 0) AND (N_Elements(charsize) EQ 0) THEN BEGIN
-                titleSize = 1.10 
-           ENDIF ELSE BEGIN
-               IF (!P.Charsize NE 0) THEN titleSize = !P.Charsize * 1.10
-               IF (N_Elements(charsize) NE 0) THEN titleSize = charsize * 1.10
-           ENDELSE
-       ENDIF ELSE titleSize = tsize
-       xloc = (!X.Window[1] - !X.Window[0]) / 2.0 + !X.Window[0]
-       distance = !Y.Window[1] - !Y.Window[0]
-       IF N_Elements(tspace) EQ 0 THEN tspace = (Total(!P.Multi) EQ 0) ? 0.0025 : 0.00125
-       yloc = !Y.Window[1] + (distance * tspace)
-        XYOutS, xloc, yloc, /NORMAL, ALIGNMENT=0.5, CHARSIZE=titleSize, $
-            title, FONT=font, COLOR=axiscolor
-    ENDIF
-
     ; Storing these system variable is *required* to make !P.MULTI work correct.
     ; Do not delete!
     newx = !X
@@ -766,21 +757,6 @@ PRO cgSurf, data, x, y, $
             FONT=font, CHARSIZE=charsize, SKIRT=skirt, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz, $
             XTitle=xtitle, YTitle=ytitle
             
-        ; Have to repair the title, too.
-        IF N_Elements(title) NE 0 THEN BEGIN
-           IF (!P.Charsize EQ 0) AND (N_Elements(charsize) EQ 0) THEN BEGIN
-                titleSize = 1.10 
-           ENDIF ELSE BEGIN
-               IF (!P.Charsize NE 0) THEN titleSize = !P.Charsize * 1.10
-               IF (N_Elements(charsize) NE 0) THEN titleSize = charsize * 1.10
-           ENDELSE
-           xloc = (!X.Window[1] - !X.Window[0]) / 2.0 + !X.Window[0]
-           distance = !Y.Window[1] - !Y.Window[0]
-           IF N_Elements(tspace) EQ 0 THEN tspace = (Total(!P.Multi) EQ 0) ? 0.0025 : 0.00125
-           yloc = !Y.Window[1] + (distance * tspace)
-           XYOutS, xloc, yloc, /NORMAL, ALIGNMENT=0.5, CHARSIZE=titleSize, $
-                title, FONT=font, COLOR=axiscolor
-        ENDIF
             
         ; Shading parameters are "sticky", but I can't tell what they
         ; were when I came into the program. Here I just set them back
@@ -832,6 +808,33 @@ PRO cgSurf, data, x, y, $
     !Y = newy 
     !Z = newz 
     !P = newP
+    
+    ; Draw the title, if you have one.
+    T3D, /RESET
+    IF N_Elements(title) NE 0 THEN BEGIN
+        IF N_Elements(tsize) EQ 0 THEN BEGIN
+            IF (!P.Charsize EQ 0) AND (N_Elements(charsize) EQ 0) THEN BEGIN
+                titleSize = 1.10
+            ENDIF ELSE BEGIN
+                IF (!P.Charsize NE 0) THEN titleSize = !P.Charsize * 1.10
+                IF (N_Elements(charsize) NE 0) THEN titleSize = charsize * 1.10
+            ENDELSE
+        ENDIF ELSE titleSize = tsize
+        IF (N_Elements(tlocation) EQ 0) && (N_Elements(tspace) NE 0) THEN BEGIN
+            xloc = (!X.Window[1] - !X.Window[0]) / 2.0 + !X.Window[0]
+            distance = !Y.Window[1] - !Y.Window[0]
+            tspace = (Total(!P.Multi) EQ 0) ? 0.0025 : 0.00125
+            yloc = !Y.Window[1] + (distance * tspace)
+            XYOutS, xloc, yloc, /NORMAL, ALIGNMENT=0.5, CHARSIZE=titleSize, $
+                title, FONT=font, COLOR=axiscolor
+        ENDIF ELSE BEGIN
+            IF N_Elements(tlocation) EQ 0 THEN tlocation = [0.5, 0.9]
+            IF N_Elements(tlocation) EQ 1 THEN titleLocation = [0.5, tlocation] ELSE titleLocation = tlocation
+            XYOutS, titleLocation[0],  titleLocation[1], /NORMAL, ALIGNMENT=0.5, CHARSIZE=titleSize, $
+                title, FONT=font, COLOR=axiscolor
+        ENDELSE
+    ENDIF
+    
 
     ; Clean up if you are using a layout.
     IF N_Elements(layout) NE 0 THEN !P.Multi = thisMulti

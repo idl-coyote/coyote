@@ -36,7 +36,7 @@
 ;******************************************************************************************;
 ;
 ;+
-; The purpose of PS_START and PS_END is to make it easy to set-up
+; The purpose of PS_START and `PS_END` is to make it easy to set-up
 ; and close a PostScript file. These programs are used extensively
 ; in all Coyote Graphics routines.
 ;
@@ -44,7 +44,7 @@
 ; on your computer, you can easily convert PostScript output to GIF, JPEG, PNG, and TIFF
 ; raster output. If `Ghostscript <http://www.ghostscript.com/download/>` is installed
 ; you can convert PostScript output to PDF files. See the appropriate keywords to
-; PS_END.
+; `PS_END`.
 ; 
 ; When PS_START is called, the current graphics device is set to "PS" (the PostScript 
 ; device). When PS_END is called the current graphics device is returned to the device

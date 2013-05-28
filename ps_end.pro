@@ -36,7 +36,7 @@
 ;******************************************************************************************;
 ;
 ;+
-; The purpose of PS_START and PS_END is to make it easy to set-up
+; The purpose of `PS_START` and PS_END is to make it easy to set-up
 ; and close a PostScript file. These programs are used extensively
 ; in all Coyote Graphics routines.
 ;

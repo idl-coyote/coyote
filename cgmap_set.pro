@@ -107,6 +107,7 @@
 ;     HORIZON keyword not being passed along to Map_Set. 28 Feb 2013. DWF.
 ;     Forgot to look at !P.Multi before setting a POSITION. Fixed. 11 March 2013. DWF.
 ;     Modified the E_GRID and E_HORIZON structure code to allow color names. 29 April 2013. Joe Sapp.
+;     In some situations, the "extra" continents structure was not being passed along. 29 May 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -416,6 +417,9 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
           ENDIF ELSE con_color = color
        ENDIF 
     ENDELSE
+    
+    ; Make sure the extra continent structure is passed on.
+    IF (N_Elements(_econt) NE 0) && (N_Elements(econt) EQ 0) THEN econt = _econt
 
     ; Fix color passed on to MAP_GRID, if needed.
     IF N_Elements(_egrid) NE 0 THEN BEGIN

@@ -62,7 +62,7 @@
 ;       If the variable is a pointer, object or structure reference the variable is recursively traversed
 ;          to free up all variables pointed to before the variable is itself destroyed. 10 June 2009. DWF.
 ;       Updated to allow undefining of pointer arrays. 8 October 2009. DWF.
-;       Valid pointers that point to undefined variable are cause an infinite loop. Now using
+;       Valid pointers that point to undefined variable can cause an infinite loop. Now using
 ;           Heap_Free, rather than recursion, with pointers. 30 May 2013. DWF.
 ;-
 ;******************************************************************************************;

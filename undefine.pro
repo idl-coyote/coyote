@@ -62,6 +62,8 @@
 ;       If the variable is a pointer, object or structure reference the variable is recursively traversed
 ;          to free up all variables pointed to before the variable is itself destroyed. 10 June 2009. DWF.
 ;       Updated to allow undefining of pointer arrays. 8 October 2009. DWF.
+;       Valid pointers that point to undefined variable are cause an infinite loop. Now using
+;           Heap_Free, rather than recursion, with pointers. 30 May 2013. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008 - 2009, by Fanning Software Consulting, Inc.                         ;
@@ -97,7 +99,7 @@ PRO UNDEFINE, var0, var1, var2, var3, var4, var5, var6, var7, var8, var9
         dataType = Size(var0, /TNAME)
         IF dataType EQ 'POINTER' THEN BEGIN
             FOR j=0L,N_Elements(var0)-1 DO BEGIN
-              IF Ptr_Valid(var0[j]) THEN Undefine, *var0[j]
+              IF Ptr_Valid(var0[j]) THEN Heap_Free, var0[j]
               Ptr_Free, var0[j]
             ENDFOR
         ENDIF
@@ -111,7 +113,7 @@ PRO UNDEFINE, var0, var1, var2, var3, var4, var5, var6, var7, var8, var9
         dataType = Size(var1, /TNAME)
         IF dataType EQ 'POINTER' THEN BEGIN
             FOR j=0L,N_Elements(var1)-1 DO BEGIN
-              IF Ptr_Valid(var1[j]) THEN Undefine, *var1[j]
+              IF Ptr_Valid(var1[j]) THEN Heap_Free, *var1[j]
               Ptr_Free, var1[j]
             ENDFOR
         ENDIF
@@ -125,7 +127,7 @@ PRO UNDEFINE, var0, var1, var2, var3, var4, var5, var6, var7, var8, var9
         dataType = Size(var2, /TNAME)
         IF dataType EQ 'POINTER' THEN BEGIN
             FOR j=0L,N_Elements(var2)-1 DO BEGIN
-              IF Ptr_Valid(var2[j]) THEN Undefine, *var2[j]
+              IF Ptr_Valid(var2[j]) THEN Heap_Free, *var2[j]
               Ptr_Free, var2[j]
             ENDFOR
         ENDIF
@@ -139,7 +141,7 @@ PRO UNDEFINE, var0, var1, var2, var3, var4, var5, var6, var7, var8, var9
         dataType = Size(var3, /TNAME)
         IF dataType EQ 'POINTER' THEN BEGIN
             FOR j=0L,N_Elements(var3)-1 DO BEGIN
-              IF Ptr_Valid(var3[j]) THEN Undefine, *var3[j]
+              IF Ptr_Valid(var3[j]) THEN Heap_Free, *var3[j]
               Ptr_Free, var3[j]
             ENDFOR
         ENDIF
@@ -153,7 +155,7 @@ PRO UNDEFINE, var0, var1, var2, var3, var4, var5, var6, var7, var8, var9
         dataType = Size(var4, /TNAME)
         IF dataType EQ 'POINTER' THEN BEGIN
             FOR j=0L,N_Elements(var4)-1 DO BEGIN
-              IF Ptr_Valid(var4[j]) THEN Undefine, *var4[j]
+              IF Ptr_Valid(var4[j]) THEN Heap_Free, *var4[j]
               Ptr_Free, var4[j]
             ENDFOR
         ENDIF
@@ -167,7 +169,7 @@ PRO UNDEFINE, var0, var1, var2, var3, var4, var5, var6, var7, var8, var9
         dataType = Size(var5, /TNAME)
         IF dataType EQ 'POINTER' THEN BEGIN
             FOR j=0L,N_Elements(var5)-1 DO BEGIN
-              IF Ptr_Valid(var5[j]) THEN Undefine, *var5[j]
+              IF Ptr_Valid(var5[j]) THEN Heap_Free, *var5[j]
               Ptr_Free, var5[j]
             ENDFOR
         ENDIF
@@ -181,7 +183,7 @@ PRO UNDEFINE, var0, var1, var2, var3, var4, var5, var6, var7, var8, var9
         dataType = Size(var6, /TNAME)
         IF dataType EQ 'POINTER' THEN BEGIN
             FOR j=0L,N_Elements(var6)-1 DO BEGIN
-              IF Ptr_Valid(var6[j]) THEN Undefine, *var6[j]
+              IF Ptr_Valid(var6[j]) THEN Heap_Free, *var6[j]
               Ptr_Free, var6[j]
             ENDFOR
         ENDIF
@@ -195,7 +197,7 @@ PRO UNDEFINE, var0, var1, var2, var3, var4, var5, var6, var7, var8, var9
         dataType = Size(var7, /TNAME)
         IF dataType EQ 'POINTER' THEN BEGIN
             FOR j=0L,N_Elements(var7)-1 DO BEGIN
-              IF Ptr_Valid(var7[j]) THEN Undefine, *var7[j]
+              IF Ptr_Valid(var7[j]) THEN Heap_Free, *var7[j]
               Ptr_Free, var7[j]
             ENDFOR
         ENDIF
@@ -209,7 +211,7 @@ PRO UNDEFINE, var0, var1, var2, var3, var4, var5, var6, var7, var8, var9
         dataType = Size(var8, /TNAME)
         IF dataType EQ 'POINTER' THEN BEGIN
             FOR j=0L,N_Elements(var8)-1 DO BEGIN
-              IF Ptr_Valid(var8[j]) THEN Undefine, *var8[j]
+              IF Ptr_Valid(var8[j]) THEN Heap_Free, *var8[j]
               Ptr_Free, var8[j]
             ENDFOR
         ENDIF
@@ -223,7 +225,7 @@ PRO UNDEFINE, var0, var1, var2, var3, var4, var5, var6, var7, var8, var9
         dataType = Size(var9, /TNAME)
         IF dataType EQ 'POINTER' THEN BEGIN
             FOR j=0L,N_Elements(var9)-1 DO BEGIN
-              IF Ptr_Valid(var9[j]) THEN Undefine, *var9[j]
+              IF Ptr_Valid(var9[j]) THEN Heap_Free, *var9[j]
               Ptr_Free, var9[j]
             ENDFOR
         ENDIF

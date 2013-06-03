@@ -150,10 +150,10 @@
 ;     traditional: in, optional, type=boolean, default=0
 ;         If this keyword is set, the traditional color scheme of a black background for
 ;         graphics windows on the display is used and PostScript files always use a white background.
-;     tlocation: in, optional, type=float, default=[0.5,0.9]
+;     tlocation: in, optional, type=float
 ;         A one or two element array in normalized coordinates that gives the location of the
 ;         plot title. The plot is centered on this location. If one element, the X location is taken
-;         as 0.5 and the element is used as the Y location. Othersize, use [x,y].
+;         as 0.5 and the element is used as the Y location. Othersize, use [x,y]. Default is [0.5,0.9].
 ;     tsize: in, optional, type=float
 ;        The character size for the title. Normally, the title character size is 1.1 times
 ;        the character size of the surface annotation.

@@ -2976,21 +2976,6 @@ PRO NCDF_File::WriteVarAttr, varName, attrName, attrValue, DATATYPE=datatype
     
         ELSE: Message, 'Input variable name or object is the wrong data type.'
     ENDCASE
-
-    ; Set the appropriate netCDF data type keyword.
-    CASE StrUpCase(datatype) OF
-        'BYTE': tbyte = 1
-        'CHAR': tchar = 1
-        'DOUBLE': tdouble = 1
-        'FLOAT': tfloat = 1
-        'LONG': tlong = 1
-        'SHORT': tshort = 1
-        'INT': tshort = 1
-        'STRING': tchar = 1
-        'ULONG': tlong = 1
-        'UINT': tlong = 1
-        ELSE: Message, 'Unknown DATATYPE for netCDF files: ' + datatype
-    ENDCASE
     
     ; Is this a valid variable object?
     IF ~Obj_Valid(varObj) THEN Message, 'Invalid variable object. Cannot add attribute.'

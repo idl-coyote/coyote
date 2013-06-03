@@ -67,6 +67,8 @@
 ;           In other words, the "missing" data is not scaled or offset. 20 Mar 2010. DWF.
 ;       Added output keywords SCALE_FACTOR, ADD_OFFSET, and DATATYPE to the GetValue method
 ;           so that these values can be returned to the caller at run-time. 29 April 2010. DWF.
+;       Modified AddAttr method to allow for additional data types in attributes, specifically
+;           INT data type. 3 June 2013. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc.                                ;
@@ -147,10 +149,16 @@ PRO NCDF_Variable::AddAttr, attrName, attrValue, DATATYPE=datatype
     CASE StrUpCase(datatype) OF
         'BYTE': tbyte = 1
         'CHAR': tchar = 1
+        'INT': tshort = 1
         'DOUBLE': tdouble = 1
         'FLOAT': tfloat = 1
         'LONG': tlong = 1
         'SHORT': tshort = 1
+        'STRING': tstring = 1
+        'UBYTE': tubyte = 1
+        'UINT64': tuint64 = 1
+        'ULONG': tulong = 1
+        'UINT':  tushort = 1
         ELSE: Message, 'Unknown DATATYPE for netCDF files: ' + datatype
     ENDCASE
     
@@ -182,8 +190,13 @@ PRO NCDF_Variable::AddAttr, attrName, attrValue, DATATYPE=datatype
         FLOAT=tfloat, $
         LENGTH=length, $
         LONG=tlong, $
-        SHORT=tshort
-    
+        SHORT=tshort, $
+        STRING=tstring, $
+        UBYTE=tubyte, $
+        UINT64=tuint64, $
+        ULONG=tulong, $
+        USHORT=tushort
+        
     ; Add the attribute to this object's attribute list. Use "self" rather
     ; then the variable name to avoid excess trips through ParseFile from the
     ; HASVAR method.

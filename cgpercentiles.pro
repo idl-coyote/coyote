@@ -62,9 +62,10 @@
 ;         
 ; :Examples:
 ;    To return percentile values for 0.25, 0.50, and 0.75 of a data set::
-;       data = Randomu(seed, 100) * 100
-;       Print, cgPercentiles(data, Percentiles=[025, 0.5 0.75])
-;       
+;       IDL> data = Randomu(3L, 100) * 100
+;       IDL> Print, cgPercentiles(data, Percentiles=[0.25, 0.5, 0.75])
+;                27.4920      45.3172      69.3138
+;                
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
 ;       David W. Fanning 

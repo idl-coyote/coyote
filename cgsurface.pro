@@ -1324,6 +1324,9 @@ END ;---------------------------------------------------------------------------
 ;         Set this keyword to the identifier of a widget that will serve as the
 ;         group leader for this widget program. When the group leader dies, this
 ;         program will die, too.
+;     palette: in, optional, type=byte
+;        A 3x256 byte array (or 256x3) representing the colors for elevation shading. An alternative
+;        way of specifying the color table, instead of using the `CTable` keyword.
 ;     reverse: in, optional, type=boolean, default=0
 ;        Set this keyword to reverse the color table set by CTABLE.
 ;     shaded: in, optional, type=boolean, default=0
@@ -1696,7 +1699,7 @@ PRO cgSurface, data, x, y, $
     ; If you want elevation shading, have to set the colors up now.
     IF elevation_shading THEN BEGIN
        s = Size(data, /Dimensions)
-       thisSurface->SetProperty, Vert_Colors=Reform(BytScl(data, /NAN, Min=Min(zrange), Max=Max(zrange)), $
+       thisSurface->SetProperty, Vert_Colors=Reform(BytScl(data, /NAN, Min=Min(data), Max=Max(data)), $
           s[0]*s[1]), Palette=colorPalette
     ENDIF
     

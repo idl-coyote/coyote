@@ -241,6 +241,7 @@
 ;        Still had some color issues with shaded surfaces having to be done in indexed color to sort out.
 ;            This appears to work now both on the display and in PostScript. 25 Jan 2013. DWF.
 ;        Added the TLOCATION keyword and depreciated the TSPACE keyword. 27 May 2013. DWF.
+;        Fixed a problem with shaded surfaces that set the top color to the background color. 12 June 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
@@ -735,7 +736,7 @@ PRO cgSurf, data, x, y, $
         ; are in the range 1-254.
         IF N_Elements(shades) NE 0 THEN BEGIN
             IF Max(shades,/NAN) GT 253 $
-                THEN checkShades = BytScl(shades, TOP=253) + 1B $
+                THEN checkShades = BytScl(shades, TOP=252) + 1B $
                 ELSE checkShades = shades
         ENDIF
         

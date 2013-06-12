@@ -1401,6 +1401,7 @@ PRO cgSurface, data, x, y, $
     Font=font, $
     Hidden_Lines=hidden_lines, $
     Group_Leader=groupLeader, $
+    Palette=palette, $
     Reverse=reverse, $
     Shaded=shaded, $
     Skirt=skirt, $
@@ -1471,12 +1472,18 @@ PRO cgSurface, data, x, y, $
     IF N_Elements(tcolorName) EQ 0 THEN tcolorName = axisColorName 
     IF N_Elements(colorName) EQ 0 THEN colorName = 'blu6' 
     IF N_Elements(bottomName) EQ 0 THEN bottomName = 'dark gray' 
-    IF N_Elements(colortable) EQ 0 THEN BEGIN
-        colors = Transpose([[rr],[gg], [bb]])
-        colortable = -1
+    IF N_Elements(palette) EQ 0 THEN BEGIN
+        IF N_Elements(colortable) EQ 0 THEN BEGIN
+            colors = Transpose([[rr],[gg], [bb]])
+            colortable = -1
+        ENDIF ELSE BEGIN
+            cgLoadCT, colortable, Reverse=Keyword_Set(reverse), Brewer=Keyword_Set(brewer), $
+                RGB_TABLE=colors, /ROW
+        ENDELSE
     ENDIF ELSE BEGIN
-        cgLoadCT, colortable, Reverse=Keyword_Set(reverse), Brewer=Keyword_Set(brewer), $
-            RGB_TABLE=colors, /ROW
+        spal = Size(palette, /Dimensions)
+        IF spal[0] NE 3 THEN colors = Transpose(palette) ELSE colors = palette
+        colortable = -1
     ENDELSE
     
     ; Create a color palette for use later.

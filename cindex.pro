@@ -63,6 +63,7 @@
 ;  Fixed a problem with 24-bit devices with color decomposition ON. 15 Feb 2000. DWF.
 ;  Added the NOTIFYID keyword, 15 Dec 2005. DWF.
 ;  Added BREWER keyword, 19 May 2008. DWF.
+;  Replaced TV commands with cgImage, 12 June 2013. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -108,7 +109,7 @@ CASE thisEvent OF
       IF thisDepth GT 8 THEN BEGIN
          thisID = !D.Window
          WSet, info.wid
-         TV, info.snap
+         cgImage, info.snap
          WSet, thisID
       ENDIF
 
@@ -130,8 +131,7 @@ WSet, info.wid
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   Device, Decomposed=0
-   TV, info.snap
+   cgImage, info.snap
    GOTO, skip_cgImage
 ENDIF
 
@@ -149,7 +149,7 @@ PRO CIndex, NOTIFYID=notifyID, BREWER=brewer
 oldWindowID = !D.Window
 thisDevice = !D.Name
 Set_Plot, 'Z'
-Device, Set_Resolution=[496,400]
+Device, Set_Resolution=[496,400], Z_BUFFER=0
 
    ; Set the starting index for the polygons.
 

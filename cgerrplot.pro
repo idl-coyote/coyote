@@ -141,6 +141,7 @@
 ;     Change History::
 ;        Written, 30 Jan 2012. Modeled on ErrPlot from IDL library. David W. Fanning.
 ;        Added Horizontal keyword. 19 March 2013. Fabien Maussion.
+;        Forgot to allow COLOR keyword to be a vector of colors. 18 June 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -226,6 +227,9 @@ PRO cgErrPlot, indep, low, high, $
     ; If user hasn't set NOCLIP, follow what is in !P.NoClip.
     noclip = (N_Elements(noclip) GT 0) ? noclip : !P.NOCLIP
     
+    ; Make sure color is the same length as indep.
+    IF N_Elements(color) NE N_Elements(indep) THEN color = Replicate(color, N_Elements(indep))
+    
     ; Draw each error bar in a loop.
     IF Keyword_Set(horizontal) THEN BEGIN
       FOR i=0,n-1 DO BEGIN
@@ -233,7 +237,7 @@ PRO cgErrPlot, indep, low, high, $
         xy1 = Convert_Coord(high[i], indep[i], /DATA, /TO_DEVICE)
         PlotS, [Replicate(xy0[0],3), Replicate(xy1[0],3)], $
           [xy0[1] + [-w, w,0], xy1[1] + [0, -w, w]], $
-          DEVICE=device, NOCLIP=noclip, PSYM=psym, COLOR=color, THICK=thick, $
+          DEVICE=device, NOCLIP=noclip, PSYM=psym, COLOR=color[i], THICK=thick, $
           _STRICT_EXTRA=extra
       ENDFOR
     ENDIF ELSE BEGIN
@@ -242,7 +246,7 @@ PRO cgErrPlot, indep, low, high, $
         xy1 = Convert_Coord(indep[i], high[i], /DATA, /TO_DEVICE)
         PlotS, [xy0[0] + [-w, w,0], xy1[0] + [0, -w, w]], $
           [Replicate(xy0[1],3), Replicate(xy1[1],3)], $
-          DEVICE=device, NOCLIP=noclip, PSYM=psym, COLOR=color, THICK=thick, $
+          DEVICE=device, NOCLIP=noclip, PSYM=psym, COLOR=color[i], THICK=thick, $
           _STRICT_EXTRA=extra
       ENDFOR
     ENDELSE

@@ -159,6 +159,7 @@
 ;       Fixed a problem that occurred when the BOTTOM keyword was used in conjuntion with
 ;          the WINDOW keyword, resulting in incorrect colors in cgWindow programs. 28 April 2011. DWF.
 ;       Added CubeHelix color table from code written by James R. A. Davenport. 5 Nov 2012. DWF.
+;       Made sure NCOLORS default takes BOTTOM value into account. 18 June 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
@@ -248,7 +249,7 @@ PRO cgLoadCT, table, $
       WDelete, !D.WINDOW
    ENDIF
 
-   IF N_Elements(ncolors) EQ 0 THEN ncolors = !D.TABLE_SIZE
+   IF N_Elements(ncolors) EQ 0 THEN ncolors = !D.TABLE_SIZE - bottom
    reverse = KEYWORD_SET(reverse)
 
    ; Open and read the color table files.

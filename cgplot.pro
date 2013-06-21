@@ -84,7 +84,7 @@
 ;     font: in, optional, type=integer, default=!P.Font
 ;        The type of font desired for axis annotation.
 ;     isotropic: in, optional, type=boolean, default=0
-;        A short-hand way of setting the `Aspect` keyword to 1.
+;        Maintain the same scale on both axes.
 ;     label: in, optional, type=string
 ;        A label is similar to a plot title, but it is aligned to the left edge
 ;        of the plot and is written in hardware fonts. Use of the label keyword
@@ -234,6 +234,7 @@
 ;              This precludes drawing in background color on non-white backgrounds. Now only change the
 ;              colors if it is possible to draw a background color. 12 Feb 2013. DWF.
 ;         Problem using symbol names (e.g., 'opencircle') in cgWindows is fixed. 10 May 2013. DWF.
+;         Changed the meaning of ISOTROPIC to its true meaning of keeping the same scale on both axes. 21 June 2013. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
@@ -587,7 +588,13 @@ PRO cgPlot, x, y, $
     
     ; Other keywords.
     IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
-    IF Keyword_Set(isotropic) THEN aspect = 1.0
+    IF Keyword_Set(isotropic) THEN BEGIN
+        yscale = Max(dep)-Min(dep)
+        xscale = Max(indep)-Min(indep)
+        aspect = Float(yscale)/xscale
+        xstyle=1
+        ystyle=1
+    ENDIF
     IF N_Elements(psym) EQ 0 THEN psym = 0
     IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
     

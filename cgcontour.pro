@@ -108,6 +108,10 @@
 ;        The type of font desired for axis annotation.
 ;     fill: in, optional, type=boolean, default=0
 ;        Set to indicate filled contours should be created.
+;     isotropic: in, optional, type=boolean, default=0
+;         Set this keyword to set the `Aspect` keyword to the plot aspect ratio that preserves
+;         identical scaling for the X and Y axes. This keyword cannot be used with multiple
+;         contour plots on the page.
 ;     irregular: in, optional, type=boolean
 ;        If this keyword is set, the data, x, and y input parameters are taken to be
 ;        irregularly gridded data, the the data is gridded for use in the contour plot
@@ -353,6 +357,7 @@
 ;        Modified the way default colors are selected when the background color is "white". 4 Dec 2012. DWF.
 ;        Making more effort to set the CELL_FILL keyword instead of FILL if filling contours on maps. 7 Jan 2013. DWF.
 ;        Added C_ORIENTATION and C_SPACING keywords and modified the program to allow line filling. 28 Jan 2013. DWF.
+;        Added ISOTROPIC keyword. 27 June 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
@@ -374,6 +379,7 @@ PRO cgContour, data, x, y, $
     COLOR=scolor, $
     FILL=fill, $
     FONT=font, $
+    ISOTROPIC=isotropic, $
     IRREGULAR=irregular, $
     LABEL=label, $
     LAYOUT=layout, $
@@ -463,6 +469,7 @@ PRO cgContour, data, x, y, $
                 COLOR=scolor, $
                 FONT=font, $
                 FILL=fill, $
+                ISOTROPIC=isotropic, $
                 IRREGULAR=irregular, $
                 LABEL=label, $
                 LAYOUT=layout, $
@@ -519,6 +526,7 @@ PRO cgContour, data, x, y, $
             COLOR=scolor, $
             FONT=font, $
             FILL=fill, $
+            ISOTROPIC=isotropic, $
             IRREGULAR=irregular, $
             LABEL=label, $
             LAYOUT=layout, $
@@ -672,8 +680,18 @@ PRO cgContour, data, x, y, $
     IF N_Elements(c_annotation) NE 0 THEN BEGIN
         FOR j=0,N_Elements(c_annotation)-1 DO c_annotation[j] = cgCheckForSymbols(c_annotation[j])
     ENDIF
+    
+    ; Is the ISOTROPIC keyword set?
+    IF Keyword_Set(isotropic) THEN BEGIN
+        IF N_Elements(x) NE 0 THEN xrange = Max(x, /NaN) - Min(x, /NaN)
+        IF N_Elements(y) NE 0 THEN yrange = Max(y, /NaN) - Min(y, /NaN)
+        dims = Size(data, /Dimensions)
+        IF N_Elements(x) EQ 0 THEN xrange = dims[0]
+        IF N_Elements(y) EQ 0 THEN yrange = dims[1]
+        aspect = Float(yrange) / xrange
+    ENDIF
    
-    IF (N_Elements(aspect) NE 0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
+    IF (N_Elements(aspect) NE 0) && (Total(!P.MULTI) EQ 0) THEN BEGIN
     
         ; If position is set, then fit the plot into those bounds.
         IF (N_Elements(position) GT 0) THEN BEGIN

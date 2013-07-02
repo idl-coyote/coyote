@@ -47,6 +47,12 @@
 ; 
 ; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
 ; to be installed on your machine.
+; 
+; If you wish to draw multiple boxplots in a display window, it will make more sense to
+; use cgLayout to set up your plot positions than to use !P.Multi. This is because the
+; labels on the plot are set up independently of the plot with the XCharsize keyword and
+; this size is not affected by !P.Multi, which normally controls not only the position of
+; plots, but the character size of plot labels, too.
 ;
 ; :Categories:
 ;    Graphics
@@ -130,6 +136,7 @@
 ;        Added the ability to send the output directly to a file via the OUTPUT keyword. 9 Dec 2011, DWF.
 ;        PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2011. DWF.
 ;        Added XLOCATION and WIDTH keywords. 5 June 2012. DWF.
+;        The XCharSize keyword was not being used correctly. 2 July 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
@@ -780,10 +787,10 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
          ENDCASE
          FOR j=1,numbox DO BEGIN
              xy = Convert_Coord(xloc[j], !Y.CRange[0], /DATA, /TO_NORMAL)
-             chary = !D.Y_CH_SIZE / Float(!D.Y_Size) * charsize
+             chary = !D.Y_CH_SIZE / Float(!D.Y_Size) * xcharsize
              XYOUTS, xy[0], xy[1] - (1.5 * chary), /NORMAL, plotlabels[j], $
                 ALIGNMENT=alignment, COLOR=cgColor(axiscolor), $
-                ORIENTATION=rotate, CHARSIZE=charsize, CHARTHICK=xthick
+                ORIENTATION=rotate, CHARSIZE=xcharsize, CHARTHICK=xthick
          ENDFOR
          IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState
       ENDIF

@@ -89,6 +89,7 @@
 ;            is not zero. I still attempt to fix this problem in the code (SetMapProjection method). 3 Jan 2012. DWF.
 ;        I added ASPECT and ISOTROPIC keywords to allow the setting of the aspect ratio of the map. 3 Jan 2012. DWF.
 ;        Added zone to the information returned with MapInfo method if projection is UTM. 25 April 2013. DWF.
+;        The map aspect was disappearing because Total(!P.Multi) can occasionally be LT 0! Fixed. 3 July 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -719,7 +720,7 @@ PRO cgMap::Draw, ERASE=erase, NOGRAPHICS=nographics, _EXTRA=extra
     ENDIF
     
     ; Do you need an aspect ratio?
-    IF (self._cg_aspect NE 0.0) AND (Total(!P.MULTI) EQ 0) THEN BEGIN
+    IF (self._cg_aspect NE 0.0) AND (Total(!P.MULTI) LT 0) THEN BEGIN
         
       position = self._cg_position
        

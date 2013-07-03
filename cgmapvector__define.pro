@@ -59,6 +59,7 @@
 ;        Added PALETTE keyword to allow the vectors to be drawn in colors scaled
 ;           to vector magnitude. 6 Jan 2012. DWF.
 ;        The CLIP keyword was not working correctly and was fixed 29 April 2013. DWF.
+;        
 ;                
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -89,10 +90,20 @@
 ;     lats: in, optional, type=float
 ;        The latitude values where the vector is to be drawn.
 ;     length, in, optional, type=float
-;        The U and V vectors are mutiplied by LENGTH before they are used
-;        to calculate the (x1,y1) endpoint of the vector. By default, the length is set
-;        to 1/100th of the XRANGE of the MapCoord object. This means that the maximum
-;        length of a vector will be approximately LENGTH * SQRT(2).
+;        The length of the UV vectors. The default value calculates a maximum length,
+;        which is the larger of either the latitude or longitude range. This value is 
+;        then divided by 100. To scale the UV values, the values are divided by the 
+;        maximum magnitude of the UV vectors and then multiplied by the length. The code 
+;        looks like this for the default case::
+;            maxlength = Max( [Max(lons)-Min(lons), Max(lats)-Min(lats)] )
+;            length = maxlength / 100.0
+;            maxMagnitude = Max(Sqrt(u^2 + v^2))
+;            uscaled = (u/maxMagnitude) * length
+;            vscaled = (v/maxMagnitude) * length
+;        The default length value is likely to be too large for polar plots, but seems
+;        adequate for other map projections. If you need to adjust the length, get the
+;        current length with the GetProperty method and the LENGTH keyword, and adjust
+;        accordingly. The length is not set finally, until the vectors are first drawn.
 ;     linestyle: out, optional, type=integer, default=1 
 ;        Set this keyword to the type of linestyle desired. See Graphics Keywords in
 ;        the on-line help for additional information.
@@ -105,6 +116,8 @@
 ;        according to the magitude of the vectors. If the color palette is not 256 colors in length
 ;        then the magitude is scaled into the number of colors available. If a color palette is
 ;        used, then the `Color` keyword is ignored.
+;     solid: in, optional, type=boolean, default=0
+;        Set this keyword to draw solid arrow heads.
 ;     t3d: in, optional, type=boolean, default=0
 ;        Set this graphics keyword if you wish to draw using the T3D transformation matrix.
 ;     thick: in, optional, type=integer, default=1
@@ -198,7 +211,7 @@ FUNCTION cgMapVector::INIT, mapCoord, $
         
     ; Store the map object. 
     self.mapCoord = mapCoord
-        
+    
     ; Do you have a color palette?
     IF N_Elements(palette) NE 0 THEN BEGIN
        self.color = ""
@@ -287,9 +300,9 @@ PRO cgMapVector::DrawArrow, x0, y0, x1, y1, $
     IF N_Elements(thick) EQ 0 THEN thick = 1.
     IF N_Elements(hthick) EQ 0 THEN hthick = thick
     
-             ;Head size in device units
+    ; Head size in device units
     IF N_Elements(hsize) EQ 0 THEN arrowsize = !d.x_size/50. * (hthick/2. > 1) $
-        ELSE arrowsize = float(hsize)
+        ELSE arrowsize = Float(hsize)
     IF N_Elements(color) EQ 0 THEN color = "opposite"
     
     ; If arrowsize GT 15, THEN use 20% arrow. Otherwise use 30%.
@@ -355,10 +368,10 @@ PRO cgMapVector::DrawArrow, x0, y0, x1, y1, $
          Polyfill, [xxp0, xxp1, xp1, xxp0], [yyp0, yyp1, yp1, yyp0], $
             /DEVICE, COLOR = cgColor(color)
        ENDIF ELSE BEGIN
-         Plots, [xp0, xp1], [yp0, yp1], /DEVICE, COLOR = cgColor(color), THICK = thick, $
+         Plots, [xp0, xp1], [yp0, yp1], /DEVICE, COLOR=cgColor(color), THICK=thick, $
             LINESTYLE=linestyle, _Extra=extra
-         Plots, [xxp0,xp1,xxp1],[yyp0,yp1,yyp1], /DEVICE, COLOR = cgColor(color), $
-            THICK = hthick, LINESTYLE=linestyle, _Extra=extra
+         Plots, [xxp0,xp1,xxp1],[yyp0,yp1,yyp1], /DEVICE, COLOR=cgColor(color), $
+            THICK=hthick, LINESTYLE=linestyle, _Extra=extra
        ENDELSE
     ENDFOR
     
@@ -420,36 +433,51 @@ PRO cgMapVector::Draw
             lon = Reform(uv[0,*])
             lat = Reform(uv[1,*])
         ENDELSE
-     ENDIF ELSE BEGIN
+    ENDIF ELSE BEGIN
         lon = *self.lons
         lat = *self.lats
     ENDELSE
     
     ; Do we have to assign a value to length?
     IF ~Finite(self.length) THEN BEGIN
-        self.mapCoord -> GetProperty, XRANGE=xr
-        length = ABS(xr[1] - xr[0]) / 100.0
-    ENDIF ELSE length = self.length
+        maxlen = Max( [Max(*self.lons)-Min(*self.lons), Max(*self.lats)-Min(*self.lats)] )
+        length = maxlen / 100.0
+    ENDIF ELSE length = self.length 
+    Print, 'Vector Length: ', length
     
     ; Scale the U and V values by the length.
-    uscaled = *self.u * length ;cgScaleVector(*self.u, 0, length)
-    vscaled = *self.v * length ;cgScaleVector(*self.v, 0, length)
+    maxmag = Max(Sqrt(*self.u^2 + *self.v^2))
+    uscaled = (*self.u/maxmag) * length 
+    vscaled = (*self.v/maxmag) * length 
     
     ; If clip is not defined, then set it here.
     IF Total(self.clip) EQ 0 $
         THEN clip = [!X.CRange[0], !Y.CRange[0], !X.CRange[1], !Y.CRange[1]] $
         ELSE clip = self.clip
         
-    ; Calculate the endpoint of the arrow and draw it.
+    ; Load colors if you have them.
     IF Ptr_Valid(self.palette) THEN BEGIN
         TVLCT, r, g, b, /Get
         TVLCT, *self.palette
     ENDIF
+
+    ; Calculate the endpoints of the arrow and draw it.
     FOR j=0L,N_Elements(*self.u)-1 DO BEGIN
-        x0 = lon[j]
-        y0 = lat[j]
+        x0 = (*self.lons)[j]
+        y0 = (*self.lats)[j]
         x1 = x0 + uscaled[j]
         y1 = y0 + vscaled[j]
+        xhalf = (x1-x0)/2.0
+        yhalf = (y1-y0)/2.0
+        x0 = x0 - xhalf
+        y0 = y0 - yhalf
+        x1 = x1 - xhalf
+        y1 = y1 - yhalf
+        uv = self.mapCoord -> Forward([x0,x1], [y0,y1])
+        x0 = uv[0,0]
+        x1 = uv[0,1]
+        y0 = uv[1,0] 
+        y1 = uv[1,1]     
         IF self.color EQ "" THEN color = (*self.magcolors)[j] ELSE color = self.color
         self -> DrawArrow, x0, y0, x1, y1, HSIZE=self.hsize, CLIP=clip, THICK=self.thick, $
            HTHICK=self.thick, LENGTH=length, COLOR=color, SOLID=self.solid, $
@@ -491,6 +519,8 @@ END
 ;        Set this keyword to supress clipping of the plot.
 ;     mapcoord: out, optional, type=object
 ;        The map coordinate for the object.
+;     solid: out, optional, type=boolean
+;        This keyword is set if solid arrow heads are currently being drawn.
 ;     t3d: out, optional, type=boolean, default=0
 ;        Set this graphics keyword if you wish to draw using the T3D transformation matrix.
 ;     thick: out, optional, type=integer, default=1
@@ -597,6 +627,8 @@ END
 ;        according to the magitude of the vectors. If the color palette is not 256 colors in length
 ;        then the magitude is scaled into the number of colors available. If a color palette is
 ;        used, then the `Color` keyword is ignored.
+;     solid: in, optional, type=boolean, default=0
+;        Set this keyword to draw solid arrow heads.
 ;     t3d: in, optional, type=boolean, default=0
 ;        Set this graphics keyword if you wish to draw using the T3D transformation matrix.
 ;     thick: in, optional, type=integer, default=1

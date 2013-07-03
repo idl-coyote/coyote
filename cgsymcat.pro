@@ -296,7 +296,7 @@ FUNCTION cgSymCat, theInSymbol, COLOR=color, NAMES=names, THICK=thick
    ENDIF
    
    ; Define helper variables for creating circles.
-   phi = Findgen(18) * (!PI * 2 / 18.)
+   phi = Findgen(36) * (!PI * 2 / 36.)
    phi = [ phi, phi(0) ]
 
    ; Use user defined symbol by default.

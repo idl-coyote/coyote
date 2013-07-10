@@ -97,7 +97,7 @@
 ;     latlonbox: out, optional, type=array
 ;        A four-element array giving the boundaries of the map projection in the
 ;        Google Map form of [north, south, east, west]. This is useful when you
-;        are creating image overlays to be added to Goggle Earth.
+;        are creating image overlays to be added to Google Earth.
 ;     map_projection: out, optional, type=string
 ;         The name of the map projection found in the GeoTiff file.
 ;     mcolor: in, optional, type=string, default='Black'
@@ -163,7 +163,7 @@
 ;         Added PALETTE keyword to return the RGB color palette present in the file, if any. 16 August 2012. DWF.
 ;         Moved the geotiff argument to a GEOTIFF keyword, as I always expect it to be this way. 6 Sept 2012. DWF.
 ;         Removed UTM/WGS84 warning message in IDL 8.2, as this problem has been fixed in IDL 8.2. 2 Oct 2012. DWF.
-;         Added BOUNDARY, ELLIPSOID, LATLONBOX, and MAP_PROJECTION output keywords to facility 
+;         Added BOUNDARY, ELLIPSOID, LATLONBOX, and MAP_PROJECTION output keywords to facilitate 
 ;            creating Google Earth overlays. 30 Oct 2012. DWF.
 ;         
 ; :Copyright:

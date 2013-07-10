@@ -925,7 +925,7 @@ END
 ;     latlonbox: out, optional, type=array
 ;        A four-element array giving the boundaries of the map projection in the
 ;        Google Map form of [north, south, east, west]. This is useful when you
-;        are creating image overlays to be added to Goggle Earth.
+;        are creating image overlays to be added to Google Earth.
 ;     overlays: out, optional, type=object
 ;        Set this keyword to a named variable that will return an object
 ;        array containing the overlay objects in the map object.

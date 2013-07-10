@@ -137,7 +137,7 @@ PRO cgPolygon, x, y, z, $
 
     ; Did user pass parameters?
     IF (N_Params() EQ 0) AND (N_Elements(position) EQ 0) THEN BEGIN
-        Print, 'USE SYNTAX: cgColorFill, x, y, [z]'
+        Print, 'USE SYNTAX: cgPolygon, x, y, [z]'
         RETURN
     ENDIF
     
@@ -150,7 +150,7 @@ PRO cgPolygon, x, y, z, $
         
         ; If adding a command, have to do this differently.
         IF Keyword_Set(addcmd) THEN BEGIN
-           cgWindow, 'cgColorFill', x, y, z, $
+           cgWindow, 'cgPolygon', x, y, z, $
               COLOR=color, $
               FCOLOR=fcolor, $
               FILL=fill, $
@@ -165,7 +165,7 @@ PRO cgPolygon, x, y, z, $
         ENDIF ELSE BEGIN
         
            ; Otherwise, we are just replacing the commands in a new or existing window.
-           cgWindow, 'cgColorFill', x, y, z, $
+           cgWindow, 'cgPolygon', x, y, z, $
               COLOR=color, $
               FCOLOR=fcolor, $
               FILL=fill, $

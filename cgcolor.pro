@@ -135,9 +135,10 @@
 ;              directly to the user. This should significantly speed up many Coyote Graphics
 ;              processes. 14 December 2012. DWF.
 ;        Removed cgColor_Color24 module in favor of using Coyote Library routine cgColor24. 5 Jan 2013. DWF.
+;        The keyword ROW was being ignored if multiple colors were specified with TRIPLE keyword. Fixed. 10 July 2013. DWF.
 ;        
 ; :Copyright:
-;     Copyright (c) 2009-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2009-2013, Fanning Software Consulting, Inc.
 ;-
 ;
 ;+
@@ -451,7 +452,7 @@ FUNCTION cgColor, theColour, colorIndex, $
     IF (Float(!Version.Release) GE 6.4) AND (!D.NAME EQ 'Z') THEN Device, Get_Pixel_Depth=theDepth
     IF (!D.NAME EQ 'PS') AND (Float(!Version.Release) GE 7.1) THEN BEGIN
        decomposedState = DecomposedColor(DEPTH=theDepth)
-   ENDIF
+    ENDIF
 
     ; Need brewer colors?
     brewer = Keyword_Set(brewer)
@@ -799,7 +800,7 @@ FUNCTION cgColor, theColour, colorIndex, $
                 colors = BytArr(ncolors, 3)
                 FOR j=0,ncolors-1 DO colors[j,*] = cgColor(theColor[j], colorIndex[j], Filename=filename, $
                    Decomposed=decomposedState, /Triple, BREWER=brewer)
-                RETURN, Byte(colors)
+                IF Keyword_Set(row) THEN RETURN, Transpose(Byte(colors)) ELSE RETURN, Byte(colors)
              ENDIF ELSE BEGIN
                 colors = LonArr(ncolors)
                 FOR j=0,ncolors-1 DO colors[j] = cgColor(theColor[j], colorIndex[j], Filename=filename, $

@@ -48,7 +48,7 @@
 ;    Graphics, Map Projections
 ;    
 ; :Returns:
-;     The an output 2D grid in which the data points have been warped into the
+;     An output 2D grid in which the data points have been warped into the
 ;     particular map projection at the requested pixel resolution.
 ;       
 ; :Params:

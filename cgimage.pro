@@ -208,8 +208,9 @@
 ;       Whoops! Typo in my last fix. Getting too old, I guess. 6 Feb 2013. DWF.
 ;       Setting any of the MISSING_*** keywords while doing multiple plots resulted in the value
 ;           of !P.Multi being ignored for the image. This is fixed for now, but just a warning. Setting
-;           these keywords creates transparent images, and makes things MUCH more complicated. So, just
-;           a warning. I'm probably at the limit of what is possible now. :-) 30 April 2013. DWF.
+;           these keywords creates transparent images, and makes things MUCH more complicated. So, I'm 
+;           probably at the limit of what is possible now. :-) 30 April 2013. DWF.
+;       The LAYOUT keyword went on walkabout after the last changes. Restored to operation. 12 July 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -1433,7 +1434,7 @@ PRO cgImage, image, x, y, $
     void = Image_Dimensions(image, XSIZE=imgXSize, YSIZE=imgYSize)
     
     ; Doing multiple plots?
-    IF Total(!P.Multi) GT 0 THEN multi = 1 ELSE multi = 0
+    IF (Total(!P.Multi) GT 0) || (N_Elements(layout) NE 0) THEN multi = 1 ELSE multi = 0
     
     ; Did you specify a color table index?
     TVLCT, r_start, g_start, b_start, /Get

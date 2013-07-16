@@ -156,8 +156,39 @@
 ;     window: in, optional, type=boolean, default=0
 ;        Set this keyword to replace all the commands in a current cgWindow or to
 ;        create a new cgWindow for displaying this command.
+;     xrange: in, optional
+;         Set this keyword to a two-element vector setting the X axis range for the plot.
+;         If this keyword is used, and the `XStyle` keyword is NOT used, then XSTYLE is set to 1.
+;     xstyle: in, optional, type=integer
+;         This keyword is a bit map that allows a variety of axis options, depending upon which bit
+;         is set. Bits are set by adding the following values together when setting the value of
+;         the keyword::
+;            Value    Description
+;              0      Allow axis autoscaling.
+;              1      Turn axis autoscaling off, force exact axis range.
+;              2      Extend axis range.
+;              4      Suppress entire axis.
+;              8      Suppress box style axis. Draw only main axis.
+;         To suppress box axis style and force exact axis range, for example, set the keyword to 8+1=9::
+;             cgPlot, cgDemoData(1), XRange=[15,78], XStyle=9
 ;     xtitle: in, optional, type=string
 ;         The X title of the plot.
+;     yrange: in, optional
+;         Set this keyword to a two-element vector setting the Y axis range for the plot.
+;         If this keyword is used, and the `YStyle` keyword is NOT used, then YSTYLE is set to 1.
+;     ystyle: in, optional, type=integer
+;         This keyword is a bit map that allows a variety of axis options, depending upon which bit
+;         is set. Bits are set by adding the following values together when setting the value of
+;         the keyword::
+;            Value    Description
+;              0      Allow axis autoscaling.
+;              1      Turn axis autoscaling off, force exact axis range.
+;              2      Extend axis range.
+;              4      Suppress entire axis.
+;              8      Suppress box style axis. Draw only main axis.
+;             16      Inhibt setting the Y axis minimum value to 0.
+;         To suppress box axis style and force exact axis range, for example, set the keyword to 8+1=9::
+;             cgPlot, cgDemoData(1), YRange=[15,28], YStyle=9
 ;     ytitle: in, optional, type=string
 ;         The Y title of the plot.
 ;     _ref_extra: in, optional, type=any
@@ -235,6 +266,8 @@
 ;              colors if it is possible to draw a background color. 12 Feb 2013. DWF.
 ;         Problem using symbol names (e.g., 'opencircle') in cgWindows is fixed. 10 May 2013. DWF.
 ;         Changed the meaning of ISOTROPIC to its true meaning of keeping the same scale on both axes. 21 June 2013. DWF.
+;         Added XRANGE, XSTYLE, YRANGE, and YSTYLE keywords. This allows exact axis scaling if the XRANGE or YRANGE
+;             keywords are used without setting the XSTYLE or YSTYLE keywords, which is more intuitive. 15 July 2013. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
@@ -265,7 +298,11 @@ PRO cgPlot, x, y, $
     TITLE=title, $
     TRADITIONAL=traditional, $
     WINDOW=window, $
+    XRANGE=xrange, $
+    XSTYLE=xstyle, $
     XTITLE=xtitle, $
+    YRANGE=yrange, $
+    YSTYLE=ystyle, $
     YTITLE=ytitle, $
     _REF_EXTRA=extra
     
@@ -326,6 +363,11 @@ PRO cgPlot, x, y, $
                 TITLE=title, $
                 TRADITIONAL=traditional, $
                 XTITLE=xtitle, $
+                XRANGE=xrange, $
+                XSTYLE=xstyle, $
+                XTITLE=xtitle, $
+                YRANGE=yrange, $
+                YSTYLE=ystyle, $
                 YTITLE=ytitle, $
                 ADDCMD=1, $
                 _Extra=extra
@@ -358,6 +400,11 @@ PRO cgPlot, x, y, $
             TITLE=title, $
             TRADITIONAL=traditional, $
             XTITLE=xtitle, $
+            XRANGE=xrange, $
+            XSTYLE=xstyle, $
+            XTITLE=xtitle, $
+            YRANGE=yrange, $
+            YSTYLE=ystyle, $
             YTITLE=ytitle, $
             REPLACECMD=replaceCmd, $
             _Extra=extra
@@ -537,6 +584,12 @@ PRO cgPlot, x, y, $
     IF N_Elements(title) EQ 0 THEN title = ""
     IF N_Elements(xtitle) EQ 0 THEN xtitle = ""
     IF N_Elements(ytitle) EQ 0 THEN ytitle = ""
+    IF N_Elements(xrange) NE 0 THEN BEGIN
+       IF N_Elements(xstyle) EQ 0 THEN xstyle = 1 
+    ENDIF
+    IF N_Elements(yrange) NE 0 THEN BEGIN
+        IF N_Elements(ystyle) EQ 0 THEN ystyle = 1
+    ENDIF
     title = cgCheckForSymbols(title)
     xtitle = cgCheckForSymbols(xtitle)
     ytitle = cgCheckForSymbols(ytitle)
@@ -651,7 +704,8 @@ PRO cgPlot, x, y, $
                     
                     ; Draw the plot that doesn't draw anything.
                     Plot, indep, dep, POSITION=position, CHARSIZE=charsize, /NODATA, $
-                        FONT=font, _STRICT_EXTRA=extra  
+                        FONT=font, XRANGE=xrange, XSTYLE=xstyle, YRANGE=yrange, YSTYLE=ystyle, $
+                        _STRICT_EXTRA=extra  
                     
                     ; Save the "after plot" system variables. Will use later. 
                     afterx = !X
@@ -689,7 +743,8 @@ PRO cgPlot, x, y, $
     ENDIF ELSE BEGIN
       Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
             POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, TITLE=title, $
-            XTITLE=xtitle, YTITLE=ytitle, _STRICT_EXTRA=extra
+            XTITLE=xtitle, YTITLE=ytitle, XRANGE=xrange, YRANGE=yrange, $
+            XSTYLE=xstyle, YSTYLE=ystyle, _STRICT_EXTRA=extra
         IF psym LE 0 THEN BEGIN
            IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=color, _EXTRA=extra  
         ENDIF  

@@ -148,9 +148,9 @@ FUNCTION cgSetDifference, set_a, set_b, $
     IF Arg_Present(positions) THEN BEGIN
         FOR j=0,N_Elements(r)-1 DO BEGIN
            IF N_Elements(thesePositions) EQ 0 THEN BEGIN
-               thesePositions = [ReverseIndices(ra, r[j])]
+               thesePositions = [cgReverseIndices(ra, r[j])]
            ENDIF ELSE BEGIN
-               thesePositions = [thesePositions, ReverseIndices(ra, r[j])]
+               thesePositions = [thesePositions, cgReverseIndices(ra, r[j])]
            ENDELSE
         ENDFOR
         positions = thesePositions

@@ -865,7 +865,9 @@ END
 ;    axkeywords: in, optional, type=structure
 ;         A structure of AXIS keywords and values that can be used to configure the axes
 ;         in whatever way the user desires. Many of the most often used axis keywords are available 
-;         as cgImage keywords.
+;         as cgImage keywords. For example::
+;            IDL> axis_format = {XTicks:4, XTickname:['Cow', 'Pig', 'Dog', 'Cat', 'Owl']}
+;            IDL> cgImage, cgDemoData(7), AXKEYWORDS=axis_format, /Axes, XRange=[0,20]
 ;    background: in, optional, type=string, default='white'
 ;         The name of the background color for the image display. Unlike the TV command in IDL,
 ;         the cgImage command will erase the display before executing the command like other

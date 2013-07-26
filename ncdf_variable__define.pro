@@ -69,6 +69,7 @@
 ;           so that these values can be returned to the caller at run-time. 29 April 2010. DWF.
 ;       Modified AddAttr method to allow for additional data types in attributes, specifically
 ;           INT data type. 3 June 2013. DWF.
+;       Had to modify AddAttr method again to allow compatibility with IDL versions below 7.2. 26 July 2013. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc.                                ;
@@ -181,21 +182,32 @@ PRO NCDF_Variable::AddAttr, attrName, attrValue, DATATYPE=datatype
         ENDIF
     ENDIF
     
-    ; Add the attribute to the file.
+    ; Add the attribute to the file. Some attributes added only after IDL 7.2.
     fileID = self.parent -> GetFileID()
-    NCDF_AttPut, fileID, self.ID, attrName, attrValue, $
-        BYTE=tbyte, $
-        CHAR=tchar, $
-        DOUBLE=tdouble, $
-        FLOAT=tfloat, $
-        LENGTH=length, $
-        LONG=tlong, $
-        SHORT=tshort, $
-        STRING=tstring, $
-        UBYTE=tubyte, $
-        UINT64=tuint64, $
-        ULONG=tulong, $
-        USHORT=tushort
+    IF (Float(!Version.Release) GE 7.2) THEN BEGIN
+        NCDF_AttPut, fileID, self.ID, attrName, attrValue, $
+            BYTE=tbyte, $
+            CHAR=tchar, $
+            DOUBLE=tdouble, $
+            FLOAT=tfloat, $
+            LENGTH=length, $
+            LONG=tlong, $
+            SHORT=tshort, $
+            STRING=tstring, $
+            UBYTE=tubyte, $
+            UINT64=tuint64, $
+            ULONG=tulong, $
+            USHORT=tushort
+    ENDIF ELSE BEGIN
+        NCDF_AttPut, fileID, self.ID, attrName, attrValue, $
+            BYTE=tbyte, $
+            CHAR=tchar, $
+            DOUBLE=tdouble, $
+            FLOAT=tfloat, $
+            LENGTH=length, $
+            LONG=tlong, $
+            SHORT=tshort
+    ENDELSE
         
     ; Add the attribute to this object's attribute list. Use "self" rather
     ; then the variable name to avoid excess trips through ParseFile from the

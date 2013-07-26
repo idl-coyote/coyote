@@ -184,7 +184,7 @@ PRO NCDF_Variable::AddAttr, attrName, attrValue, DATATYPE=datatype
     
     ; Add the attribute to the file. Some attributes added only after IDL 7.2.
     fileID = self.parent -> GetFileID()
-    IF (Float(!Version.Release) GE 7.2) THEN BEGIN
+    IF (Float(!Version.Release) GE 8.1) THEN BEGIN
         NCDF_AttPut, fileID, self.ID, attrName, attrValue, $
             BYTE=tbyte, $
             CHAR=tchar, $

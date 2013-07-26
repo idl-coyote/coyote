@@ -7,6 +7,11 @@
 ;       The purpose of this function is to compare two floating-point values or
 ;       arrays to determine if the values or arrays are equal. Arrays are equal
 ;       if they have the same number of elements, and each element is equal.
+;       
+;       To learn why determing if floats are equal is hard (and probably not done
+;       correctly in this program), please read the following article::
+;       
+;          http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm
 ;
 ; AUTHOR:
 ;

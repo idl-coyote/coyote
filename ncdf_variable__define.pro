@@ -69,7 +69,7 @@
 ;           so that these values can be returned to the caller at run-time. 29 April 2010. DWF.
 ;       Modified AddAttr method to allow for additional data types in attributes, specifically
 ;           INT data type. 3 June 2013. DWF.
-;       Had to modify AddAttr method again to allow compatibility with IDL versions below 7.2. 26 July 2013. DWF.
+;       Had to modify AddAttr method again to allow compatibility with IDL versions below 8.1. 26 July 2013. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc.                                ;

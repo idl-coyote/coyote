@@ -297,6 +297,7 @@
 ;          is a big change, but I think it will lead to better results in the long run and won't affect
 ;          current IDL programs much, if at all. 27 Feb 2013. DWF.
 ;       Added TEXTTHICK keyword to change the thickness of the textual annotations. 28 Feb 2013. DWF.
+;       Added more error handling for bad POSITION values. 26 July 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
@@ -668,6 +669,13 @@ PRO cgColorbar, $
     
     IF Size(annotateColor, /TNAME) EQ 'STRING' THEN annotateColor = cgColor(annotateColor)
     IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
+    
+    ; If the POSITION is screwed up, the user can get a weird error message from AXIS about a
+    ; "data coordinate system not established". Check the position here to make sure it is right.
+    IF position[0] GE position[2] THEN Message, 'The X POSITION coordinates cannot be reconciled.'
+    IF position[1] GE position[3] THEN Message, 'The Y POSITION coordinates cannot be reconciled.'
+    IF (position[0] LT 0) || (position[2] GT 1) THEN Message, 'The X POSITION cooordinates must be in the range 0 to 1.'
+    IF (position[1] LT 0) || (position[3] GT 1) THEN Message, 'The Y POSITION cooordinates must be in the range 0 to 1.'
     
     IF KEYWORD_SET(vertical) THEN BEGIN
 

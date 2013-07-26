@@ -538,8 +538,6 @@ PRO cgColorbar, $
           IF position[2]-position[0] GT position[3]-position[1] THEN BEGIN
              position = [position[1], position[0], position[3], position[2]]
           ENDIF
-          IF position[0] GE position[2] THEN Message, "Position coordinates can't be reconciled."
-          IF position[1] GE position[3] THEN Message, "Position coordinates can't be reconciled."
        ENDELSE
        IF Keyword_Set(fit) THEN BEGIN
             position[[1,3]] = !Y.Window
@@ -569,8 +567,6 @@ PRO cgColorbar, $
           IF position[3]-position[1] GT position[2]-position[0] THEN BEGIN
              position = [position[1], position[0], position[3], position[2]]
           ENDIF
-          IF position[0] GE position[2] THEN Message, "Position coordinates can't be reconciled."
-          IF position[1] GE position[3] THEN Message, "Position coordinates can't be reconciled."
        ENDELSE
        IF Keyword_Set(fit) THEN BEGIN
             position[[0,2]] = !X.Window

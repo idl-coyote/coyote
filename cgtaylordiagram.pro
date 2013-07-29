@@ -98,6 +98,15 @@
 ;        A four-element, normalized array giving the position of the plot in the display window: [x0,y0,x1,y1].
 ;    ref_stddev: in, optional, type=float, default=1.0
 ;        The reference standard deviation. This is typically the "observed" or "model" value. A scalar.
+;    rms_circles_off: in, optional, type=boolean, default=0
+;        Set this keyword to prevent the drawing of the RMS circles that radiate out from the observed RMS value.
+;    rms_format: in, optional, type=string, default='(I0)'
+;        Set this keyword to a format string that is used for format the RMS circle labels.
+;    rms_increment: in, optional, type=float, default=1.0
+;        The RMS circles are drawn from the observed RMS value, using this value as an increment of the circle radius.
+;    rms_labels_off: in, optional, type=boolean, default=0
+;        Set this keyword to prevent the drawing of the RMS circle labels. If this keyword is set, only the RMS
+;        circles are drawn.
 ;    stddev_max: in, optional, type=float
 ;        The maximum standard deviation to plot on the graph. 
 ;    symbol: in, optional, type=integer, default=16
@@ -135,6 +144,8 @@
 ;            graphics routine. I simply copied most of his code and adapted it for non-IDL 8 
 ;            users. I also added a couple of features I though were missing from the original code.
 ;        Added OVERPLOT keyword. 21 May 2013. DWF.
+;        Added RMS_*** keywords to allow more control over the drawing and labeling of the RMS circles 
+;            on the plot. 29 July 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2013, Fanning Software Consulting, Inc.
@@ -150,6 +161,10 @@ PRO cgTaylorDiagram, stddev, correlation, $
     OVERPLOT=overplot, $
     POSITION=position, $
     REF_STDDEV=ref_stddev, $
+    RMS_CIRCLES_OFF=rms_circles_off, $
+    RMS_FORMAT=rms_format, $
+    RMS_INCREMENT=rms_increment, $
+    RMS_LABELS_OFF=rms_labels_off, $
     STDDEV_MAX=stddev_max, $
     SYMBOL=symbol, $
     SYMSIZE=symsize, $
@@ -285,6 +300,10 @@ PRO cgTaylorDiagram, stddev, correlation, $
                 OVERPLOT=overplot, $
                 POSITION=position, $
                 REF_STDDEV=ref_stddev, $
+                RMS_CIRCLES_OFF=rms_circles_off, $
+                RMS_FORMAT=rms_format, $
+                RMS_INCREMENT=rms_increment, $
+                RMS_LABELS_OFF=rms_labels_off, $
                 STDDEV_MAX=stddev_max, $
                 SYMBOL=symbol, $
                 SYMSIZE=symsize, $
@@ -305,6 +324,10 @@ PRO cgTaylorDiagram, stddev, correlation, $
                 OVERPLOT=overplot, $
                 POSITION=position, $
                 REF_STDDEV=ref_stddev, $
+                RMS_CIRCLES_OFF=rms_circles_off, $
+                RMS_FORMAT=rms_format, $
+                RMS_INCREMENT=rms_increment, $
+                RMS_LABELS_OFF=rms_labels_off, $
                 STDDEV_MAX=stddev_max, $
                 SYMBOL=symbol, $
                 SYMSIZE=symsize, $
@@ -329,6 +352,8 @@ PRO cgTaylorDiagram, stddev, correlation, $
   SetDefaultValue, symbol, 16
   SetDefaultValue, symsize, 1.5
   SetDefaultValue, ref_stddev, 1.0
+  SetDefaultValue, rms_increment, 1.0
+  SetDefaultValue, rms_format, '(I0)'
   SetDefaultValue, stddev_max, Round((Max(stddev) * 1.25) * 10)/ 10.0
   
   ; Skip all this if you are overplotting
@@ -346,7 +371,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
   ENDIF
    
   ; Initial plot in window.
-  cgDisplay, 680, 640
+  IF !D.Window LT 0 THEN cgDisplay, 680, 640
   cgPlot, x, y, /NoData, XTITLE='Standard Deviation', YTITLE='Standard Deviation', $
       XSTYLE=9, YSTYLE=9, POSITION=position, BACKGROUND='white'
   
@@ -362,27 +387,32 @@ PRO cgTaylorDiagram, stddev, correlation, $
   long_y_left  = FltArr(nticks)
   
   ; Multiple RMS circles
-  multi_cir = 1000          ;number of points of each RMS circle
-  ratio = 0.25          ;ratios for each circle: i.e. in increments of this value
-  number_cirs = stddev_max * 4   ;Number of RMS circles
+  multi_cir = 1000                                      ; Number of points of each RMS circle
+  number_cirs = Fix((stddev_max / rms_increment)) + 5   ; Number of RMS circles
+  initial_rms_increment = rms_increment
     
-  FOR i=0, number_cirs-1 DO BEGIN
-
-    multi_max = ref_stddev + ratio
-    multi_min = ref_stddev - ratio
-   
-    multi_circlesx = Findgen(multi_cir)/(multi_cir-1)*(multi_max-multi_min)+multi_min
-    multi_circlesy = SQRT(ratio^2 - (multi_circlesx-ref_stddev)^2)
-
-    cgPlotS, 0 > multi_circlesx < stddev_max, multi_circlesy, COLOR=c_stddev, LINESTYLE=1
-    number = String(i+1)
-    IF (multi_circlesx[i+50] GT 0) AND (multi_circlesx[i+50] LT 1.5) THEN BEGIN
-        cgText, multi_circlesx[i+50], multi_circlesy[i+50], number, $
-           CHARSIZE=cgDefCharsize()*0.8, ALIGNMENT=1, /DATA, CLIP=0, COLOR=c_stddev
-    ENDIF
-    ratio = ratio + 0.25
+  IF ~Keyword_Set(rms_circles_off) THEN BEGIN
+      FOR i=0, number_cirs-1 DO BEGIN
     
-  ENDFOR
+        multi_max = ref_stddev + rms_increment
+        multi_min = ref_stddev - rms_increment
+       
+        multi_circlesx = Findgen(multi_cir)/(multi_cir-1)*(multi_max-multi_min)+multi_min
+        multi_circlesy = SQRT(rms_increment^2 - (multi_circlesx-ref_stddev)^2)
+    
+        cgPlotS, 0 > multi_circlesx < stddev_max, 0 > multi_circlesy < stddev_max, COLOR=c_stddev, LINESTYLE=1
+        number = String(rms_increment, Format=rms_format)
+
+        IF ~Keyword_Set(rms_labels_off) THEN BEGIN
+            IF (multi_circlesx[i+50] GT 0) AND (multi_circlesx[i+50] LT stddev_max) THEN BEGIN
+                cgText, multi_circlesx[i+50], multi_circlesy[i+50], number, $
+                   CHARSIZE=cgDefCharsize()*0.8, ALIGNMENT=1, /DATA, CLIP=0, COLOR=c_stddev
+            ENDIF
+        ENDIF
+        rms_increment = initial_rms_increment + rms_increment
+        
+      ENDFOR
+  ENDIF
   
   ; Mask: Masking part of the RMS circles out:
   cgColorFill, [x, stddev_max, x[0]],[y, stddev_max, y[0]], /data, COLOR='white'
@@ -568,7 +598,8 @@ END
       correlation = [0.8, 0.9, 0.65, 0.74, 0.91, 0.98, 0.85, 0.35] ; Correlations
       ref_std = 1.0                                                ; Reference standard (observed)
       stddev_max = 1.5                                             ; Standard Deviation maximum
-      cgTaylorDiagram, stddev, correlation, REF_STDDEV=ref_std, STDDEV_MAX=stddev_max, LABELS=labels, /WINDOW
+      cgTaylorDiagram, stddev, correlation, REF_STDDEV=ref_std, STDDEV_MAX=stddev_max, $
+          RMS_INCREMENT=0.25, RMS_FORMAT='(F0.2)', LABELS=labels, /WINDOW
 
       labels = ['I',  'J', 'K', 'L',  'M', 'N', 'O',   'P']                 ; Point labels.
       stddev = [1.25, 0.7, 1.1, 0.86, 1.5, 1.21, 0.78, 0.52]                ; Standard Deviations

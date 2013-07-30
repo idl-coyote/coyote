@@ -167,6 +167,8 @@
 ;           access to these keywords in NCDF_VarDef. Also modified the NETCDF4_FORMAT keyword
 ;           to apply only in IDL versions 8.0 and higher. 21 Feb 2012. DWF.
 ;       Small typo fixed in setting CHAR datatype for IDL 8.1 and higher. 22 May 2013. DWF.
+;       Typo (CONTINUOUS->CONTIGUOUS) fixed in WriteDefVar method. 30 July 2013. DWF.
+;       Modified CopyVarDefTo method to allow new NCDF4 keywords. 30 July 2013. DWF.
 ;       
 ;-
 ;******************************************************************************************;
@@ -685,10 +687,31 @@ END
 ;                                                                           
 ; Keywords:                                                                 
 ;                                                                           
-;    None.                                                                    
+;    CHUNK_DIMENSIONS: Set this keyword equal to a vector containing the chunk dimensions for the variable.
+;                A new NetCDF variable is chunked by default, using a default chunk value that is 
+;                the full dimension size for limited dimensions, and 1 for unlimited dimensions.
+;                CHUNK_DIMENSIONS must have the same number of elements as the number of dimensions 
+;                specified by Dim. If the CONTIGUOUS keyword is set, the value of the 
+;                CHUNK_DIMENSIONS keyword is ignored. Available only in IDL 8.0 and higher.
+;    GZIP:       Set this keyword to an integer between zero and nine to specify the level 
+;                of GZIP compression applied to the variable. Lower compression values result 
+;                in faster but less efficient compression. This keyword is ignored if the 
+;                CHUNK_DIMENSIONS keyword is not set. This keyword is ignored if the CONTIGUOUS 
+;                keyword is set. If the GZIP keyword is set, the CONTIGUOUS keyword is ignored.
+;                You can only use GZIP compression with NCDF 4 files. Available only in 
+;                IDL 8.0 and higher.    
+;    SHUFFLE:    Set this keyword to apply the shuffle filter to the variable. If the GZIP 
+;                keyword is not set, this keyword is ignored. The shuffle filter de-interlaces blocks 
+;                of data by reordering individual bytes. Byte shuffling can sometimes 
+;                increase compression density because bytes in the same block positions 
+;                often have similar values, and grouping similar values together often 
+;                leads to more efficient compression. Available only in IDL 8.0 and higher.                                              
 ;                                                                           
 ;------------------------------------------------------------------------------------------;
-PRO NCDF_File::CopyVarDefTo, varName, destObj
+PRO NCDF_File::CopyVarDefTo, varName, destObj, $
+    CHUNK_DIMENSIONS=chunk_dimensions, $
+    GZIP=gzip, $
+    SHUFFLE=shuffle
 
     ; Compiler options.
     Compile_Opt DEFINT32
@@ -753,13 +776,18 @@ PRO NCDF_File::CopyVarDefTo, varName, destObj
     
     ; Copy the information to the destination object.
     IF dimCount EQ 0 THEN BEGIN
-        destObj -> WriteVarDef, varName, DATATYPE=datatype
+      destObj -> WriteVarDef, varName, DATATYPE=datatype, $
+        CHUNK_DIMENSIONS=chunk_dimensions, $
+        GZIP=gzip, $
+        SHUFFLE=shuffle
     ENDIF ELSE BEGIN
-        destObj -> WriteVarDef, varName, dimIDs, DATATYPE=datatype
+      destObj -> WriteVarDef, varName, dimIDs, DATATYPE=datatype, $
+        CHUNK_DIMENSIONS=chunk_dimensions, $
+        GZIP=gzip, $
+        SHUFFLE=shuffle
     ENDELSE
     
 END
-
 
 ;------------------------------------------------------------------------------------------;
 ;                                                                           
@@ -2508,7 +2536,7 @@ END
 ;                CHUNK_DIMENSIONS must have the same number of elements as the number of dimensions 
 ;                specified by Dim. If the CONTIGUOUS keyword is set, the value of the 
 ;                CHUNK_DIMENSIONS keyword is ignored. Available only in IDL 8.0 and higher.
-;    CONTINUOUS:  Set this keyword to store a NetCDF variable as a single array in a file. 
+;    CONTIGUOUS: Set this keyword to store a NetCDF variable as a single array in a file. 
 ;                Contiguous storage works well for smaller variables such as coordinate variables.
 ;                Contiguous storage works only for fixed-sized datasets (those without any unlimited 
 ;                dimensions). You can’t use compression or other filters with contiguous data.
@@ -2539,7 +2567,7 @@ END
 ;------------------------------------------------------------------------------------------;
 PRO NCDF_File::WriteVarDef, varName, dimNames, $
     CHUNK_DIMENSIONS=chunk_dimensions, $
-    CONTINUOUS=continuous, $
+    CONTIGUOUS=contiguous, $
     DATATYPE=datatype, $
     GZIP=gzip, $
     OBJECT=object, $

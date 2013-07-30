@@ -365,7 +365,6 @@ PRO cgPlot, x, y, $
                 XTITLE=xtitle, $
                 XRANGE=xrange, $
                 XSTYLE=xstyle, $
-                XTITLE=xtitle, $
                 YRANGE=yrange, $
                 YSTYLE=ystyle, $
                 YTITLE=ytitle, $
@@ -402,7 +401,6 @@ PRO cgPlot, x, y, $
             XTITLE=xtitle, $
             XRANGE=xrange, $
             XSTYLE=xstyle, $
-            XTITLE=xtitle, $
             YRANGE=yrange, $
             YSTYLE=ystyle, $
             YTITLE=ytitle, $

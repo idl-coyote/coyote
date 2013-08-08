@@ -298,6 +298,8 @@
 ;          current IDL programs much, if at all. 27 Feb 2013. DWF.
 ;       Added TEXTTHICK keyword to change the thickness of the textual annotations. 28 Feb 2013. DWF.
 ;       Added more error handling for bad POSITION values. 26 July 2013. DWF.
+;       Modified the code so that the original input POSITION values are not changed by the
+;           program code. 8 August 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
@@ -328,7 +330,7 @@ PRO cgColorbar, $
     OOB_HIGH=oob_high, $
     OOB_LOW=oob_low, $
     PALETTE=palette, $
-    POSITION=position, $
+    POSITION=origpos, $
     RANGE=range, $
     REVERSE=reverse, $
     RIGHT=right, $
@@ -394,7 +396,7 @@ PRO cgColorbar, $
             OOB_HIGH=oob_high, $
             OOB_LOW=oob_low, $
             PALETTE=palette, $
-            POSITION=position, $
+            POSITION=origpos, $
             RANGE=range, $
             REVERSE=reverse, $
             RIGHT=right, $
@@ -423,6 +425,10 @@ PRO cgColorbar, $
          RETURN
     ENDIF
     
+    ; Do you have an original position vector? If so, copy it here to avoid
+    ; changing the original input position in the code below.
+    IF (N_Elements(origpos) NE 0) THEN position = origpos
+
     ; Get the current color table vectors. 
     TVLCT, r, g, b, /GET
     

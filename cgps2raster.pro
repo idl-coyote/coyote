@@ -7,6 +7,7 @@
 ;    The purpose of this program is to convert a PostScript file to a high
 ;    resolution raster file, using the ImageMagick convert command to do the
 ;    conversion.
+;    
 ;******************************************************************************************;
 ;                                                                                          ;
 ;  Copyright (c) 2011, by Fanning Software Consulting, Inc. All rights reserved.           ;
@@ -149,9 +150,7 @@
 ;       Added the ability to set the number of bits per channel with TIFF files with the IM_TIFF_DEPTH 
 ;           keyword in cgWindow_SetDefs, and changed the default number of bits to 8 per channel
 ;           from the previous 16. 14 May 2013. DWF.
-;       Added a NOSHELL keyword to the SPAWN command on Windows computers. This will minimize the command 
-;           prompt window that would otherwise be opened. 13 August 2013. DWF.
-;
+;           
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
@@ -357,12 +356,8 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
               IF showcmd THEN Print, 'ImageMagick CONVERT command: ',  cmd
           ENDIF
           
-          ; Try to hide the command window on Windows.
-          IF StrUpCase(!Version.OS_FAMILY) EQ 'WINDOWS' THEN BEGIN
-             SPAWN, cmd, result, err_result, /NoShell
-          ENDIF ELSE BEGIN
-             SPAWN, cmd, result, err_result
-          ENDELSE
+          ; Execute the spawned command.
+          SPAWN, cmd, result, err_result
                 
           IF ~silent THEN BEGIN
               IF err_result[0] NE "" THEN BEGIN

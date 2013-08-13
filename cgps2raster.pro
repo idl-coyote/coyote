@@ -149,6 +149,8 @@
 ;       Added the ability to set the number of bits per channel with TIFF files with the IM_TIFF_DEPTH 
 ;           keyword in cgWindow_SetDefs, and changed the default number of bits to 8 per channel
 ;           from the previous 16. 14 May 2013. DWF.
+;       Added a NOSHELL keyword to the SPAWN command on Windows computers. This will minimize the command 
+;           prompt window that would otherwise be opened. 13 August 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -354,7 +356,13 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
           IF ~silent THEN BEGIN
               IF showcmd THEN Print, 'ImageMagick CONVERT command: ',  cmd
           ENDIF
-          SPAWN, cmd, result, err_result
+          
+          ; Try to hide the command window on Windows.
+          IF StrUpCase(!Version.OS_FAMILY) EQ 'WINDOWS' THEN BEGIN
+             SPAWN, cmd, result, err_result, /NoShell
+          ENDIF ELSE BEGIN
+             SPAWN, cmd, result, err_result
+          ENDELSE
                 
           IF ~silent THEN BEGIN
               IF err_result[0] NE "" THEN BEGIN

@@ -55,8 +55,6 @@
 ;         apply the action to.
 ;     adjustsize: in, optional, type=boolean
 ;         Set this keyword to adjust default character size to the display window size.
-;     aspect: in, optional, type=boolean
-;         Set this keyword to the desired aspect ratio (ysize/xsize) of the window.
 ;     background: in, optional, type=string
 ;         The background color of the window. Only use if the ERASEIT property is also set.
 ;     cmdindex: in, optional, type=integer
@@ -184,6 +182,9 @@
 ;          Set his keyword to the PostScript scale factor you wish to use in creating PostScript output.
 ;     ps_tt_font: in, optional, type=string
 ;        Set this keyword to the name of a true-type font to use in creating PostScript output.
+;     resize: in, optional, type=integer
+;        A two element array giving the xsize and ysize of the resulting graphics window (the draw widget). 
+;        If a scalar is passed, the same value will be used for both xsize and ysize.
 ;     restore_visualization: in, optional, type=string
 ;          Set this keyword to the name of a visualization save file to restore.
 ;     save_visualization: in, optional, type=string, default='graphic.cgs'
@@ -230,13 +231,13 @@
 ;     Added CREATE_PDF, PDF_UNIX_CONVERT_CMD, and PDF_PATH keywords. 11 Dec 2011. DWF.
 ;     Added IM_WIDTH keyword. 3 April 2012. DWF.
 ;     Added the OUTPUT keyword. 3 April 2012. DWF.
+;     Removed ASPECT keyword, which never worked, and added RESIZE keyword. 13 Aug 2013. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
 ;-
 PRO cgControl, selection, $
     ADJUSTSIZE=adjustsize, $                      ; Adjusts text size to fit display window size.
-    ASPECT=aspect, $                              ; Sets the aspect ratio of the window.
     ALL=all, $                                    ; Apply the command operation to all the commands (i.e., DeleteCMD)
     BACKGROUND=background, $                      ; Sets the background color of the window
     CMDINDEX=cmdIndex, $                          ; Apply the command operation to this command only.
@@ -283,7 +284,8 @@ PRO cgControl, selection, $
     PS_QUIET=ps_quiet, $                          ; Select the QUIET keyword on PS_Start.
     PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
     PS_TT_FONT=ps_tt_font, $                      ; Select the true-type font to use for PostScript output.
-   RESTORE_VISUALIZATION=restore_visualization, $; Set this keyword to the name of a file containing a visualization to restore.
+    RESIZE=resize, $                              ; Set this keyword to resize the draw widget window.
+    RESTORE_VISUALIZATION=restore_visualization, $; Set this keyword to the name of a file containing a visualization to restore.
     SAVE_VISUALIZATION=save_visualization         ; Set this keyword to the name of a file where the visualization is to be saved.
     
    Compile_Opt idl2
@@ -391,6 +393,12 @@ PRO cgControl, selection, $
    
    ; Make sure the index is a scalar.
    index = index[0]
+   
+   ; Resizing window?
+   IF N_Elements(resize) NE 0 THEN BEGIN
+        IF N_Elements(resize) EQ 1 THEN resize = [resize, resize]
+        IF Obj_Valid(objref[index]) THEN objref[index] -> Resize, resize[0], resize[1]
+   ENDIF
    
    ; Are you deleting commands?
    IF N_Elements(deleteCmd) NE 0 THEN BEGIN

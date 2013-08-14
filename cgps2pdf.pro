@@ -117,6 +117,12 @@
 ; :History:
 ;     Change History::
 ;        Written, 6 December 2011, from code supplied to me by Paul Krummel. DWF.
+;        I had been using the Mac command pstopdf to create PDF files on Macs. Unfortunately, these
+;           PDF files are rotated incorrectly for plots having a landscape aspect ratio (ie, most plots).
+;           In this version of the software, I have decided to have Macs use Ghostscript and ImageMagick
+;           like all other UNIX machines. However, I have left the pstopdf code in place to accommodate
+;           anyone who prefers that method. You will have to uncomment the appropriate bits of code
+;           (there are two places where this has to happen, search for "DARWIN" in the code). 14 Aug 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -189,15 +195,33 @@ PRO cgPS2PDF, ps_file, pdf_file, $
           
       'DARWIN': BEGIN
       	 
-          IF (N_Elements(gs_path) EQ 0) || (gs_path EQ "") THEN gs_path = '/usr/bin/'
-          file = File_Search(gs_path, 'pstopdf', COUNT=count, /FOLD_CASE)
-          IF count EQ 0 THEN BEGIN
-             IF ~Keyword_Set(silent) THEN Message, 'The Ghostscript executable file "pstopdf" cannot be found. Exiting without conversion.', /INFORMATIONAL
-             RETURN
-          ENDIF ELSE gs_exe = file[count-1]
-          docmdtest = 0
-          END
+; If you prefer to use pstopdf to do your PDF file conversion, uncomment this code and comment what is here.
+; It is likely that pstopdf will not rotate the PDF file properly in all cases. There is also some code below
+; this that will have to be uncommented, too.
+;          IF (N_Elements(gs_path) EQ 0) || (gs_path EQ "") THEN gs_path = '/usr/bin/'
+;          file = File_Search(gs_path, 'pstopdf', COUNT=count, /FOLD_CASE)
+;          IF count EQ 0 THEN BEGIN
+;             IF ~Keyword_Set(silent) THEN Message, 'The Ghostscript executable file "pstopdf" cannot be found. Exiting without conversion.', /INFORMATIONAL
+;             RETURN
+;          ENDIF ELSE gs_exe = file[count-1]
+;          docmdtest = 0
+;          END
           
+           ; Maybe the user provided an alternative command. If not, use the
+           ; standard "gs" command.
+           IF (N_Elements(unix_convert_cmd) NE 0) && (unix_convert_cmd NE "") THEN BEGIN
+                gs_exe = unix_convert_cmd
+                docmdtest = 0
+           ENDIF ELSE BEGIN
+                IF (N_Elements(gs_path) NE 0) && (gs_path NE "") THEN BEGIN
+                    file = File_Search(gs_path, 'gs', COUNT=count)
+                    IF count GT 0 THEN gs_exe = file[count-1]
+                ENDIF ELSE gs_exe = 'gs'
+                docmdtest = 1
+           ENDELSE
+            
+           END
+           
        ELSE: BEGIN ; UNIX flavors
         
            ; Maybe the user provided an alternative command. If not, use the
@@ -241,7 +265,8 @@ PRO cgPS2PDF, ps_file, pdf_file, $
    ENDIF
    
    ; Construct the command that is to be spawned. 
-   IF StrUpCase(!Version.OS) EQ 'DARWIN' THEN BEGIN
+   ;IF StrUpCase(!Version.OS) EQ 'DARWIN' THEN BEGIN ; Uncomment this line to use pstopdf on Macs
+   IF StrUpCase(!Version.OS) EQ 'FOO' THEN BEGIN ; The "true" section of code should never be executed.
        cmd = gs_exe + " " + ps_file[0] + " -o " + pdf_file
    ENDIF ELSE BEGIN
    

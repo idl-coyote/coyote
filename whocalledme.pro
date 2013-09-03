@@ -106,7 +106,7 @@ FUNCTION WhoCalledMe
    ; two levels from there. Unless, of course, I am close to $MAIN$.
    index = Where(StrMid(callstack, 0, 11) EQ 'WHOCALLEDME', count)
    IF count GE 1 THEN index = (Reverse(index))[0] 
-   callingRoutine = (StrSplit(StrCompress(callStack[(index-1) > 0])," ", /Extract))[0]
+   callingRoutine = (StrSplit(StrCompress(callStack[(index-2) > 0])," ", /Extract))[0]
    
    ; Return the answer.
    RETURN, callingRoutine

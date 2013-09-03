@@ -103,7 +103,7 @@ FUNCTION WhoAmI
    callStack = Scope_Traceback()
    
    ; Find where I am in the call stack. The calling program is up
-   ; two levels from there. Unless, of course, I am close to $MAIN$.
+   ; one level from there. Unless, of course, I am close to $MAIN$.
    index = Where(StrMid(callstack, 0, 6) EQ 'WHOAMI', count)
    IF count GE 1 THEN index = (Reverse(index))[0] 
    thisRoutine = (StrSplit(StrCompress(callStack[(index-1) > 0])," ", /Extract))[0]

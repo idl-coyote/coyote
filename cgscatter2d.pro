@@ -210,6 +210,7 @@
 ;        Removed an extra COLOR keyword and changed an OPLOT command to a PLOTS command
 ;           to allow a vector of colors to be used for the scatter points.
 ;         Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
+;         Bad logic when creating a GRID and setting [XY]Style keywords. 30 Aug 2013. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -666,7 +667,8 @@ PRO cgScatter2D, x, y, $
           Plot, x, y, BACKGROUND=background, COLOR=gcolor, CHARSIZE=charsize, $
                 POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, $
                 XTICKLEN=xticklen, YTICKLEN=yticklen, XRANGE=xrange, YRANGE=yrange, $
-                XGRIDSTYLE=glinestyle, YGRIDSTYLE=glinestyle, XSTYLE=4 AND xstyle, YSTYLE=4 AND ystyle, $
+                XGRIDSTYLE=glinestyle, YGRIDSTYLE=glinestyle, $
+                XSTYLE=(2S^16-5) AND xstyle, YSTYLE=(2S^16-5) AND ystyle, $
                 _STRICT_EXTRA=extra, XTickFormat='(A1)', YTickFormat='(A1)', $
                 XTITLE="", YTITLE="", TITLE=""
            

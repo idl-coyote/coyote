@@ -41,8 +41,6 @@
 ; 
 ; .. image:: cgcolorbar4.png
 ; 
-; .. image:: cgcolorbar3.png
-; 
 ; .. image:: cgcolorbar1.png
 ; 
 ; .. image:: cgcolorbar5.png

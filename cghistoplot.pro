@@ -105,6 +105,9 @@
 ;       If set, the polygons are filled with lines instead of solid color. If
 ;       this keyword is set, the following keywords can also be used: `ORIENTATION`,
 ;       `PATTERN`, `POLYCOLOR`, and `SPACING`.
+;    line_thick: in, optional, type=integer, default=1
+;       Set this keyword to set the thickness of lines used in the fill pattern. Applies only
+;       if the `Line_Fill` keyword is set.
 ;    locations: out, optional
 ;       Starting locations of each bin. (See the HISTOGRAM documentation for details.)
 ;    maxinput: in, optional
@@ -330,6 +333,7 @@
 ;        Now taking into account the MININPUT and MAXINPUT values when calculating a default bin size. 19 Feb 2013. DWF.
 ;        Added [XY]TickNames, [XY]Tickformat, [XY]TickS, and [XY]TickValues keywords. 21 Feb 2013. DWF.
 ;        Now choosing the default tick format of '(F)' when LOG is set. 28 April 2013. DWF.
+;        Added Line_Thick keyword to change thickness of fill line. 28 Aug 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2007-2013, Fanning Software Consulting, Inc.
@@ -350,6 +354,7 @@ PRO cgHistoplot, $                  ; The program name.
    L64=l64, $                       ; Input for HISTOGRAM.
    LAYOUT=layout, $                 ; Select the grid layout.
    LINE_FILL=line_fill, $           ; Set if you want line-filled polygons.
+   LINE_THICK=line_thick, $         ; Change thickness of fill lines.
    LOCATIONS=locations, $
    LOG=log, $
    MAXINPUT=maxinput, $             ; The maximum value to HISTOGRAM.
@@ -461,6 +466,7 @@ PRO cgHistoplot, $                  ; The program name.
                ;
                FILLPOLYGON=fillpolygon, $       ; Set if you want filled polygons
                LINE_FILL=line_fill, $           ; Set if you want line-filled polygons.
+               LINE_THICK=line_thick, $         ; Change thickness of fill lines.
                ORIENTATION=orientation, $       ; The orientation of the lines.
                PATTERN=pattern, $               ; The fill pattern.
                POLYCOLOR=polycolorname, $           ; The name of the polygon draw/fill color.
@@ -531,6 +537,7 @@ PRO cgHistoplot, $                  ; The program name.
                ;
                FILLPOLYGON=fillpolygon, $       ; Set if you want filled polygons
                LINE_FILL=line_fill, $           ; Set if you want line-filled polygons.
+               LINE_THICK=line_thick, $         ; Change thickness of fill lines.
                ORIENTATION=orientation, $       ; The orientation of the lines.
                PATTERN=pattern, $               ; The fill pattern.
                POLYCOLOR=polycolorname, $           ; The name of the polygon draw/fill color.
@@ -992,7 +999,7 @@ PRO cgHistoplot, $                  ; The program name.
             orient = orientation[j MOD norient]
             space = spacing[j MOD nspace]
             PolyFill, x, y, COLOR=fillColor, /LINE_FILL, ORIENTATION=orient, $
-               PATTERN=pattern, SPACING=space, NOCLIP=0
+               PATTERN=pattern, SPACING=space, NOCLIP=0, THICK=line_thick
             start = start + binsize
             endpt = start + binsize
          ENDFOR

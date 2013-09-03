@@ -235,6 +235,7 @@
 ;         Fixed a typo that was interfering with the YTITLE keyword. 3 Oct 2012. DWF.
 ;         Fixed a bug in the interaction of the NOERASE and OVERPLOT keywords. 14 Jan 2013. DWF.
 ;         Added a BARTHICK keyword to change the thickness of the bar outlines. 28 Feb 2013. DWF.
+;         Further work checking for NANs in the display of the data. NAN data set to length of 0. 3 Sept 2013. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -611,7 +612,11 @@ PRO cgBarPlot, values, $
     FOR i=0,nbars-1 do BEGIN               ; Draw the bars
        width = winoffset+[barstart[i],barstart[i], $     ; Compute bar width
          (barstart[i]+barsize),(barstart[i]+barsize)]
-       length = [baselines[i], baselines[i]+values[i], baselines[i]+values[i], baselines[i]]
+       IF Finite(values[i]) EQ 0 THEN BEGIN
+          length = 0.0
+       ENDIF ELSE BEGIN
+          length = [baselines[i], baselines[i]+values[i], baselines[i]+values[i], baselines[i]]
+       ENDELSE
        IF (rotate) THEN BEGIN              ; Horizontal bars
           xy = Convert_Coord(length, [0,1,1,0], /DATA, /TO_NORMAL)  ; Compute bar length
           length=Transpose(xy[0,*])

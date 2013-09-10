@@ -48,7 +48,7 @@
 ; -0.5 to 0.5, you might type something like this::
 ;
 ;    xAxis->GetProperty, Range=xRange
-;    xScale = FSC_Normalize(xRange, Position=[-0.5, 0.5])
+;    xScale = cgNormalize(xRange, Position=[-0.5, 0.5])
 ;    xAxis, XCoord_Conv=xScale
 ;
 ; :Categories:
@@ -68,7 +68,7 @@
 ;    Here is how to use this program::
 ;    
 ;       xAxis->GetProperty, Range=xRange
-;       xScale = FSC_Normalize(xRange, Position=[-0.5, 0.5])
+;       xScale = cgNormalize(xRange, Position=[-0.5, 0.5])
 ;       xAxis, XCoord_Conv=xScale
 
 ;
@@ -88,13 +88,16 @@
 ;       Fixed a problem when range[0] is greater than range[1]. 11 July 2006. DWF.
 ;       Renamed to FSC_Normalize to avoid conflicts with 10,000 other programs named NORMALIZE. 17 October 2008. DWF.
 ;       Renamed to cgNormalize 6 February 2013. DWF.
+;       The number I chose (1e-12) to fix the illegal divide by zero problem was too large. I'm now using 
+;           1d-25 instead. 9 September 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c)1997-2013, Fanning Software Consulting, Inc.
 ;-
 FUNCTION cgNormalize, range, Position=position
 
-    On_Error, 1
+    On_Error, 2 ; Return to caller.
+    
     IF N_Params() EQ 0 THEN Message, 'Please pass range vector as argument.'
     
     IF (N_Elements(position) EQ 0) THEN position = [0.0D, 1.0D] ELSE $
@@ -103,10 +106,10 @@ FUNCTION cgNormalize, range, Position=position
     
     IF range[1] GE range[0] THEN BEGIN
        scale = [((position[0]*range[1])-(position[1]*range[0])) / $
-           ((range[1]-range[0]) > 1e-12), (position[1]-position[0])/((range[1]-range[0]) > 1e-12)]
+           ((range[1]-range[0]) > 1d-25), (position[1]-position[0])/((range[1]-range[0]) > 1d-25)]
     ENDIF ELSE BEGIN
        scale = [((position[1]*range[0])-(position[0]*range[1])) / $
-           ((range[0]-range[1]) > 1e-12), (position[1]-position[0])/((range[0]-range[1]) > 1e-12)]
+           ((range[0]-range[1]) > 1d-25), (position[1]-position[0])/((range[0]-range[1]) > 1d-25)]
        scale[1] = -scale[1]
     ENDELSE
     

@@ -165,6 +165,7 @@
 ;         Removed UTM/WGS84 warning message in IDL 8.2, as this problem has been fixed in IDL 8.2. 2 Oct 2012. DWF.
 ;         Added BOUNDARY, ELLIPSOID, LATLONBOX, and MAP_PROJECTION output keywords to facilitate 
 ;            creating Google Earth overlays. 30 Oct 2012. DWF.
+;         Small fix to allow true-color TIFF images to be read correctly. 11 Sept 2013. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -290,6 +291,7 @@ Function cgGeoMap, image, $
                    END
 
                 ELSE: Message, 'Do not know how to handle an image with ' + StrTrim(channels,2) + ' channels'
+            
             ENDCASE
       ENDELSE
    ENDIF
@@ -1358,7 +1360,12 @@ Function cgGeoMap, image, $
        ENDIF ELSE BEGIN
              IF N_Elements(geofile) EQ 0 THEN BEGIN
                 geofile = image
-                outimage = Read_Tiff(geofile, r, g, b, SUB_RECT=sub_rect)
+                void = Query_Tiff(geofile, info)
+                IF info.channels GT 3 THEN BEGIN
+                   outimage = Read_Tiff(geofile, SUB_RECT=sub_rect)
+                ENDIF ELSE BEGIN
+                   outimage = Read_Tiff(geofile, r, g, b, SUB_RECT=sub_rect)
+                ENDELSE
                 IF N_Elements(r) NE 0 THEN palette=[[r],[g],[b]]
                 dims = Image_Dimensions(outimage, YINDEX=yindex)
                 outimage = Reverse(Temporary(outimage), yindex+1)

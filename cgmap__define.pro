@@ -90,6 +90,7 @@
 ;        I added ASPECT and ISOTROPIC keywords to allow the setting of the aspect ratio of the map. 3 Jan 2012. DWF.
 ;        Added zone to the information returned with MapInfo method if projection is UTM. 25 April 2013. DWF.
 ;        The map aspect was disappearing because Total(!P.Multi) can occasionally be LT 0! Fixed. 3 July 2013. DWF.
+;        Added Hughes ellipsoid, used at NSIDC, as index 25. 11 Sept 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -144,7 +145,8 @@
 ;        Set this to the name or index number of the ellopsoid or datum you wish to use
 ;        for the map projection. The value is passed directly to Map_Proj_Init. The
 ;        default is a sphere for those projections that only support a sphere, otherwise
-;        a Clark projection is used to conform to Map_Proj_Init defaults.
+;        a Clark projection is used to conform to Map_Proj_Init defaults. Added the "Hughes"
+;        datum, which is used at NSIDC. Use "Hughes" or index number 25.
 ;     fill: in, optional, type=boolean, default=0
 ;        Set this keyword to display filled continents, if the keyword CONTINENTS is set.
 ;     erase: in, optional, type=boolean, default=0
@@ -393,13 +395,15 @@ FUNCTION cgMap::INIT, map_projection, $
    
    ; Since I already have "WGS 84" in the list, and since IDL 8 introduces an ellipsoid 
    ; with this name, I am going to use index 24 to list the more commonly used "WGS84" name.
+   ; Add "Hughes" as index 25.
    IF Float(!Version.Release) GE 8.0 THEN BEGIN
       theDatums = [theDatums, $
                   { cgMap_DATUM, 20, 'Clarke IGN', 6378249.2, 6356515.0 }, $
                   { cgMap_DATUM, 21, 'Helmert 1906', 6378200.0, 6356818.2 }, $
                   { cgMap_DATUM, 22, 'Modified Fischer 1960', 6378115.0, 6356773.3 }, $
                   { cgMap_DATUM, 23, 'South American 1969', 6378160.0, 6356774.7 }, $
-                  { cgMap_DATUM, 24, 'WGS84', 6378137.0, 6356752.314245 }]
+                  { cgMap_DATUM, 24, 'WGS84', 6378137.0, 6356752.314245 }, $
+                  { cgMap_DATUM, 25, 'Hughes', 6378273.00, 6356889.4 } ]
        
    ENDIF
    
@@ -1578,7 +1582,7 @@ PRO cgMap::SetProperty, $
             index = Where(StrUpCase((*self._cg_theDatums).name) EQ StrUpCase(datum))
             IF index[0] EQ -1 THEN Message, 'Cannot find datum ' + datum + ' in datum list.' 
             thisDatum = (*self._cg_theDatums)[index]
-        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > datum < 19]
+        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > datum < 25]
         self._cg_thisDatum = thisDatum
    ENDIF
    
@@ -1588,7 +1592,7 @@ PRO cgMap::SetProperty, $
             index = Where(StrUpCase((*self._cg_theDatums).name) EQ StrUpCase(ellipsoid))
             IF index[0] EQ -1 THEN Message, 'Cannot find ellipsoid ' + ellipsoid + ' in datum list.' 
             thisDatum = (*self._cg_theDatums)[index]
-        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > ellipsoid < 19]
+        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > ellipsoid < 25]
         self._cg_thisDatum = thisDatum
    ENDIF
 
@@ -1796,7 +1800,7 @@ FUNCTION cgMap::SetMapProjection, map_projection, $
             index = Where(StrUpCase((*self._cg_theDatums).name) EQ StrUpCase(datum))
             IF index[0] EQ -1 THEN Message, 'Cannot find datum ' + datum + ' in datum list.' 
             thisDatum = (*self._cg_theDatums)[index]
-        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > datum < 24]
+        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > datum < 25]
         self._cg_thisDatum = thisDatum
    ENDIF
 
@@ -1806,7 +1810,7 @@ FUNCTION cgMap::SetMapProjection, map_projection, $
             index = Where(StrUpCase((*self._cg_theDatums).name) EQ StrUpCase(ellipsoid))
             IF index[0] EQ -1 THEN Message, 'Cannot find ellipsoid ' + ellipsoid + ' in datum list.' 
             thisDatum = (*self._cg_theDatums)[index]
-        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > ellipsoid < 24]
+        ENDIF ELSE thisDatum = (*self._cg_theDatums)[0 > ellipsoid < 25]
         self._cg_thisDatum = thisDatum
    ENDIF
    

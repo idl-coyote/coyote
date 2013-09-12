@@ -166,6 +166,9 @@
 ;         Added BOUNDARY, ELLIPSOID, LATLONBOX, and MAP_PROJECTION output keywords to facilitate 
 ;            creating Google Earth overlays. 30 Oct 2012. DWF.
 ;         Small fix to allow true-color TIFF images to be read correctly. 11 Sept 2013. DWF.
+;         Modified program to look for NSIDC Hughes ellipsoid specified as semi-major axis of 6378273.0 and 
+;            semi-minor axis of 6356889.4 as specified by the GeoTiff tags GEOGSEMIMAJORAXISGEOKEY and
+;            GEOGSEMIMINORAXISGEOKEY. I do this ONLY for Polar Stereographic map projections.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -389,10 +392,11 @@ Function cgGeoMap, image, $
                 4030: thisDatum = 8  ; WGS 84
                 4034: thisDatum = 1  ; Clarke 1880
                 4035: thisDatum = 19 ; Sphere
+                4054: thisDatum = 25 ; Hughes
                 4267: thisDatum = 0  ; NAD27, same as Clark 1866
                 4322: thisDatum = 5  ; WGS 72
                 4326: thisDatum = 8  ; WGS 84
-                ELSE:
+                ELSE: 
             ENDCASE
         ENDIF
         
@@ -417,9 +421,6 @@ Function cgGeoMap, image, $
             ENDCASE
         ENDIF
         
-        ; Default datum if you don't have one defined by here.
-        IF N_Elements(thisDatum) THEN thisDatum = 19 ; Defaults to Sphere.
-
         ; What kind of projection is this?
         IF Where(fields EQ 'PROJCOORDTRANSGEOKEY') NE -1 THEN BEGIN
             CASE geotiff.PROJCOORDTRANSGEOKEY OF
@@ -462,6 +463,21 @@ Function cgGeoMap, image, $
         ENDELSE
         IF N_Elements(thisProjection) EQ 0 THEN Message, 'Unknown map projection for this GeoTIFF image.' 
         
+        
+        ; To accommodate NSIDC polar stereographic projection with a HUGHES ellipsoid, look for length of semi-major and
+        ; semi-minor axes if datum is undefined and this is a Polar Stereographic map projection.       
+        IF (thisProjection EQ 106) && (N_Elements(thisDatum) EQ 0) THEN BEGIN
+             IF (Where(fields EQ 'GEOGSEMIMAJORAXISGEOKEY'))[0] NE -1 THEN semimajor = geotiff.GEOGSEMIMAJORAXISGEOKEY
+             IF (Where(fields EQ 'GEOGSEMIMINORAXISGEOKEY'))[0] NE -1 THEN semiminor = geotiff.GEOGSEMIMINORAXISGEOKEY
+             IF (N_Elements(semimajor) NE 0) AND (N_Elements(semiminor) NE 0) THEN BEGIN
+                  IF (semimajor GE 6378272.00) && (semimajor LE 6378274.00) && $
+                     (semiminor GE 6356889.3) && (semiminor LE 6356889.5) THEN thisDatum = 25
+             ENDIF
+        ENDIF
+        
+        ; Default datum if you don't have one defined by here.
+        IF N_Elements(thisDatum) THEN thisDatum = 19 ; Defaults to Sphere.
+
         ; Make the map coordinate object, based on the map projection.
         CASE thisProjection OF
         
@@ -586,7 +602,7 @@ Function cgGeoMap, image, $
                  
                  index = Where(fields EQ 'PROJFALSENORTHINGGEOKEY', count)
                  IF count GT 0 THEN falseNorth = geotiff.PROJFALSENORTHINGGEOKEY ELSE falseNorth = 0
-
+                 
                  mapCoord = Obj_New('cgMap', thisProjection, DATUM=thisDatum, $
                       CENTER_LATITUDE=lat, CENTER_LONGITUDE=lon, $
                       FALSE_EASTING=falseEast, FALSE_NORTHING=falseNorth, $

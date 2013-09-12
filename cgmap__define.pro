@@ -90,7 +90,7 @@
 ;        I added ASPECT and ISOTROPIC keywords to allow the setting of the aspect ratio of the map. 3 Jan 2012. DWF.
 ;        Added zone to the information returned with MapInfo method if projection is UTM. 25 April 2013. DWF.
 ;        The map aspect was disappearing because Total(!P.Multi) can occasionally be LT 0! Fixed. 3 July 2013. DWF.
-;        Added Hughes ellipsoid, used at NSIDC, as index 25. 11 Sept 2013. DWF.
+;        Added Hughes ellipsoid, used at NSIDC, as index 26 or as "Hughes". 11 Sept 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -403,7 +403,7 @@ FUNCTION cgMap::INIT, map_projection, $
                   { cgMap_DATUM, 22, 'Modified Fischer 1960', 6378115.0, 6356773.3 }, $
                   { cgMap_DATUM, 23, 'South American 1969', 6378160.0, 6356774.7 }, $
                   { cgMap_DATUM, 24, 'WGS84', 6378137.0, 6356752.314245 }, $
-                  { cgMap_DATUM, 25, 'Hughes', 6378273.00, 6356889.4 } ]
+                  { cgMap_DATUM, 26, 'Hughes', 6378273.00, 6356889.4 } ]
        
    ENDIF
    

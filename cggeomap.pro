@@ -470,13 +470,13 @@ Function cgGeoMap, image, $
              IF (Where(fields EQ 'GEOGSEMIMAJORAXISGEOKEY'))[0] NE -1 THEN semimajor = geotiff.GEOGSEMIMAJORAXISGEOKEY
              IF (Where(fields EQ 'GEOGSEMIMINORAXISGEOKEY'))[0] NE -1 THEN semiminor = geotiff.GEOGSEMIMINORAXISGEOKEY
              IF (N_Elements(semimajor) NE 0) AND (N_Elements(semiminor) NE 0) THEN BEGIN
-                  IF (semimajor GE 6378272.00) && (semimajor LE 6378274.00) && $
-                     (semiminor GE 6356889.3) && (semiminor LE 6356889.5) THEN thisDatum = 25
+                  IF (semimajor GE 6378272.0d) && (semimajor LE 6378274.0d) && $
+                     (semiminor GE 6356889.3d) && (semiminor LE 6356889.5d) THEN thisDatum = 26 ; Hughes ellipsoid
              ENDIF
         ENDIF
         
         ; Default datum if you don't have one defined by here.
-        IF N_Elements(thisDatum) THEN thisDatum = 19 ; Defaults to Sphere.
+        IF N_Elements(thisDatum) EQ 0 THEN thisDatum = 19 ; Defaults to Sphere.
 
         ; Make the map coordinate object, based on the map projection.
         CASE thisProjection OF

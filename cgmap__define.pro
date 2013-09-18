@@ -91,6 +91,8 @@
 ;        Added zone to the information returned with MapInfo method if projection is UTM. 25 April 2013. DWF.
 ;        The map aspect was disappearing because Total(!P.Multi) can occasionally be LT 0! Fixed. 3 July 2013. DWF.
 ;        Added Hughes ellipsoid, used at NSIDC, as index 26 or as "Hughes". 11 Sept 2013. DWF.
+;        Fixed a bug in the way ellipsoids were selected when using numbers to choose elliposids. All ellipsoids
+;           with values over 20 were affected. 18 Sept 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -379,7 +381,7 @@ FUNCTION cgMap::INIT, map_projection, $
    theDatums[5] =  { cgMap_DATUM,  5, 'WGS 72', 6378135.0, 6356750.519915  }
    theDatums[6] =  { cgMap_DATUM,  6, 'Everst', 6377276.3452 , 6356075.4133 }
    theDatums[7] =  { cgMap_DATUM,  7, 'WGS 66', 6378145.0 , 6356759.769356  }
-   theDatums[8] =  { cgMap_DATUM,  8, 'WGS 84', 6378137.0, 6356752.314245 }
+   theDatums[8] =  { cgMap_DATUM,  8, 'GRS 1980', 6378137.0, 6356752.31414 }
    theDatums[9] =  { cgMap_DATUM,  9, 'Airy', 6377563.396, 6356256.91  }
    theDatums[10] = { cgMap_DATUM, 10, 'Modified Everest', 6377304.063, 6356103.039 }
    theDatums[11] = { cgMap_DATUM, 11, 'Modified Airy', 6377340.189, 6356034.448  }
@@ -391,7 +393,11 @@ FUNCTION cgMap::INIT, map_projection, $
    theDatums[17] = { cgMap_DATUM, 17, 'Mercury 1960', 6378166.0, 6356784.283666  }
    theDatums[18] = { cgMap_DATUM, 18, 'Modified Mercury 1968', 6378150.0, 6356768.337303 }
    theDatums[19] = { cgMap_DATUM, 19, 'Sphere', 6370997.0, 6370997.0 }
-   theDatums[20] = { cgMap_DATUM,  8, 'GRS 1980', 6378137.0, 6356752.31414 }
+   IF Float(!Version.Release) GE 8.0 THEN BEGIN
+        theDatums[20] = { cgMap_DATUM,  24, 'WGS 84', 6378137.0, 6356752.314245 }
+   ENDIF ELSE BEGIN
+        theDatums[20] = { cgMap_DATUM,  8, 'WGS 84', 6378137.0, 6356752.314245 }
+   ENDELSE
    
    ; Since I already have "WGS 84" in the list, and since IDL 8 introduces an ellipsoid 
    ; with this name, I am going to use index 24 to list the more commonly used "WGS84" name.
@@ -416,18 +422,23 @@ FUNCTION cgMap::INIT, map_projection, $
         thisDatum = theDatums[19] 
    ENDIF ELSE BEGIN
         IF Size(datum, /TNAME) EQ 'STRING' THEN BEGIN
-            index = Where(StrUpCase(theDatums.name) EQ StrUpCase(datum))
+            datumIndex = Where(StrUpCase(theDatums.name) EQ StrUpCase(datum))
+            datumIndex = datumIndex[0]
             
             ; If you can't find one, try compressing the names.
-            IF index[0] EQ -1 THEN BEGIN
-               index = Where(StrCompress(StrUpCase(theDatums.name), /Remove_All) EQ $
-                    StrCompress(StrUpCase(datum), /Remove_All))
+            IF datumIndex[0] EQ -1 EQ 0 THEN BEGIN
+               datumIndex = Where(StrCompress(StrUpCase(theDatums.name), /Remove_All) EQ $
+                    StrCompress(StrUpCase(datum), /Remove_All), nameCount)
             ENDIF
             
             ; Now if you can't find one, report it.
-            IF index[0] EQ -1 THEN Message, 'Cannot find datum ' + datum + ' in datum list.' 
-            thisDatum = theDatums[index[0]]
-        ENDIF ELSE thisDatum = theDatums[0 > datum < (N_Elements(theDatums)-1)]
+            IF datumIndex[0] EQ -1 THEN Message, 'Cannot find datum ' + datum + ' in datum list.' 
+            thisDatum = theDatums[datumIndex]
+        ENDIF ELSE BEGIN
+            datumIndex = Where(theDatums.index EQ datum, count)
+            IF count GT 0 THEN thisDatum = theDatums[datumIndex[0]] ELSE Message, 'Cannot find datum ' + StrTrim(datum,2) + ' in datum list.' 
+        ENDELSE
+        IF N_Elements(thisDatum) GT 1 THEN thisDatum = thisDatum[0]
    ENDELSE
    
    ; There is a bug in all versions of IDL up to IDL 8.1 apparently that
@@ -435,8 +446,8 @@ FUNCTION cgMap::INIT, map_projection, $
    ; with a WGS84 datum (the most common datum used in this projection). Here
    ; we substitute the WALBECK datum, which is nearly identical to WGS84 are
    ; results in position errors of less than a meter typically.
-   IF ((StrUpCase(thisDatum.Name) EQ 'WGS 84') || (StrUpCase(thisDatum.Name) EQ 'WGS84')) && $
-      (StrUpCase(this_map_projection.Name) EQ 'UTM') && $
+   IF ((StrUpCase((thisDatum.Name)[0]) EQ 'WGS 84') || (StrUpCase((thisDatum.Name)[0]) EQ 'WGS84')) && $
+      (StrUpCase((this_map_projection.Name)[0]) EQ 'UTM') && $
       (Float(!version.release) LT 8.2) THEN BEGIN
           Print, 'Switching UTM datum from WGS84 to WALBECK to avoid UTM projection bug.'
           thisDatum = { cgMAP_DATUM, 12, 'Walbeck', 6378137.0, 6356752.314245 }

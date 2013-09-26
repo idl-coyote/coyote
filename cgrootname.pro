@@ -78,6 +78,11 @@
 ;            C:\rsi\idl7.8\lib\
 ;       IDL> Print, theExtension
 ;            pro
+;            
+;    Get the name of the current directory, with the path separator as the last character. This is
+;    the equivalent of CD, Current=current & current = current + Path_Sep().
+;       IDL> void = cgRootName(Directory=current)
+;       IDL> Print, current
 ;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -96,6 +101,8 @@
 ;        Added ability to recongnize directory by path separator in last character. 19 Sept 2005. DWF.
 ;        If directory is blank (because a relative filename was passed), set to current directory. 6 Aug 2009. DWF.
 ;        There were a couple of instances where the directory did NOT end in a path separator. Fixed. 24 Feb 2012. DWF.
+;        Added ability to get the current directory with a path separator in one step instead of two. See example
+;           section for details. 26 Sept 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2003-2012, Fanning Software Consulting, Inc.
@@ -112,12 +119,21 @@ FUNCTION cgRootName, filename, $
    extension = ""
    file = ""
 
-   ; If there is no filename, return NULL.
-   IF (N_Elements(filename) EQ 0) OR (filename EQ "") THEN RETURN, file
-
    ; Is a path separator specified?
    IF N_Elements(pathsep) EQ 0 THEN pathsep = Path_Sep()
-
+   
+   ; If there is no filename, return a null string. But, before you leave get the
+   ; current directory.
+   IF (N_Elements(filename) EQ 0) || (filename EQ "") THEN BEGIN
+    
+        ; Make the directory the current directory.
+        CD, CURRENT=directory
+        lastChar = StrMid(directory, 0, 1, /REVERSE_OFFSET)
+        IF lastChar NE pathsep THEN directory = directory + pathsep
+        
+        RETURN, file
+   ENDIF
+   
    ; If the last element of filename is a path separator, then separation is easy.
    IF StrMid(filename, StrLen(filename)-1, 1) EQ pathsep THEN BEGIN
       directory = filename

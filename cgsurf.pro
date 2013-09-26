@@ -242,6 +242,7 @@
 ;            This appears to work now both on the display and in PostScript. 25 Jan 2013. DWF.
 ;        Added the TLOCATION keyword and depreciated the TSPACE keyword. 27 May 2013. DWF.
 ;        Fixed a problem with shaded surfaces that set the top color to the background color. 12 June 2013. DWF.
+;        Fixed a problem with the TITLE keyword that was resetting !P.T, even if the SAVE keyword was set. 25 Sept 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
@@ -811,6 +812,7 @@ PRO cgSurf, data, x, y, $
     !P = newP
     
     ; Draw the title, if you have one.
+    t3d = !P.T
     T3D, /RESET
     IF N_Elements(title) NE 0 THEN BEGIN
         SetDecomposedState, 1, Current=currentState
@@ -837,6 +839,7 @@ PRO cgSurf, data, x, y, $
         ENDELSE
         SetDecomposedState, currentState
     ENDIF
+    !P.T = t3d
     
 
     ; Clean up if you are using a layout.

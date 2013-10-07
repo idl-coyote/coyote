@@ -53,9 +53,9 @@
 ;       places the widget at the far right-hand side of the screen.
 ;    y: in, optional, type=integer
 ;       Set this equal to a normalized position for the center
-;       of the widget as measured from the bottom of the screen.
+;       of the widget as measured from the top of the screen.
 ;       The default value is 0.5 (the center) Setting this equal to 1.0
-;       places the widget at the top of the screen.
+;       places the widget at the bottom of the screen.
 ;       
 ; :Keywords:
 ;    centerontlb: in, optional, type=long
@@ -92,6 +92,7 @@
 ;       Added DEVICE keyword. 4 January 2006. DWF.
 ;       Added CenterOnTLB keyword. 7 March 2011. DJ.
 ;       Renamed cgCenterTLB and retired the previous CenterTLB program. 29 Oct 2012. DWF.
+;       Fixed documention of y parameter. 1 Oct 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.

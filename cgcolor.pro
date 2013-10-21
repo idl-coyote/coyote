@@ -136,6 +136,7 @@
 ;              processes. 14 December 2012. DWF.
 ;        Removed cgColor_Color24 module in favor of using Coyote Library routine cgColor24. 5 Jan 2013. DWF.
 ;        The keyword ROW was being ignored if multiple colors were specified with TRIPLE keyword. Fixed. 10 July 2013. DWF.
+;        Another fix to handle Windows 8 computers that report their window size incorrectly. 21 Oct 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2009-2013, Fanning Software Consulting, Inc.
@@ -411,7 +412,20 @@ FUNCTION cgColor, theColour, colorIndex, $
     ; pixels to read Windows windows.
     IF ((!D.Window GE 0) && ((!D.Flags AND 256) NE 0)) || (!D.Name EQ 'Z') THEN BEGIN
        IF StrUpCase(!Version.OS_Family) EQ 'WINDOWS' THEN BEGIN
-          opixel = cgSnapshot(!D.X_Size-3, !D.Y_Size-3, 1, 1)
+        
+          ; Windows computers appear to be complete screwed up with respect to
+          ; reporting the correct window size. Now Windows 8 appears to be
+          ; reporting something completely different from Windows 7. I'm
+          ; going to Catch any errors I have here, and choose the lower-left
+          ; pixel, rather than the upper-right pixel. This should not be a 
+          ; problem, since the problem comes from draw widgets that are not
+          ; yet the current graphics window.
+          Catch, theError
+          IF theError NE 0 THEN BEGIN
+             opixel = cgSnapShot(0, 0, 1, 1)
+          ENDIF
+          IF N_Elements(opixel) EQ 0 THEN opixel = cgSnapshot(!D.X_Size-3, !D.Y_Size-3, 1, 1)
+          Catch, /Cancel
        ENDIF ELSE BEGIN
           opixel = cgSnapshot(!D.X_Size-1, !D.Y_Size-1, 1, 1)
        ENDELSE

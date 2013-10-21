@@ -309,8 +309,8 @@ FUNCTION cgKrig2d, z, x, y, $
         ndims = Size(z, /N_DIMENSIONS)
         IF ndims NE 2 THEN Message, 'Regular gridding requires a 2D data set be provided.'
         dims = Size(z, /DIMENSIONS)
-        IF N_Elements(nx) EQ 0 THEN nx = dims[0]
-        IF N_ELements(ny) EQ 0 THEN ny = dims[1]
+        nx = dims[0]
+        ny = dims[1]
     ENDIF ELSE BEGIN ; Otherwise, irregular grid and all three parameters must be present and same size.
         IF N_Params() NE 3 THEN Message, 'All three positional parameters must be present to do irregular gridding.'
         IF N_Elements(z) NE N_Elements(x) THEN Message, 'All three positional parameters must contain the same number of elements.'

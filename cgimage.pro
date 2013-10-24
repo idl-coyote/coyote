@@ -211,6 +211,7 @@
 ;           these keywords creates transparent images, and makes things MUCH more complicated. So, I'm 
 ;           probably at the limit of what is possible now. :-) 30 April 2013. DWF.
 ;       The LAYOUT keyword went on walkabout after the last changes. Restored to operation. 12 July 2013. DWF.
+;       The YTITLE keyword was missing when passed to cgWindow. Fixed now. 24 Oct 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -1427,6 +1428,7 @@ PRO cgImage, image, x, y, $
                XRANGE=plotxrange, $
                XTITLE=plotxtitle, $
                YRANGE=plotyrange, $
+               YTITLE=plotytitle, $
                REPLACECMD=replacecmd, $
                _EXTRA=extra
              RETURN

@@ -334,6 +334,9 @@
 ;        Added [XY]TickNames, [XY]Tickformat, [XY]TickS, and [XY]TickValues keywords. 21 Feb 2013. DWF.
 ;        Now choosing the default tick format of '(F)' when LOG is set. 28 April 2013. DWF.
 ;        Added Line_Thick keyword to change thickness of fill line. 28 Aug 2013. DWF.
+;        Changed the default background color to "white" from "background" and default axis 
+;           color to "black" from "opposite". It's about time this routine behaved like other
+;           Coyote Graphic routines! 22 Oct 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2007-2013, Fanning Software Consulting, Inc.
@@ -774,7 +777,7 @@ PRO cgHistoplot, $                  ; The program name.
    ENDELSE
 
    ; Check for keywords.
-   IF N_Elements(backColorName) EQ 0 THEN backColorName = "background"
+   IF N_Elements(backColorName) EQ 0 THEN backColorName = "white"
    IF N_Elements(dataColorName) EQ 0 THEN dataColorName = "Indian Red"
    SetDefaultValue, title, ""
    
@@ -794,7 +797,7 @@ PRO cgHistoplot, $                  ; The program name.
 
    ; Choose an axis color.
    IF N_Elements(axisColorName) EQ 0 AND N_Elements(saxescolor) NE 0 THEN axisColorName = saxescolor
-   axisColorName = cgDefaultColor(axisColorName, DEFAULT='opposite')
+   axisColorName = cgDefaultColor(axisColorName, DEFAULT='black')
    IF N_Elements(polycolorname) EQ 0 THEN polycolorname = "Rose"
    IF N_Elements(probColorname) EQ 0 THEN probColorname = "Blue"
    frequency = Keyword_Set(frequency)

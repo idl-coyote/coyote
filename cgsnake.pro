@@ -131,6 +131,9 @@
 ;     mu: in, optional, type=float, default=0.10
 ;        The regularization parameter. This should be set according to the amount of
 ;        noise in the image. Use a larger value for noisier images.
+;     parameterfile: in, optional, type=string
+;        The name of a parameter file created with the ActiveContour program and containing
+;        most of the snake parameters set here with other keywords.
 ;     sigma: in, optional, type=float, default=1.0
 ;        The standard deviation or sigma of the Gaussian function used in Gaussian
 ;        blurring.
@@ -162,6 +165,7 @@ FUNCTION cgSnake, image, x_init, y_init, $
    MAX_VALUE=max_v, $
    MIN_VALUE=min_v, $
    MU=mu, $
+   PARAMETERFILE=parameterFile, $
    SIGMA=sigma, $
    SPATIAL_SCALE=spatial_scale
 

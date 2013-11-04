@@ -222,8 +222,7 @@
 ;    wysize: in, optional, type=integer, default=5
 ;       The y size in device coordinates of the the graphics window.
 ;    wtitle: in, optional, type=string, default='Resizeable Graphics Window'
-;       The title of the graphics window. A window index number is appended to the
-;       title so multiple cgWindow programs can be selected.
+;       The title of the graphics window. 
 ;          
 ; :Examples:
 ;    Test code::

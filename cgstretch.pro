@@ -1284,7 +1284,7 @@ PRO cgSTRETCH_SAVEAS, event
 
             WSet, info.windex
             keys = PSWindow()
-            configureIt = cgPSConfig(Group_Leader=event.top, Cancel=cancelled, $
+            configureIt = cgPS_Config(Group_Leader=event.top, Cancel=cancelled, $
                Color=1, Filename='cgstretch.ps', _Extra=keys)
             IF NOT cancelled THEN BEGIN
                   thisDevice = !D.Name
@@ -1354,7 +1354,7 @@ PRO cgSTRETCH_SAVEHISTOAS, event
       'PS': BEGIN
 
             keys = PSWindow()
-            configureIt = cgPSConfig(Group_Leader=event.top, Cancel=cancelled, $
+            configureIt = cgPS_Config(Group_Leader=event.top, Cancel=cancelled, $
                Color=1, Filename='cgstretch_histrogram.ps', _Extra=keys)
             IF NOT cancelled THEN BEGIN
                   thisDevice = !D.Name

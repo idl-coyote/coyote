@@ -108,7 +108,7 @@
 ;     ps_metric: in, optional, type=boolean, default=0
 ;          Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
 ;     ps_quiet: in, optional, type=boolean, default=0
-;          Set this keyword to suppress output messages from PS_Start and PS_End.
+;          Set this keyword to suppress output messages from cgPS_Open and PS_End.
 ;     ps_scale_factor: in, optional, type=float, default=1.0
 ;          Set this keyword to the PostScript scale factor you want to use for PostScript output.
 ;     ps_tt_font: in, optional, type=string, default="Helvetica"
@@ -190,7 +190,7 @@ PRO cgWindow_SetDefs, $
    PS_Encapsulated = ps_encapsulated, $            ; Create Encapsulated PostScript output.
    PS_FONT=ps_font, $                              ; Select the font for PostScript output.
    PS_CHARSIZE=ps_charsize, $                      ; Select the character size for PostScript output.
-   PS_QUIET=ps_quiet, $                            ; Select the QUIET keyword for PS_START.
+   PS_QUIET=ps_quiet, $                            ; Select the QUIET keyword for cgPS_Open.
    PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
    PS_TT_FONT=ps_tt_font, $                        ; Select the true-type font to use for PostScript output.
    Reset=reset, $                                  ; Reset to original values. 
@@ -280,7 +280,7 @@ PRO cgWindow_SetDefs, $
            PS_Encapsulated:ps_encapsulated, $            ; Create Encapsulated PostScript output.
            PS_Charsize:ps_charsize, $                    ; PostScript character size.
            PS_Font:ps_font, $                            ; PostScript font to use.
-           PS_Quiet:ps_quiet, $                          ; PostScript QUIET keyword on PS_Start.
+           PS_Quiet:ps_quiet, $                          ; PostScript QUIET keyword on cgPS_Open.
            PS_Scale_Factor:ps_scale_factor, $            ; PostScript scale_factor
            PS_TT_Font:ps_tt_font }                       ; PostScript true-type font.
            

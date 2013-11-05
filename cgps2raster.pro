@@ -122,11 +122,11 @@
 ;    also create a PNG file named lineplot.png for display in a browser,
 ;    type these commands::
 ;
-;        PS_Start, FILENAME='lineplot.ps'
+;        cgPS_Open, FILENAME='lineplot.ps'
 ;        cgPlot, Findgen(11), COLOR='navy', /NODATA, XTITLE='Time', YTITLE='Signal'
 ;        cgPlot, Findgen(11), COLOR='indian red', /OVERPLOT
 ;        cgPlot, Findgen(11), COLOR='olive', PSYM=2, /OVERPLOT
-;        PS_End, /PNG
+;        cgPS_Close, /PNG
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::

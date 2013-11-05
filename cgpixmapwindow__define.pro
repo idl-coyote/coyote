@@ -228,7 +228,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
        PS_Encapsulated = d_ps_encapsulated, $            ; Create Encapsulated PostScript output.    
        PS_FONT = d_ps_font, $                            ; Select the font for PostScript output.
        PS_CHARSIZE = d_ps_charsize, $                    ; Select the character size for PostScript output.
-       PS_QUIET = d_ps_quiet, $                          ; Select the QUIET keyword for PS_Start.
+       PS_QUIET = d_ps_quiet, $                          ; Select the QUIET keyword for cgPS_Open.
        PS_SCALE_FACTOR = d_ps_scale_factor, $            ; Select the scale factor for PostScript output.
        PS_TT_FONT = d_ps_tt_font                         ; Select the true-type font to use for PostScript output.
         

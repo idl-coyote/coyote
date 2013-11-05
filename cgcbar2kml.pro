@@ -347,7 +347,7 @@ PRO cgCBar2KML, $
      ; Write the image file.
      rootname = cgRootName(imageFilename, DIRECTORY=thisDir)
      psFileName = Filepath(ROOT_DIR=thisDir, rootname + '.ps')
-     PS_Start, psFilename, /Quiet
+     cgPS_Open, psFilename, /Quiet
      cgDisplay, 1000, 200
      cgColorFill, [0,1,1,0,0], [0,0,1,1,0], /Normal, Color=background
      cgColorbar, $
@@ -379,7 +379,7 @@ PRO cgCBar2KML, $
         TICKNAMES=ticknames, $
         TITLE=title, $
         XLOG=xlog
-     PS_End, /PNG, /DELETE_PS, WIDTH=width, /NoMessage
+     cgPS_Close, /PNG, /DELETE_PS, WIDTH=width, /NoMessage
      
      ; Create the screen overlay object if a raster file was created.
      IF File_Test(imageFilename) THEN BEGIN
@@ -397,7 +397,7 @@ PRO cgCBar2KML, $
      ; Write the image file.
      rootname = cgRootName(imageFilename, DIRECTORY=thisDir)
      psFileName = Filepath(ROOT_DIR=thisDir, rootname + '.ps')
-     PS_Start, psFilename, /Quiet
+     cgPS_Open, psFilename, /Quiet
      cgDisplay, 1000, 200
      cgColorFill, [0,1,1,0,0], [0,0,1,1,0], /Normal, Color=background
      cgColorbar, $
@@ -429,7 +429,7 @@ PRO cgCBar2KML, $
         TICKNAMES=ticknames, $
         TITLE=title, $
         XLOG=xlog
-     PS_End, /PNG, /DELETE_PS, WIDTH=width, /NoMessage
+     cgPS_Close, /PNG, /DELETE_PS, WIDTH=width, /NoMessage
    
      ; Write the KML file.
      kmlFile = Obj_New('cgKML_File', filename)

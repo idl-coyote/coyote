@@ -148,7 +148,7 @@ PRO cgSymbol_Example, PS=ps, UNICODE=unicode
     y = Reverse((Indgen(13) + 1) * (1.0 / 14))
     
     ; Need PostScript output?
-    IF Keyword_Set(ps) || (!D.Name EQ 'PS') THEN PS_Start
+    IF Keyword_Set(ps) || (!D.Name EQ 'PS') THEN cgPS_Open
     
     ; Create a window.
     cgDisplay, 800, 500
@@ -167,7 +167,7 @@ PRO cgSymbol_Example, PS=ps, UNICODE=unicode
     ENDFOR
     
     ; Clean up PostScript, if needed.
-    IF Keyword_Set(ps) || (!D.Name EQ 'PS') THEN PS_End
+    IF Keyword_Set(ps) || (!D.Name EQ 'PS') THEN cgPS_Close
     
     ; Restore the users window.
     IF N_Elements(thisWindow) NE 0 THEN BEGIN
@@ -227,7 +227,7 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
     ; Return to caller on error.
     ON_Error, 2
     
-    ; A common block to communicate with PS_Start.
+    ; A common block to communicate with cgPS_Open.
     COMMON _$FSC_PS_START_, ps_struct
     
     ; Do you wish to see an example?

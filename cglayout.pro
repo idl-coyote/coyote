@@ -151,14 +151,14 @@
 ;    
 ;    Here is how to display square plots in a PostScript file::
 ;    
-;        PS_Start, 'cglayout_example.ps'
+;        cgPS_Open, 'cglayout_example.ps'
 ;        cgDisplay
 ;        pos = cgLayout([2,2], Aspect=1.0)
 ;        FOR j=0,3 DO BEGIN
 ;          cgPlot, cgDemoData(17), NoErase=j NE 0, Position=pos[*,j], Title='Plot ' + StrTrim(j+1,2)
 ;        ENDFOR
 ;        cgText, 0.5, 0.925, /Normal, 'Example Plot Layout', Alignment=0.5, Charsize=cgDefCharsize()*1.25
-;        PS_End
+;        cgPS_Close
 ;        
 ;    Here is how to draw the third plot in a 3 column by 2 row layout::
 ;    

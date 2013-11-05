@@ -5,7 +5,7 @@
 ; PURPOSE:
 ;
 ;    The purpose of FSC_PS_SETUP__DEFINE is to define a structure that is
-;    use with PS_START and PS_END, programs that make it easy to set-up
+;    use with cgPS_Open and cgPS_Close, programs that make it easy to set-up
 ;    for and close a PostScript file. The programs work in close conjunction
 ;    with PSCONFIG, another program from the Coyote Library.
 ;
@@ -25,16 +25,16 @@
 ;
 ; CALLING SEQUENCE:
 ;
-;       Used internally in PS_START and PS_END.
+;       Used internally in cgPS_Open and cgPS_Close.
 ;
 ; COMMON BLOCKS:
 ;
 ;       _$FSC_PS_START_   Contains the PS_STRUCT structure for communication between
-;                         PS_START and PS_END.
+;                         cgPS_Open and cgPS_Close.
 ;
 ; MODIFICATION HISTORY:
 ;
-;       Separated from PS_START file, 7 April 2009, by David W. Fanning.
+;       Separated from cgPS_Open file, 7 April 2009, by David W. Fanning.
 ;       Added PAGETYPE field to structure. 8 August 2009. DWF.
 ;       Changes to handle inability to create raster files from PS encapsulated files in 
 ;           landscape mode. Added "encapsulated" field to structure. 26 Aug 2011. DWF.
@@ -71,7 +71,7 @@
 PRO FSC_PS_SETUP__DEFINE
 
     struct = { FSC_PS_SETUP, $
-               currentDevice: "", $   ; Current graphics device when PS_START is called.
+               currentDevice: "", $   ; Current graphics device when cgPS_Open is called.
                setup: 0, $            ; A flag that makes sure PS device is opened/closed in correct sequence.
                convert: "", $         ; Set to type of output file, if converting with ImageMagick.
                filename: "", $        ; PostScript filename.

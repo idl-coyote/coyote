@@ -72,9 +72,9 @@
 ;        
 ;    or::
 ;        cgSet_TTFont, 'Times'
-;        PS_Start, 'cgplot.ps', Font=1
+;        cgPS_Open, 'cgplot.ps', Font=1
 ;        cgPlot, cgDemoData(1), Title='This is Times Text'
-;        PS_End, /PNG
+;        cgPS_Close, /PNG
 ;         
 ;    or, to set the font ONLY for the current cgWindow::
 ;        cgPlot, cgDemoData(1), Title='This is Times Text', /Window

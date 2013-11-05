@@ -153,7 +153,7 @@ PRO cgGreek_Example, UNICODE=unicode, PS=ps
     y = Reverse((Indgen(12) + 1) * (1.0 / 13))
     
     ; Need PostScript output?
-    IF Keyword_Set(ps) || (!D.Name EQ 'PS') THEN PS_Start
+    IF Keyword_Set(ps) || (!D.Name EQ 'PS') THEN cgPS_Open
     
     ; Create a window.
     cgDisplay, 600, 500
@@ -169,7 +169,7 @@ PRO cgGreek_Example, UNICODE=unicode, PS=ps
     ENDFOR
     
     ; Clean up PostScript, if needed.
-    IF Keyword_Set(ps) || (!D.Name EQ 'PS') THEN PS_End
+    IF Keyword_Set(ps) || (!D.Name EQ 'PS') THEN cgPS_Close
 
     ; Restore the users window.
     IF N_Elements(thisWindow) NE 0 THEN BEGIN

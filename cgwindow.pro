@@ -264,7 +264,7 @@
 ;        Numerous changes leading up to official release. 4 Feb 2011. DWF.
 ;        Added workaround for UNIX bug for draw widget creation. 5 Feb 2011. DWF.
 ;        Corrected a window aspect ratio problem with PostScript output by making the
-;           window the current window before calling PS_Start. 17 Feb 2011. DWF.
+;           window the current window before calling cgPS_Open. 17 Feb 2011. DWF.
 ;        Added machinery for programmatically generating raster files. 18 Feb 2011. Jeremy Bailin.
 ;        Problem with restoring visualizations fixed. 6 March 2011. DWF.
 ;        Fixed a problem with CALL_METHOD, which requires one positional parameter. 8 March 2011. DWF.

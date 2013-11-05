@@ -100,9 +100,9 @@
 ; :Examples:
 ;    A typical sequence of commands to create a test.pdf file::
 ;    
-;       PS_Start, Filename='test.ps'
+;       cgPS_Open, Filename='test.ps'
 ;       cgHistoplot, cgDemoData(7), /Fill
-;       PS_End
+;       cgPS_Close
 ;       cgPS2PDF, 'test.ps'
 ;       
 ; :Author:

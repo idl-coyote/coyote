@@ -265,7 +265,7 @@ PRO cgDisplay, pxsize, pysize, $
     ENDIF ELSE BEGIN
         CASE !D.Name OF
         
-            ; There can be some strange interactions with PS_START if PS_START
+            ; There can be some strange interactions with cgPS_Open if cgPS_Open
             ; is called with no current windows open, and cgDisplay is called with
             ; an aspect ratio that results in a PORTRAIT mode display. This checks
             ; for that problem.

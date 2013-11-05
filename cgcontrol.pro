@@ -177,7 +177,7 @@
 ;     ps_metric: in, optional, type=boolean, default=0
 ;          Set this keyword to configure PSCONFIG to use metric values and A4 page size in its interface.
 ;     ps_quiet: in, optional, type=boolean, default=0
-;          Set this keyword to set the QUIET keyword on PS_Start.
+;          Set this keyword to set the QUIET keyword on cgPS_Open.
 ;     ps_scale_factor: in, optional, type=float
 ;          Set his keyword to the PostScript scale factor you wish to use in creating PostScript output.
 ;     ps_tt_font: in, optional, type=string
@@ -281,7 +281,7 @@ PRO cgControl, selection, $
     PS_ENCAPSULATED=ps_encapsulated, $            ; Create Encapsulated PostScript output.
     PS_FONT=ps_font, $                            ; Select the font for PostScript output.
     PS_METRIC=ps_metric, $                        ; Select metric measurements in PostScript output.
-    PS_QUIET=ps_quiet, $                          ; Select the QUIET keyword on PS_Start.
+    PS_QUIET=ps_quiet, $                          ; Select the QUIET keyword on cgPS_Open.
     PS_SCALE_FACTOR=ps_scale_factor, $            ; Select the scale factor for PostScript output.
     PS_TT_FONT=ps_tt_font, $                      ; Select the true-type font to use for PostScript output.
     RESIZE=resize, $                              ; Set this keyword to resize the draw widget window.
@@ -457,7 +457,7 @@ PRO cgControl, selection, $
         PS_ENCAPSULATED = ps_encapsulated, $            ; Create encapsulated PostScript output.
         PS_FONT=ps_font, $                              ; Select the font for PostScript output.
         PS_METRIC = ps_metric, $                        ; Select metric measurements in PostScript output.
-        PS_QUIET=ps_quiet, $                            ; Setlect the QUIET keywords for PS_Start.
+        PS_QUIET=ps_quiet, $                            ; Setlect the QUIET keywords for cgPS_Open.
         PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
         PS_TT_FONT=ps_tt_font                           ; Select the true-type font to use for PostScript output.
         

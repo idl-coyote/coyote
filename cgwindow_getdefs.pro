@@ -176,7 +176,7 @@ PRO cgWindow_GetDefs, $
    PS_Metric = ps_metric, $                        ; Select metric measurements in PostScript output.
    PS_Encapsulated = ps_encapsulated, $            ; Create Encapsulated PostScript output.
    PS_FONT=ps_font, $                              ; Select the font for PostScript output.
-   PS_QUIET=ps_quiet, $                            ; The QUIET keyword to PS_Start.
+   PS_QUIET=ps_quiet, $                            ; The QUIET keyword to cgPS_Open.
    PS_SCALE_FACTOR=ps_scale_factor, $              ; Select the scale factor for PostScript output.
    PS_TT_FONT=ps_tt_font                           ; Select the true-type font to use for PostScript output.
    

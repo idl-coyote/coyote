@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   GetDecomposedState
+;   cgGetColorState
 ;
 ; PURPOSE:
 ;   Provides a device-independent way to get the color decomposition state of the
@@ -44,6 +44,11 @@
 ;    
 ; :Returns:
 ;     Returns a 1 if color decomposition is turned on and a 0 if indexed color is used.
+;     
+; :Params:
+;     device: in, optional, type=string
+;         The IDL graphics device whose color decomposition state you wish to know the
+;         current value of. If undefined, the current graphics device is used.
 ;       
 ; :Keywords:
 ;     Depth: out, optional, type=integer
@@ -51,7 +56,7 @@
 ;         and 24 for true-color devices.
 ;          
 ; :Examples:
-;       IDL> currentState = GetDecomposedState()
+;       IDL> currentState = cgGetColorState()
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -64,15 +69,95 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 12 December 2010 as a better named wrapper for DECOMPOSEDCOLOR program. DWF.
+;        Written, 5 Nov 2013, as a combination of DecomposedColor and GetDecomposedState, which
+;           have both been retired from the Coyote Library.
 ;
 ; :Copyright:
-;     Copyright (c) 2010, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
 ;-
-FUNCTION GetDecomposedState, DEPTH=depth
+FUNCTION cgGetColorState, device, DEPTH=depth
 
-    Compile_Opt idl2
+    ; Return to caller on error.
+    ON_ERROR, 2
+
+    ; Was a graphics device passed in?
+    IF N_Elements(device) EQ 0 THEN device = !D.NAME
     
-    RETURN, DecomposedColor(Depth=depth)
+    ; If the asked for graphics device is not the same as the current device,
+    ; load the one the user asked for.
+    IF StrUpCase(device) NE !D.NAME THEN BEGIN
+        thisDevice = !D.NAME
+        Set_Plot, device
+    ENDIF
+
+    ; Which graphics device are you interested in?
+    CASE !D.NAME OF
+    
+        'PS': BEGIN ; PostScript
+           CASE 1 OF
+                Float(!Version.Release) EQ 7.1: BEGIN
+                    Help, /DEVICE, OUTPUT=outstr
+                    psinfo = outstr[4]
+                    parts = StrSplit(psinfo, ':', /EXTRACT)
+                    IF StrUpCase(StrCompress(parts[1], /REMOVE_ALL)) EQ 'DECOMPOSED' THEN BEGIN
+                        decomposed = 1
+                        depth = 24
+                    ENDIF ELSE BEGIN
+                        decomposed = 0
+                        depth = 8
+                    ENDELSE
+                END
+                Float(!Version.Release) GT 7.1: BEGIN
+                    Device, GET_DECOMPOSED=decomposed
+                    IF decomposed THEN depth = 24 ELSE depth = 8
+                    END
+                ELSE: BEGIN
+                    decomposed = 0
+                    depth = 8
+                    END
+            ENDCASE
+           END
+           
+        'Z': BEGIN ; Z-graphics buffer.
+            IF (Float(!Version.Release) GE 6.4) THEN BEGIN
+                Device, GET_DECOMPOSED=decomposed
+                Device, GET_PIXEL_DEPTH=depth
+            ENDIF ELSE BEGIN
+                decomposed = 0
+                depth = 8
+            ENDELSE
+            END
+            
+        'X': Device, GET_DECOMPOSED=decomposed, GET_VISUAL_DEPTH=depth
+        
+        'WIN': Device, GET_DECOMPOSED=decomposed, GET_VISUAL_DEPTH=depth
+        
+        'MAC': BEGIN
+            IF (Float(!Version.Release) GE 5.2) THEN BEGIN
+                Device, Get_Decomposed=decomposedState, GET_VISUAL_DEPTH=depth
+            ENDIF ELSE BEGIN
+                decomposed = 0
+                depth = 8
+            ENDELSE
+            END
+            
+         'NULL': BEGIN ; Setting up in decomposed mode will make sure
+                       ; drawing colors are never loaded, which is not
+                       ; allowed for the NULL device.
+            decomposed = 1
+            depth = 24
+            END
+            
+        ELSE: BEGIN ; All other devices are 8-bit oldsters.
+            decomposed = 0
+            depth = 8
+            END
+    ENDCASE
+ 
+    ; Need to clean up?
+    IF N_Elements(thisDevice) NE 0 THEN Set_Plot, thisDevice
+    
+    ; Return the result.
+    RETURN, decomposed
     
 END    

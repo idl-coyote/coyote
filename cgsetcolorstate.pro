@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   SetDecomposedState
+;   cgSetColorState
 ;
 ; PURPOSE:
 ;   Provides a device-independent way to set the color decomposition state of the
@@ -109,9 +109,9 @@
 ; :Examples:
 ;     To set the device in color decomposition mode, then return it, do something like this::
 ;     
-;        SetDecomposedState, 1, CurrentState=mode
+;        cgSetColorState, 1, CurrentState=theState
 ;        ...
-;        SetDecomposeState, mode
+;        cgSetColorState, theState
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -132,11 +132,12 @@
 ;        Removed the Z-graphics buffer from control by this program. 24 Dec 2011. DWF.
 ;        Added back the ability to set decomposed state for the Z-buffer, but only
 ;           if the depth buffer is 24-bits or higher. 25 May 2012. DWF.
+;        Renamed SetDecomposedState to cgSetColorState. 5 November 2013. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2010, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
 ;-
-PRO SetDecomposedState, state, CURRENTSTATE=currentState, DEPTH=depth, ZDEPTH=zdepth
+PRO cgSetColorState, state, CURRENTSTATE=currentState, DEPTH=depth, ZDEPTH=zdepth
 
     Compile_Opt idl2
     
@@ -146,7 +147,7 @@ PRO SetDecomposedState, state, CURRENTSTATE=currentState, DEPTH=depth, ZDEPTH=zd
     state = Keyword_Set(state)
     
     ; Get the current state and pixel depth.
-    currentState = DecomposedColor(DEPTH=depth)
+    currentState = cgGetColorState(DEPTH=depth)
     
     ; Set the decomposition state, if you are able. Otherwise assume
     ; indexed color mode.

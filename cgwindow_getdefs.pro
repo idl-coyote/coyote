@@ -88,7 +88,7 @@
 ;     ps_metric: out, optional, type=boolean
 ;          The metric status of the window.
 ;     ps_quiet: out, optional, type=boolean
-;          Set to one of the QUIET keyword is set on PSConfig.
+;          Set to one of the QUIET keyword is set on cgPSConfig.
 ;     ps_scale_factor: out, optional, type=float
 ;          The PostScript scale factor.
 ;     ps_tt_font: out, optional, type=string

@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   PSCONFIG
+;   cgPSCONFIG
 ;
 ; PURPOSE:
 ;    The purpose of this program is to allow the user to configure the PostScript device
@@ -49,7 +49,7 @@
 ;    A structure of keywords, appropriate for configuring the PostScript device, is returned.
 ;    These keywords are generally passed to the PostScript device by means of keyword inheritance::
 ;    
-;         keywords = PSConfig()   ; Obtain PostScript keywords
+;         keywords = cgPSConfig()   ; Obtain PostScript keywords
 ;         Set_Plot, 'PS'          ; Select the PostScript device
 ;         Device, _Extra=keywords ; Configure the PostScript device with keywords
 ;    
@@ -198,7 +198,7 @@
 ;    To have the user specify PostScript configuration parameters, use
 ;    the program like this::
 ;
-;       keywords = PSConfig(Cancel=cancelled)
+;       keywords = cgPSConfig(Cancel=cancelled)
 ;       IF cancelled THEN RETURN
 ;       thisDevice = !D.Name
 ;       Set_Plot, 'PS'
@@ -226,11 +226,12 @@
 ;        Added MATCH keyword. 14 Dec 2010. DWF.
 ;        Changed ENCAPSULATE keyword to ENCAPSULATED, which is what I always type! 29 Jan 2011. DWF.
 ;        Depreciated EUROPEAN keyword in favor of METRIC. 31 Jan 2011. DWF.
+;        Renamed cgPSConfig from PSConfig. 5 November 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2000-2012, Fanning Software Consulting, Inc.
 ;-
-FUNCTION PSConfig, psObject,          $ ; A FSC_PSCONFIG object. 
+FUNCTION cgPSConfig, psObject,          $ ; A FSC_PSCONFIG object. 
    AvantGarde=avantgarde,             $ ; Set this keyword to select the AvantGarde font.
    Bits_per_Pixel=bits_per_pixel,     $ ; The number of image bits saved for each image pixel: 2, 4, or 8.
    Bold=bold,                         $ ; Set this keyword to select the Bold font style.
@@ -280,104 +281,105 @@ FUNCTION PSConfig, psObject,          $ ; A FSC_PSCONFIG object.
    ZapfChancery=zapfchancery,         $ ; Set this keyword to select the ZapfChancery font.
    ZapfDingbats=zapfdingbats            ; Set this keyword to select the ZapfDingbats font.
 
-On_Error, 2
-
-; Depreciated keywords.
-IF N_Elements(metric) EQ 0 THEN metric = Keyword_Set(european) ELSE metric = Keyword_Set(metric)
-
-; Cannot have landscape orientation with encapsulated PostScript output.
-IF Keyword_Set(encapsulated) THEN landscape = 0
-
-; Did the user ask us to match the aspect ratio of the current graphics window?
-IF Keyword_Set(match) THEN BEGIN
+    On_Error, 2
     
-    ; Is this a device that supports windows?
-    IF (!D.Flags AND 256) NE 0 THEN BEGIN
+    ; Depreciated keywords.
+    IF N_Elements(metric) EQ 0 THEN metric = Keyword_Set(european) ELSE metric = Keyword_Set(metric)
     
-        ; Is there a current graphics window?
-        IF !D.Window GE 0 THEN BEGIN
-            IF N_Elements(inches) NE 0 THEN cm = 1 - Keyword_Set(inches)
-            keywords = PSWindow(Landscape=landscape, CM=cm, Metric=metric)
-            xsize = keywords.xsize
-            ysize = keywords.ysize
-            xoffset = keywords.xoffset
-            yoffset = keywords.yoffset
-            inches = keywords.inches
-            landscape = keywords.landscape
-            portrait = keywords.portrait
+    ; Cannot have landscape orientation with encapsulated PostScript output.
+    IF Keyword_Set(encapsulated) THEN landscape = 0
+    
+    ; Did the user ask us to match the aspect ratio of the current graphics window?
+    IF Keyword_Set(match) THEN BEGIN
+        
+        ; Is this a device that supports windows?
+        IF (!D.Flags AND 256) NE 0 THEN BEGIN
+        
+            ; Is there a current graphics window?
+            IF !D.Window GE 0 THEN BEGIN
+                IF N_Elements(inches) NE 0 THEN cm = 1 - Keyword_Set(inches)
+                keywords = PSWindow(Landscape=landscape, CM=cm, Metric=metric)
+                xsize = keywords.xsize
+                ysize = keywords.ysize
+                xoffset = keywords.xoffset
+                yoffset = keywords.yoffset
+                inches = keywords.inches
+                landscape = keywords.landscape
+                portrait = keywords.portrait
+            ENDIF
         ENDIF
     ENDIF
-ENDIF
-
-IF N_Elements(psObject) EQ 0 THEN BEGIN
-   psObject = Obj_New('FSC_PSCONFIG', $
-      AvantGarde=avantgarde,             $
-      Bits_per_Pixel=bits_per_pixel,     $
-      Bold=bold,                         $
-      BookStyle=book,                    $
-      Bkman=bookman,                     $
-      CMYK=cmyk,                         $
-      Color=color,                       $
-      Courier=courier,                   $
-      Debug=debug,                       $
-      Decomposed=decomposed,             $
-      DefaultSetup=defaultsetup,         $
-      Demi=demi,                         $
-      Directory=directory,               $
-      Encapsulated=encapsulated,         $
-      Filename=filename,                 $
-      FontSize=fontsize,                 $
-      FontType=fonttype,                 $
-      Helvetica=helvetica,               $
-      Inches=inches,                     $
-      Italic=italic,                     $
-      Isolatin=isolatin,                 $
-      Landscape=landscape,               $
-      Light=light,                       $
-      Medium=medium,                     $
-      Metric=metric,                     $
-      Name=name,                         $
-      Narrow=narrow,                     $
-      Oblique=oblique,                   $
-      PageType=pagetype,                 $
-      Palatino=palatino,                 $
-      Preview=preview,                   $
-      Schoolbook=schoolbook,             $
-      Set_Font=set_font,                 $
-      Symbol=symbol,                     $
-      Times=times,                       $
-      TrueType=truetype,                 $
-      XOffset=xoffset,                   $
-      XSize=xsize,                       $
-      YOffset=yoffset,                   $
-      YSize=ysize,                       $
-      ZapfChancery=zapfchancery,         $
-      ZapfDingbats=zapfdingbats )
-      Create = 1
-ENDIF ELSE BEGIN
-   type = Size(psObject, /Type)
-   IF type NE 11 THEN BEGIN
-      Message, 'Object Reference required as an argument'
-   ENDIF
-   create = 0
-ENDELSE
-
-   ; Call the GUI of the FSC_PSCONFIG object.
-
-IF Keyword_Set(nogui) EQ 0 THEN $
-   psObject->GUI, Group_Leader=group_leader, Cancel=cancelled, FontInfo=Keyword_Set(fontinfo)
-
-   ; Get the PostScript device keywords, along with the font type information.
-
-keywords = psObject->GetKeywords(FontType=fonttype)
-
-   ; If this program created the psObject, destroy it. Otherwise leave it.
-
-IF create THEN Obj_Destroy, psObject
-
-   ; Return the PostScript device keywords.
-
-RETURN, keywords
+    
+    IF N_Elements(psObject) EQ 0 THEN BEGIN
+       psObject = Obj_New('FSC_PSCONFIG', $
+          AvantGarde=avantgarde,             $
+          Bits_per_Pixel=bits_per_pixel,     $
+          Bold=bold,                         $
+          BookStyle=book,                    $
+          Bkman=bookman,                     $
+          CMYK=cmyk,                         $
+          Color=color,                       $
+          Courier=courier,                   $
+          Debug=debug,                       $
+          Decomposed=decomposed,             $
+          DefaultSetup=defaultsetup,         $
+          Demi=demi,                         $
+          Directory=directory,               $
+          Encapsulated=encapsulated,         $
+          Filename=filename,                 $
+          FontSize=fontsize,                 $
+          FontType=fonttype,                 $
+          Helvetica=helvetica,               $
+          Inches=inches,                     $
+          Italic=italic,                     $
+          Isolatin=isolatin,                 $
+          Landscape=landscape,               $
+          Light=light,                       $
+          Medium=medium,                     $
+          Metric=metric,                     $
+          Name=name,                         $
+          Narrow=narrow,                     $
+          Oblique=oblique,                   $
+          PageType=pagetype,                 $
+          Palatino=palatino,                 $
+          Preview=preview,                   $
+          Schoolbook=schoolbook,             $
+          Set_Font=set_font,                 $
+          Symbol=symbol,                     $
+          Times=times,                       $
+          TrueType=truetype,                 $
+          XOffset=xoffset,                   $
+          XSize=xsize,                       $
+          YOffset=yoffset,                   $
+          YSize=ysize,                       $
+          ZapfChancery=zapfchancery,         $
+          ZapfDingbats=zapfdingbats )
+          Create = 1
+    ENDIF ELSE BEGIN
+       type = Size(psObject, /Type)
+       IF type NE 11 THEN BEGIN
+          Message, 'Object Reference required as an argument'
+       ENDIF
+       create = 0
+    ENDELSE
+    
+       ; Call the GUI of the FSC_PSCONFIG object.
+    
+    IF Keyword_Set(nogui) EQ 0 THEN $
+       psObject->GUI, Group_Leader=group_leader, Cancel=cancelled, FontInfo=Keyword_Set(fontinfo)
+    
+       ; Get the PostScript device keywords, along with the font type information.
+    
+    keywords = psObject->GetKeywords(FontType=fonttype)
+    
+       ; If this program created the psObject, destroy it. Otherwise leave it.
+    
+    IF create THEN Obj_Destroy, psObject
+    
+       ; Return the PostScript device keywords.
+    
+    RETURN, keywords
+    
 END ;----------------------------------------------------------------------
 
 

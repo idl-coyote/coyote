@@ -178,6 +178,7 @@
 ;       Added DejaVuSans keyword to allow this true-type font to be used in PostScript Output. 21 Dec 2012. DWF.
 ;       Modified so that the PostScript device can keep a consistent interface when using True-Type
 ;          fonts. Requires using cgSet_TTFont to select True-Type fonts. 22 May 2013. DWF.
+;       Retired this program and changed name to cgPS_Open. 4 Nov 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.

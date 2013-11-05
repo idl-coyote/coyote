@@ -113,6 +113,7 @@
 ;    The traceback information was bypassed when in the PostScript device. Not what I
 ;      had in mind. Fixed. 6 July 2009. DWF.
 ;    The QUIET keyword was clearing traceback information. Fixed with help from Phillip Bitzer. 2 Oct 2012. DWF.
+;    Retired this program and changed name to cgErrorMsg. 4 Nov 2013. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;

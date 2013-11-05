@@ -285,7 +285,7 @@ PRO cgDCBar, colors, $
     ; I would prefer to draw in 24-bit color if I can, since this way I can
     ; avoid loading colors into the color table. I'll have to see where I am to
     ; see if I can do this in 24-bit color.
-    SetDecomposedState, 1, CURRENT=currentState
+    cgSetColorState, 1, CURRENT=currentState
     
     cbar_colors = cgDefaultColor(cbar_colors)
     color = cgDefaultColor(color, DEFAULT='opposite')
@@ -448,5 +448,5 @@ PRO cgDCBar, colors, $
     TVLCT, rr, gg, bb
     
     ; Clean up.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
 END

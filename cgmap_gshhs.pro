@@ -175,7 +175,7 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
       Catch, /Cancel
       void = cgErrorMsg()
       IF N_Elements(lun) NE 0 THEN Free_Lun, lun
-      IF N_Elements(thisState) NE 0 THEN SetDecomposedState, thisState
+      IF N_Elements(thisState) NE 0 THEN cgSetColorState, thisState
       IF N_Elements(r) NE 0 THEN TVLCT, r, g, b
       RETURN
    ENDIF
@@ -199,7 +199,7 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
     ENDIF
     
    ; Do this in decomposed color mode if possible.
-   SetDecomposedState, 1, CurrentState=thisState
+   cgSetColorState, 1, CurrentState=thisState
    TVLCT, r, g, b, /Get
    
    ; Default values.
@@ -373,7 +373,7 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
    Free_Lun, lun
 
    ; Restore decomposition state.
-   SetDecomposedState, thisState
+   cgSetColorState, thisState
    
    IF !D.NAME NE 'Z' THEN TVLCT, r, g, b
 END

@@ -123,7 +123,7 @@ PRO cgDraw_ROI, roi, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = cgErrorMsg()
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         RETURN
     ENDIF
 
@@ -180,7 +180,7 @@ PRO cgDraw_ROI, roi, $
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
     ; Do this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    cgSetColorState, 1, CURRENTSTATE=currentState
     
     ; Need a color?
     thisColor = cgDefaultColor(color, DEFAULT='opposite')
@@ -208,7 +208,7 @@ PRO cgDraw_ROI, roi, $
       _Extra=extra
     
     ; Clean up.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
     IF !D.Name NE 'Z' THEN TVLCT, rr, gg, bb
    
 END

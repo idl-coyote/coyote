@@ -172,7 +172,7 @@ PRO cgText, xloc, yloc, text, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = cgErrorMsg()
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         RETURN
     ENDIF
     
@@ -304,7 +304,7 @@ PRO cgText, xloc, yloc, text, $
     ENDIF
 
     ; Write the text. Do this in Decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    cgSetColorState, 1, CURRENTSTATE=currentState
 
     ; Get the input color table.
     TVLCT, rr, gg, bb, /Get
@@ -337,7 +337,7 @@ PRO cgText, xloc, yloc, text, $
             DATA=data, DEVICE=device, NORMAL=normal, WIDTH=width, ORIENTATION=orientation, _STRICT_EXTRA=extra
     ENDELSE
     
-   SetDecomposedState, currentState
+   cgSetColorState, currentState
    
    ; Restore the color tables.
    IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb

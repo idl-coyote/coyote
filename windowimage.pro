@@ -270,7 +270,7 @@ END ;---------------------------------------------------------------------------
 
 PRO WindowImage_Display, info
 
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    cgSetColorState, 1, CURRENTSTATE=currentState
 
     ; Load the color table.
     cgLoadCT, info.colortable, REVERSE=info.reverse, BREWER=info.brewer, NCOLORS=253
@@ -295,7 +295,7 @@ PRO WindowImage_Display, info
                         String(info.ilevel, FORMAT=format)
     cgText, 0.5, 0.75, /Normal, Alignment=0.5, Font=0, txt, Color='black'
   
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
 
 END ;---------------------------------------------------------------------------------------
 

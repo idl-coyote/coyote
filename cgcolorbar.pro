@@ -361,7 +361,7 @@ PRO cgColorbar, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = cgErrorMsg()
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         RETURN
     ENDIF
 
@@ -642,25 +642,25 @@ PRO cgColorbar, $
 
        
     ; Let's do this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    cgSetColorState, 1, CURRENTSTATE=currentState
        
     ; Display the color bar in the window. Sizing is
     ; different for PostScript and regular display.
     IF scalablePixels THEN BEGIN
 
        ; Display the color bar.
-       SetDecomposedState, 0
+       cgSetColorState, 0
        TV, bar, xstart, ystart, XSIZE=xsize, YSIZE=ysize, /Normal
-       SetDecomposedState, 1 
+       cgSetColorState, 1 
 
     ENDIF ELSE BEGIN
 
        bar = CONGRID(bar, CEIL(xsize*!D.X_VSize), CEIL(ysize*!D.Y_VSize))
 
        ; Display the color bar.
-       SetDecomposedState, 0
+       cgSetColorState, 0
        TV, bar, xstart, ystart, /Normal
-       SetDecomposedState, 1
+       cgSetColorState, 1
 
     ENDELSE
    
@@ -868,7 +868,7 @@ PRO cgColorbar, $
     ENDIF
 
     ; Restore the color state.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
 
     ; Restore the previous plot and map system variables.
     !P = bang_p

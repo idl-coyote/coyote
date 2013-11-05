@@ -131,7 +131,7 @@ PRO cgPolygon, x, y, z, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = cgErrorMsg()
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         RETURN
     ENDIF
 
@@ -184,7 +184,7 @@ PRO cgPolygon, x, y, z, $
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     
     ; We are going to draw in decomposed color, if possible.
-    SetDecomposedState, 1, Current=currentState
+    cgSetColorState, 1, Current=currentState
        
     ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
     IF (currentState EQ 0) THEN BEGIN
@@ -240,7 +240,7 @@ PRO cgPolygon, x, y, z, $
     ENDCASE
     
     ; Clean up.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
     IF !D.Name NE 'Z' THEN TVLCT, rr, gg, bb
    
 END

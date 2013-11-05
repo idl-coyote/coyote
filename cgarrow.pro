@@ -129,7 +129,7 @@ PRO cgArrow, x0, y0, x1, y1, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = cgErrorMsg()
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         RETURN
     ENDIF
     
@@ -177,7 +177,7 @@ PRO cgArrow, x0, y0, x1, y1, $
            ENDELSE
     ENDIF
     IF N_Elements(sColor) EQ 0 THEN color = !P.Color ELSE color = sColor
-    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Byte(color)
+    IF Size(color, /TYPE) EQ 3 THEN IF cgGetColorState() EQ 0 THEN color = Byte(color)
     IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
     
     ; Head size in device units
@@ -233,7 +233,7 @@ PRO cgArrow, x0, y0, x1, y1, $
        xxp1 = xp1 + a * (dx*mcost - dy * sint)
        yyp1 = yp1 + a * (dx*sint  + dy * mcost)
      
-       SetDecomposedState, 1, CURRENT=currentState
+       cgSetColorState, 1, CURRENT=currentState
        IF Keyword_Set(solid) THEN BEGIN   ;Use polyfill?
          b = a * mcost*.9d ; End of arrow shaft (Fudge to force join)
          cgPlotS, [xp0, xp1+b*dx], [yp0, yp1+b*dy], /DEVICE, $
@@ -246,7 +246,7 @@ PRO cgArrow, x0, y0, x1, y1, $
          cgPlotS, [xxp0,xp1,xxp1],[yyp0,yp1,yyp1], /DEVICE, COLOR=color, $
             THICK=hthick, LINESTYLE=linestyle, _Extra=extra
        ENDELSE
-       SetDecomposedState, currentState
+       cgSetColorState, currentState
        ENDFOR
        
        ; Restore the input colors.

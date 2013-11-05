@@ -159,7 +159,7 @@ PRO cgAxis, xloc, yloc, zloc, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = cgErrorMsg()
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         RETURN
     ENDIF
     
@@ -224,7 +224,7 @@ PRO cgAxis, xloc, yloc, zloc, $
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
 
     ; Draw the axis. Do this in Decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    cgSetColorState, 1, CURRENTSTATE=currentState
 
     ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
     IF (currentState EQ 0) THEN BEGIN
@@ -324,7 +324,7 @@ PRO cgAxis, xloc, yloc, zloc, $
             ZTITLE=ztitle, $
             _STRICT_EXTRA=extra
     ENDCASE
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
    
    ; Restore the color tables.
    IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb

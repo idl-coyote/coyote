@@ -155,7 +155,7 @@ PRO cgMap_Continents, $
     IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
       void = cgErrorMsg()
-      IF N_Elements(thisState) NE 0 THEN SetDecomposedState, thisState
+      IF N_Elements(thisState) NE 0 THEN cgSetColorState, thisState
       RETURN
     ENDIF
       
@@ -209,7 +209,7 @@ PRO cgMap_Continents, $
     ENDIF ELSE color = "opposite"
 
     ; Try to do this in decomposed color, if possible.
-    SetDecomposedState, 1, Current=thisState
+    cgSetColorState, 1, Current=thisState
     
     ; Change colors into appropriate values, if needed.
     IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
@@ -254,6 +254,6 @@ PRO cgMap_Continents, $
        ZVALUE=zvalue
           
     ; Restore color state.
-    SetDecomposedState, thisState
+    cgSetColorState, thisState
     
 END ;-------------------------------------------------------------------    

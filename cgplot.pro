@@ -216,7 +216,7 @@
 ;        Written, 12 November 2010. DWF.
 ;        Added SYMCOLOR keyword, and allow all 46 symbols from cgSYMCAT. 15 November 2010. DWF.
 ;        Added NODATA keyword. 15 November 2010. DWF.
-;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
+;        Now setting decomposition state by calling cgSetColorState. 16 November 2010. DWF.
 ;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
 ;        Fixed a problem with overplotting with symbols. 17 November 2010. DWF.
 ;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
@@ -313,7 +313,7 @@ PRO cgPlot, x, y, $
         Catch, /CANCEL
         void = cgErrorMsg()
         IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         IF (N_Elements(output) NE 0) THEN PS_END, /NOFIX
         RETURN
     ENDIF
@@ -554,7 +554,7 @@ PRO cgPlot, x, y, $
     TVLCT, rr, gg, bb, /GET
     
     ; Going to do this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    cgSetColorState, 1, CURRENTSTATE=currentState
     
     ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
     IF (currentState EQ 0) THEN BEGIN
@@ -821,7 +821,7 @@ PRO cgPlot, x, y, $
     ENDIF
     
     ; Restore the decomposed color state if you can.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
     
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.

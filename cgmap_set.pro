@@ -190,7 +190,7 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
     IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
       void = cgErrorMsg()
-      IF N_Elements(thisState) NE 0 THEN SetDecomposedState, thisState
+      IF N_Elements(thisState) NE 0 THEN cgSetColorState, thisState
       RETURN
     ENDIF
       
@@ -478,7 +478,7 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
     ENDIF
     
     ; Try to do this in decomposed color, if possible.
-    SetDecomposedState, 1, Current=thisState
+    cgSetColorState, 1, Current=thisState
     
     ; If this is a graphics device, and there is no current graphics window,
     ; then set the erase flag.
@@ -632,6 +632,6 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
     ENDIF
 
     ; Restore color state.
-    SetDecomposedState, thisState
+    cgSetColorState, thisState
     
     END ;-------------------------------------------------------------------

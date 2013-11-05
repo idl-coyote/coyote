@@ -180,7 +180,7 @@ PRO cgDotPlot, labels, values, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = cgErrorMsg()
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         IF (N_Elements(output) NE 0) THEN PS_END, /NOFIX
         RETURN
     ENDIF
@@ -382,7 +382,7 @@ PRO cgDotPlot, labels, values, $
     TVLCT, rr, gg, bb, /GET
     
     ; Going to do this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    cgSetColorState, 1, CURRENTSTATE=currentState
     
     ; Check keywords.
     IF N_Elements(title) EQ 0 THEN title = ""
@@ -510,7 +510,7 @@ PRO cgDotPlot, labels, values, $
     ENDIF
     
     ; Restore the decomposed color state if you can.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
     
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.

@@ -61,7 +61,7 @@
 ;         A color of any type allowed as the `inputColour`. Used if the `inputColour` is undefined.
 ;     mode: in, optional, type=boolean
 ;         The color mode. A 0 mean indexed color mode. A 1 means decomposed color mode.
-;         If not supplied in the call, the color mode is determined at run-time with `GetDecomposedState`.
+;         If not supplied in the call, the color mode is determined at run-time with `cgGetColorState`.
 ;         The color mode is *always* determined at run time if the current graphics device 
 ;         is the PostScript device.
 ;     traditional: in, optional, type=boolean, default=0
@@ -128,7 +128,7 @@ FUNCTION cgDefaultColor, inputColour, $
     ; are in the PostScript file (since we try to draw in DECOMPOSED mode always).
     ; But, if we are TOLD what mode to use, we have to honor that, even in PostScript.
     IF ((N_Elements(mode) EQ 0) || (!D.Name EQ 'PS')) THEN BEGIN
-       thisMode = GetDecomposedState()
+       thisMode = cgGetColorState()
        IF (N_Elements(mode) NE 0) THEN thisMode = Keyword_Set(mode)
     ENDIF ELSE thisMode = Keyword_Set(mode)
     traditional = Keyword_Set(traditional)

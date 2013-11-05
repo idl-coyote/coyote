@@ -92,7 +92,7 @@
 ;            initial colors were incorrect on subsequent calls. Also made a modification so that 
 ;            color index -1 as input is handled properly (ignored). 26 November 2010. DWF.
 ;       Added WINDOW and WINID keywords. 26 January 2011. DWF.
-;       Changed several Get_Decomposed calls to the more generic SetDecomposedState. 15 Jan 2012. DWF.
+;       Changed several Get_Decomposed calls to the more generic cgSetColorState. 15 Jan 2012. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 1997-2012, Fanning Software Consulting, Inc.
@@ -258,7 +258,7 @@ PRO XColors_Set, info
     
     TVLCT, r, g, b
     WSet, info.windowindex
-    SetDecomposedState, 0, Current=theState
+    cgSetColorState, 0, Current=theState
     TV, info.colorimage
     Device, Decomposed=theState
     WSet, info.thisWindow
@@ -1411,7 +1411,7 @@ PRO XCOLORS, $
     bar = BYTSCL(bar, TOP=ncolors-1) + bottom
     bar = XColors_Congrid(bar, 256, 40, /INTERP)
     WSet, windowIndex
-    SetDecomposedState, 0, Current=theState
+    cgSetColorState, 0, Current=theState
     TV, bar
     Device, Decomposed=theState
     

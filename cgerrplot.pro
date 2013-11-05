@@ -162,7 +162,7 @@ PRO cgErrPlot, indep, low, high, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = cgErrorMsg()
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         IF N_Elements(dataSwitch) NE 0 THEN BEGIN
             indep = low
             low = high
@@ -207,7 +207,7 @@ PRO cgErrPlot, indep, low, high, $
     ENDIF
     
     ; Going to draw the lines in decomposed color, if possible
-    SetDecomposedState, 1, CurrentState=currentState
+    cgSetColorState, 1, CurrentState=currentState
     
     ; Choose a color.
     color = cgDefaultColor(sColor, DEFAULT='OPPOSITE')
@@ -252,6 +252,6 @@ PRO cgErrPlot, indep, low, high, $
     ENDELSE
 
     
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
 END
    

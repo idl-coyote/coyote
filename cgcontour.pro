@@ -283,7 +283,7 @@
 ;        Restored the CELL_FILL keyword, which had been accidentally removed in
 ;           the earlier version. 12 November 2010. DWF.
 ;        Add the ability to specify the contour colors as color names. 16 November 2010. DWF.
-;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
+;        Now setting decomposition state by calling cgSetColorState. 16 November 2010. DWF.
 ;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
 ;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
 ;        Many changes after BACKGROUND changes to get !P.MULTI working again! 18 November 2010. DWF.
@@ -426,7 +426,7 @@ PRO cgContour, data, x, y, $
         void = cgErrorMsg()
         IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
         IF (!D.Name NE "NULL") && (N_Elements(rr) NE 0) THEN TVLCT, rr, gg, bb
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         RETURN
     ENDIF
     
@@ -724,7 +724,7 @@ PRO cgContour, data, x, y, $
     IF Keyword_Set(onImage) THEN overplot = 1
     
     ; Going to have to do all of this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    cgSetColorState, 1, CURRENTSTATE=currentState
     
     ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
     IF (currentState EQ 0) THEN BEGIN
@@ -977,7 +977,7 @@ PRO cgContour, data, x, y, $
         ENDIF ELSE BEGIN
             con_colors = Replicate(color, nlevels)
         ENDELSE
-        IF Size(con_colors, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN con_colors = Byte(con_colors)
+        IF Size(con_colors, /TYPE) EQ 3 THEN IF cgGetColorState() EQ 0 THEN con_colors = Byte(con_colors)
         IF Size(con_colors, /TYPE) LE 2 THEN con_colors = StrTrim(Fix(c_colors),2)
     ENDELSE
     
@@ -1186,7 +1186,7 @@ PRO cgContour, data, x, y, $
      ENDIF
     
     ; Restore the decomposed color state if you can.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
     
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.

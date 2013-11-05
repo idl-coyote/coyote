@@ -317,7 +317,8 @@ FUNCTION cgColor, theColour, colorIndex, $
     
     ; Get the current color state. This will help you determine what to 
     ; do with the input color.
-    IF N_Elements(decomposedState) NE 0 THEN colorState = Keyword_Set(decomposedState) ELSE colorState = GetDecomposedState()
+    IF N_Elements(decomposedState) NE 0 THEN colorState = Keyword_Set(decomposedState) $
+        ELSE colorState = cgGetColorState()
     
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
@@ -465,7 +466,7 @@ FUNCTION cgColor, theColour, colorIndex, $
     IF (!D.Flags AND 256) NE 0 THEN Device, Get_Visual_Depth=theDepth ELSE theDepth = 8
     IF (Float(!Version.Release) GE 6.4) AND (!D.NAME EQ 'Z') THEN Device, Get_Pixel_Depth=theDepth
     IF (!D.NAME EQ 'PS') AND (Float(!Version.Release) GE 7.1) THEN BEGIN
-       decomposedState = DecomposedColor(DEPTH=theDepth)
+       decomposedState = cgGetColorState(DEPTH=theDepth)
     ENDIF
 
     ; Need brewer colors?

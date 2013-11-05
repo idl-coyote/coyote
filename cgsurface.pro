@@ -1452,7 +1452,7 @@ PRO cgSurface, data, x, y, $
         Message, 'This program only works on devices that support windows.'
         
     ; We are going to do this in decomposed color mode.
-    SetDecomposedState, 1, CurrentState=currentDecomposedState
+    cgSetColorState, 1, CurrentState=currentDecomposedState
       
     ; Check parameters.
     IF N_Elements(data) EQ 0 THEN BEGIN

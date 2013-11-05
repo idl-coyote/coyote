@@ -2040,7 +2040,7 @@ PRO cgImage, image, x, y, $
                 ENDCASE
             'PS': BEGIN
                 IF (thisRelease GE 7.1) THEN BEGIN
-                   thisDecomposed = DecomposedColor(Depth=thisDepth)
+                   thisDecomposed = cgGetColorState(Depth=thisDepth)
                    Device, Decomposed=0
                 ENDIF ELSE thisDepth = 8
                 ENDCASE
@@ -2083,7 +2083,7 @@ PRO cgImage, image, x, y, $
              ENDCASE
           'PS': BEGIN
              IF (Float(!Version.Release) GE 7.1) THEN BEGIN
-                   thisDecomposed = DecomposedColor(Depth=thisDepth)
+                   thisDecomposed = cgGetColorState(Depth=thisDepth)
                    TVLCT, r, g, b, /GET
                    LoadCT, 0, /Silent
                    Device, DECOMPOSED=1, BITS_PER_PIXEL=8, COLOR=1

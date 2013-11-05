@@ -812,7 +812,7 @@ PRO cgHistoplot, $                  ; The program name.
    IF N_Elements(thick) EQ 0 THEN thick = 1.0
 
    ; Do this in decomposed color, if possible.
-   SetDecomposedState, 1, CURRENT=currentState
+   cgSetColorState, 1, CURRENT=currentState
    
    ; Load plot colors.
    TVLCT, r, g, b, /GET
@@ -1268,5 +1268,5 @@ PRO cgHistoplot, $                  ; The program name.
     ENDIF
     
     ; Clean up.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
 END

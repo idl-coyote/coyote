@@ -107,7 +107,7 @@ PRO pg_plotimage,im,x,y,isotropic=isotropic,fulledges=fulledges,_extra=_extra $
         Catch, /CANCEL
         void = cgErrorMsg()
         IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         RETURN
     ENDIF
     
@@ -169,7 +169,7 @@ PRO pg_plotimage,im,x,y,isotropic=isotropic,fulledges=fulledges,_extra=_extra $
     TVLCT, rr, gg, bb, /GET
     
     ; Going to do this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    cgSetColorState, 1, CURRENTSTATE=currentState
     
     ; Set up the layout, if necessary.
     IF N_Elements(layout) NE 0 THEN BEGIN
@@ -333,14 +333,14 @@ PRO pg_plotimage,im,x,y,isotropic=isotropic,fulledges=fulledges,_extra=_extra $
 
   ;plot image on the screen, rescaling depends on the value of rescale kyword
   ;xsize,ysize needed for PS output only
-  SetDecomposedState, 0, CURRENT=current
+  cgSetColorState, 0, CURRENT=current
   IF keyword_set(no_rescale) THEN $
      tv,newimage,normcoordllc[0],normcoordllc[1],/normal $
        ,xsize=normcoordurc[0]-normcoordllc[0],ysize=normcoordurc[1]-normcoordllc[1] $
   ELSE $     
      tvscl,newimage,normcoordllc[0],normcoordllc[1],/normal $
           ,xsize=normcoordurc[0]-normcoordllc[0],ysize=normcoordurc[1]-normcoordllc[1]
-  SetDecomposedState, current
+  cgSetColorState, current
 
   ;replot the x- and y- axis, as they may have been overwritten by the image
   ;most of the stuff is just keyword propagation
@@ -393,7 +393,7 @@ PRO pg_plotimage,im,x,y,isotropic=isotropic,fulledges=fulledges,_extra=_extra $
   ENDELSE
 
     ; Restore the decomposed color state if you can.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
     
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.

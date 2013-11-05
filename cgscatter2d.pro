@@ -264,7 +264,7 @@ PRO cgScatter2D, x, y, $
         Catch, /CANCEL
         void = cgErrorMsg()
         IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         IF (N_Elements(output) NE 0) THEN PS_END, /NOFIX
         RETURN
     ENDIF
@@ -497,7 +497,7 @@ PRO cgScatter2D, x, y, $
     TVLCT, rr, gg, bb, /GET
     
     ; Going to do this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    cgSetColorState, 1, CURRENTSTATE=currentState
     
     ; Set up the layout, if necessary.
     IF N_Elements(layout) NE 0 THEN BEGIN
@@ -775,7 +775,7 @@ PRO cgScatter2D, x, y, $
     ENDIF
     
     ; Restore the decomposed color state if you can.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
     
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.

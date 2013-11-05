@@ -317,7 +317,7 @@ PRO cgMapVector::DrawArrow, x0, y0, x1, y1, $
     ENDELSE
     
     ; Do this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENT=currentState
+    cgSetColorState, 1, CURRENT=currentState
     
     FOR i = 0L, N_Elements(x0)-1 DO BEGIN   ;Each vector
 
@@ -376,7 +376,7 @@ PRO cgMapVector::DrawArrow, x0, y0, x1, y1, $
     ENDFOR
     
     ; Restore color state.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
     
 END
 

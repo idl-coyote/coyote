@@ -447,7 +447,7 @@ PRO cgMap_Grid, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = cgErrorMsg()
-        IF N_Elements(thisState) NE 0 THEN SetDecomposedState, thisState
+        IF N_Elements(thisState) NE 0 THEN cgSetColorState, thisState
         RETURN
     ENDIF
 
@@ -507,7 +507,7 @@ PRO cgMap_Grid, $
     ENDIF ELSE IF (N_Elements(thick) EQ 0) THEN thick = !P.Thick 
 
     ; Try to do this in decomposed color, if possible.
-    SetDecomposedState, 1, Current=thisState
+    cgSetColorState, 1, Current=thisState
     
     ; Need a color.
     IF N_Elements(scolor) NE 0 THEN BEGIN
@@ -522,7 +522,7 @@ PRO cgMap_Grid, $
     ENDIF ELSE scolor = "opposite"
     IF N_Elements(scolor) EQ 0 THEN color = !P.Color ELSE  color = sColor
     IF (Size(scolor, /TNAME) EQ 'BYTE') AND (N_Elements(scolor) EQ 3) THEN color = cgColor(scolor)
-    IF Size(color, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN color = Byte(color)
+    IF Size(color, /TYPE) EQ 3 THEN IF cgGetColorState() EQ 0 THEN color = Byte(color)
     IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
     
     ; Check for label color now. Depends on other colors and value of BOX_AXES.
@@ -1108,6 +1108,6 @@ PRO cgMap_Grid, $
   endif   ; box_thick
 
     ; Restore color mode
-    SetDecomposedState, thisState
+    cgSetColorState, thisState
     
 end

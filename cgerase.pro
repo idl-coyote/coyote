@@ -106,7 +106,7 @@ PRO cgErase, background_color, COLOR=color, LAYOUT=layout, WINDOW=window
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
-       IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+       IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
        RETURN
     ENDIF
 
@@ -128,14 +128,14 @@ PRO cgErase, background_color, COLOR=color, LAYOUT=layout, WINDOW=window
     ; Get a color for erasing.
     IF N_Elements(background_color) EQ 0 THEN thisColor = 'white' ELSE thisColor = background_color
     IF N_Elements(color) NE 0 THEN thisColor = color 
-    IF Size(thisColor, /TYPE) EQ 3 THEN IF GetDecomposedState() EQ 0 THEN thisColor = Byte(thisColor)
+    IF Size(thisColor, /TYPE) EQ 3 THEN IF cgGetColorState() EQ 0 THEN thisColor = Byte(thisColor)
     IF Size(thisColor, /TYPE) LE 2 THEN thisColor = StrTrim(Fix(thisColor),2)
 
     ; Get the current color vectors.
     TVLCT, rr, gg, bb, /Get
     
     ; Do this in decomposed color, if possible.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    cgSetColorState, 1, CURRENTSTATE=currentState
     
     IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = cgColor(thisColor)
     
@@ -165,7 +165,7 @@ PRO cgErase, background_color, COLOR=color, LAYOUT=layout, WINDOW=window
 
     
     ; Clean up.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
     IF !D.Name NE 'Z' THEN TVLCT, rr, gg, bb
    
 END

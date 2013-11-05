@@ -203,7 +203,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 13 November 2010. DWF.
-;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
+;        Now setting decomposition state by calling cgSetColorState. 16 November 2010. DWF.
 ;        Added TSIZE and TSPACE keywords to treak title size and placement, 
 ;           as necessary. 17 November 2010. DWF.
 ;        Background keyword now applies in PostScript file as well. 17 November 2010. DWF.
@@ -288,7 +288,7 @@ PRO cgSurf, data, x, y, $
         Catch, /CANCEL
         void = cgErrorMsg()
         IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         RETURN
     ENDIF
     
@@ -494,7 +494,7 @@ PRO cgSurf, data, x, y, $
     ENDIF
    
     ; Going to draw in decomposed color, if possible to avoid dirtying the color table.
-    SetDecomposedState, 1, CURRENTSTATE=currentState
+    cgSetColorState, 1, CURRENTSTATE=currentState
 
     ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
     IF (currentState EQ 0) THEN BEGIN
@@ -742,7 +742,7 @@ PRO cgSurf, data, x, y, $
         ENDIF
         
          ; All shaded surfaces have to be done in indexed color mode.
-        SetDecomposedState, 0
+        cgSetColorState, 0
         
         ; Shaded surface plot. Should be no axes here at all.
          Shade_Surf, data, x, y, /NOERASE, SHADES=checkShades, $
@@ -750,7 +750,7 @@ PRO cgSurf, data, x, y, $
             BACKGROUND=shadebackground, AX=rotx, AZ=rotz, CHARSIZE=charsize, $
             XTITLE=xtitle, YTITLE=ytitle, ZTITLE=ztitle;;;;;, COLOR=color, BOTTOM=bottom  
             
-        SetDecomposedState, 1
+        cgSetColorState, 1
             
         ; Have to repair the axes. Do this in decomposed color mode, if possible.
         TVLCT, rl, gl, bl ; Color table after colors are loaded.
@@ -771,13 +771,13 @@ PRO cgSurf, data, x, y, $
         ; We can draw the surface in decomposed color mode, unless the SHADES
         ; keyword is being used. Then we have to use indexed color mode.         
         IF N_Elements(shades) NE 0 THEN BEGIN
-            SetDecomposedState, 0
+            cgSetColorState, 0
             TVLCT, rl, gl, bl ; Color table after colors are loaded.
             Surface, data, x, y, NOERASE=1, SHADES=shades, $
                 XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
                 FONT=font, CHARSIZE=charsize, _STRICT_EXTRA=extra, AX=rotx, AZ=rotz , $
                 XTITLE=xtitle, YTITLE=ytitle, ZTITLE=ztitle    
-             SetDecomposedState, 1    
+             cgSetColorState, 1    
         ENDIF ELSE BEGIN
             TVLCT, rl, gl, bl ; Color table after colors are loaded.
             Surface, data, x, y, NOERASE=1, COLOR=color, BOTTOM=bottom, $
@@ -799,7 +799,7 @@ PRO cgSurf, data, x, y, $
     ENDIF
 
     ; Restore the decomposed color state to the input state.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
 
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.
@@ -815,7 +815,7 @@ PRO cgSurf, data, x, y, $
     t3d = !P.T
     T3D, /RESET
     IF N_Elements(title) NE 0 THEN BEGIN
-        SetDecomposedState, 1, Current=currentState
+        cgSetColorState, 1, Current=currentState
         IF N_Elements(tsize) EQ 0 THEN BEGIN
             IF (!P.Charsize EQ 0) AND (N_Elements(charsize) EQ 0) THEN BEGIN
                 titleSize = 1.10
@@ -837,7 +837,7 @@ PRO cgSurf, data, x, y, $
             XYOutS, titleLocation[0],  titleLocation[1], /NORMAL, ALIGNMENT=0.5, CHARSIZE=titleSize, $
                 title, FONT=font, COLOR=axiscolor
         ENDELSE
-        SetDecomposedState, currentState
+        cgSetColorState, currentState
     ENDIF
     !P.T = t3d
     

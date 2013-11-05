@@ -110,7 +110,7 @@
 ;        Added SYMCOLOR keyword. PSYM accepts all values from cgSYMCAT. SYMCOLOR and SYMSIZE
 ;           keywords can be vectors the size of x. 15 November 2010. DWF
 ;        Added ability to support COLOR keyword as a vector the size of x. 15 November 2010. DWF
-;        Now setting decomposition state by calling SetDecomposedState. 16 November 2010. DWF.
+;        Now setting decomposition state by calling cgSetColorState. 16 November 2010. DWF.
 ;        Final color table restoration skipped in Z-graphics buffer. 17 November 2010. DWF.
 ;        Changes so that color variables don't change type. 23 Nov 2010. DWF.
 ;        Modified to use decomposed color, if possible. 24 Dec 2010. DWF.
@@ -151,7 +151,7 @@ PRO cgPlotS, x, y, z, $
         Catch, /CANCEL
         void = cgErrorMsg()
         IF Keyword_Set(dataSwitch) THEN x = Temporary(y)
-        IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+        IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         RETURN
     ENDIF
     
@@ -204,7 +204,7 @@ PRO cgPlotS, x, y, z, $
     ENDIF
     
     ; Going to draw the lines in decomposed color, if possible
-    SetDecomposedState, 1, CurrentState=currentState
+    cgSetColorState, 1, CurrentState=currentState
     
     ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
     IF (currentState EQ 0) THEN BEGIN
@@ -338,7 +338,7 @@ PRO cgPlotS, x, y, z, $
     ENDIF 
    
     ; Restore the decomposed state if you can.
-    SetDecomposedState, currentState
+    cgSetColorState, currentState
    
     ; Restore the color table. Can't do this for the Z-buffer or
     ; the snap shot will be incorrect.

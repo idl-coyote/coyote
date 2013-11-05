@@ -177,7 +177,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
   IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
       void = cgErrorMsg()
-      IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
+      IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
       RETURN
   ENDIF
   
@@ -336,7 +336,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
     ENDIF
     
   ; Do this in decomposed color mode.
-  SetDecomposedState, 1, CURRENT=currentState
+  cgSetColorState, 1, CURRENT=currentState
   
   ; Check parameters.
   IF N_Params() NE 2 THEN BEGIN
@@ -584,7 +584,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
   ENDIF
 
   ; Restore color mode.
-  SetDecomposedState, currentState
+  cgSetColorState, currentState
   
 END
   

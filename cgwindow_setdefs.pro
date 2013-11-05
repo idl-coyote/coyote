@@ -108,7 +108,7 @@
 ;     ps_metric: in, optional, type=boolean, default=0
 ;          Set this keyword to configure cgPS_Config to use metric values and A4 page size in its interface.
 ;     ps_quiet: in, optional, type=boolean, default=0
-;          Set this keyword to suppress output messages from cgPS_Open and PS_End.
+;          Set this keyword to suppress output messages from cgPS_Open and cgPS_Close.
 ;     ps_scale_factor: in, optional, type=float, default=1.0
 ;          Set this keyword to the PostScript scale factor you want to use for PostScript output.
 ;     ps_tt_font: in, optional, type=string, default="Helvetica"

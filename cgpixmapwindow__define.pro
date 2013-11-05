@@ -175,7 +175,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, 0
     ENDIF
     
@@ -382,7 +382,7 @@ PRO cgPixmapWindow::SetProperty, VISIBLE=visible, _EXTRA=extra
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     

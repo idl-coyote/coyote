@@ -131,7 +131,7 @@ FUNCTION cgKML_GroundOverlay::INIT, $
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN, 0
   ENDIF
   
@@ -169,7 +169,7 @@ PRO cgKML_GroundOverlay::Head, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -199,7 +199,7 @@ PRO cgKML_GroundOverlay::Body, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -250,7 +250,7 @@ PRO cgKML_GroundOverlay::Tail, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -277,7 +277,7 @@ PRO cgKML_GroundOverlay::Build, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   

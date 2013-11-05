@@ -45,7 +45,7 @@ PRO WindowImage_OriginalSettings, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN $
             Widget_Control, event.top, SET_UVALUE=info, /NO_COPY
         RETURN
@@ -102,7 +102,7 @@ PRO WindowImage_Resize, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN $
             Widget_Control, event.top, SET_UVALUE=info, /NO_COPY
         RETURN
@@ -147,7 +147,7 @@ PRO WindowImage_DrawEvents, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN $
             Widget_Control, event.top, SET_UVALUE=info, /NO_COPY
         RETURN
@@ -360,7 +360,7 @@ PRO WindowImage, image, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 

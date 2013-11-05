@@ -110,7 +110,7 @@ FUNCTION cgCheckForSymbols, aString
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(aString) EQ 0 THEN RETURN, "" ELSE RETURN, aString
     ENDIF
     

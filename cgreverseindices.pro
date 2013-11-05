@@ -97,7 +97,7 @@ FUNCTION cgReverseIndices, ri, index, COUNT=count
    Catch, theError
    IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         count = 0
         RETURN, -1
    ENDIF

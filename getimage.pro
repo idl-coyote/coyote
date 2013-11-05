@@ -91,14 +91,6 @@
 ;       A "CANCEL" operation is indicated by a 0 return value.
 ;       Any error in reading the file results in a 0 return value.
 ;
-; RESTRICTIONS:
-;
-;      Requires the following Coyote Library files:
-;
-;      CENTER_TLB
-;      ERROR_MESSAGE
-;      FSC_FIELD
-;
 ; EXAMPLE:
 ;       To load the image "galaxy.dat" in the $IDL/examples/data
 ;       directory, type:
@@ -122,7 +114,6 @@
 ;       Extensive update for IDL Programming Techniques, 3rd Edition. 1 November 2006. DWF.
 ;          XSIZE, YSIZE, CATCH, and FRAMES keyword made obsolete.
 ;          HEADDATA, ENDIAN, DATATYPE, DIMENSIONS keywords added.
-;          Now dependent on FSC_FIELD, ERROR_MESSAGE, and CENTER_TLB from Coyote Library.
 ;       Added ability to parse fully qualified file names passed from Dialog_Pickfile. 30 Oct 2010. DWF.
 ;       IF a file name is not passed into the program, it asks the user to select one now. 10 Jan 2011. DWF.
 ;       Problem with SWAP_ENDIAN keywords fixed. 7 March 2011. DWF.
@@ -227,7 +218,7 @@ PRO GETIMAGE_EVENT, event
    ; doing any damage.
    Catch, theError
    IF theError NE 0 THEN BEGIN
-      ok = Error_Message()
+      ok = cgErrorMsg()
       formdata = {cancel:1}
       *info.ptrToFormData =formdata
       RETURN
@@ -540,7 +531,7 @@ FUNCTION GETIMAGE, filename, Directory=directory, DataType=datatype, Dimensions=
       ; If we can't read the file for some reason, let the user know
       ; why, free the pointer and its information, check the logical
       ; unit number back in if it is checked out, and return a 0.
-      ok = Error_Message()
+      ok = cgErrorMsg()
       Ptr_Free, ptrToFormData
       canceled = 1
       IF N_Elements(lun) NE 0 THEN Free_Lun, lun

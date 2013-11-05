@@ -201,7 +201,7 @@ FUNCTION cgZPlot::INIT, x, y, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, 0
     ENDIF
     
@@ -336,7 +336,7 @@ PRO cgZPlot::CLEANUP
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -413,7 +413,7 @@ PRO cgZPlot::AddLegends, legendObject, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
   
@@ -494,7 +494,7 @@ PRO cgZPlot::AddOverplots, oplotObject, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
   
@@ -560,7 +560,7 @@ PRO cgZPlot::AdjustRange, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
       
@@ -601,7 +601,7 @@ PRO cgZPlot::Button_Events, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -725,7 +725,7 @@ PRO cgZPlot::Draw
     Catch, theError
     IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
     ENDIF
    
@@ -773,7 +773,7 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
     Catch, theError
     IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
     ENDIF
 
@@ -956,7 +956,7 @@ PRO cgZPlot::Erase
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
  
@@ -985,7 +985,7 @@ PRO cgZPlot::FileOutput, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -1066,7 +1066,7 @@ PRO cgZPlot::GetProperty, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -1147,7 +1147,7 @@ PRO cgZPlot::Notify_Realize
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
 
@@ -1177,7 +1177,7 @@ PRO cgZPlot::Pan_Events, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -1250,7 +1250,7 @@ PRO cgZPlot::ResizeDrawWidget, xsize, ysize, DRAW=draw
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -1339,7 +1339,7 @@ PRO cgZPlot::SetProperty, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -1395,7 +1395,7 @@ PRO cgZPlot::Redo, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -1438,7 +1438,7 @@ PRO cgZPlot::TLB_Resize_Events, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -1469,7 +1469,7 @@ PRO cgZPlot::Undo, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -1511,7 +1511,7 @@ PRO cgZPlot::UndoList
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -1551,7 +1551,7 @@ PRO cgZPlot::Zoom_Events, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -1637,7 +1637,7 @@ PRO cgZPlot_Events, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    

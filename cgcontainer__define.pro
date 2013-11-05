@@ -79,7 +79,7 @@ FUNCTION cgContainer::INIT, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, 0
    ENDIF
    
@@ -222,7 +222,7 @@ PRO cgContainer::GetProperty, NAME=name, COUNT=count, UVALUE=uvalue, _REF_EXTRA=
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       IF N_Elements(extra) NE 0 THEN Print, '      ' + 'Unhandled keywords: ' + extra
       RETURN
    ENDIF
@@ -259,7 +259,7 @@ PRO cgContainer::SetProperty, NAME=name, UVALUE=uvalue, _REF_EXTRA=extra
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    

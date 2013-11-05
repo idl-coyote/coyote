@@ -130,7 +130,7 @@ FUNCTION cgMapPlotS::INIT, mapCoord, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, 0
     ENDIF
     
@@ -204,7 +204,7 @@ PRO cgMapPlotS::Draw
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -324,7 +324,7 @@ PRO cgMapPlotS::GetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -409,7 +409,7 @@ PRO cgMapPlotS::SetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     IF N_Elements(lons) NE 0 THEN BEGIN

@@ -106,7 +106,7 @@ PRO cgShapeInfo_Events, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
 
@@ -245,7 +245,7 @@ PRO cgShapeInfo, filename, XRANGE=xrange, YRANGE=yrange
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
 

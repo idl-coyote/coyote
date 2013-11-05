@@ -180,7 +180,7 @@ FUNCTION cgSnake, image, x_init, y_init, $
           void = Dialog_Message('GVF_Snake object not found. Please see command log for details.')
           RETURN, -1
       ENDIF ELSE BEGIN
-          void = Error_Message()
+          void = cgErrorMsg()
           RETURN, -1
       ENDELSE
    ENDIF

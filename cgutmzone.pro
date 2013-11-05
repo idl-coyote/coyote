@@ -82,7 +82,7 @@ FUNCTION cgUTMZone, longitude, latitude, FORMAL=formal
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, 0
     ENDIF
     

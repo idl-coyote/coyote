@@ -407,7 +407,7 @@ PRO cgHistoplot, $                  ; The program name.
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      ok = Error_Message(!Error_State.Msg + '. Returning...')
+      ok = cgErrorMsg(!Error_State.Msg + '. Returning...')
       IF N_Elements(nancount) EQ 0 THEN BEGIN
             IF N_Elements(_data) NE 0 THEN data = Temporary(_data)
       ENDIF ELSE BEGIN

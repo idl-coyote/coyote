@@ -104,7 +104,7 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF Obj_Valid(m1) THEN Obj_Destroy, m1
         IF Obj_Valid(m2) THEN Obj_Destroy, m2
         success = 0

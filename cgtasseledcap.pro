@@ -118,7 +118,7 @@ FUNCTION cgTasseledCap, input, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
        IF (N_Elements(putback) NE 0) && putback THEN input = Temporary(image)
        RETURN, input
    ENDIF

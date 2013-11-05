@@ -89,7 +89,7 @@ FUNCTION WindowAvailable, windowID
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = Error_Message(Traceback=1)
+   ok = cgErrorMsg(Traceback=1)
    Print, 'Window ID: ', windowID
    RETURN, 0
 ENDIF

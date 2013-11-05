@@ -108,12 +108,6 @@
 ;       changed specifically for this release, so by sure you get a copy of that with this
 ;       source code.
 ;       
-;       http://www.idlcoyote.com/programs/coyoteprograms.zip
-;       
-;       ERROR_MESSAGE     http://www.idlcoyote.com/programs/error_message.pro
-;       FIND_BOUNDARY     http://www.idlcoyote.com/programs/find_boundary.pro
-;       FIT_ELLIPSE       http://www.idlcoyote.com/programs/fit_ellipse.pro
-;       
 ;       The program currently works only with 2D bi-level images.
 ;
 ; EXAMPLE:
@@ -218,7 +212,7 @@ FUNCTION Blob_Analyzer::FitEllipse, indexNumber, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, -1
     ENDIF
     
@@ -280,7 +274,7 @@ FUNCTION Blob_Analyzer::GetIndices, indexNumber, COUNT=count, XSIZE=xsize, YSIZE
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, -1
     ENDIF
     
@@ -365,7 +359,7 @@ FUNCTION Blob_Analyzer::GetStats, indexNumber, INDICES=indices, NOSCALE=noscale,
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, -1
     ENDIF
     
@@ -488,7 +482,7 @@ PRO Blob_Analyzer::ReportStats, NOSCALE=noscale, TOFILE=tofile, FILENAME=filenam
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(lun) NE 0 THEN Free_Lun, lun
         RETURN
     ENDIF
@@ -589,7 +583,7 @@ FUNCTION Blob_Analyzer::INIT, inputImage, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, 0
     ENDIF
     

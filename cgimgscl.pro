@@ -195,7 +195,7 @@ FUNCTION cgImgScl, image, xsize, ysize, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
-       ok = Error_Message()
+       ok = cgErrorMsg()
        RETURN, image
     ENDIF
     

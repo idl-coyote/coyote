@@ -154,7 +154,7 @@ PRO cgMap_Continents, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       IF N_Elements(thisState) NE 0 THEN SetDecomposedState, thisState
       RETURN
     ENDIF

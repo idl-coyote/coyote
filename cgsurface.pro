@@ -90,6 +90,7 @@
 ;        Added TRANSFORM keyword to allow the initial surface to be rotated to user 
 ;            specifications. 26 Sept 2011. DWF.
 ;        Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
+;        Axes titles are now changing size with the CHARSIZE keyword, as they are supposed to. 4 Nov 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010-2011, Fanning Software Consulting, Inc.
@@ -110,7 +111,7 @@ PRO CW_Light_Control_Intensity_Events, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, infoCarrier, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -160,7 +161,7 @@ PRO CW_Light_Control_Events, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, infoCarrier, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -420,7 +421,7 @@ PRO cgSurface_Axes_OnOff, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -467,7 +468,7 @@ PRO cgSurface_Bottom_OnOff, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -506,7 +507,7 @@ PRO cgSurface_Change_Colors, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -574,7 +575,7 @@ PRO cgSurface_Draw_Events, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -700,7 +701,7 @@ PRO cgSurface_Elevation_Colors, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -757,7 +758,7 @@ PRO cgSurface_Elevation_Shading, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -823,7 +824,7 @@ PRO cgSurface_Move_Surface, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -872,7 +873,7 @@ PRO cgSurface_Move_Title, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -1003,7 +1004,7 @@ PRO cgSurface_Properties, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -1101,7 +1102,7 @@ PRO cgSurface_Skirt_OnOff, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -1139,7 +1140,7 @@ PRO cgSurface_Style, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
     ENDIF
 
@@ -1436,7 +1437,7 @@ PRO cgSurface, data, x, y, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
   
@@ -1623,15 +1624,15 @@ PRO cgSurface, data, x, y, $
     textModel = Obj_New('IDLgrModel')
     thisView->Add, textModel
     
-    ; Create helper objects. First, create title objects
-    ; for the axes and plot. Color them green.
-    xTitle = Obj_New('IDLgrText', xtitleText, Color=axisColor, /Enable_Formatting)
-    yTitle = Obj_New('IDLgrText', ytitleText, Color=axisColor, /Enable_Formatting)
-    zTitle = Obj_New('IDLgrText', ztitleText, Color=axisColor, /Enable_Formatting)
-    
     ; Create font objects.
     axisFont  = Obj_New('IDLgrFont', font, Size=12*charsize)
     titleFont = Obj_New('IDLgrFont', font, Size=12*tcharsize)
+    
+    ; Create helper objects. First, create title objects
+    ; for the axes and plot. Color them green.
+    xTitle = Obj_New('IDLgrText', xtitleText, Color=axisColor, /Enable_Formatting, Font=axisFont)
+    yTitle = Obj_New('IDLgrText', ytitleText, Color=axisColor, /Enable_Formatting, Font=axisFont)
+    zTitle = Obj_New('IDLgrText', ztitleText, Color=axisColor, /Enable_Formatting, Font=axisFont)
     
     ; Create a plot title object. I am going to place the title
     ; centered in X and towards the top of the viewplane rectangle.

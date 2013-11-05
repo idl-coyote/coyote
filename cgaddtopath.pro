@@ -77,7 +77,7 @@ PRO cgADDTOPATH, theDirectory, VERBOSE=verbose
     ; Error handling.
     Catch, theError
     IF theError NE 0 THEN BEGIN
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 

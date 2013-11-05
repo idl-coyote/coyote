@@ -76,7 +76,7 @@ PRO NCDF_File_Examples
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         Obj_Destroy, fileObj
         Obj_Destroy, sObj
         Obj_Destroy, dObj

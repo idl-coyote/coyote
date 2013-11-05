@@ -74,12 +74,6 @@
 ;
 ;   None.
 ;
-; RESTRICTIONS:
-;
-;   Requires the folling files from the Coyote Library:
-;
-;      http://www.idlcoyote.com/programs/error_message.pro
-;
 ; EVENT STRUCTURE:
 ;
 ;   All events are handled internally unless either the Event_Pro or Event_Func
@@ -223,7 +217,7 @@
 ;       Browse button events are also returned. 29 SEP 2000. DWF.
 ;   Fixed a bug in setting the file filter. 29 SEP 2000. DWF.
 ;   Removed the Directory Browse button 10 AUG 2002. DWF.
-;   Added ERROR_MESSAGE to error handling. 10 AUG 2002. DWF.
+;   Added cgErrorMsg to error handling. 10 AUG 2002. DWF.
 ;   Changed the ability to specify a file filter as a string array, instead
 ;       of just as a scalar string. This required the use of a pointer, which
 ;       meant that I had to remove the FILTER field from the CW_FILESELECT
@@ -305,7 +299,7 @@ PRO FSC_FileSelect::Directory_Events, event
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN
 ENDIF
 
@@ -333,7 +327,7 @@ PRO FSC_FileSelect::Filename_Events, event
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN
 ENDIF
 
@@ -362,7 +356,7 @@ FUNCTION FSC_FileSelect::GetFilename
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN, -1
 ENDIF
 
@@ -416,7 +410,7 @@ PRO FSC_FileSelect::GetProperty, $
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN
 ENDIF
 
@@ -453,7 +447,7 @@ FUNCTION FSC_FileSelect::Inspect_DirectoryName, dirname, textSelection
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN, -1
 ENDIF
 
@@ -474,7 +468,7 @@ FUNCTION FSC_FileSelect::Inspect_Filename, filename, textSelection
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN, -1
 ENDIF
 
@@ -493,7 +487,7 @@ PRO FSC_FileSelect::LabelSize
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN
 ENDIF
 
@@ -514,7 +508,7 @@ PRO FSC_FileSelect::MatchSize
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN
 ENDIF
 
@@ -606,7 +600,7 @@ PRO FSC_FileSelect::Select_File, event
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN
 ENDIF
 
@@ -658,7 +652,7 @@ PRO FSC_FileSelect::SetFilename, theName
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN
 ENDIF
 
@@ -705,7 +699,7 @@ PRO FSC_FileSelect::SetProperty, $
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN
 ENDIF
 
@@ -760,7 +754,7 @@ PRO FSC_FileSelect::TextSelect, selection
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN
 ENDIF
 
@@ -805,7 +799,7 @@ Catch, theError
 ;theError = 0
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN, 0
 ENDIF
 
@@ -1063,7 +1057,7 @@ FUNCTION FSC_FileSelect, $
 Catch, theError
 ;theError = 0
 IF theError NE 0 THEN BEGIN
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN, 0
 ENDIF
 

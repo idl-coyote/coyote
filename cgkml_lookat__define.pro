@@ -102,7 +102,7 @@ FUNCTION cgKML_LookAt::INIT, $
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN, 0
   ENDIF
   
@@ -156,7 +156,7 @@ PRO cgKML_LookAt::Build, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
     
@@ -181,7 +181,7 @@ PRO cgKML_LookAt::Body, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -216,7 +216,7 @@ PRO cgKML_LookAt::Head, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -245,7 +245,7 @@ PRO cgKML_LookAt::Tail, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -294,7 +294,7 @@ PRO cgKML_LookAt::GetProperty, $
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -347,7 +347,7 @@ PRO cgKML_LookAt::SetProperty, $
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   

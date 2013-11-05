@@ -288,7 +288,7 @@ FUNCTION cgMap::INIT, map_projection, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, 0
    ENDIF
       
@@ -693,7 +693,7 @@ PRO cgMap::Draw, ERASE=erase, NOGRAPHICS=nographics, _EXTRA=extra
     Catch, theError
     IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
     ENDIF
     
@@ -857,7 +857,7 @@ FUNCTION cgMap::Forward, lons, lats, mapStruct, NOFORWARDFIX=noForwardFix
     Catch, theError
     IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, -1
     ENDIF
     
@@ -984,7 +984,7 @@ PRO cgMap::GetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
     ENDIF
    
@@ -1096,7 +1096,7 @@ FUNCTION cgMap::Inverse, x, y
     Catch, theError
     IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, -1
     ENDIF
     
@@ -1157,7 +1157,7 @@ PRO cgMap::LatLonLabels, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         success = 0
         RETURN
     ENDIF
@@ -1374,7 +1374,7 @@ FUNCTION cgMap::MapInfo
     Catch, theError
     IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, -1
     ENDIF
    
@@ -1569,7 +1569,7 @@ PRO cgMap::SetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
     ENDIF
       
@@ -1786,7 +1786,7 @@ FUNCTION cgMap::SetMapProjection, map_projection, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, 1
     ENDIF
    
@@ -1983,7 +1983,7 @@ PRO cgMap::CLEANUP
     Catch, theError
     IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
     ENDIF
    

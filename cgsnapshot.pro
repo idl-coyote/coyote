@@ -190,7 +190,7 @@ FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
        Catch, /Cancel
-       ok = Error_Message()
+       ok = cgErrorMsg()
        IF N_Elements(thisWindow) EQ 0 THEN RETURN, -1
        IF thisWindow GE 0 THEN WSet, thisWindow
        

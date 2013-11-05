@@ -172,7 +172,7 @@ FUNCTION cgConLevels, data, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        IF ~Keyword_Set(silent) THEN void = Error_Message()
+        IF ~Keyword_Set(silent) THEN void = cgErrorMsg()
         success = 0
         RETURN, -1
     ENDIF

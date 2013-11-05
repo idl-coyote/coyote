@@ -94,7 +94,7 @@
 ;       Ran into a problem in which the PostScript file is stored in the directory pointed
 ;          to by the IDL_TMPDIR environment variable. Now check to see if the input filename
 ;          is the same as the output filename and make a change, if necessary. 22 July 2010. DWF.
-;        Retreated to standard error handling with ERROR_MESSAGE as there are inevitable errors. 2 August 2010. DWF.
+;        Retreated to standard error handling with cgErrorMsg as there are inevitable errors. 2 August 2010. DWF.
 ;        Output file was created, even if not used. Now deleting file and issuing messages to
 ;           explain why output file was not created. 1 November 2010. DWF.
 ;        Added SUCCESS and QUIET keywords. 15 Novemember 2010. DWF.
@@ -130,7 +130,7 @@ PRO cgFIXPS, in_filename, out_filename, $
       Catch, theError
       IF theError NE 0 THEN BEGIN
           Catch, /CANCEL
-          IF ~Keyword_Set(quiet) THEN ok = Error_Message()
+          IF ~Keyword_Set(quiet) THEN ok = cgErrorMsg()
           success = 0
           IF N_Elements(out_lun) NE 0 THEN Free_Lun, out_lun
           IF N_Elements(in_lun) NE 0 THEN Free_Lun, in_lun

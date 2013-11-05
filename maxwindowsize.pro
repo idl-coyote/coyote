@@ -91,7 +91,7 @@ FUNCTION MaxWindowSize, MONITOR_RESOLUTION=monitor_resolution
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, [-1,-1]
     ENDIF
     

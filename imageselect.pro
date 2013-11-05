@@ -237,7 +237,7 @@ FUNCTION ImageSelect_WindowSize, image, XSIZE=xsize, YSIZE=ysize
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, Size(image, /Dimensions)
    ENDIF
 
@@ -284,7 +284,7 @@ PRO ImageSelect_Action, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      ok = Error_Message()
+      ok = cgErrorMsg()
       IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
       RETURN
    ENDIF
@@ -459,7 +459,7 @@ PRO ImageSelect_FilenameEvents, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      ok = Error_Message()
+      ok = cgErrorMsg()
       IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
       RETURN
    ENDIF
@@ -606,7 +606,7 @@ PRO ImageSelect_FlipImage, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      ok = Error_Message()
+      ok = cgErrorMsg()
       IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
       RETURN
    ENDIF
@@ -640,7 +640,7 @@ PRO ImageSelect_ListEvents, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      ok = Error_Message()
+      ok = cgErrorMsg()
       IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
       RETURN
    ENDIF
@@ -893,7 +893,7 @@ PRO ImageSelect_ReadFiles, extension, filename, info, fileinfo, image, ok, type,
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       ok = 0
       RETURN
    ENDIF
@@ -1258,7 +1258,7 @@ PRO ImageSelect_SetFilter, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      ok = Error_Message()
+      ok = cgErrorMsg()
       IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info, /No_Copy
       RETURN
    ENDIF
@@ -1453,7 +1453,7 @@ Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
    Cancel = 1
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN, 0
 ENDIF
 

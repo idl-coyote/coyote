@@ -98,7 +98,7 @@ PRO List_Selector_Button_Events, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -161,7 +161,7 @@ PRO List_Selector_Size_Events, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -201,7 +201,7 @@ FUNCTION List_Selector, theNames, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, ""
    ENDIF  
    

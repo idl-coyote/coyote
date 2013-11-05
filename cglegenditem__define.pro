@@ -97,7 +97,7 @@ PRO cgLegendItem::Draw
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(thisFont) NE 0 THEN !P.Font = thisFont
         RETURN
     ENDIF
@@ -213,7 +213,7 @@ PRO cgLegendItem::GetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -304,7 +304,7 @@ PRO cgLegendItem::SetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -412,7 +412,7 @@ FUNCTION cgLegendItem::INIT, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, 0
     ENDIF
     

@@ -186,7 +186,7 @@ FUNCTION cgGoogleMapWidget::INIT, parent, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN, 0
     ENDIF
     
@@ -334,7 +334,7 @@ PRO cgGoogleMapWidget::CreateMapCoordObject
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
        Obj_Destroy, mapCoord
        RETURN
     ENDIF
@@ -494,7 +494,7 @@ PRO cgGoogleMapWidget::DrawWidgetEvents, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN
     ENDIF
         
@@ -519,7 +519,7 @@ FUNCTION cgGoogleMapWidget::GetMapCoord, UPDATE=update
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN, Obj_New()
     ENDIF
     
@@ -586,7 +586,7 @@ PRO cgGoogleMapWidget::GetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN
     ENDIF
     
@@ -624,7 +624,7 @@ PRO cgGoogleMapWidget::Map_Type, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN
     ENDIF
 
@@ -660,7 +660,7 @@ PRO cgGoogleMapWidget::Notify_Realize
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
 
@@ -744,7 +744,7 @@ PRO cgGoogleMapWidget::SetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN
     ENDIF
     
@@ -792,7 +792,7 @@ PRO cgGoogleMapWidget::Zoom_In, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN
     ENDIF
 
@@ -818,7 +818,7 @@ PRO cgGoogleMapWidget::Zoom_Out, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN
     ENDIF
 
@@ -879,7 +879,7 @@ PRO cgGoogleMapWidget_Events, event
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    

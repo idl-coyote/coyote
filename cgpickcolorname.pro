@@ -266,7 +266,7 @@ FUNCTION cgPickColorName, theName, $         ; The name of the starting color.
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /Cancel
-     ok = Error_Message(/Traceback)
+     ok = cgErrorMsg(/Traceback)
      cancel = 1
      IF N_Elements(theName) NE 0 THEN RETURN, theName ELSE RETURN, 'White'
   ENDIF

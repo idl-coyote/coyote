@@ -98,7 +98,7 @@ FUNCTION cgKML_Overlay::INIT, $
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN, 0
   ENDIF
   
@@ -128,7 +128,7 @@ PRO cgKML_Overlay::Body, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -162,7 +162,7 @@ PRO cgKML_Overlay::Build, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   

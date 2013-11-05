@@ -124,7 +124,7 @@ FUNCTION cgOverPlot::INIT, x, y, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         RETURN, 0
     ENDIF
@@ -228,7 +228,7 @@ PRO cgOverPlot::Draw, SKIP=skip
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -312,7 +312,7 @@ PRO cgOverPlot::GetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -384,7 +384,7 @@ PRO cgOverPlot::SetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 

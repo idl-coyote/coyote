@@ -154,7 +154,7 @@ FUNCTION cgGraphicsKeywords::INIT, $
     
     Catch, theError
     IF theError NE 0 THEN BEGIN
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, 0
     ENDIF
     
@@ -500,7 +500,7 @@ PRO cgGraphicsKeywords::GetProperty, $
     ; Error handling.
     Catch, theError
     IF theError NE 0 THEN BEGIN
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -670,7 +670,7 @@ PRO cgGraphicsKeywords::SetProperty, $
     ; Error handling.
     Catch, theError
     IF theError NE 0 THEN BEGIN
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     

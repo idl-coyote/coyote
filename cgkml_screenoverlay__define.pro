@@ -147,7 +147,7 @@ FUNCTION cgKML_ScreenOverlay::INIT, $
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN, 0
   ENDIF
   
@@ -213,7 +213,7 @@ PRO cgKML_ScreenOverlay::Head, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -243,7 +243,7 @@ PRO cgKML_ScreenOverlay::Body, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -285,7 +285,7 @@ PRO cgKML_ScreenOverlay::Tail, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -312,7 +312,7 @@ PRO cgKML_ScreenOverlay::Build, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -464,7 +464,7 @@ PRO cgKML_ScreenOverlay::SetProperty, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    

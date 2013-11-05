@@ -513,7 +513,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
       Catch, theError
       IF theError NE 0 THEN BEGIN
          Catch, /CANCEL
-         void = Error_Message()
+         void = cgErrorMsg()
          IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState
          IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
          RETURN

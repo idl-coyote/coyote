@@ -129,55 +129,6 @@ END ;---------------------------------------------------------------------------
 
 
 
-FUNCTION CW_Drawcolor_Error_Message, theMessage, Traceback=traceback, NoName=noName, _Extra=extra
-
-;  The standard event handler function.
-
-On_Error, 2
-
-   ; Check for presence and type of message.
-
-IF N_Elements(theMessage) EQ 0 THEN theMessage = !Error_State.Msg
-s = Size(theMessage)
-messageType = s[s[0]+1]
-IF messageType NE 7 THEN BEGIN
-   Message, "The message parameter must be a string.", _Extra=extra
-ENDIF
-
-   ; Get the call stack and the calling routine's name.
-
-Help, Calls=callStack
-callingRoutine = (Str_Sep(StrCompress(callStack[1])," "))[0]
-
-   ; Are widgets supported? Doesn't matter in IDL 5.3 and higher.
-
-widgetsSupported = ((!D.Flags AND 65536L) NE 0) OR Float(!Version.Release) GE 5.3
-IF widgetsSupported THEN BEGIN
-   IF Keyword_Set(noName) THEN answer = Dialog_Message(theMessage, _Extra=extra) ELSE BEGIN
-      IF StrUpCase(callingRoutine) EQ "$MAIN$" THEN answer = Dialog_Message(theMessage, _Extra=extra) ELSE $
-         answer = Dialog_Message(StrUpCase(callingRoutine) + ": " + theMessage, _Extra=extra)
-   ENDELSE
-ENDIF ELSE BEGIN
-      Message, theMessage, /Continue, /NoPrint, /NoName, /NoPrefix, _Extra=extra
-      Print, '%' + callingRoutine + ': ' + theMessage
-      answer = 'OK'
-ENDELSE
-
-   ; Provide traceback information if requested.
-
-IF Keyword_Set(traceback) THEN BEGIN
-   Help, /Last_Message, Output=traceback
-   Print,''
-   Print, 'Traceback Report from ' + StrUpCase(callingRoutine) + ':'
-   Print, ''
-   FOR j=0,N_Elements(traceback)-1 DO Print, "     " + traceback[j]
-ENDIF
-
-RETURN, answer
-END ;-----------------------------------------------------------------------------------------------------------------------------
-
-
-
 FUNCTION CW_DrawColor::GetTLB
 
 ; This method function returns the identifier of the top-level base widget.
@@ -366,7 +317,7 @@ FUNCTION CW_DRAWCOLOR::Init, $
    ; Error handling.
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = CW_Drawcolor_Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN, 0
 ENDIF
 

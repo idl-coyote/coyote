@@ -85,7 +85,7 @@ PRO cgKML2KMZ, kml_filename, supportFiles
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    

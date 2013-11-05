@@ -149,7 +149,7 @@ PRO cgPlotS, x, y, z, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF Keyword_Set(dataSwitch) THEN x = Temporary(y)
         IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         RETURN

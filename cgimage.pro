@@ -248,7 +248,7 @@ FUNCTION cgImage_Make_Transparent_Image, image, transparent, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         success = 0
         RETURN, 0
     ENDIF
@@ -376,7 +376,7 @@ FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
-       ok = Error_Message()
+       ok = cgErrorMsg()
        IF Ptr_Valid(ptr) THEN BEGIN
             image = Temporary(*ptr)
             Ptr_Free, ptr
@@ -630,7 +630,7 @@ FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
-       ok = Error_Message()
+       ok = cgErrorMsg()
        RETURN, image
     ENDIF
     
@@ -1234,7 +1234,7 @@ PRO cgImage, image, x, y, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
-       ok = Error_Message()
+       ok = cgErrorMsg()
        IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
        IF transparentImage THEN image = oldImage
        RETURN

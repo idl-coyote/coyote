@@ -83,19 +83,6 @@
 ;       a tool I use, and improve upon whenever necessary, in my own work with netCDF and HDF
 ;       files. It will get better for all of us if you report problems to me directly.
 ;
-; REQUIRES:
-;
-;     The following programs are required from the Coyote Library. And it is always a
-;     good idea to make sure you have the latest version of the Coyote Library code,
-;     as updates are irregular and frequent.
-;
-;              http://www.idlcoyote.com/programs/netcdf_data__define.pro
-;              http://www.idlcoyote.com/programs/error_message.pro
-;;              http://www.idlcoyote.com/programs/undefine.pro
-;              http://www.idlcoyote.com/programs/textbox.pro
-;              http://www.idlcoyote.com/programs/cgrootname.pro
-;              http://www.idlcoyote.com/programs/textlineformat.pro
-;
 ; METHODS:
 ;
 ;     The following methods can be used directly.
@@ -243,7 +230,7 @@ PRO NCDF_DATA::Browse, $
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       Widget_Control, self.tlb, /DESTROY
       success = 0
       RETURN
@@ -488,7 +475,7 @@ PRO NCDF_DATA::EventHandler, event
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -589,7 +576,7 @@ FUNCTION NCDF_DATA::GetAttrNames
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, ""
    ENDIF
     
@@ -617,7 +604,7 @@ PRO NCDF_DATA::ListAttrNames
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
     
@@ -645,7 +632,7 @@ FUNCTION NCDF_DATA::GetVarNames
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, ""
    ENDIF
     
@@ -673,7 +660,7 @@ PRO NCDF_DATA::ListVarNames
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
     
@@ -701,7 +688,7 @@ FUNCTION NCDF_DATA::GetVarAttrNames, theVariable
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, ""
    ENDIF
     
@@ -738,7 +725,7 @@ PRO NCDF_DATA::OpenNewFile, event
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -780,7 +767,7 @@ PRO NCDF_DATA::OpenFile, filename
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
 
@@ -824,7 +811,7 @@ PRO NCDF_DATA::ParseFile
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
       self.hasBeenParsed = 0
       IF N_Elements(fileID) NE 0 THEN NCDF_Close, fileID
       RETURN
@@ -1019,7 +1006,7 @@ PRO NCDF_DATA::Parse_HDF_File
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       self.hasBeenParsed = 0
       IF N_Elements(fileID) NE 0 THEN HDF_SD_End, fileID
       RETURN
@@ -1155,7 +1142,7 @@ PRO NCDF_DATA::Parse_HDF_EOS_File
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       self.hasBeenParsed = 0
       IF N_Elements(fileID) NE 0 THEN BEGIN
         IF N_Elements(swathID) NE 0 THEN ok = EOS_SW_DETACH(swathID)
@@ -1462,7 +1449,7 @@ FUNCTION NCDF_DATA::ReadAttribute, theAttribute, SUCCESS=success
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       success = 0
       RETURN, -1
    ENDIF
@@ -1497,7 +1484,7 @@ PRO NCDF_DATA::ReadAttributeFromGUI, event
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -1550,7 +1537,7 @@ PRO NCDF_DATA::ReadAttributeFromGUI_Events, event
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -1681,7 +1668,7 @@ FUNCTION NCDF_DATA::ReadDimension, dimensionName, SUCCESS=success
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       success = 0
       RETURN, -1
    ENDIF
@@ -1752,7 +1739,7 @@ FUNCTION NCDF_DATA::ReadFile, theFile, SUCCESS=success
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       success = 0
       RETURN, -1
    ENDIF
@@ -1873,7 +1860,7 @@ PRO NCDF_DATA::ReadFileFromGUI, event
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
 
@@ -1928,7 +1915,7 @@ FUNCTION NCDF_DATA::ReadGlobalAttr, SUCCESS=success
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       success = 0
       RETURN, -1
    ENDIF
@@ -2055,7 +2042,7 @@ FUNCTION NCDF_DATA::ReadVariable, theVariable, $
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       IF self.isHDF THEN HDF_SD_End, fileID ELSE NCDF_CLOSE, fileID
       success = 0
       RETURN, -1
@@ -2207,7 +2194,7 @@ PRO NCDF_DATA::ReadVariableFromGUI, event
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -2264,7 +2251,7 @@ FUNCTION NCDF_DATA::ReadVarAttr, theVariableName, theAttributeName
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, ""
    ENDIF
 
@@ -2305,7 +2292,7 @@ PRO NCDF_DATA::ReadVariableFromGUI_Events, event
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -2427,7 +2414,7 @@ FUNCTION NCDF_DATA::ReadVariableWithAttr, theVariable, SUCCESS=success
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       success = 0
       RETURN, -1
    ENDIF
@@ -2557,7 +2544,7 @@ PRO NCDF_DATA::ReadVarPlusFromGUI, event
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
 
@@ -2611,7 +2598,7 @@ PRO NCDF_DATA::ReadVarPlusFromGUI_Events, event
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -2705,7 +2692,7 @@ PRO NCDF_DATA::SelectionInTree, event
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
 
@@ -2943,7 +2930,7 @@ FUNCTION NCDF_DATA::INIT, filename, $
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, 0
    ENDIF
 

@@ -44,7 +44,7 @@
 ;                    in an error state at that time (error status = 2). Default is 0. (Input)
 ;
 ;       NOCLUTTER:   Believe it or not, some people who use an ErrorLogger prefer that an error log
-;                    file is never left behind. (They prefer that the program act like ERROR_MESSAGE.)
+;                    file is never left behind. (They prefer that the program act like cgErrorMsg.)
 ;                    For those people, the NOCLUTTER keyword provides a way for them to automatically
 ;                    set the ALERT and DESTROY_ON_DELETE keywords to 1. It also prevents the error 
 ;                    logger from ever setting the error status to 2. Thus, when the ErrorLogger is
@@ -315,7 +315,7 @@ PRO ErrorLogger::AddText, theText, PRINT=print, ADD_CALLER=add_caller
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -582,7 +582,7 @@ FUNCTION ErrorLogger::OpenFile, newLogFilename, DELETE_CURRENT_FILE=delete_curre
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(lun) NE 0 THEN BEGIN
             Free_Lun, lun
             File_Delete, newLogFilename, /ALLOW_NONEXISTENT
@@ -866,7 +866,7 @@ END
 ;                    logged. Default is 1 (Input)
 ;
 ;       NOCLUTTER:   Believe it or not, some people who use an ErrorLogger prefer that an error log
-;                    file is never left behind. (They prefer that the program act like ERROR_MESSAGE.)
+;                    file is never left behind. (They prefer that the program act like cgErrorMsg.)
 ;                    For those people, the NOCLUTTER keyword provides a way for them to automatically
 ;                    set the ALERT and DESTROY_ON_DELETE keywords to 1. It also prevents the error 
 ;                    logger from ever setting the error status to 2. Thus, when the ErrorLogger is
@@ -894,7 +894,7 @@ FUNCTION ErrorLogger::INIT, filename, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(lun) NE 0 THEN BEGIN
             Free_Lun, lun
             File_Delete, logFilename, /ALLOW_NONEXISTENT

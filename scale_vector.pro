@@ -119,7 +119,7 @@ FUNCTION Scale_Vector, vector, minRange, maxRange, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, vector
    ENDIF
 

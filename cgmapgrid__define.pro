@@ -199,7 +199,7 @@ FUNCTION cgMapGrid::INIT, mapCoord, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, 0
     ENDIF
     
@@ -308,7 +308,7 @@ PRO cgMapGrid::AutoDrawGrid, SUCCESS=success
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         seccess = 0
         RETURN
     ENDIF
@@ -516,7 +516,7 @@ PRO cgMapGrid::Draw
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
         
@@ -603,7 +603,7 @@ PRO cgMapGrid::GetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -674,7 +674,7 @@ PRO cgMapGrid::SetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     

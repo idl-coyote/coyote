@@ -91,7 +91,7 @@ FUNCTION cgKML_Object::INIT, id, TARGETID=targetID, _REF_EXTRA=extra
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN, 0
   ENDIF
   
@@ -123,7 +123,7 @@ PRO cgKML_Object::Build, LUN=lun
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   
@@ -159,7 +159,7 @@ PRO cgKML_Object::XMLTag, tag, value, LUN=lun, SPACE=space
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
   

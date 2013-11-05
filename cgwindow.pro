@@ -337,7 +337,7 @@ PRO cgWindow, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message(Traceback=0)
+        void = cgErrorMsg(Traceback=0)
         RETURN
     ENDIF
     destroyObjects = Keyword_Set(wdestroyobjects)

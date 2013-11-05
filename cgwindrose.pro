@@ -153,7 +153,7 @@ PRO cgWindRose_ReadSamFile, filename, SPEED=speed, DIRECTION=direction
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -226,7 +226,7 @@ PRO cgWindRose, speed, direction, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    

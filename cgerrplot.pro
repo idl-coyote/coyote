@@ -161,7 +161,7 @@ PRO cgErrPlot, indep, low, high, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         IF N_Elements(dataSwitch) NE 0 THEN BEGIN
             indep = low

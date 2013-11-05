@@ -88,12 +88,12 @@ FUNCTION DirPath, subdirectory, RootDirectory=rootdirectory
 
    ; Catch the error. If something goes wrong, return the current directory.
 
-   Forward_Function Error_Message
+   Forward_Function cgErrorMsg
 
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      ok = Error_Message(/Traceback)
+      ok = cgErrorMsg(/Traceback)
       CD, Current=currentDir
       Return, currentDir
    ENDIF

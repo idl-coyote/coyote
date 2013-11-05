@@ -310,7 +310,7 @@ FUNCTION cgColor, theColour, colorIndex, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
-       ok = Error_Message()
+       ok = cgErrorMsg()
        cancelled = 1
        RETURN, !P.Color
     ENDIF

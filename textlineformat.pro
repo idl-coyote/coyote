@@ -82,7 +82,7 @@ FUNCTION TEXTLINEFORMAT, theText, LENGTH=length
    ; Error handling.
    Catch, theError
    IF theError NE 0 THEN BEGIN
-      ok = Error_Message()
+      ok = cgErrorMsg()
       RETURN, theText
    ENDIF
 

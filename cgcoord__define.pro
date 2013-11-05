@@ -93,7 +93,7 @@ FUNCTION cgCoord::INIT, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, 0
    ENDIF
    
@@ -164,7 +164,7 @@ PRO cgCoord::GetProperty, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    
@@ -198,7 +198,7 @@ PRO cgCoord::SetProperty, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    

@@ -127,7 +127,7 @@ PRO cgShapePointFile, xpts, ypts, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
        Obj_Destroy, shapefile
        RETURN
    ENDIF

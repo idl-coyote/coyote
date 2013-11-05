@@ -78,7 +78,7 @@ PRO FSCCleanUp8, ALL=all, CG=cg, DG=dg, FG=fg
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
-     void = Error_Message()
+     void = cgErrorMsg()
      RETURN
   ENDIF
 

@@ -90,7 +90,7 @@ PRO cgZImage_ZoomWindow_Events, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -175,7 +175,7 @@ PRO cgZImage_ZoomDied, zoomID
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message(/Quiet)
+        void = cgErrorMsg(/Quiet)
         RETURN
     ENDIF
 
@@ -237,7 +237,7 @@ PRO cgZImage_BoxColor, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
        RETURN
     ENDIF
 
@@ -297,7 +297,7 @@ PRO cgZImage_LoadColors, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -473,7 +473,7 @@ PRO cgZImage_Factor, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
          
         ; Put the info structure back.
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info
@@ -506,7 +506,7 @@ PRO cgZImage_DrawEvents, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
          
         ; Turn motion events off.
         Widget_Control, event.id, Draw_Motion_Events=0        
@@ -911,7 +911,7 @@ PRO cgZImage, image, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     

@@ -111,7 +111,7 @@ Function Find_Resource_File, filename, SUCCESS=success, VERBOSE=verbose
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         success = 0
         RETURN, ""
     ENDIF

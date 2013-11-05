@@ -260,53 +260,6 @@ END ;-------------------------------------------------------------------------
 
 
 
-FUNCTION FSC_PSCONFIG_Error_Message, theMessage, Traceback=traceback, $
-   NoName=noName
-
-; Handles program errors.
-
-On_Error, 2
-
-   ; Check for presence and type of message.
-
-IF N_Elements(theMessage) EQ 0 THEN theMessage = !Error_State.Msg
-s = Size(theMessage)
-messageType = s[s[0]+1]
-IF messageType NE 7 THEN BEGIN
-   Message, "The message parameter must be a string."
-ENDIF
-
-   ; Get the call stack and the calling routine's name.
-
-Help, Calls=callStack
-callingRoutine = (StrSplit(StrCompress(callStack[1])," ", /Extract))[0]
-
-   ; Are widgets supported? Doesn't matter in IDL 5.3 and higher.
-
-widgetsSupported = ((!D.Flags AND 65536L) NE 0) OR Float(!Version.Release) GE 5.3
-IF widgetsSupported THEN BEGIN
-   IF Keyword_Set(noName) THEN answer = Dialog_Message(theMessage) ELSE BEGIN
-      IF StrUpCase(callingRoutine) EQ "$MAIN$" THEN answer = Dialog_Message(theMessage) ELSE $
-         answer = Dialog_Message(StrUpCase(callingRoutine) + ": " + theMessage)
-   ENDELSE
-ENDIF ELSE BEGIN
-      Message, theMessage, /Continue, /NoPrint, /NoName, /NoPrefix
-      Print, '%' + callingRoutine + ': ' + theMessage
-      answer = 'OK'
-ENDELSE
-
-   ; Provide traceback information if requested.
-
-IF Keyword_Set(traceback) THEN BEGIN
-   Help, /Last_Message, Output=traceback
-   FOR j=0,N_Elements(traceback)-1 DO Print, traceback[j]
-ENDIF
-
-RETURN, answer
-END ;---------------------------------------------------------------------------------------------
-
-
-
 PRO FSC_PSCONFIG_Events, event
 
 ; This is the main event hander for the program. Its purpose
@@ -317,7 +270,7 @@ PRO FSC_PSCONFIG_Events, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message()
+   ok = cgErrorMsg()
    RETURN
 ENDIF
 
@@ -404,7 +357,7 @@ PRO FSC_PSCONFIG::Accept, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -579,7 +532,7 @@ FUNCTION FSC_PSCONFIG::Construct_Full_Filename
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN, ""
 ENDIF
 
@@ -665,7 +618,7 @@ PRO FSC_PSCONFIG::FontType, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -772,7 +725,7 @@ FUNCTION FSC_PSCONFIG::GetKeywords, FontType=fonttype
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN, {Cancel:1}
 ENDIF
 
@@ -920,7 +873,7 @@ PRO FSC_PSCONFIG::GUI, Group_Leader=leader, NoBlock=noblock, Cancel=cancel, $
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -1226,7 +1179,7 @@ PRO FSC_PSCONFIG::GUIFont, Cancel=cancel, Group_Leader=leader, NoBlock=noblock, 
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -1554,7 +1507,7 @@ PRO FSC_PSCONFIG::Help, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -1609,7 +1562,7 @@ FUNCTION FSC_PSCONFIG::PageDimensions
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN, [0,0]
 ENDIF
 
@@ -1653,7 +1606,7 @@ PRO FSC_PSCONFIG::Orientation, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -1675,7 +1628,7 @@ PRO FSC_PSCONFIG::PageSize, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -1716,7 +1669,7 @@ PRO FSC_PSCONFIG::Revert, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -1786,7 +1739,7 @@ PRO FSC_PSCONFIG::SaveConfiguration
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -1828,7 +1781,7 @@ PRO FSC_PSCONFIG::SetDefault, defaultname
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -2207,7 +2160,7 @@ PRO FSC_PSCONFIG::StatusLight, safe
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -2238,7 +2191,7 @@ PRO FSC_PSCONFIG::StyleButtons, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -2256,7 +2209,7 @@ PRO FSC_PSCONFIG::Units, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -2275,7 +2228,7 @@ PRO FSC_PSCONFIG::UpdateDisplay
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -2340,7 +2293,7 @@ PRO FSC_PSCONFIG::UpdateFontStyle, Clear = Clear
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -2364,7 +2317,7 @@ PRO FSC_PSCONFIG::UpdateSizes, xsize, ysize, xoffset, yoffset
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -2384,7 +2337,7 @@ PRO FSC_PSCONFIG::WindowSize, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=self.debug)
+   ok = cgErrorMsg(Traceback=self.debug)
    RETURN
 ENDIF
 
@@ -2466,7 +2419,7 @@ PRO FSC_PSCONFIG::SetProperty,        $ ; The SetProperty method of the object.
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=Keyword_Set(self.debug))
+   ok = cgErrorMsg(Traceback=Keyword_Set(self.debug))
    RETURN
 ENDIF
 
@@ -2615,7 +2568,7 @@ FUNCTION FSC_PSCONFIG::INIT,          $ ; The INIT method of the FSC_PSCONFIG ob
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_PSConfig_Error_Message(Traceback=Keyword_Set(debug))
+   ok = cgErrorMsg(Traceback=Keyword_Set(debug))
    RETURN, 1
 ENDIF
 

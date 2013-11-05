@@ -81,12 +81,6 @@
 ;       Print, length
 ;           230.0
 ;
-; DEPENDENCIES:
-;
-;       Requires ERROR_MESSAGE from the Coyote Library.
-;
-;           http://www.idlcoyote.com/programs/error_message.pro
-;
 ; MODIFICATION HISTORY:
 ;
 ;       Written by David W. Fanning, April 2002. Based on an algorithm written by Guy
@@ -101,7 +95,7 @@
 ;       Fixed a problem with POLYFILLV under-reporting the area by removing
 ;           POLYFILLV and using a pixel counting method. 10 Dec 2002. DWF.
 ;       Added the PERIM_AREA and CENTER keywords. 15 December 2002. DWF.
-;       Replaced the ERROR_MESSAGE routine with the latest version. 15 December 2002. DWF.
+;       Replaced the cgErrorMsg routine with the latest version. 15 December 2002. DWF.
 ;       Fixed a problem in which XSIZE and YSIZE have to be specified as integers to work. 6 March 2006. DWF.
 ;       Fixed a small problem with very small ROIs that caused the program to crash. 1 October 2008. DWF.
 ;       Modified the algorithm that determines the number of boundary points for small ROIs. 28 Sept 2010. DWF.
@@ -184,7 +178,7 @@ FUNCTION Find_Boundary, indices, $
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN, -1
 ENDIF
 

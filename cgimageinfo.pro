@@ -113,7 +113,7 @@ PRO cgImageInfo, image, position
     CATCH, theError
     IF theError NE 0 THEN BEGIN
         CATCH, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         
         ; Set the cursor back to original shape.
         IF !D.Name EQ 'WIN' THEN BEGIN

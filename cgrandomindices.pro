@@ -88,7 +88,7 @@ FUNCTION cgRandomIndices, length, number, SEED=seed
      Catch, theError
      IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, -1
      ENDIF
 

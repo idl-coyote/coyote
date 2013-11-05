@@ -523,7 +523,7 @@ PRO ContrastZoom_DistinguishEvents, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    Widget_Control, event.top, Set_UValue=info, /No_Copy
    RETURN
 ENDIF

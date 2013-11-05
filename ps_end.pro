@@ -219,7 +219,7 @@ PRO PS_END, $
        Catch, /CANCEL
    
        ; Issue an error message, unless messages are turned off.
-       IF ~Keyword_Set(nomessage) THEN void = Error_Message()
+       IF ~Keyword_Set(nomessage) THEN void = cgErrorMsg()
    
        ; Clean up.
        IF ps_struct.currentDevice NE "" THEN Set_Plot, ps_struct.currentDevice

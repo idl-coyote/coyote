@@ -76,17 +76,6 @@
 ;       The NCDF_DATA object can be used to read netCDF data in a non-interactive
 ;       way, if you prefer not to use a GUI to interact with the data file.
 ;
-; REQUIRES:
-;
-;        The following programs are required from the Coyote Library.
-;
-;              http://www.idlcoyote.com/netcdf_data__define.pro
-;              http://www.idlcoyote.com/error_message.pro
-;              http://www.idlcoyote.com/undefine.pro
-;              http://www.idlcoyote.com/textbox.pro
-;              http://www.idlcoyote.com/cgRootName.pro
-;              http://www.idlcoyote.com/textlineformat.pro
-;
 ; MODIFICATION HISTORY:
 ;       Written by:  David W. Fanning, 03 Feb 2008. Used ideas from many
 ;           people, including Chris Torrence, Ken Bowman, Liam Gumely, 
@@ -139,7 +128,7 @@ PRO NCDF_BROWSER, filename, $
    CATCH, theError
    IF theError NE 0 THEN BEGIN
       CATCH, /CANCEL
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
    

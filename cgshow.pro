@@ -93,7 +93,7 @@ PRO cgShow, selection, OBJECT=object, WIDGETID=widgetID, TITLE=title
    IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         ;ok = Dialog_Message(!Error_State.MSG)
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
    ENDIF
    

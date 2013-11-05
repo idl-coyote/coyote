@@ -287,7 +287,7 @@ FUNCTION cgCmdWindow::Init, parent, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, 0
     ENDIF
    
@@ -624,7 +624,7 @@ PRO cgCmdWindow::Cleanup
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -684,7 +684,7 @@ PRO cgWindow_Command::CreateCommandStruct, structName, Quiet=quiet
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -787,7 +787,7 @@ PRO cgWindow_Command::Draw, SUCCESS=success, KEYWORDS=keywords
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         success = 0
         RETURN
     ENDIF
@@ -933,7 +933,7 @@ FUNCTION cgWindow_Command::EvaluateKeywords, keywords, SUCCESS=success
   IF theError NE 0 THEN BEGIN
      Catch, /CANCEL
      success = 0
-     void = Error_Message()
+     void = cgErrorMsg()
      IF N_Elements(keywords) NE 0 THEN RETURN, keywords ELSE RETURN, 0
   ENDIF
   
@@ -1008,7 +1008,7 @@ PRO cgWindow_Command::List, prefix
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -1052,7 +1052,7 @@ FUNCTION cgWindow_Command::ReplaceEscapeSequences, aString
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(aString) EQ 0 THEN RETURN, "" ELSE RETURN, aString
     ENDIF
     
@@ -1171,7 +1171,7 @@ FUNCTION cgWindow_Command::INIT, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, 0
     ENDIF
 
@@ -1255,7 +1255,7 @@ PRO cgCmdWindow::AddCommand, command,  INDEX=index
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -1281,7 +1281,7 @@ PRO cgCmdWindow::AutoPostScriptFile, filename
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         
         ; Close the PostScript file.
         PS_END, /NoFix     
@@ -1343,7 +1343,7 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         
         ; Close the PostScript file.
         PS_END, /NoFix     
@@ -1512,7 +1512,7 @@ PRO cgCmdWindow::Copy, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
    ENDIF
     
@@ -1618,7 +1618,7 @@ PRO cgCmdWindow::DrawWidgetEvents, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -1649,7 +1649,7 @@ PRO cgCmdWindow::CreatePostScriptFile, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         
         ; Close the PostScript file.
         PS_END, /NoFix     
@@ -1726,7 +1726,7 @@ PRO cgCmdWindow::DeleteCommand, cmdIndex, ALL=all
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -1771,7 +1771,7 @@ PRO cgCmdWindow_Dispatch_Events, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -1815,7 +1815,7 @@ PRO cgCmdWindow::ExecuteCommands
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         !P.Multi = thisMulti
         !X.OMargin = thisXOmargin
         !Y.OMargin = thisYOmargin
@@ -1929,7 +1929,7 @@ FUNCTION cgCmdWindow::GetCommandKeyword, keyword, cmdIndex, SUCCESS=success
 
     Catch, theError
     IF theError NE 0 THEN BEGIN
-        void = Error_Message()
+        void = cgErrorMsg()
         success = 0
         RETURN, success
     ENDIF
@@ -2084,7 +2084,7 @@ PRO cgCmdWindow::GetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -2180,7 +2180,7 @@ PRO cgCmdWindow::ListCommand, cmdIndex, CREATECOMMANDSTRUCT=createCommandStruct
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -2242,7 +2242,7 @@ PRO cgCmdWindow::LoadColors, r, g, b, XCOLORS_DATA=colorData
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -2281,7 +2281,7 @@ PRO cgCmdWindow::Output, filename
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -2384,7 +2384,7 @@ FUNCTION cgCmdWindow::PackageCommand, command, p1, p2, p3, p4, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, Obj_New()
     ENDIF
 
@@ -2431,7 +2431,7 @@ PRO cgCmdWindow::ReplaceCommand, command, cmdIndex, MULTI=multi
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -2472,7 +2472,7 @@ PRO cgCmdWindow::Resize, x, y
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -2515,7 +2515,7 @@ PRO cgCmdWindow::SaveAsRaster, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         
         ; Close the PostScript file.
         PS_END, /NoFix     
@@ -2711,7 +2711,7 @@ PRO cgCmdWindow::RestoreCommands, filename
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
 
@@ -2834,7 +2834,7 @@ PRO cgCmdWindow::SaveCommands, filename
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -2991,7 +2991,7 @@ PRO cgCmdWindow::SetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     

@@ -54,29 +54,6 @@
 ;                  If not set, the file will be opened as "read-only".
 ;
 ;
-; REQUIRES:
-;
-;     The following programs are required from the Coyote Library. And it is always a
-;     good idea to make sure you have the latest version of the Coyote Library code,
-;     as updates are irregular and frequent.
-;
-;              http://www.idlcoyote.com/programs/ncdf_attribute__define.pro
-;              http://www.idlcoyote.com/programs/ncdf_data__define.pro
-;              http://www.idlcoyote.com/programs/ncdf_browser.pro
-;              http://www.idlcoyote.com/programs/ncdf_castdatatype.pro
-;              http://www.idlcoyote.com/programs/ncdf_container__define.pro
-;              http://www.idlcoyote.com/programs/ncdf_dimension__define.pro
-;              http://www.idlcoyote.com/programs/ncdf_variable__define.pro
-;              http://www.idlcoyote.com/programs/errorlogger__define.pro
-;              http://www.idlcoyote.com/programs/error_message.pro
-;              http://www.idlcoyote.com/programs/cgcentertlb.pro
-;              http://www.idlcoyote.com/programs/undefine.pro
-;              http://www.idlcoyote.com/programs/textbox.pro
-;              http://www.idlcoyote.com/programs/cgrootname.pro
-;              http://www.idlcoyote.com/programs/textlineformat.pro
-;              
-;     These files may be (almost certainly are!) dependent on other Coyote Library files.
-;
 ; METHODS:
 ;
 ;     The following methods are available. Each is documented in front of the method.

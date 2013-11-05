@@ -159,7 +159,7 @@ FUNCTION cgMapContinents::INIT, mapCoord, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /Cancel
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN, 0
     ENDIF
 
@@ -261,7 +261,7 @@ FUNCTION cgMapContinents::Confirm_Filename, filename
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(returnName) NE 0 THEN RETURN, returnName ELSE RETURN, ""
     ENDIF
     
@@ -307,7 +307,7 @@ PRO cgMapContinents::Draw
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -480,7 +480,7 @@ PRO cgMapContinents::GetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     
@@ -603,7 +603,7 @@ PRO cgMapContinents::SetProperty, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         RETURN
     ENDIF
     

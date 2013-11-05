@@ -21,7 +21,7 @@ FUNCTION cgImageGroup::Init, image, FILENAME=filename, REVERSE=reverse
    Catch, theError
    IF theError NE 0 THEN BEGIN
        Catch, /CANCEL
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN,1
    ENDIF
 

@@ -279,7 +279,7 @@ PRO FSC_ColorSelect::Set_Color, color
    ; Error Handling.
    Catch, theError
    IF theError NE 0 THEN BEGIN
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN
    ENDIF
    
@@ -308,7 +308,7 @@ PRO FSC_ColorSelect::Set_Color_Index, colorIndex, BREWER=brewer, TABLENAME=table
    ; Error Handling.
    Catch, theError
    IF theError NE 0 THEN BEGIN
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN
    ENDIF
    
@@ -360,7 +360,7 @@ FUNCTION FSC_ColorSelect::PickColorEvents, event
     Catch, theError
     IF theError NE 0 THEN BEGIN
        Catch, /Cancel
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN, 0
     ENDIF
 
@@ -445,7 +445,7 @@ PRO FSC_ColorSelect::GetProperty, $
    ; Error Handling.
    Catch, theError
    IF theError NE 0 THEN BEGIN
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN
    ENDIF
 
@@ -486,7 +486,7 @@ PRO FSC_ColorSelect::SetProperty, $
    ; Error Handling.
     Catch, theError
     IF theError NE 0 THEN BEGIN
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN
     ENDIF
     
@@ -544,7 +544,7 @@ FUNCTION FSC_ColorSelect::INIT, $   ; The compound widget FSC_ColorSelect INIT m
    ; Error Handling.
     Catch, theError
     IF theError NE 0 THEN BEGIN
-       void = Error_Message()
+       void = cgErrorMsg()
        RETURN, 0
     ENDIF
     

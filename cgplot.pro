@@ -311,7 +311,7 @@ PRO cgPlot, x, y, $
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
-        void = Error_Message()
+        void = cgErrorMsg()
         IF N_Elements(thisMulti) NE 0 THEN !P.Multi = thisMulti
         IF N_Elements(currentState) NE 0 THEN SetDecomposedState, currentState
         IF (N_Elements(output) NE 0) THEN PS_END, /NOFIX

@@ -180,7 +180,7 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
-      IF ~Keyword_Set(silent) THEN void = Error_Message()
+      IF ~Keyword_Set(silent) THEN void = cgErrorMsg()
       success = 0
       RETURN
    ENDIF

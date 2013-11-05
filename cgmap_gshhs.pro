@@ -173,7 +173,7 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       IF N_Elements(lun) NE 0 THEN Free_Lun, lun
       IF N_Elements(thisState) NE 0 THEN SetDecomposedState, thisState
       IF N_Elements(r) NE 0 THEN TVLCT, r, g, b

@@ -336,102 +336,6 @@ END ;---------------------------------------------------------------------------
 
 
 
-FUNCTION FSC_InputField_ERROR_MESSAGE, theMessage, Error=error, Informational=information, $
-   Traceback=traceback, NoName=noname, Title=title, _Extra=extra
-
-On_Error, 2
-
-   ; Check for presence and type of message.
-
-IF N_Elements(theMessage) EQ 0 THEN theMessage = !Error_State.Msg
-s = Size(theMessage)
-messageType = s[s[0]+1]
-IF messageType NE 7 THEN BEGIN
-   Message, "The message parameter must be a string.", _Extra=extra
-ENDIF
-
-   ; Get the call stack and the calling routine's name.
-
-Help, Calls=callStack
-IF Float(!Version.Release) GE 5.2 THEN $
-   callingRoutine = (StrSplit(StrCompress(callStack[1])," ", /Extract))[0] ELSE $
-   callingRoutine = (Str_Sep(StrCompress(callStack[1])," "))[0]
-
-   ; Are widgets supported?
-
-widgetsSupported = ((!D.Flags AND 65536L) NE 0)
-IF widgetsSupported THEN BEGIN
-
-      ; If this is an error produced with the MESSAGE command, it is a trapped
-      ; error and will have the name "IDL_M_USER_ERR".
-
-   IF !ERROR_STATE.NAME EQ "IDL_M_USER_ERR" THEN BEGIN
-
-      IF N_Elements(title) EQ 0 THEN title = 'Trapped Error'
-
-         ; If the message has the name of the calling routine in it,
-         ; it should be stripped out. Can you find a colon in the string?
-
-      colon = StrPos(theMessage, ":")
-      IF colon NE -1 THEN BEGIN
-
-            ; Extract the text up to the colon. Is this the same as
-            ; the callingRoutine? If so, strip it.
-
-         IF StrMid(theMessage, 0, colon) EQ callingRoutine THEN $
-            theMessage = StrMid(theMessage, colon+1)
-
-      ENDIF
-
-         ; Add the calling routine's name, unless NONAME is set.
-
-      IF Keyword_Set(noname) THEN BEGIN
-         answer = Dialog_Message(theMessage, Title=title, _Extra=extra, $
-            Error=error, Information=information)
-      ENDIF ELSE BEGIN
-         answer = Dialog_Message(StrUpCase(callingRoutine) + ": " + $
-            theMessage, Title=title, _Extra=extra, $
-            Error=error, Information=information)
-      ENDELSE
-
-   ENDIF ELSE BEGIN
-
-         ; Otherwise, this is an IDL system error.
-
-      IF N_Elements(title) EQ 0 THEN title = 'System Error'
-
-      IF StrUpCase(callingRoutine) EQ "$MAIN$" THEN $
-         answer = Dialog_Message(theMessage, _Extra=extra, Title=title, $
-            Error=error, Information=information) ELSE $
-      IF Keyword_Set(noname) THEN BEGIN
-         answer = Dialog_Message(theMessage, _Extra=extra, Title=title, $
-            Error=error, Information=information)
-      ENDIF ELSE BEGIN
-         answer = Dialog_Message(StrUpCase(callingRoutine) + "--> " + $
-            theMessage, _Extra=extra, Title=title, $
-            Error=error, Information=information)
-      ENDELSE
-   ENDELSE
-ENDIF ELSE BEGIN
-      Message, theMessage, /Continue, /NoPrint, /NoName, /NoPrefix, _Extra=extra
-      Print, '%' + callingRoutine + ': ' + theMessage
-      answer = 'OK'
-ENDELSE
-
-   ; Provide traceback information if requested.
-
-IF Keyword_Set(traceback) THEN BEGIN
-   Help, /Last_Message, Output=traceback
-   Print,''
-   Print, 'Traceback Report from ' + StrUpCase(callingRoutine) + ':'
-   Print, ''
-   FOR j=0,N_Elements(traceback)-1 DO Print, "     " + traceback[j]
-ENDIF
-
-RETURN, answer
-END ;-----------------------------------------------------------------------------------------------------------------------------
-
-
 PRO FSC_InputField::MoveTab
 IF  NOT Widget_Info(self.tabnext, /Valid_ID) THEN RETURN
 Widget_Control, self.tabnext, /Input_Focus
@@ -517,7 +421,7 @@ PRO FSC_InputField::Set_Value, value, IntegerValue=integervalue, $
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = FSC_InputField_ERROR_MESSAGE(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN
 ENDIF
 
@@ -566,7 +470,7 @@ FUNCTION FSC_InputField::Validate, value
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = FSC_InputField_ERROR_MESSAGE(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN, ""
 ENDIF
    ; A null string should be returned at once.
@@ -775,7 +679,7 @@ FUNCTION FSC_InputField::TextEvents, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_InputField_ERROR_MESSAGE(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN, 0
 ENDIF
 
@@ -1030,7 +934,7 @@ PRO FSC_InputField::GetProperty, $
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = FSC_InputField_ERROR_MESSAGE(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN
 ENDIF
 
@@ -1083,7 +987,7 @@ PRO FSC_InputField::SetProperty, $
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = FSC_InputField_ERROR_MESSAGE(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN
 ENDIF
 
@@ -1174,7 +1078,7 @@ FUNCTION FSC_InputField::INIT, $    ; The compound widget FSC_InputField INIT me
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = FSC_InputField_ERROR_MESSAGE(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN, 0
 ENDIF
 

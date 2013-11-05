@@ -108,7 +108,7 @@ PRO PrecipMap, filename, DATA=data, MAP=map, Palette=palette
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN
    ENDIF
 

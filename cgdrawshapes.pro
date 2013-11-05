@@ -179,7 +179,7 @@ PRO cgDrawShapes_DrawEntity, entity, $
    ; Error handling.
    Catch, theError
    IF theError NE 0 THEN BEGIN
-      ok = Error_Message(/Traceback)
+      ok = cgErrorMsg(/Traceback)
       IF Obj_Valid(shapefile) THEN Obj_Destroy, shapefile
       IF Ptr_Valid(entities) THEN Heap_Free, entities
       RETURN
@@ -396,7 +396,7 @@ PRO cgDrawShapes, shapeFile, $
    ; Error handling.
    Catch, theError
    IF theError NE 0 THEN BEGIN
-      ok = Error_Message()
+      ok = cgErrorMsg()
       IF Obj_Valid(shapefile) THEN Obj_Destroy, shapefile
       IF Ptr_Valid(entities) THEN Heap_Free, entities
       RETURN

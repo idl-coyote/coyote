@@ -102,11 +102,11 @@
 ;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
 ;         when making raster file output.
 ;     ps_encapsulated: in, optional, type=boolean, default=0
-;          Set this keyword to configure cgPSConfig to produce encapsulated PostScript output by default.
+;          Set this keyword to configure cgPS_Config to produce encapsulated PostScript output by default.
 ;     ps_font: in, optional, type=integer, default=0
 ;          Set this to the !P.Font value to use for creating PostScript files.
 ;     ps_metric: in, optional, type=boolean, default=0
-;          Set this keyword to configure cgPSConfig to use metric values and A4 page size in its interface.
+;          Set this keyword to configure cgPS_Config to use metric values and A4 page size in its interface.
 ;     ps_quiet: in, optional, type=boolean, default=0
 ;          Set this keyword to suppress output messages from cgPS_Open and PS_End.
 ;     ps_scale_factor: in, optional, type=float, default=1.0

@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   cgPSCONFIG
+;   cgPS_CONFIG
 ;
 ; PURPOSE:
 ;    The purpose of this program is to allow the user to configure the PostScript device
@@ -49,7 +49,7 @@
 ;    A structure of keywords, appropriate for configuring the PostScript device, is returned.
 ;    These keywords are generally passed to the PostScript device by means of keyword inheritance::
 ;    
-;         keywords = cgPSConfig()   ; Obtain PostScript keywords
+;         keywords = cgPS_Config()   ; Obtain PostScript keywords
 ;         Set_Plot, 'PS'          ; Select the PostScript device
 ;         Device, _Extra=keywords ; Configure the PostScript device with keywords
 ;    
@@ -198,7 +198,7 @@
 ;    To have the user specify PostScript configuration parameters, use
 ;    the program like this::
 ;
-;       keywords = cgPSConfig(Cancel=cancelled)
+;       keywords = cgPS_Config(Cancel=cancelled)
 ;       IF cancelled THEN RETURN
 ;       thisDevice = !D.Name
 ;       Set_Plot, 'PS'
@@ -226,12 +226,12 @@
 ;        Added MATCH keyword. 14 Dec 2010. DWF.
 ;        Changed ENCAPSULATE keyword to ENCAPSULATED, which is what I always type! 29 Jan 2011. DWF.
 ;        Depreciated EUROPEAN keyword in favor of METRIC. 31 Jan 2011. DWF.
-;        Renamed cgPSConfig from PSConfig. 5 November 2013. DWF.
+;        Renamed cgPS_Config from PSConfig. 5 November 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2000-2012, Fanning Software Consulting, Inc.
 ;-
-FUNCTION cgPSConfig, psObject,          $ ; A FSC_PSCONFIG object. 
+FUNCTION cgPS_Config, psObject,          $ ; A FSC_PSCONFIG object. 
    AvantGarde=avantgarde,             $ ; Set this keyword to select the AvantGarde font.
    Bits_per_Pixel=bits_per_pixel,     $ ; The number of image bits saved for each image pixel: 2, 4, or 8.
    Bold=bold,                         $ ; Set this keyword to select the Bold font style.

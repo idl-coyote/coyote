@@ -109,7 +109,7 @@
 ;           different versions of IDL. 23 Feb 2012. DWF.
 ;        Added ability to use IM_WIDTH keyword to set the width of raster file output
 ;           created with ImageMagick. 3 April 2012. DWF.
-;        Forgot to specify the GROUP_LEADER when calling cgPS_Open. Caused cgPSConfig to
+;        Forgot to specify the GROUP_LEADER when calling cgPS_Open. Caused cgPS_Config to
 ;           run though its block when cgWindow was called from a blocking widget program.
 ;           5 June 2012. DWF.
 ;        Added the ability to save the file name and directory of the last output file, so
@@ -1383,7 +1383,7 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
                 FILENAME=thisname, $
                 GROUP_LEADER=self.tlb, $
                 METRIC=self.ps_metric, $
-                KEYWORDS=keywords, $ ; Returned cgPSConfig keywords.
+                KEYWORDS=keywords, $ ; Returned cgPS_Config keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
                 FONT=self.ps_font, $
@@ -1420,7 +1420,7 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
                 FILENAME=thisname, $
                 GROUP_LEADER=self.tlb, $
                 METRIC=self.ps_metric, $
-                KEYWORDS=keywords, $ ; Returned cgPSConfig keywords.
+                KEYWORDS=keywords, $ ; Returned cgPS_Config keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
                 FONT=self.ps_font, $
@@ -2022,12 +2022,12 @@ END ;---------------------------------------------------------------------------
 ;         Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
 ;         when making raster file output.
 ;     ps_encapsulated: out, optional, type=boolean, default=0
-;         Set this keyword to configure cgPSConfig to produce encapsulated PostScript output by default.
+;         Set this keyword to configure cgPS_Config to produce encapsulated PostScript output by default.
 ;     ps_font: out, optional, type=integer
 ;         Set this keyword to the type of font you want to use in PostScript output. It sets the 
-;         FONT keyword on the cgPSConfig command. Normally, 0 (hardware fonts) or 1 (true-type fonts).
+;         FONT keyword on the cgPS_Config command. Normally, 0 (hardware fonts) or 1 (true-type fonts).
 ;     ps_metric: out, optional, type=boolean, default=0
-;         Set this keyword to configure cgPSConfig to use metric values and A4 page size in its interface.
+;         Set this keyword to configure cgPS_Config to use metric values and A4 page size in its interface.
 ;     ps_quiet: out, optional, type=boolean, default=0
 ;         Set this keyword to set the QUIET keyword on cgPS_Open.
 ;     ps_scale_factor: out, optional, type=float
@@ -2602,7 +2602,7 @@ PRO cgCmdWindow::SaveAsRaster, event
                 FILENAME=thisname, $
                 GROUP_LEADER=self.tlb, $
                 METRIC=self.ps_metric, $
-                KEYWORDS=keywords, $ ; Returned cgPSConfig keywords.
+                KEYWORDS=keywords, $ ; Returned cgPS_Config keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
                 FONT=self.ps_font, $
@@ -2639,7 +2639,7 @@ PRO cgCmdWindow::SaveAsRaster, event
                 FILENAME=thisname, $
                 GROUP_LEADER=self.tlb, $
                 METRIC=self.ps_metric, $
-                KEYWORDS=keywords, $ ; Returned cgPSConfig keywords.
+                KEYWORDS=keywords, $ ; Returned cgPS_Config keywords.
                 SCALE_FACTOR=self.ps_scale_factor, $
                 CHARSIZE=self.ps_charsize, $
                 FONT=self.ps_font, $
@@ -2925,12 +2925,12 @@ END
 ;        Set this keyword to zero if you want to keep the PostScript output ImageMagick creates
 ;        when making raster file output.
 ;     ps_encapsulated: in, optional, type=boolean, default=0
-;        Set this keyword to configure cgPSConfig to produce encapsulated PostScript output by default.
+;        Set this keyword to configure cgPS_Config to produce encapsulated PostScript output by default.
 ;     ps_font: in, optional, type=integer
 ;        Set this keyword to the type of font you want to use in PostScript output. It sets the 
-;        FONT keyword on the cgPSConfig command. Normally, 0 (hardware fonts) or 1 (true-type fonts).
+;        FONT keyword on the cgPS_Config command. Normally, 0 (hardware fonts) or 1 (true-type fonts).
 ;     ps_metric: in, optional, type=boolean, default=0
-;        Set this keyword to configure cgPSConfig to use metric values and A4 page size in its interface.
+;        Set this keyword to configure cgPS_Config to use metric values and A4 page size in its interface.
 ;     ps_quiet: in, optional, type=boolean, default=0
 ;        Set this keyword to set the QUIET keyword on cgPS_Open.
 ;     ps_scale_factor: in, optional, type=float

@@ -7,7 +7,7 @@
 ;    The purpose of FSC_PS_SETUP__DEFINE is to define a structure that is
 ;    use with cgPS_Open and cgPS_Close, programs that make it easy to set-up
 ;    for and close a PostScript file. The programs work in close conjunction
-;    with cgPSConfig, another program from the Coyote Library.
+;    with cgPS_Config, another program from the Coyote Library.
 ;
 ; AUTHOR:
 ;

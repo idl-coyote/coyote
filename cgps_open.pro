@@ -111,7 +111,7 @@
 ;     encapsulated: in, optional, type=boolean, default=0
 ;         Set this keyword to produce encapsulated PostScript output.
 ;     gui: in, optional, type=boolean, default=0
-;         The default behavior is to use cgPSConfig to configure the PostScript device silently. 
+;         The default behavior is to use cgPS_Config to configure the PostScript device silently. 
 ;         If you wish to allow the user to interatively configure the PostScript device, set this
 ;         keyword.
 ;     keywords: out, optional, type=structure                
@@ -130,7 +130,7 @@
 ;     tt_font: in, optional, type=string
 ;         The name of a true-type font to use. Using this keyword sets `Font` to 1.
 ;     _ref_extra: in, optional
-;         Any keyword appropriate for the PostScript configuration program cgPSConfig, from
+;         Any keyword appropriate for the PostScript configuration program cgPS_Config, from
 ;         the Coyote Library can be used with cgPS_Open.
 ;              
 ; :Examples:
@@ -281,11 +281,11 @@ PRO cgPS_Open, filename, $
       IF !D.X_Size GT !D.Y_Size THEN landscape = 1 ELSE landscape = 0
       IF Keyword_Set(encapsulated) THEN landscape = 0
       sizes = PSWindow(_Extra=extra, LANDSCAPE=landscape)
-      keywords = cgPSConfig(_Strict_Extra=extra, INCHES=sizes.inches, XSIZE=sizes.xsize, YSIZE=sizes.ysize, $
+      keywords = cgPS_Config(_Strict_Extra=extra, INCHES=sizes.inches, XSIZE=sizes.xsize, YSIZE=sizes.ysize, $
          XOFFSET=sizes.xoffset, YOFFSET=sizes.yoffset, Cancel=cancelled, NOGUI=(~gui), $
          LANDSCAPE=sizes.landscape, ENCAPSULATED=encapsulated, FILENAME=ps_filename[0])
    ENDIF ELSE BEGIN
-      keywords = cgPSConfig(_Strict_Extra=extra, ENCAPSULATED=encapsulated, $
+      keywords = cgPS_Config(_Strict_Extra=extra, ENCAPSULATED=encapsulated, $
           LANDSCAPE=landscape, CANCEL=cancelled, NOGUI=(~gui), FILENAME=ps_filename[0])
    ENDELSE
    IF cancelled THEN BEGIN

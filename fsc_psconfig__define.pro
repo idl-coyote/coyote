@@ -105,9 +105,9 @@
 ;     Set_Plot, thisDevice
 ;     Obj_Destroy, psObject
 ;
-;  Note that the object can also be called from the cgPSConfig interface:
+;  Note that the object can also be called from the cgPS_Config interface:
 ;
-;     psKeywords = cgPSConfig()
+;     psKeywords = cgPS_Config()
 ;
 ; OTHER PROGRAMS NEEDED:
 ;

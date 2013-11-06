@@ -14,7 +14,7 @@ this routine, refer to the IDL Online Help Navigator
 or type: <P>
 <PRE>     ? mk_html_help</PRE><P>
 at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Thu May 16 11:14:42 2013.<P>
+<STRONG>Last modified: </STRONG>Wed Nov 06 08:20:53 2013.<P>
  
 <HR>
  
@@ -39,10 +39,8 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#CONTRASTZOOM">CONTRASTZOOM</A>
 <LI><A HREF="#CONVERT_TO_TYPE">CONVERT_TO_TYPE</A>
 <LI><A HREF="#CW_DRAWCOLOR">CW_DRAWCOLOR</A>
-<LI><A HREF="#DECOMPOSEDCOLOR">DECOMPOSEDCOLOR</A>
 <LI><A HREF="#DIRPATH">DIRPATH</A>
 <LI><A HREF="#ERRORLOGGER__DEFINE">ERRORLOGGER__DEFINE</A>
-<LI><A HREF="#ERROR_MESSAGE">ERROR_MESSAGE</A>
 <LI><A HREF="#FIND_BOUNDARY">FIND_BOUNDARY</A>
 <LI><A HREF="#FIND_RESOURCE_FILE">FIND_RESOURCE_FILE</A>
 <LI><A HREF="#FIT_ELLIPSE">FIT_ELLIPSE</A>
@@ -61,7 +59,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#FSC_PSCONFIG__DEFINE">FSC_PSCONFIG__DEFINE</A>
 <LI><A HREF="#FSC_PS_SETUP__DEFINE">FSC_PS_SETUP__DEFINE</A>
 <LI><A HREF="#GAUSSSCL">GAUSSSCL</A>
-<LI><A HREF="#GETDECOMPOSEDSTATE">GETDECOMPOSEDSTATE</A>
 <LI><A HREF="#GETIMAGE">GETIMAGE</A>
 <LI><A HREF="#GETPRIMARYSCREENSIZE">GETPRIMARYSCREENSIZE</A>
 <LI><A HREF="#GET_OBJECT_ID">GET_OBJECT_ID</A>
@@ -77,7 +74,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#LEFTJUSTIFY">LEFTJUSTIFY</A>
 <LI><A HREF="#LINKEDLIST">LINKEDLIST</A>
 <LI><A HREF="#LIST_SELECTOR">LIST_SELECTOR</A>
-<LI><A HREF="#LOGLEVELS (FUNCTION)">LOGLEVELS (FUNCTION)</A>
 <LI><A HREF="#LOGSCL">LOGSCL</A>
 <LI><A HREF="#MAXMIN">MAXMIN</A>
 <LI><A HREF="#MAXWINDOWSIZE">MAXWINDOWSIZE</A>
@@ -96,11 +92,8 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#PRECIPMAP">PRECIPMAP</A>
 <LI><A HREF="#PRINTWINDOW">PRINTWINDOW</A>
 <LI><A HREF="#PROGRAMROOTDIR">PROGRAMROOTDIR</A>
-<LI><A HREF="#PSCONFIG">PSCONFIG</A>
 <LI><A HREF="#PSWINDOW">PSWINDOW</A>
 <LI><A HREF="#PS_BACKGROUND">PS_BACKGROUND</A>
-<LI><A HREF="#PS_END">PS_END</A>
-<LI><A HREF="#PS_START">PS_START</A>
 <LI><A HREF="#RANDOMNUMBERGENERATOR">RANDOMNUMBERGENERATOR</A>
 <LI><A HREF="#RANGEOF">RANGEOF</A>
 <LI><A HREF="#REPMAT">REPMAT</A>
@@ -108,11 +101,9 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#REVERSE_AXES">REVERSE_AXES</A>
 <LI><A HREF="#SAVETOMAIN">SAVETOMAIN</A>
 <LI><A HREF="#SCALEMODIS">SCALEMODIS</A>
-<LI><A HREF="#SCALE_VECTOR">SCALE_VECTOR</A>
 <LI><A HREF="#SCROLLWINDOW">SCROLLWINDOW</A>
 <LI><A HREF="#SDEVSCL">SDEVSCL</A>
 <LI><A HREF="#SELECT_OBJECTS">SELECT_OBJECTS</A>
-<LI><A HREF="#SETDECOMPOSEDSTATE">SETDECOMPOSEDSTATE</A>
 <LI><A HREF="#SETDEFAULTVALUE">SETDEFAULTVALUE</A>
 <LI><A HREF="#SHARPEN">SHARPEN</A>
 <LI><A HREF="#SORT_ND">SORT_ND</A>
@@ -738,12 +729,6 @@ at the IDL command line prompt.<P>
        changed specifically for this release, so by sure you get a copy of that with this
        source code.
        
-       http://www.idlcoyote.com/programs/coyoteprograms.zip
-       
-       ERROR_MESSAGE     http://www.idlcoyote.com/programs/error_message.pro
-       FIND_BOUNDARY     http://www.idlcoyote.com/programs/find_boundary.pro
-       FIT_ELLIPSE       http://www.idlcoyote.com/programs/fit_ellipse.pro
-       
        The program currently works only with 2D bi-level images.
 
  EXAMPLE:
@@ -952,6 +937,7 @@ at the IDL command line prompt.<P>
   Fixed a problem with 24-bit devices with color decomposition ON. 15 Feb 2000. DWF.
   Added the NOTIFYID keyword, 15 Dec 2005. DWF.
   Added BREWER keyword, 19 May 2008. DWF.
+  Replaced TV commands with cgImage, 12 June 2013. DWF.
 </PRE><P>
 <STRONG>(See cindex.pro)</STRONG><P>
 <HR>
@@ -1415,7 +1401,7 @@ at the IDL command line prompt.<P>
 <A NAME="CW_DRAWCOLOR">
 <H2>CW_DRAWCOLOR</H2></A>
 <A HREF="#CONVERT_TO_TYPE">[Previous Routine]</A>
-<A HREF="#DECOMPOSEDCOLOR">[Next Routine]</A>
+<A HREF="#DIRPATH">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -1503,79 +1489,9 @@ at the IDL command line prompt.<P>
 <STRONG>(See cw_drawcolor.pro)</STRONG><P>
 <HR>
  
-<A NAME="DECOMPOSEDCOLOR">
-<H2>DECOMPOSEDCOLOR</H2></A>
-<A HREF="#CW_DRAWCOLOR">[Previous Routine]</A>
-<A HREF="#DIRPATH">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-  DECOMPOSEDCOLOR
-
- PURPOSE:
-
-   This function is used to determine, in a device independent way, if the 
-   current graphics device is using color decomposition. The function returns
-   a 1 if color decomposition is turned on, and a 0 if it is turned off. When
-   color decomposition is turned on, we say the device is using a true-color
-   display. If color decomposition is turned off, we say the device is using
-   an indexed color display.
-
- AUTHOR:
-
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: david@idlcoyote.com
-   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-
- CATEGORY:
-
-   Utilities
-
- CALLING SEQUENCE:
-
-   result = DecomposedColor()
-
- RETURN VALUE:
-
-   result:       A 1 if color decomposition is turned on. A 0 if color decomposition is turned off.
-
- ARGUMENTS:
-
-  device:        The IDL graphics device whose color decomposition state you wish to know the
-                 current value of. If undefined, the current graphics device is used.
-
- KEYWORDRS:
-
-  DEPTH:          An output keyword that returns the depth of the graphics device. Normally,
-                  either 8 for index color devices, with color decomposition turned off, or 24
-                  for true-color devices with color decomposition turned on.
-
- EXAMPLE:
-
-  IDL> Print, DecomposedColor()     ; Color decomposition state of current graphics device.
-       1
-  IDL> Print, DecomposedColor('PS') ; Color decomposition state of PostScript graphics device.
-       0
-
- MODIFICATION HISTORY:
-
-  Written by: David W. Fanning, May 24, 2009.
-  Modified the way decomposition was obtained for PostScript devices IDL 7.1 and higher. 12 Dec 2010. DWF.
-  Fixed a problem in the CASE statement with ELSE clause and added a NULL device segment. 4 Jan 2011. DWF.
-  It now appears 24-bit PostScript support was added in IDL 7.1, although the Get_Decomposed keyword
-      didn't work until IDL 7.1.1. 13 January 2011. DWF
-
-</PRE><P>
-<STRONG>(See decomposedcolor.pro)</STRONG><P>
-<HR>
- 
 <A NAME="DIRPATH">
 <H2>DIRPATH</H2></A>
-<A HREF="#DECOMPOSEDCOLOR">[Previous Routine]</A>
+<A HREF="#CW_DRAWCOLOR">[Previous Routine]</A>
 <A HREF="#ERRORLOGGER__DEFINE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -1635,7 +1551,7 @@ at the IDL command line prompt.<P>
 <A NAME="ERRORLOGGER__DEFINE">
 <H2>ERRORLOGGER__DEFINE</H2></A>
 <A HREF="#DIRPATH">[Previous Routine]</A>
-<A HREF="#ERROR_MESSAGE">[Next Routine]</A>
+<A HREF="#FIND_BOUNDARY">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -1683,7 +1599,7 @@ at the IDL command line prompt.<P>
                     in an error state at that time (error status = 2). Default is 0. (Input)
 
        NOCLUTTER:   Believe it or not, some people who use an ErrorLogger prefer that an error log
-                    file is never left behind. (They prefer that the program act like ERROR_MESSAGE.)
+                    file is never left behind. (They prefer that the program act like cgErrorMsg.)
                     For those people, the NOCLUTTER keyword provides a way for them to automatically
                     set the ALERT and DESTROY_ON_DELETE keywords to 1. It also prevents the error 
                     logger from ever setting the error status to 2. Thus, when the ErrorLogger is
@@ -1753,133 +1669,9 @@ at the IDL command line prompt.<P>
 <STRONG>(See errorlogger__define.pro)</STRONG><P>
 <HR>
  
-<A NAME="ERROR_MESSAGE">
-<H2>ERROR_MESSAGE</H2></A>
-<A HREF="#ERRORLOGGER__DEFINE">[Previous Routine]</A>
-<A HREF="#FIND_BOUNDARY">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-    ERROR_MESSAGE
-
- PURPOSE:
-
-    The purpose of this function  is to have a device-independent
-    error messaging function. The error message is reported
-    to the user by using DIALOG_MESSAGE if widgets are
-    supported and MESSAGE otherwise.
-
-    In general, the ERROR_MESSAGE function is not called directly.
-    Rather, it is used in a CATCH error handler. Errors are thrown
-    to ERROR_MESSAGE with the MESSAGE command. A typical CATCH error
-    handler is shown below.
-
-       Catch, theError
-       IF theError NE 0 THEN BEGIN
-          Catch, /Cancel
-          void = Error_Message()
-          RETURN
-       ENDIF
-
-    Error messages would get into the ERROR_MESSAGE function by
-    throwing an error with the MESSAGE command, like this:
-
-       IF test NE 1 THEN Message, 'The test failed.'
-
- AUTHOR:
-
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: david@idlcoyote.com
-   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-
- CATEGORY:
-
-    Utility.
-
- CALLING SEQUENCE:
-
-    ok = Error_Message(the_Error_Message)
-
- INPUTS:
-
-    the_Error_Message: This is a string argument containing the error
-       message you want reported. If undefined, this variable is set
-       to the string in the !Error_State.Msg system variable.
-
- KEYWORDS:
-
-    ERROR: Set this keyword to cause Dialog_Message to use the ERROR
-       reporting dialog. Note that a bug in IDL causes the ERROR dialog
-       to be used whether this keyword is set to 0 or 1!
-
-    INFORMATIONAL: Set this keyword to cause Dialog_Message to use the
-       INFORMATION dialog instead of the WARNING dialog. Note that a bug
-       in IDL causes the ERROR dialog to be used if this keyword is set to 0!
-       
-    NONAME: Normally, the name of the routine in which the error occurs is
-       added to the error message. Setting this keyword will suppress this
-       behavior.
-
-    TITLE: Set this keyword to the title of the DIALOG_MESSAGE window. By
-       default the keyword is set to 'System Error' unless !ERROR_STATE.NAME
-       equals "IDL_M_USER_ERR", in which case it is set to "Trapped Error'.
-
-    TRACEBACK: Setting this keyword results in an error traceback
-       being printed to standard output with the PRINT command. Set to
-       1 (ON) by default. Use TRACEBACK=0 to turn this functionality off.
-       
-    QUIET: Set this keyword to suppress the DIALOG_MESSAGE pop-up dialog.
-
- OUTPUTS:
-
-    Currently the only output from the function is the string "OK".
-
- RESTRICTIONS:
-
-    The WARNING Dialog_Message dialog is used by default.
-
- EXAMPLE:
-
-    To handle an undefined variable error:
-
-    IF N_Elements(variable) EQ 0 THEN $
-       ok = Error_Message('Variable is undefined')
-
- MODIFICATION HISTORY:
-
-    Written by: David W. Fanning, 27 April 1999.
-    Added the calling routine's name in the message and NoName keyword. 31 Jan 2000. DWF.
-    Added _Extra keyword. 10 February 2000. DWF.
-    Forgot to add _Extra everywhere. Fixed for MAIN errors. 8 AUG 2000. DWF.
-    Adding call routine's name to Traceback Report. 8 AUG 2000. DWF.
-    Added ERROR, INFORMATIONAL, and TITLE keywords. 19 SEP 2002. DWF.
-    Removed the requirement that you use the NONAME keyword with the MESSAGE
-      command when generating user-trapped errors. 19 SEP 2002. DWF.
-    Added distinctions between trapped errors (errors generated with the
-      MESSAGE command) and IDL system errors. Note that if you call ERROR_MESSAGE
-      directly, then the state of the !ERROR_STATE.NAME variable is set
-      to the *last* error generated. It is better to access ERROR_MESSAGE
-      indirectly in a Catch error handler from the MESSAGE command. 19 SEP 2002. DWF.
-    Change on 19 SEP 2002 to eliminate NONAME requirement did not apply to object methods.
-      Fixed program to also handle messages from object methods. 30 JULY 2003. DWF.
-    Removed obsolete STR_SEP and replaced with STRSPLIT. 27 Oct 2004. DWF.
-    Made a traceback the default case without setting TRACEBACK keyword. 19 Nov 2004. DWF.
-    Added check for window connection specifically for CRON jobs. 6 May 2008. DWF.
-    Added QUIET keyword. 18 October 2008. DWF.
-    The traceback information was bypassed when in the PostScript device. Not what I
-      had in mind. Fixed. 6 July 2009. DWF.
-    The QUIET keyword was clearing traceback information. Fixed with help from Phillip Bitzer. 2 Oct 2012. DWF.
-</PRE><P>
-<STRONG>(See error_message.pro)</STRONG><P>
-<HR>
- 
 <A NAME="FIND_BOUNDARY">
 <H2>FIND_BOUNDARY</H2></A>
-<A HREF="#ERROR_MESSAGE">[Previous Routine]</A>
+<A HREF="#ERRORLOGGER__DEFINE">[Previous Routine]</A>
 <A HREF="#FIND_RESOURCE_FILE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -1965,12 +1757,6 @@ at the IDL command line prompt.<P>
        Print, length
            230.0
 
- DEPENDENCIES:
-
-       Requires ERROR_MESSAGE from the Coyote Library.
-
-           http://www.idlcoyote.com/programs/error_message.pro
-
  MODIFICATION HISTORY:
 
        Written by David W. Fanning, April 2002. Based on an algorithm written by Guy
@@ -1985,7 +1771,7 @@ at the IDL command line prompt.<P>
        Fixed a problem with POLYFILLV under-reporting the area by removing
            POLYFILLV and using a pixel counting method. 10 Dec 2002. DWF.
        Added the PERIM_AREA and CENTER keywords. 15 December 2002. DWF.
-       Replaced the ERROR_MESSAGE routine with the latest version. 15 December 2002. DWF.
+       Replaced the cgErrorMsg routine with the latest version. 15 December 2002. DWF.
        Fixed a problem in which XSIZE and YSIZE have to be specified as integers to work. 6 March 2006. DWF.
        Fixed a small problem with very small ROIs that caused the program to crash. 1 October 2008. DWF.
        Modified the algorithm that determines the number of boundary points for small ROIs. 28 Sept 2010. DWF.
@@ -2358,6 +2144,11 @@ OUTPUTS:
        The purpose of this function is to compare two floating-point values or
        arrays to determine if the values or arrays are equal. Arrays are equal
        if they have the same number of elements, and each element is equal.
+       
+       To learn why determing if floats are equal is hard (and probably not done
+       correctly in this program), please read the following article::
+       
+          http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm
 
  AUTHOR:
 
@@ -2936,10 +2727,6 @@ OUTPUTS:
 
    None.
 
- DEPENDENCIES:
-
-   Requires ERROR_MESSAGE from the Coyote Library..
-
  EVENT STRUCTURE:
 
    An event is returned each time the droplist value is changed. The event structure
@@ -3454,12 +3241,6 @@ OUTPUTS:
 
    None.
 
- RESTRICTIONS:
-
-   Requires the folling files from the Coyote Library:
-
-      http://www.idlcoyote.com/programs/error_message.pro
-
  EVENT STRUCTURE:
 
    All events are handled internally unless either the Event_Pro or Event_Func
@@ -3603,7 +3384,7 @@ OUTPUTS:
        Browse button events are also returned. 29 SEP 2000. DWF.
    Fixed a bug in setting the file filter. 29 SEP 2000. DWF.
    Removed the Directory Browse button 10 AUG 2002. DWF.
-   Added ERROR_MESSAGE to error handling. 10 AUG 2002. DWF.
+   Added cgErrorMsg to error handling. 10 AUG 2002. DWF.
    Changed the ability to specify a file filter as a string array, instead
        of just as a scalar string. This required the use of a pointer, which
        meant that I had to remove the FILTER field from the CW_FILESELECT
@@ -4107,9 +3888,9 @@ OUTPUTS:
      Set_Plot, thisDevice
      Obj_Destroy, psObject
 
-  Note that the object can also be called from the PS_CONFIG interface:
+  Note that the object can also be called from the cgPS_Config interface:
 
-     psKeywords = PSConfig()
+     psKeywords = cgPS_Config()
 
  OTHER PROGRAMS NEEDED:
 
@@ -4188,9 +3969,9 @@ OUTPUTS:
  PURPOSE:
 
     The purpose of FSC_PS_SETUP__DEFINE is to define a structure that is
-    use with PS_START and PS_END, programs that make it easy to set-up
+    use with cgPS_Open and cgPS_Close, programs that make it easy to set-up
     for and close a PostScript file. The programs work in close conjunction
-    with PSCONFIG, another program from the Coyote Library.
+    with cgPS_Config, another program from the Coyote Library.
 
  AUTHOR:
 
@@ -4208,19 +3989,20 @@ OUTPUTS:
 
  CALLING SEQUENCE:
 
-       Used internally in PS_START and PS_END.
+       Used internally in cgPS_Open and cgPS_Close.
 
  COMMON BLOCKS:
 
        _$FSC_PS_START_   Contains the PS_STRUCT structure for communication between
-                         PS_START and PS_END.
+                         cgPS_Open and cgPS_Close.
 
  MODIFICATION HISTORY:
 
-       Separated from PS_START file, 7 April 2009, by David W. Fanning.
+       Separated from cgPS_Open file, 7 April 2009, by David W. Fanning.
        Added PAGETYPE field to structure. 8 August 2009. DWF.
        Changes to handle inability to create raster files from PS encapsulated files in 
            landscape mode. Added "encapsulated" field to structure. 26 Aug 2011. DWF.
+       Modified to keep track of the "input" True-Type font for PostScript devices. 22 May 2013. DWF.
 </PRE><P>
 <STRONG>(See fsc_ps_setup__define.pro)</STRONG><P>
 <HR>
@@ -4228,7 +4010,7 @@ OUTPUTS:
 <A NAME="GAUSSSCL">
 <H2>GAUSSSCL</H2></A>
 <A HREF="#FSC_PS_SETUP__DEFINE">[Previous Routine]</A>
-<A HREF="#GETDECOMPOSEDSTATE">[Next Routine]</A>
+<A HREF="#GETIMAGE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -4308,51 +4090,9 @@ OUTPUTS:
 <STRONG>(See gaussscl.pro)</STRONG><P>
 <HR>
  
-<A NAME="GETDECOMPOSEDSTATE">
-<H2>GETDECOMPOSEDSTATE</H2></A>
-<A HREF="#GAUSSSCL">[Previous Routine]</A>
-<A HREF="#GETIMAGE">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
-  Provides a device-independent way to get the color decomposition state of the
-  current graphics device. 
-
- :Categories:
-    Graphics, Utilities
-    
- :Returns:
-     Returns a 1 if color decomposition is turned on and a 0 if indexed color is used.
-       
- :Keywords:
-     Depth: out, optional, type=integer
-         The depth of the color display. Typically 8 for indexed color devices
-         and 24 for true-color devices.
-          
- :Examples:
-       IDL> currentState = GetDecomposedState()
-       
- :Author:
-       FANNING SOFTWARE CONSULTING::
-           David W. Fanning 
-           1645 Sheely Drive
-           Fort Collins, CO 80526 USA
-           Phone: 970-221-0438
-           E-mail: david@idlcoyote.com
-           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- :History:
-     Change History::
-        Written, 12 December 2010 as a better named wrapper for DECOMPOSEDCOLOR program. DWF.
-
- :Copyright:
-     Copyright (c) 2010, Fanning Software Consulting, Inc.
-</PRE><P>
-<STRONG>(See getdecomposedstate.pro)</STRONG><P>
-<HR>
- 
 <A NAME="GETIMAGE">
 <H2>GETIMAGE</H2></A>
-<A HREF="#GETDECOMPOSEDSTATE">[Previous Routine]</A>
+<A HREF="#GAUSSSCL">[Previous Routine]</A>
 <A HREF="#GETPRIMARYSCREENSIZE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -4448,14 +4188,6 @@ OUTPUTS:
        A "CANCEL" operation is indicated by a 0 return value.
        Any error in reading the file results in a 0 return value.
 
- RESTRICTIONS:
-
-      Requires the following Coyote Library files:
-
-      CENTER_TLB
-      ERROR_MESSAGE
-      FSC_FIELD
-
  EXAMPLE:
        To load the image "galaxy.dat" in the $IDL/examples/data
        directory, type:
@@ -4479,7 +4211,6 @@ OUTPUTS:
        Extensive update for IDL Programming Techniques, 3rd Edition. 1 November 2006. DWF.
           XSIZE, YSIZE, CATCH, and FRAMES keyword made obsolete.
           HEADDATA, ENDIAN, DATATYPE, DIMENSIONS keywords added.
-          Now dependent on FSC_FIELD, ERROR_MESSAGE, and CENTER_TLB from Coyote Library.
        Added ability to parse fully qualified file names passed from Dialog_Pickfile. 30 Oct 2010. DWF.
        IF a file name is not passed into the program, it asks the user to select one now. 10 Jan 2011. DWF.
        Problem with SWAP_ENDIAN keywords fixed. 7 March 2011. DWF.
@@ -5797,7 +5528,7 @@ OUTPUTS:
 <A NAME="LIST_SELECTOR">
 <H2>LIST_SELECTOR</H2></A>
 <A HREF="#LINKEDLIST">[Previous Routine]</A>
-<A HREF="#LOGLEVELS (FUNCTION)">[Next Routine]</A>
+<A HREF="#LOGSCL">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -5870,88 +5601,9 @@ OUTPUTS:
 <STRONG>(See list_selector.pro)</STRONG><P>
 <HR>
  
-<A NAME="LOGLEVELS (FUNCTION)">
-<H2>LOGLEVELS (FUNCTION)</H2></A>
-<A HREF="#LIST_SELECTOR">[Previous Routine]</A>
-<A HREF="#LOGSCL">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-        LOGLEVELS (function)
-
- PURPOSE:
-        Compute default values for logarithmic axis labeling
-        or contour levels. For a range from 1 to 100 these
-        would be 1., 2., 5., 10., 20., 50., 100.
-        If the range spans more than (usually) 3 decades, only
-        decadal values will be returned unless the /FINE keyword
-        is set.
-
- CATEGORY:
-        Tools
-
- CALLING SEQUENCE:
-        result = LOGLEVELS([range | MIN=min,MAX=max] [,/FINE], [COARSE=dec])
-
- INPUTS:
-        RANGE -> A 2-element vector with the minimum and maximum
-            value to be returned. Only levels _within_ this range
-            will be returned. If RANGE contains only one element,
-            this is interpreted as MAX and MIN will be assumed as
-            3 decades smaller. RANGE superseeds the MIN and MAX
-            keywords. Note that RANGE must be positive definite
-            but can be given in descending order in which case
-            the labels will be reversed.
-
- KEYWORD PARAMETERS:
-        MIN, MAX -> alternative way of specifying a RANGE. If only
-            one keyword is given, the other one is computed as
-            3 decades smaller/larger than the given parameter.
-            RANGE superseeds MIN and MAX.
-
-        /FINE -> always return finer levels (1,2,5,...)
-
-        COARSE -> the maximum number of decades for which LOGLEVELS
-            shall return fine labels. Default is 3. (non-integer
-            values are possible).
-
- OUTPUTS:
-        A vector with "round" logarithmic values within the given
-        range. The original (or modified) RANGE will be returned
-        unchanged if RANGE does not span at least one label interval.
-        The result will always contain at least two elements.
-
-
- SUBROUTINES:
-        none
-
- REQUIREMENTS:
-        none
-
- NOTES:
-        If COARSE is lt 0, the nearest decades will be returned
-        instead. The result will always have at least two elements.
-        If COARSE forces decades, the result values may be out-of-
-        range if RANGE spans less than a decade.
-
-        Caution with type conversion from FLOAT to DOUBLE !!
-
- EXAMPLE:
-        range = [ min(data), max(data) ]
-        c_level = LOGLEVELS(range)
-        contour,...,c_level=c_level
-
-
- MODIFICATION HISTORY:
-        mgs, 17 Mar 1999: VERSION 1.00
-
-</PRE><P>
-<STRONG>(See loglevels.pro)</STRONG><P>
-<HR>
- 
 <A NAME="LOGSCL">
 <H2>LOGSCL</H2></A>
-<A HREF="#LOGLEVELS (FUNCTION)">[Previous Routine]</A>
+<A HREF="#LIST_SELECTOR">[Previous Routine]</A>
 <A HREF="#MAXMIN">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -6361,17 +6013,6 @@ OUTPUTS:
        The NCDF_DATA object can be used to read netCDF data in a non-interactive
        way, if you prefer not to use a GUI to interact with the data file.
 
- REQUIRES:
-
-        The following programs are required from the Coyote Library.
-
-              http://www.idlcoyote.com/netcdf_data__define.pro
-              http://www.idlcoyote.com/error_message.pro
-              http://www.idlcoyote.com/undefine.pro
-              http://www.idlcoyote.com/textbox.pro
-              http://www.idlcoyote.com/cgRootName.pro
-              http://www.idlcoyote.com/textlineformat.pro
-
  MODIFICATION HISTORY:
        Written by:  David W. Fanning, 03 Feb 2008. Used ideas from many
            people, including Chris Torrence, Ken Bowman, Liam Gumely, 
@@ -6603,19 +6244,6 @@ OUTPUTS:
        a tool I use, and improve upon whenever necessary, in my own work with netCDF and HDF
        files. It will get better for all of us if you report problems to me directly.
 
- REQUIRES:
-
-     The following programs are required from the Coyote Library. And it is always a
-     good idea to make sure you have the latest version of the Coyote Library code,
-     as updates are irregular and frequent.
-
-              http://www.idlcoyote.com/programs/netcdf_data__define.pro
-              http://www.idlcoyote.com/programs/error_message.pro
-;              http://www.idlcoyote.com/programs/undefine.pro
-              http://www.idlcoyote.com/programs/textbox.pro
-              http://www.idlcoyote.com/programs/cgrootname.pro
-              http://www.idlcoyote.com/programs/textlineformat.pro
-
  METHODS:
 
      The following methods can be used directly.
@@ -6820,29 +6448,6 @@ OUTPUTS:
                   If not set, the file will be opened as "read-only".
 
 
- REQUIRES:
-
-     The following programs are required from the Coyote Library. And it is always a
-     good idea to make sure you have the latest version of the Coyote Library code,
-     as updates are irregular and frequent.
-
-              http://www.idlcoyote.com/programs/ncdf_attribute__define.pro
-              http://www.idlcoyote.com/programs/ncdf_data__define.pro
-              http://www.idlcoyote.com/programs/ncdf_browser.pro
-              http://www.idlcoyote.com/programs/ncdf_castdatatype.pro
-              http://www.idlcoyote.com/programs/ncdf_container__define.pro
-              http://www.idlcoyote.com/programs/ncdf_dimension__define.pro
-              http://www.idlcoyote.com/programs/ncdf_variable__define.pro
-              http://www.idlcoyote.com/programs/errorlogger__define.pro
-              http://www.idlcoyote.com/programs/error_message.pro
-              http://www.idlcoyote.com/programs/cgcentertlb.pro
-              http://www.idlcoyote.com/programs/undefine.pro
-              http://www.idlcoyote.com/programs/textbox.pro
-              http://www.idlcoyote.com/programs/cgrootname.pro
-              http://www.idlcoyote.com/programs/textlineformat.pro
-              
-     These files may be (almost certainly are!) dependent on other Coyote Library files.
-
  METHODS:
 
      The following methods are available. Each is documented in front of the method.
@@ -6932,6 +6537,9 @@ OUTPUTS:
        Added a bunch of new IDL 8.0 and 8.1 keyword to the WriteVarDef method to allow
            access to these keywords in NCDF_VarDef. Also modified the NETCDF4_FORMAT keyword
            to apply only in IDL versions 8.0 and higher. 21 Feb 2012. DWF.
+       Small typo fixed in setting CHAR datatype for IDL 8.1 and higher. 22 May 2013. DWF.
+       Typo (CONTINUOUS->CONTIGUOUS) fixed in WriteDefVar method. 30 July 2013. DWF.
+       Modified CopyVarDefTo method to allow new NCDF4 keywords. 30 July 2013. DWF.
        
 </PRE><P>
 <STRONG>(See ncdf_file__define.pro)</STRONG><P>
@@ -7116,6 +6724,9 @@ OUTPUTS:
            In other words, the "missing" data is not scaled or offset. 20 Mar 2010. DWF.
        Added output keywords SCALE_FACTOR, ADD_OFFSET, and DATATYPE to the GetValue method
            so that these values can be returned to the caller at run-time. 29 April 2010. DWF.
+       Modified AddAttr method to allow for additional data types in attributes, specifically
+           INT data type. 3 June 2013. DWF.
+       Had to modify AddAttr method again to allow compatibility with IDL versions below 8.1. 26 July 2013. DWF.
 </PRE><P>
 <STRONG>(See ncdf_variable__define.pro)</STRONG><P>
 <HR>
@@ -7384,7 +6995,7 @@ OUTPUTS:
 <A NAME="PROGRAMROOTDIR">
 <H2>PROGRAMROOTDIR</H2></A>
 <A HREF="#PRINTWINDOW">[Previous Routine]</A>
-<A HREF="#PSCONFIG">[Next Routine]</A>
+<A HREF="#PSWINDOW">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -7486,213 +7097,9 @@ OUTPUTS:
 <STRONG>(See programrootdir.pro)</STRONG><P>
 <HR>
  
-<A NAME="PSCONFIG">
-<H2>PSCONFIG</H2></A>
-<A HREF="#PROGRAMROOTDIR">[Previous Routine]</A>
-<A HREF="#PSWINDOW">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- The purpose of this program is to allow the user to configure the PostScript device
- with or without a graphical user interface. This function is essentially a simplified
- wrapper to the FSC_PSConfig object, which provides a powerful graphical user interface
- for configuring the IDL PostScript device.
-
- .. image:: psconfig.png
- 
- :Categories:
-    Utilities, Graphics
-    
- :Returns:
-    A structure of keywords, appropriate for configuring the PostScript device, is returned.
-    These keywords are generally passed to the PostScript device by means of keyword inheritance::
-    
-         keywords = PSConfig()   ; Obtain PostScript keywords
-         Set_Plot, 'PS'          ; Select the PostScript device
-         Device, _Extra=keywords ; Configure the PostScript device with keywords
-    
- :Params:
-     psobject: in, optional, type=object
-        An FSC_PSCONFIG object reference of the sort returned by this function
-        can be passed as an argument to the function. It is up to the user to destroy 
-        the object if passed as an argument. Passing an object argument essentially
-        by-passes the rest of the keywords and the GUI will take its initial values
-        from the values in the input object. This allows the programmer to keep track
-        of how the user last configured the GUI and to set it up in exactly the same
-        way the next time the GUI is invoked.
-
- :Keywords:
-     AvantGarde: in, optional, type=boolean, default=0
-        Set this keyword to select the AvantGarde PostScript font.
-     Bits_per_Pixel: in, optional, type=integer, default=8
-        The number of image bits saved for each image pixel: 2, 4, or 8. 
-     Bold: in, optional, type=boolean, default=0
-        Set this keyword to select a bold PostScript font.
-     BookStyle: in, optional, type=boolean, default=0
-        Set this keyword to specify that the book version of the current PostScript
-        font should be used.
-     Bkman: in, optional, type=boolean, default=0
-        Set this keyword to select the Bookman PostScript font.
-     Cancel: out, optional, type=boolean, default=0
-        If this keyword is set to 1, the user hit the Cancel button in the GUI.
-     CMYK: in, optional, type=boolean, default=0
-        Set this keyword to use CMYK colors instead of RGB colors in the output.
-     Color: in, optional, type=boolean, default=1
-        Set this keyword to 1 to select color or gray-scale output.
-     Courier: in, optional, type=boolean, default=0
-        Set this keyword to select the Courier font.
-     Debug: in, optional, type=boolean, default=0
-        Set this keyword to get traceback information when errors are encountered.
-     Decomposed: in, optional, type=boolean, default=0
-        Set this keyword to turn on 24-bit color support. Set to zero to select indexed color 
-        support. Applies only to IDL versions 7.1 and higher.
-     DefaultSetup: in, optional, type=structure
-        Set this keyword to the "name" of a default style. Current styles (you can easily
-        create and add your own to the source code) are the following::
-           "System (Portrait)" - The normal "default" system set-up. Also, "System".
-           "System (Landcape)" - The normal "default" landscape system set-up.
-           "Centered (Portrait)" - The window centered on the page. Also, "Center" or "Centered".
-           "Centered (Landscape)" - The window centered on the landscape page. Also, "Landscape".
-           "Square (Portrait)" - A square plot, centered on the page.
-           "Square (Landscape)" - A square plot, centered on the landscape page.
-           "Figure (Small)" - A small encapsulated figure size, centered on page. Also, "Encapsulated" or "Encapsulate".
-           "Figure (Large)" - A larger encapsulated figure size, centered on page. Also, "Figure".
-           "Color (Portrait)" - A "centered" plot, with color turned on. Also, "Color".
-           "Color (Landscape)" - A "centered" landscape plot, with color turned on.
-     Demi: in, optional, type=boolean, default=0
-        Set this keyword to select the Demi font style.
-     Directory: in, optional, type=string
-        Set this keyword to the name of the starting directory. The current directory is used by default.
-     Encapsulated: in, optional, type=boolean, default=0
-        Set this keyword to 1 to select Encapsulated PostScript output.
-     European: in, optional
-        This keyword is depreciated in favor or `Metric`.
-     Filename: in, optional, type=string, default='idl.ps'
-        Set this keyword to the name of the PostScript file you wish to create.
-     FontInfo: in, optional, type=boolean, default=0
-        Set this keyword if you wish to see font information in the GUI interface. Since font
-        information has to be interpreted to be used, most users prefer not to see this information
-        on the GUI.
-     FontSize: in, optional, type=integer, default=12
-        Set this keyword to the desired font size. Values should be between 6 and 32.
-     FontType: out, optional, type=integer
-        This keyword is both an input and an output keyword. It allows you to specify the font
-        type you wish to use, and it also returns the font type the user selected in the GUI.
-        The user is responsibe for configuring the PostScript graphical commands with the appropriate font
-        type, because it cannot be done via the normal Device keyword channel. Normally, this is set to
-        !P.Font.
-     Group_Leader: in, optional, type=long
-        Set this keyword to the identifer of a widget group leader. This program will be destroyed
-        if the group leader application is destroyed.
-     Helvetica: in, optional, type=boolean, default=0
-        Set this keyword to select the Helvetica PostScript font.
-     Inches: in, optional, type=boolean, default=1
-        Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters. 
-        Set to zero by default if the `Metric` keyword is set.
-     Italic: in, optional, type=boolean, default=0
-        Set this keyword to select italic type font styling.
-     Isolatin: in, optional, type=boolean, default=0
-        Set this keyword to select ISOlatin1 encoding.
-     Landscape: in, optional, type=boolean, default=0
-        Set this keyword to select Landscape page output. Portrait page output is the default.
-     Light: in, optional, type=boolean, default=0
-        Set this keyword to select the Light PostScript style for the font.
-     Match: in, optional, type=boolean, default=0
-        If this keyword is set, the initial PostScript window will match the aspect ratio of the 
-        current graphics window.
-     Medium: in, optional, type=boolean, default=0
-        Set this keyword to select the Medium PostScript style for the font.
-     Metric: in, optional, type=boolean, default=0
-        Set this keyword to indicate metric mode (i.e., A4 page and centimeter units). 
-     Name: in, optional, type=string
-        Set this keyword to the "name" of the created FSC_PSConfig object.
-     Narrow: in, optional, type=boolean, default=0
-        Set this keyword to select the Narrow font style.
-     NoGUI: in, optional, type=boolean, default=0
-        Set this keyword if you don't want a graphical user interface, but just want to get the 
-        return structure of keywords.
-     Oblique: in, optional, type=boolean, default=0
-        Set this keyword to select the Oblique font style.
-     PageType: in, optional, type=string, default='LETTER'
-        Set this keyword to the "type" of page. Possible values are::
-          "Letter" - 8.5 by 11 inches. (Default, unless the Metric keyword is set.)
-          "Legal" - 8.5 by 14 inches.
-          "Ledger" - 11 by 17 inches.
-          "A4" - 21.0 by 29.7 centimeters. (Default, if the Metric keyword is set.)
-     Palatino: in, optional, type=boolean, default=0
-        Set this keyword to select the Palatino font.
-     Preview: in, optional, type=integer, default=0
-        Set this keyword to select the type of PostScript preview to add to the file. Values 0, 1, or 2.
-        Adding previews to PostScript files created in IDL is not recommended as the results are always
-        poor. There are better methods to add PostScript previews using other software, such as GhostView.
-     Schoolbook: in, optional, type=boolean, default=0
-        Set this keyword to select the Schoolbook PostScript font.
-     Set_Font: in, optional, type=string
-        Set this keyword to the name of a PostScript hardware or true-type font you want to use.
-        Note that if you specify a true-type font, you must also set the `TrueType` keyword.
-     Symbol: in, optional, type=boolean, default=0
-        Set this keyword to select the Symbol PostScript font.
-     Times: in, optional, type=boolean, default=0
-        Set this keyword to select the Times PostScript font.
-     TrueType: in, optional, type=boolean, default=0
-        Set this keyword to use true-type fonts in the PostScript output. Set the name of the font
-        with the `Set_Font` keyword.
-     XOffset: in, optional, type=float 
-        Set this keyword to the X Offset. Uses "System (Portrait)" defaults. (Note: offset 
-        calculated from lower-left corner of page.)
-     XSize: in, optional, type=float
-        Set this keyword to the X size of the PostScript "window". Uses "System (Portrait)" defaults.
-     YOffset: in, optional, type=float 
-        Set this keyword to the Y Offset. Uses "System (Portrait)" defaults. (Note: offset 
-        calculated from lower-left corner of page.)
-     YSize: in, optional, type=float
-        Set this keyword to the Y size of the PostScript "window". Uses "System (Portrait)" defaults.
-     ZapfChancery: in, optional, type=boolean, default=0
-        Set this keyword to select the ZapfChancery PostScript font.
-     ZapfDingbats: in, optional, type=boolean, default=0
-        Set this keyword to select the ZapfDingbats PostScript font.
-
- :Examples:
-    To have the user specify PostScript configuration parameters, use
-    the program like this::
-
-       keywords = PSConfig(Cancel=cancelled)
-       IF cancelled THEN RETURN
-       thisDevice = !D.Name
-       Set_Plot, 'PS'
-       Device, _Extra=keywords
-       Plot, findgen(11) ; Or whatever graphics commands you use.
-       Device, /Close_File
-       Set_Plot, thisDevice
-
- :Author:
-     FANNING SOFTWARE CONSULTING::
-        David W. Fanning 
-        1645 Sheely Drive
-        Fort Collins, CO 80526 USA
-        Phone: 970-221-0438
-        E-mail: david@idlcoyote.com
-        Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- :History:
-     Change History::
-        Written by David W. Fanning, 31 January 2000.
-        Added NOGUI keyword to allow default keywords to be obtained without
-        user interaction. 11 Oct 2004. DWF.
-        Added CMYK option 24 August 2007. Requires LANGUAGE_LEVEL=2 printer. L. Anderson
-        Updated for IDL 7.1 and 24-bt color PostScript support. 24 May 2009. DWF.
-        Added MATCH keyword. 14 Dec 2010. DWF.
-        Changed ENCAPSULATE keyword to ENCAPSULATED, which is what I always type! 29 Jan 2011. DWF.
-        Depreciated EUROPEAN keyword in favor of METRIC. 31 Jan 2011. DWF.
-        
- :Copyright:
-     Copyright (c) 2000-2012, Fanning Software Consulting, Inc.
-</PRE><P>
-<STRONG>(See psconfig.pro)</STRONG><P>
-<HR>
- 
 <A NAME="PSWINDOW">
 <H2>PSWINDOW</H2></A>
-<A HREF="#PSCONFIG">[Previous Routine]</A>
+<A HREF="#PROGRAMROOTDIR">[Previous Routine]</A>
 <A HREF="#PS_BACKGROUND">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -7867,7 +7274,7 @@ OUTPUTS:
 <A NAME="PS_BACKGROUND">
 <H2>PS_BACKGROUND</H2></A>
 <A HREF="#PSWINDOW">[Previous Routine]</A>
-<A HREF="#PS_END">[Next Routine]</A>
+<A HREF="#RANDOMNUMBERGENERATOR">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  :Description:
@@ -7905,323 +7312,9 @@ OUTPUTS:
 <STRONG>(See ps_background.pro)</STRONG><P>
 <HR>
  
-<A NAME="PS_END">
-<H2>PS_END</H2></A>
-<A HREF="#PS_BACKGROUND">[Previous Routine]</A>
-<A HREF="#PS_START">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- The purpose of PS_START and PS_END is to make it easy to set-up
- and close a PostScript file. These programs are used extensively
- in all Coyote Graphics routines.
-
- If `ImageMagick  <http://www.imagemagick.org/script/index.php>` is installed 
- on your computer, you can easily convert PostScript output to GIF, JPEG, PNG, and TIFF
- raster output. If `Ghostscript <http://www.ghostscript.com/download/>` is installed
- you can convert PostScript output to PDF files. See the appropriate keywords below.
- 
- When PS_START is called, the current graphics device is set to "PS" (the PostScript 
- device). When PS_END is called the current graphics device is returned to the device
- in effect when PS_START was called.
-
- :Categories:
-    Utilities, Graphics
-    
- :Keywords:
-     allow_transparent: in, optional, type=boolean, default=0
-         To make the background of some image files white, rather than transparent,
-         you have to set the "-alpha off" string in the ImageMagick call. This
-         string is automatically added to the ImageMagick call unless this keyword
-         is set, in which case the string is not added and the image background will
-         be transparent.  
-     bmp: in, optional, type=boolean, default=0                 
-        Set this keyword to convert the PostScript output file to a BMP image. Requires ImageMagick.
-     delete_ps: in, optional, type=boolean, default=0            
-        Setting this keyword will delete the PostScript file that is used as the intermediate
-        file in the conversion to other file types.
-     density: in, optional, type=integer, default=300
-        The horizontal and vertical density (in dots per inch, DPI) of the image when the PostScript file
-        is converted to a raster format by ImageMagick. 
-     filetype: in, optional, type='string', default=""
-        This keyword provides a generic way of setting the `BMP`, `GIF`, `JPEG`, `PNG`, and `TIFF` 
-        keywords. Set this keyword to the type of file output desired, and the correct "output"
-        keyword will be set.
-     gif: in, optional, type=boolean, default=0                 
-        Set this keyword to convert the PostScript output file to a GIF image. Requires ImageMagick.
-     gs_path: in, optional, type=string
-        This program assumes that UNIX users can access Ghostscript with the "gs"
-        command. It assumes WINDOWS users have installed Ghostscript in either
-        the C:\gs or C:\Program Files\gs directories. If either of these assumptions
-        is incorrect, you can specify the directory where the Ghostscript executable
-        resides with this keyword. (The Windows 32-bit executable is named gswin32c.exe
-        and the 64-bit executable is named gswin64c.exe.) Passed directly to cgPS2PDF.
-     im_options: in, optional, type=string, default=""
-        A string of ImageMagick "convert" options that can be passed to the ImageMagick convert 
-        command. No error checking occurs with this string.
-     jpeg: in, optional, type=boolean, default=0                 
-        Set this keyword to convert the PostScript output file to a JPEG image. Requires ImageMagick.
-     nofix: in, optional, type=boolean, default=0  
-        If this keyword is set, then the cgFixPS program to fix IDL landscape
-        PostScript files is not called.
-     nomessage: in, optional, type=boolean, default=0                  
-        If this keyword is set, then no error messages are issued. The keyword is used primarily 
-        to allow PS_END to reset the internal structure without a lot of ruckus.  
-     outfilename: out, optional, type=string
-        The name of the output filename created by the program.             
-     pdf: in, optional, type=boolean, default=0                 
-        Set this keyword to convert the PostScript output file to a PDF file. Requires Ghostscript.
-     png: in, optional, type=boolean, default=0                 
-        Set this keyword to convert the PostScript output file to a PNG image. Requires ImageMagick.
-        Normally, 24-bit PNG files are created. However, if the IM_PNG8 keyword is set with
-        cgWindow_SetDefs, then PS_End will create an 8-bit PNG file instead.
-     resize: in, optional, type=integer, default=25
-        If an image is being created from the PostScript file, it is often resized by some 
-        amount. You can use this keyword to change the value (e.g, RESIZE=100).
-        The value is passed on to resize argument as a percentage in the ImageMagick call.
-     showcmd: in, optional, type=boolean, default=0
-        Set this command to show the command used to do any PostScript coversions.
-     tiff: in, optional, type=boolean, default=0                 
-        Set this keyword to convert the PostScript output file to a TIFF image. Requires ImageMagick.
-     unix_convert_cmd: in, optional, type=string
-         There are a number of commands on UNIX machines for converting PostScript files
-         to PDF files. This program assumes you are using Ghostscript to do the conversion
-         for you. The Ghostscript command on most UNIX machines is "gs", which is used if
-         this keyword is undefined. However, if you would prefer to use another program to do
-         the conversion for you, you can specify the name of the command here. For example,
-         "pstopdf" or "epstopdf". In creating the actual command, this command will be
-         separated by a space from the input file name. In other words, if the alternative
-         conversion command was "pstopdf", the actual command would be "pstopdf" + " " + ps_file.
-         Any output filename is ignored. This command does not apply to Macintosh or Windows 
-         computers. Passed directly to cgPS2PDF.
-     width: in, optional, type=integer
-         Set the keyword to the final pixel width of the output raster image. Applies
-         only to raster image file output (e.g., JPEG, PNG, TIFF, etc.). The height of
-         the image is chosen to preserve the image aspect ratio.
-          
- :Examples:
-    To create a line plot in a PostScript file named lineplot.ps and
-    also create a PNG file named lineplot.png for display in a browser,
-    type these commands::
-
-        PS_Start, FILENAME='lineplot.ps'
-        cgPlot, Findgen(11), COLOR='navy', /NODATA, XTITLE='Time', YTITLE='Signal'
-        cgPlot, Findgen(11), COLOR='indian red', /OVERPLOT
-        cgPlot, Findgen(11), COLOR='olive', PSYM=2, /OVERPLOT
-        PS_End, /PNG
-       
- :Author:
-       FANNING SOFTWARE CONSULTING::
-           David W. Fanning 
-           1645 Sheely Drive
-           Fort Collins, CO 80526 USA
-           Phone: 970-221-0438
-           E-mail: david@idlcoyote.com
-           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- :History:
-     Change History::
-       Written by: David W. Fanning, 20 May 2008.
-       Slight modification to allow filenames with spaces in them.
-       Added NoMatch keyword. 17 March 2009. DWF.
-       Added a number of keywords to make these commands more configurable. 19 March 2009. DWF.
-       Only set thickness system variables if starting system variables are set to their
-           default values (namely, 0). This allows users to set their own system variables
-           before they call PS_START, rather than after. 23 March  2009. DWF.
-       Moved PS_END to its own file to allow the IDLExBr_Assistant to work properly. 7 April 2009. DWF.
-       Reordered ImageMagick commands to put them in the proper sequence to get "alpha" switch to work. 23 April 2009. DWF.
-       Put the switches *ahead* of the PostScript file name. Now resizing works and default size reduction
-           returned to 25%. 23 April 2009. DWF.
-       Still having a devil of a time getting the ImageMagick "convert" command right. Fonts
-           have become a problem. Now trying a "flatten" option in the command. 12 May 2009. DWF.
-       If the PostScript file is in Landscape mode, it is now "fixed" with cgFixPS to allow it
-           to be displayed right-side up in PostScript viewers. 8 August 2009. DWF.
-       Fixed a problem in not checking the GIF keyword properly. 4 December 2009. DWF.
-       Added NOFIX keyword to the program. 1 November 2010. DWF.
-       Added better handing of errors coming from cgFixPS after update to FIXPS. 15 November 2010. DWF.
-       Added DELETE_PS keyword. 16 Jan 2011. DWF.
-       Better protection of code from not finding ImageMagick. 17 Jan 2011. DWF.
-       Collecting result of SPAWN command. Only printing if QUIET=0. 16 Feb 2011. DWF.
-       Changes to handle inability to create raster files from PS encapsulated files in 
-           landscape mode. Added NOMESSAGE keyword. 26 Aug 2011. DWF.
-        Added PDF keyword. Requires Ghostscript to use. 6 Dec 2011. DWF.
-        Added SHOWCMD keyword. 9 Dec 2011. DWF.
-        Added OUTFILENAME keyword. 11 Dec 2011. DWF.
-        Just realized a BMP case is missing from one of the CASE statements. 12 Dec 2011. DWF.
-        Added GS_PATH and UNIX_CONVERT_CMD keywords to support PDF output. 14 Dec 2011. DWF.
-        Add the WIDTH keyword. 3 April 2012. DWF.
-        Added a check for IM_PNG8 keyword, using cgWindow_GetDefs to see if an 8-bit or 24-bit
-           PNG file should be created. 3 April 2012. DWF.
-        Modified the ImageMagick commands that resizes the image to a particular width. Necessary
-           to accommodate PNG8 file output. Using ImageMagick 6.7.2-9. 4 April 2012. DWF.
-        Added FILETYPE keyword to provide a generic way of creating raster file output. 30 August 2012. DWF.
-        Modified to use the cgPS2Raster program so code doesn't have to be maintained in 
-            two places. 15 Oct 2012. DWF.
-        Added a check for ImageMagick and an informational message for raster operations. 4 Nov 2012. DWF.
-        Fixed a problem in which the NOMESSAGE keyword was not getting passed along to cgPS2Raster. 5 Nov 2012. DWF.
-        Fixed a problem where I was not passing the PORTRAIT keyword to cgPS2Raster properly. 22 Jan 2013. DWF.
-
- :Copyright:
-     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
-</PRE><P>
-<STRONG>(See ps_end.pro)</STRONG><P>
-<HR>
- 
-<A NAME="PS_START">
-<H2>PS_START</H2></A>
-<A HREF="#PS_END">[Previous Routine]</A>
-<A HREF="#RANDOMNUMBERGENERATOR">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- The purpose of PS_START and PS_END is to make it easy to set-up
- and close a PostScript file. These programs are used extensively
- in all Coyote Graphics routines.
-
- If `ImageMagick  <http://www.imagemagick.org/script/index.php>` is installed 
- on your computer, you can easily convert PostScript output to GIF, JPEG, PNG, and TIFF
- raster output. If `Ghostscript <http://www.ghostscript.com/download/>` is installed
- you can convert PostScript output to PDF files. See the appropriate keywords to
- PS_END.
- 
- When PS_START is called, the current graphics device is set to "PS" (the PostScript 
- device). When PS_END is called the current graphics device is returned to the device
- in effect when PS_START was called.
- 
- PS_Start uses the current display window as a template for the Postscript
- file. Thus, if the display window is wider than it is higher, output is
- in Landscape mode. To set the size of the PostScript "window" yourself, be
- sure to set the NOMATCH keyword to 1.
-       
- To display surface plots correctly the FONT keyword should be set to 1.
- Otherwise, the default font is 0, or hardware fonts when outputting to 
- PostScript.
-
- You can easily configure any modifications you like for your PostScript output
- by setting fields in the plot and axis system variables (!P, !X, !Y, and !Z).
- The modifications currently made by default in this program are these::
-
-     !P.Thick = 3
-     !P.CharThick = 3
-     !X.Thick = 3
-     !Y.Thick = 3
-     !Z.Thick = 3
-     !P.Font = 0
-          
- The !P.Charsize variable is set differently on Windows computers, and depending
- on whether !P.MULTI is being used. On Windows the default is 1.25, or 1.00 for
- multiple plots. On other computers, the default is 1.5, or 1.25 for multiple plots.
- If true-type fonts are being used (FONT=1), the default is 1.5, or 1.25 for 
- multiple plots.
-
- The PS_Start program contains the common block, _$FSC_PS_START_. See the FSC_PS_SETUP__DEFINE 
- program in the Coyote Library for its definition.
- 
- :Categories:
-    Utilities, Graphics
-    
- :Params:
-     filename: in, optional, type=string, default='idl.ps'
-        The name of the PostScript file created.
-    
- :Keywords:
-     cancel: out, optional, type=boolean, default=0
-         An output keyword that is set to 1 if the user cancelled from
-         PS_Config. Otherwise, set to 0.
-     charsize: in, optional, type=float
-         If this keyword is set, the !P.Charsize variable is set to this value until PS_END is called.
-     default_thickness: in, optional, type=integer, default=3
-         Sets the following system variables to this value while creating PostScript output:
-         !P.Thick, !P.CharThick, !X.Thick, !Y.Thick, !Z.Thick. These variables are returned to
-         their original values by `PS_End`. A system variable is set to this value only if it 
-         currently contains the IDL default value of 0.0. If it is set to anything else, this 
-         default thickness value is ignored.
-     dejavusans: in, optional, type=boolean, default=0
-         Set this keyword to select the DejaVuSans true-type font for PostScript output.
-         This option is ONLY available in IDL 8.2 or higher and/or you have installed the
-         DejaVuSans true-type font in your font directory.
-     filename: in, optional, type=string, default='idl.ps'
-         The name of the PostScript file created. An alternative, and older, way of setting
-         the `filename` parameter.
-     font: in, optional, type=integer, default=0                
-         Set this to the type of font you want. A -1 selects Hershey fonts, a 0 selects hardware 
-         fonts (Helvetica, normally), and a 1 selects a True-Type font. Set to 0 by default.
-     encapsulated: in, optional, type=boolean, default=0
-         Set this keyword to produce encapsulated PostScript output.
-     gui: in, optional, type=boolean, default=0
-         The default behavior is to use PSCONFIG to configure the PostScript device silently. 
-         If you wish to allow the user to interatively configure the PostScript device, set this
-         keyword.
-     keywords: out, optional, type=structure                
-         This output keyword contains the keyword structure returned from PS_Config.
-     landscape: in, optional, type=boolean, default=0
-         Set this keyword to produce landscape PostScript output.
-     nomatch: in, optional, type=boolean, default=0                
-         Normally, PS_Start will try to "match" the aspect ratio of the PostScript file "window" 
-         to the current display window. If this keyword is set, then this doesn't occur, giving 
-         the user the option of specifying the size and offsets of the PostScript window directly 
-         though appropriate keywords.
-     quiet: in, optional, type=boolean, default=0
-         If set, informational messages are not set. 
-     scale_factor: in, optional, type=float, default=1.0
-         Set this to the PostScript scale factor. By default: 1.
-     tt_font: in, optional, type=string, default="Helvetica"
-         The name of a true-type font to use if FONT=1.
-     _ref_extra: in, optional
-         Any keyword appropriate for the PostScript configuration program PSConfig, from
-         the Coyote Library can be used with PS_Start.
-              
- :Examples:
-    To create a line plot in a PostScript file named lineplot.ps and
-    also create a PNG file named lineplot.png for display in a browser,
-    type these commands::
-
-        PS_Start, FILENAME='lineplot.ps'
-        cgPlot, Findgen(11), COLOR='navy', /NODATA, XTITLE='Time', YTITLE='Signal'
-        cgPlot, Findgen(11), COLOR='indian red', /OVERPLOT
-        cgPlot, Findgen(11), COLOR='olive', PSYM=2, /OVERPLOT
-        PS_End, /PNG
-       
- :Author:
-       FANNING SOFTWARE CONSULTING::
-           David W. Fanning 
-           1645 Sheely Drive
-           Fort Collins, CO 80526 USA
-           Phone: 970-221-0438
-           E-mail: david@idlcoyote.com
-           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- :History:
-     Change History::
-       Written by: David W. Fanning, 20 May 2008.
-       Slight modification to allow filenames with spaces in them.
-       Added NoMatch keyword. 17 March 2009. DWF.
-       Added a number of keywords to make these commands more configurable. 19 March 2009. DWF.
-       Only set thickness system variables if starting system variables are set to their
-           default values (namely, 0). This allows users to set their own system variables
-           before they call PS_START, rather than after. 23 March  2009. DWF.
-       Moved PS_END to its own file to allow the IDLExBr_Assistant to work properly. 7 April 2009. DWF.
-       Modified to allow PostScript page type to be stored for future processing with cgFixPS. 9 August 2009. DWF.
-       Added NoFix keyword to PS_END calls to repair previous, but unused set-ups. 1 Nov 2010. DWF.
-       Added Charsize keyword to PS_START. 14 Nov 2010. DWF.
-       Changed the way default character sizes are set. 19 Nov 2010. DWF.
-       Added CANCEL and KEYWORDS output keywords. 16 Jan 2011. DWF.
-       Changes to handle inability to create raster files from PS encapsulated files in 
-           landscape mode. 26 Aug 2011. DWF.
-       The SCALE_FACTOR is called at the time the PostScript file is opened to avoid problems
-           with the bounding box not being set to the correct values. 26 October 2011. DWF.
-       Created a DEFAULT_THICKNESS keyword to set the default thicknesses of PostScript 
-           system variables. 14 Dec 2011. DWF.
-       Moved the true-type font set-up to *after* changing the graphics device to PostScript. 10 Jan 2012. DWF.
-       Added DejaVuSans keyword to allow this true-type font to be used in PostScript Output. 21 Dec 2012. DWF.
-       
- :Copyright:
-     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
-</PRE><P>
-<STRONG>(See ps_start.pro)</STRONG><P>
-<HR>
- 
 <A NAME="RANDOMNUMBERGENERATOR">
 <H2>RANDOMNUMBERGENERATOR</H2></A>
-<A HREF="#PS_START">[Previous Routine]</A>
+<A HREF="#PS_BACKGROUND">[Previous Routine]</A>
 <A HREF="#RANGEOF">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -8615,7 +7708,7 @@ OUTPUTS:
 <A NAME="SCALEMODIS">
 <H2>SCALEMODIS</H2></A>
 <A HREF="#SAVETOMAIN">[Previous Routine]</A>
-<A HREF="#SCALE_VECTOR">[Next Routine]</A>
+<A HREF="#SCROLLWINDOW">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -8696,90 +7789,9 @@ OUTPUTS:
 <STRONG>(See scalemodis.pro)</STRONG><P>
 <HR>
  
-<A NAME="SCALE_VECTOR">
-<H2>SCALE_VECTOR</H2></A>
-<A HREF="#SCALEMODIS">[Previous Routine]</A>
-<A HREF="#SCROLLWINDOW">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- This is a utility routine to scale the elements of a vector or an array into a 
- given data range. 
-
- :Categories:
-    Utilities
-    
- :Returns:
-     A vector or array of the same size as the input, scaled into the data range given
-     by `minRange` and `maxRange'. The input vector is confined to the data range set
-     by `MinValue` and `MaxValue` before scaling occurs.
-
- :Params:
-    maxRange: in, optional, type=varies, default=1
-       The maximum output value of the scaled vector. Set to 1 by default.
-    minRange: in, optional, type=varies, default=0
-       The minimum output value of the scaled vector. Set to 0 by default.
-    vector: in, required
-       The input vector or array to be scaled.
-
- :Keywords:
-    double: in, optional, type=boolean, default=0
-         Set this keyword to perform scaling in double precision. Otherwise, scaling 
-         is done in floating point precision.
-     maxvalue: in, optional
-         Set this value to the maximum value of the vector, before scaling (vector < maxvalue).
-         The default value is Max(vector).
-     minvalue: in, optional
-         Set this value to the mimimum value of the vector, before scaling (minvalue < vector).
-         The default value is Min(vector).
-     nan: in, optional, type=boolean, default=0
-         Set this keyword to enable not-a-number checking. NANs in vector will be ignored.
-     preserve_type: in, optional, type=boolean, default=0
-         Set this keyword to preserve the input data type in the output.
-
- :Examples:
-       Simple example of scaling a vector::
-       
-          IDL> x = [3, 5, 0, 10]
-          IDL> xscaled = Scale_Vector(x, -50, 50)
-          IDL> Print, xscaled
-               -20.0000     0.000000     -50.0000      50.0000
-
-       Suppose your image has a minimum value of -1.7 and a maximum value = 2.5.
-       You wish to scale this data into the range 0 to 255, but you want to use
-       a diverging color table. Thus, you want to make sure value 0.0 is scaled to 128.
-       You proceed like this::
-
-          scaledImage = Scale_Vector(image, 0, 255, MINVALUE=-2.5, MAXVALUE=2.5)
-
- :Author:
-    FANNING SOFTWARE CONSULTING::
-       David W. Fanning
-       1645 Sheely Drive
-       Fort Collins, CO 80526 USA
-       Phone: 970-221-0438
-       E-mail: david@idlcoyote.com
-       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- :History:
-     Change History::
-         Written by:  David W. Fanning, 12 Dec 1998.
-         Added MAXVALUE and MINVALUE keywords. 5 Dec 1999. DWF.
-         Added NAN keyword. 18 Sept 2000. DWF.
-         Removed check that made minRange less than maxRange to allow ranges to be
-            reversed on axes, etc. 28 Dec 2003. DWF.
-         Added PRESERVE_TYPE and DOUBLE keywords. 19 February 2006. DWF.
-         Added FPUFIX to cut down on floating underflow errors. 11 March 2006. DWF.
-         This routine is being depreciated in favor of cgScaleVector. 16 May 2013. DWF.
-
- :Copyright:
-     Copyright (c) 1998-2013, Fanning Software Consulting, Inc.
-</PRE><P>
-<STRONG>(See scale_vector.pro)</STRONG><P>
-<HR>
- 
 <A NAME="SCROLLWINDOW">
 <H2>SCROLLWINDOW</H2></A>
-<A HREF="#SCALE_VECTOR">[Previous Routine]</A>
+<A HREF="#SCALEMODIS">[Previous Routine]</A>
 <A HREF="#SDEVSCL">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -8949,7 +7961,7 @@ OUTPUTS:
 <A NAME="SELECT_OBJECTS">
 <H2>SELECT_OBJECTS</H2></A>
 <A HREF="#SDEVSCL">[Previous Routine]</A>
-<A HREF="#SETDECOMPOSEDSTATE">[Next Routine]</A>
+<A HREF="#SETDEFAULTVALUE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -9003,117 +8015,9 @@ OUTPUTS:
 <STRONG>(See select_objects.pro)</STRONG><P>
 <HR>
  
-<A NAME="SETDECOMPOSEDSTATE">
-<H2>SETDECOMPOSEDSTATE</H2></A>
-<A HREF="#SELECT_OBJECTS">[Previous Routine]</A>
-<A HREF="#SETDEFAULTVALUE">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
-   Provides a device-independent way to set the color decomposition state of the
-   current graphics device. Devices that do not have a DECOMPOSED keyword to the
-   DEVICE command are assumed to be in indexed color mode always.
-   
-   I have removed the Z-graphics buffer from being controlled by this program. I
-   do so reluctantly, but I am pragmatic enough to realize that progress forward
-   is necessarily slow and that I must recognize the reality of legacy IDL code.
-   
-   My personal view is that all graphics routines should use 24-bit decomposed
-   color. There are myriad advantages, but basically they boil down to this:
-   (1) You have 16.7 million colors available to you simultaneously, and (2) you
-   don't have to contaminate color tables to use drawing colors. Coyote Graphics
-   routines are in the habit of switching out of whatever color mode the user happens 
-   to be using, into 24-bit decomposed color mode, then switching back when finished
-   with its business. But, it is impossible to do this correctly in the Z-graphics
-   buffer.
-   
-   The reason for this is that in the Z-graphics buffer, you need to switch not only
-   the color mode, but also the pixel depth. In other words, I would prefer to set
-   the Z-graphics buffer up like this::
-   
-       Set_Plot, 'Z'
-       Device, Decomposed=1, Set_Pixel_Depth=24
-       
-   But, if I do that, then I need to set it back (for 99 people out of a 100) like this::
-   
-       Device, Decomposed=0, Set_Pixel_Depth=8
-       
-   Unfortunately, using this command will erase whatever is in the Z-graphics buffer!
-   
-   My solution to this problem is to leave it to the user to configure the Z-graphics buffer
-   the way they want it. If you configure it to use 24-bit decomposed color, all of the Coyote
-   Graphics routines will work as they normally do. If you configure it to use 8-bit indexed color,
-   which is the default configuration, then it will work "normally", but you will be in great
-   danger of contaminating the system color table. The reason for this is that Coyote Graphics
-   cannot "restore" the entry color table in the Z-buffer without obliterating what is already
-   in the graphics window. Users who work with indexed color are probably already very much
-   aware of this problem, so it shouldn't surprise them. (They might not expect this with
-   Coyote Graphics, but this is the price that has to be paid.)
-   
-   My suggestion is to put the Z-graphics configuration in your IDL startup file. Set it
-   up in 24-bit decomposed color mode, use Coyote Graphics to do all your graphical output,
-   and you will find things working perfectly. 
-   See `Configuring the Z-Graphics Buffer for Coyote Graphics <http://www.idlcoyote.com/cg_tips/configz.php>` 
-   for additional information.
-
- :Categories:
-    Graphics, Utilities
-    
- :Params:
-    state: in, required, type=integer, default=0
-         Set to 1 to set the current graphics device to decomposed color. Set to 0 
-         to set the current graphics device to indexed color. Devices lacking a 
-         DECOMPOSED keyword are assumed to be perpetually in indexed color mode.
-         The Z-graphics buffer is always unchanged after the 24 Dec 2011 update. 
-       
- :Keywords:
-     currentstate: out, optional, type=integer
-         The current decomposition state of the current graphics device when the
-         program is called. A 1 indicates decomposed color. A 0 indicates indexed 
-         color.
-     depth: out, optional, type=integer
-         The currnet pixel depth of the graphics device. 
-     zdepth: in, optional, type=integer
-         The pixel depth of the Z-graphics device. Set to 8 or 24. Applies ONLY 
-         when setting the Z-graphics device state to 0. If undefined, the current 
-         depth of the Z-graphics device is unchanged from its current state. No
-         longer used after 24 Dec 2011 update. Code still in place, however.
-          
- :Examples:
-     To set the device in color decomposition mode, then return it, do something like this::
-     
-        SetDecomposedState, 1, CurrentState=mode
-        ...
-        SetDecomposeState, mode
-       
- :Author:
-       FANNING SOFTWARE CONSULTING::
-           David W. Fanning 
-           1645 Sheely Drive
-           Fort Collins, CO 80526 USA
-           Phone: 970-221-0438
-           E-mail: david@idlcoyote.com
-           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- :History:
-     Change History::
-        Written, 16 November 2010. DWF.
-        Changes to include SET_PIXEL_DEPTH in Z-graphics buffer. 19 Nov 2010. DWF.
-        Allow PostScript 7.0 to set the decomposition keyword. 12 Dec 2010. DWF.
-        Added DEPTH and ZDEPTH keywords. 31 Dec 2010. DWF.
-        Added a do-nothing NULL device to Case statement. 4 Jan 2011. DWF.
-        Removed the Z-graphics buffer from control by this program. 24 Dec 2011. DWF.
-        Added back the ability to set decomposed state for the Z-buffer, but only
-           if the depth buffer is 24-bits or higher. 25 May 2012. DWF.
-
- :Copyright:
-     Copyright (c) 2010, Fanning Software Consulting, Inc.
-</PRE><P>
-<STRONG>(See setdecomposedstate.pro)</STRONG><P>
-<HR>
- 
 <A NAME="SETDEFAULTVALUE">
 <H2>SETDEFAULTVALUE</H2></A>
-<A HREF="#SETDECOMPOSEDSTATE">[Previous Routine]</A>
+<A HREF="#SELECT_OBJECTS">[Previous Routine]</A>
 <A HREF="#SHARPEN">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -9889,6 +8793,8 @@ OUTPUTS:
        If the variable is a pointer, object or structure reference the variable is recursively traversed
           to free up all variables pointed to before the variable is itself destroyed. 10 June 2009. DWF.
        Updated to allow undefining of pointer arrays. 8 October 2009. DWF.
+       Valid pointers that point to undefined variable can cause an infinite loop. Now using
+           Heap_Free, rather than recursion, with pointers. 30 May 2013. DWF.
 </PRE><P>
 <STRONG>(See undefine.pro)</STRONG><P>
 <HR>

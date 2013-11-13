@@ -41,6 +41,11 @@
 ; fall below the 75th percentile of the data. Computing percentiles is 
 ; really nothing more than counting in a sorted input array. A box-and-whisker
 ; plot usually will display the 25th, 50th, and 75th percentiles.
+; 
+; A `commercial version <http://www.idlcoyote.com/coyotestore/index.php?main_page=product_info&cPath=2&products_id=196>`
+; of this program, containing a DIMENSION keyword, can be purchased from the Coyote Store. The 
+; DIMENSION keyword allows the user to calculate the percentiles over a particular dimension
+; of a multi-dimensional data set.
 ;
 ; :Categories:
 ;    Math

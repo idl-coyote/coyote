@@ -337,6 +337,7 @@
 ;        Changed the default background color to "white" from "background" and default axis 
 ;           color to "black" from "opposite". It's about time this routine behaved like other
 ;           Coyote Graphic routines! 22 Oct 2013. DWF.
+;        Fixed problem with XTICKVALUES and YTICKVALUES keywords when plot is rotated. 19 Nov 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2007-2013, Fanning Software Consulting, Inc.
@@ -1087,11 +1088,11 @@ PRO cgHistoplot, $                  ; The program name.
              XTITLE=xtitle, $                 ; The X title.
              XTICKNAMES=xticknames, $
              XTICKS=xticks, $
-             XTICKVALUES=xtickvalues, $
+             XTICKV=xtickvalues, $
              YTITLE=ytitle, $                 ; The Y title.
              YTICKNAMES=yticknames, $
              YTICKS=yticks, $
-             YTICKVALUES=ytickvalues, $
+             YTICKV=ytickvalues, $
              NoErase=1, $
              YTicklen=-0.025, $
              _Strict_Extra=extra                      ; Pass any extra PLOT keywords.

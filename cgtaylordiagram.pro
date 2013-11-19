@@ -146,6 +146,8 @@
 ;        Added OVERPLOT keyword. 21 May 2013. DWF.
 ;        Added RMS_*** keywords to allow more control over the drawing and labeling of the RMS circles 
 ;            on the plot. 29 July 2013. DWF.
+;        Modified the algorithm that places the "Correlation" label to allow multiple plots in a 
+;           window. Also removed a cgPolyFill command that appeared to have no effect. 19 Nov 2013. DWF
 ;
 ; :Copyright:
 ;     Copyright (c) 2013, Fanning Software Consulting, Inc.
@@ -375,6 +377,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
   cgPlot, x, y, /NoData, XTITLE='Standard Deviation', YTITLE='Standard Deviation', $
       XSTYLE=9, YSTYLE=9, POSITION=position, BACKGROUND='white'
   
+  Print, 'After initial plot: ', !X.Window,!Y.Window
   ; PART II: Building ticks: Long and Short ticks
   ; Long Ticks
   nticks = 10
@@ -417,8 +420,11 @@ PRO cgTaylorDiagram, stddev, correlation, $
   ; Mask: Masking part of the RMS circles out:
   cgColorFill, [x, stddev_max, x[0]],[y, stddev_max, y[0]], /data, COLOR='white'
   cgPolygon, [x, stddev_max, x[0]],[y, stddev_max, y[0]], /data, COLOR='white'
-  cgColorFill, [!X.Window[0],!X.Window[0], !X.Window[1], !X.Window[1], !X.Window[0]], $
-               [!Y.Window[1], 1.0, 1.0, !Y.Window[1], !Y.Window[1]], /Normal, COLOR='white'
+  
+  ; Not sure this is needed. Certainly not on my windows machine in IDL 8.2.3.
+;  cgColorFill, [!X.Window[0],!X.Window[0], !X.Window[1], !X.Window[1], !X.Window[0]], $
+;               [!Y.Window[1], 1.0, 1.0, !Y.Window[1]], $
+;               /Normal, COLOR='white'
   
   cgPlotS, x, y
   
@@ -519,10 +525,12 @@ PRO cgTaylorDiagram, stddev, correlation, $
     cgPlots, [extrashort_outerx[i], extrashortx[i]], [extrashort_outery[i], extrashorty[i]], COLOR=c_correlation
   ENDFOR
   
-  ;Correlation Axis Name
-  cc_namex  = stddev_max - stddev_max*0.25
-  cc_namey  = stddev_max - stddev_max*0.25
-  cgText, cc_namex, cc_namey, 'Correlation', ORIENTATION=-45., ALIGNMENT=0.5,  COLOR=c_correlation
+  ; Correlation Axis Name
+Print, 'Setting Correlation coordinate: ', !X.Window,!Y.Window  
+  cc_namex  = (!X.Window[1] - !X.Window[0]) * 0.775 + !X.Window[0]
+  cc_namey  = (!Y.Window[1] - !Y.Window[0]) * 0.775 + !Y.Window[0]
+  cgText, cc_namex, cc_namey, 'Correlation', ORIENTATION=-45., ALIGNMENT=0.5,  $
+    COLOR=c_correlation, /NORMAL
  
 
   ; Observed/Reference Circles. The dashed circles centered in the Observed value are the centered RMS
@@ -593,16 +601,17 @@ END
   
   ;#######################################  Main Test Program  #############################################
 
+      cgDisplay, 700, 700
       labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']            ; Point labels.
       stddev = [1.4, 0.9, 1.0, 1.272, 1.1, 0.95, 1.08, 0.5]        ; Standard Deviations
       correlation = [0.8, 0.9, 0.65, 0.74, 0.91, 0.98, 0.85, 0.35] ; Correlations
       ref_std = 1.0                                                ; Reference standard (observed)
       stddev_max = 1.5                                             ; Standard Deviation maximum
       cgTaylorDiagram, stddev, correlation, REF_STDDEV=ref_std, STDDEV_MAX=stddev_max, $
-          RMS_INCREMENT=0.25, RMS_FORMAT='(F0.2)', LABELS=labels, /WINDOW
+          RMS_INCREMENT=0.25, RMS_FORMAT='(F0.2)', LABELS=labels
 
       labels = ['I',  'J', 'K', 'L',  'M', 'N', 'O',   'P']                 ; Point labels.
       stddev = [1.25, 0.7, 1.1, 0.86, 1.5, 1.21, 0.78, 0.52]                ; Standard Deviations
       correlation = Reverse([0.8, 0.9, 0.65, 0.74, 0.91, 0.98, 0.85, 0.35]) ; Correlations
-      cgTaylorDiagram, stddev, correlation, /OVERPLOT, LABELS=labels, /ADDCMD, C_SYMBOL='blue'
+      cgTaylorDiagram, stddev, correlation, /OVERPLOT, LABELS=labels, C_SYMBOL='blue'
 END

@@ -48,8 +48,10 @@
 ; :Params:
 ;    geofile_1: in, required, type=string
 ;        The name of the first GeoTiff file to be combined into a mosaic.
+;        Currently the code only works with 2D images.
 ;    geofile_2: in, required, type=string
 ;        The name of the second GeoTiff file to be combined into a mosaic.
+;        Currently the code only works with 2D images.
 ;       
 ; :Keywords:
 ;     filename: in, optional, type=string
@@ -63,9 +65,15 @@
 ;     missing: in, optional, type=varies
 ;         The missing value in the input images. If scalar value, the same value is used
 ;         for both images, but may be a two-element array. 
-;     miss_out, in, optional, type=varies
+;     miss_out: in, optional, type=varies
 ;         The missing value of the output image. If undefined, missing[0] is used. If
 ;         missing[0] is undefined, the value 0B is used.
+;     palette: in, optional
+;         A 256x3 array containing the R, G, and B color vectors with which the image
+;         should be displayed. The palette will be stored with the mosaiced image. If
+;         this is not supplied, and either of the other images have a palette, it will be
+;         used instead. Images are checked for palettes in the order they are supplied
+;         to the function.
 ;     success: out, optional, type=boolean
 ;         This keyword is set to 1 if the function completed successfully. And to
 ;         0 otherwise.
@@ -86,6 +94,7 @@
 ;        Now blending overlap regions using 50% of pixel values from the two images. 14 Sept 2012. DWF.
 ;        Revamp of algorithm's handing of missing values.  Added MISS_OUT keyword and removed HISTOMATCH
 ;           keyword because it only works for BYTE data. Restricted mosaicking to 2D images. 29 Jan 2013. DWF.
+;        Added PALETTE keyword and changed algoritm to use color palettes if available. 21 Nov 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012-2013, Fanning Software Consulting, Inc.
@@ -96,6 +105,7 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
    MAPOUT=mapout, $
    MISSING=missing, $
    MISS_OUT=miss_out, $
+   PALETTE=palette, $
    SUCCESS=success
 
     Compile_Opt idl2
@@ -131,11 +141,16 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
     ; Let's read the images and get the bounaries of the map projection.
     m1 = cgGeoMap(geofile_1, IMAGE=image_1, PALETTE=pal_1, BOUNDARY=b1, $
         GEOTIFF=geo1, SUCCESS=success)
-    IF ~success THEN RETURN, ""
-    m2 = cgGeoMap(geofile_2, IMAGE=image_2, PALETTE=pal_2, BOUNDARY=b2, $
-        GEOTIFF=geo2, SUCCESS=success)
+        
+    ; If you haven't been given a palette, then use this palette, if there is one.
+    IF N_Elements(palette) EQ 0 THEN IF N_Elements(pal_1) NE 0 THEN palette = pal_1
     IF ~success THEN RETURN, ""
     
+    m2 = cgGeoMap(geofile_2, IMAGE=image_2, PALETTE=pal_2, BOUNDARY=b2, $
+        GEOTIFF=geo2, SUCCESS=success)
+    IF N_Elements(palette) EQ 0 THEN IF N_Elements(pal_2) NE 0 THEN palette = pal_2
+    IF ~success THEN RETURN, ""
+        
     ; Check to be sure projection and ellipsoid are the same.
     m1 -> GetProperty, Map_Projection=projection_1, Ellipsoid=ellipsoid_1
     m2 -> GetProperty, Map_Projection=projection_2, Ellipsoid=ellipsoid_2
@@ -232,23 +247,41 @@ FUNCTION cgGeoMosaic, geofile_1, geofile_2, $
         IF filename EQ "" THEN RETURN, ""
     ENDIF    
     
+    ; If you have a palette, get the palette RGB vectors.
+    IF N_Elements(palette) NE 0 THEN BEGIN
+        red = palette[*,0]
+        grn = palette[*,1]
+        blu = palette[*,2]
+    ENDIF
+    
     ; Update the GeoTiff structure for the new file and write the file.
     newGeo = geo1
     newGeo.ModelTiePointTag[3:4] = [xr[0], yr[1]]
     newGeo.ModelPixelScaleTag[0] = xscale
     newGeo.ModelPixelScaleTag[1] = yscale
     CASE imageType OF
-        1: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, PLANARCONFIG=2
-        2: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, PLANARCONFIG=2, /SHORT, /SIGNED
-        3: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, PLANARCONFIG=2, /LONG, /SIGNED
-        4: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, PLANARCONFIG=2, /FLOAT
-        5: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, PLANARCONFIG=2, /DOUBLE
-        6: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, PLANARCONFIG=2, /COMPLEX
-        9: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, PLANARCONFIG=2, /DCOMPLEX
-       12: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, PLANARCONFIG=2, /SHORT
-       13: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, PLANARCONFIG=2, /LONG
-       14: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, PLANARCONFIG=2, /L64, /SIGNED
-       15: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, PLANARCONFIG=2, /L64
+        1: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, $
+              RED=red, GREEN=grn, BLUE=blu
+        2: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, /SHORT, /SIGNED, $
+              RED=red, GREEN=grn, BLUE=blu
+        3: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, /LONG, /SIGNED, $
+              RED=red, GREEN=grn, BLUE=blu
+        4: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, /FLOAT, $
+              RED=red, GREEN=grn, BLUE=blu
+        5: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, /DOUBLE, $
+              RED=red, GREEN=grn, BLUE=blu
+        6: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, /COMPLEX, $
+              RED=red, GREEN=grn, BLUE=blu
+        9: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, /DCOMPLEX, $
+              RED=red, GREEN=grn, BLUE=blu
+       12: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, /SHORT, $
+              RED=red, GREEN=grn, BLUE=blu
+       13: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, /LONG, $
+              RED=red, GREEN=grn, BLUE=blu
+       14: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, /L64, /SIGNED, $
+              RED=red, GREEN=grn, BLUE=blu
+       15: Write_Tiff, filename, Reverse(newimage, 2), GEOTIFF=newGeo, /L64, $
+              RED=red, GREEN=grn, BLUE=blu
     ENDCASE
     
     ; Create a map object for the image, if one is needed.

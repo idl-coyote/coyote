@@ -85,6 +85,9 @@
 ;    labels: in, optional, type=string
 ;        An array of string labels for the points that will be plotted on the diagram.
 ;        This array must be the same length as the `stddev` array and the `correlation` array.
+;    noerase: in, optional, type=boolean, default=0
+;        Set this keyword if you don't want the Taylor Diagram plot to erase what is already on
+;        the display.
 ;    output: in, optional, type=string
 ;        The name of an output file to write the Taylor Diagram to. The type of file is taken from
 ;        the file extension. For example, OUTPUT='mydiagram.png'. It is assumed that Ghostscript and
@@ -147,7 +150,8 @@
 ;        Added RMS_*** keywords to allow more control over the drawing and labeling of the RMS circles 
 ;            on the plot. 29 July 2013. DWF.
 ;        Modified the algorithm that places the "Correlation" label to allow multiple plots in a 
-;           window. Also removed a cgPolyFill command that appeared to have no effect. 19 Nov 2013. DWF
+;           window. Also removed a cgPolyFill command that appeared to have no effect. 19 Nov 2013. DWF.
+;        Added NOERASE keyword and made sure no window was opened when OUTPUT keyword is used. 21 Nov 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2013, Fanning Software Consulting, Inc.
@@ -159,6 +163,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
     C_REF=c_ref, $
     C_SYMBOL=c_symbol, $
     LABELS=labels, $
+    NOERASE=noerase, $
     OUTPUT=output, $
     OVERPLOT=overplot, $
     POSITION=position, $
@@ -184,6 +189,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
   ENDIF
   
   overplot = Keyword_Set(overplot)
+  noerase = Keyword_Set(noerase)
 
   ; Are we doing some kind of output?
   IF (N_Elements(output) NE 0) && (output NE "") && ~overplot THEN BEGIN
@@ -298,6 +304,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
                 C_REF=c_ref, $
                 C_SYMBOL=c_symbol, $
                 LABELS=labels, $
+                NOERASE=noerase, $
                 OUTPUT=output, $
                 OVERPLOT=overplot, $
                 POSITION=position, $
@@ -322,6 +329,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
                 C_REF=c_ref, $
                 C_SYMBOL=c_symbol, $
                 LABELS=labels, $
+                NOERASE=noerase, $
                 OUTPUT=output, $
                 OVERPLOT=overplot, $
                 POSITION=position, $
@@ -373,11 +381,10 @@ PRO cgTaylorDiagram, stddev, correlation, $
   ENDIF
    
   ; Initial plot in window.
-  IF !D.Window LT 0 THEN cgDisplay, 680, 640
+  IF (!D.Window LT 0) && (~overplot) THEN cgDisplay, 680, 640
   cgPlot, x, y, /NoData, XTITLE='Standard Deviation', YTITLE='Standard Deviation', $
-      XSTYLE=9, YSTYLE=9, POSITION=position, BACKGROUND='white'
+      XSTYLE=9, YSTYLE=9, POSITION=position, BACKGROUND='white', NOERASE=noerase
   
-  Print, 'After initial plot: ', !X.Window,!Y.Window
   ; PART II: Building ticks: Long and Short ticks
   ; Long Ticks
   nticks = 10
@@ -526,7 +533,6 @@ PRO cgTaylorDiagram, stddev, correlation, $
   ENDFOR
   
   ; Correlation Axis Name
-Print, 'Setting Correlation coordinate: ', !X.Window,!Y.Window  
   cc_namex  = (!X.Window[1] - !X.Window[0]) * 0.775 + !X.Window[0]
   cc_namey  = (!Y.Window[1] - !Y.Window[0]) * 0.775 + !Y.Window[0]
   cgText, cc_namex, cc_namey, 'Correlation', ORIENTATION=-45., ALIGNMENT=0.5,  $

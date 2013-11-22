@@ -137,6 +137,7 @@
 ;        PostScript, PDF, and Imagemagick parameters can now be tailored with cgWindow_SetDefs. 14 Dec 2011. DWF.
 ;        Added XLOCATION and WIDTH keywords. 5 June 2012. DWF.
 ;        The XCharSize keyword was not being used correctly. 2 July 2013. DWF.
+;        The program was not setting the color state back to the entry state. 22 Nov 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
@@ -312,10 +313,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
       stats.sdev = StDDev(data, /NAN, /DOUBLE)
 
       ; Color decomposition on, if allowed.
-      IF (!D.Flags AND 256) NE 0 THEN BEGIN
-         Device, Get_Visual_Depth=theDepth
-         IF theDepth GE 24 THEN Device, Decomposed=1, Get_Decomposed=theState
-      ENDIF
+      cgSetColorState, 1, Current=theState
        
       ; Draw the box.
       halfwidth = width / 2.0
@@ -363,7 +361,8 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
             PSYM=cgSymCat(9), COLOR=cgColor(outliercolor), NOCLIP=0
       ENDIF
       
-      IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState
+      cgSetColorState, theState
+      
    END ;-----------------------------------------------------------------------------------------------------
    
 ;+
@@ -766,10 +765,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
          ENDIF ELSE BEGIN
             plotlabels = ['  ', labels, '  ']
          ENDELSE
-         IF (!D.Flags AND 256) NE 0 THEN BEGIN
-            Device, Get_Visual_Depth=theDepth
-            IF theDepth GE 24 THEN Device, Decomposed=1, Get_Decomposed=theState
-         ENDIF
+         cgSetColorState, 1, CURRENT=theState
          IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
          Plot, xrange, yrange, /NODATA, _STRICT_EXTRA=extra, $
             XMINOR=1, XTICKS=numbox+1, YSTYLE=1, BACKGROUND=cgColor(background_color), $
@@ -792,7 +788,7 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
                 ALIGNMENT=alignment, COLOR=cgColor(axiscolor), $
                 ORIENTATION=rotate, CHARSIZE=xcharsize, CHARTHICK=xthick
          ENDFOR
-         IF N_Elements(theState) NE 0 THEN Device, Decomposed=theState
+         cgSetColorState, theState
       ENDIF
       
       ; Draw the boxes.

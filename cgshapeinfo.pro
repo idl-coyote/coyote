@@ -16,7 +16,7 @@
 ;
 ;   Knowing the attribute and entity names of a shapefile will give
 ;   you insight into how to read and display the information in the file.
-;   For examples, see the Coyote Library programs DrawCounties and DrawStates.
+;   For examples, see the Coyote Library program cgDrawShapes.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -59,7 +59,7 @@
 ;
 ;   Knowing the attribute and entity names of a shapefile will give
 ;   you insight into how to read and display the information in the file.
-;   For examples, see the Coyote Library programs DrawCounties and DrawStates.
+;   For examples, see the Coyote Library program cgDrawShapes.
 ;
 ; :Categories:
 ;    Utilities

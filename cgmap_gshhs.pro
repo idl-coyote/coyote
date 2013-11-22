@@ -292,7 +292,10 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
 ;              container: 0L, $ ; ID of container polygon that encloses this polygon (-1 if "none").
 ;              ancestor: 0L }   ; ID of ancestor polygon in the full resolution set that was the source
 ;                               ; of this polygon (-1 of "none").
-
+;
+;  I don't have a polygon header for version 2.1 of the GSHHS software but I believe the 2.0 header will
+;  work. This version of GSHHS was pretty buggy and not used very long. Better to upgrade to 2.2.
+;  
    ; Define the polygon header, for GSHHS software 2.2, which uses a 44 byte
    ; header structure. For example, gshhs_h.b from the gshhg_2.2.zip.
    header = { id: 0L, $        ; A unique polygon ID number, starting at 0.
@@ -309,8 +312,8 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
               east: 0L, $      ; East extent of polygon boundary in micro-degrees.
               south: 0L, $     ; South extent of polygon boundary in micro-degrees.
               north: 0L, $     ; North extent of polygon boundary in micro-degrees.
-              area: 0L, $      ; Area of polygon in 1/10 km^2.
-              area_full: 0L, $ ; Area of origiinal full-resolution polygon in 1/10 km^2.
+              area: 0L, $      ; Area of polygon in area/10^p = km^2.
+              area_full: 0L, $ ; Area of original full-resolution polygon in area_full/10^p = km2.
               container: 0L, $ ; ID of container polygon that encloses this polygon (-1 if "none").
               ancestor: 0L }   ; ID of ancestor polygon in the full resolution set that was the source
                                ; of this polygon (-1 of "none").
@@ -321,33 +324,24 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
    
       READU, lun, header
       
-      ; Parse the flag. Version 6 corresponds to 1.1x. Version 7 cooresponds to 2.0.
+      ; Parse the flag. Version 6 corresponds to 1.1x. Version 7 corresponds to 2.0.
+      ; Version 8 corresponds to 2.1 and Version 9 corresponds to 2.2.
       f = header.flag
       version = ISHFT(f, -8) AND 255B
-      IF version LT 7 THEN BEGIN
-          IF version GT 3 THEN BEGIN
-             polygonLevel = (f AND 255B) 
-          ENDIF ELSE BEGIN
-             polygonLevel = header.level
-          ENDELSE
-          greenwich = ISHFT(f, -16) AND 255B
-          source = ISHFT(f, -24) AND 255B
+
+      IF version LT 9 THEN BEGIN
+          IF version LE 3 THEN polygonLevel = header.level ELSE polygonLevel = (f AND 255B) 
+          greenwich = ISHFT(f, -16) AND 1B
+          source = ISHFT(f, -24) AND 1B
+          river = ISHFT(f, -25) AND 1B
       ENDIF ELSE BEGIN
-          IF version LT 9 THEN BEGIN
-              polygonLevel = (f AND 255B) 
-              greenwich = ISHFT(f, -16) AND 1B
-              source = ISHFT(f, -24) AND 1B
-              river = ISHFT(f, -25) AND 1B
-          ENDIF ELSE BEGIN
-              polygonLevel = (f AND 255B) 
-              greenwich = ISHFT(f, -16) AND 1B
-              source = ISHFT(f, -24) AND 1B
-              river = ISHFT(f, -25) AND 1B
-              magnitude = ISHFT(f, -26) AND 1B
-          ENDELSE
+          polygonLevel = (f AND 255B) 
+          greenwich = ISHFT(f, -16) AND 3B
+          source = ISHFT(f, -24) AND 1B
+          river = ISHFT(f, -25) AND 255B
+          magnitude = ISHFT(f, -26) AND 255B ; Divide header.area by 10^magnitude to get true area.
       ENDELSE
-      IF N_Elements(magnitude) EQ 0 THEN magnitude = 0
-      
+
       ; Get the polygon coordinates. Convert to lat/lon.
       polygon = LonArr(2, header.npoints, /NoZero)
       READU, lun, polygon
@@ -356,7 +350,11 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
       Undefine, polygon
 
       ; Discriminate polygons based on header information.
-      polygonArea = header.area * 0.1 * 10^magnitude
+      IF version LE 8 THEN BEGIN
+          polygonArea = header.area * 0.1 ; km^2
+      ENDIF ELSE BEGIN
+          polygonArea = header.area / 10^magnitude ; km^2
+      ENDELSE
    
       IF polygonLevel GT level THEN CONTINUE
       IF polygonArea LE minArea THEN CONTINUE
@@ -401,6 +399,7 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
       ; Need outlines with a fill?
       IF Keyword_Set(fill) AND Keyword_Set(outline) THEN $
          PLOTS, lon, lat, Color=cgColor(color), NOCLIP=noclip, Thick=thick
+
 
    ENDWHILE
    Free_Lun, lun

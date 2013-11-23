@@ -67,6 +67,9 @@
 ;         Set this keyword to the normal linestyle graphics keyword values. The default is a solid line.
 ;     normal: in, optional, type=boolean, default=0
 ;         Set to indicate the polygon vertices are in normalized coordinates, rather than data coordinates.
+;     outline: in, optional, type=boolean, default=0
+;         Set this keyword to draw the outline of the ROI, rather than the default filled ROI. In this
+;         case cgPlotS will be used to draw the ROI, rather than the built-in IDL procedure Draw_ROI.
 ;     psym: in, optional, type=integer
 ;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
 ;        routine cgSYMCAT. An integer between 0 and 46. May also be specified as a
@@ -110,6 +113,7 @@ PRO cgDraw_ROI, roi, $
     DEVICE=device, $
     LINESTYLE=linestyle, $
     NORMAL=normal, $
+    OUTLINE=outline, $
     PSYM=psym, $
     SYMSIZE=symsize, $
     T3D=t3d, $
@@ -196,16 +200,50 @@ PRO cgDraw_ROI, roi, $
     IF N_Elements(psym) EQ 0 THEN psym = 0
         
     ; Draw the ROI
-    Draw_ROI, roi, $
-      COLOR=thisColor, $
-      DEVICE=device, $
-      LINESTYLE=linestyle, $
-      NORMAL=normal, $
-      PSYM=cgSymCat(psym), $
-      SYMSIZE=symsize, $
-      T3D=t3d, $
-      THICK=thick, $
-      _Extra=extra
+    IF Keyword_Set(outline) THEN BEGIN
+        IF Obj_Isa(roi, 'IDLanROI') THEN BEGIN
+            roi -> GetProperty, DATA=data
+            x = Reform(data[0,*])
+            y = Reform(data[1,*])
+            cgPlots, x, y, $
+                COLOR=thisColor, $
+                DEVICE=device, $
+                LINESTYLE=linestyle, $
+                NORMAL=normal, $
+                PSYM=cgSymCat(psym), $
+                SYMSIZE=symsize, $
+                T3D=t3d, $
+                THICK=thick
+        ENDIF ELSE BEGIN
+            objs = roi -> Get(/ALL, COUNT=count)
+            FOR j=0,count-1 DO BEGIN
+            thisROI = objs[j]
+            thisROI -> GetProperty, DATA=data
+            x = Reform(data[0,*])
+            y = Reform(data[1,*])
+            cgPlots, x, y, $
+                COLOR=thisColor, $
+                DEVICE=device, $
+                LINESTYLE=linestyle, $
+                NORMAL=normal, $
+                PSYM=cgSymCat(psym), $
+                SYMSIZE=symsize, $
+                T3D=t3d, $
+                THICK=thick
+            ENDFOR
+        ENDELSE
+    ENDIF ELSE BEGIN
+        Draw_ROI, roi, $
+          COLOR=thisColor, $
+          DEVICE=device, $
+          LINESTYLE=linestyle, $
+          NORMAL=normal, $
+          PSYM=cgSymCat(psym), $
+          SYMSIZE=symsize, $
+          T3D=t3d, $
+          THICK=thick, $
+          _Extra=extra
+    ENDELSE
     
     ; Clean up.
     cgSetColorState, currentState

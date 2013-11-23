@@ -462,7 +462,8 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
 ;       this:
 ;
 ;           struct = { Median:0.0D, Mean: 0.0D, Min:0.0D, Max:0.0D, $
-;                      Q25:0.0D, Q75:0.0D, IQR:0.0D, SDEV:0.0D, N:0L }
+;                      Q25:0.0D, Q75:0.0D, IQR:0.0D, SDEV:0.0D, N:0L, $
+;                      Top_Whisker:0.0D, Bot_Whisker:0.0D }
 ;
 ;       Where "mean" is the median value of the data, "Q25" and "Q75" are the 25th percent
 ;       quartile and 75th percent quartile of the data, repectively, "IRG" is the

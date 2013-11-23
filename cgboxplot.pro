@@ -99,9 +99,9 @@
 ;           
 ; .. image:: cgboxplot.png 
 ;
-;    An article about his program can be found here::
+;    An article about his program can be found `on my web page <http://www.idlcoyote.com/graphics_tips/box_whisker.html>`.
 ;       
-;         http://www.idlcoyote.com/graphics_tips/box_whisker.html
+;         
 ;    
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -138,6 +138,7 @@
 ;        Added XLOCATION and WIDTH keywords. 5 June 2012. DWF.
 ;        The XCharSize keyword was not being used correctly. 2 July 2013. DWF.
 ;        The program was not setting the color state back to the entry state. 22 Nov 2013. DWF.
+;        Added the fields TOP_WHISKER and BOT_WHISKER to the STATS structure. 23 Nov 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2009, Fanning Software Consulting, Inc.
@@ -342,6 +343,8 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
          index = Value_Locate(sortedData, quartile_25 - (1.5 * iqr))
          bottom = sortedData[0 > (index+1) < (N_Elements(data)-1)]
       ENDELSE
+      stats.top_whisker = top
+      stats.bot_whisker = bottom
       
       ; Draw the whiskers.
       PLOTS, [xlocation, xlocation], [quartile_75, top], COLOR=cgColor(outlinecolor)
@@ -794,7 +797,8 @@ FUNCTION cgBoxPlot_Prepare_Data, data, missing_data_value
       ; Draw the boxes.
       IF N_Elements(width) EQ 0 THEN width = ((!X.CRange[1] - !X.Crange[0]) / (numbox+2.0)) * 0.9
       s = { Median:0.0D, Mean: 0.0D, Min:0.0D, Max:0.0D, $
-           Q25:0.0D, Q75:0.0D, IQR:0.0D, SDEV:0.0D, N:0L }
+           Q25:0.0D, Q75:0.0D, IQR:0.0D, SDEV:0.0D, N:0L, $
+           top_whisker:0.0D, bot_whisker:0.0D }
       IF Arg_Present(stats) THEN stats = Replicate(s, numbox)
       FOR j=1,numbox DO BEGIN
           IF passedDataType EQ 'POINTER' THEN BEGIN

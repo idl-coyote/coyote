@@ -86,9 +86,11 @@
 ;       Slight modifications to the interface. 14 May 2010. DWF.
 ;       Added XRANGE and YRANGE output keywords. 15 May 2010. DWF.
 ;       Renamed cgShapeFile from Shapefile. 20 Aug 2012. DWF.
+;       Modified so that when the user selects a new Attribute Name, the Attribue Value index stays
+;          the same. 24 Nov 2013. DWF.
 ;       
 ; :Copyright:
-;    Copyright (c) 2006-2012, Fanning Software Consulting, Inc.
+;    Copyright (c) 2006-2013, Fanning Software Consulting, Inc.
 ;-   
 ;
 ;+
@@ -124,6 +126,7 @@ PRO cgShapeInfo_Events, event
          types = IntArr(N_Elements(*(*info).entities))
          bounds = FltArr(N_Elements(*(*info).entities))
          thisEntity = (*(*info).entities)[event.index]
+         (*info).valueIndex = event.index
          types = thisEntity.shape_type
          bounds = thisEntity.bounds
          typeIndex = Where((*info).typecode EQ types, count)
@@ -143,15 +146,25 @@ PRO cgShapeInfo_Events, event
       ; User selected a file attribute. Get the entity attributes associated with this file attribute.
       'NAMELIST': BEGIN
 
-         entityAttributes = StrArr(N_Elements(*(*info).entities))
-         FOR j=0,N_Elements(*(*info).entities)-1 DO BEGIN
-            thisEntity = (*(*info).entities)[j]
-            entityAttributes[j] = StrUpCase(StrTrim((*thisEntity.attributes).(event.index), 2))
-         ENDFOR
-         Widget_Control, (*info).entityList, Set_Value=entityAttributes
-         *(*info).entityAttributes = entityAttributes
-         Widget_Control, (*info).statusbar, Set_Value=String(Replicate(32B, 150))
-         END
+            num = N_Elements(*(*info).entities)
+            entityAttributes = StrArr(num)
+            IF num GT 1000 THEN BEGIN
+               progressBar = Obj_New("CGPROGRESSBAR", Title='Collecting Attribute Values...')
+               progressBar -> Start
+            ENDIF
+            usingProgress = Obj_Valid(progressBar)
+            FOR j=0,num-1 DO BEGIN
+                thisEntity = (*(*info).entities)[j]
+                entityAttributes[j] = StrUpCase(StrTrim((*thisEntity.attributes).(event.index), 2))
+                IF usingProgress THEN progressBar -> Update, (Float(j)/num)*100
+            ENDFOR
+            IF usingProgress THEN cgProgressBar -> Destroy
+            (*info).nameIndex = event.index
+            Widget_Control, (*info).entityList, Set_Value=entityAttributes
+            *(*info).entityAttributes = entityAttributes
+            Widget_Control, (*info).statusbar, Set_Value=String(Replicate(32B, 150))
+            Widget_Control, (*info).entityList, Set_List_Select=(*info).valueIndex
+        END
 
       ; User wants to open new shapefile.
       'OPENFILE': BEGIN
@@ -336,7 +349,8 @@ PRO cgShapeInfo, filename, XRANGE=xrange, YRANGE=yrange
    ; Create info structure and store it.
    info = Ptr_New({entities:entities, namelist:namelist, entitylist:entitylist, $
       entityAttributes:Ptr_New(entityAttributes, /No_Copy), shapefile:shapefile, $
-      typecode:typecode, shapetype:shapetype, statusbar:statusbar, directory:directory}, /No_Copy)
+      typecode:typecode, shapetype:shapetype, statusbar:statusbar, directory:directory, $
+      nameIndex:0, valueIndex:0}, /No_Copy)
    Widget_Control, tlb, Set_UValue=info
 
    ; Start it up.

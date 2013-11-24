@@ -338,7 +338,7 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
           polygonLevel = (f AND 255B) 
           greenwich = ISHFT(f, -16) AND 3B
           source = ISHFT(f, -24) AND 1B
-          river = ISHFT(f, -25) AND 255B
+          river = ISHFT(f, -25) AND 1B
           magnitude = ISHFT(f, -26) AND 255B ; Divide header.area by 10^magnitude to get true area.
       ENDELSE
 
@@ -351,9 +351,9 @@ PRO cgMap_GSHHS, filename, $         ; The name of the GSHHS data file to open
 
       ; Discriminate polygons based on header information.
       IF version LE 8 THEN BEGIN
-          polygonArea = header.area * 0.1 ; km^2
+          polygonArea = Double(header.area) * 0.1 ; km^2
       ENDIF ELSE BEGIN
-          polygonArea = header.area / 10^magnitude ; km^2
+          polygonArea = Double(header.area) / 10.0^magnitude ; km^2
       ENDELSE
    
       IF polygonLevel GT level THEN CONTINUE

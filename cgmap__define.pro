@@ -93,6 +93,7 @@
 ;        Added Hughes ellipsoid, used at NSIDC, as index 26 or as "Hughes". 11 Sept 2013. DWF.
 ;        Fixed a bug in the way ellipsoids were selected when using numbers to choose elliposids. All ellipsoids
 ;           with values over 20 were affected. 18 Sept 2013. DWF.
+;        Added FORMAT keyword to LanLonLabels method. 27 November 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -1120,6 +1121,8 @@ END
 ;   created.
 ;
 ; :Keywords:
+;     format: in, optional, type=string
+;        The normal format string for the labels.
 ;     latdelta: in, optional, type=float
 ;        The degree spacing in latitude between latitude lines.
 ;     latlab: out, optional, type=float
@@ -1143,6 +1146,7 @@ END
 ;        this value is set to 0.
 ;--------------------------------------------------------------------------
 PRO cgMap::LatLonLabels, $
+    FORMAT=format, $
     LATDELTA=latdelta, $
     LATLAB=latlab, $
     LATNAMES=latnames, $
@@ -1354,9 +1358,10 @@ PRO cgMap::LatLonLabels, $
     lonlab = (lats[index] - lats[index-1]) / 2.0 + lats[index-1]
 
     ; Set up the latitude and longitude names.
-    IF Total(lats-Long(lats)) EQ 0 THEN format='(I0)' ELSE format='(F0.2)'
+    IF N_Elements(format) EQ 0 THEN BEGIN
+      IF (Total(lats-Long(lats)) EQ 0) THEN format='(I0)' ELSE format='(F0.2)'
+    ENDIF
     latnames = String(lats, FORMAT=format)
-    IF Total(lons-Long(lons)) EQ 0 THEN format='(I0)' ELSE format='(F0.2)'
     lonnames = String(lons, FORMAT=format)
     
  END

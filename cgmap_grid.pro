@@ -80,6 +80,7 @@
 ;           have a point in the XRANGE of the projection. A fix to that problem has failed to work in all
 ;           circumstances, so I have done more work on that algorithm to see if I can solve the problem is
 ;           a better way. Now usine Value_Locate to test for point. 19 February 2013. DWF.
+;        Now implementing label formatting when using CGGRID keyword. 27 November 2013. DWF.
 ;            
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -543,7 +544,8 @@ PRO cgMap_Grid, $
          ; This routine is here because Map_Grid does not select good line for small areas.
          IF Keyword_Set(cgGrid) THEN BEGIN
              mapObj -> LatLonLabels, LATS=mlats, LATLAB=mlatlab, LATDELTA=latdelta, LATNAMES=mlatnames, $
-                                     LONS=mlons, LONLAB=mlonlab, LONDELTA=londelta, LONNAMES=mlonnames
+                                     LONS=mlons, LONLAB=mlonlab, LONDELTA=londelta, LONNAMES=mlonnames, $
+                                     FORMAT=format
              IF N_Elements(lats) EQ 0 THEN BEGIN
                 lats = mlats
                 IF (N_Elements(latnames) EQ 0) THEN latnames = mlatnames

@@ -94,6 +94,8 @@
 ;        Fixed a bug in the way ellipsoids were selected when using numbers to choose elliposids. All ellipsoids
 ;           with values over 20 were affected. 18 Sept 2013. DWF.
 ;        Added FORMAT keyword to LanLonLabels method. 27 November 2013. DWF.
+;        Change EASTING and NORTHING keywords to FALSE_EASTING and FALSE_NOTHING to conform to Map_Proj_Init. 29 Nov 2013. DWF.
+;        Forgetting to add the false_easting and false_northing values to the structure in INIT method. 29 Nov 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -150,12 +152,20 @@
 ;        default is a sphere for those projections that only support a sphere, otherwise
 ;        a Clark projection is used to conform to Map_Proj_Init defaults. Added the "Hughes"
 ;        datum, which is used at NSIDC. Use "Hughes" or index number 25.
-;     fill: in, optional, type=boolean, default=0
-;        Set this keyword to display filled continents, if the keyword CONTINENTS is set.
 ;     erase: in, optional, type=boolean, default=0
 ;        Set this keyword if you wish to have the object erase the current graphics display
 ;        before drawing its content in the DRAW method. The graphics display will be erased
 ;        in the background color.
+;     false_easting: in, optional, type=double, default=0.0
+;        Set this keyword to the false easting value (in meters) to be added to each x 
+;        coordinate for the forward transform, or subtracted from each x coordinate for 
+;        the inverse transform.
+;     false_northing: in, optional, type=double, default=0.0
+;        Set this keyword to the false northing value (in meters) to be added to each y 
+;        coordinate for the forward transform, or subtracted from each y coordinate for 
+;        the inverse transform.
+;     fill: in, optional, type=boolean, default=0
+;        Set this keyword to display filled continents, if the keyword CONTINENTS is set.
 ;     gcolor: in, optional, type=string, default='gray'
 ;        The name of the drawing color for the MapGrid object if this is requested.
 ;     grid: in, optional, type=boolean, default=0
@@ -254,9 +264,10 @@ FUNCTION cgMap::INIT, map_projection, $
     CONTINENTS=continents, $
     DATUM=datum, $
     DRAW=draw, $
-    EASTING=easting, $
     ELLIPSOID=ellipsoid, $
     ERASE=erase, $
+    FALSE_EASTING=easting, $
+    FALSE_NORTHING=northing, $
     FILL=fill, $
     GCOLOR=gcolor, $
     GRID=grid, $
@@ -269,7 +280,6 @@ FUNCTION cgMap::INIT, map_projection, $
     NAME=name, $
     NOBORDER=noborder, $
     NOFORWARDFIX=noForwardFix, $
-    NORTHING=northing, $
     ONIMAGE=onimage, $
     POSITION=position, $
     RADIANS=radians, $
@@ -477,10 +487,12 @@ FUNCTION cgMap::INIT, map_projection, $
    self._cg_center_latitude = center_latitude
    self._cg_center_longitude = center_longitude
    self._cg_color = color
+   self._cg_easting = easting
    self._cg_erase = erase
    self._cg_multi_position = FltArr(4)
    self._cg_noborder = Keyword_Set(noborder)
    self._cg_noforwardfix = Keyword_Set(noforwardfix)
+   self._cg_northing = northing
    self._cg_onimage = Keyword_Set(onimage)
    self._cg_radians = Keyword_Set(radians)
    self._cg_theDatums = Ptr_New(theDatums)
@@ -955,9 +967,10 @@ PRO cgMap::GetProperty, $
     COLOR=color, $
     DATUM=datum, $
     DRAW=draw, $
-    EASTING=easting, $
     ELLIPSOID=ellipsoid, $
     ERASE=erase, $
+    FALSE_EASTING=easting, $
+    FALSE_NORTHING=northing, $
     HIRES=hires, $
     LATLONBOX=latlonbox, $
     LIMIT=limit, $
@@ -965,7 +978,6 @@ PRO cgMap::GetProperty, $
     NAME=name, $
     NOBORDER=noborder, $
     NOFORWARDFIX=noforwardfix, $
-    NORTHING=northing, $
     ONIMAGE=onimage, $
     OVERLAYS=overlays, $
     POSITION=position, $
@@ -1459,6 +1471,14 @@ END
 ;        Set this keyword if you wish to have the object erase the current graphics display
 ;        before drawing its content in the DRAW method. The graphics display will be erased
 ;        in the background color.
+;     false_easting: in, optional, type=double, default=0.0
+;        Set this keyword to the false easting value (in meters) to be added to each x
+;        coordinate for the forward transform, or subtracted from each x coordinate for
+;        the inverse transform.
+;     false_northing: in, optional, type=double, default=0.0
+;        Set this keyword to the false northing value (in meters) to be added to each y
+;        coordinate for the forward transform, or subtracted from each y coordinate for
+;        the inverse transform.
 ;     gcolor: in, optional, type=string, default='gray'
 ;        The name of the drawing color for the MapGrid object if this is requested.
 ;     grid: in, optional, type=boolean, default=0
@@ -1542,9 +1562,10 @@ PRO cgMap::SetProperty, $
     CONTINENTS=continents, $
     DATUM=datum, $
     DRAW=draw, $
-    EASTING=easting, $
     ELLIPSOID=ellipsoid, $
     ERASE=erase, $
+    FALSE_EASTING=easting, $
+    FALSE_NORTHING=northing, $
     GCOLOR=gcolor, $
     GRID=grid, $
     HIRES=hires, $
@@ -1555,7 +1576,6 @@ PRO cgMap::SetProperty, $
     NAME=name, $
     NOBORDER=noborder, $
     NOFORWARDFIX=noForwardFix, $
-    NORTHING=northing, $
     ONIMAGE=onimage, $
     POSITION=position, $
     RADIANS=radians, $
@@ -1775,10 +1795,10 @@ FUNCTION cgMap::SetMapProjection, map_projection, $
     CENTER_LATITUDE=center_latitude, $
     CENTER_LONGITUDE=center_longitude, $
     DATUM=datum, $
-    EASTING=easting, $
+    FALSE_EASTING=easting, $
+    FALSE_NORTHING=northing, $
     ELLIPSOID=ellipsoid, $
     LIMIT=limit, $
-    NORTHING=northing, $
     RADIANS=radians, $
     SEMIMAJOR_AXIS=semimajor_axis, $
     SEMIMINOR_AXIS=semiminor_axis, $

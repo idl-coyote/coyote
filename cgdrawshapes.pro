@@ -124,9 +124,13 @@
 ;       Wrong string case for discovering particular attributes caused them not to be drawn. 27 Oct 2011. DWF.
 ;       Added the ability to draw point shapefiles. Changed default color to "opposite". 20 Aug 2012. DWF.
 ;       Made sure a window is open when the default color is chosen. 29 Aug 2012. DWF.
+;       Added a DrawMapCoord keyword so that shapes in a different map projection can be drawn on 
+;          a map correctly. 29 Nov 2013. DWF.
+;       Changed the default value of the USELIMIT keyword to 1. Mostly, because I've been burned too many
+;          times to think a default value of 0 makes sense. 29 Nov 2013. DWF.
 ;       
 ; :Copyright:
-;    Copyright (c) 2011, Fanning Software Consulting, Inc.
+;    Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
 ;---------------------------------------------------------------------------
 ;
 ;+
@@ -165,6 +169,7 @@
 ;-
 PRO cgDrawShapes_DrawEntity, entity, $
     COLOR=color, $
+    DRAWMAPCOORD=drawMapCoord, $
     FCOLOR=fcolor, $
     FILL=fill, $
     LINESTYLE=linestyle, $
@@ -197,17 +202,22 @@ PRO cgDrawShapes_DrawEntity, entity, $
             cuts = [*entity.parts, entity.n_vertices]
             FOR j=0, entity.n_parts-1 DO BEGIN
                IF N_Elements(mapCoord) NE 0 THEN BEGIN
-                   IF Obj_Valid(mapCoord) THEN BEGIN
-                        mapCoord -> Draw, /NoGraphics
-                        mapStruct = mapCoord->GetMapStruct()
-                   ENDIF ELSE mapStruct = mapCoord
+                   IF Obj_Valid(drawMapCoord) THEN drawMapCoord -> Draw, /NoGraphics
                    IF projected_xy THEN BEGIN
                        x = Reform((*entity.vertices)[0, cuts[j]:cuts[j+1]-1])
                        y = Reform((*entity.vertices)[1, cuts[j]:cuts[j+1]-1])
+                       
+                       ; Do you need to transform the coordinates to the drawing map projection space?
+                       IF mapCoord NE drawMapCoord THEN BEGIN
+                           ll = mapCoord -> Inverse(x, y)
+                           xy = drawMapCoord -> Forward(ll[0,*], ll[1,*], /NoForwardFix)
+                           x = Reform(xy[0,*])
+                           y = Reform(xy[1,*])
+                       ENDIF
                    ENDIF ELSE BEGIN
-                       xy = Map_Proj_Forward((*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
-                                             (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
-                                              MAP_STRUCTURE=mapStruct)
+                       xy = drawMapCoord -> Forward((*entity.vertices)[0, cuts[j]:cuts[j+1]-1], $
+                                                    (*entity.vertices)[1, cuts[j]:cuts[j+1]-1], $
+                                                    /NoForwardFix)
                        x = Reform(xy[0,*])
                        y = Reform(xy[1,*])
                    ENDELSE
@@ -336,6 +346,13 @@ END ;---------------------------------------------------------------------------
 ;     colors: in, optional, type=string, default="opposite"
 ;         The name of the color or colors used to draw the entity. This
 ;         may be a string array of the same size as ATTRVALUES.
+;     drawmapcoord: in, optional, type=object
+;         A map coordinate object (e.g., cgMap) that describes the map projection
+;         and datum on which the shapes in the shapefile will be drawn. If not
+;         supplied, the map coordinate object passed with the `mapCoord` keyword will
+;         be used. Use this keyword only if there is a mismatch in the map projection and
+;         datum used in the shapefile and the the map projection and datum that the shape
+;         is to be drawn onto.
 ;     fcolors: in, optional, type=string
 ;         The name of the color used to fill the entity. Used if the FILL
 ;         keyword is set. By default, the same as the COLORS keyword.
@@ -346,11 +363,13 @@ END ;---------------------------------------------------------------------------
 ;         By default, set to 0 and solid lines. May be a vector of the same
 ;         size as ATTRVALUES.
 ;     mapCoord: in, optional, type=object
-;         A map coordinate object (e.g., cgMap). Required to draw the
-;         entity on a GCTP map projection set up with MAP_PROJ_INIT.
-;         Note that this could also be a map structure as returned from MAP_PROJ_INIT,
-;         but in that case the user is resposible for setting up the XY map
-;         coordinate space independently and outside of this program.
+;         A map coordinate object (e.g., cgMap) that describes the map projection 
+;         and datum used in the shapefile. If `drawMapCoord` is not used, this is also
+;         the map coordinate system used for drawing the shape or shapes in the file.
+;         This keyword is required to draw the shapes on a GCTP map projection set up 
+;         with MAP_PROJ_INIT. Note that this could also be a map structure as returned 
+;         from MAP_PROJ_INIT, but in that case the user is responsible for setting up the 
+;         XY map coordinate space independently and outside of this program.
 ;     minnumverts: in, optional, type=long, default=3
 ;         Set this keyword to the minimum number of vertices required to actually
 ;         draw a polygon. In other words, to to drawn, a polygon must have at least
@@ -366,7 +385,7 @@ END ;---------------------------------------------------------------------------
 ;         The default symbol size. Used only when displaying points.
 ;     thick: in, optional, type=integer, default=1
 ;         The thickness of the line used to draw the entity.
-;     uselimit: in, optional, type=boolean, default=0
+;     uselimit: in, optional, type=boolean, default=1
 ;         Set this keyword to use the LIMIT as determined from the map coordinate object.
 ;         This keyword applies only if a valid `MapCoord` object is passed to the program.
 ;     window: in, optional, type=boolean, default=0
@@ -379,6 +398,7 @@ PRO cgDrawShapes, shapeFile, $
    ATTRNAME=attrname, $
    ATTRVALUES=attrvalues, $
    COLORS=colors, $
+   DRAWMAPCOORD=drawMapCoord, $
    FCOLORS=fcolors, $
    FILL=fill, $
    LINESTYLE=linestyle, $
@@ -415,6 +435,7 @@ PRO cgDrawShapes, shapeFile, $
            ATTRNAME=attrname, $
            ATTRVALUES=attrvalues, $
            COLORS=colors, $
+           DRAWMAPCOORD=drawMapCoord, $
            FCOLORS=fcolors, $
            FILL=fill, $
            LINESTYLE=linestyle, $
@@ -439,6 +460,7 @@ PRO cgDrawShapes, shapeFile, $
            ATTRNAME=attrname, $
            ATTRVALUES=attrvalues, $
            COLORS=colors, $
+           DRAWMAPCOORD=drawMapCoord, $
            FCOLORS=fcolors, $
            FILL=fill, $
            LINESTYLE=linestyle, $
@@ -568,9 +590,12 @@ PRO cgDrawShapes, shapeFile, $
    
    ; If you have a map coordinate, then set the data range appropriately.
    IF Obj_Valid(mapCoord) THEN BEGIN
+    
+       IF Obj_Valid(drawMapCoord) EQ 0 THEN drawMapCoord = mapCoord
       
        ; This is only necessary, if a LIMIT wasn't specified.
-       IF ~Keyword_Set(uselimit) THEN BEGIN
+       IF N_Elements(uselimit) EQ 0 THEN uselimit = 1
+       IF ~uselimit THEN BEGIN
            entityMinX = FltArr(N_Elements(*entities))
            entityMaxX = FltArr(N_Elements(*entities))
            entityMiny = FltArr(N_Elements(*entities))
@@ -604,9 +629,10 @@ PRO cgDrawShapes, shapeFile, $
           IF Ptr_Valid(thisEntity.vertices) THEN BEGIN
               IF (N_Elements(*thisEntity.vertices) GE minNumVerts) THEN BEGIN
                   cgDrawShapes_DrawEntity, (*entities)[j], COLOR=(fastColors[index])[0], $
-                     Fill=(fill[index])[0], LineStyle=(linestyle[index])[0], $
+                     DRAWMAPCOORD=drawMapCoord, $
+                     Fill=(fill[index])[0], LINESTYLE=(linestyle[index])[0], $
                      THICK=(thick[index])[0], PROJECTED_XY=projected_xy, $
-                     MapCoord=mapCoord, FCOLOR=(fastFillColors[index])[0]
+                     MAPCOORD=mapCoord, FCOLOR=(fastFillColors[index])[0]
               ENDIF 
           ENDIF ELSE BEGIN
               cgDrawShapes_DrawEntity, (*entities)[j], COLOR=(fastColors[index])[0], $

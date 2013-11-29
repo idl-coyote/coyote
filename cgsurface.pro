@@ -1358,6 +1358,12 @@ END ;---------------------------------------------------------------------------
 ;     transform: in, optional, type=4x4 double array
 ;         A homogeneous transformation matrix to be applied to the initial surface. Such a 
 ;         transformation matrix can be obtained, for example, with the T3D procedure.
+;     vert_colors: in, optional, type=byte
+;         A vector of colors to be used to specify the color of a surface vertex. The vector
+;         may be of the form [n] where each entry is a color index, or of the form [3,n] where
+;         each 3-element row is an RGB color, or of the form [4,n] where each 4-element row
+;         is an RGBA color. To remove vertex colors after they have been set, set VERT_COLORS
+;         to a scalar. See the documentation for IDLgrSurface for additional details.
 ;     xoffset: in, optional, type=integer, default=50
 ;         The number of pixels the surface window should be offset in the X direction
 ;         from the upper-left corner of the display.
@@ -1415,6 +1421,7 @@ PRO cgSurface, data, x, y, $
     TCharsize=tcharsize, $
     TColor=tcolorName, $
     Transform=transform, $
+    Vert_Colors=vert_colors, $
     XOffset=xoffset, $
     XRange=xrange_u, $
     XSize=xsize, $
@@ -1648,12 +1655,12 @@ PRO cgSurface, data, x, y, $
     IF elevation_shading THEN BEGIN
         thisSurface = OBJ_NEW('IDLgrSurface', data, x, y, $
            Color=color, _Strict_Extra=extra, Style=style, $
-           Shading=shading, Hidden_Lines=hidden_lines)
+           Shading=shading, Hidden_Lines=hidden_lines, Vert_Colors=vert_colors)
     ENDIF ELSE BEGIN
         thisSurface = OBJ_NEW('IDLgrSurface', data, x, y, $
            Color=color, _Strict_Extra=extra, Style=style, $
            Shading=shading, Hidden_Lines=hidden_lines, BOTTOM=bottom, $
-           SPECULAR=specularColor)    
+           SPECULAR=specularColor, Vert_Colors=vert_colors)    
     ENDELSE
     
     ; Do you have a texture image?

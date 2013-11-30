@@ -179,6 +179,9 @@
 ;       Modified so that the PostScript device can keep a consistent interface when using True-Type
 ;          fonts. Requires using cgSet_TTFont to select True-Type fonts. 22 May 2013. DWF.
 ;       Changed name to cgPS_Open from PS_Start. 4 November 2013. DWF. Retired PS_Start.
+;       Added ability to specify the name of the output raster file desired as the filename. If this is done,
+;          and ImageMagick is installed, the PostScript intermediate file is deleted and the raster file is
+;          created automatically without setting a raster output keyword on cgPS_Close. 29 Nov 2013. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
@@ -205,6 +208,24 @@ PRO cgPS_Open, filename, $
    ; Handle the filename parameter and keywords.
    IF N_Elements(filename) EQ 0 THEN filename = 'idl.ps'
    IF N_Elements(ps_filename) EQ 0 THEN ps_filename = filename 
+   
+   ; Get the file extension. This will tell you what kind of raster file you need to make.
+   rootname = cgRootName(ps_filename, DIRECTORY=directory, EXTENSION=extension)
+   CASE StrUpCase(extension) OF
+       'PS': 
+       'EPS':
+       '': ps_filename = Filepath(ROOT_DIR=directory, rootname + '.ps')
+       ELSE: BEGIN
+          ps_filename = Filepath(ROOT_DIR=directory, rootname + '.ps')
+          
+          ; If ImageMagick is installed, the we can create the raster file directly,
+          ; and we can delete the intermediate PostScript file.
+          IF cgHasImageMagick() THEN BEGIN
+             ps_struct.rasterFileType = extension
+             IF N_Elements(quiet) EQ 0 THEN quiet = 1
+          END
+          END
+   ENDCASE
       
    ; Need DejaVuSans fonts?
    IF Keyword_Set(dejavusans) && (Float(!Version.Release) GE 8.2) THEN BEGIN
@@ -213,7 +234,7 @@ PRO cgPS_Open, filename, $
    ENDIF
    
    ; Define the PS structure.
-   IF N_Elements(ps_struct) EQ 0 THEN ps_struct = {FSC_PS_SETUP}
+   IF N_Elements(ps_struct) EQ 0 THEN ps_struct = {cgPS_SETUP}
    
    ; Save the current True-Type font before entering the PostScript device.
    ; Necessary for restoring it later.

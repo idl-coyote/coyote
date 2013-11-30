@@ -1,49 +1,17 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;   FSC_PS_SETUP__DEFINE
+;   cgPS_Setup__Define
 ;
 ; PURPOSE:
-;
-;    The purpose of FSC_PS_SETUP__DEFINE is to define a structure that is
-;    use with cgPS_Open and cgPS_Close, programs that make it easy to set-up
-;    for and close a PostScript file. The programs work in close conjunction
-;    with cgPS_Config, another program from the Coyote Library.
-;
-; AUTHOR:
-;
-;   FANNING SOFTWARE CONSULTING
-;   David Fanning, Ph.D.
-;   1645 Sheely Drive
-;   Fort Collins, CO 80526 USA
-;   Phone: 970-221-0438
-;   E-mail: david@idlcoyote.com
-;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-;
-; CATEGORY:
-;
-;       Graphics, File Output, PostScript
-;
-; CALLING SEQUENCE:
-;
-;       Used internally in cgPS_Open and cgPS_Close.
-;
-; COMMON BLOCKS:
-;
-;       _$FSC_PS_START_   Contains the PS_STRUCT structure for communication between
-;                         cgPS_Open and cgPS_Close.
-;
-; MODIFICATION HISTORY:
-;
-;       Separated from cgPS_Open file, 7 April 2009, by David W. Fanning.
-;       Added PAGETYPE field to structure. 8 August 2009. DWF.
-;       Changes to handle inability to create raster files from PS encapsulated files in 
-;           landscape mode. Added "encapsulated" field to structure. 26 Aug 2011. DWF.
-;       Modified to keep track of the "input" True-Type font for PostScript devices. 22 May 2013. DWF.
-;-
+;   The purpose of cgPS_SETUP__DEFINE is to define a structure that is
+;   used by cgPS_Open and cgPS_Close to communicate PostScript set-up information
+;   back and forth. The idea is to allow simple and error set-up of PostScript and
+;   raster file output (though PostScript intermediate files and ImageMagick).
 ;
 ;******************************************************************************************;
-;  Copyright (c) 2008 - 2013, by Fanning Software Consulting, Inc.                         ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2008-2013, by Fanning Software Consulting, Inc. All rights reserved.      ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -68,9 +36,43 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-PRO FSC_PS_SETUP__DEFINE
+;
+;+
+; The purpose of cgPS_SETUP__DEFINE is to define a structure that is
+; used by cgPS_Open and cgPS_Close to communicate PostScript set-up information
+; back and forth. The idea is to allow simple and error set-up of PostScript and
+; raster file output (though PostScript intermediate files and ImageMagick). The 
+; program uses a common block named " _$FSC_PS_START_ ".
+;
+; :Categories:
+;    Graphics Utility
+; 
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;       Separated from cgPS_Open file, 7 April 2009, by David W. Fanning.
+;       Added PAGETYPE field to structure. 8 August 2009. DWF.
+;       Changes to handle inability to create raster files from PS encapsulated files in 
+;           landscape mode. Added "encapsulated" field to structure. 26 Aug 2011. DWF.
+;       Modified to keep track of the "input" True-Type font for PostScript devices. 22 May 2013. DWF.
+;       Added RasterFileType field to keep track of what kind of output file should be created
+;           from the intermediate PostScript file. 29 Nov 2013. DWF.
+;       Created from retired Coyote Library program FSC_PS_SETUP and added rasterFileType field. 29 Nov 2013. DWF.
+;           
+; :Copyright:
+;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
+;-
+PRO cgPS_SETUP__DEFINE
 
-    struct = { FSC_PS_SETUP, $
+    struct = { CGPS_SETUP, $
                currentDevice: "", $   ; Current graphics device when cgPS_Open is called.
                setup: 0, $            ; A flag that makes sure PS device is opened/closed in correct sequence.
                convert: "", $         ; Set to type of output file, if converting with ImageMagick.
@@ -82,6 +84,7 @@ PRO FSC_PS_SETUP__DEFINE
                tt_font:"", $          ; The name of the True-Type font in effect.
                tt_font_old:"", $      ; The name of the  True-Type font in effect before entering PostScript device.
                font: 0, $             ; The type of font being used. -1 Hershey, 0 PostScript, 1 True-type
+               rasterFileType: "", $  ; The type of raster file to be created from the PostScript file.
                p: !P, $               ; The plotting system variable.
                x: !X, $               ; The X axis system variable.
                y: !Y, $               ; The Y axis system variable.

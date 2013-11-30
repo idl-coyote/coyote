@@ -185,9 +185,10 @@
 ;        Fixed a problem in which the NOMESSAGE keyword was not getting passed along to cgPS2Raster. 5 Nov 2012. DWF.
 ;        Fixed a problem where I was not passing the PORTRAIT keyword to cgPS2Raster properly. 22 Jan 2013. DWF.
 ;        Modified to restore the input True-Type font for PostScript devices. 22 May 2013. DWF.
+;        Can now create raster file output directly from the input filename of cgPS_Open. 29 Nov 2013. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2008-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
 ;-
 PRO cgPS_Close, $
     ALLOW_TRANSPARENT=allow_transparent, $
@@ -231,6 +232,7 @@ PRO cgPS_Close, $
        ps_struct.currentDevice = ""
        ps_struct.filename = ""
        ps_struct.convert = ""
+       ps_struct.rasterFileType = ""
        
        RETURN
        
@@ -256,7 +258,10 @@ PRO cgPS_Close, $
    ; Need to convert the PostScript to a raster file?
    needRaster = 0
    allow_transparent = Keyword_Set(allow_transparent)
-   IF N_Elements(filetype) EQ 0 THEN filetype = ""
+   IF N_Elements(filetype) EQ 0 THEN BEGIN
+       filetype = ps_struct.rasterFileType
+       IF filetype NE "" THEN delete_ps = 1
+   ENDIF
    CASE StrUpCase(filetype) OF
        'BMP': bmp = 1
        'GIF': gif = 1
@@ -327,6 +332,7 @@ PRO cgPS_Close, $
    ps_struct.currentDevice = ""
    ps_struct.filename = ""
    ps_struct.convert = ""
+   ps_struct.rasterFileType = ""
 
    
 END ;---------------------------------------------------------------

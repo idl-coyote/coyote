@@ -84,7 +84,11 @@
 ;    
 ; :Params:
 ;     filename: in, optional, type=string, default='idl.ps'
-;        The name of the PostScript file created.
+;        The name of the PostScript file to be created. This can also be the name of a raster 
+;        file (e.g., PNG, JPEG, TIFF, PDF, etc.) that you would like to have created from a PostScript 
+;        intermediate file. This requires that ImageMagick is installed correctly on your 
+;        machine. If you choose this kind of filename, the intermediate PostScript file is
+;        automatically deleted.
 ;    
 ; :Keywords:
 ;     cancel: out, optional, type=boolean, default=0
@@ -205,11 +209,15 @@ PRO cgPS_Open, filename, $
  
    COMMON _$FSC_PS_START_, ps_struct
    
-   ; Handle the filename parameter and keywords.
+    ; Define the PS structure.
+    IF N_Elements(ps_struct) EQ 0 THEN ps_struct = {cgPS_SETUP}
+       
+   ; Handle the filename parameter and keywords. This is necessary because "filename" can come
+   ; from both an input parameter and a keyword parameter (historical reasons).
    IF N_Elements(filename) EQ 0 THEN filename = 'idl.ps'
    IF N_Elements(ps_filename) EQ 0 THEN ps_filename = filename 
    
-   ; Get the file extension. This will tell you what kind of raster file you need to make.
+   ; Get the file extension. This will tell you what kind of raster file you need to make, if any.
    rootname = cgRootName(ps_filename, DIRECTORY=directory, EXTENSION=extension)
    CASE StrUpCase(extension) OF
        'PS': 
@@ -232,9 +240,6 @@ PRO cgPS_Open, filename, $
       tt_font = 'DejaVuSans'
       font = 1
    ENDIF
-   
-   ; Define the PS structure.
-   IF N_Elements(ps_struct) EQ 0 THEN ps_struct = {cgPS_SETUP}
    
    ; Save the current True-Type font before entering the PostScript device.
    ; Necessary for restoring it later.

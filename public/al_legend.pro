@@ -342,11 +342,12 @@ symline = (np ne 0) || (nl ne 0)                        ; FLAG TO PLOT SYM/LINE
     for i=0,N_elements(psymi)-1 do psym[i] = cgsymcat(psymi[i])
  endif else begin    
      
- case np of             ;Get symbols
- 0: psym = intarr(n)    ;Default = solid
- 1: psym = intarr(n) + psymi
- else: psym = psymi
- endcase 
+     case np of             ;Get symbols
+     0: psym = intarr(n)    ;Default = solid
+     1: psym = intarr(n) + psymi
+     else: psym = psymi
+     endcase 
+     
  endelse
 
  case nv of 

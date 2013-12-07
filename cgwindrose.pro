@@ -331,7 +331,6 @@ PRO cgWindRose, speed, direction, $
    angles = (Indgen(16)*22.5)
    colors = Bindgen(s[0])
    cgLoadCT, 1, /Brewer, NColors=s[0], Clip=[30, 250]
-   ;colors = ['pink', 'dark khaki', 'red', 'blu7', 'grn5', 'sky blue', 'purple']
    FOR j=0,15 DO BEGIN
       FOR k=s[0]-1,0,-1 DO BEGIN
          radii = Total(matrix[0:k,*],1) / N_Elements(speed_final) * 100
@@ -361,8 +360,8 @@ PRO cgWindRose, speed, direction, $
    ENDFOR
    speedStr[N_Elements(speeds)-1] = sym
    
-   AL_Legend, speedStr, PSym=Replicate(15,N_Elements(speeds)), SymSize=1.5, Color=colors, $
-       Position=[0.05, 0.22], /Normal, Spacing=1.5, Charsize=cgDefCharsize()*0.75
+   cgLegend, Title=speedStr, PSym=15, SymSize=1.5, Color=colors[0:5], Length=0.0, $
+       Location=[0.05, 0.22], VSpace=1.5, Charsize=cgDefCharsize()*0.75, /Box
    cgText, 0.045, 0.24, /Normal, 'Wind Speed (m/s)', Charsize=cgDefCharsize()*0.85
    
    ; Add a title to the plot.

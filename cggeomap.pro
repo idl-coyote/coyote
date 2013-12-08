@@ -169,6 +169,7 @@
 ;         Modified program to look for NSIDC Hughes ellipsoid specified as semi-major axis of 6378273.0 and 
 ;            semi-minor axis of 6356889.4 as specified by the GeoTiff tags GEOGSEMIMAJORAXISGEOKEY and
 ;            GEOGSEMIMINORAXISGEOKEY. I do this ONLY for Polar Stereographic map projections.
+;         True-color geoTiff files not being returned correctly because of a typo. Changed "GT" to "GE" on line 1380. 8 Dec 2013. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -1377,7 +1378,7 @@ Function cgGeoMap, image, $
              IF N_Elements(geofile) EQ 0 THEN BEGIN
                 geofile = image
                 void = Query_Tiff(geofile, info)
-                IF info.channels GT 3 THEN BEGIN
+                IF info.channels GE 3 THEN BEGIN
                    outimage = Read_Tiff(geofile, SUB_RECT=sub_rect)
                 ENDIF ELSE BEGIN
                    outimage = Read_Tiff(geofile, r, g, b, SUB_RECT=sub_rect)

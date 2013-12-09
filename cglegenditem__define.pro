@@ -92,6 +92,19 @@
 ;     addcmd: in, optional, type=boolean,default=0
 ;        If this keyword is set, the object is added to the resizeable graphics
 ;        window, cgWindow. The DRAW method of the object is called in cgWindow.
+;     alignment: in, optional, type=integer, default=0
+;        This keyword affects the alignment of the legend box with respect to the `Location` point.
+;        There are eight possible values (0 to 7) that assign the location point to be one of the
+;        four corners of the legend box, or the middle of one of the four sides of the legend box.
+;        The values are specified as follows::
+;           0 - Location specifies the upper left corner of the legend box.
+;           1 - Location specifies the upper right corner of the legend box.
+;           2 - Location specifies the lower right corner of the legend box.
+;           3 - Location specifies the lower left corner of the legend box.
+;           4 - Location specifies the top side of the legend box (centered horizontally).
+;           5 - Location specifies the bottom side of the legend box (centered horizontally).
+;           6 - Location specifies the left side of the legend box (centered vertically).
+;           7 - Location specifies the right side of the legend box (centered vertically).
 ;     background: out, optional, type=boolean, default=0
 ;        Set this keyword to draw a colored background for the legend.
 ;     bg_color: out, optional, type=string, default="white"
@@ -157,6 +170,7 @@
 ;---------------------------------------------------------------------------
 FUNCTION cgLegendItem::INIT, $
     ADDCMD=addcmd, $
+    ALIGNMENT=alignment, $
     BACKGROUND=background, $
     BG_COLOR=bg_color, $
     BOX=box, $
@@ -200,6 +214,7 @@ FUNCTION cgLegendItem::INIT, $
     ENDIF
     
     ; Define default parameters.
+    SetDefaultValue, alignment, 0
     SetDefaultValue, background, 0, /Boolean
     SetDefaultValue, bg_color, 'white'
     SetDefaultValue, box, 0, /Boolean
@@ -249,7 +264,65 @@ FUNCTION cgLegendItem::INIT, $
     SetDefaultValue, visible, 1
     SetDefaultValue, vspace, 1.5
     
+    ; Set the appropriate alignment keywords.
+    alignment = 0 > alignment < 7
+    CASE alignment OF
+        0: BEGIN
+           align_hcenter = 0
+           align_vcenter = 0
+           align_right = 0
+           align_bottom = 0
+           END
+        1: BEGIN
+           align_hcenter = 0
+           align_vcenter = 0
+           align_right = 1
+           align_bottom = 0
+           END
+        2: BEGIN
+           align_hcenter = 0
+           align_vcenter = 0
+           align_right = 1
+           align_bottom = 1
+           END
+        3: BEGIN
+           align_hcenter = 0
+           align_vcenter = 0
+           align_right = 0
+           align_bottom = 1
+           END
+        4: BEGIN
+           align_hcenter = 1
+           align_vcenter = 0
+           align_right = 0
+           align_bottom = 0
+           END
+        5: BEGIN
+           align_hcenter = 1
+           align_vcenter = 0
+           align_right = 0
+           align_bottom = 1
+           END
+        6: BEGIN
+           align_hcenter = 0
+           align_vcenter = 1
+           align_right = 0
+           align_bottom = 0
+           END
+        7: BEGIN
+           align_hcenter = 0
+           align_vcenter = 1
+           align_right = 1
+           align_bottom = 0
+           END
+    ENDCASE
+    
     ; Populate the object.
+    self.alignment = alignment
+    self.align_bottom = Keyword_Set(align_bottom)
+    self.align_hcenter = Keyword_Set(align_hcenter)
+    self.align_vcenter = Keyword_Set(align_vcenter)
+    self.align_right = Keyword_Set(align_right)
     self.background = background
     self.bg_color = Ptr_New(bg_color)
     self.box = Keyword_Set(box)
@@ -329,6 +402,173 @@ END
 
 
 ;+--------------------------------------------------------------------------
+; This method calculates the size of the box needed for the legend.
+;---------------------------------------------------------------------------
+PRO cgLegendItem::CalculateBoxSize
+
+    ; Set up thickness values, if needed.
+    IF self.bx_thick EQ 0 THEN thick = !P.Thick ELSE thick = self.bx_thick
+    IF self.symthick EQ 0 THEN symthick = !P.Thick ELSE symthick = self.symthick
+    IF self.thick EQ 0 THEN thick = !P.Thick ELSE thick = self.thick
+    
+    ; Do we need to convert location to normalized coordinate space?
+    IF self.data THEN BEGIN
+        location = Convert_Coord(self.location, /Data, /TO_Normal)
+    ENDIF ELSE location = self.location
+    
+    ; If you are drawing a box, then the position refers to the box position, not
+    ; the first legend item.
+    IF self.box THEN BEGIN
+        bx0 = location[0]
+        by1 = location[1]
+        x0 = bx0 + (2.25 * Float(!D.X_CH_Size)/!D.X_Size)
+        x1 = x0 + self.length
+        y = by1 - (1.75 * Float(!D.Y_CH_Size)/!D.Y_Size)
+        y_offset = self.vspace * Float(!D.Y_CH_Size)/!D.Y_Size
+    ENDIF ELSE BEGIN
+        x0 = location[0]
+        x1 = x0 + self.length
+        y = location[1]
+        y_offset = self.vspace * Float(!D.Y_CH_Size)/!D.Y_Size
+        bx0 = x0 - (2 * Float(!D.X_CH_Size)/!D.X_Size)
+        by1 = y + (2 * Float(!D.Y_CH_Size)/!D.Y_Size)
+    ENDELSE
+    
+    ; We want to keep track of the item width as we draw it.
+    IF Ptr_Valid(self.width) THEN BEGIN
+        Ptr_Free, self.width
+        self.width = Ptr_New(/Allocate_Heap)
+    ENDIF ELSE self.width = Ptr_New(/Allocate_Heap)
+    itemWidth = FltArr(N_Elements(*self.titles))
+
+    IF !D.Name EQ 'PS' THEN BEGIN
+        xx = 0.1
+        yy=1.25
+        xsize = !D.X_Size
+        ysize = !D.Y_Size
+    ENDIF ELSE BEGIN
+        xsize = !D.X_Size
+        ysize = !D.Y_Size
+        currentID = !D.Window
+        
+        ; This has to be WINDOW, rather than cgDisplay because cgDisplay means
+        ; something different in cgWindows.
+        Window, XSIZE=xsize, YSIZE=30, /Pixmap, /Free
+        pixID = !D.Window
+        xx = 0.5
+        yy=0.5
+    ENDELSE
+    
+    ; For each legend item.
+    FOR j = 0, N_Elements(*self.titles) - 1 DO BEGIN
+    
+        ; Need to draw a line?
+        IF x0 NE x1 THEN BEGIN
+            itemWidth[j] = x1-x0
+        ENDIF
+        
+        ; Need to draw symbols?
+        IF (*self.psyms)[j] NE 0 THEN BEGIN
+            ; Center the symbol on the line?
+            IF self.center_sym THEN BEGIN
+                x2 = x0 + (x1 - x0) / 2.0
+            ENDIF
+            itemWidth[j] = itemWidth[j] + (self.symsize * (Float(!D.X_CH_Size)/xsize))
+        ENDIF
+        
+        ; Draw the title.
+        IF self.hardware THEN BEGIN
+            thisFont = !P.Font
+            !P.Font = (!D.Name EQ 'PS') ? 1 : 0
+        ENDIF
+        by0 =  y-(0.5*!D.Y_CH_SIZE/ysize)-(j*y_offset)
+        cgText, xx, yy, Alignment=0.5, /Normal, (*self.titles)[j],  $
+            TT_FONT=*self.tt_font, CHARSIZE=self.charsize, FONT=!P.Font, WIDTH=width, CHARTHICK=thick
+        itemWidth[j] = itemWidth[j] + width
+        IF self.hardware THEN !P.Font = thisFont
+        
+    ENDFOR
+    *self.width = itemWidth
+    
+    ; Cleanup
+    IF N_Elements(pixID) NE 0 THEN BEGIN
+        WDelete, pixID
+        IF currentID GE 0 THEN WSet, currentID
+    ENDIF
+    
+    ; Calculate the end position of the legend box.
+    len = Max(itemWidth)
+    bx1 = x0 + len + (2.0 * Float(!D.X_CH_Size)/xsize)
+    by0 = by0 - Float(!D.Y_CH_Size)/ysize
+    xlength = bx1 - bx0
+    ylength = by1 - by0
+
+    ; There are 8 possible positions for the legend box, depending on the values of certain keywords,
+    ; with respect to the location specified.
+    CASE 1 OF
+        ~self.align_bottom && ~self.align_vcenter && ~self.align_hcenter && ~self.align_right: ; Location is upper-left corner.
+        
+        ~self.align_bottom && self.align_right && ~self.align_vcenter: BEGIN   ; Location is upper-right corner.
+            ; Translate X coordinates to the left by length of box.
+            bx0 = bx0 - xlength
+            bx1 = bx1 - xlength
+        END
+        
+        self.align_bottom && self.align_right && ~self.align_vcenter: BEGIN     ; Location is bottom-right corner.
+            ; Translate X coordinates to the left by length of box.
+            ; Translate Y coordinates up by length of box.
+            bx0 = bx0 - xlength
+            bx1 = bx1 - xlength
+            by0 = by0 + ylength
+            by1 = by1 + ylength
+        END
+        
+        self.align_bottom && ~self.align_right  && ~self.align_vcenter  && ~self.align_hcenter: BEGIN    ; Location is bottom-left corner.
+            ; Translate Y coordinates up by length of box.
+            by0 = by0 + ylength
+            by1 = by1 + ylength
+        END
+        
+        ~self.align_bottom && self.align_hcenter && ~self.align_right: BEGIN   ; Location is top center.
+            ; Move to left by half an x length.
+            bx0 = bx0 - (xlength/2.0)
+            bx1 = bx1 - (xlength/2.0)
+        END
+        
+        self.align_bottom && self.align_hcenter && ~self.align_right: BEGIN    ; Location is bottom center.
+            ; Move to left by half an x length.
+            ; Translate Y coordinates up by length of box.
+            bx0 = bx0 - (xlength/2.0)
+            bx1 = bx1 - (xlength/2.0)
+            by0 = by0 + ylength
+            by1 = by1 + ylength
+        END
+        
+        self.align_vcenter && ~self.align_right  && ~self.align_bottom: BEGIN    ; Location is left center.
+            ; Translate Y coordinates up by half the length of box
+            by0 = by0 + (ylength/2.0)
+            by1 = by1 + (ylength/2.0)
+        END
+        
+        self.align_vcenter && self.align_right  && ~self.align_bottom: BEGIN     ; Location is right center.
+            ; Translate X coordinates to the left by length of box.
+            bx0 = bx0 - xlength
+            bx1 = bx1 - xlength
+            ; Translate Y coordinates up by half the length of box
+            by0 = by0 + (ylength/2.0)
+            by1 = by1 + (ylength/2.0)
+        END
+        
+        ELSE: Message, 'Confusing use of alignment keywords. Continuing...', /Informational
+        
+    ENDCASE
+    
+    self.bx_pos = [bx0, by0, bx1, by1]
+
+END
+
+
+;+--------------------------------------------------------------------------
 ; This method draws the legend item or items in a graphics window.
 ;---------------------------------------------------------------------------
 PRO cgLegendItem::Draw
@@ -353,6 +593,8 @@ PRO cgLegendItem::Draw
     
     ; We want to draw in decomposed color, if possible.
     cgSetColorState, 1, Current=incomingColorState
+    
+    self -> CalculateBoxSize
     
     ; Do we need to draw a background? If so, we have a problem. We can't figure out where
     ; to draw the background "box" until after we have actually drawn the legend in the window
@@ -393,27 +635,20 @@ PRO cgLegendItem::Draw
     ; If you are drawing a box, then the position refers to the box position, not 
     ; the first legend item.
     IF self.box THEN BEGIN
-        bx0 = location[0]
-        by1 = location[1]
+        bx0 = self.bx_pos[0]
+        by1 = self.bx_pos[3]
         x0 = bx0 + (2.25 * Float(!D.X_CH_Size)/!D.X_Size)
         x1 = x0 + self.length
         y = by1 - (1.75 * Float(!D.Y_CH_Size)/!D.Y_Size)
         y_offset = self.vspace * Float(!D.Y_CH_Size)/!D.Y_Size
     ENDIF ELSE BEGIN
-        x0 = location[0]
+        x0 = self.bx_pos[0] + (2 * Float(!D.X_CH_Size)/!D.X_Size)
         x1 = x0 + self.length
-        y = location[1]
+        y = self.bx_pos[3] -(2 * Float(!D.Y_CH_Size)/!D.Y_Size)
         y_offset = self.vspace * Float(!D.Y_CH_Size)/!D.Y_Size
-        bx0 = x0 - (2 * Float(!D.X_CH_Size)/!D.X_Size)
-        by1 = y + (2 * Float(!D.Y_CH_Size)/!D.Y_Size)
+        bx0 = self.bx_pos[0] 
+        by1 = self.bx_pos[3] 
     ENDELSE
-
-    ; We want to keep track of the item width as we draw it.
-    IF Ptr_Valid(self.width) THEN BEGIN
-        Ptr_Free, self.width
-        self.width = Ptr_New(/Allocate_Heap)
-    ENDIF ELSE self.width = Ptr_New(/Allocate_Heap)
-    itemWidth = FltArr(N_Elements(*self.titles))
     
     ; For each legend item.
     FOR j = 0, N_Elements(*self.titles) - 1 DO BEGIN
@@ -422,7 +657,6 @@ PRO cgLegendItem::Draw
         IF x0 NE x1 THEN BEGIN
            cgPlotS, [x0,x1], [y,y]-(j*y_offset), COLOR=colors[j], $
                     LINESTYLE=(*self.linestyles)[j], THICK=thick, /NORMAL
-           itemWidth[j] = x1-x0
         ENDIF
     
         ; Need to draw symbols?
@@ -436,7 +670,6 @@ PRO cgLegendItem::Draw
                cgPlotS, [x0,x1], [y,y]-(j*y_offset), PSYM=(*self.psyms)[j], THICK=symthick, $
                         SYMSIZE=self.symsize, SYMCOLOR=symcolors[j], /NORMAL
             ENDELSE
-            itemWidth[j] = itemWidth[j] + (self.symsize * (Float(!D.X_CH_Size)/!D.X_Size))
         ENDIF
     
         ; Draw the title.
@@ -447,30 +680,29 @@ PRO cgLegendItem::Draw
         cgText, x1+(2.0*!D.X_CH_SIZE/!D.X_Size), y-(0.5*!D.Y_CH_SIZE/!D.Y_Size)-(j*y_offset),$
             /NORMAL, ALIGNMENT=0.0, (*self.titles)[j], COLOR=tcolors[j], $
             TT_FONT=*self.tt_font, CHARSIZE=self.charsize, FONT=!P.Font, WIDTH=width, CHARTHICK=thick
-         itemWidth[j] = itemWidth[j] + width
-         by0 =  y-(0.5*!D.Y_CH_SIZE/!D.Y_Size)-(j*y_offset)
         IF self.hardware THEN !P.Font = thisFont
         
     ENDFOR
-    *self.width = itemWidth
     
     ; Calculate the end position of the legend box.
-    len = Max(itemWidth)
-    bx1 = x0 + len + (2.0 * Float(!D.X_CH_Size)/!D.X_Size)
-    by0 = by0 - Float(!D.Y_CH_Size)/!D.Y_Size
+     bx0 = self.bx_pos[0]
+     bx1 = self.bx_pos[2]
+     by0 = self.bx_pos[1]
+     by1 = self.bx_pos[3]
     
     ; Draw the box, if needed.
     IF self.box THEN BEGIN
         cgPlots, [bx0, bx0, bx1, bx1, bx0], [by1, by0, by0, by1, by1], /Normal, $
             Color=bx_color, Thick=bx_thick
-        IF drawAgain THEN self.bx_pos = [bx0, by0, bx1, by1]  ELSE self.bx_pos = FltArr(4)
-    ENDIF
+     ENDIF
     
+     ; We have to calculate the box each time, or else this won't work in resizeable
+     ; graphics windows.
+     self.bx_pos = FltArr(4)
+
     ; Restore starting color state.
     cgSetColorState, incomingColorState
     
-    ; Do you need to call the draw method again?
-    IF drawAgain THEN self -> Draw
 END
 
 
@@ -478,6 +710,8 @@ END
 ; This method obtains properties from the object.
 ;
 ; :Keywords:
+;     alignment: out, optional, type=integer
+;        The current alignment of the legend box.
 ;     background: out, optional, type=boolean, default=0
 ;        Set this keyword to draw a colored background for the legend.
 ;     bg_color: out, optional, type=string, default="white"
@@ -496,7 +730,7 @@ END
 ;     colors: out, optional, type=string/strarr
 ;        The name of the data color. This is the color of each data line.
 ;     data: out, optional, type=boolean
-;         Indicates if the `Location` is in data coordinates.
+;        Indicates if the `Location` is in data coordinates.
 ;     hardware: out, optional, type=boolean
 ;        Set this keyword if you want to output the legend text in a hardware font.
 ;     length: out, optional, type=float, default=0.075
@@ -532,6 +766,7 @@ END
 ;        `Charsize` to determine vertical spacing.
 ;---------------------------------------------------------------------------
 PRO cgLegendItem::GetProperty, $
+   ALIGNMENT=alignment, $
    BACKGROUND=background, $
    BG_COLOR=bg_color, $
    BOX=box, $
@@ -565,6 +800,7 @@ PRO cgLegendItem::GetProperty, $
         RETURN
     ENDIF
 
+    IF Arg_Present(alignment) THEN alignment = self.alignment
     IF Arg_Present(background) THEN background = self.background
     IF Arg_Present(bg_color) THEN bg_color = *self.bg_color
     IF Arg_Present(box) THEN box = self.box
@@ -596,6 +832,19 @@ END
 ; This method sets properties of the object.
 ; 
 ; :Keywords:
+;     alignment: in, optional, type=integer, default=0
+;        This keyword affects the alignment of the legend box with respect to the `Location` point.
+;        There are eight possible values (0 to 7) that assign the location point to be one of the
+;        four corners of the legend box, or the middle of one of the four sides of the legend box.
+;        The values are specified as follows::
+;           0 - Location specifies the upper left corner of the legend box.
+;           1 - Location specifies the upper right corner of the legend box.
+;           2 - Location specifies the lower right corner of the legend box.
+;           3 - Location specifies the lower left corner of the legend box.
+;           4 - Location specifies the top side of the legend box (centered horizontally).
+;           5 - Location specifies the bottom side of the legend box (centered horizontally).
+;           6 - Location specifies the left side of the legend box (centered vertically).
+;           7 - Location specifies the right side of the legend box (centered vertically).
 ;     background: in, optional, type=boolean, default=0
 ;        Set this keyword to draw a colored background for the legend.
 ;     bg_color: in, optional, type=string, default="white"
@@ -654,6 +903,7 @@ END
 ;        `Charsize` to determine vertical spacing.
 ;---------------------------------------------------------------------------
 PRO cgLegendItem::SetProperty, $
+   ALIGNMENT=alignment, $ $
    BACKGROUND=background, $
    BG_COLOR=bg_color, $
    BOX=box, $
@@ -688,6 +938,66 @@ PRO cgLegendItem::SetProperty, $
         RETURN
     ENDIF
 
+    ; Set the appropriate alignment keywords.
+    IF N_Elements(alignment) NE 0 THEN BEGIN
+        alignment = 0 > alignment < 7
+        CASE alignment OF
+            1: BEGIN
+                align_hcenter = 0
+                align_vcenter = 0
+                align_right = 0
+                align_bottom = 0
+            END
+            1: BEGIN
+                align_hcenter = 0
+                align_vcenter = 0
+                align_right = 1
+                align_bottom = 0
+            END
+            2: BEGIN
+                align_hcenter = 0
+                align_vcenter = 0
+                align_right = 1
+                align_bottom = 1
+            END
+            3: BEGIN
+                align_hcenter = 0
+                align_vcenter = 0
+                align_right = 0
+                align_bottom = 1
+            END
+            4: BEGIN
+                align_hcenter = 1
+                align_vcenter = 0
+                align_right = 0
+                align_bottom = 0
+            END
+            5: BEGIN
+                align_hcenter = 1
+                align_vcenter = 0
+                align_right = 0
+                align_bottom = 1
+            END
+            6: BEGIN
+                align_hcenter = 0
+                align_vcenter = 1
+                align_right = 0
+                align_bottom = 0
+            END
+            7: BEGIN
+                align_hcenter = 0
+                align_vcenter = 1
+                align_right = 1
+                align_bottom = 0
+            END
+        ENDCASE
+        self.alignment = alignment
+    ENDIF
+    
+    IF N_Elements(align_bottom) NE 0 THEN self.align_bottom = Keyword_Set(align_bottom)
+    IF N_Elements(align_hcenter) NE 0 THEN self.align_hcenter = Keyword_Set(align_hcenter)
+    IF N_Elements(align_vcenter) NE 0 THEN self.align_vcenter = Keyword_Set(align_vcenter)
+    IF N_Elements(align_right) NE 0 THEN self.align_right = Keyword_Set(align_right)
     IF N_Elements(background) NE 0 THEN self.background = Keyword_Set(background)
     IF N_Elements(bg_color) NE 0 THEN self.bg_color = bg_color
     IF N_Elements(box) NE 0 THEN self.box = Keyword_Set(box)
@@ -746,6 +1056,11 @@ PRO cgLegendItem__Define, class
 
     class = { cgLegendItem, $
               INHERITS IDL_Object, $
+              alignment: 0L, $
+              align_hcenter: 0, $
+              align_vcenter: 0, $
+              align_bottom: 0, $
+              align_right: 0, $
               background: 0, $              ; A flag that indicates a background should be drawn.
               bg_color: Ptr_New(), $        ; The color of the background.
               box: 0, $                     ; A flag that indicates a box should be drawn around legend.

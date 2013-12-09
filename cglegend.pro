@@ -66,7 +66,7 @@
 ;        window, cgWindow. The DRAW method of the object is called in cgWindow.
 ;     alignment: in, optional, type=integer, default=0
 ;        This keyword affects the alignment of the legend box with respect to the `Location` point.
-;        There are eight possible values (0 to 7) that assign the location point to be one of the
+;        There are nine possible values (0 to 8) that assign the location point to be one of the
 ;        four corners of the legend box, or the middle of one of the four sides of the legend box.
 ;        The values are specified as follows::
 ;           0 - Location specifies the upper left corner of the legend box.
@@ -77,6 +77,7 @@
 ;           5 - Location specifies the bottom side of the legend box (centered horizontally).
 ;           6 - Location specifies the left side of the legend box (centered vertically).
 ;           7 - Location specifies the right side of the legend box (centered vertically).
+;           8 - Location specified the very center of the legend box.
 ;     background: out, optional, type=boolean, default=0
 ;        Set this keyword to draw a colored background for the legend.
 ;     bg_color: out, optional, type=string, default="white"

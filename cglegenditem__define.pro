@@ -94,7 +94,7 @@
 ;        window, cgWindow. The DRAW method of the object is called in cgWindow.
 ;     alignment: in, optional, type=integer, default=0
 ;        This keyword affects the alignment of the legend box with respect to the `Location` point.
-;        There are eight possible values (0 to 7) that assign the location point to be one of the
+;        There are nine possible values (0 to 8) that assign the location point to be one of the
 ;        four corners of the legend box, or the middle of one of the four sides of the legend box.
 ;        The values are specified as follows::
 ;           0 - Location specifies the upper left corner of the legend box.
@@ -105,6 +105,7 @@
 ;           5 - Location specifies the bottom side of the legend box (centered horizontally).
 ;           6 - Location specifies the left side of the legend box (centered vertically).
 ;           7 - Location specifies the right side of the legend box (centered vertically).
+;           8 - Location specified the very center of the legend box.
 ;     background: out, optional, type=boolean, default=0
 ;        Set this keyword to draw a colored background for the legend.
 ;     bg_color: out, optional, type=string, default="white"
@@ -265,7 +266,7 @@ FUNCTION cgLegendItem::INIT, $
     SetDefaultValue, vspace, 1.5
     
     ; Set the appropriate alignment keywords.
-    alignment = 0 > alignment < 7
+    alignment = 0 > alignment < 8
     CASE alignment OF
         0: BEGIN
            align_hcenter = 0
@@ -315,6 +316,12 @@ FUNCTION cgLegendItem::INIT, $
            align_right = 1
            align_bottom = 0
            END
+        8: BEGIN
+            align_hcenter = 1
+            align_vcenter = 1
+            align_right = 0
+            align_bottom = 0
+        END
     ENDCASE
     
     ; Populate the object.
@@ -507,6 +514,15 @@ PRO cgLegendItem::CalculateBoxSize
     ; with respect to the location specified.
     CASE 1 OF
         ~self.align_bottom && ~self.align_vcenter && ~self.align_hcenter && ~self.align_right: ; Location is upper-left corner.
+
+        ~self.align_bottom && self.align_vcenter && self.align_hcenter && ~self.align_right: BEGIN ; Location is dead center of box.       
+        ; Move to left by half an x length.
+        bx0 = bx0 - (xlength/2.0)
+        bx1 = bx1 - (xlength/2.0)
+        ; Translate Y coordinates up by half the length of box
+        by0 = by0 + (ylength/2.0)
+        by1 = by1 + (ylength/2.0)
+        END
         
         ~self.align_bottom && self.align_right && ~self.align_vcenter: BEGIN   ; Location is upper-right corner.
             ; Translate X coordinates to the left by length of box.
@@ -834,7 +850,7 @@ END
 ; :Keywords:
 ;     alignment: in, optional, type=integer, default=0
 ;        This keyword affects the alignment of the legend box with respect to the `Location` point.
-;        There are eight possible values (0 to 7) that assign the location point to be one of the
+;        There are nine possible values (0 to 8) that assign the location point to be one of the
 ;        four corners of the legend box, or the middle of one of the four sides of the legend box.
 ;        The values are specified as follows::
 ;           0 - Location specifies the upper left corner of the legend box.
@@ -845,6 +861,7 @@ END
 ;           5 - Location specifies the bottom side of the legend box (centered horizontally).
 ;           6 - Location specifies the left side of the legend box (centered vertically).
 ;           7 - Location specifies the right side of the legend box (centered vertically).
+;           8 - Location specified the very center of the legend box.
 ;     background: in, optional, type=boolean, default=0
 ;        Set this keyword to draw a colored background for the legend.
 ;     bg_color: in, optional, type=string, default="white"
@@ -940,7 +957,7 @@ PRO cgLegendItem::SetProperty, $
 
     ; Set the appropriate alignment keywords.
     IF N_Elements(alignment) NE 0 THEN BEGIN
-        alignment = 0 > alignment < 7
+        alignment = 0 > alignment < 8
         CASE alignment OF
             1: BEGIN
                 align_hcenter = 0
@@ -988,6 +1005,12 @@ PRO cgLegendItem::SetProperty, $
                 align_hcenter = 0
                 align_vcenter = 1
                 align_right = 1
+                align_bottom = 0
+            END
+            8: BEGIN
+                align_hcenter = 1
+                align_vcenter = 1
+                align_right = 0
                 align_bottom = 0
             END
         ENDCASE

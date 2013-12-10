@@ -67,7 +67,7 @@
 ;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table. May be a vector of the same
 ;        length as X.
-;     mapcoord: in, optional, type=object
+;     map_object: in, optional, type=object
 ;        If you are drawing on a map projection set up with Map_Proj_Init
 ;        and using projected meter space, rather than lat/lon space, then you can use this
 ;        keyword to provide a cgMap object that will allow you to convert the `x` and `y`
@@ -129,8 +129,6 @@
 ;        Added the ability to specify the PSYM keyword as a string. 20 July 2012. DWF.
 ;        Added a check for a window to draw into, if needed. 8 July 2012. DWF.
 ;        Loop counter didn't assume someone would pass in 2D array of XY pairs. Fixed. 31 Jan 2013. DWF.
-;        Renamed Map_Object keyword to MapCoord to keep it consistent with other routines in the Coyote Library.
-;            10 December 2013. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
@@ -138,7 +136,7 @@
 PRO cgPlotS, x, y, z, $
     ADDCMD=addcmd, $
     COLOR=scolor, $
-    MAPCOORD=mapCoord, $
+    MAP_OBJECT=map_object, $
     PSYM=psymIn, $
     SYMCOLOR=ssymcolor, $
     SYMSIZE=symsize, $
@@ -177,7 +175,7 @@ PRO cgPlotS, x, y, z, $
     
         cgWindow, 'cgPlotS', x, y, z, $
             COLOR=scolor, $
-            MAPCOORD=mapCoord, $
+            map_object=map_object, $
             PSYM=psym, $
             SYMCOLOR=ssymcolor, $
             SYMSIZE=symsize, $
@@ -243,8 +241,8 @@ PRO cgPlotS, x, y, z, $
     
     ; Do you have a map obect? If so, you need both an X and a Y vector.
     ; Convert from lon/lat to projected XY.
-    IF Obj_Valid(mapCoord) && (N_Params() EQ 2) THEN BEGIN
-          xy = mapCoord -> Forward(x, y)
+    IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
+          xy = map_object -> Forward(x, y)
           xmap = Reform(xy[0,*])
           ymap = Reform(xy[1,*])
     ENDIF 
@@ -260,9 +258,9 @@ PRO cgPlotS, x, y, z, $
        CASE n_params OF
             1: IF psym[0] LE 0 THEN PlotS, x, Color=color, _STRICT_EXTRA=extra
             2: BEGIN
-               IF Obj_Valid(mapCoord) && (N_Params() EQ 2) THEN BEGIN
+               IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
                    IF psym[0] LE 0 THEN BEGIN
-                      mapCoord -> Draw, /NoGraphics
+                      map_object -> Draw, /NoGraphics
                       PlotS, xmap, ymap, Color=color, _STRICT_EXTRA=extra
                    ENDIF
                ENDIF ELSE BEGIN
@@ -283,8 +281,8 @@ PRO cgPlotS, x, y, z, $
                            Color=thisColor, _STRICT_EXTRA=extra
                    END
                 2: IF psym[0] LE 0 THEN BEGIN
-                       IF Obj_Valid(mapCoord) && (N_Params() EQ 2) THEN BEGIN
-                           mapCoord -> Draw, /NoGraphics
+                       IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
+                           map_object -> Draw, /NoGraphics
                            PlotS, [xmap[j],xmap[j+1]], [ymap[j], ymap[j+1]], $
                                 Color=thisColor, _STRICT_EXTRA=extra
                        ENDIF ELSE BEGIN
@@ -318,8 +316,8 @@ PRO cgPlotS, x, y, z, $
                    END
                    
                 2: BEGIN
-                   IF Obj_Valid(mapCoord) && (N_Params() EQ 2) THEN BEGIN
-                       mapCoord -> Draw, /NoGraphics
+                   IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
+                       map_object -> Draw, /NoGraphics
                        PlotS, xmap[j], ymap[j], COLOR=thisColor, PSYM=cgSymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
                            SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    ENDIF ELSE BEGIN

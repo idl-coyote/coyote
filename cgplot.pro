@@ -114,7 +114,7 @@
 ;        by row.
 ;     legends: in, optional, type=object
 ;        One or more cgLegendItem objects that are to be drawn on the plot.
-;     mapcoord: in, optional, type=object
+;     map_object: in, optional, type=object
 ;        If you are drawing on a map projection set up with Map_Proj_Init
 ;        and using projected meter space, rather than lat/lon space, then you can use this
 ;        keyword to provide a cgMap object that will allow you to convert the dependent and independent
@@ -291,7 +291,7 @@
 ;         Added XRANGE, XSTYLE, YRANGE, and YSTYLE keywords. This allows exact axis scaling if the XRANGE or YRANGE
 ;             keywords are used without setting the XSTYLE or YSTYLE keywords, which is more intuitive. 15 July 2013. DWF.
 ;         Added error bar plotting capability via ERR_* keywords. 10 December 2013. DWF.
-;         Added MapCoord keyword to allow plotting values in longitude/latitude to be converted to XY projected meter
+;         Added Map_Object keyword to allow plotting values in longitude/latitude to be converted to XY projected meter
 ;             space automatically. 10 December 2013. DWF.
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
@@ -316,7 +316,7 @@ PRO cgPlot, x, y, $
     LABEL=label, $
     LAYOUT=layout, $
     LEGENDS=legends, $
-    MAPCOORD=mapcoord, $
+    MAP_OBJECT=map_object, $
     NODATA=nodata, $
     NOERASE=noerase, $
     OPLOTS=oplots, $
@@ -391,7 +391,7 @@ PRO cgPlot, x, y, $
                 LABEL=label, $
                 LAYOUT=layout, $
                 LEGENDS=legends, $
-                MAPCOORD=mapcoord, $
+                MAP_OBJECT=map_object, $
                 NODATA=nodata, $
                 NOERASE=noerase, $
                 OPLOTS=oplots, $
@@ -435,7 +435,7 @@ PRO cgPlot, x, y, $
             LABEL=label, $
             LAYOUT=layout, $
             LEGENDS=legends, $
-            MAPCOORD=mapcoord, $
+            MAP_OBJECT=map_object, $
             NODATA=nodata, $
             NOERASE=noerase, $
             OPLOTS=oplots, $
@@ -463,7 +463,7 @@ PRO cgPlot, x, y, $
       
        1: BEGIN
        _dep = x
-       _indep = Findgen(N_Elements(dep))
+       _indep = Findgen(N_Elements(x))
        ENDCASE
     
        2: BEGIN
@@ -478,29 +478,29 @@ PRO cgPlot, x, y, $
     IF N_Elements(_indep) EQ 1 THEN _indep = [_indep]
     
     ; If you have a map coordinate object, do the conversion to XY projected meter space here.
-    IF (N_Elements(mapCoord) NE 0) && Obj_Valid(mapCoord) THEN BEGIN
+    IF (N_Elements(map_object) NE 0) && Obj_Valid(map_object) THEN BEGIN
         
-        xy = mapCoord -> Forward(_dep, _indep, /NoForwardFix)
+        xy = map_object -> Forward(_dep, _indep, /NoForwardFix)
         dep = Reform(xy[0,*])
         indep = Reform(xy[1,*])
         
         IF (N_Elements(err_ylow) NE 0) THEN BEGIN
-            xy = mapCoord -> Forward(_dep, _indep-err_ylow, /NoForwardFix)
+            xy = map_object -> Forward(_dep, _indep-err_ylow, /NoForwardFix)
             err_ylow = Reform(xy[1,*]) - indep
         ENDIF
         
         IF (N_Elements(err_yhigh) NE 0) THEN BEGIN
-            xy = mapCoord -> Forward(_dep, _indep+err_yhigh, /NoForwardFix)
+            xy = map_object -> Forward(_dep, _indep+err_yhigh, /NoForwardFix)
             err_yhigh = Reform(xy[1,*]) - indep
         ENDIF
 
         IF (N_Elements(err_xlow) NE 0) THEN BEGIN
-            xy = mapCoord -> Forward(_dep-err_xlow, _indep, /NoForwardFix)
+            xy = map_object -> Forward(_dep-err_xlow, _indep, /NoForwardFix)
             err_xlow = Reform(xy[0,*]) - dep
         ENDIF
 
         IF (N_Elements(err_xhigh) NE 0) THEN BEGIN
-            xy = mapCoord -> Forward(_dep+err_xhigh, _indep, /NoForwardFix)
+            xy = map_object -> Forward(_dep+err_xhigh, _indep, /NoForwardFix)
             err_xhigh = Reform(xy[0,*]) - dep
         ENDIF
 

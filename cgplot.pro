@@ -81,6 +81,22 @@
 ;        If this keyword is a string, the name of the data color. By default, 'black'.
 ;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table.
+;        ERR_COLOR=serr_color, $
+;     err_color: in, optional, type=varies
+;         The color error bars should be drawn in. The default is to use the `Color` keyword.
+;     err_thick:, in, optional, type=integer
+;         The thickness of the line for drawing the error bars. By default, !P.Thick.
+;     err_width: in, optional, type=float
+;         The width of the end lines on error bars in normalized coordinates. By default, the
+;         width is one percent of the width of the axes length in the appropriate dimension.
+;     err_xhigh: in, optional
+;         The high error values that should be added to the independent or X data values.
+;     err_xlow: in, optional
+;         The low error values that should be subtracted from the independent or X data values.
+;     err_yhigh: in, optional
+;         The high error values that should be added to the dependent or Y data values.
+;     err_ylow: in, optional
+;         The low error values that should be subtracted from the dependent or Y data values.
 ;     font: in, optional, type=integer, default=!P.Font
 ;        The type of font desired for axis annotation.
 ;     isotropic: in, optional, type=boolean, default=0
@@ -98,6 +114,12 @@
 ;        by row.
 ;     legends: in, optional, type=object
 ;        One or more cgLegendItem objects that are to be drawn on the plot.
+;     mapcoord: in, optional, type=object
+;        If you are drawing on a map projection set up with Map_Proj_Init
+;        and using projected meter space, rather than lat/lon space, then you can use this
+;        keyword to provide a cgMap object that will allow you to convert the dependent and independent
+;        parameters from longitude and latitude values, respectively, to projected meter space
+;        before drawing. 
 ;     nodata: in, optional, type=boolean, default=0
 ;        Set this keyword to draw axes, but no data.
 ;     noerase: in, optional, type=boolean, default=0
@@ -268,7 +290,9 @@
 ;         Changed the meaning of ISOTROPIC to its true meaning of keeping the same scale on both axes. 21 June 2013. DWF.
 ;         Added XRANGE, XSTYLE, YRANGE, and YSTYLE keywords. This allows exact axis scaling if the XRANGE or YRANGE
 ;             keywords are used without setting the XSTYLE or YSTYLE keywords, which is more intuitive. 15 July 2013. DWF.
-;         
+;         Added error bar plotting capability via ERR_* keywords. 10 December 2013. DWF.
+;         Added MapCoord keyword to allow plotting values in longitude/latitude to be converted to XY projected meter
+;             space automatically. 10 December 2013. DWF.
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
 ;-
@@ -280,11 +304,19 @@ PRO cgPlot, x, y, $
     BACKGROUND=sbackground, $
     CHARSIZE=charsize, $
     COLOR=scolor, $
+    ERR_COLOR=serr_color, $
+    ERR_THICK=err_thick, $
+    ERR_WIDTH=err_width, $
+    ERR_XHIGH=err_xhigh, $
+    ERR_XLOW=err_xlow, $
+    ERR_YHIGH=err_yhigh, $
+    ERR_YLOW=err_ylow, $
     FONT=font, $
     ISOTROPIC=isotropic, $
     LABEL=label, $
     LAYOUT=layout, $
     LEGENDS=legends, $
+    MAPCOORD=mapcoord, $
     NODATA=nodata, $
     NOERASE=noerase, $
     OPLOTS=oplots, $
@@ -347,11 +379,19 @@ PRO cgPlot, x, y, $
                 BACKGROUND=sbackground, $
                 CHARSIZE=charsize, $
                 COLOR=scolor, $
+                ERR_COLOR=serr_color, $
+                ERR_THICK=err_thick, $
+                ERR_WIDTH=err_width, $
+                ERR_XHIGH=err_xhigh, $
+                ERR_XLOW=err_xlow, $
+                ERR_YHIGH=err_yhigh, $
+                ERR_YLOW=err_ylow, $
                 FONT=font, $
                 ISOTROPIC=isotropic, $
                 LABEL=label, $
                 LAYOUT=layout, $
                 LEGENDS=legends, $
+                MAPCOORD=mapcoord, $
                 NODATA=nodata, $
                 NOERASE=noerase, $
                 OPLOTS=oplots, $
@@ -383,11 +423,19 @@ PRO cgPlot, x, y, $
             BACKGROUND=sbackground, $
             CHARSIZE=charsize, $
             COLOR=scolor, $
+            ERR_COLOR=serr_color, $
+            ERR_THICK=err_thick, $
+            ERR_WIDTH=err_width, $
+            ERR_XHIGH=err_xhigh, $
+            ERR_XLOW=err_xlow, $
+            ERR_YHIGH=err_yhigh, $
+            ERR_YLOW=err_ylow, $
             FONT=font, $
             ISOTROPIC=isotropic, $
             LABEL=label, $
             LAYOUT=layout, $
             LEGENDS=legends, $
+            MAPCOORD=mapcoord, $
             NODATA=nodata, $
             NOERASE=noerase, $
             OPLOTS=oplots, $
@@ -414,20 +462,52 @@ PRO cgPlot, x, y, $
     CASE N_Params() OF
       
        1: BEGIN
-       dep = x
-       indep = Findgen(N_Elements(dep))
+       _dep = x
+       _indep = Findgen(N_Elements(dep))
        ENDCASE
     
        2: BEGIN
-       dep = y
-       indep = x
+       _dep = y
+       _indep = x
        ENDCASE
     
     ENDCASE
     
     ; If either of these input vectors are scalars, make them vectors.
-    IF N_Elements(dep) EQ 1 THEN dep = [dep]
-    IF N_Elements(indep) EQ 1 THEN indep = [indep]
+    IF N_Elements(_dep) EQ 1 THEN _dep = [_dep]
+    IF N_Elements(_indep) EQ 1 THEN _indep = [_indep]
+    
+    ; If you have a map coordinate object, do the conversion to XY projected meter space here.
+    IF (N_Elements(mapCoord) NE 0) && Obj_Valid(mapCoord) THEN BEGIN
+        
+        xy = mapCoord -> Forward(_dep, _indep, /NoForwardFix)
+        dep = Reform(xy[0,*])
+        indep = Reform(xy[1,*])
+        
+        IF (N_Elements(err_ylow) NE 0) THEN BEGIN
+            xy = mapCoord -> Forward(_dep, _indep-err_ylow, /NoForwardFix)
+            err_ylow = Reform(xy[1,*]) - indep
+        ENDIF
+        
+        IF (N_Elements(err_yhigh) NE 0) THEN BEGIN
+            xy = mapCoord -> Forward(_dep, _indep+err_yhigh, /NoForwardFix)
+            err_yhigh = Reform(xy[1,*]) - indep
+        ENDIF
+
+        IF (N_Elements(err_xlow) NE 0) THEN BEGIN
+            xy = mapCoord -> Forward(_dep-err_xlow, _indep, /NoForwardFix)
+            err_xlow = Reform(xy[0,*]) - dep
+        ENDIF
+
+        IF (N_Elements(err_xhigh) NE 0) THEN BEGIN
+            xy = mapCoord -> Forward(_dep+err_xhigh, _indep, /NoForwardFix)
+            err_xhigh = Reform(xy[0,*]) - dep
+        ENDIF
+
+    ENDIF ELSE BEGIN
+        dep = _dep
+        indep = _indep
+    ENDELSE
     
     
     ; Check to see if psymIn is a string. If so, covert it here.
@@ -561,6 +641,7 @@ PRO cgPlot, x, y, $
       IF Size(sbackground, /TNAME) EQ 'LONG' THEN sbackground = Fix(sbackground)
       IF Size(saxiscolor, /TNAME) EQ 'LONG' THEN saxiscolor = Fix(saxiscolor)
       IF Size(saxescolor, /TNAME) EQ 'LONG' THEN saxescolor = Fix(saxescolor)
+      IF Size(serr_color, /TNAME) EQ 'LONG' THEN serr_color = Fix(serr_color)
       IF Size(scolor, /TNAME) EQ 'LONG' THEN scolor = Fix(scolor)
       IF Size(ssymcolor, /TNAME) EQ 'LONG' THEN ssymcolor = Fix(ssymcolor)
     ENDIF
@@ -632,6 +713,7 @@ PRO cgPlot, x, y, $
         ENDELSE
     ENDIF
     symcolor = cgDefaultColor(ssymcolor, DEFAULT=color, TRADITIONAL=traditional)
+    err_color = cgDefaultColor(serr_color, DEFAULT=color, TRADITIONAL=traditional)
     
     ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font
@@ -733,6 +815,7 @@ PRO cgPlot, x, y, $
     IF Size(axiscolor, /TNAME) EQ 'STRING' THEN axiscolor = cgColor(axiscolor)
     IF Size(color, /TNAME) EQ 'STRING' THEN color = cgColor(color)
     IF Size(background, /TNAME) EQ 'STRING' THEN background = cgColor(background)
+    IF Size(err_color, /TNAME) EQ 'STRING' THEN err_color = cgColor(err_color)
     IF Size(symcolor, /TNAME) EQ 'STRING' THEN symcolor = cgColor(symcolor)
     
     ; Draw the plot.
@@ -775,6 +858,78 @@ PRO cgPlot, x, y, $
         yy = !Y.Window[1] + 0.015
         labelfont = (!D.Name EQ 'PS') ? 1 : 0
         cgText, xx, yy, /NORMAL, label, FONT=labelfont, COLOR=axiscolor
+    ENDIF
+    
+    ; Do you have error bars to draw?
+    errTotal = Total(N_Elements(err_xhigh) + N_Elements(err_xlow) + $
+                     N_Elements(err_yhigh) + N_Elements(err_ylow))
+    IF errTotal GT 0 THEN BEGIN
+        
+        ; Draw X errors.
+        IF (N_Elements(err_xhigh) NE 0) || (N_Elements(err_xlow) NE 0) THEN BEGIN
+            
+            IF N_Elements(err_width) EQ 0 THEN BEGIN
+                yerr_width = 0.01 * (!Y.Window[1] - !Y.Window[0]) 
+            ENDIF ELSE BEGIN
+                yerr_width = err_width
+            ENDELSE
+            
+            ; X high error bars.
+            IF (N_Elements(err_xhigh) NE 0) THEN BEGIN
+                xhigh = indep + err_xhigh
+                FOR j=0,N_Elements(err_xhigh)-1 DO BEGIN
+                    PlotS, [indep[j], xhigh[j]], [dep[j], dep[j]], Color=err_color, Thick=err_thick
+                    nCoord = Convert_Coord(xhigh[j], dep[j], /Data, /To_Normal)
+                    PlotS, [nCoord[0], nCoord[0]], [nCoord[1]+yerr_width, nCoord[1]-yerr_width], $
+                        /Normal, Color=err_color, Thick=err_thick
+                ENDFOR
+            ENDIF
+            
+            ; X low error bars.
+            IF (N_Elements(err_xlow) NE 0) THEN BEGIN
+                xlow = indep - err_xlow
+                FOR j=0,N_Elements(err_xlow)-1 DO BEGIN
+                    PlotS, [indep[j], xlow[j]], [dep[j], dep[j]], Color=err_color, Thick=err_thick
+                    nCoord = Convert_Coord(xlow[j], dep[j], /Data, /To_Normal)
+                    PlotS, [nCoord[0], nCoord[0]], [nCoord[1]+yerr_width, nCoord[1]-yerr_width], $
+                        /Normal, Color=err_color, Thick=err_thick
+                ENDFOR
+            ENDIF
+
+        ENDIF
+        
+        ; Draw y errors.
+        IF (N_Elements(err_yhigh) NE 0) || (N_Elements(err_ylow) NE 0) THEN BEGIN
+        
+            IF N_Elements(err_width) EQ 0 THEN BEGIN
+                xerr_width = 0.01 * (!X.Window[1] - !X.Window[0])
+            ENDIF ELSE BEGIN
+                xerr_width = err_width
+            ENDELSE
+            
+            ; Y high error bars.
+            IF (N_Elements(err_yhigh) NE 0) THEN BEGIN
+                yhigh = dep + err_yhigh
+                FOR j=0,N_Elements(err_yhigh)-1 DO BEGIN
+                    PlotS, [indep[j], indep[j]], [yhigh[j], dep[j]], Color=err_color, Thick=err_thick
+                    nCoord = Convert_Coord(indep[j], yhigh[j], /Data, /To_Normal)
+                    PlotS, [nCoord[0]-xerr_width, nCoord[0]+xerr_width], [nCoord[1], nCoord[1]], $
+                        /Normal, Color=err_color, Thick=err_thick
+                ENDFOR
+            ENDIF
+            
+            ; Y low error bars.
+            IF (N_Elements(err_ylow) NE 0) THEN BEGIN
+                ylow = dep - err_ylow
+                FOR j=0,N_Elements(err_ylow)-1 DO BEGIN
+                    PlotS, [indep[j], indep[j]], [ylow[j], dep[j]], Color=err_color, Thick=err_thick
+                    nCoord = Convert_Coord(indep[j], ylow[j], /Data, /To_Normal)
+                    PlotS, [nCoord[0]-xerr_width, nCoord[0]+xerr_width], [nCoord[1], nCoord[1]], $
+                        /Normal, Color=err_color, Thick=err_thick
+                ENDFOR
+            ENDIF
+            
+        ENDIF
     ENDIF
          
     ; If this is the first plot in PS, then we have to make it appear that we have

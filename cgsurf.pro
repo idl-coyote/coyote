@@ -726,7 +726,7 @@ PRO cgSurf, data, x, y, $
 ;            ELSE TVLCT, Reform(origialbg), 254
             
         ; Restrict the current color table vectors to the range 1-254.
-        LoadCT, 0
+        LoadCT, 0, /Silent
         IF N_Elements(palette) NE 0 THEN BEGIN
             TVLCT, Congrid(palette[*,0],253), Congrid(palette[*,1],253), Congrid(palette[*,2],253), 1
         ENDIF ELSE BEGIN

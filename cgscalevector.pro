@@ -57,18 +57,18 @@
 ;
 ; :Keywords:
 ;    double: in, optional, type=boolean, default=0
-;         Set this keyword to perform scaling in double precision. Otherwise, scaling 
-;         is done in floating point precision.
-;     maxvalue: in, optional
-;         Set this value to the maximum value of the vector, before scaling (vector < maxvalue).
-;         The default value is Max(vector).
-;     minvalue: in, optional
-;         Set this value to the mimimum value of the vector, before scaling (minvalue < vector).
-;         The default value is Min(vector).
-;     nan: in, optional, type=boolean, default=0
-;         Set this keyword to enable not-a-number checking. NANs in vector will be ignored.
-;     preserve_type: in, optional, type=boolean, default=0
-;         Set this keyword to preserve the input data type in the output.
+;       Set this keyword to perform scaling in double precision. Otherwise, scaling 
+;       is done in floating point precision.
+;    maxvalue: in, optional
+;       Set this value to the maximum value of the vector, before scaling (vector < maxvalue).
+;       The default value is Max(vector).
+;    minvalue: in, optional
+;       Set this value to the mimimum value of the vector, before scaling (minvalue < vector).
+;       The default value is Min(vector).
+;    nan: in, optional, type=boolean, default=0
+;       Set this keyword to enable not-a-number checking. NANs in vector will be ignored.
+;    preserve_type: in, optional, type=boolean, default=0
+;       Set this keyword to preserve the input data type in the output.
 ;
 ; :Examples:
 ;       Simple example of scaling a vector::

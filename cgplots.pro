@@ -175,7 +175,7 @@ PRO cgPlotS, x, y, z, $
     
         cgWindow, 'cgPlotS', x, y, z, $
             COLOR=scolor, $
-            map_object=map_object, $
+            MAP_OBJECT=map_object, $
             PSYM=psym, $
             SYMCOLOR=ssymcolor, $
             SYMSIZE=symsize, $

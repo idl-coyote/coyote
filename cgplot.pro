@@ -293,6 +293,8 @@
 ;         Added error bar plotting capability via ERR_* keywords. 10 December 2013. DWF.
 ;         Added Map_Object keyword to allow plotting values in longitude/latitude to be converted to XY projected meter
 ;             space automatically. 10 December 2013. DWF.
+;         Data could sometimes be drawn when OVERPLOT and NODATA keywords were both set. Fixed. 16 Dec 2013. DWF.
+;         
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
 ;-
@@ -820,7 +822,7 @@ PRO cgPlot, x, y, $
     
     ; Draw the plot.
     IF Keyword_Set(overplot) THEN BEGIN
-       IF psym LE 0 THEN OPlot, indep, dep, COLOR=color, _EXTRA=extra
+       IF psym LE 0 THEN IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=color, _EXTRA=extra
     ENDIF ELSE BEGIN
       Plot, indep, dep, BACKGROUND=background, COLOR=axiscolor, CHARSIZE=charsize, $
             POSITION=position, /NODATA, NOERASE=tempNoErase, FONT=font, TITLE=title, $

@@ -66,6 +66,12 @@
 ;         table.
 ;     device: in, optional, type=boolean, default=0
 ;         Set to indicate the polygon vertices are in device coordinates.
+;     map_object: in, optional, type=object
+;        If you are drawing on a map projection set up with Map_Proj_Init
+;        and using projected meter space, rather than lat/lon space, then you can use this
+;        keyword to provide a cgMap object that will allow you to convert the `x` and `y`
+;        parameters from longitude and latitude, respectively, to projected meter space
+;        before drawing. X and Y must both be present.
 ;     normal: in, optional, type=boolean, default=0
 ;         Set to indicate the polygon vertices are in normalized coordinates.
 ;     position: in, optional, type=float
@@ -103,12 +109,14 @@
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;        Added a POSITION keyword to allow setting the color position in a graphics window. 24 Jan 2013. DWF.
+;        Added a MAP_OBJECT keyword to allow polygon filling on maps. 13 Dec 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
 ;-
-PRO cgColorFill, x, y, z, $
+PRO cgColorFill, _x, _y, z, $
     COLOR=color, $
+    MAP_OBJECT=map_object, $
     NORMAL=normal, $
     DEVICE=device, $
     POSITION=position, $
@@ -134,8 +142,9 @@ PRO cgColorFill, x, y, z, $
     ; Should this be added to a resizeable graphics window?
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-        cgWindow, 'cgColorFill', x, y, z, $
+        cgWindow, 'cgColorFill', _x, _y, z, $
             COLOR=color, $
+            MAP_OBJECT=map_object, $
             NORMAL=normal, $
             DEVICE=device, $
             POSITION=position, $
@@ -154,8 +163,8 @@ PRO cgColorFill, x, y, z, $
     ; Use position to set up vectors?
     IF N_Elements(position) NE 0 THEN BEGIN
        p = position
-       x = [p[0], p[0], p[2], p[2], p[0]]
-       y = [p[1], p[3], p[3], p[1], p[1]]
+       _x = [p[0], p[0], p[2], p[2], p[0]]
+       _y = [p[1], p[3], p[3], p[1], p[1]]
        normal = 1
     ENDIF
     
@@ -169,6 +178,16 @@ PRO cgColorFill, x, y, z, $
 
     ; Get the current color vectors.
     TVLCT, rr, gg, bb, /Get
+    
+    ; Do you have a map object? If so, assume lon/lat conversion to projected XY space.
+    IF Obj_Valid(map_object) THEN BEGIN
+        xy = map_object -> Forward(_x, _y, /NoForwardFix)
+        x = Reform(xy[0,*])
+        y = Reform(xy[1,*])
+    ENDIF ELSE BEGIN
+        x = _x
+        y = _y
+    ENDELSE
     
     ; Fill the polygon.
     IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = cgColor(thisColor)

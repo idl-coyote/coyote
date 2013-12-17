@@ -113,7 +113,7 @@
 ; :Copyright:
 ;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
 ;-
-PRO cgColorFill, _x, _y, z, $
+PRO cgColorFill, x, y, z, $
     COLOR=color, $
     MAP_OBJECT=map_object, $
     NORMAL=normal, $
@@ -141,7 +141,7 @@ PRO cgColorFill, _x, _y, z, $
     ; Should this be added to a resizeable graphics window?
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-        cgWindow, 'cgColorFill', _x, _y, z, $
+        cgWindow, 'cgColorFill', x, y, z, $
             COLOR=color, $
             MAP_OBJECT=map_object, $
             NORMAL=normal, $
@@ -162,8 +162,8 @@ PRO cgColorFill, _x, _y, z, $
     ; Use position to set up vectors?
     IF N_Elements(position) NE 0 THEN BEGIN
        p = position
-       _x = [p[0], p[0], p[2], p[2], p[0]]
-       _y = [p[1], p[3], p[3], p[1], p[1]]
+       x = [p[0], p[0], p[2], p[2], p[0]]
+       y = [p[1], p[3], p[3], p[1], p[1]]
        normal = 1
     ENDIF
     
@@ -180,19 +180,19 @@ PRO cgColorFill, _x, _y, z, $
     
     ; Do you have a map object? If so, assume lon/lat conversion to projected XY space.
     IF Obj_Valid(map_object) THEN BEGIN
-        xy = map_object -> Forward(_x, _y, /NoForwardFix)
-        x = Reform(xy[0,*])
-        y = Reform(xy[1,*])
+        xy = map_object -> Forward(x, y, /NoForwardFix)
+        _x = Reform(xy[0,*])
+        _y = Reform(xy[1,*])
     ENDIF ELSE BEGIN
-        x = _x
-        y = _y
+        _x = x
+        _y = y
     ENDELSE
     
     ; Fill the polygon.
     IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = cgColor(thisColor)
     CASE N_Elements(z) OF
-        0: PolyFill, x, y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _STRICT_EXTRA=extra
-        ELSE: PolyFill, x, y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _STRICT_EXTRA=extra
+        0: PolyFill, _x, _y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _STRICT_EXTRA=extra
+        ELSE: PolyFill, _x, _y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _STRICT_EXTRA=extra
     ENDCASE
     
     ; Clean up.

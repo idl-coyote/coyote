@@ -121,7 +121,7 @@
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
-PRO cgPolygon, _x, _y, z, $
+PRO cgPolygon, x, y, z, $
     ADDCMD=addcmd, $
     COLOR=color, $
     FCOLOR=fcolor, $
@@ -158,7 +158,7 @@ PRO cgPolygon, _x, _y, z, $
         
         ; If adding a command, have to do this differently.
         IF Keyword_Set(addcmd) THEN BEGIN
-           cgWindow, 'cgPolygon', _x, _y, z, $
+           cgWindow, 'cgPolygon', x, y, z, $
               COLOR=color, $
               FCOLOR=fcolor, $
               FILL=fill, $
@@ -174,7 +174,7 @@ PRO cgPolygon, _x, _y, z, $
         ENDIF ELSE BEGIN
         
            ; Otherwise, we are just replacing the commands in a new or existing window.
-           cgWindow, 'cgPolygon', _x, _y, z, $
+           cgWindow, 'cgPolygon', x, y, z, $
               COLOR=color, $
               FCOLOR=fcolor, $
               FILL=fill, $
@@ -220,8 +220,8 @@ PRO cgPolygon, _x, _y, z, $
     ; Are we filling a POSITION in the window?
     IF N_Elements(position) NE 0 THEN BEGIN
        p = position
-       _x = [p[0], p[0], p[2], p[2], p[0]]
-       _y = [p[1], p[3], p[3], p[1], p[1]]
+       x = [p[0], p[0], p[2], p[2], p[0]]
+       y = [p[1], p[3], p[3], p[1], p[1]]
        normal = 1
        device = 0
     ENDIF
@@ -231,30 +231,30 @@ PRO cgPolygon, _x, _y, z, $
     
     ; Do you have a map object? If so, assume lon/lat conversion to projected XY space.
     IF Obj_Valid(map_object) THEN BEGIN
-        xy = map_object -> Forward(_x, _y, /NoForwardFix)
-        x = Reform(xy[0,*])
-        y = Reform(xy[1,*])
+        xy = map_object -> Forward(x, y, /NoForwardFix)
+        _x = Reform(xy[0,*])
+        _y = Reform(xy[1,*])
     ENDIF ELSE BEGIN
-        x = _x
-        y = _y
+        _x = x
+        _y = y
     ENDELSE
     
     ; Fill the polygon.
     CASE N_Elements(z) OF
         0: BEGIN
               IF Keyword_Set(fill) THEN BEGIN
-                 PolyFill, x, y, COLOR=fillColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
+                 PolyFill, _x, _y, COLOR=fillColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
                  PlotS, x, y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
               ENDIF ELSE BEGIN
-                 PlotS, x, y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
+                 PlotS, _x, _y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
               ENDELSE
            END
         ELSE: BEGIN
               IF Keyword_Set(fill) THEN BEGIN
-                 PolyFill, x, y, z, COLOR=fillColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
-                 PlotS, x, y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
+                 PolyFill, _x, _y, z, COLOR=fillColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
+                 PlotS, _x, _y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
               ENDIF ELSE BEGIN
-                 PlotS, x, y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
+                 PlotS, _x, _y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
               ENDELSE
            END
     ENDCASE

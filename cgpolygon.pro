@@ -47,17 +47,17 @@
 ;    
 ; :Params:
 ;     x: in, required, type=number
-;         A vector argument providing the X coordinates of the points to be connected. 
-;         The vector must contain at least three elements. If only one argument is 
-;         specified, X must be an array of either two or three vectors (i.e., (2,*) 
-;         or (3,*)). In this special case, the vector X[0,*] specifies the X values, 
-;         X[1,*] specifies Y, and X[2,*] contain the Z values.       
+;        A vector argument providing the X coordinates of the points to be connected. 
+;        The vector must contain at least three elements. If only one argument is 
+;        specified, X must be an array of either two or three vectors (i.e., (2,*) 
+;        or (3,*)). In this special case, the vector X[0,*] specifies the X values, 
+;        X[1,*] specifies Y, and X[2,*] contain the Z values.       
 ;     y: in, required, type=number
-;         A vector argument providing the Y coordinates of the points to be connected. 
-;         Y must contain at least three elements.
+;        A vector argument providing the Y coordinates of the points to be connected. 
+;        Y must contain at least three elements.
 ;     z: in, optional, type=number
-;         An optional vector argument providing the Z coordinates of the points to be 
-;         connected. Z must contain at least three elements.
+;        An optional vector argument providing the Z coordinates of the points to be 
+;        connected. Z must contain at least three elements.
 ;
 ; :Keywords:
 ;     addcmd: in, optional, type=boolean, default=0
@@ -65,27 +65,33 @@
 ;        automatically sets the WINDOW keyword, but the command does not erase the
 ;        graphics window as it would normally.
 ;     color: in, optional, type=string, default='rose'
-;         The name of the polygon color. Color names are those used with cgColor. 
-;         This value can also be a long integer or an index into the current color
-;         table.
+;        The name of the polygon color. Color names are those used with cgColor. 
+;        This value can also be a long integer or an index into the current color
+;        table.
 ;     device: in, optional, type=boolean, default=0
-;         Set to indicate the polygon vertices are in device coordinates.
+;        Set to indicate the polygon vertices are in device coordinates.
 ;     fcolor: in, optional, type=string/integer/long
-;         The name of the polygon fill color. Color names are those used with cgColor. 
-;         This value can also be a long integer or an index into the current color
-;         table. The default is the same as `Color`.
+;        The name of the polygon fill color. Color names are those used with cgColor. 
+;        This value can also be a long integer or an index into the current color
+;        table. The default is the same as `Color`.
 ;     fill: in, optional, type=boolean, default=0
-;         Set this keyword to draw a filled polygon, rather than an open polygon.
+;        Set this keyword to draw a filled polygon, rather than an open polygon.
+;     map_object: in, optional, type=object
+;        If you are drawing on a map projection set up with Map_Proj_Init
+;        and using projected meter space, rather than lat/lon space, then you can use this
+;        keyword to provide a cgMap object that will allow you to convert the `x` and `y`
+;        parameters from longitude and latitude, respectively, to projected meter space
+;        before drawing. X and Y must both be present.
 ;     normal: in, optional, type=boolean, default=0
-;         Set to indicate the polygon vertices are in normalized coordinates.
+;        Set to indicate the polygon vertices are in normalized coordinates.
 ;     position: in, optional, type=fltarr(4)
-;         Set this keyword to a four-element position array of normalized coordinates
-;         to fill a rectangular area on the graphics display. The normal input parameters
-;         are ignored if this keyword is set.
+;        Set this keyword to a four-element position array of normalized coordinates
+;        to fill a rectangular area on the graphics display. The normal input parameters
+;        are ignored if this keyword is set.
 ;     window: in, optional, type=boolean, default=0
-;         Set this keyword to add the command to the current cgWindow application.
+;        Set this keyword to add the command to the current cgWindow application.
 ;     _ref_extra: in, optional, type=appropriate
-;         Any other keywords to the IDL POLYFILL command may be used.
+;        Any other keywords to the IDL POLYFILL command may be used.
 ;     
 ;          
 ; :Examples:
@@ -110,15 +116,17 @@
 ;        Added Position keyword to allow a fill of a particular portion of the graphics 
 ;            window. 20 Apr 2012. DWF.
 ;        Added AddCmd keyword. 25 Oct 2012. DWF.
+;        Added a MAP_OBJECT keyword to allow polygon filling on maps. 16 Dec 2013. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
-PRO cgPolygon, x, y, z, $
+PRO cgPolygon, _x, _y, z, $
     ADDCMD=addcmd, $
     COLOR=color, $
     FCOLOR=fcolor, $
     FILL=fill, $
+    MAP_OBJECT=map_object, $
     NORMAL=normal, $
     DEVICE=device, $
     POSITION=position, $
@@ -150,10 +158,11 @@ PRO cgPolygon, x, y, z, $
         
         ; If adding a command, have to do this differently.
         IF Keyword_Set(addcmd) THEN BEGIN
-           cgWindow, 'cgPolygon', x, y, z, $
+           cgWindow, 'cgPolygon', _x, _y, z, $
               COLOR=color, $
               FCOLOR=fcolor, $
               FILL=fill, $
+              MAP_OBJECT=map_object, $
               NORMAL=normal, $
               DEVICE=device, $
               POSITION=position, $
@@ -165,10 +174,11 @@ PRO cgPolygon, x, y, z, $
         ENDIF ELSE BEGIN
         
            ; Otherwise, we are just replacing the commands in a new or existing window.
-           cgWindow, 'cgPolygon', x, y, z, $
+           cgWindow, 'cgPolygon', _x, _y, z, $
               COLOR=color, $
               FCOLOR=fcolor, $
               FILL=fill, $
+              MAP_OBJECT=map_object, $
               NORMAL=normal, $
               DEVICE=device, $
               POSITION=position, $
@@ -200,9 +210,6 @@ PRO cgPolygon, x, y, z, $
        fillColor = cgDefaultColor(fcolor)
     ENDELSE
     
-    ; Get the current color vectors.
-    TVLCT, rr, gg, bb, /Get
-    
     ; Do you need a window?
     IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
     
@@ -213,11 +220,24 @@ PRO cgPolygon, x, y, z, $
     ; Are we filling a POSITION in the window?
     IF N_Elements(position) NE 0 THEN BEGIN
        p = position
-       x = [p[0], p[0], p[2], p[2], p[0]]
-       y = [p[1], p[3], p[3], p[1], p[1]]
+       _x = [p[0], p[0], p[2], p[2], p[0]]
+       _y = [p[1], p[3], p[3], p[1], p[1]]
        normal = 1
        device = 0
     ENDIF
+    
+    ; Get the current color vectors.
+    TVLCT, rr, gg, bb, /Get
+    
+    ; Do you have a map object? If so, assume lon/lat conversion to projected XY space.
+    IF Obj_Valid(map_object) THEN BEGIN
+        xy = map_object -> Forward(_x, _y, /NoForwardFix)
+        x = Reform(xy[0,*])
+        y = Reform(xy[1,*])
+    ENDIF ELSE BEGIN
+        x = _x
+        y = _y
+    ENDELSE
     
     ; Fill the polygon.
     CASE N_Elements(z) OF

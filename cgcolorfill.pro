@@ -47,25 +47,25 @@
 ;    
 ; :Params:
 ;     x: in, required, type=number
-;         A vector argument providing the X coordinates of the points to be connected. 
-;         The vector must contain at least three elements. If only one argument is 
-;         specified, X must be an array of either two or three vectors (i.e., (2,*) 
-;         or (3,*)). In this special case, the vector X[0,*] specifies the X values, 
-;         X[1,*] specifies Y, and X[2,*] contain the Z values.       
+;        A vector argument providing the X coordinates of the points to be connected. 
+;        The vector must contain at least three elements. If only one argument is 
+;        specified, X must be an array of either two or three vectors (i.e., (2,*) 
+;        or (3,*)). In this special case, the vector X[0,*] specifies the X values, 
+;        X[1,*] specifies Y, and X[2,*] contain the Z values.       
 ;     y: in, required, type=number
-;         A vector argument providing the Y coordinates of the points to be connected. 
-;         Y must contain at least three elements.
+;        A vector argument providing the Y coordinates of the points to be connected. 
+;        Y must contain at least three elements.
 ;     z: in, optional, type=number
-;         An optional vector argument providing the Z coordinates of the points to be 
-;         connected. Z must contain at least three elements.
+;        An optional vector argument providing the Z coordinates of the points to be 
+;        connected. Z must contain at least three elements.
 ;
 ; :Keywords:
 ;     color: in, optional, type=string/byte/integer/long, default='rose'
-;         The name of the fill color. Color names are those used with cgColor. 
-;         This value can also be a long integer or an index into the current color
-;         table.
+;        The name of the fill color. Color names are those used with cgColor. 
+;        This value can also be a long integer or an index into the current color
+;        table.
 ;     device: in, optional, type=boolean, default=0
-;         Set to indicate the polygon vertices are in device coordinates.
+;        Set to indicate the polygon vertices are in device coordinates.
 ;     map_object: in, optional, type=object
 ;        If you are drawing on a map projection set up with Map_Proj_Init
 ;        and using projected meter space, rather than lat/lon space, then you can use this
@@ -73,16 +73,15 @@
 ;        parameters from longitude and latitude, respectively, to projected meter space
 ;        before drawing. X and Y must both be present.
 ;     normal: in, optional, type=boolean, default=0
-;         Set to indicate the polygon vertices are in normalized coordinates.
+;        Set to indicate the polygon vertices are in normalized coordinates.
 ;     position: in, optional, type=float
-;         Set to the normal four-element normalized position array for locating 
-;         a rectangular region in a graphics window. If this keyword is used, the
-;         x and y parameters are constructed from this position.
+;        Set to the normal four-element normalized position array for locating 
+;        a rectangular region in a graphics window. If this keyword is used, the
+;        x and y parameters are constructed from this position.
 ;     window: in, optional, type=boolean, default=0
-;         Set this keyword to add the command to the current cgWindow application.
+;        Set this keyword to add the command to the current cgWindow application.
 ;     _ref_extra: in, optional, type=appropriate
-;         Any other keywords to the IDL POLYFILL command may be used.
-;     
+;        Any other keywords to the IDL POLYFILL command may be used. 
 ;          
 ; :Examples:
 ;    Used like the IDL Polyfill command::

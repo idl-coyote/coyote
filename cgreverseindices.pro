@@ -50,7 +50,7 @@
 ;         The REVERSE_INDICES vector that is returned from the HISTOGRAM command.
 ;    index: in, required, type=integer
 ;         The zero-based index into the REVERSE_INDICES vector from which to obtain
-;         the indices. For example, and index value of 4 will return the indices in
+;         the indices. For example, an index value of 4 will return the indices in
 ;         the 5th bin (zero based counting) of the histogram. 
 ;       
 ; :Keywords:

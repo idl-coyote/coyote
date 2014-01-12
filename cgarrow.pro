@@ -49,11 +49,11 @@
 ;    x0: in, required, type=integer/float
 ;         The x location of the blunt end of the arrow. May be a vector. Assumes
 ;         device coordinates.
-;    x1: in, required, type=integer/float
-;         The x location of the sharp end of the arrow. May be a vector. Assumes
-;         device coordinates.
 ;    y0: in, required, type=integer/float
 ;         The y location of the blunt end of the arrow. May be a vector. Assumes
+;         device coordinates.
+;    x1: in, required, type=integer/float
+;         The x location of the sharp end of the arrow. May be a vector. Assumes
 ;         device coordinates.
 ;    y1: in, required, type=integer/float
 ;         The y location of the sharp end of the arrow. May be a vector. Assumes

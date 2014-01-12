@@ -146,6 +146,7 @@
 ;       Small typo fixed in setting CHAR datatype for IDL 8.1 and higher. 22 May 2013. DWF.
 ;       Typo (CONTINUOUS->CONTIGUOUS) fixed in WriteDefVar method. 30 July 2013. DWF.
 ;       Modified CopyVarDefTo method to allow new NCDF4 keywords. 30 July 2013. DWF.
+;       Added DelGlobalAttr method to allow deletion of global attributes. 11 Jan 2014. DWF.
 ;       
 ;-
 ;******************************************************************************************;
@@ -922,6 +923,66 @@ PRO NCDF_File::CopyDimTo, dimName, destObj
     
     ; Copy the information to the destination object.
     destObj -> WriteDim, dimName, dimSize, UNLIMITED=unlimited
+    
+END
+
+
+;------------------------------------------------------------------------------------------;
+;
+; NAME:
+;    NCDF_File::DelGlobalAttr
+;
+; Purpose:
+;
+;    Deletes a global attribute from this netCDF file.
+;
+; Method Syntax:
+;
+;    obj -> DelGlobalAttr, attrName
+;
+; Auguments:
+;
+;    attrName: The case sensitive name of the global attribute you wish to delete.
+;
+;
+;------------------------------------------------------------------------------------------;
+PRO NCDF_File::DelGlobalAttr, attrName
+
+    ; Compiler options.
+    Compile_Opt DEFINT32
+    Compile_Opt STRICTARR
+    Compile_Opt STRICTARRSUBS
+    Compile_Opt LOGICAL_PREDICATE
+    
+    ; Error handling.
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        self.errorLogger -> AddError
+        RETURN
+    ENDIF
+    
+    ; The file has to be writable to delete a global attribute.
+    IF ~self.writable THEN $
+        Message, 'Cannot delete a global attribute from a READ-ONLY file.'
+        
+    ; Check parameters.
+    IF N_Elements(attrName) EQ 0 THEN Message, 'The attribute name is required.'
+    
+    ; Make sure the attribute is available. Another possible behavior
+    ; would be to do nothing and return instead of throwing an error
+    check = self -> HasGlobalAttr(attrName, OBJECT=attrObj)
+    IF ~check THEN Message, 'The attribute name is not present in the file or is spelled incorrectly: ' + attrName
+    
+    ; Put the file into define mode
+    self -> SetMode, /DEFINE
+    
+    ; Delete the attribute from the file.
+    NCDF_ATTDEL, self.fileID, attrName, /GLOBAL
+    
+    ; We should also remove the attribute object from the container
+    self.attrs -> Remove, attrObj
+    Undefine, attrObj
     
 END
 

@@ -117,9 +117,10 @@
 ;            window. 20 Apr 2012. DWF.
 ;        Added AddCmd keyword. 25 Oct 2012. DWF.
 ;        Added a MAP_OBJECT keyword to allow polygon filling on maps. 16 Dec 2013. DWF.
+;        Completely forgot to deconstruct a single parameter into component parts. 11 Jan 2014. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2012-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgPolygon, x, y, z, $
     ADDCMD=addcmd, $
@@ -196,6 +197,26 @@ PRO cgPolygon, x, y, z, $
     ; We are going to draw in decomposed color, if possible.
     cgSetColorState, 1, Current=currentState
        
+    ; If we only have a single parameter, see if it can be deconstructed.
+    IF N_Params() EQ 1 THEN BEGIN
+        dims = Size(x, /Dimensions)
+        ndims = Size(x, /N_Dimensions)
+        IF ndims EQ 1 THEN Message, 'If a single argument is supplied, it must be a 2D array.'
+        IF (dims[0] NE 2) && (dims[0] NE 3) THEN Message, 'Input argument is not dimensioned correctly.'
+        CASE dims[0] OF
+            2: BEGIN
+                y = Reform(x[1,*])
+                x = Reform(x[0,*])
+            END
+            3: BEGIN
+                z = Reform(x[2,*])
+                y = Reform(x[1,*])
+                x = Reform(x[0,*])
+            END
+        ENDCASE
+        
+    ENDIF
+    
     ; If current state is "indexed color" and colors are represented as long integers then "fix" them.
     IF (currentState EQ 0) THEN BEGIN
       IF Size(color, /TNAME) EQ 'LONG' THEN color = Fix(color)
@@ -244,7 +265,7 @@ PRO cgPolygon, x, y, z, $
         0: BEGIN
               IF Keyword_Set(fill) THEN BEGIN
                  PolyFill, _x, _y, COLOR=fillColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
-                 PlotS, x, y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
+                 PlotS, _x, _y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
               ENDIF ELSE BEGIN
                  PlotS, _x, _y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
               ENDELSE

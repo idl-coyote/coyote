@@ -109,9 +109,10 @@
 ;        Modified to use cgDefaultColor for default color selection. 24 Dec 2011. DWF.
 ;        Added a POSITION keyword to allow setting the color position in a graphics window. 24 Jan 2013. DWF.
 ;        Added a MAP_OBJECT keyword to allow polygon filling on maps. 13 Dec 2013. DWF.
+;        Completely forgot to deconstruct a single parameter into component parts. 11 Jan 2014. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgColorFill, x, y, z, $
     COLOR=color, $
@@ -158,6 +159,26 @@ PRO cgColorFill, x, y, z, $
     
     ; We are going to draw in decomposed color, if possible.
     cgSetColorState, 1, Current=currentState
+    
+    ; If we only have a single parameter, see if it can be deconstructed.
+    IF N_Params() EQ 1 THEN BEGIN
+        dims = Size(x, /Dimensions)
+        ndims = Size(x, /N_Dimensions)
+        IF ndims EQ 1 THEN Message, 'If a single argument is supplied, it must be a 2D array.'
+        IF (dims[0] NE 2) && (dims[0] NE 3) THEN Message, 'Input argument is not dimensioned correctly.'
+        CASE dims[0] OF
+            2: BEGIN
+               y = Reform(x[1,*])
+               x = Reform(x[0,*])
+               END
+            3: BEGIN
+               z = Reform(x[2,*])
+               y = Reform(x[1,*])
+               x = Reform(x[0,*])
+               END
+        ENDCASE
+        
+    ENDIF
 
     ; Use position to set up vectors?
     IF N_Elements(position) NE 0 THEN BEGIN

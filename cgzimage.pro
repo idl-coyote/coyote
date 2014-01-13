@@ -70,9 +70,10 @@
 ;           needed. 18 October 2012. DWF.
 ;        The color palette was not always being included when images were zoomed. Fixed. 17 Nov 2012. DWF.
 ;        Added ZoomFactor keyword to allow the zoom factor to be set on start-up. 28 Nov 2012. DWF.
+;        Fixed a typo that caused bringing controls into the window to fail. 13 Jan 2014. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2012-2014, Fanning Software Consulting, Inc.
 ;-
 
 ;+
@@ -531,7 +532,7 @@ PRO cgZImage_DrawEvents, event
        IF buttonPressed EQ 'RIGHT' THEN BEGIN
           IF (*info).mapcontrols EQ 1 THEN BEGIN
              Widget_Control, (*info).controlID, Map=0
-             (*info).map = 0
+             (*info).mapcontrols = 0
           ENDIF ELSE BEGIN
              Widget_Control, (*info).controlID, Map=1
              (*info).mapcontrols = 1

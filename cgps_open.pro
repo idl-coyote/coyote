@@ -186,9 +186,10 @@
 ;       Added ability to specify the name of the output raster file desired as the filename. If this is done,
 ;          and ImageMagick is installed, the PostScript intermediate file is deleted and the raster file is
 ;          created automatically without setting a raster output keyword on cgPS_Close. 29 Nov 2013. DWF.
+;       Moved the check for Charsize to after setting to the PostScript device. 14 Jan 2014. DWF.
 ;       
 ; :Copyright:
-;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2008-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgPS_Open, filename, $
     CANCEL=cancelled, $
@@ -281,13 +282,6 @@ PRO cgPS_Open, filename, $
    ; Change any parameters you feel like changing.
    IF ps_struct.p.thick EQ 0 THEN !P.Thick = default_thickness
    IF ps_struct.p.charthick EQ 0 THEN !P.Charthick = default_thickness
-   IF ps_struct.p.charsize EQ 0 THEN BEGIN
-        IF N_Elements(charsize) EQ 0 THEN BEGIN
-            !P.Charsize = cgDefCharsize(FONT=font)
-        ENDIF ELSE !P.Charsize = charsize
-   ENDIF ELSE BEGIN
-        IF N_Elements(charsize) NE 0 THEN !P.Charsize = charsize
-   ENDELSE
    IF ps_struct.x.thick EQ 0 THEN !X.Thick = default_thickness
    IF ps_struct.y.thick EQ 0 THEN !Y.Thick = default_thickness
    IF ps_struct.z.thick EQ 0 THEN !Z.Thick = default_thickness
@@ -326,6 +320,15 @@ PRO cgPS_Open, filename, $
    Device, _EXTRA=keywords, SCALE_FACTOR=scale_factor
    IF N_Elements(tt_font) NE 0 THEN Device, Set_Font=tt_font, /TT_Font
    
+   ; Determine the character size.
+   IF ps_struct.p.charsize EQ 0 THEN BEGIN
+       IF N_Elements(charsize) EQ 0 THEN BEGIN
+           !P.Charsize = cgDefCharsize(FONT=font)
+       ENDIF ELSE !P.Charsize = charsize
+   ENDIF ELSE BEGIN
+       IF N_Elements(charsize) NE 0 THEN !P.Charsize = charsize
+   ENDELSE
+
    ; Store filename and other pertinent information.
    ps_struct.filename = keywords.filename
    ps_struct.encapsulated = keywords.encapsulated

@@ -68,9 +68,11 @@
 ;           windows. 20 July 2011. DWF.
 ;        Made PostScript default font sizes on Windows slightly larger to conform 
 ;           with function graphics output in IDL 8.2.3. 17 June 2013. DWF.
+;        Did what I *thought* I did on 17 June 2013. 14 January 2013. DWF.
+;        
 ;
 ; :Copyright:
-;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2014, Fanning Software Consulting, Inc.
 ;-
 FUNCTION cgDefCharSize, ADJUSTSIZE=adjustsize, FONT=font
 
@@ -115,22 +117,22 @@ FUNCTION cgDefCharSize, ADJUSTSIZE=adjustsize, FONT=font
             
                 'WINDOWS': BEGIN
                     IF Total(!P.MULTI) EQ 0 THEN BEGIN
-                        thisCharsize = 1.25                         
+                        IF !D.Name EQ 'PS' THEN thisCharsize = 1.50 ELSE thisCharsize = 1.25                         
                     ENDIF ELSE BEGIN
                         totalplots = !P.Multi[1]*!P.Multi[2]*(!P.Multi[3] > 1)
                         CASE 1 OF
-                            totalplots LE 4: thisCharsize = 1.25
-                            totalplots GT 4: thisCharsize = 1.00
+                            totalplots LE 4: IF !D.Name EQ 'PS' THEN thisCharsize = 1.50 ELSE thisCharsize = 1.25
+                            totalplots GT 4: IF !D.Name EQ 'PS' THEN thisCharsize = 1.25 ELSE thisCharsize = 1.00
                         ENDCASE
                     ENDELSE
                     IF (font EQ 1) THEN BEGIN
                         IF Total(!P.MULTI) EQ 0 THEN BEGIN
-                            thisCharsize = 1.75 
+                            IF !D.Name EQ 'PS' THEN thisCharsize = 2.0 ELSE thisCharsize = 1.75 
                         ENDIF ELSE BEGIN
                             totalplots = !P.Multi[1]*!P.Multi[2]*(!P.Multi[3] > 1)
                             CASE 1 OF
-                                totalplots LE 4: thisCharsize = 1.75
-                                totalplots GT 4: thisCharsize = 1.50
+                                totalplots LE 4: IF !D.Name EQ 'PS' THEN thisCharsize = 2.00 ELSE thisCharsize = 1.75
+                                totalplots GT 4: IF !D.Name EQ 'PS' THEN thisCharsize = 1.75 ELSE thisCharsize = 1.50
                             ENDCASE
                         ENDELSE
                     ENDIF
@@ -138,12 +140,12 @@ FUNCTION cgDefCharSize, ADJUSTSIZE=adjustsize, FONT=font
                     
                 ELSE: BEGIN
                     IF Total(!P.MULTI) EQ 0 THEN BEGIN
-                        thisCharsize = 1.50 
+                        IF !D.Name EQ 'PS' THEN thisCharsize = 1.75 ELSE thisCharsize = 1.50 
                     ENDIF ELSE BEGIN
                          totalplots = !P.Multi[1]*!P.Multi[2]*(!P.Multi[3] > 1)
                         CASE 1 OF
-                            totalplots LE 4: thisCharsize = 1.50
-                            totalplots GT 4: thisCharsize = 1.25
+                            totalplots LE 4: IF !D.Name EQ 'PS' THEN thisCharsize = 1.75 ELSE thisCharsize = 1.50
+                            totalplots GT 4: IF !D.Name EQ 'PS' THEN thisCharsize = 1.50 ELSE thisCharsize = 1.25
                         ENDCASE
                     ENDELSE 
                     IF (font EQ 1) THEN BEGIN
@@ -152,8 +154,8 @@ FUNCTION cgDefCharSize, ADJUSTSIZE=adjustsize, FONT=font
                         ENDIF ELSE BEGIN
                             totalplots = !P.Multi[1]*!P.Multi[2]*(!P.Multi[3] > 1)
                             CASE 1 OF
-                                totalplots LE 4: thisCharsize = 1.75
-                                totalplots GT 4: thisCharsize = 1.50
+                                totalplots LE 4: IF !D.Name EQ 'PS' THEN thisCharsize = 2.00 ELSE thisCharsize = 1.75
+                                totalplots GT 4: IF !D.Name EQ 'PS' THEN thisCharsize = 1.75 ELSE thisCharsize = 1.50
                             ENDCASE
                         ENDELSE
                     ENDIF
@@ -174,6 +176,7 @@ FUNCTION cgDefCharSize, ADJUSTSIZE=adjustsize, FONT=font
 
     ENDIF ELSE thisCharSize = !P.Charsize
         
+    print, thisCharsize
     RETURN, thisCharSize
     
 END

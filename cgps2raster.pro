@@ -166,6 +166,7 @@
 ;           I now use a second "convert" command to resize the raster file that has previously been produced. 14 Jan 2014. DWF.
 ;       Added HEIGHT keyword to allow the height of the raster file to be set. 14 Jan 2014. DWF.
 ;       Added IM_COMMAND keyword to return the ImageMagick command or commands used to produce the raster file. 14 Jan 2014. DWF.
+;       New resize algorithm was noticably slower. Went back to a single ImageMagick command, but done correctly now. 15 Jan 2014. DWF.
 ;           
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -310,9 +311,25 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
           IF allowAlphaCmd THEN alpha_cmd =  allow_transparent ? '' : ' -alpha off' 
           density_cmd = ' -density ' + StrTrim(density,2)
           
-          ; Need to resize?
-          IF resize NE 0 THEN resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL)+'%'
- 
+          ; Need to resize to a specific width or height? 
+          IF (N_Elements(width) NE 0) || (N_Elements(height) NE 0) THEN BEGIN
+              CASE 1 OF
+                 (N_Elements(width) NE 0) && (N_Elements(height) EQ 0): BEGIN
+                    resize_cmd = ' -resize ' + StrCompress(Fix(width), /REMOVE_ALL)
+                    END
+                  (N_Elements(width) EQ 0) && (N_Elements(height) NE 0): BEGIN
+                    void = Query_Image(outfilename, DIMENSIONS=dims)
+                    width = Round(dims[0]*Float(height)/dims[1])
+                    resize_cmd = ' -resize ' + StrCompress(width, /REMOVE_ALL)
+                    END
+              ENDCASE
+          ENDIF
+
+          ; We will do the normal resize, unless this has already been done. Two checks here.
+          IF (resize NE 0) && (N_Elements(resize_cmd) EQ 0) THEN BEGIN
+              resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL) + '%'
+          ENDIF
+          
            ; Start ImageMagick convert command.
           cmd = 'convert'
                 
@@ -372,26 +389,6 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
           ; Execute the spawned command unless you are saving it.
           IF spawnCmd THEN SPAWN, cmd, result, err_result ELSE im_command = cmd
                 
-          ; Resize to a specific width or height? Use ImageMagick to resize.
-          IF (N_Elements(width) NE 0) || (N_Elements(height) NE 0) THEN BEGIN
-              cmd = 'convert'
-              cmd = cmd + ' "' + outfilename + '"'
-              CASE 1 OF
-                 (N_Elements(width) NE 0) && (N_Elements(height) EQ 0): BEGIN
-                    cmd = cmd + ' -resize ' + StrCompress(Fix(width), /REMOVE_ALL)
-                    END
-                  (N_Elements(width) EQ 0) && (N_Elements(height) NE 0): BEGIN
-                    void = Query_Image(outfilename, DIMENSIONS=dims)
-                    width = Round(dims[0]*Float(height)/dims[1])
-                    cmd = cmd + ' -resize ' + StrCompress(width, /REMOVE_ALL)
-                    END
-              ENDCASE
-              cmd = cmd + ' "' + outfilename + '"'
-              IF ~silent THEN BEGIN
-                  IF showcmd THEN Print, 'ImageMagick CONVERT command: ',  cmd
-              ENDIF
-              IF spawnCmd THEN SPAWN, cmd, result, err_result ELSE im_command =  [im_command, cmd]
-          ENDIF
 
           IF ~silent THEN BEGIN
               IF err_result[0] NE "" THEN BEGIN

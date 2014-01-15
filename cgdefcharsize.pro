@@ -176,7 +176,6 @@ FUNCTION cgDefCharSize, ADJUSTSIZE=adjustsize, FONT=font
 
     ENDIF ELSE thisCharSize = !P.Charsize
         
-    print, thisCharsize
     RETURN, thisCharSize
     
 END

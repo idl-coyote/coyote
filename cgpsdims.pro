@@ -108,6 +108,7 @@ FUNCTION cgPSDims, filename, SUCCESS=success
         count = count + 1
         IF count MOD 100 EQ 0 THEN buffer = [buffer, StrArr(100)]
     ENDWHILE
+    Free_Lun, lun
     
     ; Find the line containing the bounding box in the comment section and
     ; extract the dimension of the PostScript file.

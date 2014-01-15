@@ -315,12 +315,16 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
           IF (N_Elements(width) NE 0) || (N_Elements(height) NE 0) THEN BEGIN
               CASE 1 OF
                  (N_Elements(width) NE 0) && (N_Elements(height) EQ 0): BEGIN
-                    resize_cmd = ' -resize ' + StrCompress(Fix(width), /REMOVE_ALL)
+                      resize_cmd = ' -resize ' + StrCompress(Fix(width), /REMOVE_ALL)
                     END
                   (N_Elements(width) EQ 0) && (N_Elements(height) NE 0): BEGIN
-                    void = Query_Image(outfilename, DIMENSIONS=dims)
-                    width = Round(dims[0]*Float(height)/dims[1])
-                    resize_cmd = ' -resize ' + StrCompress(width, /REMOVE_ALL)
+                      IF (1-portrait) THEN BEGIN
+                          resize_cmd = ' -resize ' + StrCompress(height, /REMOVE_ALL)
+                      ENDIF ELSE BEGIN
+                      dims = cgPSDims(ps_filename)
+                      width = Round(dims[0]*Float(height)/dims[1])
+                      resize_cmd = ' -resize ' + StrCompress(width, /REMOVE_ALL)
+                      ENDELSE
                     END
               ENDCASE
           ENDIF

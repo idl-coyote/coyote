@@ -263,9 +263,15 @@ end
 ;        If this keyword is set, the object is added to the resizeable graphics
 ;        window, cgWindow. Note that a map projection command must be added to the
 ;        window before this command is added to be effective.
-;     bcolor: optional, type=string, default='opposite'
+;     bcolor: in, optional, type=string, default='opposite'
 ;        The name of the color to draw box axes with.
-;     box_axes: optional, type=boolean, default=0
+;     bthick: in, optional, type=float
+;         The thickness of the box axes in device units.
+;     blabel: in, optional, type=float, default=0
+;          Set this keyword to 0 to label all four of the box axes.
+;          Set this keyword to 1 to label the left and bottom box axes only.
+;          Set this keyword to 2 to label the top and right box axes only.
+;     box_axes: in, optional, type=boolean, default=0
 ;        Set this keyword to draw box axes on the map projection.
 ;     cggrid: in, optional, type=boolean, default=0
 ;        Set this keyword to allow the latitude and longitude values to be set by
@@ -408,6 +414,8 @@ end
 PRO cgMap_Grid, $
    ADDCMD=addcmd, $
    BCOLOR=bcolor, $
+   BLABEL=blabel, $
+   BTHICK=bthick, $
    BOX_AXES=box_axes, $
    CGGRID=cggrid, $
    CHARSIZE=charsize, $
@@ -456,6 +464,8 @@ PRO cgMap_Grid, $
     IF (Keyword_Set(addcmd)) && ((!D.Flags && 256) NE 0) THEN BEGIN
     
         cgWindow, 'cgMap_Grid', $
+               BLABEL=blabel, $
+               BTHICK=bthick, $
                BOX_AXES=box_axes, $
                CHARSIZE=charsize, $
                CGGRID=cgGrid, $
@@ -497,6 +507,7 @@ PRO cgMap_Grid, $
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
     SetDefaultValue, charsize, cgDefCharsize() * 0.75
     SetDefaultValue, bcolor, "opposite"
+    SetDefaultValue, blabel, 0
     noclip = Keyword_Set(noclip)
     
     ; I want to use the more natural LINESTYLE and THICK keywords to this routine.
@@ -799,7 +810,7 @@ PRO cgMap_Grid, $
         xww = (map.uv_box[[0,2]] * !x.s[1] + !x.s[0]) * !d.x_size + del
         yww = (map.uv_box[[1,3]] * !y.s[1] + !y.s[0]) * !d.y_size + del
       ENDELSE
-      bdel = box_thick * !d.y_px_cm ;Thickness of box in device units
+      IF (N_Elements(bthick) NE 0) THEN bdel = bthick ELSE bdel = box_thick * !d.y_px_cm ;Thickness of box in device units
   
       xp = xw[0] - [0,bdel, bdel,0] ;X  & Y polygon coords for outer box
       yp = yw[0] - [0,0,bdel,bdel]
@@ -1094,9 +1105,18 @@ PRO cgMap_Grid, $
                   cgColorFill, xp0, yp0, /DEVICE, COLOR=bcolor
               xychar[iaxis] = z
               if strlen(vtext[i]) gt 0 then begin
-                  cgText, xychar[0], xychar[1], vtext[i], $
+                  CASE blabel OF
+                     0: cgText, xychar[0], xychar[1], vtext[i], $
                       ORIENTATION=dy * (90-180*j), CHARSIZE=charsize, $
                       ALIGN=0.5, CLIP=0, Z=zvalue, COLOR=lcolor, /DEVICE, _EXTRA=extra
+                     1: IF (j EQ 0) THEN cgText, xychar[0], xychar[1], vtext[i], $
+                         ORIENTATION=dy * (90-180*j), CHARSIZE=charsize, $
+                         ALIGN=0.5, CLIP=0, Z=zvalue, COLOR=lcolor, /DEVICE, _EXTRA=extra
+                      2: IF (j EQ 1) THEN cgText, xychar[0], xychar[1], vtext[i], $
+                         ORIENTATION=dy * (90-180*j), CHARSIZE=charsize, $
+                         ALIGN=0.5, CLIP=0, Z=zvalue, COLOR=lcolor, /DEVICE, _EXTRA=extra
+                  ENDCASE
+                  
               endif
               v0 = z
           endfor

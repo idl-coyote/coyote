@@ -186,9 +186,10 @@
 ;        Fixed a problem where I was not passing the PORTRAIT keyword to cgPS2Raster properly. 22 Jan 2013. DWF.
 ;        Modified to restore the input True-Type font for PostScript devices. 22 May 2013. DWF.
 ;        Can now create raster file output directly from the input filename of cgPS_Open. 29 Nov 2013. DWF.
+;        The program wasn't picking up default values from cgWindow_GetDefs. 22 Jan 2014. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2008-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgPS_Close, $
     ALLOW_TRANSPARENT=allow_transparent, $
@@ -287,6 +288,7 @@ PRO cgPS_Close, $
    SetDefaultValue, resize, 25
    IF needRaster THEN BEGIN
        IF cgHasImageMagick() THEN BEGIN
+        IF N_Elements(delete_ps) EQ 0 THEN cgWindow_GetDefs, PS_DELETE=delete_ps
        cgPS2Raster, ps_filename, raster_filename, $
           ALLOW_TRANSPARENT=allow_transparent, $
           BMP=bmp, $

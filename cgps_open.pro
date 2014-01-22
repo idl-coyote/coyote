@@ -187,6 +187,7 @@
 ;          and ImageMagick is installed, the PostScript intermediate file is deleted and the raster file is
 ;          created automatically without setting a raster output keyword on cgPS_Close. 29 Nov 2013. DWF.
 ;       Moved the check for Charsize to after setting to the PostScript device. 14 Jan 2014. DWF.
+;       The program wasn't picking up default values from cgWindow_GetDefs. 22 Jan 2014. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2014, Fanning Software Consulting, Inc.
@@ -247,25 +248,35 @@ PRO cgPS_Open, filename, $
    cgWindow_GetDefs, PS_TT_FONT=ps_tt_font
    ps_struct.tt_font_old = ps_tt_font
    
-   ; PostScript hardware fonts by default.
-   SetDefaultValue, font, 0
+   ; Get the default font for PostScript output.
+   IF N_Elements(font) EQ 0 THEN cgWindow_GetDefs, PS_FONT=font
    ps_struct.font = font
    
-   ; Store the current true-type font.
+   ; Set up the true-type font for PostScript, if needed.
+   IF (N_Elements(tt_font) EQ 0) AND (font EQ 1) THEN cgWindow_GetDefs, PS_TT_FONT=tt_font
    IF N_Elements(tt_font) NE 0 THEN BEGIN
         ps_struct.tt_font = tt_font
         font = 1
    ENDIF
    
    gui = Keyword_Set(gui)
+   
+   ; Get the default QUIET flag, if not set here.
+   IF N_Elements(quiet) EQ 0 THEN cgWindow_GetDefs, PS_QUIET=quiet
    quiet = Keyword_Set(quiet)
+   
+   ; Get the default ENCAPSULATED flag, if not set here.
+   IF N_Elements(encapsulated) EQ 0 THEN cgWindow_GetDefs, PS_ENCAPSULATED=encapsulated
+   encapsulated = Keyword_Set(encapsulated)
    
    ; Handle keywords appropriately.
    SetDefaultValue, default_thickness, 3
-   encapsulated = Keyword_Set(encapsulated)
    landscape = Keyword_Set(landscape)
    IF encapsulated THEN landscape = 0
-   SetDefaultValue, scale_factor, 1
+   
+   ; Get the default scale_factor.
+   IF N_Elements(scale_factor) EQ 0 THEN cgWindow_GetDefs, PS_SCALE_FACTOR=scale_factor
+   SetDefaultValue, scale_factor, 1.0
 
    ; If the setup flag is on, then we have to close the previous
    ; start command before we can continue.

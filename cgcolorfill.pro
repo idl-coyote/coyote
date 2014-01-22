@@ -60,6 +60,13 @@
 ;        connected. Z must contain at least three elements.
 ;
 ; :Keywords:
+;     checkforfinite: in, optional, type=boolean, default=0
+;        If the input data is not finite (i.e., it contains NaNs), then the drawing of
+;        the polygons will be affected. This is particularly true if you are drawing polygons
+;        on map projections using the `Map_Object` keyword. The program could check all input for NaNs, but
+;        this would be quite slow when a great number of polygons are being drawn. For this reason,
+;        the program only checks polygon input when this keyword is set. Only polygons containing all
+;        finite values are drawn when this keyword is set.
 ;     color: in, optional, type=string/byte/integer/long, default='rose'
 ;        The name of the fill color. Color names are those used with cgColor. 
 ;        This value can also be a long integer or an index into the current color
@@ -110,11 +117,13 @@
 ;        Added a POSITION keyword to allow setting the color position in a graphics window. 24 Jan 2013. DWF.
 ;        Added a MAP_OBJECT keyword to allow polygon filling on maps. 13 Dec 2013. DWF.
 ;        Completely forgot to deconstruct a single parameter into component parts. 11 Jan 2014. DWF.
+;        Added CheckForFinite keyword to check output for NaN values before display. 22 Jan 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgColorFill, x, y, z, $
+    CHECKFORFINITE=checkForFinite, $
     COLOR=color, $
     MAP_OBJECT=map_object, $
     NORMAL=normal, $
@@ -143,6 +152,7 @@ PRO cgColorFill, x, y, z, $
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
         cgWindow, 'cgColorFill', x, y, z, $
+            CHECKFORFINITE=checkForFinite, $
             COLOR=color, $
             MAP_OBJECT=map_object, $
             NORMAL=normal, $
@@ -159,6 +169,9 @@ PRO cgColorFill, x, y, z, $
     
     ; We are going to draw in decomposed color, if possible.
     cgSetColorState, 1, Current=currentState
+    
+    ; Check for NaNs in the data?
+    SetDefaultValue, checkForFinite, 0
     
     ; If we only have a single parameter, see if it can be deconstructed.
     IF N_Params() EQ 1 THEN BEGIN
@@ -200,21 +213,40 @@ PRO cgColorFill, x, y, z, $
     TVLCT, rr, gg, bb, /Get
     
     ; Do you have a map object? If so, assume lon/lat conversion to projected XY space.
+    ; Check for NaNs, if requested, because some projections can contain a lot of them.
     IF Obj_Valid(map_object) THEN BEGIN
         xy = map_object -> Forward(x, y, /NoForwardFix)
+        xr = map_object.xrange
+        yr = map_object.yrange
         _x = Reform(xy[0,*])
-        _y = Reform(xy[1,*])
+        _y =  Reform(xy[1,*])
+        IF checkForFinite THEN BEGIN
+           void = Where(Finite(_x) EQ 0, lonNaNCnt)
+           void = Where(Finite(_y) EQ 0, latNaNCnt)
+        ENDIF ELSE BEGIN
+            lonNaNCnt = 0
+            latNaNCnt = 0
+        ENDELSE
     ENDIF ELSE BEGIN
         _x = x
         _y = y
+        IF checkForFinite THEN BEGIN
+           void = Where(Finite(_x) EQ 0, lonNaNCnt)
+           void = Where(Finite(_y) EQ 0, latNaNCnt)
+        ENDIF ELSE BEGIN
+            lonNaNCnt = 0
+            latNaNCnt = 0
+        ENDELSE
     ENDELSE
     
-    ; Fill the polygon.
+    ; Fill the polygon as long as you don't have any NaNs in the data.
     IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = cgColor(thisColor)
-    CASE N_Elements(z) OF
-        0: PolyFill, _x, _y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _STRICT_EXTRA=extra
-        ELSE: PolyFill, _x, _y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _STRICT_EXTRA=extra
-    ENDCASE
+    IF (lonNaNCnt EQ 0) && (latNaNCnt EQ 0) THEN BEGIN
+        CASE N_Elements(z) OF
+            0: PolyFill, _x, _y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _STRICT_EXTRA=extra
+            ELSE: PolyFill, _x, _y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _STRICT_EXTRA=extra
+        ENDCASE
+    ENDIF
     
     ; Clean up.
     cgSetColorState, currentState

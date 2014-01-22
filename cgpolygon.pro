@@ -64,6 +64,13 @@
 ;        Set this keyword to add the command to an cgWindow. Setting this keyword
 ;        automatically sets the WINDOW keyword, but the command does not erase the
 ;        graphics window as it would normally.
+;     checkforfinite: in, optional, type=boolean, default=0
+;        If the input data is not finite (i.e., it contains NaNs), then the drawing of
+;        the polygons will be affected. This is particularly true if you are drawing polygons
+;        on map projections using the `Map_Object` keyword. The program could check all input for NaNs, but
+;        this would be quite slow when a great number of polygons are being drawn. For this reason,
+;        the program only checks polygon input when this keyword is set. Only polygons containing all
+;        finite values are drawn when this keyword is set.
 ;     color: in, optional, type=string, default='rose'
 ;        The name of the polygon color. Color names are those used with cgColor. 
 ;        This value can also be a long integer or an index into the current color
@@ -118,12 +125,14 @@
 ;        Added AddCmd keyword. 25 Oct 2012. DWF.
 ;        Added a MAP_OBJECT keyword to allow polygon filling on maps. 16 Dec 2013. DWF.
 ;        Completely forgot to deconstruct a single parameter into component parts. 11 Jan 2014. DWF.
+;        Added CheckForFinite keyword to check output for NaN values before display. 22 Jan 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgPolygon, x, y, z, $
     ADDCMD=addcmd, $
+    CHECKFORFINITE=checkForFinite, $
     COLOR=color, $
     FCOLOR=fcolor, $
     FILL=fill, $
@@ -160,6 +169,7 @@ PRO cgPolygon, x, y, z, $
         ; If adding a command, have to do this differently.
         IF Keyword_Set(addcmd) THEN BEGIN
            cgWindow, 'cgPolygon', x, y, z, $
+              CHECKFORFINITE=checkForFinite, $
               COLOR=color, $
               FCOLOR=fcolor, $
               FILL=fill, $
@@ -176,6 +186,7 @@ PRO cgPolygon, x, y, z, $
         
            ; Otherwise, we are just replacing the commands in a new or existing window.
            cgWindow, 'cgPolygon', x, y, z, $
+              CHECKFORFINITE=checkForFinite, $
               COLOR=color, $
               FCOLOR=fcolor, $
               FILL=fill, $
@@ -197,6 +208,9 @@ PRO cgPolygon, x, y, z, $
     ; We are going to draw in decomposed color, if possible.
     cgSetColorState, 1, Current=currentState
        
+    ; Check for NaNs in the data?
+    SetDefaultValue, checkForFinite, 0
+
     ; If we only have a single parameter, see if it can be deconstructed.
     IF N_Params() EQ 1 THEN BEGIN
         dims = Size(x, /Dimensions)
@@ -251,34 +265,53 @@ PRO cgPolygon, x, y, z, $
     TVLCT, rr, gg, bb, /Get
     
     ; Do you have a map object? If so, assume lon/lat conversion to projected XY space.
+    ; Check for NaNs, if requested, because some projections can contain a lot of them.
     IF Obj_Valid(map_object) THEN BEGIN
         xy = map_object -> Forward(x, y, /NoForwardFix)
+        xr = map_object.xrange
+        yr = map_object.yrange
         _x = Reform(xy[0,*])
-        _y = Reform(xy[1,*])
+        _y =  Reform(xy[1,*])
+        IF checkForFinite THEN BEGIN
+           void = Where(Finite(_x) EQ 0, lonNaNCnt)
+           void = Where(Finite(_y) EQ 0, latNaNCnt)
+        ENDIF ELSE BEGIN
+            lonNaNCnt = 0
+            latNaNCnt = 0
+        ENDELSE
     ENDIF ELSE BEGIN
         _x = x
         _y = y
+        IF checkForFinite THEN BEGIN
+           void = Where(Finite(_x) EQ 0, lonNaNCnt)
+           void = Where(Finite(_y) EQ 0, latNaNCnt)
+        ENDIF ELSE BEGIN
+            lonNaNCnt = 0
+            latNaNCnt = 0
+        ENDELSE
     ENDELSE
     
     ; Fill the polygon.
-    CASE N_Elements(z) OF
-        0: BEGIN
-              IF Keyword_Set(fill) THEN BEGIN
-                 PolyFill, _x, _y, COLOR=fillColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
-                 PlotS, _x, _y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
-              ENDIF ELSE BEGIN
-                 PlotS, _x, _y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
-              ENDELSE
-           END
-        ELSE: BEGIN
-              IF Keyword_Set(fill) THEN BEGIN
-                 PolyFill, _x, _y, z, COLOR=fillColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
-                 PlotS, _x, _y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
-              ENDIF ELSE BEGIN
-                 PlotS, _x, _y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
-              ENDELSE
-           END
-    ENDCASE
+    IF (lonNaNCnt EQ 0) && (latNaNCnt EQ 0) THEN BEGIN
+        CASE N_Elements(z) OF
+            0: BEGIN
+                  IF Keyword_Set(fill) THEN BEGIN
+                     PolyFill, _x, _y, COLOR=fillColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
+                     PlotS, _x, _y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
+                  ENDIF ELSE BEGIN
+                     PlotS, _x, _y, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
+                  ENDELSE
+               END
+            ELSE: BEGIN
+                  IF Keyword_Set(fill) THEN BEGIN
+                     PolyFill, _x, _y, z, COLOR=fillColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
+                     PlotS, _x, _y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
+                  ENDIF ELSE BEGIN
+                     PlotS, _x, _y, z, COLOR=thisColor, NORMAL=normal, DEVICE=device, _EXTRA=extra
+                  ENDELSE
+               END
+        ENDCASE
+    ENDIF
     
     ; Clean up.
     cgSetColorState, currentState

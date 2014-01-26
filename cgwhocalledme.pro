@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   WhoCalledMe
+;   cgWhoCalledMe
 ;
 ; PURPOSE:
 ;   This is a function that will identify the caller of the program module
@@ -36,36 +36,28 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
-;   This is a function that will identify the caller of the program module
-;   that contains this funciton.
+; This is a function that will identify the caller of the program module
+; that contains this funciton.
 ;
 ; :Categories:
 ;    Utilities
 ;    
-; :Params:
-;    none
-;       
-; :Keywords:
-;     none
-;     
-; : Return Value:
-;     caller:
-;         A string in uppercase letters identifying the caller of the program
-;         module from which this program was called.
+; :Returns:
+;     This function returns a string in uppercase letters identifying the caller 
+;     of the program module from which this program was called.
 ;         
 ; :Examples:
-;    Used to determine which module called this module containing WhoCalledMe::
-;       IDL> Print, WhoCalledMe()
+;    Used to determine which module called this module containing cgWhoCalledMe::
+;       IDL> Print, cgWhoCalledMe()
 ;       
 ;       ; Compile and run the following main level program.
 ;       ;***************************
 ;       PRO junker
-;          Print, WhoCalledMe()
+;          Print, cgWhoCalledMe()
 ;       END
 ;       
 ;       PRO junk
-;          Print, WhoCalledMe()
+;          Print, cgWhoCalledMe()
 ;       END
 ;       
 ;       junk
@@ -77,13 +69,13 @@
 ;            JUNK
 ;       
 ; :Author:
-;       FANNING SOFTWARE CONSULTING::
-;           David W. Fanning 
-;           1645 Sheely Drive
-;           Fort Collins, CO 80526 USA
-;           Phone: 970-221-0438
-;           E-mail: david@idlcoyote.com
-;           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;     FANNING SOFTWARE CONSULTING::
+;        David W. Fanning 
+;        1645 Sheely Drive
+;        Fort Collins, CO 80526 USA
+;        Phone: 970-221-0438
+;        E-mail: david@idlcoyote.com
+;        Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; :History:
 ;     Change History::
@@ -92,7 +84,7 @@
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-FUNCTION WhoCalledMe
+FUNCTION cgWhoCalledMe
 
    Compile_Opt idl2
 

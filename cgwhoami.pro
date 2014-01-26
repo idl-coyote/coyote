@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   WhoAmI
+;   cgWhoAmI
 ;
 ; PURPOSE:
 ;   This is a function that will identify the name of the procedure or function which
@@ -36,36 +36,28 @@
 ;******************************************************************************************;
 ;
 ;+
-; :Description:
-;   This is a function that will identify the name of the procedure or function which
-;   calls this function.
+; This is a function that will identify the name of the procedure or function which
+; calls this function.
 ;
 ; :Categories:
 ;    Utilities
 ;    
-; :Params:
-;    none
-;       
-; :Keywords:
-;     none
-;     
-; : Return Value:
-;     caller:
-;         A string in uppercase letters identifying the name of the program
-;         module containing this function.
+; : Returns:
+;      The program returns a string in uppercase letters identifying the name of the program
+;      module containing this function.
 ;         
 ; :Examples:
 ;    Used to a module by name::
-;       IDL> Print, WhoAmI()
+;       IDL> Print, cgWhoAmI()
 ;       
 ;       ; Compile and run the following main level program.
 ;       ;***************************
 ;       PRO junker
-;          Print, WhoAmI()
+;          Print, cgWhoAmI()
 ;       END
 ;       
 ;       PRO junk
-;          Print, WhoAmI()
+;          Print, cgWhoAmI()
 ;       END
 ;       
 ;       junk
@@ -92,7 +84,7 @@
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
 ;-
-FUNCTION WhoAmI
+FUNCTION cgWhoAmI
 
    Compile_Opt idl2
 

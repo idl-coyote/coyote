@@ -212,6 +212,7 @@
 ;           probably at the limit of what is possible now. :-) 30 April 2013. DWF.
 ;       The LAYOUT keyword went on walkabout after the last changes. Restored to operation. 12 July 2013. DWF.
 ;       The YTITLE keyword was missing when passed to cgWindow. Fixed now. 24 Oct 2013. DWF.
+;       Fixed a couple of places where I meant "missing_index" and used "missing_color". 26 Jan 2014. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -1696,10 +1697,10 @@ PRO cgImage, image, x, y, $
     IF N_Elements(min) EQ 0 THEN min = Min(image, /NAN) ELSE scale = 1
     IF N_Elements(max) EQ 0 THEN max = Max(image, /NAN) ELSE scale = 1
     IF (min LT 0) OR (max GT 255) THEN scale = 1
-    IF N_Elements(top) EQ 0 THEN top = (N_Elements(missing_value) NE 0) ? !D.TABLE_SIZE - 2 : !D.TABLE_SIZE - 1
+    IF N_Elements(top) EQ 0 THEN top = (N_Elements(missing_index) NE 0) ? !D.TABLE_SIZE - 2 : !D.TABLE_SIZE - 1
     IF N_Elements(bottom) EQ 0 THEN bottom = 0B
     IF N_Elements(ncolors) NE 0 THEN BEGIN
-        top = (N_Elements(missing_value) NE 0) ? (ncolors - 2) < 255 : (ncolors - 1)
+        top = (N_Elements(missing_index) NE 0) ? (ncolors - 2) < 255 : (ncolors - 1)
         scale = 1
     ENDIF
     

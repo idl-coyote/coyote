@@ -102,9 +102,10 @@
 ;        Adapted from FSC_PICKFILE to be a Coyote Graphics routine by David W. Fanning, 4 Aug 2011.
 ;        Added keywords TITLE and WRITE to work around a bug in Dialog_Pickfile that clips the
 ;           input filenames. 25 Feb 2012. DWF.
+;        Swithched from ProgramRootDir to cgSourceDir. 27 Jan 2014. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2014, Fanning Software Consulting, Inc.
 ;-
 FUNCTION cgPickfile, $
     DATADIR=datadir, $
@@ -147,9 +148,9 @@ FUNCTION cgPickfile, $
     ; Find the "data" subdirectory. If it can't be found, then the
     ; current directory is the data directory.
     IF N_Elements(dataDir) EQ 0 THEN BEGIN
-        dataDir = ProgramRootDir() + 'data'
+        dataDir = cgSourceDir() + 'data'
         IF ~File_Test(dataDir, /DIRECTORY) THEN BEGIN
-            dataDir = ProgramRootDir(/ONEUP) + 'data'
+            dataDir = cgSourceDir(/ONEUP) + 'data'
             IF ~File_Test(dataDir, /DIRECTORY) THEN CD, CURRENT=dataDir
         ENDIF
     ENDIF

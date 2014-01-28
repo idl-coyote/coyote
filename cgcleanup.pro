@@ -59,12 +59,10 @@
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
+
 ;+
 ; This procedure cleans up any open graphics windows and widget windows for
 ; versions of IDL prior to IDL 8.
-;
-; :Categories:
-;    Utility
 ;
 ; :Keywords:
 ;     all: in, optional, type=boolean, default=1
@@ -104,9 +102,6 @@ END ;---------------------------------------------------------------------------
 ;+
 ; This procedure cleans up any open graphics windows and widget windows for
 ; versions of IDL from IDL 8 onward.
-;
-; :Categories:
-;    Utility
 ;
 ; :Keywords:
 ;     all: in, optional, type=boolean, default=1

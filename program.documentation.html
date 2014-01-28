@@ -14,7 +14,7 @@ this routine, refer to the IDL Online Help Navigator
 or type: <P>
 <PRE>     ? mk_html_help</PRE><P>
 at the IDL command line prompt.<P>
-<STRONG>Last modified: </STRONG>Wed Nov 06 08:20:53 2013.<P>
+<STRONG>Last modified: </STRONG>Mon Jan 27 18:31:36 2014.<P>
  
 <HR>
  
@@ -42,7 +42,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#DIRPATH">DIRPATH</A>
 <LI><A HREF="#ERRORLOGGER__DEFINE">ERRORLOGGER__DEFINE</A>
 <LI><A HREF="#FIND_BOUNDARY">FIND_BOUNDARY</A>
-<LI><A HREF="#FIND_RESOURCE_FILE">FIND_RESOURCE_FILE</A>
 <LI><A HREF="#FIT_ELLIPSE">FIT_ELLIPSE</A>
 <LI><A HREF="#FIXED_MAP_GRID">FIXED_MAP_GRID</A>
 <LI><A HREF="#FLOATS_EQUAL">FLOATS_EQUAL</A>
@@ -57,7 +56,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#FSC_INPUTFIELD">FSC_INPUTFIELD</A>
 <LI><A HREF="#FSC_PLOTWINDOW">FSC_PLOTWINDOW</A>
 <LI><A HREF="#FSC_PSCONFIG__DEFINE">FSC_PSCONFIG__DEFINE</A>
-<LI><A HREF="#FSC_PS_SETUP__DEFINE">FSC_PS_SETUP__DEFINE</A>
 <LI><A HREF="#GAUSSSCL">GAUSSSCL</A>
 <LI><A HREF="#GETIMAGE">GETIMAGE</A>
 <LI><A HREF="#GETPRIMARYSCREENSIZE">GETPRIMARYSCREENSIZE</A>
@@ -91,7 +89,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#PICKCOLOR">PICKCOLOR</A>
 <LI><A HREF="#PRECIPMAP">PRECIPMAP</A>
 <LI><A HREF="#PRINTWINDOW">PRINTWINDOW</A>
-<LI><A HREF="#PROGRAMROOTDIR">PROGRAMROOTDIR</A>
 <LI><A HREF="#PSWINDOW">PSWINDOW</A>
 <LI><A HREF="#PS_BACKGROUND">PS_BACKGROUND</A>
 <LI><A HREF="#RANDOMNUMBERGENERATOR">RANDOMNUMBERGENERATOR</A>
@@ -115,8 +112,6 @@ at the IDL command line prompt.<P>
 <LI><A HREF="#TRANSFORM_VOLUME">TRANSFORM_VOLUME</A>
 <LI><A HREF="#UNDEFINE">UNDEFINE</A>
 <LI><A HREF="#VCOLORBAR">VCOLORBAR</A>
-<LI><A HREF="#WHOAMI">WHOAMI</A>
-<LI><A HREF="#WHOCALLEDME">WHOCALLEDME</A>
 <LI><A HREF="#WINDBARB">WINDBARB</A>
 <LI><A HREF="#WINDOWAVAILABLE">WINDOWAVAILABLE</A>
 <LI><A HREF="#WINDOWIMAGE">WINDOWIMAGE</A>
@@ -1672,7 +1667,7 @@ at the IDL command line prompt.<P>
 <A NAME="FIND_BOUNDARY">
 <H2>FIND_BOUNDARY</H2></A>
 <A HREF="#ERRORLOGGER__DEFINE">[Previous Routine]</A>
-<A HREF="#FIND_RESOURCE_FILE">[Next Routine]</A>
+<A HREF="#FIT_ELLIPSE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -1779,94 +1774,9 @@ at the IDL command line prompt.<P>
 <STRONG>(See find_boundary.pro)</STRONG><P>
 <HR>
  
-<A NAME="FIND_RESOURCE_FILE">
-<H2>FIND_RESOURCE_FILE</H2></A>
-<A HREF="#FIND_BOUNDARY">[Previous Routine]</A>
-<A HREF="#FIT_ELLIPSE">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-  FIND_RESOURCE_FILE
-
- PURPOSE:
-
-  This function is designed to search for and return the fully qualified
-  path to a resource file. The order of search is as follows:
-
-    1. In the current directory.
-    2. In the same directory as this file is found in.
-    3. In the directories rooted at the IDL resource directory (IDL_DIR/resource).
-    4. In the directories rooted at a resource directory found in the same directory this file is in.
-    5. In the directories rooted at a resource directory found in the a directory one above the directory this file is in.
-    6. Anywhere in the IDL PATH. Note that a *.pro file *must* be in a directory for the directory to be on
-       the IDL PATH.
- 
-
- AUTHOR:
-
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: david@idlcoyote.com
-   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-
- CATEGORY:
-
-  Utilities
-
- CALLING SEQUENCE:
-
-  fullPath = Find_Resource_File(resourceFilename)
-
- INPUTS:
-
-  resourceFilename:   The root name of a resource file. For example, 'arc.bmp'.
-
- KEYWORD PARAMETERS:
-
-  SUCCESS:            An output keyword whose value is set to 1 if the program
-                      successfully finds the resource file. Otherwise, set to 0.
-                      
-  VERBOSE:            Set this keyword to enable output that prints the full path 
-                      to the resource file, or tells you that the file cannot be found.
-
- RETURN_VALUE:
-
-  fullpath:           A fully-qualified file path to the resource file.
-
- EXAMPLE:
-
-  IDL> print, find_resource_file('gshhs_i.b', success=s) & print, 'success: ', s
-       /home/fanning/IDL/incubator/gshhs_i.b
-       success:            1
-  IDL> print, find_resource_file('dataviewer_splash.jpg', success=s) & print, 'success: ', s
-       /home/fanning/IDL/dataviewer/resources/dataviewer_splash.jpg
-       success:            1
-  IDL> print, find_resource_file('arc.bmp', success=s) & print, 'success: ', s
-       /usr/local/rsi/idl70/resource/bitmaps/arc.bmp
-       success:            1
-  IDL> print, find_resource_file('toast_and_jam.txt', success=s) & print, 'success: ', s
-
-      success:            0
- MODIFICATION HISTORY:
-
-  Written by: David W Fanning, December 12, 2008.
-  It seems all my resource files are in "resources" directories, not  "resource" directories.
-     So now the program looks in both places. 6 January 2009.
-  The file did not seem to be looking in the IDL path. It does now. 21 April 2010. DWF.
-  The file will also look in the directory of the caller of this program. 21 April 2010. DWF.
-  Fixed a problem when File_Search finds several files with the same name. Always takes the
-      first file found now. 4 June 2010. DWF.
-  Modified to look in the current directory first. 5 March 2013. DWF.
-</PRE><P>
-<STRONG>(See find_resource_file.pro)</STRONG><P>
-<HR>
- 
 <A NAME="FIT_ELLIPSE">
 <H2>FIT_ELLIPSE</H2></A>
-<A HREF="#FIND_RESOURCE_FILE">[Previous Routine]</A>
+<A HREF="#FIND_BOUNDARY">[Previous Routine]</A>
 <A HREF="#FIXED_MAP_GRID">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -3779,7 +3689,7 @@ OUTPUTS:
 <A NAME="FSC_PSCONFIG__DEFINE">
 <H2>FSC_PSCONFIG__DEFINE</H2></A>
 <A HREF="#FSC_PLOTWINDOW">[Previous Routine]</A>
-<A HREF="#FSC_PS_SETUP__DEFINE">[Next Routine]</A>
+<A HREF="#GAUSSSCL">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -3957,59 +3867,9 @@ OUTPUTS:
 <STRONG>(See fsc_psconfig__define.pro)</STRONG><P>
 <HR>
  
-<A NAME="FSC_PS_SETUP__DEFINE">
-<H2>FSC_PS_SETUP__DEFINE</H2></A>
-<A HREF="#FSC_PSCONFIG__DEFINE">[Previous Routine]</A>
-<A HREF="#GAUSSSCL">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-   FSC_PS_SETUP__DEFINE
-
- PURPOSE:
-
-    The purpose of FSC_PS_SETUP__DEFINE is to define a structure that is
-    use with cgPS_Open and cgPS_Close, programs that make it easy to set-up
-    for and close a PostScript file. The programs work in close conjunction
-    with cgPS_Config, another program from the Coyote Library.
-
- AUTHOR:
-
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: david@idlcoyote.com
-   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-
- CATEGORY:
-
-       Graphics, File Output, PostScript
-
- CALLING SEQUENCE:
-
-       Used internally in cgPS_Open and cgPS_Close.
-
- COMMON BLOCKS:
-
-       _$FSC_PS_START_   Contains the PS_STRUCT structure for communication between
-                         cgPS_Open and cgPS_Close.
-
- MODIFICATION HISTORY:
-
-       Separated from cgPS_Open file, 7 April 2009, by David W. Fanning.
-       Added PAGETYPE field to structure. 8 August 2009. DWF.
-       Changes to handle inability to create raster files from PS encapsulated files in 
-           landscape mode. Added "encapsulated" field to structure. 26 Aug 2011. DWF.
-       Modified to keep track of the "input" True-Type font for PostScript devices. 22 May 2013. DWF.
-</PRE><P>
-<STRONG>(See fsc_ps_setup__define.pro)</STRONG><P>
-<HR>
- 
 <A NAME="GAUSSSCL">
 <H2>GAUSSSCL</H2></A>
-<A HREF="#FSC_PS_SETUP__DEFINE">[Previous Routine]</A>
+<A HREF="#FSC_PSCONFIG__DEFINE">[Previous Routine]</A>
 <A HREF="#GETIMAGE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -6540,6 +6400,7 @@ OUTPUTS:
        Small typo fixed in setting CHAR datatype for IDL 8.1 and higher. 22 May 2013. DWF.
        Typo (CONTINUOUS->CONTIGUOUS) fixed in WriteDefVar method. 30 July 2013. DWF.
        Modified CopyVarDefTo method to allow new NCDF4 keywords. 30 July 2013. DWF.
+       Added DelGlobalAttr method to allow deletion of global attributes. 11 Jan 2014. DWF.
        
 </PRE><P>
 <STRONG>(See ncdf_file__define.pro)</STRONG><P>
@@ -6930,7 +6791,7 @@ OUTPUTS:
 <A NAME="PRINTWINDOW">
 <H2>PRINTWINDOW</H2></A>
 <A HREF="#PRECIPMAP">[Previous Routine]</A>
-<A HREF="#PROGRAMROOTDIR">[Next Routine]</A>
+<A HREF="#PSWINDOW">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -6992,114 +6853,9 @@ OUTPUTS:
 <STRONG>(See printwindow.pro)</STRONG><P>
 <HR>
  
-<A NAME="PROGRAMROOTDIR">
-<H2>PROGRAMROOTDIR</H2></A>
-<A HREF="#PRINTWINDOW">[Previous Routine]</A>
-<A HREF="#PSWINDOW">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- NAME:
-       ProgramRootDir
-
- PURPOSE:
-
-       The purpose of this function is to provide a portable way of finding
-       the root directory of a program distribution. The directory that is returned
-       is the directory in which the source file using ProgramRootDir resides.
-       The program is useful for distributing applications that have a large number
-       of files in specific program directories.
-
-
- AUTHOR:
-
-       FANNING SOFTWARE CONSULTING
-       1645 Sheely Drive
-       Fort Collins, CO 80526 USA
-       Phone: 970-221-0438
-       E-mail: david@idlcoyote.com
-
- SYNTAX:
-
-       theDirectory = ProgramRootDir()
-
- RETURN_VALUE:
-
-       theDirectory:   The directory in which the program module running ProgramRootDir resides.
-
- ARGUMENTS:
-
-       None.
-
- KEYWORDS:
-
-       NOMARK: Normally, the directory that is returned contains a path separator at its
-               end, so that the directory can easily be concatinated with other file names.
-               If this keyword is set, the final path separator mark is removed from the
-               directory name.
-
-       ONEUP:  Set this keyword if you want to start your search one directory
-               *above* where your source program resides (i.e., "../Source").
-               This allows you, for example, to put your source files in a Source
-               directory that it at the same level as your Data directory, Utility
-               directory, etc. See the example below.
-
-       TWOUP:  Set this keyword if you want to start your search two directories
-               *above* where your source program resides (i.e., "../../Source").
-
-
- EXAMPLE:
-
-       Assume that your application files (and source programs) reside in this root directory:
-
-           ../app
-
-       You have placed a DATA directory immediately under the APP directiory, and a RESOURCES
-       directory immedately under the DATA directory. Your directory structure looks like this:
-
-           ../app                    ; Contains your application and source (*.pro) files.
-           ../app/data               ; Contains your application data files.
-           ...app/data/resources     ; Contains your application resource files.
-
-       The end user can install the APP directory wherever he or she likes. In your
-       program, you will identify the DATA and RESOURCES directory like this:
-
-            ; Get icon image in resources directory.
-            filename = Filepath(Root_Dir=ProgramRootDir(), Subdirectory=['data','resources'], 'myicon.tif')
-
-            ; Get default image in data directory.
-            filename = Filepath(Root_Dir=ProgramRootDir(), Subdirectory='data', 'ctscan.tif')
-
-       Alternatively, you might set up an application directory structure like this:
-
-           ../app                    ; Contains your application files.
-           ../app/source             ; Contains your application source (*.pro) files.
-           ../app/data               ; Contains your application data files.
-           ...app/data/resources     ; Contains your application resource files.
-
-       In this case, you would use the ONEUP keyword to find your data and resource files, like this:
-
-            ; Get icon image in resources directory.
-            filename = Filepath(Root_Dir=ProgramRootDir(/ONEUP), Subdirectory=['data','resources'], 'myicon.tif')
-
-            ; Get default image in data directory.
-            filename = Filepath(Root_Dir=ProgramRootDir(/ONEUP), Subdirectory='data', 'ctscan.tif')
-
-
-
- MODIFICATION_HISTORY:
-
-       Written by: David W. Fanning, 23 November 2003. Based on program SOURCEROOT, written by
-         Jim Pendleton at RSI (http://www.rsinc.com/codebank/search.asp?FID=35).
-       Added ONEUP keyword. 10 December 2003. DWF.
-       Added TWOUP keyword. 8 June 2007. DWF.
-       Added NOMARK keyword. 8 June 2007. DWF.
-</PRE><P>
-<STRONG>(See programrootdir.pro)</STRONG><P>
-<HR>
- 
 <A NAME="PSWINDOW">
 <H2>PSWINDOW</H2></A>
-<A HREF="#PROGRAMROOTDIR">[Previous Routine]</A>
+<A HREF="#PRINTWINDOW">[Previous Routine]</A>
 <A HREF="#PS_BACKGROUND">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
@@ -8021,65 +7777,58 @@ OUTPUTS:
 <A HREF="#SHARPEN">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
- NAME:
-  SetDefaultValue
+ This procedure sets default values for positional and keyword arguments to
+ IDL procedures and functions.
 
- PURPOSE:
+ :Categories:
+    Utilities
 
-   This procedure sets default values for positional and keyword arguments to
-   IDL procedures and functions.
+ :Params:
+    argument: in, required
+         The augument variable you are setting the default value of. If this variable
+         is undefined, the `defaultValue` will be assigned to it. Otherwise, the argument
+         variable will not change.
+    defaultvalue: in, required
+         The default value that will be assigned to the argument variable ONLY if the argument
+         variable is undefined. If this variable is undefined, the argument variable will
+         be treated as if the BOOLEAN keyword had been set.
 
- AUTHOR:
+ :Keywords:
+    boolean: in, optional, type=integer
+         If this keyword is set, the argument value will always be forced to return with a 
+         value of 0 or 1.
 
-   FANNING SOFTWARE CONSULTING
-   David Fanning, Ph.D.
-   1645 Sheely Drive
-   Fort Collins, CO 80526 USA
-   Phone: 970-221-0438
-   E-mail: david@idlcoyote.com
-   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
-
- CATEGORY:
-
-   Utilities
-
- CALLING SEQUENCE:
-
-   SetDefaultValue, argument, defaultValue
-
- ARGUMENTS:
-
-  argument:       The augument variable you are setting the default value of. If this variable
-                  is undefined, the defaultValue will be assigned to it. Otherwise, the argument
-                  variable will not change.
-                  
-  defaultValue:   The default value that will be assigned to the argument variable ONLY if the argument
-                  variable is undefined. If this variable is undefined, the argument variable will
-                  be treated as if the BOOLEAN keyword had been set.
-
- KEYWORDS:
-
-  BOOLEAN:        If this keyword is set, the argument value will always be forced to return with a 
-                  value of 0 or 1.
-
- EXAMPLE:
-
-  FUNCTION Action, arg1, arg2, MULTIPLY=multiply
+ :Examples:
+    Here is how to use this program::
+    
+      FUNCTION Action, arg1, arg2, MULTIPLY=multiply
   
-     SetDefaultValue, arg1, 1
-     SetDefaultValue, arg2, 2
-     SetDefaultValue, multiply, 1, /BOOLEAN 
+         SetDefaultValue, arg1, 1
+         SetDefaultValue, arg2, 2
+         SetDefaultValue, multiply, 1, /BOOLEAN 
      
-     IF multiply THEN RETURN, arg1 * arg2 ELSE RETURN, arg1 + arg2
+         IF multiply THEN RETURN, arg1 * arg2 ELSE RETURN, arg1 + arg2
      
-  END
+      END
 
- MODIFICATION HISTORY:
+ :Author:
+    FANNING SOFTWARE CONSULTING::
+       David W. Fanning
+       1645 Sheely Drive
+       Fort Collins, CO 80526 USA
+       Phone: 970-221-0438
+       E-mail: david@idlcoyote.com
+       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 
-  Written by: David W. Fanning, November 26, 2008, from suggestion by Carsten Lechte on
-     IDL newsgroup on this date.
-  Made a change to the way the BOOLEAN keyword works. Now argument is set to BOOLEAN before
-     return, if required. 3 Dec 2008. DWF.
+ :History:
+     Change History::
+        Written by: David W. Fanning, November 26, 2008, from suggestion by Carsten Lechte on
+           IDL newsgroup on this date.
+        Made a change to the way the BOOLEAN keyword works. Now argument is set to BOOLEAN before
+           return, if required. 3 Dec 2008. DWF.
+
+ :Copyright:
+     Copyright (c) 2008-2014, Fanning Software Consulting, Inc.
 </PRE><P>
 <STRONG>(See setdefaultvalue.pro)</STRONG><P>
 <HR>
@@ -8802,7 +8551,7 @@ OUTPUTS:
 <A NAME="VCOLORBAR">
 <H2>VCOLORBAR</H2></A>
 <A HREF="#UNDEFINE">[Previous Routine]</A>
-<A HREF="#WHOAMI">[Next Routine]</A>
+<A HREF="#WINDBARB">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>
  NAME:
@@ -8953,139 +8702,9 @@ OUTPUTS:
 <STRONG>(See vcolorbar__define.pro)</STRONG><P>
 <HR>
  
-<A NAME="WHOAMI">
-<H2>WHOAMI</H2></A>
-<A HREF="#VCOLORBAR">[Previous Routine]</A>
-<A HREF="#WHOCALLEDME">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- :Description:
-   This is a function that will identify the name of the procedure or function which
-   calls this function.
-
- :Categories:
-    Utilities
-    
- :Params:
-    none
-       
- :Keywords:
-     none
-     
- : Return Value:
-     caller:
-         A string in uppercase letters identifying the name of the program
-         module containing this function.
-         
- :Examples:
-    Used to a module by name::
-       IDL> Print, WhoAmI()
-       
-       ; Compile and run the following main level program.
-       ;***************************
-       PRO junker
-          Print, WhoAmI()
-       END
-       
-       PRO junk
-          Print, WhoAmI()
-       END
-       
-       junk
-       END
-       ;**************************
-
-       IDL> .go
-            JUNK
-            JUNKER
-       
- :Author:
-       FANNING SOFTWARE CONSULTING::
-           David W. Fanning 
-           1645 Sheely Drive
-           Fort Collins, CO 80526 USA
-           Phone: 970-221-0438
-           E-mail: david@idlcoyote.com
-           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- :History:
-     Change History::
-        Written, 28 January 2011. DWF. 
-
- :Copyright:
-     Copyright (c) 2011, Fanning Software Consulting, Inc.
-</PRE><P>
-<STRONG>(See whoami.pro)</STRONG><P>
-<HR>
- 
-<A NAME="WHOCALLEDME">
-<H2>WHOCALLEDME</H2></A>
-<A HREF="#WHOAMI">[Previous Routine]</A>
-<A HREF="#WINDBARB">[Next Routine]</A>
-<A HREF="#ROUTINELIST">[List of Routines]</A>
-<PRE>
- :Description:
-   This is a function that will identify the caller of the program module
-   that contains this funciton.
-
- :Categories:
-    Utilities
-    
- :Params:
-    none
-       
- :Keywords:
-     none
-     
- : Return Value:
-     caller:
-         A string in uppercase letters identifying the caller of the program
-         module from which this program was called.
-         
- :Examples:
-    Used to determine which module called this module containing WhoCalledMe::
-       IDL> Print, WhoCalledMe()
-       
-       ; Compile and run the following main level program.
-       ;***************************
-       PRO junker
-          Print, WhoCalledMe()
-       END
-       
-       PRO junk
-          Print, WhoCalledMe()
-       END
-       
-       junk
-       END
-       ;**************************
-
-       IDL> .go
-            $MAIN$
-            JUNK
-       
- :Author:
-       FANNING SOFTWARE CONSULTING::
-           David W. Fanning 
-           1645 Sheely Drive
-           Fort Collins, CO 80526 USA
-           Phone: 970-221-0438
-           E-mail: david@idlcoyote.com
-           Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-
- :History:
-     Change History::
-        Written, 16 January 2011. DWF. 
-
- :Copyright:
-     Copyright (c) 2011, Fanning Software Consulting, Inc.
-</PRE><P>
-<STRONG>(See whocalledme.pro)</STRONG><P>
-<HR>
- 
 <A NAME="WINDBARB">
 <H2>WINDBARB</H2></A>
-<A HREF="#WHOCALLEDME">[Previous Routine]</A>
+<A HREF="#VCOLORBAR">[Previous Routine]</A>
 <A HREF="#WINDOWAVAILABLE">[Next Routine]</A>
 <A HREF="#ROUTINELIST">[List of Routines]</A>
 <PRE>

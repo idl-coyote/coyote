@@ -74,6 +74,8 @@
 ;  Fixed a problem when File_Search finds several files with the same name. Always takes the
 ;      first file found now. 4 June 2010. DWF.
 ;  Modified to look in the current directory first. 5 March 2013. DWF.
+;  I found a typo in this code that was causing it to search WAY too many directories
+;      and was slowing it down tremendously. Reasonably fast now. 27 Jan 2013. DWF.
 ;-
 ;
 ;******************************************************************************************;
@@ -145,7 +147,7 @@ Function Find_Resource_File, filename, SUCCESS=success, VERBOSE=verbose
     ENDIF
 
     ; Look in the IDL resource directory
-    resourceDir = Filepath(ROOT_DIR=thisDir, SUBDIRECTORY='resource', "")
+    resourceDir = Filepath(ROOT_DIR=!DIR, SUBDIRECTORY='resource', "")
     resourceName = File_Search(resourceDir, filename, COUNT=count)
     IF count GE 0 THEN BEGIN
         resourceName = resourceName[0]
@@ -173,7 +175,7 @@ Function Find_Resource_File, filename, SUCCESS=success, VERBOSE=verbose
     ; Look for a file in a resource directory, rooted on this directory.
     thisDir = ProgramRootDir()
     resourceDir = Filepath(ROOT_DIR=thisDir, SUBDIRECTORY='resource', "")
-    resourceName = File_Search(thisDir, filename, COUNT=count)
+    resourceName = File_Search(resourceDir, filename, COUNT=count)
     IF count GE 0 THEN BEGIN
         resourceName = resourceName[0]
         IF File_Test(resourceName, /REGULAR, /READ) THEN BEGIN
@@ -186,7 +188,7 @@ Function Find_Resource_File, filename, SUCCESS=success, VERBOSE=verbose
     ; Look for a file in a resources directory, rooted on this directory.
     thisDir = ProgramRootDir()
     resourceDir = Filepath(ROOT_DIR=thisDir, SUBDIRECTORY='resources', "")
-    resourceName = File_Search(thisDir, filename, COUNT=count)
+    resourceName = File_Search(resourceDir, filename, COUNT=count)
     IF count GE 0 THEN BEGIN
         resourceName = resourceName[0]
         IF File_Test(resourceName, /REGULAR, /READ) THEN BEGIN
@@ -199,7 +201,7 @@ Function Find_Resource_File, filename, SUCCESS=success, VERBOSE=verbose
     ; Look for a file in a resource directory, rooted oneup from this directory.
     thisDir = ProgramRootDir(/ONEUP)
     resourceDir = Filepath(ROOT_DIR=thisDir, SUBDIRECTORY='resource', "")
-    resourceName = File_Search(thisDir, filename, COUNT=count)
+    resourceName = File_Search(resourceDir, filename, COUNT=count)
     IF count GE 0 THEN BEGIN
         resourceName = resourceName[0]
         IF File_Test(resourceName, /REGULAR, /READ) THEN BEGIN
@@ -212,7 +214,7 @@ Function Find_Resource_File, filename, SUCCESS=success, VERBOSE=verbose
     ; Look for a file in a resource directory, rooted oneup from this directory.
     thisDir = ProgramRootDir(/ONEUP)
     resourceDir = Filepath(ROOT_DIR=thisDir, SUBDIRECTORY='resources', "")
-    resourceName = File_Search(thisDir, filename, COUNT=count)
+    resourceName = File_Search(resourceDir, filename, COUNT=count)
     IF count GE 0 THEN BEGIN
         resourceName = resourceName[0]
         IF File_Test(resourceName, /REGULAR, /READ) THEN BEGIN

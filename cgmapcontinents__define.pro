@@ -87,7 +87,7 @@
 ;        to zero. This keyword is ignored if using FILENAME.
 ;     filename: in, optional, type=string
 ;        The name of the GSHHS file to open. If a fully qualified file name is not provided,
-;        the program will look for the GSHHS file using Find_Resource_File() function. Only if
+;        the program will look for the GSHHS file using cgFindPathTo() function. Only if
 ;        this fails and a file is not found, will an error be issued. This keyword applies only
 ;        to GSHHS data files currently. If the GSHHS keyword is set, and this keyword is undefined,
 ;        then the filename will be set to "gshhs_i.b", unless the HIRES keyword is set, in which
@@ -275,7 +275,7 @@ FUNCTION cgMapContinents::Confirm_Filename, filename
        
     ; If you can't find it, do a search in resource directories for it.
     IF ~found THEN BEGIN
-       resourceFile = Find_Resource_File(filename, SUCCESS=success)
+       resourceFile = cgFindPathTo(filename, SUCCESS=success)
        IF success THEN BEGIN
            returnName = resourceFile
        ENDIF ELSE BEGIN
@@ -323,7 +323,7 @@ PRO cgMapContinents::Draw
     IF self.gshhs THEN BEGIN
         rootName = File_Basename(self.filename)
         IF StrLowCase(rootName) EQ StrLowCase(self.filename) THEN BEGIN
-            gshhsFileName = Find_Resource_File(rootName, SUCCESS=success)
+            gshhsFileName = cgFindPathTo(rootName, SUCCESS=success)
         ENDIF ELSE BEGIN
             gshhsFileName = self.filename
             IF self.filename EQ "" THEN success = 0 ELSE success = 1
@@ -408,7 +408,7 @@ END
 ;        to zero. This keyword is ignored if using FILENAME.
 ;     filename: in, optional, type=string
 ;        The name of the GSHHS file to open. If a fully qualified file name is not provided,
-;        the program will look for the GSHHS file using Find_Resource_File() function. Only if
+;        the program will look for the GSHHS file using cgFindPathTo() function. Only if
 ;        this fails and a file is not found, will an error be issued. This keyword applies only
 ;        to GSHHS data files currently. If the GSHHS keyword is set, and this keyword is undefined,
 ;        then the filename will be set to "gshhs_i.b", unless the HIRES keyword is set, in which
@@ -531,7 +531,7 @@ END
 ;        to zero. This keyword is ignored if using FILENAME.
 ;     filename: in, optional, type=string
 ;        The name of the GSHHS file to open. If a fully qualified file name is not provided,
-;        the program will look for the GSHHS file using Find_Resource_File() function. Only if
+;        the program will look for the GSHHS file using cgFindPathTo() function. Only if
 ;        this fails and a file is not found, will an error be issued. This keyword applies only
 ;        to GSHHS data files currently. If the GSHHS keyword is set, and this keyword is undefined,
 ;        then the filename will be set to "gshhs_i.b", unless the HIRES keyword is set, in which

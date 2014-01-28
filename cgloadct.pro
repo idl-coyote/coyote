@@ -147,7 +147,7 @@
 ;       Added ability to read Brewer Color Table file, if available, with BREWER keyword. 14 May 2008. DWF.
 ;       Small change in the way the program looks for the Brewer file. 8 July 2008. DWF.
 ;       Changed the way the program looks for the Brewer color table file. Now use
-;          the Coyote Library routine FIND_RESOURCE_FILE to look for the file. 29 June 2010. DWF. 
+;          the Coyote Library routine cgFindPathTo to look for the file. 29 June 2010. DWF. 
 ;       Renamed Colorbar procedure to cgColorbar to avoid conflict with IDL 8 Colorbar function.
 ;          26 September 2010. DWF.
 ;       Added ROW keyword to transpose color table vectors for new graphics functions 
@@ -160,6 +160,7 @@
 ;          the WINDOW keyword, resulting in incorrect colors in cgWindow programs. 28 April 2011. DWF.
 ;       Added CubeHelix color table from code written by James R. A. Davenport. 5 Nov 2012. DWF.
 ;       Made sure NCOLORS default takes BOTTOM value into account. 18 June 2013. DWF.
+;       Changed the way the brewer color table is searched for. Speed-up over 300x. 27 Jan 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
@@ -236,8 +237,9 @@ PRO cgLoadCT, table, $
    
    ; Try to locate the brewer file. 
    IF Keyword_Set(brewer) THEN BEGIN
-       brewerfile = Find_Resource_File('fsc_brewer.tbl')
-       IF brewerfile EQ "" THEN BEGIN
+       brewerfilepath = Filepath( ROOT_DIR=cgSourceDir(), 'fsc_brewer.tbl')
+       brewerFile = File_Search(brewerfilepath, Count=count)
+       IF count EQ 0 THEN BEGIN
             Message, 'Cannot find the Brewer color table file "fsc_brewer.tbl."' + $
                      ' Using normal IDL color tables.', /INFORMATIONAL
        ENDIF ELSE file = brewerfile

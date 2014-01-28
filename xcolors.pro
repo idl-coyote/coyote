@@ -81,7 +81,7 @@
 ;           about the state of the color table tool into object methods. 21 October 2008. DWF.
 ;       Add REVERSE keyword and Reverse Color Table button. 12 April 2009. DWF.
 ;       In looking for a Brewer color table file, I replaced all FILE_WHICH 
-;           commands with FIND_RESOURCE_FILE commands. 28 April 2009. DWF.
+;           commands with cgFindPathTo commands. 28 April 2009. DWF.
 ;       Made sure all "NOTIFY" data structures have both a "REVERSED" and 
 ;           "BREWER" field in them to indicate the status of the XCOLORS program. Also 
 ;           inproved the documentation and made it more accurate. 20 Sept 2009. DWF.
@@ -838,7 +838,7 @@ PRO XCOLORS_SWITCH_COLORS, event
            END
 
         'BREWER': BEGIN
-           info.file = Find_Resource_File('fsc_brewer.tbl')
+           info.file = cgFindPathTo('fsc_brewer.tbl')
            info.brewer = 1
            END
    ENDCASE
@@ -1188,7 +1188,7 @@ PRO XCOLORS, $
        ; in the IDL path if it is not found there.
     
     brewerfile = Filepath(SubDir=['resource','colors'], 'fsc_brewer.tbl')
-    IF File_Test(brewerfile, /READ) EQ 0 THEN brewerfile = Find_Resource_File('fsc_brewer.tbl')
+    IF File_Test(brewerfile, /READ) EQ 0 THEN brewerfile = cgFindPathTo('fsc_brewer.tbl')
     IF brewerfile EQ "" THEN BEGIN
         locatedBrewerFile = 0 
     ENDIF ELSE BEGIN

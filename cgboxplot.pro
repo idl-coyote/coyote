@@ -66,7 +66,7 @@
 ;          
 ;    Here are the IDL commands to read the data and produce a box plot of it::
 ;       
-;        OpenR, 1, Find_Resource_File('mm_data.dat')
+;        OpenR, 1, cgFindPathTo('mm_data.dat')
 ;        header = Strarr(2)
 ;        Readf, 1, header
 ;        data = Intarr(5, 20)

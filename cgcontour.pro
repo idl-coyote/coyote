@@ -1025,8 +1025,8 @@ PRO cgContour, data, x, y, $
  
                     ; Make sure axis are turned off. I don't really want to draw anything,
                     ; just advance !P.MULTI or "erase" the display for the next plot.
-                    IF BitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
-                    IF BitGet(ystyle, 2) NE 1 THEN yystyle = xstyle + 4 ELSE yystyle = ystyle
+                    IF cgBitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
+                    IF cgBitGet(ystyle, 2) NE 1 THEN yystyle = xstyle + 4 ELSE yystyle = ystyle
                     
                     ; Draw the plot that doesn't draw anything.
                      Contour, contourData, xgrid, ygrid, COLOR=axiscolor, CHARSIZE=charsize, $

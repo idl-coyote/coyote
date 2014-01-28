@@ -648,9 +648,9 @@ PRO cgSurf, data, x, y, $
                 
                 ; Make sure axis are turned off. I don't really want to draw anything,
                 ; just advance !P.MULTI or "erase" the display for the next plot.
-                IF BitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
-                IF BitGet(ystyle, 2) NE 1 THEN yystyle = ystyle + 4 ELSE yystyle = ystyle
-                IF BitGet(zstyle, 2) NE 1 THEN zzstyle = zstyle + 4 ELSE zzstyle = zstyle
+                IF cgBitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
+                IF cgBitGet(ystyle, 2) NE 1 THEN yystyle = ystyle + 4 ELSE yystyle = ystyle
+                IF cgBitGet(zstyle, 2) NE 1 THEN zzstyle = zstyle + 4 ELSE zzstyle = zstyle
                 
                 ; Draw the plot that doesn't draw anything.
                 Surface, data, x, y, XSTYLE=xxstyle, YSTYLE=yystyle, ZSTYLE=zzstyle, $
@@ -703,9 +703,9 @@ PRO cgSurf, data, x, y, $
     
     ; Turn the axes off to draw the surface itself. Start by making sure bit 4 in
     ; the [XYZ]Style bits are turned on.
-    IF BitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
-    IF BitGet(ystyle, 2) NE 1 THEN yystyle = ystyle + 4 ELSE yystyle = ystyle
-    IF BitGet(zstyle, 2) NE 1 THEN zzstyle = zstyle + 4 ELSE zzstyle = zstyle
+    IF cgBitGet(xstyle, 2) NE 1 THEN xxstyle = xstyle + 4 ELSE xxstyle = xstyle
+    IF cgBitGet(ystyle, 2) NE 1 THEN yystyle = ystyle + 4 ELSE yystyle = ystyle
+    IF cgBitGet(zstyle, 2) NE 1 THEN zzstyle = zstyle + 4 ELSE zzstyle = zstyle
          
     ; Make absolutely sure the colors are fresh.
     IF N_Elements(palette) NE 0 THEN TVLCT, palette ELSE TVLCT, rr, gg, bb

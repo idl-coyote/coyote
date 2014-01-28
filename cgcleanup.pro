@@ -40,16 +40,6 @@
 ; :Categories:
 ;    Utility
 ;       
-; :Keywords:
-;     all: in, optional, type=boolean, default=1
-;       Set this keyword if you wish to clean up windows of all types.
-;     cg: in, optional, type=boolean, default=0
-;       Set this keyword if you wish to clean up only Coyote Graphics windows.
-;     dg: in, optional, type=boolean, default=0
-;       Set this keyword if you wish to clean up only Direct Graphics windows.
-;     fg: in, optional, type=boolean, default=0
-;       Set this keyword if you wish to clean up only Function Graphics windows.
-;
 ; :Examples:
 ;    For example, to destroy all windows on the display::
 ;       IDL> cgCleanup
@@ -69,12 +59,119 @@
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
 ;-
+;+
+; This procedure cleans up any open graphics windows and widget windows for
+; versions of IDL prior to IDL 8.
+;
+; :Categories:
+;    Utility
+;
+; :Keywords:
+;     all: in, optional, type=boolean, default=1
+;       Set this keyword if you wish to clean up windows of all types.
+;     cg: in, optional, type=boolean, default=0
+;       Set this keyword if you wish to clean up only Coyote Graphics windows.
+;     dg: in, optional, type=boolean, default=0
+;       Set this keyword if you wish to clean up only Direct Graphics windows.
+;-
+PRO cgCleanUp_v7, ALL=all, CG=cg, DG=dg
+
+    Compile_Opt idl2
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = cgErrorMsg()
+        RETURN
+    ENDIF
+    
+    ; By default clear out all of the windows
+    anySet = Keyword_Set(cg) + Keyword_Set(dg)
+    doAll = ( N_Elements(all) EQ 0 && anySet EQ 0) ? 1 : Keyword_Set(all)
+    
+    IF (doAll || Keyword_Set(cg) ) THEN BEGIN
+        ; Widget windows or Coyote Graphics windows.
+        Widget_Control, /Reset
+    ENDIF
+    
+    IF (doAll || Keyword_Set(dg) ) THEN BEGIN
+        ; IDL direct graphics windows.
+        WHILE !D.Window GT -1 DO WDelete, !D.Window
+    ENDIF
+    
+END ;--------------------------------------------------------------------------------------
+
+;+
+; This procedure cleans up any open graphics windows and widget windows for
+; versions of IDL from IDL 8 onward.
+;
+; :Categories:
+;    Utility
+;
+; :Keywords:
+;     all: in, optional, type=boolean, default=1
+;       Set this keyword if you wish to clean up windows of all types.
+;     cg: in, optional, type=boolean, default=0
+;       Set this keyword if you wish to clean up only Coyote Graphics windows.
+;     dg: in, optional, type=boolean, default=0
+;       Set this keyword if you wish to clean up only Direct Graphics windows.
+;     fg: in, optional, type=boolean, default=0
+;       Set this keyword if you wish to clean up only Function Graphics windows.
+;-
+PRO cgCleanUp_v8, ALL=all, CG=cg, DG=dg, FG=fg
+
+    Compile_Opt idl2
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /CANCEL
+        void = cgErrorMsg()
+        RETURN
+    ENDIF
+    
+    ; By default clear out all of the windows
+    anySet = Keyword_Set(cg) + Keyword_Set(dg) + Keyword_Set(fg)
+    doAll = ( N_Elements(all) EQ 0 && anySet EQ 0) ? 1 : Keyword_Set(all)
+    
+    IF ((doAll || Keyword_Set(fg)) && (Float(!Version.Release)) GE 8.0 ) THEN BEGIN
+        ; Function graphics windows.
+        windowObjs = GetWindows()
+        Obj_Destroy, windowObjs
+    ENDIF
+    
+    IF (doAll || Keyword_Set(cg) ) THEN BEGIN
+        ; Widget windows or Coyote Graphics windows.
+        Widget_Control, /Reset
+    ENDIF
+    
+    IF (doAll || Keyword_Set(dg) ) THEN BEGIN
+        ; IDL direct graphics windows.
+        WHILE !D.Window GT -1 DO WDelete, !D.Window
+    ENDIF
+    
+END ;--------------------------------------------------------------------------------------
+
+
+;+
+; This procedure chooses between cleanup for version 7 and earlier of IDL, or version 8 and later.
+;
+; :Keywords:
+;     all: in, optional, type=boolean, default=1
+;       Set this keyword if you wish to clean up windows of all types.
+;     cg: in, optional, type=boolean, default=0
+;       Set this keyword if you wish to clean up only Coyote Graphics windows.
+;     dg: in, optional, type=boolean, default=0
+;       Set this keyword if you wish to clean up only Direct Graphics windows.
+;     fg: in, optional, type=boolean, default=0
+;       Set this keyword if you wish to clean up only Function Graphics windows.
+;
+;-
 PRO cgCleanUp, ALL=all, CG=cg, DG=dg, FG=fg
 
    IF (Float(!Version.Release) GE 8.0) THEN BEGIN
-      fscCleanUp8, ALL=all, CG=cg, DG=dg, FG=fg
+      cgCleanUp_v8, ALL=all, CG=cg, DG=dg, FG=fg
    ENDIF ELSE BEGIN
-      fscCleanUp7, ALL=all, CG=cg, DG=dg
+      cgCleanUp_v7, ALL=all, CG=cg, DG=dg
    ENDELSE
 
-END
+END ;--------------------------------------------------------------------------------------

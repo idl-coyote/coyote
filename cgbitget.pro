@@ -1,53 +1,14 @@
-;+
+; docformat = 'rst'
+;
 ; NAME:
-;       BITGET
+;   cgBitGet
 ;
 ; PURPOSE:
+;   The function returns the bit value (0 or 1) of a specified bit in a supplied number.
 ;
-;       Returns the bit value (0 or 1) of a specified bit in a supplied number.
-;
-; AUTHOR:
-;
-;       FANNING SOFTWARE CONSULTING
-;       David Fanning, Ph.D.
-;       1645 Sheely Drive
-;       Fort Collins, CO 80526 USA
-;       Phone: 970-221-0438
-;       E-mail: david@idlcoyote.com
-;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
-;
-; CATEGORY:
-
-;       Utilities
-;
-; CALLING SEQUENCE:
-;
-;       bitValue = BitGet(number, bit)
-;
-; INPUT_PARAMETERS:
-;
-;       number:          The input number. Should be a scalar integer. If not, it is converted to
-;                        one by rounding.
-;
-;       bit:             The number of the bit you are interested in. A value between 0 and 63.
-;                        If not supplied, all 64 bit values of the number are returned. May be
-;                        an array of bit numbers.
-;
-; OUTPUT_PARAMETERS:
-;
-;      bitValue:        The value, 0 or 1, of the specified bit in the number.
-;
-; KEYWORDS:
-;
-;     SILENT:           If set, suppresses informational messages regarding rounding operations.
-;
-; MODIFICATION HISTORY:
-;
-;       Written by David W. Fanning, 14 June 2006.
-;-
 ;******************************************************************************************;
-;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
-;  All rights reserved.                                                                    ;
+;                                                                                          ;
+;  Copyright (c) 2014, by Fanning Software Consulting, Inc. All rights reserved.           ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
 ;  modification, are permitted provided that the following conditions are met:             ;
@@ -72,19 +33,64 @@
 ;  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS           ;
 ;  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                            ;
 ;******************************************************************************************;
-FUNCTION BitGet, value, bit, SILENT=silent
+;
+;+
+; The program is used to obtain the value of a particular bit in an integer number.
+;
+; :Categories:
+;    Utilities
+;    
+; :Returns:
+;    The function returns the bit value (0 or 1) of a specified bit in a supplied number.
+;
+; :Params:
+;    number: in, required, type=integer
+;         The number from which the bit value is obtained. It should be a scalar integer.
+;         If it is not, it is converted to a scalar integer by rounding.
+;    bit: in, required, type=integer
+;         The number of the bit you are interested in. A value between 0 and 63.
+;         If not supplied, all 64 bit values of the number are returned. May be
+;         an array of bit numbers.
+;
+; :Keywords:
+;    silent: in, optional, type=boolean, default=0
+;         If set, suppresses informational messages regarding rounding operations.
+;
+; :Examples:
+;    Here is how to use this program::
+;       IDL> !X.Style = 5
+;       IDL> Print, cgBitGet(!X.Style, 2)
+;            1
+;
+; :Author:
+;    FANNING SOFTWARE CONSULTING::
+;       David W. Fanning
+;       1645 Sheely Drive
+;       Fort Collins, CO 80526 USA
+;       Phone: 970-221-0438
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
+;
+; :History:
+;     Change History::
+;        Written by David W. Fanning, 14 June 2006.
+;
+; :Copyright:
+;     Copyright (c) 2006-2014, Fanning Software Consulting, Inc.
+;-
+FUNCTION cgBitGet, number, bit, SILENT=silent
 
    ; Return to caller if something goes wrong.
    On_Error, 2
 
    ; Get the data type.
-   theType = Size(value, /TYPE)
+   theType = Size(number, /TYPE)
 
    ; Special pointer processing.
    IF theType EQ 10 THEN BEGIN
-      theValue = *value
+      theValue = *number
       theType = Size(theValue, /TYPE)
-   ENDIF ELSE theValue = value
+   ENDIF ELSE theValue = number
 
    ; Validate data type. Round any non-integer data type.
    CASE 1 OF
@@ -117,6 +123,7 @@ FUNCTION BitGet, value, bit, SILENT=silent
   ENDIF ELSE  bit = 0 > bit < 63 ; Confine it to correct range.
 
   ; Calculate the bit value and return it.
-  RETURN, ((theValue AND exponent)/exponent)[bit]
+  result = ((theValue AND exponent)/exponent)[bit]
+  RETURN, Convert_To_Type(result, Size(number, /TYPE))
 
 END

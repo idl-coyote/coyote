@@ -82,6 +82,9 @@
 ;        Color names are those used with cgColor. Otherwise, the keyword is assumed 
 ;        to be a color index into the current color table.
 ;        ERR_COLOR=serr_color, $
+;     err_clip: in, optional, type=boolean, default=0
+;         Set this keyword to cause error bars to be clipped to the borders of the plot.
+;         The default is to draw error bars, even if outside the plot.
 ;     err_color: in, optional, type=varies
 ;         The color error bars should be drawn in. The default is to use the `Color` keyword.
 ;     err_thick:, in, optional, type=integer
@@ -294,9 +297,10 @@
 ;         Added Map_Object keyword to allow plotting values in longitude/latitude to be converted to XY projected meter
 ;             space automatically. 10 December 2013. DWF.
 ;         Data could sometimes be drawn when OVERPLOT and NODATA keywords were both set. Fixed. 16 Dec 2013. DWF.
+;         Added ERR_CLIP keyword. 31 Jan 2014. DWF.
 ;         
 ; :Copyright:
-;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgPlot, x, y, $
     ADDCMD=addcmd, $
@@ -306,6 +310,7 @@ PRO cgPlot, x, y, $
     BACKGROUND=sbackground, $
     CHARSIZE=charsize, $
     COLOR=scolor, $
+    ERR_CLIP=err_clip, $
     ERR_COLOR=serr_color, $
     ERR_THICK=err_thick, $
     ERR_WIDTH=err_width, $
@@ -381,6 +386,7 @@ PRO cgPlot, x, y, $
                 BACKGROUND=sbackground, $
                 CHARSIZE=charsize, $
                 COLOR=scolor, $
+                ERR_CLIP=err_clip, $
                 ERR_COLOR=serr_color, $
                 ERR_THICK=err_thick, $
                 ERR_WIDTH=err_width, $
@@ -425,6 +431,7 @@ PRO cgPlot, x, y, $
             BACKGROUND=sbackground, $
             CHARSIZE=charsize, $
             COLOR=scolor, $
+            ERR_CLIP=err_clip, $
             ERR_COLOR=serr_color, $
             ERR_THICK=err_thick, $
             ERR_WIDTH=err_width, $
@@ -880,10 +887,11 @@ PRO cgPlot, x, y, $
             IF (N_Elements(err_xhigh) NE 0) THEN BEGIN
                 xhigh = indep + err_xhigh
                 FOR j=0,N_Elements(err_xhigh)-1 DO BEGIN
-                    PlotS, [indep[j], xhigh[j]], [dep[j], dep[j]], Color=err_color, Thick=err_thick
+                    PlotS, [indep[j], xhigh[j]], [dep[j], dep[j]], Color=err_color, Thick=err_thick, $
+                        NoClip=1-Keyword_Set(err_clip)
                     nCoord = Convert_Coord(xhigh[j], dep[j], /Data, /To_Normal)
                     PlotS, [nCoord[0], nCoord[0]], [nCoord[1]+yerr_width, nCoord[1]-yerr_width], $
-                        /Normal, Color=err_color, Thick=err_thick
+                        /Normal, Color=err_color, Thick=err_thick, NoClip=1-Keyword_Set(err_clip)
                 ENDFOR
             ENDIF
             
@@ -891,10 +899,11 @@ PRO cgPlot, x, y, $
             IF (N_Elements(err_xlow) NE 0) THEN BEGIN
                 xlow = indep - err_xlow
                 FOR j=0,N_Elements(err_xlow)-1 DO BEGIN
-                    PlotS, [indep[j], xlow[j]], [dep[j], dep[j]], Color=err_color, Thick=err_thick
+                    PlotS, [indep[j], xlow[j]], [dep[j], dep[j]], Color=err_color, Thick=err_thick, $
+                    NoClip=1-Keyword_Set(err_clip)
                     nCoord = Convert_Coord(xlow[j], dep[j], /Data, /To_Normal)
                     PlotS, [nCoord[0], nCoord[0]], [nCoord[1]+yerr_width, nCoord[1]-yerr_width], $
-                        /Normal, Color=err_color, Thick=err_thick
+                        /Normal, Color=err_color, Thick=err_thick, NoClip=1-Keyword_Set(err_clip)
                 ENDFOR
             ENDIF
 
@@ -913,10 +922,11 @@ PRO cgPlot, x, y, $
             IF (N_Elements(err_yhigh) NE 0) THEN BEGIN
                 yhigh = dep + err_yhigh
                 FOR j=0,N_Elements(err_yhigh)-1 DO BEGIN
-                    PlotS, [indep[j], indep[j]], [yhigh[j], dep[j]], Color=err_color, Thick=err_thick
+                    PlotS, [indep[j], indep[j]], [yhigh[j], dep[j]], Color=err_color, Thick=err_thick, $
+                        NoClip=1-Keyword_Set(err_clip)
                     nCoord = Convert_Coord(indep[j], yhigh[j], /Data, /To_Normal)
                     PlotS, [nCoord[0]-xerr_width, nCoord[0]+xerr_width], [nCoord[1], nCoord[1]], $
-                        /Normal, Color=err_color, Thick=err_thick
+                        /Normal, Color=err_color, Thick=err_thick, NoClip=1-Keyword_Set(err_clip)
                 ENDFOR
             ENDIF
             
@@ -924,10 +934,11 @@ PRO cgPlot, x, y, $
             IF (N_Elements(err_ylow) NE 0) THEN BEGIN
                 ylow = dep - err_ylow
                 FOR j=0,N_Elements(err_ylow)-1 DO BEGIN
-                    PlotS, [indep[j], indep[j]], [ylow[j], dep[j]], Color=err_color, Thick=err_thick
+                    PlotS, [indep[j], indep[j]], [ylow[j], dep[j]], Color=err_color, Thick=err_thick, $
+                    NoClip=1-Keyword_Set(err_clip)
                     nCoord = Convert_Coord(indep[j], ylow[j], /Data, /To_Normal)
                     PlotS, [nCoord[0]-xerr_width, nCoord[0]+xerr_width], [nCoord[1], nCoord[1]], $
-                        /Normal, Color=err_color, Thick=err_thick
+                        /Normal, Color=err_color, Thick=err_thick, NoClip=1-Keyword_Set(err_clip)
                 ENDFOR
             ENDIF
             

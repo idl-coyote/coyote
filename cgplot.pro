@@ -298,6 +298,7 @@
 ;             space automatically. 10 December 2013. DWF.
 ;         Data could sometimes be drawn when OVERPLOT and NODATA keywords were both set. Fixed. 16 Dec 2013. DWF.
 ;         Added ERR_CLIP keyword. 31 Jan 2014. DWF.
+;         Added a sanity check for inappropriate use of the ISOTROPIC keyword. 6 Feb 2014. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
@@ -731,9 +732,15 @@ PRO cgPlot, x, y, $
     ; Other keywords.
     IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
     IF Keyword_Set(isotropic) THEN BEGIN
-        yscale = Max(dep)-Min(dep)
-        xscale = Max(indep)-Min(indep)
-        aspect = Float(yscale)/xscale
+        yscaleTest = Max(dep)-Min(dep)
+        xscaleTest = Max(indep)-Min(indep)
+        aspect = Float(yscaleTest)/xscaleTest
+        
+        ; Do a sanity check.
+        IF (aspect LT 1e-2) || (aspect GT 100) THEN $
+            Message, 'Axes ranges are incompatible with the ISOTROPIC keyword. Try using ASPECT.'
+        xscale = xscaleTest
+        yscale = yscaleTest
         xstyle=1
         ystyle=1
     ENDIF

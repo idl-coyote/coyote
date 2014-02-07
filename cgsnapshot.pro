@@ -92,6 +92,8 @@
 ;        output file selected.
 ;    gif: in, optional, type=boolean, default=0
 ;        Set this keyword to write the screen dump as a color GIF file.
+;    jp2: in, optional, type=boolean, default=0
+;        Set this keyword to write a color JPEG2000 file.
 ;    jpeg: in, optional, type=boolean, default=0
 ;        Set this keyword to write the screen dump as a color JPEG file.
 ;    nodialog: in, optional, type=boolean, default=0        
@@ -160,8 +162,10 @@
 ;        Added the ability to get the file type from the file name extension. 26 Dec 2011. DWF.
 ;        Added a POSITION keyword to select a position inside the window for capture. 20 October 2012. DWF.
 ;        Fixed a problem with not setting back to incoming decomposed state on an error. 20 Nov 2012. DWF.
+;        Added ability to write JPEG2000 files. 7 February 2014. DWF.
+;        
 ; :Copyright:
-;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2014, Fanning Software Consulting, Inc.
 ;-
 FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
    BMP=bmp, $
@@ -171,6 +175,7 @@ FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
    Dither=dither, $
    Filename=filename, $
    GIF=gif, $
+   JP2=jp2, $
    JPEG=jpeg, $
    NoDialog=nodialog, $
    Order=order, $
@@ -244,6 +249,7 @@ FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
        CASE StrUpCase(type) OF
           'BMP': bmp = 1
           'GIF': gif = 1
+          'JP2': jp2 = 1
           'JPEG': jpeg = 1
           'JPG': jpeg = 1
           'PICT': pict = 1
@@ -272,6 +278,11 @@ FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
           fileType = 'JPEG'
           extension = 'jpg'
        ENDELSE
+    ENDIF
+    IF Keyword_Set(jp2) THEN BEGIN
+        writeImage = 1
+        fileType = 'JPEG2000'
+        extension = 'jp2'
     ENDIF
     IF Keyword_Set(jpeg) THEN BEGIN
        writeImage = 1
@@ -367,6 +378,20 @@ FUNCTION cgSnapshot, xstart, ystart, ncols, nrows, $
                 image2D = image
              ENDELSE
              Write_GIF, filename, image2D, r, g, b, _Extra=extra
+             END
+             
+          'JPEG2000': BEGIN
+             IF truecolor THEN BEGIN
+                image3D = image
+             ENDIF ELSE BEGIN
+                s = Size(image, /Dimensions)
+                image3D = BytArr(3, s[0], s[1])
+                TVLCT, r, g, b, /Get
+                image3D[0,*,*] = r[image]
+                image3D[1,*,*] = g[image]
+                image3D[2,*,*] = b[image]
+             ENDELSE
+             Write_JPEG2000, filename, image3D, _Extra=extra
              END
     
           'JPEG': BEGIN

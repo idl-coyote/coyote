@@ -732,9 +732,9 @@ PRO cgPlot, x, y, $
     ; Other keywords.
     IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
     IF Keyword_Set(isotropic) THEN BEGIN
-        yscaleTest = Max(dep)-Min(dep)
-        xscaleTest = Max(indep)-Min(indep)
-        aspect = Float(yscaleTest)/xscaleTest
+        yscaleTest = Max(dep, /NaN) - Min(dep, /NaN)
+        xscaleTest = Max(indep, /NaN) - Min(indep, /NaN)
+        aspect = Double(yscaleTest)/xscaleTest
         
         ; Do a sanity check.
         IF (aspect LT 1e-2) || (aspect GT 100) THEN $

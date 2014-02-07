@@ -358,9 +358,10 @@
 ;        Making more effort to set the CELL_FILL keyword instead of FILL if filling contours on maps. 7 Jan 2013. DWF.
 ;        Added C_ORIENTATION and C_SPACING keywords and modified the program to allow line filling. 28 Jan 2013. DWF.
 ;        Added ISOTROPIC keyword. 27 June 2013. DWF.
+;        Added sanity check for ISOTROPIC keyword. 6 Feb 2014. DWF.
 ;        
 ; :Copyright:
-;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgContour, data, x, y, $
     ADDCMD=addcmd, $
@@ -683,12 +684,29 @@ PRO cgContour, data, x, y, $
     
     ; Is the ISOTROPIC keyword set?
     IF Keyword_Set(isotropic) THEN BEGIN
+        yscaleTest = Max(dep, /NaN) - Min(dep, /NaN)
+        xscaleTest = Max(indep, /NaN) - Min(indep, /NaN)
+        aspect = Float(yscaleTest)/xscaleTest
+        
+        ; Do a sanity check.
+        IF (aspect LT 1e-2) || (aspect GT 100) THEN $
+            Message, 'Axes ranges are incompatible with the ISOTROPIC keyword. Try using ASPECT.'
+        xscale = xscaleTest
+        yscale = yscaleTest
+        xstyle=1
+        ystyle=1
+    ENDIF
+    IF Keyword_Set(isotropic) THEN BEGIN
         IF N_Elements(x) NE 0 THEN xrange = Max(x, /NaN) - Min(x, /NaN)
         IF N_Elements(y) NE 0 THEN yrange = Max(y, /NaN) - Min(y, /NaN)
         dims = Size(data, /Dimensions)
         IF N_Elements(x) EQ 0 THEN xrange = dims[0]
         IF N_Elements(y) EQ 0 THEN yrange = dims[1]
-        aspect = Float(yrange) / xrange
+        aspect = Double(yrange) / xrange
+
+        ; Do a sanity check.
+        IF (aspect LT 1e-2) || (aspect GT 100) THEN $
+            Message, 'Axes ranges are incompatible with the ISOTROPIC keyword. Try using ASPECT.'
     ENDIF
    
     IF (N_Elements(aspect) NE 0) && (Total(!P.MULTI) EQ 0) THEN BEGIN

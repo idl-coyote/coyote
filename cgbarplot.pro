@@ -92,6 +92,12 @@
 ;         names, 24-bit color values, or color index numbers (byte values) of the colors to
 ;         be used for the bars. If not specified, the colors are selected based on the 
 ;         available colors in the current color table.
+;     labelskip: in, optional, type=integer, default=1
+;         Normally, every bar is labelled. IDL has a maximum number of 60 labels. This keyword
+;         allows you to control how bars are labelled and to work around the 60 label limit.
+;         Set this keyword the number of labels to skip. For example, if you had 90 bars, you
+;         could set Labelskip=3 and have 30 labels. If undefined, Labelskip will always be set 
+;         so there are less than 60 labels on the plot.
 ;     layout: in, optional, type=intarr(3)
 ;         This keyword specifies a grid with a graphics window and determines where the
 ;         graphic should appear. The syntax of LAYOUT is three numbers: [ncolumns, nrows, location].
@@ -236,9 +242,10 @@
 ;         Fixed a bug in the interaction of the NOERASE and OVERPLOT keywords. 14 Jan 2013. DWF.
 ;         Added a BARTHICK keyword to change the thickness of the bar outlines. 28 Feb 2013. DWF.
 ;         Further work checking for NANs in the display of the data. NAN data set to length of 0. 3 Sept 2013. DWF.
+;         Added LABELSKIP keyword and make sure number of labels doesn't exceed 60. 8 Feb 2014. DWF.
 ;         
 ; :Copyright:
-;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgBarPlot, values, $
     ADDCMD=addcmd, $
@@ -253,6 +260,7 @@ PRO cgBarPlot, values, $
     BASELINES=baselines, $
     BASERANGE=baserange, $
     COLORS=scolors, $
+    LABELSKIP=labelskip, $
     LAYOUT=layout, $
     NOERASE=noerase, $
     OUTFILENAME=outfilename, $
@@ -317,6 +325,7 @@ PRO cgBarPlot, values, $
                 BASELINES=baselines, $
                 BASERANGE=baserange, $
                 COLORS=scolors, $
+                LABELSKIP=labelskip, $
                 LAYOUT=layout, $
                 NOERASE=noerase, $
                 OPLOTCOLORS=oplotcolors, $
@@ -348,6 +357,7 @@ PRO cgBarPlot, values, $
                 BASELINES=baselines, $
                 BASERANGE=baserange, $
                 COLORS=scolors, $
+                LABELSKIP=labelskip, $
                 LAYOUT=layout, $
                 NOERASE=noerase, $
                 OPLOTCOLORS=oplotcolors, $
@@ -632,15 +642,28 @@ PRO cgBarPlot, values, $
        IF (outline) THEN cgPlots, x, y, /NORMAL, COLOR=OplotColors[i], THICK=barThick ; Outline using !p.color
     ENDFOR
     
-    tickv = (tickv-tick_scal_fact[0])/tick_scal_fact[1]  ; Locations of the ticks
-    barcoords = tickv
+    ; Locations of the tick marks.
+    tickv = (tickv-tick_scal_fact[0])/tick_scal_fact[1]  
+    
+    ; Make sure you have no more than 60 labels.
+    IF N_Elements(labelSkip) EQ 0 THEN BEGIN
+        labelSkip = Ceil(nbars / 60.0)
+        ticks = nbars - 1 
+    ENDIF ELSE labelSkip = Fix(labelSkip)
+    IF labelSkip GT 1 THEN BEGIN
+        skipLabelVector = Indgen((nbars+labelSkip)/labelSkip)*labelSkip
+        ticks = (Ceil(nbars/Float(labelSkip)-1))
+        tickv = tickv[skipLabelVector]
+        barnames = barnames[skipLabelVector]
+    ENDIF
         
+    ; Label the bar axis.
     IF (rotate) THEN BEGIN ; Label the bars (Y-axis)
-       cgAxis,yaxis=0,ystyle=ystyle,yticks=(nbars-1),ytickv=tickv,ytickname=barnames, $
-          yticklen=0.0, _extra=extra
+       cgAxis, YAxis=0, YStyle=ystyle, YTickS=ticks, YTickV=tickv, $
+          YTickName=barnames, YTickLen=0.0, _Extra=extra
     ENDIF ELSE BEGIN       ; Label the bars (X-axis)
-       cgAxis,xaxis=0,xstyle=xstyle,xticks=(nbars-1),xtickv=tickv,xtickname=barnames, $
-          xticklen=0.0, _extra=extra
+       cgAxis, XAxis=0, XStyle=xstyle, XTickS=ticks, XTickV=tickv, $
+          XTickName=barnames, XTickLen=0.0, _Extra=extra
     ENDELSE
 
     ; Are we producing output? If so, we need to clean up here.

@@ -288,26 +288,26 @@ PRO cgPS_Close, $
    SetDefaultValue, resize, 25
    IF needRaster THEN BEGIN
        IF cgHasImageMagick() THEN BEGIN
-        IF N_Elements(delete_ps) EQ 0 THEN cgWindow_GetDefs, PS_DELETE=delete_ps
-       cgPS2Raster, ps_filename, raster_filename, $
-          ALLOW_TRANSPARENT=allow_transparent, $
-          BMP=bmp, $
-          DELETE_PS=delete_ps, $
-          DENSITY=density, $
-          IM_OPTIONS=im_options, $
-          FILETYPE=filetype, $
-          GIF=gif, $
-          JPEG=jpeg, $
-          OUTFILENAME=outfilename, $
-          PDF=pdf, $
-          PNG=png, $
-          PORTRAIT=portrait, $
-          RESIZE=resize, $
-          SHOWCMD=showcmd, $
-          SILENT=Keyword_Set(nomessage), $
-          SUCCESS=success, $
-          TIFF=tiff, $
-          WIDTH=width
+           IF N_Elements(delete_ps) EQ 0 THEN cgWindow_GetDefs, PS_DELETE=delete_ps
+           cgPS2Raster, ps_filename, raster_filename, $
+              ALLOW_TRANSPARENT=allow_transparent, $
+              BMP=bmp, $
+              DELETE_PS=delete_ps, $
+              DENSITY=density, $
+              IM_OPTIONS=im_options, $
+              FILETYPE=filetype, $
+              GIF=gif, $
+              JPEG=jpeg, $
+              OUTFILENAME=outfilename, $
+              PDF=pdf, $
+              PNG=png, $
+              PORTRAIT=portrait, $
+              RESIZE=resize, $
+              SHOWCMD=showcmd, $
+              SILENT=Keyword_Set(nomessage), $
+              SUCCESS=success, $
+              TIFF=tiff, $
+              WIDTH=width
        ENDIF ELSE BEGIN
            Print, ''
            Print, 'Message from the cgPS_Close Program:'

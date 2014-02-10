@@ -170,9 +170,6 @@
 ;   The program now remembers the last directory you used and will start in that
 ;       directory, unless told otherwise. 26 Oct 2011. DWF.
 ;   Parsing of full filename failing. Fixed 27 Oct 2011. DWF.
-;   Fixed a problem when the INCHES keyword was set to 0 (METRIC was resetting it). 10 Feb 2014. DWF.
-;   Assuming people will use offsets created by the program and not the IDL offsets (in landscape mode).
-;        This changes keeps a lot of weirdness out. 10 Feb 2014. DWF.
 ;-
 
 ;******************************************************************************************;
@@ -2745,18 +2742,18 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
    ; DWF No longer doing this, because I think people will use the offsets from cgPS_Config to configure
    ; the program.
 
-;   IF landscape THEN BEGIN
-;      dims = self->PageDimensions()
-;      self.xoffsetSet = yoffset
-;      self.xsizeSet = xsize
-;      self.yoffsetSet = xoffset
-;      self.ysizeSet = ysize
-;   ENDIF ELSE BEGIN
+   IF landscape THEN BEGIN
+      dims = self->PageDimensions()
+      self.xoffsetSet = yoffset
+      self.xsizeSet = xsize
+      self.yoffsetSet = xoffset
+      self.ysizeSet = ysize
+   ENDIF ELSE BEGIN
       self.xoffsetSet = xoffset
       self.xsizeSet = xsize
       self.yoffsetSet = yoffset
       self.ysizeSet = ysize
-;   ENDELSE
+   ENDELSE
 
    ; Get the correct directory separator.
 

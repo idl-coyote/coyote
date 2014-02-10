@@ -1583,15 +1583,10 @@ CASE StrUpCase(self.pagetype) OF
          shortside = 8.27
          longside = 11.70
       ENDCASE
-   ELSE: BEGIN
-         IF self.metric THEN BEGIN
-            shortside = 8.27
-            longside = 11.70
-         ENDIF ELSE BEGIN
-            shortside = 8.5
-            longside = 11.0
-         ENDELSE
-      ENDCASE
+;   ELSE: BEGIN
+;         shortside = 8.5
+;         longside = 11.0
+;      ENDCASE
 ENDCASE
 
 IF self.inchesSet EQ 0 THEN BEGIN
@@ -2654,7 +2649,7 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
         ENDIF ELSE BEGIN
             IF inches THEN xoffset = 0.5 ELSE xoffset = 0.5 * 2.54
         ENDELSE
-   ENDIF 
+   ENDIF
    IF N_Elements(xsize) EQ 0 THEN BEGIN
         IF landscape THEN BEGIN
             IF inches THEN xsize = 9.5 ELSE xsize = 9.5 * 2.54
@@ -2738,13 +2733,11 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
    self.set_fontSet = set_font
 
    ; Offsets are harder to set because I am trying to shield the
-   ; user from PostScript weirdness. 
-   ; DWF No longer doing this, because I think people will use the offsets from cgPS_Config to configure
-   ; the program.
+   ; user from PostScript weirdness.
 
    IF landscape THEN BEGIN
       dims = self->PageDimensions()
-      self.xoffsetSet = yoffset
+      self.xoffsetSet = dims[1] - yoffset
       self.xsizeSet = xsize
       self.yoffsetSet = xoffset
       self.ysizeSet = ysize

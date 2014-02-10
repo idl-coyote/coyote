@@ -206,7 +206,7 @@ END ; --------------------------------------------------------------------------
 ;       printers and generally only when output is being sent to the
 ;       PRINTER device. See the description of the `XFudge` and `YFudge`
 ;       keywords for additional information.
-;    landscape: n, optional, type=boolean, default=0
+;    landscape: in, optional, type=boolean, default=0
 ;        Set this keyword to return sizes and offsets in landscape mode.
 ;    margin: in, optional, type=float, default=0.15
 ;       An optional margin to calculate around the edge of the output window.

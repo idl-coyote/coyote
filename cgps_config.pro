@@ -298,7 +298,7 @@ FUNCTION cgPS_Config, psObject,       $ ; A FSC_PSCONFIG object.
             ; Is there a current graphics window?
             IF !D.Window GE 0 THEN BEGIN
                 IF N_Elements(inches) NE 0 THEN cm = 1 - Keyword_Set(inches)
-                keywords = cgPSWindow(Landscape=landscape, CM=cm, Metric=metric)
+                keywords = cgPSWindow(Landscape=landscape, CM=cm, Metric=metric, /Sane_Offsets)
                 xsize = keywords.xsize
                 ysize = keywords.ysize
                 xoffset = keywords.xoffset

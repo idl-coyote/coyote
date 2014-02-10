@@ -170,6 +170,9 @@
 ;   The program now remembers the last directory you used and will start in that
 ;       directory, unless told otherwise. 26 Oct 2011. DWF.
 ;   Parsing of full filename failing. Fixed 27 Oct 2011. DWF.
+;   Fixed a problem when the INCHES keyword was set to 0 (METRIC was resetting it). 10 Feb 2014. DWF.
+;   Assuming people will use offsets created by the program and not the IDL offsets (in landscape mode).
+;        This changes keeps a lot of weirdness out. 10 Feb 2014. DWF.
 ;-
 
 ;******************************************************************************************;
@@ -1583,10 +1586,15 @@ CASE StrUpCase(self.pagetype) OF
          shortside = 8.27
          longside = 11.70
       ENDCASE
-;   ELSE: BEGIN
-;         shortside = 8.5
-;         longside = 11.0
-;      ENDCASE
+   ELSE: BEGIN
+         IF self.metric THEN BEGIN
+            shortside = 8.27
+            longside = 11.70
+         ENDIF ELSE BEGIN
+            shortside = 8.5
+            longside = 11.0
+         ENDELSE
+      ENDCASE
 ENDCASE
 
 IF self.inchesSet EQ 0 THEN BEGIN
@@ -2638,7 +2646,7 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
         ENDIF 
    ENDELSE
    IF N_Elements(fontsize) EQ 0 THEN fontsize = 12
-   IF Keyword_Set(inches) EQ 0 THEN IF Keyword_Set(metric) THEN inches = 0 ELSE inches = 1
+   IF N_Elements(inches) EQ 0 THEN IF Keyword_Set(metric) THEN inches = 0 ELSE inches = 1
    IF N_Elements(name) EQ 0 THEN name = ""
    IF N_Elements(pagetype) EQ 0 THEN IF Keyword_Set(metric) THEN pagetype = "A4" ELSE pagetype = "LETTER"
    IF N_Elements(preview) EQ 0 THEN preview = 0
@@ -2649,7 +2657,7 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
         ENDIF ELSE BEGIN
             IF inches THEN xoffset = 0.5 ELSE xoffset = 0.5 * 2.54
         ENDELSE
-   ENDIF
+   ENDIF 
    IF N_Elements(xsize) EQ 0 THEN BEGIN
         IF landscape THEN BEGIN
             IF inches THEN xsize = 9.5 ELSE xsize = 9.5 * 2.54
@@ -2733,20 +2741,22 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
    self.set_fontSet = set_font
 
    ; Offsets are harder to set because I am trying to shield the
-   ; user from PostScript weirdness.
+   ; user from PostScript weirdness. 
+   ; DWF No longer doing this, because I think people will use the offsets from cgPS_Config to configure
+   ; the program.
 
-   IF landscape THEN BEGIN
-      dims = self->PageDimensions()
-      self.xoffsetSet = dims[1] - yoffset
-      self.xsizeSet = xsize
-      self.yoffsetSet = xoffset
-      self.ysizeSet = ysize
-   ENDIF ELSE BEGIN
+;   IF landscape THEN BEGIN
+;      dims = self->PageDimensions()
+;      self.xoffsetSet = yoffset
+;      self.xsizeSet = xsize
+;      self.yoffsetSet = xoffset
+;      self.ysizeSet = ysize
+;   ENDIF ELSE BEGIN
       self.xoffsetSet = xoffset
       self.xsizeSet = xsize
       self.yoffsetSet = yoffset
       self.ysizeSet = ysize
-   ENDELSE
+;   ENDELSE
 
    ; Get the correct directory separator.
 

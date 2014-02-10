@@ -311,7 +311,7 @@ PRO cgPS_Open, filename, $
    IF ~Keyword_Set(nomatch) THEN BEGIN
       IF !D.X_Size GT !D.Y_Size THEN landscape = 1 ELSE landscape = 0
       IF Keyword_Set(encapsulated) THEN landscape = 0
-      sizes = PSWindow(_Extra=extra, LANDSCAPE=landscape)
+      sizes = cgPSWindow(_Extra=extra, LANDSCAPE=landscape, /SANE_OFFSETS)
       keywords = cgPS_Config(_Strict_Extra=extra, INCHES=sizes.inches, XSIZE=sizes.xsize, YSIZE=sizes.ysize, $
          XOFFSET=sizes.xoffset, YOFFSET=sizes.yoffset, Cancel=cancelled, NOGUI=(~gui), $
          LANDSCAPE=sizes.landscape, ENCAPSULATED=encapsulated, FILENAME=ps_filename[0])

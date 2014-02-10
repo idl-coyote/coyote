@@ -231,7 +231,7 @@
 ; :Copyright:
 ;     Copyright (c) 2000-2012, Fanning Software Consulting, Inc.
 ;-
-FUNCTION cgPS_Config, psObject,          $ ; A FSC_PSCONFIG object. 
+FUNCTION cgPS_Config, psObject,       $ ; A FSC_PSCONFIG object. 
    AvantGarde=avantgarde,             $ ; Set this keyword to select the AvantGarde font.
    Bits_per_Pixel=bits_per_pixel,     $ ; The number of image bits saved for each image pixel: 2, 4, or 8.
    Bold=bold,                         $ ; Set this keyword to select the Bold font style.
@@ -298,7 +298,7 @@ FUNCTION cgPS_Config, psObject,          $ ; A FSC_PSCONFIG object.
             ; Is there a current graphics window?
             IF !D.Window GE 0 THEN BEGIN
                 IF N_Elements(inches) NE 0 THEN cm = 1 - Keyword_Set(inches)
-                keywords = PSWindow(Landscape=landscape, CM=cm, Metric=metric)
+                keywords = cgPSWindow(Landscape=landscape, CM=cm, Metric=metric)
                 xsize = keywords.xsize
                 ysize = keywords.ysize
                 xoffset = keywords.xoffset
@@ -354,7 +354,7 @@ FUNCTION cgPS_Config, psObject,          $ ; A FSC_PSCONFIG object.
           YSize=ysize,                       $
           ZapfChancery=zapfchancery,         $
           ZapfDingbats=zapfdingbats )
-          Create = 1
+       create = 1
     ENDIF ELSE BEGIN
        type = Size(psObject, /Type)
        IF type NE 11 THEN BEGIN

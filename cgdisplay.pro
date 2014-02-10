@@ -271,7 +271,7 @@ PRO cgDisplay, pxsize, pysize, $
             ; for that problem.
             'PS': BEGIN
                 COMMON _$FSC_PS_START_, ps_struct
-                keywords = PSWindow(AspectRatio=Float(pysize)/pxsize)
+                keywords = cgPSWindow(AspectRatio=Float(pysize)/pxsize)
                 Device, _Extra=keywords
                 IF N_Elements(ps_struct) NE 0 THEN ps_struct.landscape = keywords.landscape
                 END

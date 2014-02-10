@@ -1283,7 +1283,7 @@ PRO cgSTRETCH_SAVEAS, event
       'PS': BEGIN
 
             WSet, info.windex
-            keys = PSWindow()
+            keys = cgPSWindow()
             configureIt = cgPS_Config(Group_Leader=event.top, Cancel=cancelled, $
                Color=1, Filename='cgstretch.ps', _Extra=keys)
             IF NOT cancelled THEN BEGIN
@@ -1353,7 +1353,7 @@ PRO cgSTRETCH_SAVEHISTOAS, event
       'BMP': dummy = cgSnapshot(Filename=filename, /BMP)
       'PS': BEGIN
 
-            keys = PSWindow()
+            keys = cgPSWindow()
             configureIt = cgPS_Config(Group_Leader=event.top, Cancel=cancelled, $
                Color=1, Filename='cgstretch_histrogram.ps', _Extra=keys)
             IF NOT cancelled THEN BEGIN
@@ -1480,7 +1480,7 @@ PRO cgSTRETCH_PRINT, event
          ; Have to set up drawing colors *before* we go into the PRINTER device.
          FOR j=0,N_Elements(info.colors)-1 DO color = cgColor(info.colors[j])
       ENDELSE
-      configurePrinter = PSWindow(/Printer)
+      configurePrinter = cgPSWindow(/Printer)
 
       ; Print the image.
       thisDevice = !D.Name

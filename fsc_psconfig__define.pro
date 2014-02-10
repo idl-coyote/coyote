@@ -2568,7 +2568,7 @@ FUNCTION FSC_PSCONFIG::INIT,          $ ; The INIT method of the FSC_PSCONFIG ob
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = cgErrorMsg(Traceback=Keyword_Set(debug))
+   ok = cgErrorMsg()
    RETURN, 1
 ENDIF
 
@@ -2643,34 +2643,6 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
    IF N_Elements(pagetype) EQ 0 THEN IF Keyword_Set(metric) THEN pagetype = "A4" ELSE pagetype = "LETTER"
    IF N_Elements(preview) EQ 0 THEN preview = 0
    IF N_Elements(set_font) EQ 0 THEN set_font = ""
-   IF N_Elements(xoffset) EQ 0 THEN BEGIN
-        IF landscape THEN BEGIN
-            IF inches THEN xoffset = 0.75 ELSE xoffset = 0.75 * 2.54
-        ENDIF ELSE BEGIN
-            IF inches THEN xoffset = 0.5 ELSE xoffset = 0.5 * 2.54
-        ENDELSE
-   ENDIF
-   IF N_Elements(xsize) EQ 0 THEN BEGIN
-        IF landscape THEN BEGIN
-            IF inches THEN xsize = 9.5 ELSE xsize = 9.5 * 2.54
-        ENDIF ELSE BEGIN
-            IF inches THEN xsize = 7.5 ELSE xsize = 7.5 * 2.54
-        ENDELSE
-   ENDIF
-   IF N_Elements(yoffset) EQ 0 THEN BEGIN
-        IF landscape THEN BEGIN
-            IF inches THEN IF inches THEN yoffset = 10.25 ELSE yoffset = 10.25 * 2.54
-        ENDIF ELSE BEGIN
-            IF inches THEN yoffset = 2.5 ELSE yoffset = 2.5 * 2.54
-        ENDELSE
-   ENDIF
-   IF N_Elements(ysize) EQ 0 THEN BEGIN
-        IF landscape THEN BEGIN
-            IF inches THEN IF inches THEN ysize = 7.0 ELSE ysize = 7.0 * 2.54
-        ENDIF ELSE BEGIN
-            IF inches THEN ysize = 6.0 ELSE ysize = 6.0 * 2.54
-        ENDELSE
-   ENDIF
    IF N_Elements(langlevel) EQ 0 THEN langlevel = 1
 
    avantgarde = Keyword_Set(avantgarde)
@@ -2735,18 +2707,46 @@ IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
    ; Offsets are harder to set because I am trying to shield the
    ; user from PostScript weirdness.
 
-   IF landscape THEN BEGIN
-      dims = self->PageDimensions()
-      self.xoffsetSet = dims[1] - yoffset
-      self.xsizeSet = xsize
-      self.yoffsetSet = xoffset
-      self.ysizeSet = ysize
-   ENDIF ELSE BEGIN
+   IF N_Elements(xoffset) EQ 0 THEN BEGIN
+       IF landscape THEN BEGIN
+           IF inches THEN xoffset = 0.75 ELSE xoffset = 0.75 * 2.54
+       ENDIF ELSE BEGIN
+           IF inches THEN xoffset = 0.5 ELSE xoffset = 0.5 * 2.54
+       ENDELSE
+   ENDIF
+   IF N_Elements(xsize) EQ 0 THEN BEGIN
+       IF landscape THEN BEGIN
+           IF inches THEN xsize = 9.5 ELSE xsize = 9.5 * 2.54
+       ENDIF ELSE BEGIN
+           IF inches THEN xsize = 7.5 ELSE xsize = 7.5 * 2.54
+       ENDELSE
+   ENDIF
+   IF N_Elements(yoffset) EQ 0 THEN BEGIN
+       IF landscape THEN BEGIN
+           IF inches THEN yoffset = 0.75 ELSE yoffset = 0.75 * 2.54
+       ENDIF ELSE BEGIN
+           IF inches THEN yoffset = 2.5 ELSE yoffset = 2.5 * 2.54
+       ENDELSE
+   ENDIF
+   IF N_Elements(ysize) EQ 0 THEN BEGIN
+       IF landscape THEN BEGIN
+           IF inches THEN ysize = 7.0 ELSE ysize = 7.0 * 2.54
+       ENDIF ELSE BEGIN
+           IF inches THEN ysize = 6.0 ELSE ysize = 6.0 * 2.54
+       ENDELSE
+   ENDIF
+;   IF landscape THEN BEGIN
+;      dims = self->PageDimensions()
+;      self.xoffsetSet = dims[1] - yoffset
+;      self.xsizeSet = xsize
+;      self.yoffsetSet = xoffset
+;      self.ysizeSet = ysize
+;   ENDIF ELSE BEGIN
       self.xoffsetSet = xoffset
       self.xsizeSet = xsize
       self.yoffsetSet = yoffset
       self.ysizeSet = ysize
-   ENDELSE
+;   ENDELSE
 
    ; Get the correct directory separator.
 

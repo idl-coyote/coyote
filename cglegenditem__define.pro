@@ -489,8 +489,11 @@ PRO cgLegendItem::CalculateBoxSize
             !P.Font = (!D.Name EQ 'PS') ? 1 : 0
         ENDIF
         by0 =  y-(0.5*!D.Y_CH_SIZE/ysize)-(j*y_offset)
-        cgText, xx, yy, Alignment=0.5, /Normal, (*self.titles)[j],  $
+        cgSetColorState, 1, Current=currentState
+        backgroundColor = cgColor('background')
+        cgText, xx, yy, Alignment=0.5, /Normal, (*self.titles)[j],  COLOR=backgroundColor, $
             TT_FONT=*self.tt_font, CHARSIZE=self.charsize, FONT=!P.Font, WIDTH=width, CHARTHICK=thick
+        cgSetColorState, currentState
         itemWidth[j] = itemWidth[j] + width
         IF self.hardware THEN !P.Font = thisFont
         

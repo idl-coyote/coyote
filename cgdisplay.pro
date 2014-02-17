@@ -151,9 +151,10 @@
 ;           the main IDL level. 7 Feb 2012. DWF.
 ;        Added FORCE and MATCH keywords. 16 Feb 2012. DWF.
 ;        Added PIXMAP, RETAIN, TITLE, XPOS, YPOS, and LOCATION keywords. 4 Sept 2012. DWF.
+;        If only one input parameter is passed, treat that as window index number to create. 15 Feb 2014. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2010-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgDisplay, pxsize, pysize, $
     ASPECT=aspect, $
@@ -185,6 +186,12 @@ PRO cgDisplay, pxsize, pysize, $
     
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
+    
+    ; If there is only one parameter, treat that as the window index number.
+    IF N_Params() EQ 1 THEN BEGIN
+        windowIndex = pxsize
+        Undefine, pxsize
+    ENDIF
     
     ; Check parameters and keywords.
     free = Keyword_Set(free)

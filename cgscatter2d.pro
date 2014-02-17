@@ -211,9 +211,10 @@
 ;           to allow a vector of colors to be used for the scatter points.
 ;         Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;         Bad logic when creating a GRID and setting [XY]Style keywords. 30 Aug 2013. DWF.
-;         
+;         If you are setting a range, but not using the [XY]Style keywords, then I am going to set [XY]Style=1. 17 Feb 2014. DWF.
+;                  
 ; :Copyright:
-;     Copyright (c) 2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2012-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgScatter2D, x, y, $
     AddCmd=addcmd, $
@@ -520,6 +521,8 @@ PRO cgScatter2D, x, y, $
     color = cgDefaultColor(sColor, DEFAULT=axisColor, TRADITIONAL=traditional)
     fcolor = cgDefaultColor(sfColor, DEFAULT='red', TRADITIONAL=traditional)
     gcolor = cgDefaultColor(sgColor, DEFAULT='gray', TRADITIONAL=traditional)
+    IF (N_Elements(xrange) NE 0) && (N_Elements(xstyle) EQ 0) THEN xstyle = 1
+    IF (N_Elements(yrange) NE 0) && (N_Elements(ystyle) EQ 0) THEN ystyle = 1
     
     ; Character size has to be determined *after* the layout has been decided.
     IF N_Elements(font) EQ 0 THEN font = !P.Font

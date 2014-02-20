@@ -80,6 +80,10 @@
 ;        is incorrect, you can specify the directory where the Ghostscript executable
 ;        resides with this keyword. (The Windows 32-bit executable is named gswin32c.exe
 ;        and the 64-bit executable is named gswin64c.exe.) Passed directly to cgPS2PDF.
+;     height: in, optional, type=integer
+;        Set the keyword to the final pixel hight of the output raster image. Applies
+;        only to raster image file output (e.g., JPEG, PNG, TIFF, etc.). The width of
+;        the image is chosen to preserve the image aspect ratio. Cannot use with the `Width` keyword.
 ;     im_options: in, optional, type=string, default=""
 ;        A string of ImageMagick "convert" options that can be passed to the ImageMagick convert 
 ;        command. No error checking occurs with this string.
@@ -121,7 +125,7 @@
 ;     width: in, optional, type=integer
 ;         Set the keyword to the final pixel width of the output raster image. Applies
 ;         only to raster image file output (e.g., JPEG, PNG, TIFF, etc.). The height of
-;         the image is chosen to preserve the image aspect ratio.
+;         the image is chosen to preserve the image aspect ratio. Cannot use with the `Height` keyword.
 ;          
 ; :Examples:
 ;    To create a line plot in a PostScript file named lineplot.ps and
@@ -187,6 +191,7 @@
 ;        Modified to restore the input True-Type font for PostScript devices. 22 May 2013. DWF.
 ;        Can now create raster file output directly from the input filename of cgPS_Open. 29 Nov 2013. DWF.
 ;        The program wasn't picking up default values from cgWindow_GetDefs. 22 Jan 2014. DWF.
+;        Added HEIGHT keyword. 20 Feb 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2014, Fanning Software Consulting, Inc.
@@ -196,10 +201,11 @@ PRO cgPS_Close, $
     BMP=bmp, $
     DELETE_PS=delete_ps, $
     DENSITY=density, $
-    IM_OPTIONS=im_options, $
     FILETYPE=filetype, $
     GIF=gif, $
     GS_PATH=gs_path, $
+    HEIGHT=height, $
+    IM_OPTIONS=im_options, $
     JPEG=jpeg, $
     NOFIX=nofix, $
     NOMESSAGE=nomessage, $
@@ -284,6 +290,8 @@ PRO cgPS_Close, $
    IF Keyword_Set(png) THEN needRaster = 1
    IF Keyword_Set(jpeg) THEN needRaster = 1
    IF Keyword_Set(tiff) THEN needRaster = 1
+   IF (N_Elements(width) NE 0) && (N_Elements(height) NE 0) THEN $
+      Message, 'Cannot specify both HEIGHT and WIDTH at the same time.'
    SetDefaultValue, density, 300
    SetDefaultValue, resize, 25
    IF needRaster THEN BEGIN
@@ -298,6 +306,7 @@ PRO cgPS_Close, $
               FILETYPE=filetype, $
               GIF=gif, $
               JPEG=jpeg, $
+              HEIGHT=height, $
               OUTFILENAME=outfilename, $
               PDF=pdf, $
               PNG=png, $

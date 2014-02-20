@@ -167,9 +167,11 @@
 ;       Added HEIGHT keyword to allow the height of the raster file to be set. 14 Jan 2014. DWF.
 ;       Added IM_COMMAND keyword to return the ImageMagick command or commands used to produce the raster file. 14 Jan 2014. DWF.
 ;       New resize algorithm was noticably slower. Went back to a single ImageMagick command, but done correctly now. 15 Jan 2014. DWF.
+;       Problem with WIDTH and HEIGHT keywords being reversed. Had to do with putting this calculation before ROTATE in
+;           ImageMagick command. Now placed in the correct order, I think. 20 Feb 2014. DWF.
 ;           
 ; :Copyright:
-;     Copyright (c) 2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgPS2Raster, ps_filename, raster_filename, $
     ALLOW_TRANSPARENT=allow_transparent, $
@@ -311,28 +313,6 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
           IF allowAlphaCmd THEN alpha_cmd =  allow_transparent ? '' : ' -alpha off' 
           density_cmd = ' -density ' + StrTrim(density,2)
           
-          ; Need to resize to a specific width or height? 
-          IF (N_Elements(width) NE 0) || (N_Elements(height) NE 0) THEN BEGIN
-              CASE 1 OF
-                 (N_Elements(width) NE 0) && (N_Elements(height) EQ 0): BEGIN
-                      resize_cmd = ' -resize ' + StrCompress(Fix(width), /REMOVE_ALL)
-                    END
-                  (N_Elements(width) EQ 0) && (N_Elements(height) NE 0): BEGIN
-                      IF (1-portrait) THEN BEGIN
-                          resize_cmd = ' -resize ' + StrCompress(height, /REMOVE_ALL)
-                      ENDIF ELSE BEGIN
-                      dims = cgPSDims(ps_filename)
-                      width = Round(dims[0]*Float(height)/dims[1])
-                      resize_cmd = ' -resize ' + StrCompress(width, /REMOVE_ALL)
-                      ENDELSE
-                    END
-              ENDCASE
-          ENDIF
-
-          ; We will do the normal resize, unless this has already been done. Two checks here.
-          IF (resize NE 0) && (N_Elements(resize_cmd) EQ 0) THEN BEGIN
-              resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL) + '%'
-          ENDIF
           
            ; Start ImageMagick convert command.
           cmd = 'convert'
@@ -344,9 +324,6 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
           ; Add the input filename.
           cmd = cmd +  ' "' + ps_filename + '"' 
                 
-          ; If we are resizing the output.
-          IF N_Elements(resize_cmd) NE 0 THEN cmd = cmd + resize_cmd
-          
           ; We want to flatten the output.
           cmd = cmd +  ' -flatten '
           
@@ -374,6 +351,34 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
           ; resulting file to be in landscape mode.
           IF (1-portrait) THEN cmd = cmd + ' -rotate 90'
                 
+          ; Need to resize to a specific width or height? This MUST be located AFTER the -ROTATE command!
+          IF (N_Elements(width) NE 0) || (N_Elements(height) NE 0) THEN BEGIN
+              CASE 1 OF
+                  (N_Elements(width) NE 0) && (N_Elements(height) EQ 0): BEGIN
+                      resize_cmd = ' -resize ' + StrCompress(Fix(width), /REMOVE_ALL)
+                  END
+                  (N_Elements(width) EQ 0) && (N_Elements(height) NE 0): BEGIN
+                      IF (1-portrait) THEN BEGIN
+                          dims = Reverse(cgPSDims(ps_filename))
+                          width = Round(dims[0]*Float(height)/dims[1])
+                          resize_cmd = ' -resize ' + StrCompress(width, /REMOVE_ALL)
+                      ENDIF ELSE BEGIN
+                           dims = cgPSDims(ps_filename)
+                           width = Round(dims[0]*Float(height)/dims[1])
+                           resize_cmd = ' -resize ' + StrCompress(width, /REMOVE_ALL)
+                      ENDELSE
+                  END
+              ENDCASE
+          ENDIF
+          
+          ; We will do the normal resize, unless this has already been done. Two checks here.
+          IF (resize NE 0) && (N_Elements(resize_cmd) EQ 0) THEN BEGIN
+              resize_cmd =  ' -resize '+ StrCompress(resize, /REMOVE_ALL) + '%'
+          ENDIF
+          
+          ; If we are resizing the output.
+          IF N_Elements(resize_cmd) NE 0 THEN cmd = cmd + resize_cmd
+          
           ; Add the output filename and check for PNG output.
           IF Keyword_Set(png) THEN BEGIN
                 

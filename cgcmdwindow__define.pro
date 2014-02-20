@@ -129,6 +129,7 @@
 ;        Misspelled keyword in PackageCommand method. 21 February 2013. DWF.
 ;        Modified GUI so there is only one Raster Image File choice, depending on if ImageMagick is
 ;           installed. 21 May 2013. DWF.
+;        I made the IM_WIDTH field in the object a pointer, so it could remain an undefined variable, if necessary. 20 FEB 2014. DWF.
 ;-
 
 
@@ -528,7 +529,7 @@ FUNCTION cgCmdWindow::Init, parent, $
     self.im_options = d_im_options
     self.im_raster = d_im_raster
     self.im_resize = d_im_resize
-    self.im_width = d_im_width
+    IF (d_im_width GT 0) THEN self.im_width = Ptr_New(d_im_width) ELSE self.im_width = Ptr_New(/Allocate_Heap)
     self.msysvar = Ptr_New(/Allocate_Heap)
     self.pdf_unix_convert_cmd = d_pdf_unix_convert_cmd
     self.pdf_path = d_pdf_path
@@ -635,6 +636,7 @@ PRO cgCmdWindow::Cleanup
     Ptr_Free, self.b
     Ptr_Free, self.msysvar
     Ptr_Free, self.storage
+    Ptr_Free, self.im_width
     
     ; Destroy the command objects.
     IF Obj_Valid(self.cmds) THEN BEGIN
@@ -1444,27 +1446,27 @@ PRO cgCmdWindow::AutoRasterFile, filetype, filename
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width, NOMESSAGE=self.ps_quiet
+                            WIDTH=*self.im_width, NOMESSAGE=self.ps_quiet
                 'GIF':  cgPS_Close, /GIF, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width, NOMESSAGE=self.ps_quiet
+                            WIDTH=*self.im_width, NOMESSAGE=self.ps_quiet
                 'JPEG': cgPS_Close, /JPEG, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width, NOMESSAGE=self.ps_quiet
+                            WIDTH=*self.im_width, NOMESSAGE=self.ps_quiet
                 'PNG':  cgPS_Close, /PNG,  DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width, NOMESSAGE=self.ps_quiet
+                            WIDTH=*self.im_width, NOMESSAGE=self.ps_quiet
                 'TIFF': cgPS_Close, /TIFF, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width, NOMESSAGE=self.ps_quiet
+                            WIDTH=*self.im_width, NOMESSAGE=self.ps_quiet
            ENDCASE
            ;IF ~self.ps_quiet THEN Print, 'Output file is located here: ' + outfilename
            END
@@ -2663,27 +2665,27 @@ PRO cgCmdWindow::SaveAsRaster, event
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width
+                            WIDTH=*self.im_width
                 'GIF':  cgPS_Close, /GIF, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width
+                            WIDTH=*self.im_width
                 'JPEG': cgPS_Close, /JPEG, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width
+                            WIDTH=*self.im_width
                 'PNG':  cgPS_Close, /PNG,  DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width
+                            WIDTH=*self.im_width
                 'TIFF': cgPS_Close, /TIFF, DELETE_PS=self.ps_delete, $
                             ALLOW_TRANSPARENT=self.im_transparent, $
                             DENSITY=self.im_density, RESIZE=self.im_resize, $
                             IM_OPTIONS=self.im_options, OUTFILENAME=outfilename, $
-                            WIDTH=self.im_width
+                            WIDTH=*self.im_width
            ENDCASE
            IF ~self.ps_quiet THEN Print, 'Output will be created here: ' + outfilename
            END
@@ -3030,7 +3032,7 @@ PRO cgCmdWindow::SetProperty, $
     IF N_Elements(im_resize) NE 0 THEN self.im_resize = im_resize
     IF N_Elements(im_options) NE 0 THEN self.im_options = im_options
     IF N_Elements(im_raster) NE 0 then self.im_raster = im_raster
-    IF N_Elements(im_width) NE 0 then self.im_width = im_width
+    IF N_Elements(im_width) NE 0 then *self.im_width = im_width
     IF N_Elements(pdf_unix_convert_cmd) NE 0 THEN self.pdf_unix_convert_cmd = pdf_unix_convert_cmd
     IF N_Elements(pdf_path) NE 0 THEN self.pdf_path = pdf_path
     IF N_Elements(ps_decomposed) NE 0 THEN self.ps_decomposed = ps_decomposed
@@ -3152,7 +3154,7 @@ PRO cgCmdWindow__Define, class
               im_resize: 0L, $              ; Sets the resize parameter on ImageMagick convert command.
               im_options: "", $             ; Sets extra ImageMagick options on the ImageMagick convert command.
               im_raster: 0L, $              ; Create raster files via ImageMagick
-              im_width: 0L $                ; Sets the width of the final raster output with ImageMagick
+              im_width: Ptr_New() $         ; Sets the width of the final raster output with ImageMagick
             }
             
 END ;----------------------------------------------------------------------------------------------------------------

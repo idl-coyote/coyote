@@ -359,6 +359,7 @@
 ;        Added C_ORIENTATION and C_SPACING keywords and modified the program to allow line filling. 28 Jan 2013. DWF.
 ;        Added ISOTROPIC keyword. 27 June 2013. DWF.
 ;        Added sanity check for ISOTROPIC keyword. 6 Feb 2014. DWF.
+;        Fixed a bug with the ISOTROPIC keyword. 23 Feb 2014. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
@@ -435,7 +436,7 @@ PRO cgContour, data, x, y, $
     IF N_Elements(data) EQ 0 THEN BEGIN
         Print, 'USE SYNTAX: cgContour, data, x, y, NLEVELS=10'
         RETURN
-    ENDIF
+    ENDIF 
     
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
@@ -682,10 +683,65 @@ PRO cgContour, data, x, y, $
         FOR j=0,N_Elements(c_annotation)-1 DO c_annotation[j] = cgCheckForSymbols(c_annotation[j])
     ENDIF
     
+    ; Handle data properly.
+    ndims = Size(data, /N_DIMENSIONS)
+    s = Size(data, /DIMENSIONS)
+    CASE ndims OF
+        1: BEGIN
+            IF N_Elements(x) EQ 0 THEN BEGIN
+                IF Keyword_Set(onImage) THEN BEGIN
+                    CASE !X.TYPE OF
+                        0: xgrid = cgScaleVector(Indgen(s[0]), !X.CRange[0], !X.CRange[1])
+                        1: xgrid = cgScaleVector(Indgen(s[0]), 10^!X.CRange[0], 10^!X.CRange[1])
+                        3: Message, 'Must supply LONGITUDE vector when overplotting on map projections'
+                    ENDCASE
+                ENDIF ELSE BEGIN
+                    xgrid = Indgen(s[0])
+                ENDELSE
+            ENDIF ELSE xgrid = x
+            IF N_Elements(y) EQ 0 THEN BEGIN
+                IF Keyword_Set(onImage) THEN BEGIN
+                    CASE !Y.TYPE OF
+                        0: ygrid = cgScaleVector(Indgen(s[1]), !Y.CRange[0], !Y.CRange[1])
+                        1: ygrid = cgScaleVector(Indgen(s[1]), 10^!Y.CRange[0], 10^!Y.CRange[1])
+                        3: Message, 'Must supply LATITUDE vector when overplotting on map projections'
+                    ENDCASE
+                ENDIF ELSE BEGIN
+                    ygrid = Indgen(s[1])
+                ENDELSE
+            ENDIF ELSE ygrid = y
+        END
+        2: BEGIN
+            IF N_Elements(x) EQ 0 THEN BEGIN
+                IF Keyword_Set(onImage) THEN BEGIN
+                    CASE !X.TYPE OF
+                        0: xgrid = cgScaleVector(Indgen(s[0]), !X.CRange[0], !X.CRange[1])
+                        1: xgrid = cgScaleVector(Indgen(s[0]), 10^!X.CRange[0], 10^!X.CRange[1])
+                        3: Message, 'Must supply LONGITUDE vector when overplotting on map projections'
+                    ENDCASE
+                ENDIF ELSE BEGIN
+                    xgrid = Indgen(s[0])
+                ENDELSE
+            ENDIF ELSE xgrid = x
+            IF N_Elements(y) EQ 0 THEN BEGIN
+                IF Keyword_Set(onImage) THEN BEGIN
+                    CASE !Y.TYPE OF
+                        0: ygrid = cgScaleVector(Indgen(s[1]), !Y.CRange[0], !Y.CRange[1])
+                        1: ygrid = cgScaleVector(Indgen(s[1]), 10^!Y.CRange[0], 10^!Y.CRange[1])
+                        3: Message, 'Must supply LATITUDE vector when overplotting on map projections'
+                    ENDCASE
+                ENDIF ELSE BEGIN
+                    ygrid = Indgen(s[1])
+                ENDELSE
+            ENDIF ELSE ygrid = y
+        END
+        ELSE: Message, 'Contour data must be 1D or 2D.'
+    ENDCASE
+
     ; Is the ISOTROPIC keyword set?
     IF Keyword_Set(isotropic) THEN BEGIN
-        yscaleTest = Max(dep, /NaN) - Min(dep, /NaN)
-        xscaleTest = Max(indep, /NaN) - Min(indep, /NaN)
+        yscaleTest = Max(ygrid, /NaN) - Min(ygrid, /NaN)
+        xscaleTest = Max(xgrid, /NaN) - Min(xgrid, /NaN)
         aspect = Float(yscaleTest)/xscaleTest
         
         ; Do a sanity check.
@@ -697,8 +753,8 @@ PRO cgContour, data, x, y, $
         ystyle=1
     ENDIF
     IF Keyword_Set(isotropic) THEN BEGIN
-        IF N_Elements(x) NE 0 THEN xrange = Max(x, /NaN) - Min(x, /NaN)
-        IF N_Elements(y) NE 0 THEN yrange = Max(y, /NaN) - Min(y, /NaN)
+        IF N_Elements(xgrid) NE 0 THEN xrange = Max(xgrid, /NaN) - Min(xgrid, /NaN)
+        IF N_Elements(ygrid) NE 0 THEN yrange = Max(ygrid, /NaN) - Min(ygrid, /NaN)
         dims = Size(data, /Dimensions)
         IF N_Elements(x) EQ 0 THEN xrange = dims[0]
         IF N_Elements(y) EQ 0 THEN yrange = dims[1]
@@ -778,61 +834,7 @@ PRO cgContour, data, x, y, $
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     IF N_Elements(c_charsize) EQ 0 THEN c_charsize = charsize * 0.75
     
-    ; Handle data properly.
-    ndims = Size(data, /N_DIMENSIONS)
-    s = Size(data, /DIMENSIONS)
-    CASE ndims OF
-        1: BEGIN
-           IF N_Elements(x) EQ 0 THEN BEGIN
-               IF Keyword_Set(onImage) THEN BEGIN
-                   CASE !X.TYPE OF
-                      0: xgrid = cgScaleVector(Indgen(s[0]), !X.CRange[0], !X.CRange[1])
-                      1: xgrid = cgScaleVector(Indgen(s[0]), 10^!X.CRange[0], 10^!X.CRange[1])
-                      3: Message, 'Must supply LONGITUDE vector when overplotting on map projections'
-                   ENDCASE
-               ENDIF ELSE BEGIN
-                  xgrid = Indgen(s[0])
-               ENDELSE
-           ENDIF ELSE xgrid = x
-           IF N_Elements(y) EQ 0 THEN BEGIN
-               IF Keyword_Set(onImage) THEN BEGIN
-                   CASE !Y.TYPE OF
-                      0: ygrid = cgScaleVector(Indgen(s[1]), !Y.CRange[0], !Y.CRange[1])
-                      1: ygrid = cgScaleVector(Indgen(s[1]), 10^!Y.CRange[0], 10^!Y.CRange[1])
-                      3: Message, 'Must supply LATITUDE vector when overplotting on map projections'
-                   ENDCASE
-               ENDIF ELSE BEGIN
-                  ygrid = Indgen(s[1])
-               ENDELSE
-           ENDIF ELSE ygrid = y
-           END
-        2: BEGIN
-           IF N_Elements(x) EQ 0 THEN BEGIN
-               IF Keyword_Set(onImage) THEN BEGIN
-                   CASE !X.TYPE OF
-                      0: xgrid = cgScaleVector(Indgen(s[0]), !X.CRange[0], !X.CRange[1])
-                      1: xgrid = cgScaleVector(Indgen(s[0]), 10^!X.CRange[0], 10^!X.CRange[1])
-                      3: Message, 'Must supply LONGITUDE vector when overplotting on map projections'
-                   ENDCASE
-               ENDIF ELSE BEGIN
-                  xgrid = Indgen(s[0])
-               ENDELSE
-           ENDIF ELSE xgrid = x
-           IF N_Elements(y) EQ 0 THEN BEGIN
-               IF Keyword_Set(onImage) THEN BEGIN
-                   CASE !Y.TYPE OF
-                      0: ygrid = cgScaleVector(Indgen(s[1]), !Y.CRange[0], !Y.CRange[1])
-                      1: ygrid = cgScaleVector(Indgen(s[1]), 10^!Y.CRange[0], 10^!Y.CRange[1])
-                      3: Message, 'Must supply LATITUDE vector when overplotting on map projections'
-                   ENDCASE
-               ENDIF ELSE BEGIN
-                  ygrid = Indgen(s[1])
-               ENDELSE
-           ENDIF ELSE ygrid = y
-           END
-        ELSE: Message, 'Contour data must be 1D or 2D.'
-    ENDCASE
-    
+ 
     ; Get the current color table vectors. The NULL business was put here at
     ; the request of Wayne Landsman in support of NASA Astronomy Library. It
     ; is important for programs NASA runs.

@@ -108,6 +108,7 @@
 ;        Fixed a problem with a TRANSPOSE command for true-color images. Bad logic. 4 Jan 2012. DWF.
 ;        Fixed a problem in which Map_Proj_Image was not handling true-color image warping correctly
 ;           and also a problem with handling missing values passed from cgImage2KML correctly. 20 Feb 2013. DWF.
+;        Forgot to specify the default value for MISSING. 25 Feb 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -144,7 +145,9 @@ FUNCTION cgChangeMapProjection, image, mapIn, $
          IF Size(missing, /TNAME) EQ 'STRING' THEN missing = Reform(cgColor(missing, /Triple))
      ENDIF
     
-   ENDIF
+   ENDIF ELSE BEGIN
+       IF (Size(image, /N_Dimensions) GT 2) THEN missing = BytArr(3) ELSE missing = 0B
+   ENDELSE
    
    ; Gather information about the input image. Do this differently if this is a 2D
    ; image as opposed to a true-color image.

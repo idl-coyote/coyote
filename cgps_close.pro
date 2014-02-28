@@ -192,6 +192,7 @@
 ;        Can now create raster file output directly from the input filename of cgPS_Open. 29 Nov 2013. DWF.
 ;        The program wasn't picking up default values from cgWindow_GetDefs. 22 Jan 2014. DWF.
 ;        Added HEIGHT keyword. 20 Feb 2014. DWF.
+;        Was not passing the QUIET flag from cgPS_Open on to cgPS2Raster correctly. Fixed. 28 Feb 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2014, Fanning Software Consulting, Inc.
@@ -313,7 +314,7 @@ PRO cgPS_Close, $
               PORTRAIT=portrait, $
               RESIZE=resize, $
               SHOWCMD=showcmd, $
-              SILENT=Keyword_Set(nomessage), $
+              SILENT=ps_struct.quiet, $
               SUCCESS=success, $
               TIFF=tiff, $
               WIDTH=width

@@ -248,6 +248,7 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
    SetDefaultValue, showcmd, 0, /BOOLEAN
    SetDefaultValue, silent, 0, /BOOLEAN
    SetDefaultValue, spawnCmd, 1, /BOOLEAN
+   IF (N_Elements(width) NE 0) && (width EQ 0) THEN Undefine, width ; Solve a problem with default values.
    IF (N_Elements(width) NE 0) || (N_Elements(height) NE 0) THEN resize = 0 ; No resize if using a specific width or height.
    IF Arg_Present(im_command) THEN BEGIN
            spawnCmd = 0

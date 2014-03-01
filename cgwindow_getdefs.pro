@@ -211,7 +211,9 @@ PRO cgWindow_GetDefs, $
    IF Arg_Present(im_resize) THEN im_resize = !FSC_WINDOW_DEFAULTS.im_resize
    IF Arg_Present(im_tiff_depth) THEN im_tiff_depth = !FSC_WINDOW_DEFAULTS.im_tiff_depth
    IF Arg_Present(im_transparent) THEN im_transparent = !FSC_WINDOW_DEFAULTS.im_transparent
-   IF Arg_Present(im_width) THEN im_width = !FSC_WINDOW_DEFAULTS.im_width
+   IF Arg_Present(im_width) THEN BEGIN
+      IF !FSC_WINDOW_DEFAULTS.im_width NE 0 THEN im_width = !FSC_WINDOW_DEFAULTS.im_width
+   ENDIF
    IF Arg_Present(pdf_unix_convert_cmd) THEN pdf_unix_convert_cmd = !FSC_WINDOW_DEFAULTS.pdf_unix_convert_cmd
    IF Arg_Present(pdf_path) THEN pdf_path = !FSC_WINDOW_DEFAULTS.pdf_path
    IF Arg_Present(ps_decomposed) THEN ps_decomposed = !FSC_WINDOW_DEFAULTS.ps_decomposed

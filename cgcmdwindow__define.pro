@@ -529,7 +529,7 @@ FUNCTION cgCmdWindow::Init, parent, $
     self.im_options = d_im_options
     self.im_raster = d_im_raster
     self.im_resize = d_im_resize
-    IF (d_im_width GT 0) THEN self.im_width = Ptr_New(d_im_width) ELSE self.im_width = Ptr_New(/Allocate_Heap)
+    self.im_width = Ptr_New(d_im_width)
     self.msysvar = Ptr_New(/Allocate_Heap)
     self.pdf_unix_convert_cmd = d_pdf_unix_convert_cmd
     self.pdf_path = d_pdf_path

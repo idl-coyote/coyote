@@ -169,6 +169,7 @@
 ;       New resize algorithm was noticably slower. Went back to a single ImageMagick command, but done correctly now. 15 Jan 2014. DWF.
 ;       Problem with WIDTH and HEIGHT keywords being reversed. Had to do with putting this calculation before ROTATE in
 ;           ImageMagick command. Now placed in the correct order, I think. 20 Feb 2014. DWF.
+;       Width can be set to zero in some instances. Now handling that case to undefine WIDTH. 1 March 2014. DWF.
 ;           
 ; :Copyright:
 ;     Copyright (c) 2011-2014, Fanning Software Consulting, Inc.
@@ -248,7 +249,7 @@ PRO cgPS2Raster, ps_filename, raster_filename, $
    SetDefaultValue, showcmd, 0, /BOOLEAN
    SetDefaultValue, silent, 0, /BOOLEAN
    SetDefaultValue, spawnCmd, 1, /BOOLEAN
-   IF (N_Elements(width) NE 0) && (width EQ 0) THEN Undefine, width ; Solve a problem with default values.
+   IF (N_Elements(width) NE 0) && (width EQ 0) THEN Undefine, width ; Solve a problem with 0 default value.
    IF (N_Elements(width) NE 0) || (N_Elements(height) NE 0) THEN resize = 0 ; No resize if using a specific width or height.
    IF Arg_Present(im_command) THEN BEGIN
            spawnCmd = 0

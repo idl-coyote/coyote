@@ -331,7 +331,7 @@ FUNCTION cgPixmapWindow::INIT, parent, $
     self.im_options = d_im_options
     self.im_raster = d_im_raster
     self.im_resize = d_im_resize
-    self.im_width = d_im_width
+    self.im_width = Ptr_New(d_im_width)
     self.msysvar = Ptr_New(/Allocate_Heap)
     self.pdf_unix_convert_cmd = d_pdf_unix_convert_cmd
     self.pdf_path = d_pdf_path

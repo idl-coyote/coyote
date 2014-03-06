@@ -279,6 +279,9 @@ PRO cgPS2PDF, ps_file, pdf_file, $
        ENDELSE
     ENDELSE
     
+    ; Show the command?
+    IF Keyword_Set(showcmd) THEN Print, cmd
+
    ; Spawn the command, note the need for extra quotes here to handle spaces in directory names.
     IF StrUpCase(!Version.OS_Family) EQ 'WINDOWS' THEN BEGIN
         Spawn, '"' + cmd + '"', /HIDE, result, error_result
@@ -291,7 +294,6 @@ PRO cgPS2PDF, ps_file, pdf_file, $
     IF error_result[0] NE "" THEN Message, error_result[0]
     
     ; If you get here, hurrah!
-    IF Keyword_Set(showcmd) THEN Print, cmd
     IF ~Keyword_Set(silent) THEN Print, 'Output PDF file: ' + pdf_file
     success = 1
    

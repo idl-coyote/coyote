@@ -193,6 +193,8 @@
 ;        The program wasn't picking up default values from cgWindow_GetDefs. 22 Jan 2014. DWF.
 ;        Added HEIGHT keyword. 20 Feb 2014. DWF.
 ;        Was not passing the QUIET flag from cgPS_Open on to cgPS2Raster correctly. Fixed. 28 Feb 2014. DWF.
+;        Modified to call cgPS2PDF directly for PDF output. Required because UNIX_CONVERT_CMD isn't passed
+;           through cgPS2Raster. 6 March 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2008-2014, Fanning Software Consulting, Inc.
@@ -296,37 +298,60 @@ PRO cgPS_Close, $
    SetDefaultValue, density, 300
    SetDefaultValue, resize, 25
    IF needRaster THEN BEGIN
-       IF cgHasImageMagick() THEN BEGIN
-           IF N_Elements(delete_ps) EQ 0 THEN cgWindow_GetDefs, PS_DELETE=delete_ps
-           cgPS2Raster, ps_filename, raster_filename, $
-              ALLOW_TRANSPARENT=allow_transparent, $
-              BMP=bmp, $
-              DELETE_PS=delete_ps, $
-              DENSITY=density, $
-              IM_OPTIONS=im_options, $
-              FILETYPE=filetype, $
-              GIF=gif, $
-              JPEG=jpeg, $
-              HEIGHT=height, $
-              OUTFILENAME=outfilename, $
-              PDF=pdf, $
-              PNG=png, $
-              PORTRAIT=portrait, $
-              RESIZE=resize, $
-              SHOWCMD=showcmd, $
-              SILENT=ps_struct.quiet, $
-              SUCCESS=success, $
-              TIFF=tiff, $
-              WIDTH=width
+       IF N_Elements(delete_ps) EQ 0 THEN cgWindow_GetDefs, PS_DELETE=delete_ps
+       IF Keyword_Set(pdf) THEN BEGIN
+           IF N_Elements(unix_convert_cmd) EQ 0 THEN BEGIN
+              IF ~cgHasImageMagick() THEN BEGIN
+                   Print, ''
+                   Print, 'Message from the cgPS_Close Program:'
+                   Print, '   The requested PDF operation cannot be completed unless ImageMagick is installed.'
+                   delete_ps = 0
+                   Print, '   The requested PostScript file has been saved: ' + ps_filename + '.'
+                   Print, '   Please see http://www.idlcoyote.com/graphics_tips/weboutput.php for details'
+                   Print, '   about converting PostScript intermediate files to PDF files via ImageMagick.
+                   void = Dialog_Message('cgPS_Close: ImageMagick must be installed to complete raster operation.')
+              ENDIF
+           ENDIF
+           cgPS2PDF, ps_filename, raster_filename, $
+             DELETE_PS=delete_ps, $
+             GS_PATH=gs_path, $
+             PAGETYPE=ps_struct.pagetype, $
+             SHOWCMD=showcmd, $
+             SILENT=silent, $
+             SUCCESS=success, $
+             UNIX_CONVERT_CMD=unix_convert_cmd
        ENDIF ELSE BEGIN
-           Print, ''
-           Print, 'Message from the cgPS_Close Program:'
-           Print, '   The requested raster operation cannot be completed unless ImageMagick is installed.'
-           delete_ps = 0
-           Print, '   The requested PostScript file has been saved: ' + ps_filename + '.'
-           Print, '   Please see http://www.idlcoyote.com/graphics_tips/weboutput.php for details'
-           Print, '   about converting PostScript intermediate files to raster files via ImageMagick.
-           void = Dialog_Message('cgPS_Close: ImageMagick must be installed to complete raster operation.')
+           IF cgHasImageMagick() THEN BEGIN
+               cgPS2Raster, ps_filename, raster_filename, $
+                  ALLOW_TRANSPARENT=allow_transparent, $
+                  BMP=bmp, $
+                  DELETE_PS=delete_ps, $
+                  DENSITY=density, $
+                  IM_OPTIONS=im_options, $
+                  FILETYPE=filetype, $
+                  GIF=gif, $
+                  JPEG=jpeg, $
+                  HEIGHT=height, $
+                  OUTFILENAME=outfilename, $
+                  PDF=pdf, $
+                  PNG=png, $
+                  PORTRAIT=portrait, $
+                  RESIZE=resize, $
+                  SHOWCMD=showcmd, $
+                  SILENT=ps_struct.quiet, $
+                  SUCCESS=success, $
+                  TIFF=tiff, $
+                  WIDTH=width
+           ENDIF ELSE BEGIN
+               Print, ''
+               Print, 'Message from the cgPS_Close Program:'
+               Print, '   The requested raster operation cannot be completed unless ImageMagick is installed.'
+               delete_ps = 0
+               Print, '   The requested PostScript file has been saved: ' + ps_filename + '.'
+               Print, '   Please see http://www.idlcoyote.com/graphics_tips/weboutput.php for details'
+               Print, '   about converting PostScript intermediate files to raster files via ImageMagick.
+               void = Dialog_Message('cgPS_Close: ImageMagick must be installed to complete raster operation.')
+           ENDELSE
        ENDELSE
    ENDIF
    

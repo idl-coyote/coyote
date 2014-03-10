@@ -142,11 +142,20 @@
 ;    also create a PNG file named lineplot.png for display in a browser,
 ;    type these commands::
 ;
-;        cgPS_Open, FILENAME='lineplot.ps'
+;        cgPS_Open, 'lineplot.ps'
 ;        cgPlot, Findgen(11), COLOR='navy', /NODATA, XTITLE='Time', YTITLE='Signal'
 ;        cgPlot, Findgen(11), COLOR='indian red', /OVERPLOT
 ;        cgPlot, Findgen(11), COLOR='olive', PSYM=2, /OVERPLOT
 ;        cgPS_Close, /PNG
+;        
+;    Or, alternatively, without also creating a PostScript file, like this. Simply pass
+;    cgPS_Open the name of the raster file you want to create::
+;    
+;        cgPS_Open, 'lineplot.png'
+;        cgPlot, Findgen(11), COLOR='navy', /NODATA, XTITLE='Time', YTITLE='Signal'
+;        cgPlot, Findgen(11), COLOR='indian red', /OVERPLOT
+;        cgPlot, Findgen(11), COLOR='olive', PSYM=2, /OVERPLOT
+;        cgPS_Close
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::

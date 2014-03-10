@@ -132,12 +132,24 @@
 ;    also create a PNG file named lineplot.png for display in a browser,
 ;    type these commands::
 ;
-;        cgPS_Open, FILENAME='lineplot.ps'
-;        cgPlot, Findgen(11), COLOR='navy', /NODATA, XTITLE='Time', YTITLE='Signal'
-;        cgPlot, Findgen(11), COLOR='indian red', /OVERPLOT
-;        cgPlot, Findgen(11), COLOR='olive', PSYM=2, /OVERPLOT
+;        cgPS_Open, 'lineplot.ps'
+;        cgPlot, Findgen(11), COLOR='navy', XTITLE='Time', YTITLE='Signal'
 ;        cgPS_Close, /PNG
-;       
+;        
+;    If you just want the raster file, without a PostScript file, it is simpler to just specify
+;    the type of file you want with cgPS_Open. Here we create a JPEG file. The intermediate
+;    PostScript file is deleted once the JPEG file is created::
+;    
+;        cgPS_Open, 'lineplot.jpg'
+;        cgPlot, Findgen(11), COLOR='navy', XTITLE='Time', YTITLE='Signal'
+;        cgPS_Close
+;
+;     An example using the UNIX epstopdf command instead of an ImageMagick command to create a PDF file::
+;     
+;         cgPS_Open, 'lineplot.eps', /DECOMPOSED
+;         cgPlot, Findgen(11), COLOR='navy', XTITLE='Time', YTITLE='Signal'
+;         cgPS_Close, /PDF, UNIX_CONVERT_CMD='epstopdf --autorotate=All'
+;         
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
 ;           David W. Fanning 

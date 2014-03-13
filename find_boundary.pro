@@ -99,9 +99,11 @@
 ;       Fixed a problem in which XSIZE and YSIZE have to be specified as integers to work. 6 March 2006. DWF.
 ;       Fixed a small problem with very small ROIs that caused the program to crash. 1 October 2008. DWF.
 ;       Modified the algorithm that determines the number of boundary points for small ROIs. 28 Sept 2010. DWF.
+;       Modified the algorithm that determines if we are "home" to correct a problem discovered by Peter Vogt in
+;          which small regions connect to larger regions by pixel corners only was cut off. 12 Mar 2014. Peter Vogt.
 ;-
 ;******************************************************************************************;
-;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
+;  Copyright (c) 2008-2014, by Fanning Software Consulting, Inc.                           ;
 ;  All rights reserved.                                                                    ;
 ;                                                                                          ;
 ;  Redistribution and use in source and binary forms, with or without                      ;
@@ -145,7 +147,7 @@ FOR j=1,7 DO BEGIN
       boundaryPts[*,ptIndex] = newPt
 
      ; Return the "from" direction.
-
+      Print, 'Normal Point'
       RETURN, (to_direction + 4) MOD 8
    ENDIF
 
@@ -156,9 +158,12 @@ ENDFOR
 IF TOTAL(mask GT 0) GT 1 THEN BEGIN ; Isolated point.
    newPt = boundaryPts[*,ptIndex-1] + darray[*,from_direction]
    boundaryPts[*,ptIndex] = newPt
+   Print, 'Isolated Point'
+   stop
    RETURN, (from_direction + 4) MOD 8
 ENDIF ELSE BEGIN ; Solitary point.
    boundaryPts[*,ptIndex] = boundaryPts[*,ptIndex-1]
+   Print, 'Solitary Point'
    RETURN, -1
 ENDELSE
 END ; ------------------------------------------------------------------------------------------
@@ -220,6 +225,7 @@ ENDIF ELSE BEGIN
 ENDELSE
 boundaryPts[0] = firstPt
 ptIndex = 0L
+secPt = LonArr(2)
 
    ;   We shall not cease from exploration
    ;   And the end of all our exploring
@@ -228,6 +234,13 @@ ptIndex = 0L
    ;
    ;                     T.S. Eliot
 REPEAT BEGIN
+    
+   ; The break condition is normally to get back to the first point, but this is not enough to
+   ; always find the perimeter. In particualr, small areas that are connected only by corner
+   ; pixels touching can get missed or cut off by using this algorithm. To get around this, we also
+   ; check the second pixel. If the first and second pixel are the same, then we know we have 
+   ; come around to the same spot and are retracing our steps. 
+   AGAIN:
    ptIndex = ptIndex + 1L
    from_direction = Find_Boundary_Outline(mask, darray, $
       boundaryPts, ptIndex, xsize, ysize, from_direction)
@@ -259,10 +272,14 @@ REPEAT BEGIN
          ENDCASE
       ENDELSE
    ENDIF
-ENDREP UNTIL (boundaryPts[0,ptIndex] EQ firstPt[0] AND $
-            boundaryPts[1,ptIndex] EQ firstPt[1])
-
-boundaryPts = boundaryPts[*,0:ptIndex-1]
+   IF ptIndex EQ 1 THEN BEGIN
+       secPt[0] = boundaryPts[0, ptIndex]
+       secPt[1] = boundaryPts[1, ptIndex]
+       GOTO, AGAIN
+   ENDIF
+ENDREP UNTIL (boundaryPts[0,ptIndex] EQ secPt[0] AND boundaryPts[1,ptIndex] EQ secPt[1] AND $
+    boundaryPts[0,ptIndex-1] EQ firstPt[0] AND boundaryPts[1,ptIndex-1] EQ firstPt[1])
+boundaryPts = boundaryPts[*, 0:ptIndex-2]
 
    ; Calculate area.
 

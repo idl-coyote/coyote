@@ -104,8 +104,11 @@
 ;        passed in, the default value for elevation is 11000 km above the surface of the Earth.
 ;         
 ;    kmz: in, optional, type=boolean, default=0
-;        Set this keyword to move the KML file and support files to a KMZ compressed file.
-;        Note that this capability is ONLY available in versions of IDL starting with version 8.0.
+;        If this keyword is set, the KML file is zipped into a KMZ file. This 
+;        functionality is only available if you have installed the Open Source 
+;        `7-Zip compression program <http://www.7-zip.org/>' and set up the path
+;        to 7z.exe correctly in cgKML2KMZ. If you don't understand, please don't
+;        set this keyword!
 ;
 ;    latlonbox: out, optional, type=array
 ;        A four-element array giving the boundaries of the map projection in the
@@ -198,6 +201,7 @@
 ;            interpreted correctly when expressed as a color string. 20 Feb 2013. DWF.
 ;        Have been writing the absolute path to the image file into the KML file, when I should
 ;            have been using a relative path. 22 Feb 2013. DWF.
+;        Problem with the MISSING keyword. Fixed. 14 Mar 2013. DWF.
 ;            
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -323,7 +327,6 @@ PRO cgImage2KML, image, mapCoord, $
    IF (StrUpCase(map_projection) NE 'EQUIRECTANGULAR') || (StrUpCase(StrCompress(ellipsoid, /REMOVE_ALL)) NE 'WGS84') THEN BEGIN
       googleMapCoord = Obj_New('cgMap', 'Equirectangular', Ellipsoid='WGS 84')
       ndims = Size(warped, /N_Dimensions)
-      IF ndims EQ 2 THEN thisMissingValue = 0 ELSE thisMissingValue=missing_value
       warped = cgChangeMapProjection(warped, mapCoord, MAPOUT=googleMapCoord, $
           LATLONBOX=latlonbox, MISSING=thisMissingValue)
    ENDIF 

@@ -37,11 +37,16 @@
 ;
 ;+
 ;   This program simply collects files created from the cgImage2KML program and moves
-;   the files to a zip file with a *.kmz file extention. The method used is an
-;   undocumented and unsupported method for creating KMZ files in IDL 8. It should not
-;   be relied upon, and it will not work in earlier versions of IDL. The cross-platform 
-;   zip file functionality is scheduled to be exposed to IDL users in an IDL release 
-;   sometime in 2013, but it is not known when or if this will occur.
+;   the files to a zip file with a *.kmz file extention. The program requires that the
+;   file archiver 7-Zip be installed on the user's computer. The 7-Zip program is freeware
+;   and is available for Windows, Mac, and UNIX users. Addtional information about the 7-Zip
+;   program can be found on the `7-Zip web page <http://www.7-zip.org/>`. The current program
+;   runs on Windows computers only, and with 7-Zip installed in the C:\Program Files directory.
+;   You may have to modify the path the the 7z.exe executable file to get the program to work
+;   correctly for you. The line to modify is clearly marked below.
+;   
+;   KMZ files are simply zip files containing KML files and support files. You can create your
+;   own KMZ files with any archiving software that supports the ZIP compression format.
 ;
 ; :Categories:
 ;    Utility
@@ -54,6 +59,12 @@
 ;         A scalar or vector of files to be included with the KML file to be packaged.
 ;         If not present, files in the same directory as the KML file and having the
 ;         same base filename will be used.
+;         
+; :Keywords:
+;     showcmd: in, optional, type=boolean, default=0
+;         Set this keyword if you wish to see the command being spawned by the program.
+;     silent: in, optional, type=boolean, default=0
+;         Set this kewyord to avoid output (except program errors) from being printed.
 ;       
 ; :Examples:
 ;    Here is how to use this program with the Google Earth Image example in the
@@ -74,11 +85,13 @@
 ; :History:
 ;     Change History::
 ;        Written, 22 Fabruary 2013 by David W. Fanning.
+;        Modified from using the old, unsupported and undocumented IDLKML_SaveKMZ routine to using 
+;           the Open Source 7-Zip routine to do the compression. 16 March 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2013, Fanning Software Consulting, Inc.
 ;-
-PRO cgKML2KMZ, kml_filename, supportFiles
+PRO cgKML2KMZ, kml_filename, supportFiles, SILENT=silent, SHOWCMD=showcmd
 
    Compile_Opt idl2
    
@@ -89,13 +102,10 @@ PRO cgKML2KMZ, kml_filename, supportFiles
       RETURN
    ENDIF
    
-   ; Only in IDL 8 or above.
-   IF Float(!Version.Release) LT 8.0 THEN BEGIN
-      Message, 'The kml2kmz program is only supported in IDL 8 or higher.'
-   ENDIF
-   
-   ; Initialize the object.
-   void = {IDLitWriteKML}
+   ; Modify this path to the 7-Zip executable file to use on your machine.
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   path_to_7zip_exe = '"c:\program files\7-zip\7z.exe"'
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    
    ; Need a KML file name?
    IF N_Elements(kml_filename) EQ 0 THEN BEGIN
@@ -108,6 +118,7 @@ PRO cgKML2KMZ, kml_filename, supportFiles
    IF StrUpCase(kmlExt) NE 'KML' THEN Message, 'Input file does not appear to be a KML file.'
    
    ; Construct the output filename.
+   zipFilename = Filepath(ROOT_Dir=kmlDir, rootName + '.zip')
    kmzFilename = Filepath(ROOT_Dir=kmlDir, rootName + '.kmz')
    
    ; Are there any supporting files?
@@ -117,10 +128,40 @@ PRO cgKML2KMZ, kml_filename, supportFiles
    ENDIF
    
    ; Append the KML filename to the supportFile, if there are some.
-   IF N_Elements(supportFiles) NE 0 THEN supportFiles = [kml_filename, supportFiles]
+   IF N_Elements(supportFiles) NE 0 THEN supportFiles = [supportFiles]
    
    ; Move the files to the KMZ file.
-   void = IDLKML_SaveKMZ(kmzFilename, supportFiles)
+   cmd = path_to_7zip_exe + " a " +  zipFilename 
+   cmd = cmd + ' ' + kml_filename
+   FOR j=0,N_Elements(supportFiles)-1 DO BEGIN
+       thisFile = FilePath(ROOT_DIR=kmlDir, supportfiles[j])
+       cmd = cmd + ' ' + thisFile 
+   ENDFOR
+   
+   ; Print the command if needed.
+   IF Keyword_Set(showcmd) && ~Keyword_Set(silent) THEN Print, 'Spawned Command: ', cmd
+   
+   ; Spawn the 7-zip command to archive the files.
+   Spawn, cmd, result, err_result 
+   
+   ; Rename the zip file to use a kmz extension.
+   IF err_result[0] EQ "" THEN File_Move, zipFilename, kmzFilename, /OVERWRITE
+   
+   ; Print the result message, if any, and not being silent.
+   IF ~Keyword_Set(silent) THEN BEGIN
+       IF N_Elements(result) GT 1 THEN BEGIN
+           FOR k=0,N_Elements(result)-1 DO Print, result[k]
+       ENDIF ELSE BEGIN
+            Message, 'A SPAWN to 7-Zip failed. Check 7-Zip path to correct.'
+       ENDELSE
+       
+       IF File_Test(kmzFilename, /REGULAR) && ~File_Test(kmzFilename, /ZERO_LENGTH) THEN BEGIN
+           Print, ""
+           Print, 'Output file located here: ' + kmzFilename
+       ENDIF ELSE BEGIN
+           Message, 'A KMZ file was not created properly. Check 7-Zip availability and path.'
+       ENDELSE
+   ENDIF
    
 END
    

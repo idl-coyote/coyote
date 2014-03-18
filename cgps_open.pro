@@ -197,6 +197,8 @@
 ;          created automatically without setting a raster output keyword on cgPS_Close. 29 Nov 2013. DWF.
 ;       Moved the check for Charsize to after setting to the PostScript device. 14 Jan 2014. DWF.
 ;       The program wasn't picking up default values from cgWindow_GetDefs. 22 Jan 2014. DWF.
+;       Modified the program so that the PostScript file location is printed only if the PostScript file 
+;          is being retrained. 17 March 2014. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2014, Fanning Software Consulting, Inc.
@@ -230,6 +232,7 @@ PRO cgPS_Open, filename, $
    
    ; Get the file extension. This will tell you what kind of raster file you need to make, if any.
    rootname = cgRootName(ps_filename, DIRECTORY=directory, EXTENSION=extension)
+   print_ps_location = 1
    CASE StrUpCase(extension) OF
        'PS': 
        'EPS':
@@ -241,7 +244,7 @@ PRO cgPS_Open, filename, $
           ; and we can delete the intermediate PostScript file.
           IF cgHasImageMagick() THEN BEGIN
              ps_struct.rasterFileType = extension
-             IF N_Elements(quiet) EQ 0 THEN quiet = 1
+             print_ps_location = 0
           END
           END
    ENDCASE
@@ -334,7 +337,9 @@ PRO cgPS_Open, filename, $
    ENDIF
    
    ; Let them know where the output will be.
-   IF ~quiet THEN Print, 'PostScript output will be created here: ', keywords.filename
+   IF ~quiet THEN BEGIN
+      IF print_ps_location THEN Print, 'PostScript output will be created here: ', keywords.filename
+   ENDIF
    
    Set_Plot, 'PS'
    Device, _EXTRA=keywords, SCALE_FACTOR=scale_factor

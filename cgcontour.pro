@@ -203,7 +203,8 @@
 ;        it is assumed that the length corresponds to the number of levels to be contoured.
 ;     position: in, optional, type=float
 ;        Set this keyword to a four-element [x0,y0,x1,y1] array giving the contour plot
-;        position in normalized coordinates. 
+;        position in normalized coordinates. Default is [0.15, 0.15, 0.915, 0.915] for
+;        graphics windows. There is no default in PostScript output.
 ;     resolution: in, optional, type=integer array, default=[41\,41]
 ;        If the IRREGULAR keyword is set, this keyword specifies the X and Y resolution
 ;        in a two element integer array of the final gridded data that is sent to the 

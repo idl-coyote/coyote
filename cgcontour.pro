@@ -360,6 +360,11 @@
 ;        Added ISOTROPIC keyword. 27 June 2013. DWF.
 ;        Added sanity check for ISOTROPIC keyword. 6 Feb 2014. DWF.
 ;        Fixed a bug with the ISOTROPIC keyword. 23 Feb 2014. DWF.
+;        Previously, I used the Aspect function to calculate a position of the plot in the window. This was causing
+;           problems when encapsulated PostScript files were created, because Aspect uses a landscape aspect ratio and EPS
+;           files can only be written in Portrait mode. I also modified the default position to be [0.15, 0.15, 0.915, 0.915],
+;           but I am doing this ONLY for graphics windows, not in PostScript output. This should accommodate a wider range
+;           of contour plot output. If you find axes cut off, use the POSITION keyword to position the plot correctly. 19 March 2014. DWF
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
@@ -790,10 +795,10 @@ PRO cgContour, data, x, y, $
           position[2] -= 0.5*(pos_width - trial_width)
           position[1] += 0.5*(pos_height - trial_height)
           position[3] -= 0.5*(pos_height - trial_height)
-        ENDIF ELSE position=Aspect(aspect)   ; if position isn't set, just use output of Aspect
+        ENDIF
         
     ENDIF
-    
+
     ; If you want to overplot on an image, set the OVERPLOT keyword.
     IF Keyword_Set(onImage) THEN overplot = 1
     
@@ -1019,10 +1024,11 @@ PRO cgContour, data, x, y, $
     IF Size(con_colors, /TNAME) EQ 'STRING' THEN con_colors = cgColor(con_colors)
     
     ; If you get here with no position defined, and no layout, and no !P.Multi and no nothing,
-    ; then for God's sake, define a reasonable position in the window!
+    ; then for God's sake, define a reasonable position in the window! Except, don't do this
+    ; in PostScript because it is very likely there that you will choose the wrong value.
     IF (N_Elements(position) EQ 0) && (Total(!P.Position) EQ 0) && $
         (N_Elements(layout) EQ 0) && (Total(!P.Multi) LE 0) && ~Keyword_Set(overplot) THEN BEGIN
-        position = [0.125, 0.125, 0.925, 0.9]
+        IF !D.Name NE 'PS' THEN position = [0.15, 0.15, 0.915, 0.915]
     ENDIF
     
     ; Do you need a PostScript background color? Lot's of problems here!

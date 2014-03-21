@@ -91,9 +91,10 @@
 ;            specifications. 26 Sept 2011. DWF.
 ;        Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 ;        Axes titles are now changing size with the CHARSIZE keyword, as they are supposed to. 4 Nov 2013. DWF.
+;        Fixed a problem with the Light Controller when trying to set a color. 21 Mar 2014. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2010-2011, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
 ;-
 
 ;+
@@ -106,6 +107,8 @@
 PRO CW_Light_Control_Intensity_Events, event
 
     ; Handles selection events from the Intensity Value widget.
+    
+    Compile_Opt idl2
     
     ; Error handling.
     Catch, theError
@@ -157,6 +160,8 @@ END ;---------------------------------------------------------------------------
 ;-
 PRO CW_Light_Control_Events, event
 
+    Compile_Opt idl2
+
     ; Error handling.
     Catch, theError
     IF theError NE 0 THEN BEGIN
@@ -177,8 +182,8 @@ PRO CW_Light_Control_Events, event
           TVLCT, info.color, info.index
           DEVICE, Decomposed=0, Get_Decomposed=theDecomposedState
           setcolor_title = Widget_Info(event.id, /UNAME)
-          thisColor = PickColor(CURRENTCOLOR=info.color, Group_Leader=event.top, Title=setcolor_title)
-          thisColor = Reform(thisColor, 3, 1)
+          thisColor = cgPickColorName( Group_Leader=event.top, Title=setcolor_title)
+          thisColor = Reform(cgColor(thisColor, /Triple), 3)
           info.theLight->SetProperty, Color=thisColor
           DEVICE, Decomposed=theDecomposedState
           info.color = thisColor
@@ -277,6 +282,8 @@ FUNCTION CW_Light_Control, parent, theLight, $
   SetColor_Name=setColor_name, $
   UValue=uvalue
 
+  Compile_Opt idl2
+  
 ; This is a compound widget that allows one to manipulate various
 ; properties of light objects.
 
@@ -353,6 +360,9 @@ END ;--------------------------------------------------------------------
 ;       The event structure from the graphical user interface of the program.
 ;-
 PRO cgSurface_Light_Controls_Event, event
+
+    Compile_Opt idl2
+
     Widget_Control, event.top, Get_UValue=info
     info.theWindow->Draw, info.theView
 END
@@ -369,6 +379,8 @@ END
 ;       The event structure from the graphical user interface of the program.
 ;-
 PRO cgSurface_Light_Controls, event
+
+    Compile_Opt idl2
 
     ; Place the light control beside the current widget program.
     Widget_Control, event.top, Get_UValue=info, /No_Copy

@@ -37,8 +37,7 @@
 ;
 ;+
 ; Plots the velocity vectors of particles at their position. Vectors may be
-; overplotted onto other IDL graphics plots. Vectors are centered on the particle
-; position
+; overplotted onto other IDL graphics plots.
 ;
 ; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
 ; to be installed on your machine.
@@ -74,21 +73,18 @@
 ;         The thickness of the line drawing the arrowhead of the vector. The
 ;         default is 3 for the PostScript device and 1 for all other devices.
 ;     length: in, optional, type=float, default=0.075
-;         The length of the "maximum" vector in normalized units. All vectors 
+;         The length of the `ReferenceVector` in normalized units. All vectors 
 ;         are scaled according to this length.
 ;     linestyle: in, optional, type=integer, default=0
 ;         The line style of the arrow. Line style integers as in PLOT.
-;     maxvector: in, optional, type=float
-;         The maximum magnitude of the vectors. If not defined, calculated
-;         from the input vectors. All vectors are scaled according the the
-;         value of this keyword and the `Length`. This keyword will return 
-;         the maximum vector magnitude used in the program on exit.
 ;     normal: in, optional, type=boolean, default=0
 ;         Set this keyword to indicate the vector positions are given in 
 ;         normalized coordinates. Data coordinates are assumed.
 ;     overplot: in, optional, type=boolean, default=0
 ;         Set this keyword to overplot the vectors on an established coordinate
 ;         system plot.
+;     referencevector: in, optional, type=float
+;         The magnitude of a reference vector that is used to scale all other vectors before display.
 ;     solid: in, optional, type=boolean, default=0
 ;         Set this keyword to draw solid, filled arrows.
 ;     thick: in, optional, type=float
@@ -97,7 +93,7 @@
 ;     veccolors: in, optional
 ;         A scalar or vector of colors the same size as `velx`. May be bytes, short integers,
 ;         or strings. Bytes and short integers are treated as indices into the current color 
-;         table.
+;         table. The default is "opposite".
 ;     window: in, optional, type=boolean, default=0
 ;         Set this keyword to add the command to an cgWindow application.
 ;     xrange: in, optional, type=float
@@ -106,6 +102,8 @@
 ;     yrange: in, optional, type=float
 ;         If a plot is to be drawn, the Y range of the plot. By default, the Y range is
 ;         calculated to contain all of the velocity vectors.
+;     _extra: in, optional
+;         Any keywords appropriate for the cgPlot command can be used to create the plot.
 ;
 ; :Examples:
 ;    Generate some particle positions and velocities::
@@ -137,20 +135,22 @@
 ;
 ; :History:
 ;     Change History::
-;        Written, 22 March 2014
+;        Written by David Fanning, based on NASA Astronomy Library program PartVelVec, 22 March 2014
 ;
 ; :Copyright:
 ;     Copyright (c) 2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgVelocityVectors, velx, vely, posx, posy, $
    ADDCMD=addcmd, $
+   DEVICE=device, $
    FRACTION=fraction, $
    HSIZE=hsize, $
    HTHICK=hthick, $
    LENGTH=length, $
    LINESTYLE=linestyle, $
-   MAXVECTOR=maxvector, $
+   NORMAL=normal, $
    OVERPLOT=overplot, $
+   REFERENCEVECTOR=referenceVector, $
    SOLID=solid, $
    THICK=thick, $
    VECCOLORS=veccolors_in, $
@@ -195,16 +195,19 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
        ; Special treatment for overplotting or adding a command.
        IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
            cgWindow, 'cgVelocityVectors', velx, vely, posx, posy, $
+               DEVICE=device, $
                FRACTION=fraction, $
                HSIZE=hsize, $
                HTHICK=hthick, $
                LENGTH=length, $
                LINESTYLE=linestyle, $
-               MAXVECTOR=maxvector, $
+               NORMAL=normal, $
                OVERPLOT=overplot, $
+               REFERENCEVECTOR=referenceVector, $
                SOLID=solid, $
                THICK=thick, $
                VECCOLORS=veccolors_in, $
+               WINDOW=window, $
                XRANGE=xrange, $
                YRANGE=yrange, $
                ADDCMD=1, $
@@ -216,16 +219,19 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
        currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
        IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
        cgWindow, 'cgVelocityVectors', velx, vely, posx, posy, $
+               DEVICE=device, $
                FRACTION=fraction, $
                HSIZE=hsize, $
                HTHICK=hthick, $
                LENGTH=length, $
                LINESTYLE=linestyle, $
-               MAXVECTOR=maxvector, $
+               NORMAL=normal, $
                OVERPLOT=overplot, $
+               REFERENCEVECTOR=referenceVector, $
                SOLID=solid, $
                THICK=thick, $
                VECCOLORS=veccolors_in, $
+               WINDOW=window, $
                XRANGE=xrange, $
                YRANGE=yrange, $
                REPLACECMD=replaceCmd, $
@@ -250,15 +256,15 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
    
    ; Calculated keyword values.
    magnitudes = SQRT(velx^2 + vely^2)
-   IF N_Elements(maxvector) EQ 0 THEN maxvector = Max(magnitudes)
-   maxvector = Double(maxvector)
+   IF N_Elements(referenceVector) EQ 0 THEN referenceVector = Max(magnitudes)
+   referenceVector = Double(referenceVector)
    
-   ; Scale the magnitudes into the maxVector.
-   scaledMags = cgScaleVector(magnitudes, 0, maxvector)
+   ; Scale the magnitudes into the referenceVector.
+   scaledMags = cgScaleVector(magnitudes, 0, referenceVector)
 
    ; Calculate scaled velocities.
-   scaledVx = length * (velx/maxvector)
-   scaledVy = length * (vely/maxvector)
+   scaledVx = length * (velx/referenceVector)
+   scaledVy = length * (vely/referenceVector)
    
    ; Other end of vectors.
    x1 = posx + scaledVx

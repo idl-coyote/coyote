@@ -65,7 +65,10 @@
 ;         device coordinates. Data coordinates are assumed.
 ;     fraction: in, optional, type=float, default=1.0
 ;         A number between 0.0 and 1.0 indicating the fraction of the vectors to
-;         draw on the plot. Vectors are selected randomly from the total population.  
+;         draw on the plot. Vectors are selected randomly from the total population,
+;         unless the `Ordered` keyword is set, in which case they are selected
+;         in an ordered, systematic fashion. For example, Fraction=0.5 will select
+;         every other input vector.
 ;     hsize: in, optional, type=float
 ;         The size of the the arrow head. By default 1/100th the width
 ;         of the device. (!D.X_SIZE / 100.)
@@ -80,6 +83,10 @@
 ;     normal: in, optional, type=boolean, default=0
 ;         Set this keyword to indicate the vector positions are given in 
 ;         normalized coordinates. Data coordinates are assumed.
+;     ordered: in, optional, type=boolean, default=0
+;         If this keyword is set, and the `Fraction` keyword is used, the fraction
+;         of vectors used in the plot are chosen from the entire population in a
+;         systematic, ordered fashion.
 ;     overplot: in, optional, type=boolean, default=0
 ;         Set this keyword to overplot the vectors on an established coordinate
 ;         system plot.
@@ -136,6 +143,8 @@
 ; :History:
 ;     Change History::
 ;        Written by David Fanning, based on NASA Astronomy Library program PartVelVec, 22 March 2014
+;        Added ORDERED keyword. 24 March 2014. DWF.
+;        Drawing the vectors All Wrong. Using what I think is the correct algorithm now. 24 March 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2014, Fanning Software Consulting, Inc.
@@ -149,6 +158,7 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
    LENGTH=length, $
    LINESTYLE=linestyle, $
    NORMAL=normal, $
+   ORDERED=ordered, $
    OVERPLOT=overplot, $
    REFERENCEVECTOR=referenceVector, $
    SOLID=solid, $
@@ -202,6 +212,7 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
                LENGTH=length, $
                LINESTYLE=linestyle, $
                NORMAL=normal, $
+               ORDERED=ordered, $
                OVERPLOT=overplot, $
                REFERENCEVECTOR=referenceVector, $
                SOLID=solid, $
@@ -226,6 +237,7 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
                LENGTH=length, $
                LINESTYLE=linestyle, $
                NORMAL=normal, $
+               ORDERED=ordered, $
                OVERPLOT=overplot, $
                REFERENCEVECTOR=referenceVector, $
                SOLID=solid, $
@@ -259,16 +271,51 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
    IF N_Elements(referenceVector) EQ 0 THEN referenceVector = Max(magnitudes)
    referenceVector = Double(referenceVector)
    
-   ; Scale the magnitudes into the referenceVector.
-   scaledMags = cgScaleVector(magnitudes, 0, referenceVector)
-
-   ; Calculate scaled velocities.
-   scaledVx = length * (velx/referenceVector)
-   scaledVy = length * (vely/referenceVector)
+   ; Do we need a plot?
+   IF N_Elements(xrange) EQ 0 THEN BEGIN
+       xr = Max(posx)- Min(posx)
+       xrange = [Min(posx) - (xr*0.1), Max(posx)+(xr*0.1)]
+   ENDIF
+   IF N_Elements(yrange) EQ 0 THEN BEGIN
+       yr = Max(posy)- Min(posy)
+       yrange = [Min(posy) - (yr*0.1), Max(posy)+(yr*0.1)]
+   ENDIF
+   IF ~overplot THEN cgPlot, [1], /NoData, XRANGE=xrange, YRANGE=yrange, _STRICT_EXTRA=extra
    
-   ; Other end of vectors.
-   x1 = posx + scaledVx
-   y1 = posy + scaledVy
+   ; Calculate default head size.
+   IF N_Elements(hsize) EQ 0 THEN hsize = !D.X_SIZE / 100.
+   
+   ; Calculate the angle between X and Y in radians.
+   angle = ATan(vely/Double(velx))
+
+   ; Calculate scaled velocities in normalized coordinate units.
+   scaledVx = length * (velx * cos(angle) / referenceVector)
+   scaledVy = length * (vely * sin(angle) / referenceVector)
+   
+   ; What kind of coordinate system are you using? You need to know to 
+   ; calcuate the arrow end  of the vector.
+   CASE 1 OF
+       Keyword_Set(device): BEGIN
+         xy = Convert_Coord(posx, posy, /Device, /To_Normal)
+         x1 = scaledVx + Reform(xy[0,*])
+         y1 = scaledVy + Reform(xy[1,*])
+         posx = Reform(xy[0,*])
+         posy = Reform(xy[1,*])
+         END
+        
+       Keyword_Set(normal): BEGIN  
+          x1 = posx + scaledVx
+          y1 = posy + scaledVy
+          END
+
+       ELSE: BEGIN
+         xy = Convert_Coord(posx, posy, /Data, /To_Normal)
+         x1 = scaledVx + Reform(xy[0,*])
+         y1 = scaledVy + Reform(xy[1,*])
+         posx = Reform(xy[0,*])
+         posy = Reform(xy[1,*])
+       END
+   ENDCASE
    
    ; Are we doing just a fraction of the vectors.
    IF fraction LT 1.0 THEN BEGIN
@@ -278,7 +325,11 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
         IF numGood EQ 0 THEN RETURN
         
         ; Compute indices of the vectors to plot. 
-        goodIndices = Long(RandomU(seed, numGood) * vecLength)
+        IF Keyword_Set(ordered) THEN BEGIN
+            goodIndices = Long(DIndGen(numGood) / (numGood - 1L) * vecLength)
+        ENDIF ELSE BEGIN
+            goodIndices = Long(RandomU(seed, numGood) * vecLength)
+        ENDELSE
         scaledVx = scaledVx[goodIndices]
         scaledVy = scaledVy[goodIndices]
         px = posx[goodIndices]
@@ -294,41 +345,6 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
         
    ENDELSE
 
-   ; Do we need a plot?
-   
-   IF N_Elements(xrange) EQ 0 THEN BEGIN
-       xr = Max(posx)- Min(posx)
-       xrange = [Min(posx) - (xr*0.1), Max(posx)+(xr*0.1)]
-   ENDIF
-   IF N_Elements(yrange) EQ 0 THEN BEGIN
-       yr = Max(posy)- Min(posy)
-       yrange = [Min(posy) - (yr*0.1), Max(posy)+(yr*0.1)]
-   ENDIF
-    
-   
-   
-   IF ~overplot THEN cgPlot, [1], /NoData, XRANGE=xrange, YRANGE=yrange, _STRICT_EXTRA=extra
-   
-   ; Calculate default head size.
-   IF N_Elements(hsize) EQ 0 THEN hsize = !D.X_SIZE / 100.
-   
-   ; What kind of coordinate system are you using? cgArrow assumes (inexplicably!) a DEVICE coordinate system. This program
-   ; assumes a more natural data coordinate system.
-   CASE 1 OF
-      ( Keyword_Set(normal) + Keyword_Set(device) ) EQ 0: BEGIN
-        data = 1B
-        normal = 0B
-        END
-      Keyword_Set(normal): BEGIN
-        data = 0B
-        normal = 1B
-        END
-      ELSE: BEGIN
-        data = 0B
-        normal = 0B
-        END
-   ENDCASE
-   
    ; Make sure the endpoints of the vectors don't extend beyond the plot window.
    px = !X.CRange[0] > px < !X.CRange[1]
    py = !Y.CRange[0] > py < !Y.CRange[1]
@@ -339,12 +355,12 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
    FOR j=0,vecLength-1 DO BEGIN
        cgArrow, px[j], py[j], x1[j], y1[j], $
            COLOR = veccolors[j], $
-           DATA = data, $
            HSIZE = hsize, $
            HTHICK = hthick, $
            LINESTYLE=linestyle, $
-           NORMAL = normal, $
+           NORMAL = 1, $
            SOLID = solid, $
            THICK = thick
     ENDFOR
+    
 END

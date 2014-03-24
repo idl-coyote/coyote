@@ -145,6 +145,7 @@
 ;        Written by David Fanning, based on NASA Astronomy Library program PartVelVec, 22 March 2014
 ;        Added ORDERED keyword. 24 March 2014. DWF.
 ;        Drawing the vectors All Wrong. Using what I think is the correct algorithm now. 24 March 2014. DWF.
+;        Modified so I don't change into position variables. 24 March 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2014, Fanning Software Consulting, Inc.
@@ -299,21 +300,23 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
          xy = Convert_Coord(posx, posy, /Device, /To_Normal)
          x1 = scaledVx + Reform(xy[0,*])
          y1 = scaledVy + Reform(xy[1,*])
-         posx = Reform(xy[0,*])
-         posy = Reform(xy[1,*])
+         px = Reform(xy[0,*])
+         y = Reform(xy[1,*])
          END
         
        Keyword_Set(normal): BEGIN  
           x1 = posx + scaledVx
           y1 = posy + scaledVy
+          px = posx
+          py = posy
           END
 
        ELSE: BEGIN
          xy = Convert_Coord(posx, posy, /Data, /To_Normal)
          x1 = scaledVx + Reform(xy[0,*])
          y1 = scaledVy + Reform(xy[1,*])
-         posx = Reform(xy[0,*])
-         posy = Reform(xy[1,*])
+         px = Reform(xy[0,*])
+         py = Reform(xy[1,*])
        END
    ENDCASE
    
@@ -332,18 +335,14 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
         ENDELSE
         scaledVx = scaledVx[goodIndices]
         scaledVy = scaledVy[goodIndices]
-        px = posx[goodIndices]
-        py = posy[goodIndices]
+        px = px[goodIndices]
+        py = py[goodIndices]
         veccolors = veccolors[goodIndices]
         x1 = x1[goodIndices]
         y1 = y1[goodIndices]
         veclength = N_Elements(px)
         
-   ENDIF ELSE BEGIN
-        px = posx
-        py = posy
-        
-   ENDELSE
+   ENDIF 
 
    ; Make sure the endpoints of the vectors don't extend beyond the plot window.
    px = !X.CRange[0] > px < !X.CRange[1]

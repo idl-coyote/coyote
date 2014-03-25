@@ -60,6 +60,14 @@
 ; :Keywords:
 ;     addcmd: in, optional, type=boolean, default=0
 ;         An alternative way to set the `Window` keyword.
+;     clip: in, optional, type=boolean, default=0
+;         Set the keyword to clip vector output to the clipping rectangle specified
+;         in the `CRect` keyword. See the documentation for the IDL graphics
+;         keyword NOCLIP.
+;     crect: in, optional, type=float
+;          A four-element array giving the clipping rectangle [xo, yo, x1, y1]. The
+;          default clipping rectangle is the plot area. See the documenation for the
+;          IDL graphics keyword CLIP.
 ;     device: in, optional, type=boolean, default=0
 ;         Set this keyword to indicate the vector positions are given in 
 ;         device coordinates. Data coordinates are assumed.
@@ -146,12 +154,16 @@
 ;        Added ORDERED keyword. 24 March 2014. DWF.
 ;        Drawing the vectors All Wrong. Using what I think is the correct algorithm now. 24 March 2014. DWF.
 ;        Modified so I don't change into position variables. 24 March 2014. DWF.
+;        Fixed a small problem with the algorithm for calculating the direction of the scaled vectors and
+;           added CLIP and CRECT keywords. 25 March 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgVelocityVectors, velx, vely, posx, posy, $
    ADDCMD=addcmd, $
+   CLIP=clipit, $
+   CRECT=crect, $
    DEVICE=device, $
    FRACTION=fraction, $
    HSIZE=hsize, $
@@ -206,6 +218,8 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
        ; Special treatment for overplotting or adding a command.
        IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
            cgWindow, 'cgVelocityVectors', velx, vely, posx, posy, $
+               CLIP=clipit, $
+               CRECT=crect, $
                DEVICE=device, $
                FRACTION=fraction, $
                HSIZE=hsize, $
@@ -231,6 +245,8 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
        currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
        IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
        cgWindow, 'cgVelocityVectors', velx, vely, posx, posy, $
+               CLIP=clipit, $
+               CRECT=crect, $
                DEVICE=device, $
                FRACTION=fraction, $
                HSIZE=hsize, $
@@ -287,11 +303,11 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
    IF N_Elements(hsize) EQ 0 THEN hsize = !D.X_SIZE / 100.
    
    ; Calculate the angle between X and Y in radians.
-   angle = ATan(vely/Double(velx))
-
+   angle = ATan(vely, Double(velx))
+   
    ; Calculate scaled velocities in normalized coordinate units.
-   scaledVx = length * (velx * cos(angle) / referenceVector)
-   scaledVy = length * (vely * sin(angle) / referenceVector)
+   scaledVx = length * (ABS(velx) * Cos(angle) / referenceVector)
+   scaledVy = length * (ABS(vely) * Sin(angle) / referenceVector)
    
    ; What kind of coordinate system are you using? You need to know to 
    ; calcuate the arrow end  of the vector.
@@ -301,7 +317,7 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
          x1 = scaledVx + Reform(xy[0,*])
          y1 = scaledVy + Reform(xy[1,*])
          px = Reform(xy[0,*])
-         y = Reform(xy[1,*])
+         py = Reform(xy[1,*])
          END
         
        Keyword_Set(normal): BEGIN  
@@ -344,16 +360,12 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
         
    ENDIF 
 
-   ; Make sure the endpoints of the vectors don't extend beyond the plot window.
-   px = !X.CRange[0] > px < !X.CRange[1]
-   py = !Y.CRange[0] > py < !Y.CRange[1]
-   x1 = !X.CRange[0] > x1 < !X.CRange[1]
-   y1 = !Y.CRange[0] > y1 < !Y.CRange[1]
-   
    ; Draw the vectors.
    FOR j=0,vecLength-1 DO BEGIN
        cgArrow, px[j], py[j], x1[j], y1[j], $
+           CLIP=clipit, $
            COLOR = veccolors[j], $
+           CRECT=crect, $
            HSIZE = hsize, $
            HTHICK = hthick, $
            LINESTYLE=linestyle, $

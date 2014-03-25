@@ -62,10 +62,18 @@
 ; :Keywords:
 ;     addcmd: in, optional, type=boolean, default=0
 ;         An alternative way to set the `Window` keyword.
+;     clip: in, optional, type=boolean, default=0
+;         Set the keyword to clip arrow output to the clipping rectangle specified
+;         in the `CRect` keyword. See the documentation for the IDL graphics 
+;         keyword NOCLIP.
 ;     color: in, optional, type=string/integer/long, default='white'
 ;         An alternative way to specify the color to use in erasing the graphics window.
 ;         Color names are those used with cgColor. This parameter is used in
 ;         preference to the background_color parameter.
+;     crect: in, optional, type=float
+;          A four-element array giving the clipping rectangle [xo, yo, x1, y1]. The
+;          default clipping rectangle is the plot area. See the documenation for the
+;          IDL graphics keyword CLIP.
 ;     data: in, optional, type=boolean, default=0
 ;          Set this keyword of the arrow locations are in data coordinates.
 ;          Device coordinates are assumed.
@@ -111,7 +119,9 @@
 ;-
 PRO cgArrow, x0, y0, x1, y1, $
     ADDCMD=addcmd, $
+    CLIP=clipit, $
     COLOR = scolor, $
+    CRECT=crect, $
     DATA = data, $
     HSIZE = hsize, $
     HTHICK = hthick, $
@@ -142,7 +152,9 @@ PRO cgArrow, x0, y0, x1, y1, $
         void = cgQuery(COUNT=wincnt)
         IF wincnt EQ 0 THEN cgWindow
         cgWindow, 'cgArrow', x0, y0, x1, y1, $
+            CLIP=clipit, $
             COLOR = scolor, $
+            CRECT=crect, $
             DATA = data, $
             HSIZE = hsize, $
             HTHICK = hthick, $
@@ -162,6 +174,10 @@ PRO cgArrow, x0, y0, x1, y1, $
     ; Set up keyword parameters.
     IF N_Elements(thick) EQ 0 THEN thick = 1.
     IF N_Elements(hthick) EQ 0 THEN hthick = thick
+    
+    ; Strange manipulations to get IDL graphics keyword straight.
+    noclip = 1 - Keyword_Set(clipit)
+    IF N_Elements(crect) NE 0 THEN clip =crect
     
     ; Choose a color.
     IF N_Elements(sColor) EQ 0 THEN BEGIN
@@ -237,14 +253,16 @@ PRO cgArrow, x0, y0, x1, y1, $
        IF Keyword_Set(solid) THEN BEGIN   ;Use polyfill?
          b = a * mcost*.9d ; End of arrow shaft (Fudge to force join)
          cgPlotS, [xp0, xp1+b*dx], [yp0, yp1+b*dy], /DEVICE, $
-            COLOR=color, THICK=thick, LINESTYLE=linestyle, _Extra=extra
+            COLOR=color, THICK=thick, LINESTYLE=linestyle, $
+            NOCLIP=noclip, CLIP=clip, _Extra=extra
          cgColorFill, [xxp0, xxp1, xp1, xxp0], [yyp0, yyp1, yp1, yyp0], $
-            /DEVICE, COLOR = color
+            /DEVICE, COLOR=color, NOCLIP=noclip, CLIP=clip, _Extra=extra
        ENDIF ELSE BEGIN
          cgPlotS, [xp0, xp1], [yp0, yp1], /DEVICE, COLOR=color, THICK=thick, $
-             LINESTYLE=linestyle, _Extra=extra
+             LINESTYLE=linestyle, NOCLIP=noclip, CLIP=clip,_Extra=extra
          cgPlotS, [xxp0,xp1,xxp1],[yyp0,yp1,yyp1], /DEVICE, COLOR=color, $
-            THICK=hthick, LINESTYLE=linestyle, _Extra=extra
+            THICK=hthick, LINESTYLE=linestyle, $
+             NOCLIP=noclip, CLIP=clip,_Extra=extra
        ENDELSE
        cgSetColorState, currentState
        ENDFOR

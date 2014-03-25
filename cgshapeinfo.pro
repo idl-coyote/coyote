@@ -88,6 +88,7 @@
 ;       Renamed cgShapeFile from Shapefile. 20 Aug 2012. DWF.
 ;       Modified so that when the user selects a new Attribute Name, the Attribue Value index stays
 ;          the same. 24 Nov 2013. DWF.
+;       Fixed a type with a progress bar. 26 March 2014. DWF.
 ;       
 ; :Copyright:
 ;    Copyright (c) 2006-2013, Fanning Software Consulting, Inc.
@@ -158,7 +159,7 @@ PRO cgShapeInfo_Events, event
                 entityAttributes[j] = StrUpCase(StrTrim((*thisEntity.attributes).(event.index), 2))
                 IF usingProgress THEN progressBar -> Update, (Float(j)/num)*100
             ENDFOR
-            IF usingProgress THEN cgProgressBar -> Destroy
+            IF usingProgress THEN ProgressBar -> Destroy
             (*info).nameIndex = event.index
             Widget_Control, (*info).entityList, Set_Value=entityAttributes
             *(*info).entityAttributes = entityAttributes

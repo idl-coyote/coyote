@@ -74,18 +74,17 @@
 ;
 ; EXAMPLE:
 ;
-;    Window, Title='Wind Barbs', /Free
+;    cgDisplay, Title='Wind Barbs', /Free
 ;    seed = -3L
-;    lon = Randomu(seed, 9) * 360 - 180
-;    lat = Randomu(seed, 9) * 180 - 90
-;    speed = Randomu(seed, 9) * 100 + 5.0
-;    direction = Indgen(9)*45
-;    Erase, Color=cgColor('Ivory', !P.Background)
-;    Polyfill,[0.1, 0.1, 0.9, 0.9, 0.1], [0.1, 0.9, 0.9, 0.1, 0.1], /Normal, Color=cgColor('light gray')
-;    Map_Set, /Cylindrical, Position=[0.1, 0.1, 0.9, 0.9], Color=cgColor('Steel Blue'), /NoErase
-;    Map_Grid, Color=cgColor('Charcoal', !D.Table_Size-2)
-;    Map_Continents, Color=cgColor('Sea Green', !D.Table_Size-3)
-;    Windbarb, lon, lat, speed, direction, /Station, Color='Indian Red', /Southern_Hemisphere
+;    lon = Randomu(seed, 60) * 360 - 180
+;    lat = Randomu(seed, 60) * 180 - 90
+;    speed = Randomu(seed, 60) * 50 + 5.0
+;    direction = Indgen(60)*25
+;    cgColorfill,[0.1, 0.1, 0.9, 0.9, 0.1], [0.1, 0.9, 0.9, 0.1, 0.1], /Normal, Color='light gray'
+;    cgMap_Set, /Cylindrical, Position=[0.1, 0.1, 0.9, 0.9], Color='Steel Blue', /NoErase
+;    cgMap_Grid, Color='Charcoal'
+;    cgMap_Continents, Color='Sea Green'
+;    Windbarb, lon, lat, speed, direction, Length=0.025, /Station, Color='Indian Red', /Southern_Hemisphere
 ;
 ;    To clip the windbards that fall outside the plot, substitute these two lines
 ;    for the last line in the example above:
@@ -106,10 +105,10 @@
 ;       After further research, I've reverted to the direction specified originally.
 ;       And I have changed the "feathers" to point clockwise normally, and counterdlockwise
 ;         if the SOUTHERN_HEMISPHERE keyword is set. Here are my sources (21 July 2005. DWF):
-;
 ;            http://ww2010.atmos.uiuc.edu/(Gh)/guides/maps/sfcobs/wnd.rxml
 ;            http://www.al.noaa.gov/WWWHD/pubdocs/windbarb.html
 ;      Fixed a small CLIP problem. 21 July 2005. DWF.
+;      Shaft of wind barbs not extending all the way to starting point. Fixed. 27 Mar 2014. DWF.
 ;
 ;-
 ;******************************************************************************************;
@@ -243,8 +242,10 @@ PRO Windbarb, x, y, wspeed, wdirection, $
 
       ; Draw the staff.
 
-      x1 = clip[0] > (xx[j] + sindr * sr) < clip[2]
-      y1 = clip[1] > (yy[j] + cosdr * sr * aspect) < clip[3]
+;      x1 = clip[0] > (xx[j] + sindr * sr) < clip[2]
+;      y1 = clip[1] > (yy[j] + cosdr * sr * aspect) < clip[3]
+      x1 = clip[0] > (xx[j]) < clip[2]
+      y1 = clip[1] > (yy[j]) < clip[3]
       x2 = clip[0] > (x1 + sindr * staff_len) < clip[2]
       y2 = clip[1] > (y1 + cosdr * staff_len * aspect) < clip[3]
       IF Keyword_Set(station) THEN StationPlot, x[j], y[j], Radius=sr, Color=color[j]
@@ -259,7 +260,7 @@ PRO Windbarb, x, y, wspeed, wdirection, $
          IF x2 LT clip[0] OR x2 GT clip[2] THEN CONTINUE
          IF y1 LT clip[1] OR y1 GT clip[3] THEN CONTINUE
          IF y2 LT clip[1] OR y2 GT clip[3] THEN CONTINUE
-         PLOTS, [x1, x2], [y1,y2], /Normal, Color=cgColor(color[j]), Clip=clip, Thick=thick
+         PLOTS, [x1, x2], [y1, y2], /Normal, Color=cgColor(color[j]), Clip=clip, Thick=thick
          IF (num50 EQ 0) AND (num10 EQ 0) THEN BEGIN
             x1 = x2 + sindr * half_len
             y1 = y2 + cosdr * half_len * aspect
@@ -267,7 +268,7 @@ PRO Windbarb, x, y, wspeed, wdirection, $
             IF x2 LT clip[0] OR x2 GT clip[2] THEN CONTINUE
             IF y1 LT clip[1] OR y1 GT clip[3] THEN CONTINUE
             IF y2 LT clip[1] OR y2 GT clip[3] THEN CONTINUE
-            PLOTS, [x1, x2], [y1,y2], /Normal, Color=cgColor(color[j]), Clip=clip, Thick=thick
+            PLOTS, [x1, x2], [y1, y2], /Normal, Color=cgColor(color[j]), Clip=clip, Thick=thick
          ENDIF
       ENDIF
 

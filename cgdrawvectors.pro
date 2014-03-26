@@ -1,7 +1,7 @@
 ; docformat = 'rst'
 ;
 ; NAME:
-;   cgVelocityVectors
+;   cgDrawVectors
 ;
 ; PURPOSE:
 ;   Plots the velocity vectors of particles at their position. Vectors may be
@@ -130,14 +130,14 @@
 ;
 ;    Plot the particle velocities::
 ;
-;         cgVelocityVectors, velx, vely, posx, posy
+;         cgDrawVectors, velx, vely, posx, posy
 ;
 ;    Example using vector colors::
 ;
 ;         magnitude = SQRT(velx^2 + vely^2)
 ;         cgLoadCT, 5
 ;         colors = BytScl(magnitude)
-;         cgVelocityVectors, velx, vely, posx, posy, VecColors=colors
+;         cgDrawVectors, velx, vely, posx, posy, VecColors=colors
 ;
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -160,7 +160,7 @@
 ; :Copyright:
 ;     Copyright (c) 2014, Fanning Software Consulting, Inc.
 ;-
-PRO cgVelocityVectors, velx, vely, posx, posy, $
+PRO cgDrawVectors, velx, vely, posx, posy, $
    ADDCMD=addcmd, $
    CLIP=clipit, $
    CRECT=crect, $
@@ -195,13 +195,13 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
    
    ; No parameters. Get some help.
    IF N_Params() EQ 0 THEN BEGIN
-       Print, 'Syntax of cgVelocityVectors: cgVelocityVectors, velx, vely, posx, posy'
+       Print, 'Syntax of cgDrawVectors: cgDrawVectors, velx, vely, posx, posy'
        RETURN
    ENDIF
    
    ; Need all four parameters. Get some help.
    IF N_Params() NE 4 THEN BEGIN
-       Print, 'Syntax of cgVelocityVectors: cgVelocityVectors, velx, vely, posx, posy'
+       Print, 'Syntax of cgDrawVectors: cgDrawVectors, velx, vely, posx, posy'
        Print, 'All four input parameters are required.'
        RETURN
    ENDIF
@@ -217,7 +217,7 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
    
        ; Special treatment for overplotting or adding a command.
        IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
-           cgWindow, 'cgVelocityVectors', velx, vely, posx, posy, $
+           cgWindow, 'cgDrawVectors', velx, vely, posx, posy, $
                CLIP=clipit, $
                CRECT=crect, $
                DEVICE=device, $
@@ -244,7 +244,7 @@ PRO cgVelocityVectors, velx, vely, posx, posy, $
        ; Open a new window or replace the current commands, as required.
        currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
        IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
-       cgWindow, 'cgVelocityVectors', velx, vely, posx, posy, $
+       cgWindow, 'cgDrawVectors', velx, vely, posx, posy, $
                CLIP=clipit, $
                CRECT=crect, $
                DEVICE=device, $

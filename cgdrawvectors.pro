@@ -88,6 +88,13 @@
 ;         are scaled according to this length.
 ;     linestyle: in, optional, type=integer, default=0
 ;         The line style of the arrow. Line style integers as in PLOT.
+;     mapCoord: in, optional, type=object
+;         A map coordinate object (e.g., cgMap) that describes the map projection
+;         and datum used to specify the vector locations. Note that this could also be a 
+;         map structure as returned from MAP_PROJ_INIT, but in that case the user is 
+;         responsible for setting up the XY map coordinate space independently and 
+;         outside of this program. This coordinate object will be used to transform
+;         lat/lon locations into the XY locations of the map projection.
 ;     normal: in, optional, type=boolean, default=0
 ;         Set this keyword to indicate the vector positions are given in 
 ;         normalized coordinates. Data coordinates are assumed.
@@ -156,11 +163,12 @@
 ;        Modified so I don't change into position variables. 24 March 2014. DWF.
 ;        Fixed a small problem with the algorithm for calculating the direction of the scaled vectors and
 ;           added CLIP and CRECT keywords. 25 March 2014. DWF.
+;        Added MAPCOORD keyword. 27 March 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2014, Fanning Software Consulting, Inc.
 ;-
-PRO cgDrawVectors, velx, vely, posx, posy, $
+PRO cgDrawVectors, velx, vely, posx_, posy_, $
    ADDCMD=addcmd, $
    CLIP=clipit, $
    CRECT=crect, $
@@ -170,6 +178,7 @@ PRO cgDrawVectors, velx, vely, posx, posy, $
    HTHICK=hthick, $
    LENGTH=length, $
    LINESTYLE=linestyle, $
+   MAPCOORD=mapcoord, $
    NORMAL=normal, $
    ORDERED=ordered, $
    OVERPLOT=overplot, $
@@ -207,7 +216,7 @@ PRO cgDrawVectors, velx, vely, posx, posy, $
    ENDIF
    
    ; All input parameters have to be the same length.
-   IF ((N_Elements(velx) + N_Elements(vely) + N_Elements(posx) + N_Elements(posy)) / 4.0) NE N_Elements(velx) THEN BEGIN
+   IF ((N_Elements(velx) + N_Elements(vely) + N_Elements(posx_) + N_Elements(posy_)) / 4.0) NE N_Elements(velx) THEN BEGIN
         Message, 'Input parameters are not all the same length.'
    ENDIF
    
@@ -217,7 +226,7 @@ PRO cgDrawVectors, velx, vely, posx, posy, $
    
        ; Special treatment for overplotting or adding a command.
        IF Keyword_Set(overplot) OR Keyword_Set(addcmd) THEN BEGIN
-           cgWindow, 'cgDrawVectors', velx, vely, posx, posy, $
+           cgWindow, 'cgDrawVectors', velx, vely, posx_, posy_, $
                CLIP=clipit, $
                CRECT=crect, $
                DEVICE=device, $
@@ -226,6 +235,7 @@ PRO cgDrawVectors, velx, vely, posx, posy, $
                HTHICK=hthick, $
                LENGTH=length, $
                LINESTYLE=linestyle, $
+               MAPCOORD=mapcoord, $
                NORMAL=normal, $
                ORDERED=ordered, $
                OVERPLOT=overplot, $
@@ -244,7 +254,7 @@ PRO cgDrawVectors, velx, vely, posx, posy, $
        ; Open a new window or replace the current commands, as required.
        currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
        IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
-       cgWindow, 'cgDrawVectors', velx, vely, posx, posy, $
+       cgWindow, 'cgDrawVectors', velx, vely, posx_, posy_, $
                CLIP=clipit, $
                CRECT=crect, $
                DEVICE=device, $
@@ -253,6 +263,7 @@ PRO cgDrawVectors, velx, vely, posx, posy, $
                HTHICK=hthick, $
                LENGTH=length, $
                LINESTYLE=linestyle, $
+               MAPCOORD=mapcoord, $
                NORMAL=normal, $
                ORDERED=ordered, $
                OVERPLOT=overplot, $
@@ -287,6 +298,17 @@ PRO cgDrawVectors, velx, vely, posx, posy, $
    magnitudes = SQRT(velx^2 + vely^2)
    IF N_Elements(referenceVector) EQ 0 THEN referenceVector = Max(magnitudes)
    referenceVector = Double(referenceVector)
+   
+   ; Do we need to transform the position coordinates with a map coordinate object?
+   IF N_Elements(mapcoord) NE 0 THEN BEGIN
+       IF Obj_Valid(mapCoord) THEN mapStruct = mapCoord -> GetMapStruct() ELSE mapStruct = mapCoord
+       xy = Map_Proj_Forward(posx_, posy_, MAP_STRUCTURE=mapStruct)
+       posx = Reform(xy[0,*])
+       posy = Reform(xy[1,*])
+   ENDIF ELSE BEGIN
+       posx = posx_
+       posy = posy_
+   ENDELSE
    
    ; Do we need a plot?
    IF N_Elements(xrange) EQ 0 THEN BEGIN

@@ -50,10 +50,10 @@
 ;         An array containing the X component of the particle velocity vector.
 ;    vely: in, required, type=integer/float
 ;         An array containing the Y component of the particle velocity vector.
-;    posx: in, required, type=integer/float
+;    posx_: in, required, type=integer/float
 ;         An array containing the X posiiton of the particle velocity vector. The
 ;         shaft end of the arrow vector is positioned here.
-;    posy: in, required, type=integer/float
+;    posy_: in, required, type=integer/float
 ;         An array containing the Y posiiton of the particle velocity vector. The
 ;         shaft end of the arrow vector is positioned here.
 ;

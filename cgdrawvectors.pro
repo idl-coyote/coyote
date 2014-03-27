@@ -164,6 +164,7 @@
 ;        Fixed a small problem with the algorithm for calculating the direction of the scaled vectors and
 ;           added CLIP and CRECT keywords. 25 March 2014. DWF.
 ;        Added MAPCOORD keyword. 27 March 2014. DWF.
+;        Modified to set color information once here, instead of allowing cgArrow to do it. 27 March 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2014, Fanning Software Consulting, Inc.
@@ -279,6 +280,9 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
        RETURN
    ENDIF
    
+   ; Doing this in decomposed color.
+   cgSetColorState, 1, Current=thisColorState
+   
    ; Default keyword values.
    SetDefaultValue, fraction, 1.0, RANGE=[0.0, 1.0]
    SetDefaultValue, length, 0.075, RANGE=[0.0, 1.0]
@@ -288,11 +292,6 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
        thick = (!D.Name EQ 'PS') ? 3 : 1
    ENDIF
    SetDefaultValue, hthick, thick
-   SetDefaultValue, veccolors_in, 'opposite'
-   
-   ; Vector colors should be the same length as other vectors.
-   veclength = N_Elements(velx)
-   IF N_Elements(veccolors_in) EQ 1 THEN veccolors = Replicate(veccolors_in, veclength) ELSE veccolors = veccolors_in
    
    ; Calculated keyword values.
    magnitudes = SQRT(velx^2 + vely^2)
@@ -320,6 +319,13 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
        yrange = [Min(posy) - (yr*0.1), Max(posy)+(yr*0.1)]
    ENDIF
    IF ~overplot THEN cgPlot, [1], /NoData, XRANGE=xrange, YRANGE=yrange, _STRICT_EXTRA=extra
+   
+   ; Color determination is postponed to here, after a plot is drawn.
+   SetDefaultValue, veccolors_in, cgColor('opposite')
+   
+   ; Vector colors should be the same length as other vectors.
+   veclength = N_Elements(velx)
+   IF N_Elements(veccolors_in) EQ 1 THEN veccolors = Replicate(veccolors_in, veclength) ELSE veccolors = veccolors_in
    
    ; Calculate default head size.
    IF N_Elements(hsize) EQ 0 THEN hsize = !D.X_SIZE / 100.
@@ -396,4 +402,6 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
            THICK = thick
     ENDFOR
     
+    ; Restore color state
+    cgSetColorState, thisColorState
 END

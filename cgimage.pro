@@ -214,6 +214,7 @@
 ;       The YTITLE keyword was missing when passed to cgWindow. Fixed now. 24 Oct 2013. DWF.
 ;       Fixed a couple of places where I meant "missing_index" and used "missing_color". 26 Jan 2014. DWF.
 ;       Added check for open graphics window when displaying alpha-channel image. 31 March 2014. DWF.
+;       Added XVECTOR and YVECTOR keywords. 1 April 2014. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2011-2014, Fanning Software Consulting, Inc.

@@ -147,7 +147,6 @@ FOR j=1,7 DO BEGIN
       boundaryPts[*,ptIndex] = newPt
 
      ; Return the "from" direction.
-      Print, 'Normal Point'
       RETURN, (to_direction + 4) MOD 8
    ENDIF
 
@@ -158,12 +157,9 @@ ENDFOR
 IF TOTAL(mask GT 0) GT 1 THEN BEGIN ; Isolated point.
    newPt = boundaryPts[*,ptIndex-1] + darray[*,from_direction]
    boundaryPts[*,ptIndex] = newPt
-   Print, 'Isolated Point'
-   stop
    RETURN, (from_direction + 4) MOD 8
 ENDIF ELSE BEGIN ; Solitary point.
    boundaryPts[*,ptIndex] = boundaryPts[*,ptIndex-1]
-   Print, 'Solitary Point'
    RETURN, -1
 ENDELSE
 END ; ------------------------------------------------------------------------------------------

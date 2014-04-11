@@ -2150,6 +2150,147 @@ END ;---------------------------------------------------------------------------
 
 
 
+PRO FSC_PSCONFIG::SetProperty,        $ ; The SetProperty method of the object.
+    AvantGarde=avantgarde,             $ ; Set this keyword to select the AvantGarde font.
+    Bits_per_Pixel=bits_per_pixel,     $ ; The number of image bits saved for each image pixel: 2, 4, or 8.
+    Bold=bold,                         $ ; Set this keyword to select the Bold font style.
+    BookStyle=book,                    $ ; Set this keyword to select the Book font style.
+    Bkman=bookman,                     $ ; Set this keyword to select the Bookman font.
+    CMYK=cmyk,                         $ ; Set this keywprd to use CMYK colors instead of RGB.
+    Color=color,                       $ ; Set this keyword to select Color PostScript output.
+    Courier=courier,                   $ ; Set this keyword to select the Courier font.
+    Decomposed=decomposed,             $ ; Set this keyword to select decomposed color.
+    DefaultSetup=defaultsetup,         $ ; Set this keyword to the "name" of a default style.
+    Demi=demi,                         $ ; Set this keyword to select the Demi font style.
+    Directory=directory,               $ ; Set thie keyword to the name of the starting directory. Current directory by default.
+    Encapsulated=encapsulated,         $ ; Set this keyword to select Encapsulated PostScript output.
+    ;   European=european,                 $ ; Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units).
+    Filename=filename,                 $ ; Set this keyword to the name of the file. Default: 'idl.ps'
+    FontSize=fontsize,                 $ ; Set this keyword to the font size. Between 6 and 36. Default is 12.
+    FontType=fonttype,                 $ ; Set this keyword to select the font type: -1 is Hershey, 0 is hardward, 1 is true-type.
+    Helvetica=helvetica,               $ ; Set this keyword to select the Helvetica font.
+    Inches=inches,                     $ ; Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters.
+    Italic=italic,                     $ ; Set this keyword to select the Italic font style.
+    Isolatin=isolatin,                 $ ; Set this keyword to select ISOlatin1 encoding.
+    Landscape=landscape,               $ ; Set this keyword to select Landscape output.
+    LanguageLevel=langlevel,           $ ; Set this keyword to the Language Level of the PostScript interpreter.
+    Light=light,                       $ ; Set this keyword to select the Light font style.
+    Medium=medium,                     $ ; Set this keyword to select the Medium font style.
+    Metric=metric,                     $ ; Set this keyword to indicate "metric" mode (i.e., A4 page and centimeter units).
+    Name=name,                         $ ; This is the "name" of the object.
+    Narrow=narrow,                     $ ; Set this keyword to select the Narrow font style.
+    Oblique=oblique, $                 $ ; Set this keyword to select the Oblique font style.
+    PageType=pagetype,                 $ ; Set this keyword to the "type" of page: 'Letter', 'Legal', 'Ledger', or 'A4'.
+    Palatino=palatino,                 $ ; Set this keyword to select the Palatino font.
+    Preview=preview,                   $ ; Set this keyword to select Preview mode: 0, 1, or 2.
+    Schoolbook=schoolbook,             $ ; Set this keyword to select the Schoolbook font.
+    Set_Font=set_font,                 $ ; Set this keyword to the name of a font passed to PostScript with Set_Plot keyword.
+    Symbol=symbol,                     $ ; Set this keyword to select the Symbol font.
+    Times=times,                       $ ; Set this keyword to select the Times font.
+    TrueType=truetype,                 $ ; Set this keyword to select True-Type fonts.
+    UpDate=update, $                   $ ; Set this keyword to update the GUI if it is on the display.
+    XOffset=xoffset,                   $ ; Set this keyword to the XOffset. (Note: offset calculated from lower-left corner of page.)
+    XSize=xsize,                       $ ; Set this keyword to the X size of the PostScript "window".
+    YOffset=yoffset,                   $ ; Set this keyword to the YOffset. (Note: offset calculated from lower-left corner of page.)
+    YSize=ysize,                       $ ; Set this keyword to the Y size of the PostScript "window".
+    ZapfChancery=zapfchancery,         $ ; Set this keyword to select the ZapfChancery font.
+    ZapfDingbats=zapfdingbats            ; Set this keyword to select the ZapfDingbats font.
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /Cancel
+        ok = cgErrorMsg(Traceback=Keyword_Set(self.debug))
+        RETURN
+    ENDIF
+    
+    ; Check for undefined variables.
+    
+    IF N_Elements(bits_per_pixel) NE 0 THEN BEGIN
+        IF bits_per_pixel EQ 2 OR bits_per_pixel EQ 4 OR bits_per_pixel EQ 8 THEN $
+            self.bitsSet = StrTrim(bits_per_pixel,2) ELSE self.bitsSet = '8'
+    ENDIF
+    IF N_Elements(color) NE 0 THEN self.colorSet = color
+    IF N_Elements(decomposed) NE 0 THEN self.decomposedSet = Keyword_Set(decomposed)
+    IF N_Elements(directory) NE 0 THEN self.directorySet = directory
+    IF N_Elements(filename) NE 0 THEN self.filenameSet = filename
+    self.fullfilenameSet = self->Construct_Full_Filename()
+    IF N_Elements(fontsize) NE 0 THEN self.fontsizeSet = fontsize
+    IF N_Elements(fonttype) NE 0 THEN self.fonttypeSet = fonttype
+    IF N_Elements(encapsulated) NE 0 THEN self.encapsulationSet = encapsulated
+    IF Keyword_Set(inches) NE 0 THEN self.inchesSet = inches
+    IF N_Elements(landscape) NE 0 THEN self.landscape = landscape
+    IF N_Elements(langlevel) NE 0 THEN self.langlevel = langlevel
+    IF Keyword_Set(name) NE 0 THEN self.name = name
+    IF N_Elements(pagetype) NE 0 THEN BEGIN
+        self.pagetypeSet = pagetype
+        self.pagetype = pagetype
+    ENDIF
+    IF N_Elements(preview) NE 0 THEN self.previewSet = 0 > preview < 2
+    
+    IF N_Elements(set_font) NE 0 THEN self.set_fontSet = set_font
+    IF N_Elements(xsize) NE 0 THEN self.xsizeSet = xsize
+    IF N_Elements(ysize) NE 0 THEN self.ysizeSet = ysize
+    
+    ; Offsets are weird.
+    
+    dims = self->PageDimensions()
+    IF N_Elements(xoffset) NE 0 THEN IF self.landscape THEN self.xoffsetSet = dims[1] - yoffset ELSE self.xoffsetSet = xoffset
+    IF N_Elements(yoffset) NE 0 THEN IF self.landscape THEN self.yoffsetSet = xoffset ELSE self.yoffsetSet = yoffset
+    
+    
+    avantgarde = Keyword_Set(avantgarde)
+    bold = Keyword_Set(bold)
+    book = Keyword_Set(book)
+    bookman = Keyword_Set(bookman)
+    cmyk = Keyword_Set(cmyk)
+    courier = Keyword_Set(courier)
+    demi = Keyword_Set(demi)
+    encapsulated = Keyword_Set(encapsulated)
+    ;european = Keyword_Set(european)
+    helvetica = Keyword_Set(helvetica)
+    isolatin = Keyword_Set(isolatin)
+    italic = Keyword_Set(italic)
+    landscape = Keyword_Set(landscape)
+    light = Keyword_Set(light)
+    medium = Keyword_Set(medium)
+    metric = Keyword_Set(metric)
+    narrow = Keyword_Set(narrow)
+    oblique = Keyword_Set(oblique)
+    palatino = Keyword_Set(palatino)
+    schoolbook = Keyword_Set(schoolbook)
+    symbol = Keyword_Set(symbol)
+    times = Keyword_Set(times)
+    truetype = Keyword_Set(truetype)
+    zapfchancery = Keyword_Set(zapfchancery)
+    zapfdingbats = Keyword_Set(zapfdingbats)
+    
+    fontset = [avantgarde, bookman, courier, helvetica, palatino, schoolbook, symbol, times, zapfchancery, zapfdingbats]
+    index = Where(fontset EQ 1, count)
+    IF count EQ 0 THEN self.fontnameSet = 'Helvetica' ELSE self.fontnameSet = (*self.fontnames)[index[0]]
+    IF self.fontnameSet EQ 'AvantGarde' THEN self.avantgarde = 1 ELSE self.avantgarde = 0
+    IF self.fontnameSet EQ 'Bookman' THEN self.bookman = 1 ELSE self.bookman = 0
+    IF self.fontnameSet EQ 'Courier' THEN self.courier = 1 ELSE self.courier = 0
+    IF self.fontnameSet EQ 'Helvetica' THEN self.helvetica = 1 ELSE self.helvetica = 0
+    IF self.fontnameSet EQ 'Palatino' THEN self.palatino = 1 ELSE self.palatino = 0
+    IF self.fontnameSet EQ 'Schoolbook' THEN self.schoolbook = 1 ELSE self.schoolbook = 0
+    IF self.fontnameSet EQ 'Symbol' THEN self.symbol = 1 ELSE self.symbol = 0
+    IF self.fontnameSet EQ 'Times' THEN self.times = 1 ELSE self.times = 0
+    IF self.fontnameSet EQ 'ZapfChancery' THEN self.zapfchancery = 1 ELSE self.zapfchancery = 0
+    IF self.fontnameSet EQ 'ZapfDingbats' THEN self.zapfdingbats = 1 ELSE self.zapfdingbats = 0
+    self.fontstyleSet = [bold, book, demi, italic, light, medium, narrow, oblique]
+    
+    ; Populate the self object by saving the configuration.
+    
+    self->SaveConfiguration
+    
+    ; Update the display if required.
+    
+    IF Keyword_Set(update) THEN self->UpdateDisplay
+    
+END ;--------------------------------------------------------------------------------
+
+
+
 PRO FSC_PSCONFIG::StatusLight, safe
 
 ; This method sets the status light (the background color of the
@@ -2371,216 +2512,77 @@ END ;---------------------------------------------------------------------------
 
 
 
-PRO FSC_PSCONFIG::SetProperty,        $ ; The SetProperty method of the object.
-   AvantGarde=avantgarde,             $ ; Set this keyword to select the AvantGarde font.
-   Bits_per_Pixel=bits_per_pixel,     $ ; The number of image bits saved for each image pixel: 2, 4, or 8.
-   Bold=bold,                         $ ; Set this keyword to select the Bold font style.
-   BookStyle=book,                    $ ; Set this keyword to select the Book font style.
-   Bkman=bookman,                     $ ; Set this keyword to select the Bookman font.
-   CMYK=cmyk,                         $ ; Set this keywprd to use CMYK colors instead of RGB.
-   Color=color,                       $ ; Set this keyword to select Color PostScript output.
-   Courier=courier,                   $ ; Set this keyword to select the Courier font.
-   DefaultSetup=defaultsetup,         $ ; Set this keyword to the "name" of a default style.
-   Demi=demi,                         $ ; Set this keyword to select the Demi font style.
-   Directory=directory,               $ ; Set thie keyword to the name of the starting directory. Current directory by default.
-   Encapsulated=encapsulated,         $ ; Set this keyword to select Encapsulated PostScript output.
-;   European=european,                 $ ; Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units).
-   Filename=filename,                 $ ; Set this keyword to the name of the file. Default: 'idl.ps'
-   FontSize=fontsize,                 $ ; Set this keyword to the font size. Between 6 and 36. Default is 12.
-   FontType=fonttype,                 $ ; Set this keyword to select the font type: -1 is Hershey, 0 is hardward, 1 is true-type.
-   Helvetica=helvetica,               $ ; Set this keyword to select the Helvetica font.
-   Inches=inches,                     $ ; Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters.
-   Italic=italic,                     $ ; Set this keyword to select the Italic font style.
-   Isolatin=isolatin,                 $ ; Set this keyword to select ISOlatin1 encoding.
-   Landscape=landscape,               $ ; Set this keyword to select Landscape output.
-   LanguageLevel=langlevel,           $ ; Set this keyword to the Language Level of the PostScript interpreter.
-   Light=light,                       $ ; Set this keyword to select the Light font style.
-   Medium=medium,                     $ ; Set this keyword to select the Medium font style.
-   Metric=metric,                     $ ; Set this keyword to indicate "metric" mode (i.e., A4 page and centimeter units).
-   Name=name,                         $ ; This is the "name" of the object.
-   Narrow=narrow,                     $ ; Set this keyword to select the Narrow font style.
-   Oblique=oblique, $                 $ ; Set this keyword to select the Oblique font style.
-   PageType=pagetype,                 $ ; Set this keyword to the "type" of page: 'Letter', 'Legal', 'Ledger', or 'A4'.
-   Palatino=palatino,                 $ ; Set this keyword to select the Palatino font.
-   Preview=preview,                   $ ; Set this keyword to select Preview mode: 0, 1, or 2.
-   Schoolbook=schoolbook,             $ ; Set this keyword to select the Schoolbook font.
-   Set_Font=set_font,                 $ ; Set this keyword to the name of a font passed to PostScript with Set_Plot keyword.
-   Symbol=symbol,                     $ ; Set this keyword to select the Symbol font.
-   Times=times,                       $ ; Set this keyword to select the Times font.
-   TrueType=truetype,                 $ ; Set this keyword to select True-Type fonts.
-   UpDate=update, $                   $ ; Set this keyword to update the GUI if it is on the display.
-   XOffset=xoffset,                   $ ; Set this keyword to the XOffset. (Note: offset calculated from lower-left corner of page.)
-   XSize=xsize,                       $ ; Set this keyword to the X size of the PostScript "window".
-   YOffset=yoffset,                   $ ; Set this keyword to the YOffset. (Note: offset calculated from lower-left corner of page.)
-   YSize=ysize,                       $ ; Set this keyword to the Y size of the PostScript "window".
-   ZapfChancery=zapfchancery,         $ ; Set this keyword to select the ZapfChancery font.
-   ZapfDingbats=zapfdingbats            ; Set this keyword to select the ZapfDingbats font.
-
-Catch, theError
-IF theError NE 0 THEN BEGIN
-   Catch, /Cancel
-   ok = cgErrorMsg(Traceback=Keyword_Set(self.debug))
-   RETURN
-ENDIF
-
-   ; Check for undefined variables.
-
-IF N_Elements(bits_per_pixel) NE 0 THEN BEGIN
-   IF bits_per_pixel EQ 2 OR bits_per_pixel EQ 4 OR bits_per_pixel EQ 8 THEN $
-      self.bitsSet = StrTrim(bits_per_pixel,2) ELSE self.bitsSet = '8'
-ENDIF
-IF N_Elements(color) NE 0 THEN self.colorSet = color
-IF N_Elements(directory) NE 0 THEN self.directorySet = directory
-IF N_Elements(filename) NE 0 THEN self.filenameSet = filename
-self.fullfilenameSet = self->Construct_Full_Filename()
-IF N_Elements(fontsize) NE 0 THEN self.fontsizeSet = fontsize
-IF N_Elements(fonttype) NE 0 THEN self.fonttypeSet = fonttype
-IF N_Elements(encapsulated) NE 0 THEN self.encapsulationSet = encapsulated
-IF Keyword_Set(inches) NE 0 THEN self.inchesSet = inches
-IF N_Elements(landscape) NE 0 THEN self.landscape = landscape
-IF N_Elements(langlevel) NE 0 THEN self.langlevel = langlevel
-IF Keyword_Set(name) NE 0 THEN self.name = name
-IF N_Elements(pagetype) NE 0 THEN BEGIN
-   self.pagetypeSet = pagetype
-   self.pagetype = pagetype
-ENDIF
-IF N_Elements(preview) NE 0 THEN self.previewSet = 0 > preview < 2
-
-IF N_Elements(set_font) NE 0 THEN self.set_fontSet = set_font
-IF N_Elements(xsize) NE 0 THEN self.xsizeSet = xsize
-IF N_Elements(ysize) NE 0 THEN self.ysizeSet = ysize
-
-   ; Offsets are weird.
-
-dims = self->PageDimensions()
-IF N_Elements(xoffset) NE 0 THEN IF self.landscape THEN self.xoffsetSet = dims[1] - yoffset ELSE self.xoffsetSet = xoffset
-IF N_Elements(yoffset) NE 0 THEN IF self.landscape THEN self.yoffsetSet = xoffset ELSE self.yoffsetSet = yoffset
-
-
-avantgarde = Keyword_Set(avantgarde)
-bold = Keyword_Set(bold)
-book = Keyword_Set(book)
-bookman = Keyword_Set(bookman)
-cmyk = Keyword_Set(cmyk)
-courier = Keyword_Set(courier)
-demi = Keyword_Set(demi)
-encapsulated = Keyword_Set(encapsulated)
-;european = Keyword_Set(european)
-helvetica = Keyword_Set(helvetica)
-isolatin = Keyword_Set(isolatin)
-italic = Keyword_Set(italic)
-landscape = Keyword_Set(landscape)
-light = Keyword_Set(light)
-medium = Keyword_Set(medium)
-metric = Keyword_Set(metric)
-narrow = Keyword_Set(narrow)
-oblique = Keyword_Set(oblique)
-palatino = Keyword_Set(palatino)
-schoolbook = Keyword_Set(schoolbook)
-symbol = Keyword_Set(symbol)
-times = Keyword_Set(times)
-truetype = Keyword_Set(truetype)
-zapfchancery = Keyword_Set(zapfchancery)
-zapfdingbats = Keyword_Set(zapfdingbats)
-
-fontset = [avantgarde, bookman, courier, helvetica, palatino, schoolbook, symbol, times, zapfchancery, zapfdingbats]
-index = Where(fontset EQ 1, count)
-IF count EQ 0 THEN self.fontnameSet = 'Helvetica' ELSE self.fontnameSet = (*self.fontnames)[index[0]]
-IF self.fontnameSet EQ 'AvantGarde' THEN self.avantgarde = 1 ELSE self.avantgarde = 0
-IF self.fontnameSet EQ 'Bookman' THEN self.bookman = 1 ELSE self.bookman = 0
-IF self.fontnameSet EQ 'Courier' THEN self.courier = 1 ELSE self.courier = 0
-IF self.fontnameSet EQ 'Helvetica' THEN self.helvetica = 1 ELSE self.helvetica = 0
-IF self.fontnameSet EQ 'Palatino' THEN self.palatino = 1 ELSE self.palatino = 0
-IF self.fontnameSet EQ 'Schoolbook' THEN self.schoolbook = 1 ELSE self.schoolbook = 0
-IF self.fontnameSet EQ 'Symbol' THEN self.symbol = 1 ELSE self.symbol = 0
-IF self.fontnameSet EQ 'Times' THEN self.times = 1 ELSE self.times = 0
-IF self.fontnameSet EQ 'ZapfChancery' THEN self.zapfchancery = 1 ELSE self.zapfchancery = 0
-IF self.fontnameSet EQ 'ZapfDingbats' THEN self.zapfdingbats = 1 ELSE self.zapfdingbats = 0
-self.fontstyleSet = [bold, book, demi, italic, light, medium, narrow, oblique]
-
-   ; Populate the self object by saving the configuration.
-
-self->SaveConfiguration
-
-   ; Update the display if required.
-
-IF Keyword_Set(update) THEN self->UpdateDisplay
-
-END ;--------------------------------------------------------------------------------
-
-
-
 PRO FSC_PSCONFIG::CLEANUP
-Ptr_Free, self.fontnames
+    Ptr_Free, self.fontnames
 END ;--------------------------------------------------------------------------------
 
 
 
 FUNCTION FSC_PSCONFIG::INIT,          $ ; The INIT method of the FSC_PSCONFIG object.
-   AvantGarde=avantgarde,             $ ; Set this keyword to select the AvantGarde font.
-   Bits_per_Pixel=bits_per_pixel,     $ ; The number of image bits saved for each image pixel: 2, 4, or 8.
-   Bold=bold,                         $ ; Set this keyword to select the Bold font style.
-   BookStyle=book,                    $ ; Set this keyword to select the Book font style.
-   Bkman=bookman,                     $ ; Set this keyword to select the Bookman font.
-   CMYK=cmyk,                         $ ; Set this keywprd to use CMYK colors instead of RGB.
-   Color=color,                       $ ; Set this keyword to select Color PostScript output.
-   Courier=courier,                   $ ; Set this keyword to select the Courier font.
-   Debug=debug,                       $ ; Set this keyword to get traceback information when errors are encountered.
-   Decomposed=decomposed, $           $ ; Set this keyword to select 24-bit color. IDL 7.1 and above only.
-   DefaultSetup=defaultsetup,         $ ; Set this keyword to the "name" of a default style.
-   Demi=demi,                         $ ; Set this keyword to select the Demi font style.
-   Directory=directory,               $ ; Set thie keyword to the name of the starting directory. Current directory by default.
-   Encapsulated=encapsulated,         $ ; Set this keyword to select Encapsulated PostScript output.
-;   European=european,                 $ ; Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units).
-   Filename=filename,                 $ ; Set this keyword to the name of the file. Default: 'idl.ps'
-   FontSize=fontsize,                 $ ; Set this keyword to the font size. Between 6 and 36. Default is 12.
-   FontType=fonttype,                 $ ; Set this keyword to select the font type: -1 is Hershey, 0 is hardward, 1 is true-type.
-   Helvetica=helvetica,               $ ; Set this keyword to select the Helvetica font.
-   Inches=inches,                     $ ; Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters.
-   Italic=italic,                     $ ; Set this keyword to select the Italic font style.
-   Isolatin=isolatin,                 $ ; Set this keyword to select ISOlatin1 encoding.
-   Landscape=landscape,               $ ; Set this keyword to select Landscape output.
-   LanguageLevel=langlevel, $         $ ; Set this keyword to select the language level (1 or 2).
-   Light=light,                       $ ; Set this keyword to select the Light font style.
-   Medium=medium,                     $ ; Set this keyword to select the Medium font style.
-   Metric=metric,                     $ ; Set this keyword to indicate metric mode (i.e., A4 page and centimeter units).
-   Name=name,                         $ ; The "name" of the object. Objects with different names can have their
-                                        ; graphical user interfaces appear simultaneously on the display.
-   Narrow=narrow,                     $ ; Set this keyword to select the Narrow font style.
-   Oblique=oblique, $                 $ ; Set this keyword to select the Oblique font style.
-   PageType=pagetype,                 $ ; Set this keyword to the "type" of page: 'Letter', 'Legal', 'Ledger', or 'A4'.
-   Palatino=palatino,                 $ ; Set this keyword to select the Palatino font.
-   Preview=preview,                   $ ; Set this keyword to select Preview mode: 0, 1, or 2.
-   Schoolbook=schoolbook,             $ ; Set this keyword to select the Schoolbook font.
-   Set_Font=set_font,                 $ ; Set this keyword to the name of a font passed to PostScript with Set_Plot keyword.
-   Symbol=symbol,                     $ ; Set this keyword to select the Symbol font.
-   Times=times,                       $ ; Set this keyword to select the Times font.
-   TrueType=truetype,                 $ ; Set this keyword to select True-Type fonts.
-   XOffset=xoffset,                   $ ; Set this keyword to the XOffset. (Note: offset calculated from lower-left corner of page.)
-   XSize=xsize,                       $ ; Set this keyword to the X size of the PostScript "window".
-   YOffset=yoffset,                   $ ; Set this keyword to the YOffset. (Note: offset calculated from lower-left corner of page.)
-   YSize=ysize,                       $ ; Set this keyword to the Y size of the PostScript "window".
-   ZapfChancery=zapfchancery,         $ ; Set this keyword to select the ZapfChancery font.
-   ZapfDingbats=zapfdingbats            ; Set this keyword to select the ZapfDingbats font.
-
-   ; Error handling.
-
-Catch, theError
-IF theError NE 0 THEN BEGIN
-   Catch, /Cancel
-   ok = cgErrorMsg()
-   RETURN, 1
-ENDIF
-
-self.debug = 1; Keyword_Set(debug)
-decomposed = Keyword_Set(decomposed)
-encapsulated = Keyword_Set(encapsulated) ; Must come before LANDSCAPE.
-landscape = Keyword_Set(landscape)
-IF encapsulated THEN landscape = 0
-
-   ; Set the available PostScript fonts.
-
-availableFonts = [                      $
+    AvantGarde=avantgarde,             $ ; Set this keyword to select the AvantGarde font.
+    Bits_per_Pixel=bits_per_pixel,     $ ; The number of image bits saved for each image pixel: 2, 4, or 8.
+    Bold=bold,                         $ ; Set this keyword to select the Bold font style.
+    BookStyle=book,                    $ ; Set this keyword to select the Book font style.
+    Bkman=bookman,                     $ ; Set this keyword to select the Bookman font.
+    CMYK=cmyk,                         $ ; Set this keywprd to use CMYK colors instead of RGB.
+    Color=color,                       $ ; Set this keyword to select Color PostScript output.
+    Courier=courier,                   $ ; Set this keyword to select the Courier font.
+    Debug=debug,                       $ ; Set this keyword to get traceback information when errors are encountered.
+    Decomposed=decomposed, $           $ ; Set this keyword to select 24-bit color. IDL 7.1 and above only.
+    DefaultSetup=defaultsetup,         $ ; Set this keyword to the "name" of a default style.
+    Demi=demi,                         $ ; Set this keyword to select the Demi font style.
+    Directory=directory,               $ ; Set thie keyword to the name of the starting directory. Current directory by default.
+    Encapsulated=encapsulated,         $ ; Set this keyword to select Encapsulated PostScript output.
+    ;   European=european,                 $ ; Set this keyword to indicate "european" mode (i.e., A4 page and centimeter units).
+    Filename=filename,                 $ ; Set this keyword to the name of the file. Default: 'idl.ps'
+    FontSize=fontsize,                 $ ; Set this keyword to the font size. Between 6 and 36. Default is 12.
+    FontType=fonttype,                 $ ; Set this keyword to select the font type: -1 is Hershey, 0 is hardward, 1 is true-type.
+    Helvetica=helvetica,               $ ; Set this keyword to select the Helvetica font.
+    Inches=inches,                     $ ; Set this keyword to indicate sizes and offsets are in inches as opposed to centimeters.
+    Italic=italic,                     $ ; Set this keyword to select the Italic font style.
+    Isolatin=isolatin,                 $ ; Set this keyword to select ISOlatin1 encoding.
+    Landscape=landscape,               $ ; Set this keyword to select Landscape output.
+    LanguageLevel=langlevel, $         $ ; Set this keyword to select the language level (1 or 2).
+    Light=light,                       $ ; Set this keyword to select the Light font style.
+    Medium=medium,                     $ ; Set this keyword to select the Medium font style.
+    Metric=metric,                     $ ; Set this keyword to indicate metric mode (i.e., A4 page and centimeter units).
+    Name=name,                         $ ; The "name" of the object. Objects with different names can have their
+    ; graphical user interfaces appear simultaneously on the display.
+    Narrow=narrow,                     $ ; Set this keyword to select the Narrow font style.
+    Oblique=oblique, $                 $ ; Set this keyword to select the Oblique font style.
+    PageType=pagetype,                 $ ; Set this keyword to the "type" of page: 'Letter', 'Legal', 'Ledger', or 'A4'.
+    Palatino=palatino,                 $ ; Set this keyword to select the Palatino font.
+    Preview=preview,                   $ ; Set this keyword to select Preview mode: 0, 1, or 2.
+    Schoolbook=schoolbook,             $ ; Set this keyword to select the Schoolbook font.
+    Set_Font=set_font,                 $ ; Set this keyword to the name of a font passed to PostScript with Set_Plot keyword.
+    Symbol=symbol,                     $ ; Set this keyword to select the Symbol font.
+    Times=times,                       $ ; Set this keyword to select the Times font.
+    TrueType=truetype,                 $ ; Set this keyword to select True-Type fonts.
+    XOffset=xoffset,                   $ ; Set this keyword to the XOffset. (Note: offset calculated from lower-left corner of page.)
+    XSize=xsize,                       $ ; Set this keyword to the X size of the PostScript "window".
+    YOffset=yoffset,                   $ ; Set this keyword to the YOffset. (Note: offset calculated from lower-left corner of page.)
+    YSize=ysize,                       $ ; Set this keyword to the Y size of the PostScript "window".
+    ZapfChancery=zapfchancery,         $ ; Set this keyword to select the ZapfChancery font.
+    ZapfDingbats=zapfdingbats            ; Set this keyword to select the ZapfDingbats font.
+    
+    ; Error handling.
+    
+    Catch, theError
+    IF theError NE 0 THEN BEGIN
+        Catch, /Cancel
+        ok = cgErrorMsg()
+        RETURN, 1
+    ENDIF
+    
+    self.debug = 1; Keyword_Set(debug)
+    decomposed = Keyword_Set(decomposed)
+    encapsulated = Keyword_Set(encapsulated) ; Must come before LANDSCAPE.
+    landscape = Keyword_Set(landscape)
+    IF encapsulated THEN landscape = 0
+    
+    ; Set the available PostScript fonts.
+    
+    availableFonts = [                      $
         'AvantGarde',                   $
         'Bookman',                      $
         'Courier',                      $
@@ -2591,187 +2593,187 @@ availableFonts = [                      $
         'Times',                        $
         'ZapfChancery',                 $
         'ZapfDingbats']
-
-self.fontnames = Ptr_New(availableFonts)
-
-   ; Default font and font type.
-
-fontname = "Helvetica"
-IF N_Elements(fonttype) EQ 0 THEN fonttype = 2
-IF N_Elements(filename) NE 0 THEN self.filenameSet = filename
-
-   ; Metric style
-self.metric = Keyword_Set(metric)
-
-   ; Set default values if a default setup was not asked for.
-
-IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
-
-   self.defaultsSet = 'None'
-   IF N_Elements(bits_per_pixel) EQ 0 THEN bits_per_pixel = 8
-   IF N_Elements(bits_per_pixel) NE 0 THEN BEGIN
-       IF bits_per_pixel EQ 2 OR bits_per_pixel EQ 4 OR bits_per_pixel EQ 8 THEN $
-          self.bitsSet = StrTrim(bits_per_pixel,2) ELSE self.bitsSet = '8'
-   ENDIF
-   IF N_Elements(color) EQ 0 THEN color = 1 ELSE color = 0 > color < color
-   IF N_Elements(filename) EQ 0 THEN filename = "idl.ps"
-   
-   ; Is this a fully-qualified filename?
-   dirName = File_Dirname(filename)  
+        
+    self.fontnames = Ptr_New(availableFonts)
     
-   ; Parse the filename and the directory name     
-   IF N_Elements(directory) EQ 0 THEN BEGIN
-        ; If no directory is provide, go get the last directory saved if you can.
-        ; Otherwise, use the current directory.
-        IF dirName EQ "." THEN BEGIN
-            DEFSYSV, '!cgPostScript_LastDir', EXISTS=exists
-            IF exists THEN directory = !cgPostScript_LastDir ELSE CD, Current=directory
+    ; Default font and font type.
+    
+    fontname = "Helvetica"
+    IF N_Elements(fonttype) EQ 0 THEN fonttype = 2
+    IF N_Elements(filename) NE 0 THEN self.filenameSet = filename
+    
+    ; Metric style
+    self.metric = Keyword_Set(metric)
+    
+    ; Set default values if a default setup was not asked for.
+    
+    IF N_Elements(defaultsetup) EQ 0 THEN BEGIN
+    
+        self.defaultsSet = 'None'
+        IF N_Elements(bits_per_pixel) EQ 0 THEN bits_per_pixel = 8
+        IF N_Elements(bits_per_pixel) NE 0 THEN BEGIN
+            IF bits_per_pixel EQ 2 OR bits_per_pixel EQ 4 OR bits_per_pixel EQ 8 THEN $
+                self.bitsSet = StrTrim(bits_per_pixel,2) ELSE self.bitsSet = '8'
+        ENDIF
+        IF N_Elements(color) EQ 0 THEN color = 1 ELSE color = 0 > color < color
+        IF N_Elements(filename) EQ 0 THEN filename = "idl.ps"
+        
+        ; Is this a fully-qualified filename?
+        dirName = File_Dirname(filename)
+        
+        ; Parse the filename and the directory name
+        IF N_Elements(directory) EQ 0 THEN BEGIN
+            ; If no directory is provide, go get the last directory saved if you can.
+            ; Otherwise, use the current directory.
+            IF dirName EQ "." THEN BEGIN
+                DEFSYSV, '!cgPostScript_LastDir', EXISTS=exists
+                IF exists THEN directory = !cgPostScript_LastDir ELSE CD, Current=directory
+            ENDIF ELSE BEGIN
+                basename = File_Basename(filename)
+                filename = basename
+                directory = dirName
+            ENDELSE
         ENDIF ELSE BEGIN
-            basename = File_Basename(filename)
-            filename = basename
-            directory = dirName
+            IF dirName NE "." THEN BEGIN
+                basename = File_Basename(filename)
+                filename = basename
+            ENDIF
         ENDELSE
-   ENDIF ELSE BEGIN
-        IF dirName NE "." THEN BEGIN
-            basename = File_Basename(filename)
-            filename = basename
-        ENDIF 
-   ENDELSE
-   IF N_Elements(fontsize) EQ 0 THEN fontsize = 12
-   IF N_Elements(inches) EQ 0 THEN IF Keyword_Set(metric) THEN inches = 0 ELSE inches = 1
-   IF N_Elements(name) EQ 0 THEN name = ""
-   IF N_Elements(pagetype) EQ 0 THEN IF Keyword_Set(metric) THEN pagetype = "A4" ELSE pagetype = "LETTER"
-   IF N_Elements(preview) EQ 0 THEN preview = 0
-   IF N_Elements(set_font) EQ 0 THEN set_font = ""
-   IF N_Elements(langlevel) EQ 0 THEN langlevel = 1
-
-   avantgarde = Keyword_Set(avantgarde)
-   bold = Keyword_Set(bold)
-   book = Keyword_Set(book)
-   bookman = Keyword_Set(bookman)
-   cmyk = Keyword_Set(cmyk)
-   courier = Keyword_Set(courier)
-   demi = Keyword_Set(demi)
-   helvetica = Keyword_Set(helvetica)
-   IF N_Elements(isolatin) EQ 0 THEN isolatin = 1 ELSE isolatin = Keyword_Set(isolatin)
-   italic = Keyword_Set(italic)
-   light = Keyword_Set(light)
-   medium = Keyword_Set(medium)
-   metric = Keyword_Set(metric)
-   narrow = Keyword_Set(narrow)
-   oblique = Keyword_Set(oblique)
-   palatino = Keyword_Set(palatino)
-   schoolbook = Keyword_Set(schoolbook)
-   symbol = Keyword_Set(symbol)
-   times = Keyword_Set(times)
-   truetype = Keyword_Set(truetype)
-   zapfchancery = Keyword_Set(zapfchancery)
-   zapfdingbats = Keyword_Set(zapfdingbats)
-
-   fontset = [avantgarde, bookman, courier, helvetica, palatino, schoolbook, symbol, times, zapfchancery, zapfdingbats]
-   index = Where(fontset EQ 1, count)
-   IF count EQ 0 THEN self.fontnameSet = 'Helvetica' ELSE self.fontnameSet = (*self.fontnames)[index[0]]
-   IF self.fontnameSet EQ 'AvantGarde' THEN self.avantgarde = 1 ELSE self.avantgarde = 0
-   IF self.fontnameSet EQ 'Bookman' THEN self.bookman = 1 ELSE self.bookman = 0
-   IF self.fontnameSet EQ 'Courier' THEN self.courier = 1 ELSE self.courier = 0
-   IF self.fontnameSet EQ 'Helvetica' THEN self.helvetica = 1 ELSE self.helvetica = 0
-   IF self.fontnameSet EQ 'Palatino' THEN self.palatino = 1 ELSE self.palatino = 0
-   IF self.fontnameSet EQ 'Schoolbook' THEN self.schoolbook = 1 ELSE self.schoolbook = 0
-   IF self.fontnameSet EQ 'Symbol' THEN self.symbol = 1 ELSE self.symbol = 0
-   IF self.fontnameSet EQ 'Times' THEN self.times = 1 ELSE self.times = 0
-   IF self.fontnameSet EQ 'ZapfChancery' THEN self.zapfchancery = 1 ELSE self.zapfchancery = 0
-   IF self.fontnameSet EQ 'ZapfDingbats' THEN self.zapfdingbats = 1 ELSE self.zapfdingbats = 0
-
-   self.bitsSet = StrTrim(bits_per_pixel, 2)
-   self.decomposedSet = decomposed
-   self.cmykSet = cmyk
-   self.colorSet = color
-   self.directorySet = directory
-   self.metric = metric
-   self.encapsulationSet = encapsulated
-   self.filenameSet = filename
-   self.fonttypeSet = -1 > fonttype < 1
-   self.fontsizeSet = Strtrim( 6 > Fix(fontsize) < 36, 2)
-   self.fontstyleSet = [bold, book, demi, italic, light, medium, narrow, oblique]
-   self.inchesSet = inches
-   self.isolatinSet = isolatin
-   self.landscapeSet = landscape
-   self.langlevelSet = langlevel
-   self.name = name
-   self.pagetype = pagetype
-   self.pagetypeSet = pagetype
-   self.previewSet = preview
-   self.truetypeSet = truetype
-   self.set_fontSet = set_font
-
-   ; Offsets are harder to set because I am trying to shield the
-   ; user from PostScript weirdness.
-
-   IF N_Elements(xoffset) EQ 0 THEN BEGIN
-       IF landscape THEN BEGIN
-           IF inches THEN xoffset = 0.75 ELSE xoffset = 0.75 * 2.54
-       ENDIF ELSE BEGIN
-           IF inches THEN xoffset = 0.5 ELSE xoffset = 0.5 * 2.54
-       ENDELSE
-   ENDIF
-   IF N_Elements(xsize) EQ 0 THEN BEGIN
-       IF landscape THEN BEGIN
-           IF inches THEN xsize = 9.5 ELSE xsize = 9.5 * 2.54
-       ENDIF ELSE BEGIN
-           IF inches THEN xsize = 7.5 ELSE xsize = 7.5 * 2.54
-       ENDELSE
-   ENDIF
-   IF N_Elements(yoffset) EQ 0 THEN BEGIN
-       IF landscape THEN BEGIN
-           IF inches THEN yoffset = 0.75 ELSE yoffset = 0.75 * 2.54
-       ENDIF ELSE BEGIN
-           IF inches THEN yoffset = 2.5 ELSE yoffset = 2.5 * 2.54
-       ENDELSE
-   ENDIF
-   IF N_Elements(ysize) EQ 0 THEN BEGIN
-       IF landscape THEN BEGIN
-           IF inches THEN ysize = 7.0 ELSE ysize = 7.0 * 2.54
-       ENDIF ELSE BEGIN
-           IF inches THEN ysize = 6.0 ELSE ysize = 6.0 * 2.54
-       ENDELSE
-   ENDIF
-;   IF landscape THEN BEGIN
-;      dims = self->PageDimensions()
-;      self.xoffsetSet = dims[1] - yoffset
-;      self.xsizeSet = xsize
-;      self.yoffsetSet = xoffset
-;      self.ysizeSet = ysize
-;   ENDIF ELSE BEGIN
-      self.xoffsetSet = xoffset
-      self.xsizeSet = xsize
-      self.yoffsetSet = yoffset
-      self.ysizeSet = ysize
-;   ENDELSE
-
-   ; Get the correct directory separator.
-
-    CASE StrUpCase(!Version.OS_Family) OF
-       'WINDOWS' : sep = '\'    ; PCs
-       'MACOS'   : sep = ':'    ; Macintoshes
-       'VMS'     : sep = ']'    ; VMS machines
-       ELSE      : sep = '/'    ; Unix machines
-    ENDCASE
+        IF N_Elements(fontsize) EQ 0 THEN fontsize = 12
+        IF N_Elements(inches) EQ 0 THEN IF Keyword_Set(metric) THEN inches = 0 ELSE inches = 1
+        IF N_Elements(name) EQ 0 THEN name = ""
+        IF N_Elements(pagetype) EQ 0 THEN IF Keyword_Set(metric) THEN pagetype = "A4" ELSE pagetype = "LETTER"
+        IF N_Elements(preview) EQ 0 THEN preview = 0
+        IF N_Elements(set_font) EQ 0 THEN set_font = ""
+        IF N_Elements(langlevel) EQ 0 THEN langlevel = 1
+        
+        avantgarde = Keyword_Set(avantgarde)
+        bold = Keyword_Set(bold)
+        book = Keyword_Set(book)
+        bookman = Keyword_Set(bookman)
+        cmyk = Keyword_Set(cmyk)
+        courier = Keyword_Set(courier)
+        demi = Keyword_Set(demi)
+        helvetica = Keyword_Set(helvetica)
+        IF N_Elements(isolatin) EQ 0 THEN isolatin = 1 ELSE isolatin = Keyword_Set(isolatin)
+        italic = Keyword_Set(italic)
+        light = Keyword_Set(light)
+        medium = Keyword_Set(medium)
+        metric = Keyword_Set(metric)
+        narrow = Keyword_Set(narrow)
+        oblique = Keyword_Set(oblique)
+        palatino = Keyword_Set(palatino)
+        schoolbook = Keyword_Set(schoolbook)
+        symbol = Keyword_Set(symbol)
+        times = Keyword_Set(times)
+        truetype = Keyword_Set(truetype)
+        zapfchancery = Keyword_Set(zapfchancery)
+        zapfdingbats = Keyword_Set(zapfdingbats)
+        
+        fontset = [avantgarde, bookman, courier, helvetica, palatino, schoolbook, symbol, times, zapfchancery, zapfdingbats]
+        index = Where(fontset EQ 1, count)
+        IF count EQ 0 THEN self.fontnameSet = 'Helvetica' ELSE self.fontnameSet = (*self.fontnames)[index[0]]
+        IF self.fontnameSet EQ 'AvantGarde' THEN self.avantgarde = 1 ELSE self.avantgarde = 0
+        IF self.fontnameSet EQ 'Bookman' THEN self.bookman = 1 ELSE self.bookman = 0
+        IF self.fontnameSet EQ 'Courier' THEN self.courier = 1 ELSE self.courier = 0
+        IF self.fontnameSet EQ 'Helvetica' THEN self.helvetica = 1 ELSE self.helvetica = 0
+        IF self.fontnameSet EQ 'Palatino' THEN self.palatino = 1 ELSE self.palatino = 0
+        IF self.fontnameSet EQ 'Schoolbook' THEN self.schoolbook = 1 ELSE self.schoolbook = 0
+        IF self.fontnameSet EQ 'Symbol' THEN self.symbol = 1 ELSE self.symbol = 0
+        IF self.fontnameSet EQ 'Times' THEN self.times = 1 ELSE self.times = 0
+        IF self.fontnameSet EQ 'ZapfChancery' THEN self.zapfchancery = 1 ELSE self.zapfchancery = 0
+        IF self.fontnameSet EQ 'ZapfDingbats' THEN self.zapfdingbats = 1 ELSE self.zapfdingbats = 0
+        
+        self.bitsSet = StrTrim(bits_per_pixel, 2)
+        self.decomposedSet = decomposed
+        self.cmykSet = cmyk
+        self.colorSet = color
+        self.directorySet = directory
+        self.metric = metric
+        self.encapsulationSet = encapsulated
+        self.filenameSet = filename
+        self.fonttypeSet = -1 > fonttype < 1
+        self.fontsizeSet = Strtrim( 6 > Fix(fontsize) < 36, 2)
+        self.fontstyleSet = [bold, book, demi, italic, light, medium, narrow, oblique]
+        self.inchesSet = inches
+        self.isolatinSet = isolatin
+        self.landscapeSet = landscape
+        self.langlevelSet = langlevel
+        self.name = name
+        self.pagetype = pagetype
+        self.pagetypeSet = pagetype
+        self.previewSet = preview
+        self.truetypeSet = truetype
+        self.set_fontSet = set_font
+        
+        ; Offsets are harder to set because I am trying to shield the
+        ; user from PostScript weirdness.
+        
+        IF N_Elements(xoffset) EQ 0 THEN BEGIN
+            IF landscape THEN BEGIN
+                IF inches THEN xoffset = 0.75 ELSE xoffset = 0.75 * 2.54
+            ENDIF ELSE BEGIN
+                IF inches THEN xoffset = 0.5 ELSE xoffset = 0.5 * 2.54
+            ENDELSE
+        ENDIF
+        IF N_Elements(xsize) EQ 0 THEN BEGIN
+            IF landscape THEN BEGIN
+                IF inches THEN xsize = 9.5 ELSE xsize = 9.5 * 2.54
+            ENDIF ELSE BEGIN
+                IF inches THEN xsize = 7.5 ELSE xsize = 7.5 * 2.54
+            ENDELSE
+        ENDIF
+        IF N_Elements(yoffset) EQ 0 THEN BEGIN
+            IF landscape THEN BEGIN
+                IF inches THEN yoffset = 0.75 ELSE yoffset = 0.75 * 2.54
+            ENDIF ELSE BEGIN
+                IF inches THEN yoffset = 2.5 ELSE yoffset = 2.5 * 2.54
+            ENDELSE
+        ENDIF
+        IF N_Elements(ysize) EQ 0 THEN BEGIN
+            IF landscape THEN BEGIN
+                IF inches THEN ysize = 7.0 ELSE ysize = 7.0 * 2.54
+            ENDIF ELSE BEGIN
+                IF inches THEN ysize = 6.0 ELSE ysize = 6.0 * 2.54
+            ENDELSE
+        ENDIF
+        ;   IF landscape THEN BEGIN
+        ;      dims = self->PageDimensions()
+        ;      self.xoffsetSet = dims[1] - yoffset
+        ;      self.xsizeSet = xsize
+        ;      self.yoffsetSet = xoffset
+        ;      self.ysizeSet = ysize
+        ;   ENDIF ELSE BEGIN
+        self.xoffsetSet = xoffset
+        self.xsizeSet = xsize
+        self.yoffsetSet = yoffset
+        self.ysizeSet = ysize
+        ;   ENDELSE
+        
+        ; Get the correct directory separator.
+        
+        CASE StrUpCase(!Version.OS_Family) OF
+            'WINDOWS' : sep = '\'    ; PCs
+            'MACOS'   : sep = ':'    ; Macintoshes
+            'VMS'     : sep = ']'    ; VMS machines
+            ELSE      : sep = '/'    ; Unix machines
+        ENDCASE
+        
+        index = FSC_PSCONFIG_RStrPos(directory, sep)
+        IF index EQ - 1 THEN BEGIN
+            self.fullFilenameSet = directory + sep + filename
+        ENDIF ELSE BEGIN
+            IF index EQ (StrLen(directory) - 1) THEN self.fullFilenameSet = directory + filename ELSE $
+                self.fullFilenameSet = directory + sep + filename
+        ENDELSE
+        
+    ENDIF ELSE self->SetDefault, defaultsetup
     
-    index = FSC_PSCONFIG_RStrPos(directory, sep)
-    IF index EQ - 1 THEN BEGIN
-       self.fullFilenameSet = directory + sep + filename
-    ENDIF ELSE BEGIN
-       IF index EQ (StrLen(directory) - 1) THEN self.fullFilenameSet = directory + filename ELSE $
-           self.fullFilenameSet = directory + sep + filename
-    ENDELSE
-
-ENDIF ELSE self->SetDefault, defaultsetup
-
-   ; Save this configuration.
-
-self->SaveConfiguration
-
-RETURN, 1
+    ; Save this configuration.
+    
+    self->SaveConfiguration
+    
+    RETURN, 1
 END ;--------------------------------------------------------------------------------
 
 

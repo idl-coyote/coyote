@@ -243,6 +243,7 @@
 ;         Added a BARTHICK keyword to change the thickness of the bar outlines. 28 Feb 2013. DWF.
 ;         Further work checking for NANs in the display of the data. NAN data set to length of 0. 3 Sept 2013. DWF.
 ;         Added LABELSKIP keyword and make sure number of labels doesn't exceed 60. 8 Feb 2014. DWF.
+;         Somehow the BARCOORDS coordinates have gone on walk-about. Restored. 15 April 2014. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2011-2014, Fanning Software Consulting, Inc.
@@ -644,6 +645,9 @@ PRO cgBarPlot, values, $
     
     ; Locations of the tick marks.
     tickv = (tickv-tick_scal_fact[0])/tick_scal_fact[1]  
+    
+    ; Return the center of the bar coordinates.
+    barcoords = tickv
     
     ; Make sure you have no more than 60 labels.
     IF N_Elements(labelSkip) EQ 0 THEN BEGIN

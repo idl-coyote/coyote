@@ -255,6 +255,14 @@ PRO cgPS_Open, filename, $
       font = 1
    ENDIF
    
+   ; I did a bad thing and made the keyword TT_FONT specify the name of a true-type font. This is
+   ; inconsistent with other software for setting up the PostScript device (e.g., FSC_PSConfig__Define
+   ; and cgPS_Config. Here I try to rectify the situation.
+   IF (N_Elements(tt_font) NE 0) && (Size(tt_font, /TNAME) EQ 'STRING') THEN BEGIN
+       setfont = tt_font
+       tt_font = 1
+   ENDIF
+   
    ; Save the current True-Type font before entering the PostScript device.
    ; Necessary for restoring it later.
    cgWindow_GetDefs, PS_TT_FONT=ps_tt_font
@@ -265,9 +273,9 @@ PRO cgPS_Open, filename, $
    ps_struct.font = font
    
    ; Set up the true-type font for PostScript, if needed.
-   IF (N_Elements(tt_font) EQ 0) AND (font EQ 1) THEN cgWindow_GetDefs, PS_TT_FONT=tt_font
-   IF N_Elements(tt_font) NE 0 THEN BEGIN
-        ps_struct.tt_font = tt_font
+   IF (N_Elements(setfont) EQ 0) AND (font EQ 1) THEN cgWindow_GetDefs, PS_TT_FONT=setfont
+   IF N_Elements(setfont) NE 0 THEN BEGIN
+        ps_struct.tt_font = setfont
         font = 1
    ENDIF
    
@@ -343,7 +351,7 @@ PRO cgPS_Open, filename, $
    
    Set_Plot, 'PS'
    Device, _EXTRA=keywords, SCALE_FACTOR=scale_factor
-   IF N_Elements(tt_font) NE 0 THEN Device, Set_Font=tt_font, /TT_Font
+   IF N_Elements(setfont) NE 0 THEN Device, Set_Font=setfont, /TT_Font
    
    ; Determine the character size.
    IF ps_struct.p.charsize EQ 0 THEN BEGIN

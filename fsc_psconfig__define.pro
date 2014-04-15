@@ -170,6 +170,8 @@
 ;   The program now remembers the last directory you used and will start in that
 ;       directory, unless told otherwise. 26 Oct 2011. DWF.
 ;   Parsing of full filename failing. Fixed 27 Oct 2011. DWF.
+;   Modified the structure of keywords returned from the GetKeywords method to use the field ISOLATIN rather than
+;       ISOLATIN1. Did this so keyword structure can be passed directly to cgPS_Config. 11 April 2014, DWF.
 ;-
 
 ;******************************************************************************************;
@@ -759,7 +761,7 @@ struct = { $
    filename: filename, $
    font_size: Fix(self.fontSizeSet), $
    inches: self.inchesSet, $
-   isolatin1: self.isolatinSet, $
+   isolatin: self.isolatinSet, $
    language_level: self.langLevelSet, $
    preview: self.previewSet, $
    tt_font: self.truetypeSet, $
@@ -2218,8 +2220,8 @@ PRO FSC_PSCONFIG::SetProperty,        $ ; The SetProperty method of the object.
     IF N_Elements(fonttype) NE 0 THEN self.fonttypeSet = fonttype
     IF N_Elements(encapsulated) NE 0 THEN self.encapsulationSet = encapsulated
     IF Keyword_Set(inches) NE 0 THEN self.inchesSet = inches
-    IF N_Elements(landscape) NE 0 THEN self.landscape = landscape
-    IF N_Elements(langlevel) NE 0 THEN self.langlevel = langlevel
+    IF N_Elements(landscape) NE 0 THEN self.landscapeSet = landscape
+    IF N_Elements(langlevel) NE 0 THEN self.langlevelSet = langlevel
     IF Keyword_Set(name) NE 0 THEN self.name = name
     IF N_Elements(pagetype) NE 0 THEN BEGIN
         self.pagetypeSet = pagetype
@@ -2542,7 +2544,7 @@ FUNCTION FSC_PSCONFIG::INIT,          $ ; The INIT method of the FSC_PSCONFIG ob
     Italic=italic,                     $ ; Set this keyword to select the Italic font style.
     Isolatin=isolatin,                 $ ; Set this keyword to select ISOlatin1 encoding.
     Landscape=landscape,               $ ; Set this keyword to select Landscape output.
-    LanguageLevel=langlevel, $         $ ; Set this keyword to select the language level (1 or 2).
+    Language_Level=lang_level,         $ ; Set this keyword to select the language level (1 or 2).
     Light=light,                       $ ; Set this keyword to select the Light font style.
     Medium=medium,                     $ ; Set this keyword to select the Medium font style.
     Metric=metric,                     $ ; Set this keyword to indicate metric mode (i.e., A4 page and centimeter units).
@@ -2641,11 +2643,11 @@ FUNCTION FSC_PSCONFIG::INIT,          $ ; The INIT method of the FSC_PSCONFIG ob
         ENDELSE
         IF N_Elements(fontsize) EQ 0 THEN fontsize = 12
         IF N_Elements(inches) EQ 0 THEN IF Keyword_Set(metric) THEN inches = 0 ELSE inches = 1
+        IF N_Elements(lang_level) EQ 0 THEN lang_level = 1
         IF N_Elements(name) EQ 0 THEN name = ""
         IF N_Elements(pagetype) EQ 0 THEN IF Keyword_Set(metric) THEN pagetype = "A4" ELSE pagetype = "LETTER"
         IF N_Elements(preview) EQ 0 THEN preview = 0
         IF N_Elements(set_font) EQ 0 THEN set_font = ""
-        IF N_Elements(langlevel) EQ 0 THEN langlevel = 1
         
         avantgarde = Keyword_Set(avantgarde)
         bold = Keyword_Set(bold)
@@ -2698,7 +2700,7 @@ FUNCTION FSC_PSCONFIG::INIT,          $ ; The INIT method of the FSC_PSCONFIG ob
         self.inchesSet = inches
         self.isolatinSet = isolatin
         self.landscapeSet = landscape
-        self.langlevelSet = langlevel
+        self.langlevelSet = 1 > lang_level < 2
         self.name = name
         self.pagetype = pagetype
         self.pagetypeSet = pagetype

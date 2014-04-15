@@ -137,6 +137,9 @@
 ;        Set this keyword to select ISOlatin1 encoding.
 ;     Landscape: in, optional, type=boolean, default=0
 ;        Set this keyword to select Landscape page output. Portrait page output is the default.
+;     Language_Level: in, optional, type=integer, default=1
+;        Set the language level of the PostScript output. Language level 2 required for features
+;        such as filled patterns for polygons.
 ;     Light: in, optional, type=boolean, default=0
 ;        Set this keyword to select the Light PostScript style for the font.
 ;     Match: in, optional, type=boolean, default=0
@@ -177,6 +180,8 @@
 ;     Times: in, optional, type=boolean, default=0
 ;        Set this keyword to select the Times PostScript font.
 ;     TrueType: in, optional, type=boolean, default=0
+;        The same functionality as TT_Font. This keyword is now depreciated.
+;     TT_Font: in, optional, type=boolean, default=0
 ;        Set this keyword to use true-type fonts in the PostScript output. Set the name of the font
 ;        with the `Set_Font` keyword.
 ;     XOffset: in, optional, type=float 
@@ -227,6 +232,8 @@
 ;        Changed ENCAPSULATE keyword to ENCAPSULATED, which is what I always type! 29 Jan 2011. DWF.
 ;        Depreciated EUROPEAN keyword in favor of METRIC. 31 Jan 2011. DWF.
 ;        Renamed cgPS_Config from PSConfig. 5 November 2013. DWF.
+;        Added Portrait, Language_Level, Font_Size, and TT_Font keywords to make it possible to pass
+;           keywords directly from the FSC_PSConfig object (using the GetKeywords method). 11 Apr 2014. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2000-2012, Fanning Software Consulting, Inc.
@@ -250,7 +257,8 @@ FUNCTION cgPS_Config, psObject,       $ ; A FSC_PSCONFIG object.
    European=european,                 $ ; This keyword depreciated in favor of "metric".
    Filename=filename,                 $ ; Set this keyword to the name of the file. Default: 'idl.ps'
    FontInfo=fontinfo,                 $ ; Set this keyword if you want font information in the FSC_PSCONFIG GUI.
-   FontSize=fontsize,                 $ ; Set this keyword to the font size. Between 6 and 36. Default is 12.
+   FontSize=fontsize,                 $ ; Same as FONT_SIZE. This keyword now depreciated.
+   Font_Size=font_size,               $ ; Preferred way to set the font size. Between 6 and 36. Default is 12.            
    FontType=fonttype,                 $ ; An input/output keyword that will have the FontType. Will be !P.Font unless FontInfo is selected.
    Group_Leader=group_leader,         $ ; The group leader of the PSConfig modal widget.
    Helvetica=helvetica,               $ ; Set this keyword to select the Helvetica font.
@@ -258,6 +266,7 @@ FUNCTION cgPS_Config, psObject,       $ ; A FSC_PSCONFIG object.
    Italic=italic,                     $ ; Set this keyword to select the Italic font style.
    Isolatin=isolatin,                 $ ; Set this keyword to select ISOlatin1 encoding.
    Landscape=landscape,               $ ; Set this keyword to select Landscape output.
+   Language_Level=language_level,     $ ; Set the language level.
    Light=light,                       $ ; Set this keyword to select the Light font style.
    Match=match,                       $ ; Set this keyword to match the aspect ratio of the current graphics window.
    Medium=medium,                     $ ; Set this keyword to select the Medium font style.
@@ -268,12 +277,14 @@ FUNCTION cgPS_Config, psObject,       $ ; A FSC_PSCONFIG object.
    Oblique=oblique,                   $ ; Set this keyword to select the Oblique font style.
    PageType=pagetype,                 $ ; Set this keyword to the "type" of page: 'Letter', 'Legal', 'Ledger', or 'A4'.
    Palatino=palatino,                 $ ; Set this keyword to select the Palatino font.
+   Portrait=portrait,                 $ ; Set this keyword as an alternative way of setting LANDSCAPE keyword to 0.
    Preview=preview,                   $ ; Set this keyword to select Preview mode: 0, 1, or 2.
    Schoolbook=schoolbook,             $ ; Set this keyword to select the Schoolbook font.
    Set_Font=set_font,                 $ ; Set this keyword to the name of a font passed to PostScript with Set_Plot keyword.
    Symbol=symbol,                     $ ; Set this keyword to select the Symbol font.
    Times=times,                       $ ; Set this keyword to select the Times font.
-   TrueType=truetype,                 $ ; Set this keyword to select True-Type fonts.
+   TrueType=truetype,                 $ ; Same as TT_Font keyword. Now depreciated.
+   TT_Font=tt_font,                   $ ; The preferred way to select True-Type fonts.
    XOffset=xoffset,                   $ ; Set this keyword to the XOffset. (Note: offset calculated from lower-left corner of page.)
    XSize=xsize,                       $ ; Set this keyword to the X size of the PostScript "window".
    YOffset=yoffset,                   $ ; Set this keyword to the YOffset. (Note: offset calculated from lower-left corner of page.)
@@ -285,9 +296,16 @@ FUNCTION cgPS_Config, psObject,       $ ; A FSC_PSCONFIG object.
     
     ; Depreciated keywords.
     IF N_Elements(metric) EQ 0 THEN metric = Keyword_Set(european) ELSE metric = Keyword_Set(metric)
+    CASE 1 OF
+        (N_Elements(fontsize) EQ 0) && (N_Elements(font_size) EQ 0): font_size = 12
+        (N_Elements(fontsize) NE 0) && (N_Elements(font_size) EQ 0): font_size = fontsize
+        (N_Elements(fontsize) NE 0) && (N_Elements(font_size) NE 0): Undefine, fontsize
+        ELSE:
+    ENDCASE
     
     ; Cannot have landscape orientation with encapsulated PostScript output.
     IF Keyword_Set(encapsulated) THEN landscape = 0
+    IF Keyword_Set(portrait) THEN landscape = 0
     
     ; Did the user ask us to match the aspect ratio of the current graphics window?
     IF Keyword_Set(match) THEN BEGIN
@@ -327,13 +345,14 @@ FUNCTION cgPS_Config, psObject,       $ ; A FSC_PSCONFIG object.
           Directory=directory,               $
           Encapsulated=encapsulated,         $
           Filename=filename,                 $
-          FontSize=fontsize,                 $
+          FontSize=font_size,                $
           FontType=fonttype,                 $
           Helvetica=helvetica,               $
           Inches=inches,                     $
           Italic=italic,                     $
           Isolatin=isolatin,                 $
           Landscape=landscape,               $
+          Language_Level=language_level,     $
           Light=light,                       $
           Medium=medium,                     $
           Metric=metric,                     $
@@ -347,7 +366,7 @@ FUNCTION cgPS_Config, psObject,       $ ; A FSC_PSCONFIG object.
           Set_Font=set_font,                 $
           Symbol=symbol,                     $
           Times=times,                       $
-          TrueType=truetype,                 $
+          TrueType=(Keyword_Set(truetype) || Keyword_Set(tt_font)),    $
           XOffset=xoffset,                   $
           XSize=xsize,                       $
           YOffset=yoffset,                   $

@@ -52,6 +52,10 @@
 ;       A vector of integers.
 ;    set_b: in, required, type=integer
 ;       A vector of integers.
+;       
+; :Keywords:
+;     count: out, optional, type=long
+;        Set this keyword to a named variable containing the number of integers found in the union.
 ;
 ; :Examples:
 ;     IDL> set_a = [1,2,3,4,5]
@@ -74,11 +78,12 @@
 ;     Change History::
 ;         Written by: David W. Fanning, November 25, 2009, from code originally supplied to the IDL
 ;             newsgroup by Research Systems software engineers.
+;         Added COUNT keyword. 24 April 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2009-2013, Fanning Software Consulting, Inc.
 ;-
-FUNCTION cgSetUnion, set_a, set_b
+FUNCTION cgSetUnion, set_a, set_b, COUNT=count
     
     Compile_Opt StrictArr, DefInt32
     
@@ -105,6 +110,7 @@ FUNCTION cgSetUnion, set_a, set_b
    
    ; Find and return the unique indices in the two sets.
    h = Histogram([set_a, set_b], OMIN=omin)
-   RETURN, Where(h GT 0) + omin 
+   retValue = Where(h GT 0, count) + omin 
+   RETURN, retValue
    
 END

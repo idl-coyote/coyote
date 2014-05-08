@@ -92,6 +92,7 @@
 ;        Changed FSC_Normalize to cgNormalize to reflect new name. 6 Feb 2013. DWF.
 ;        Axes titles are now changing size with the CHARSIZE keyword, as they are supposed to. 4 Nov 2013. DWF.
 ;        Fixed a problem with the Light Controller when trying to set a color. 21 Mar 2014. DWF.
+;        Added checks to make sure the surface ranges are not zero. 8 March 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
@@ -1691,6 +1692,11 @@ PRO cgSurface, data, x, y, $
     IF N_Elements(xrange_u) NE 0 THEN xrange = xrange_u
     IF N_Elements(yrange_u) NE 0 THEN yrange = yrange_u
     IF N_Elements(zrange_u) NE 0 THEN zrange = zrange_u
+    
+    ; Make sure the ranges are not zero.
+    IF Abs(xrange[1] - xrange[0]) LT 1e-12 THEN xrange = [xrange[1]+0.1*xrange[1], xrange[1]-0.1*xrange[1]]
+    IF Abs(yrange[1] - yrange[0]) LT 1e-12 THEN yrange = [yrange[1]+0.1*yrange[1], yrange[1]-0.1*yrange[1]]
+    IF Abs(zrange[1] - zrange[0]) LT 1e-12 THEN zrange = [zrange[1]+0.1*zrange[1], zrange[1]-0.1*zrange[1]]
     
     ; Create axes objects for the surface. Axes are created after the surface 
     ; so the range can be set correctly. Note how I set the font.

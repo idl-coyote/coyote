@@ -152,6 +152,8 @@
 ;        Added FORCE and MATCH keywords. 16 Feb 2012. DWF.
 ;        Added PIXMAP, RETAIN, TITLE, XPOS, YPOS, and LOCATION keywords. 4 Sept 2012. DWF.
 ;        If only one input parameter is passed, treat that as window index number to create. 15 Feb 2014. DWF.
+;        More work to fix a problem with an interaction between cgPS_Open and cgDisplay, when the
+;           PostScript file is set up in ENCAPSULATED mode and the ASPECT keyword is used. 8 May 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
@@ -278,9 +280,13 @@ PRO cgDisplay, pxsize, pysize, $
             ; for that problem.
             'PS': BEGIN
                 COMMON _$FSC_PS_START_, ps_struct
-                keywords = cgPSWindow(AspectRatio=Float(pysize)/pxsize)
+                IF N_Elements(ps_struct) NE 0 THEN BEGIN
+                    keywords = cgPSWindow(AspectRatio=Float(pysize)/pxsize, Landscape=ps_struct.landscape)
+                ENDIF ELSE BEGIN
+                    keywords = cgPSWindow(AspectRatio=Float(pysize)/pxsize)
+                    ps_struct.landscape = keywords.landscape
+                ENDELSE
                 Device, _Extra=keywords
-                IF N_Elements(ps_struct) NE 0 THEN ps_struct.landscape = keywords.landscape
                 END
             'Z': Device, Set_Resolution=[pxsize,pysize]
             ELSE:

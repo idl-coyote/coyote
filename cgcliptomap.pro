@@ -87,6 +87,8 @@
 ;        I have reason to believe the way I was creating the location vectors and
 ;           and image subset in this program was causing me to be 1 pixel off in
 ;           creating the image subset. The algorithm has been tweaked to correct this. 12 Dec 2012. DWF.
+;        Duh! Changed the name of MapOut keyword to OutMap to make it work, but forgot to change 
+;            the variable name. Output map coordinate object now returning properly. 20 May 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -156,10 +158,10 @@ FUNCTION cgCliptoMap, imageIn, boundary, $
    
    ; Create an output map coordinate object.
    map -> GetProperty, MAP_PROJECTION=projection, ELLIPSOID=ellipsoid, ZONE=zone
-   mapout = Obj_New('cgmap', projection, Ellipsoid=ellipsoid, ZONE=zone, $
+   outMap = Obj_New('cgmap', projection, Ellipsoid=ellipsoid, ZONE=zone, $
       XRange=[xvec[xsubs[0]],xvec[xsubs[1]]], $
       YRange=[yvec[ysubs[0]],yvec[ysubs[1]]])
-   mapOut -> GetProperty, LATLONBOX=latlonBox
+   outMap -> GetProperty, LATLONBOX=latlonBox
    
    RETURN, subimage
    

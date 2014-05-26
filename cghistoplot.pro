@@ -175,6 +175,10 @@
 ;       output for a single graphics command. Output parameters can be set with cgWindow_SetDefs.
 ;    pattern: in, optional
 ;       The fill pattern for the polygons if the `FILLPOLYGON` keyword is set. (See POLYFILL documentation.)
+;    peak_height: in, optional
+;       Set this keyword to the height of the highest peak in the histogram. All other
+;       peaks will be rendered proportional to this value. Setting this keyword also sets
+;       the `Frequency` keyword to 0. 
 ;    polycolor: in, optional, type=string, default="rose"
 ;       The name of the polygon fill color if the `FILLPOLYGON` keyword is set.
 ;    position: in, optional, type=fltarr
@@ -341,6 +345,7 @@
 ;           Coyote Graphic routines! 22 Oct 2013. DWF.
 ;        Fixed problem with XTICKVALUES and YTICKVALUES keywords when plot is rotated. 19 Nov 2013. DWF.
 ;        Added OL_STYLE keyword. 25 Feb 2014. DWF.
+;        Added Peak_Height keyword. 26 May 2014.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2007-2013, Fanning Software Consulting, Inc.
@@ -382,6 +387,7 @@ PRO cgHistoplot, $                  ; The program name.
    OUTLINE=outline, $               ; Set this keyword if you wish to draw only the outline of the plot.
    OUTPUT=output, $                 ; The type of output file desired.
    PATTERN=pattern, $               ; The fill pattern.
+   PEAK_HEIGHT=peak_height, $       ; The height of the highest peak in the histogram.
    POLYCOLOR=polycolorname, $       ; The name of the polygon draw/fill color.
    POSITION=position, $             ; The position of the plot in the window in normalized coordinates.
    PROBABILITY_FUNCTION=probability, $
@@ -487,6 +493,7 @@ PRO cgHistoplot, $                  ; The program name.
                LOCATIONS=locations, $
                OMAX=omax, $
                OMIN=omin, $
+               PEAK_HEIGHT=peak_height, $       ; The height of the highest peak in the histogram.
                PROBABILITY_FUNCTION=probability, $
                REVERSE_INDICES=ri, $
                ;
@@ -559,6 +566,7 @@ PRO cgHistoplot, $                  ; The program name.
                LOCATIONS=locations, $
                OMAX=omax, $
                OMIN=omin, $
+               PEAK_HEIGHT=peak_height, $       ; The height of the highest peak in the histogram.
                PROBABILITY_FUNCTION=probability, $
                REVERSE_INDICES=ri, $
                ;
@@ -713,6 +721,7 @@ PRO cgHistoplot, $                  ; The program name.
           ENDELSE
        ENDELSE
    ENDIF
+   IF Keyword_Set(peak_height) THEN frequency = 0 ; Can't use both keywords.
    SetDefaultValue, ol_style, 0
    
    ; What kind of data are we doing a HISTOGRAM on?
@@ -843,19 +852,30 @@ PRO cgHistoplot, $                  ; The program name.
           IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Relative Frequency'
           IF (N_Elements(ytickformat) EQ 0) && (N_Elements(yticknames) EQ 0) THEN ytickformat = '(F6.4)'
       ENDELSE
-   ENDIF ELSE BEGIN
-      IF Keyword_Set(rotate) THEN BEGIN
-          IF N_Elements(xtitle) EQ 0 THEN xtitle = 'Histogram Density'
-          IF (N_Elements(xtickformat) EQ 0) && (N_Elements(xticknames) EQ 0) THEN BEGIN
-            IF Keyword_Set(log) THEN xtickformat = '(F)' ELSE xtickformat = '(I)'
-          ENDIF
-      ENDIF ELSE BEGIN
-          IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Histogram Density'
-          IF (N_Elements(ytickformat) EQ 0) && (N_Elements(yticknames) EQ 0) THEN BEGIN
-            IF Keyword_Set(log) THEN ytickformat = '(F)' ELSE ytickformat = '(I)'
-          ENDIF
-      ENDELSE
-   ENDELSE
+   ENDIF
+   
+    IF Keyword_Set(peak_height) THEN BEGIN
+        IF Keyword_Set(rotate) THEN BEGIN
+            IF N_Elements(xtitle) EQ 0 THEN xtitle = 'Normalized Histogram Density'
+            IF N_Elements(xtickformat) EQ 0 THEN xtickformat = '(F0.2)'
+        ENDIF ELSE BEGIN
+            IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Normalized Histogram Density'
+            IF N_Elements(ytickformat) EQ 0 THEN ytickformat = '(F0.2)'
+        ENDELSE
+    ENDIF
+    
+    IF Keyword_Set(rotate) THEN BEGIN
+        IF N_Elements(xtitle) EQ 0 THEN xtitle = 'Histogram Density'
+        IF (N_Elements(xtickformat) EQ 0) && (N_Elements(xticknames) EQ 0) THEN BEGIN
+          IF Keyword_Set(log) THEN xtickformat = '(F)' ELSE xtickformat = '(I)'
+        ENDIF
+    ENDIF ELSE BEGIN
+        IF N_Elements(ytitle) EQ 0 THEN ytitle = 'Histogram Density'
+        IF (N_Elements(ytickformat) EQ 0) && (N_Elements(yticknames) EQ 0) THEN BEGIN
+          IF Keyword_Set(log) THEN ytickformat = '(F)' ELSE ytickformat = '(I)'
+        ENDIF
+    ENDELSE
+
    
    ; Check for symbols in titles.
    IF N_Elements(title) NE 0 THEN title = cgCheckForSymbols(title)
@@ -880,6 +900,11 @@ PRO cgHistoplot, $                  ; The program name.
    
    ; Are you plotting the frequency rather than the count?
    IF frequency THEN histdata = Float(histdata)/N_Elements(_data)
+   
+   ; Are you doing a peak height?
+   IF N_Elements(peak_height) NE 0 THEN BEGIN
+      histdata = histdata * (peak_height / Float(Max(histdata)))
+   ENDIF
    
    ; Need a probability distribution?
    IF Arg_Present(probability) OR Keyword_Set(oprob) THEN BEGIN

@@ -749,7 +749,7 @@ PRO cgPlot, x, y, $
     
         ; If position is set, then fit the plot into those bounds.
         IF (N_Elements(position) GT 0) THEN BEGIN
-          trial_position = Aspect(aspect, margin=0.)
+          trial_position = cgAspect(aspect, margin=0.)
           trial_width = trial_position[2]-trial_position[0]
           trial_height = trial_position[3]-trial_position[1]
           pos_width = position[2]-position[0]
@@ -770,7 +770,7 @@ PRO cgPlot, x, y, $
           position[2] -= 0.5*(pos_width - trial_width)
           position[1] += 0.5*(pos_height - trial_height)
           position[3] -= 0.5*(pos_height - trial_height)
-        ENDIF ELSE position=Aspect(aspect)   ; if position isn't set, just use output of Aspect
+        ENDIF ELSE position=cgAspect(aspect)   ; if position isn't set, just use output of Aspect
         
     ENDIF
     

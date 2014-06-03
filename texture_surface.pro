@@ -329,7 +329,7 @@ info.thisWindow->GetProperty, Dimensions=wdims
 info.thisPrinter->GetProperty, Dimensions=pdims
 plotAspect = Float(wdims[1]) / wdims[0]
 printerAspect = Float(pdims[1]) / pdims[0]
-position = Aspect(plotAspect, WindowAspect=printerAspect, Margin=0)
+position = cgAspect(plotAspect, WindowAspect=printerAspect, Margin=0)
 
    ; Change the dimensions and postion of the viewport on the output page.
    ; Be sure to use normalized coordinates (units=3).
@@ -496,7 +496,7 @@ thisView = OBJ_NEW('IDLgrView', Color=[80,80,80], $
 
 surfaceAspect = Float(s[1]) / s[0]
 windowAspect = 1.0
-pos = Aspect(surfaceAspect, WindowAspect=windowAspect, Margin=0)
+pos = cgAspect(surfaceAspect, WindowAspect=windowAspect, Margin=0)
 pos = pos - 0.5
 
     ; Create a model for the surface and axes and add it to the view.

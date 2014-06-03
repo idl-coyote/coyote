@@ -752,7 +752,7 @@ PRO cgMap::Draw, ERASE=erase, NOGRAPHICS=nographics, _EXTRA=extra
         
       position = self._cg_position
        
-      trial_position = Aspect(self._cg_aspect, margin=0.)
+      trial_position = cgAspect(self._cg_aspect, margin=0.)
       trial_width = trial_position[2]-trial_position[0]
       trial_height = trial_position[3]-trial_position[1]
       pos_width = position[2]-position[0]

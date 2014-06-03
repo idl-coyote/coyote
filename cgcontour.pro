@@ -775,7 +775,7 @@ PRO cgContour, data, x, y, $
     
         ; If position is set, then fit the plot into those bounds.
         IF (N_Elements(position) GT 0) THEN BEGIN
-          trial_position = Aspect(aspect, margin=0.)
+          trial_position = cgAspect(aspect, margin=0.)
           trial_width = trial_position[2]-trial_position[0]
           trial_height = trial_position[3]-trial_position[1]
           pos_width = position[2]-position[0]

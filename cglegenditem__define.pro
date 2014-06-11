@@ -78,7 +78,7 @@
 ;           point with the CENTER_SYM keyword. 04/25/2013, Matthew Argall.
 ;        Many changes to make this work like a simple, but useful, legend-drawing program. Now
 ;           called by the wrapper cgLegend. 5 Dec 2013. DWF.
-;        The background color was incorrectly set in the SetProperty method. 10 June 2014. DWF.
+;        Several small problems with pointers in the SetProperty method fixed. 10 June 2014. DWF.
 ;           
 ; :Copyright:
 ;     Copyright (c) 2013, Fanning Software Consulting, Inc.
@@ -963,7 +963,7 @@ PRO cgLegendItem::SetProperty, $
     IF N_Elements(alignment) NE 0 THEN BEGIN
         alignment = 0 > alignment < 8
         CASE alignment OF
-            1: BEGIN
+            0: BEGIN
                 align_hcenter = 0
                 align_vcenter = 0
                 align_right = 0
@@ -1028,7 +1028,7 @@ PRO cgLegendItem::SetProperty, $
     IF N_Elements(background) NE 0 THEN self.background = Keyword_Set(background)
     IF N_Elements(bg_color) NE 0 THEN *self.bg_color = bg_color
     IF N_Elements(box) NE 0 THEN self.box = Keyword_Set(box)
-    IF N_Elements(bx_color) NE 0 THEN self.bx_color = bx_color
+    IF N_Elements(bx_color) NE 0 THEN *self.bx_color = bx_color
     IF N_Elements(bx_thick) NE 0 THEN self.bx_thick = bx_thick
     IF N_Elements(center_sym) NE 0 THEN self.center_sym = center_sym
     IF N_Elements(charsize) NE 0 THEN self.charsize = charsize

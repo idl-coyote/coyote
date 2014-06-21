@@ -299,6 +299,7 @@
 ;         Data could sometimes be drawn when OVERPLOT and NODATA keywords were both set. Fixed. 16 Dec 2013. DWF.
 ;         Added ERR_CLIP keyword. 31 Jan 2014. DWF.
 ;         Added a sanity check for inappropriate use of the ISOTROPIC keyword. 6 Feb 2014. DWF.
+;         Problem with using ISOTROPIC keyword without POSITION keyword fixed. 21 Jun 2014. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
@@ -732,8 +733,16 @@ PRO cgPlot, x, y, $
     ; Other keywords.
     IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
     IF Keyword_Set(isotropic) THEN BEGIN
-        yscaleTest = Max(dep, /NaN) - Min(dep, /NaN)
-        xscaleTest = Max(indep, /NaN) - Min(indep, /NaN)
+        IF N_Elements(yrange) EQ 0 THEN BEGIN
+           yscaleTest = Max(dep, /NaN) - Min(dep, /NaN)
+        ENDIF ELSE BEGIN
+           yscaleTest = Max(yrange, /NaN) - Min(yrange, /NaN)    
+        ENDELSE
+        IF N_Elements(xrange) EQ 0 THEN BEGIN
+           xscaleTest = Max(indep, /NaN) - Min(indep, /NaN)
+        ENDIF ELSE BEGIN
+           xscaleTest = Max(xrange, /NaN) - Min(xrange, /NaN)            
+        ENDELSE
         aspect = Double(yscaleTest)/xscaleTest
         
         ; Do a sanity check.
@@ -770,7 +779,7 @@ PRO cgPlot, x, y, $
           position[2] -= 0.5*(pos_width - trial_width)
           position[1] += 0.5*(pos_height - trial_height)
           position[3] -= 0.5*(pos_height - trial_height)
-        ENDIF ELSE position=cgAspect(aspect)   ; if position isn't set, just use output of Aspect
+        ENDIF ELSE position=cgAspect(aspect, /SINGLE_PLOT)   ; if position isn't set, just use output of Aspect
         
     ENDIF
     

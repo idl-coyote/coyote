@@ -157,6 +157,7 @@
 ;           name of the netCDF of HDF file is now named "ncdf_filename" or "hdf_filename". This
 ;           will avoid conflicts with global attributes with "filename". 20 January 2011. DWF.
 ;       Typo in the section reading calibration data fixed. 12 March 2013. DWF.
+;       Problem reading a variable containing no attributes fixed. 20 June 2014. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008-2010, by Fanning Software Consulting, Inc.                           ;
@@ -1782,8 +1783,10 @@ FUNCTION NCDF_DATA::ReadFile, theFile, SUCCESS=success
                     varStruct = Create_Struct(varStruct, attrName, value)         
                 ENDFOR
                 struct = Create_Struct(struct, varName, Temporary(varStruct))
-                
-           ENDIF
+           ENDIF ELSE BEGIN
+              struct = Create_Struct(struct, varName, Temporary(varStruct))
+           ENDELSE
+           
        ENDFOR
        HDF_SD_EndAccess, varID
        HDF_SD_END, fileID

@@ -79,6 +79,7 @@
 ;        Many changes to make this work like a simple, but useful, legend-drawing program. Now
 ;           called by the wrapper cgLegend. 5 Dec 2013. DWF.
 ;        Several small problems with pointers in the SetProperty method fixed. 10 June 2014. DWF.
+;        Added CharThick keyword. 1 Sept 2014. DWF.
 ;           
 ; :Copyright:
 ;     Copyright (c) 2013, Fanning Software Consulting, Inc.
@@ -124,6 +125,8 @@
 ;     charsize: in, optional, type=float
 ;        The character size for the legend text. Uses cgDefCharsize by default.
 ;        Ignored if using hardware fonts on the display.
+;     charthick: in, optional, type=float
+;        The thickness of the legend text. If undefined, use `Thick` value.
 ;     colors: in, optional, type=varies, default="black"
 ;        The name of the data color. This is the color of each data line. May be an array.
 ;     data: in, optional, type=boolean, default=0
@@ -180,6 +183,7 @@ FUNCTION cgLegendItem::INIT, $
     BX_THICK=bx_thick, $
     CENTER_SYM=center_sym, $
     CHARSIZE=charsize, $
+    CHARTHICK=charthick, $
     COLORS=colors, $
     DATA=data, $
     DRAW=draw, $
@@ -355,6 +359,8 @@ FUNCTION cgLegendItem::INIT, $
     self.visible = Keyword_Set(visible)
     self.vspace = vspace
     self.wid = -1
+    IF (N_Elements(thick) NE 0) && (N_Elements(charthick) EQ 0) THEN charthick = thick ; Don't move these two lines.
+    IF N_Elements(charthick) NE 0 THEN self.charthick = charthick
     
     ; Need to add this command to a resizeable cgWindow?
     IF Keyword_Set(window) THEN self -> AddCmd, /REPLACE, /DESTROY_OBJECT
@@ -418,7 +424,8 @@ PRO cgLegendItem::CalculateBoxSize
     IF self.bx_thick EQ 0 THEN thick = !P.Thick ELSE thick = self.bx_thick
     IF self.symthick EQ 0 THEN symthick = !P.Thick ELSE symthick = self.symthick
     IF self.thick EQ 0 THEN thick = !P.Thick ELSE thick = self.thick
-    
+    IF self.charthick EQ 0 THEN charthick = self.thick ELSE charthick = self.charthick ; Don't move line.
+
     ; Do we need to convert location to normalized coordinate space?
     IF self.data THEN BEGIN
         location = Convert_Coord(self.location, /Data, /TO_Normal)
@@ -493,7 +500,7 @@ PRO cgLegendItem::CalculateBoxSize
         cgSetColorState, 1, Current=currentState
         backgroundColor = cgColor('background')
         cgText, xx, yy, Alignment=0.5, /Normal, (*self.titles)[j],  COLOR=backgroundColor, $
-            TT_FONT=*self.tt_font, CHARSIZE=self.charsize, FONT=!P.Font, WIDTH=width, CHARTHICK=thick
+            TT_FONT=*self.tt_font, CHARSIZE=self.charsize, FONT=!P.Font, WIDTH=width, CHARTHICK=charthick
         cgSetColorState, currentState
         itemWidth[j] = itemWidth[j] + width
         IF self.hardware THEN !P.Font = thisFont
@@ -646,7 +653,8 @@ PRO cgLegendItem::Draw
     IF self.bx_thick EQ 0 THEN thick = !P.Thick ELSE thick = self.bx_thick
     IF self.symthick EQ 0 THEN symthick = !P.Thick ELSE symthick = self.symthick
     IF self.thick EQ 0 THEN thick = !P.Thick ELSE thick = self.thick
-    
+    IF self.charthick EQ 0 THEN charthick = self.thick ELSE charthick = self.charthick ; Don't move line.
+
     ; Do we need to convert location to normalized coordinate space?
     IF self.data THEN BEGIN
         location = Convert_Coord(self.location, /Data, /TO_Normal)
@@ -699,7 +707,7 @@ PRO cgLegendItem::Draw
         ENDIF
         cgText, x1+(2.0*!D.X_CH_SIZE/!D.X_Size), y-(0.5*!D.Y_CH_SIZE/!D.Y_Size)-(j*y_offset),$
             /NORMAL, ALIGNMENT=0.0, (*self.titles)[j], COLOR=tcolors[j], $
-            TT_FONT=*self.tt_font, CHARSIZE=self.charsize, FONT=!P.Font, WIDTH=width, CHARTHICK=thick
+            TT_FONT=*self.tt_font, CHARSIZE=self.charsize, FONT=!P.Font, WIDTH=width, CHARTHICK=charthick
         IF self.hardware THEN !P.Font = thisFont
         
     ENDFOR
@@ -747,6 +755,8 @@ END
 ;     charsize: out, optional, type=float
 ;        The character size for the legend text. Uses cgDefCharsize by default.
 ;        Ignored if using hardware fonts on the display.
+;     charthick: out, optional, type=float
+;        The thickness of the legend text. 
 ;     colors: out, optional, type=string/strarr
 ;        The name of the data color. This is the color of each data line.
 ;     data: out, optional, type=boolean
@@ -794,6 +804,7 @@ PRO cgLegendItem::GetProperty, $
    BX_THICK=bx_thick, $
    CENTER_SYM=center_sym, $
    CHARSIZE=charsize, $
+   CHARTHICK=charthick, $
    COLORS=colors, $
    DATA=data, $
    HARDWARE=hardware, $
@@ -828,6 +839,7 @@ PRO cgLegendItem::GetProperty, $
     IF Arg_Present(bx_thick) THEN bx_thick = self.bx_thick
     IF Arg_Present(center_sym) THEN center_sym = self.center_sym
     IF Arg_Present(charsize) THEN charsize = self.charsize
+    IF Arg_Present(charthick) THEN charthick = self.charthick
     IF Arg_Present(colors) THEN colors = *self.colors
     IF Arg_Present(data) THEN data = self.data
     IF Arg_Present(hardware) THEN hardware = self.hardware
@@ -882,6 +894,8 @@ END
 ;     charsize: in, optional, type=float
 ;        The character size for the legend text. Uses cgDefCharsize by default.
 ;        Ignored if using hardware fonts on the display.
+;     charthick: in, optional, type=float
+;        The thickness of the legend text. If undefined, use `Thick` value.
 ;     colors: in, optional, type=string/strarr
 ;        The name of the data color. This is the color of each data line.
 ;     data: in, optional, type=boolean, default=0
@@ -932,6 +946,7 @@ PRO cgLegendItem::SetProperty, $
    BX_THICK=bx_thick, $
    CENTER_SYM=center_sym, $
    CHARSIZE=charsize, $
+   CHARTHICK=charthick, $
    COLORS=colors, $
    DATA=data, $
    HARDWARE=hardware, $
@@ -1032,6 +1047,7 @@ PRO cgLegendItem::SetProperty, $
     IF N_Elements(bx_thick) NE 0 THEN self.bx_thick = bx_thick
     IF N_Elements(center_sym) NE 0 THEN self.center_sym = center_sym
     IF N_Elements(charsize) NE 0 THEN self.charsize = charsize
+    IF N_Elements(charthick) NE 0 THEN self.charthick = charthick
     IF N_Elements(colors) NE 0 THEN *self.colors = colors
     IF N_Elements(data) NE 0 THEN self.data = Keyword_Set(data)
     IF N_Elements(hardware) NE 0 THEN self.hardware = Keyword_Set(hardware)
@@ -1095,6 +1111,7 @@ PRO cgLegendItem__Define, class
               bx_pos: FltArr(4), $          ; The position of the legend box in the window.
               bx_thick: 0.0, $              ; The thickness of the box line.
               charsize: 0.0, $              ; The character size of the legend titles.
+              charthick: 0.0, $             ; The thickness of the legend text.
               center_sym: 0, $              ; A flag indicating the symbol should be centered on the line.
               colors: Ptr_New(), $          ; The color of the lines connecting symbols.
               data: 0, $                    ; A flag that indicates the location of in data coordinate space.

@@ -95,6 +95,8 @@
 ;     charsize: in, optional, type=float
 ;        The character size for the legend text. Uses cgDefCharsize by default.
 ;        Ignored if using hardware fonts on the display.
+;     charthick: in, optional, type=float
+;        The thickness of the legend text. If undefined, use `Thick` value.
 ;     colors: in, optional, type=varies, default="black"
 ;        The name of the data color. This is the color of each data line. May be an array.
 ;     data: in, optional, type=boolean, default=0
@@ -154,6 +156,7 @@
 ; :History:
 ;     Change History::
 ;        Written 5 Dec 2013. David W Fanning.
+;        Added CharThick keyword. 1 Sept 2014. DWF.
 ;-
 PRO cgLegend, $
     ADDCMD=addcmd, $
@@ -165,6 +168,7 @@ PRO cgLegend, $
     BX_THICK=bx_thick, $
     CENTER_SYM=center_sym, $
     CHARSIZE=charsize, $
+    CHARTHICK=charthick, $
     COLORS=colors, $
     DATA=data, $
     HARDWARE=hardware, $
@@ -203,6 +207,7 @@ PRO cgLegend, $
         BX_THICK=bx_thick, $
         CENTER_SYM=center_sym, $
         CHARSIZE=charsize, $
+        CHARTHICK=charthick, $
         COLORS=colors, $
         DATA=data, $
         DRAW=1, $

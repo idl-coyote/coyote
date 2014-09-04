@@ -80,6 +80,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 28 January 2011. DWF. 
+;        Fixed problem intoduced when I converted WhoAmI to cgWhoAmI. 2 Sep 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -96,7 +97,7 @@ FUNCTION cgWhoAmI
    
    ; Find where I am in the call stack. The calling program is up
    ; one level from there. Unless, of course, I am close to $MAIN$.
-   index = Where(StrMid(callstack, 0, 6) EQ 'WHOAMI', count)
+   index = Where(StrMid(callstack, 0, 8) EQ 'CGWHOAMI', count)
    IF count GE 1 THEN index = (Reverse(index))[0] 
    thisRoutine = (StrSplit(StrCompress(callStack[(index-1) > 0])," ", /Extract))[0]
    

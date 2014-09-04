@@ -300,6 +300,9 @@
 ;         Added ERR_CLIP keyword. 31 Jan 2014. DWF.
 ;         Added a sanity check for inappropriate use of the ISOTROPIC keyword. 6 Feb 2014. DWF.
 ;         Problem with using ISOTROPIC keyword without POSITION keyword fixed. 21 Jun 2014. DWF.
+;         Fixed incorrect use of MARGIN keyword in cgAspect. 1 Sep 2014. DWF.
+;         Fixed a problem with plotting with a map coordinate object. I had reversed independent and
+;              dependent data vectors. 2 Sept 2014. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
@@ -491,28 +494,28 @@ PRO cgPlot, x, y, $
     ; If you have a map coordinate object, do the conversion to XY projected meter space here.
     IF (N_Elements(map_object) NE 0) && Obj_Valid(map_object) THEN BEGIN
         
-        xy = map_object -> Forward(_dep, _indep, /NoForwardFix)
-        dep = Reform(xy[0,*])
-        indep = Reform(xy[1,*])
+        xy = map_object -> Forward(_indep, _dep, /NoForwardFix)
+        dep = Reform(xy[1,*])
+        indep = Reform(xy[0,*])
         
         IF (N_Elements(err_ylow) NE 0) THEN BEGIN
-            xy = map_object -> Forward(_dep, _indep-err_ylow, /NoForwardFix)
-            err_ylow = Reform(xy[1,*]) - indep
+            xy = map_object -> Forward(_indep, _dep-err_ylow, /NoForwardFix)
+            err_ylow = Reform(xy[1,*]) - dep
         ENDIF
         
         IF (N_Elements(err_yhigh) NE 0) THEN BEGIN
-            xy = map_object -> Forward(_dep, _indep+err_yhigh, /NoForwardFix)
-            err_yhigh = Reform(xy[1,*]) - indep
+            xy = map_object -> Forward(_indep, _dep+err_yhigh, /NoForwardFix)
+            err_yhigh = Reform(xy[1,*]) - dep
         ENDIF
 
         IF (N_Elements(err_xlow) NE 0) THEN BEGIN
-            xy = map_object -> Forward(_dep-err_xlow, _indep, /NoForwardFix)
-            err_xlow = Reform(xy[0,*]) - dep
+            xy = map_object -> Forward(_indep-err_xlow, _dep, /NoForwardFix)
+            err_xlow = Reform(xy[0,*]) - indep
         ENDIF
 
         IF (N_Elements(err_xhigh) NE 0) THEN BEGIN
-            xy = map_object -> Forward(_dep+err_xhigh, _indep, /NoForwardFix)
-            err_xhigh = Reform(xy[0,*]) - dep
+            xy = map_object -> Forward(_indep+err_xhigh, _dep, /NoForwardFix)
+            err_xhigh = Reform(xy[0,*]) - indep
         ENDIF
 
     ENDIF ELSE BEGIN
@@ -758,7 +761,7 @@ PRO cgPlot, x, y, $
     
         ; If position is set, then fit the plot into those bounds.
         IF (N_Elements(position) GT 0) THEN BEGIN
-          trial_position = cgAspect(aspect, margin=0.)
+          trial_position = cgAspect(aspect, /Single_Plot)
           trial_width = trial_position[2]-trial_position[0]
           trial_height = trial_position[3]-trial_position[1]
           pos_width = position[2]-position[0]

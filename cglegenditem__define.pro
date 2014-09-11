@@ -480,7 +480,8 @@ PRO cgLegendItem::CalculateBoxSize
         ; Need to draw a line?
         IF x0 NE x1 THEN BEGIN
             itemWidth[j] = x1-x0
-        ENDIF
+            widthFudgeFactor = 1.15
+        ENDIF ELSE widthFudgeFactor = 1.0
         
         ; Need to draw symbols?
         IF (*self.psyms)[j] NE 0 THEN BEGIN
@@ -502,7 +503,9 @@ PRO cgLegendItem::CalculateBoxSize
         cgText, xx, yy, Alignment=0.5, /Normal, (*self.titles)[j],  COLOR=backgroundColor, $
             TT_FONT=*self.tt_font, CHARSIZE=self.charsize, FONT=!P.Font, WIDTH=width, CHARTHICK=charthick
         cgSetColorState, currentState
-        itemWidth[j] = itemWidth[j] + width
+        
+        ; The text width should be a little overestimated if you are drawing a line.
+        itemWidth[j] = itemWidth[j] + (width*widthFudgeFactor)
         IF self.hardware THEN !P.Font = thisFont
         
     ENDFOR

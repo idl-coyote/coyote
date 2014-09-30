@@ -212,7 +212,7 @@
 ;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot or Coyote Graphic cgPlot command is 
 ;        allowed in the program. Note that this is not the same as saying it is a good
-;        idea to use every one of the these keywords. Use good judgement.
+;        idea to use every one of the these keywords. Use good judgment.
 ;-
 FUNCTION cgZPlot::INIT, x, y, $
     ASPECT=aspect, $

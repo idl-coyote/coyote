@@ -227,6 +227,26 @@
 ;       cgPlot, Findgen(11), Color='olive', AxisColor='red', Thick=2
 ;       cgPlot, Findgen(11), Color='blue', SymColor='red', PSym=-16
 ;       
+;     Example using error bars::
+;       data = Congrid(cgDemoData(1), 15)
+;       seed = -5L
+;       time = cgScaleVector(Findgen(N_Elements(data)), 1, 9)
+;       high_yerror = RandomU(seed, N_Elements(data)) * 5 > 0.5
+;       low_yerror = RandomU(seed, N_Elements(data)) * 4 > 0.25
+;       high_xerror = RandomU(seed, N_Elements(data)) * 0.75 > 0.1
+;       low_xerror = RandomU(seed, N_Elements(data))  * 0.75 > 0.1
+;       xtitle = 'Time'
+;       ytitle = 'Signal Strength'
+;       title = 'Error Bar Plot'
+;       position = [0.125, 0.125, 0.9, 0.925]
+;       thick = (!D.Name EQ 'PS') ? 3 : 1
+;       cgDisplay, 600, 500, Title='Errorbar Plot'
+;       cgPlot, time, data, Color='red5', PSym=-16, $
+;           SymSize=1.0, Thick=thick, Title=title, XTitle=xtitle, YTitle=ytitle, $
+;           Position=position, YStyle=1, $
+;           ERR_XLow=low_xerror, ERR_XHigh=high_xerror, ERR_CLIP=1, $
+;           ERR_YLow=low_yerror, ERR_YHigh=high_yerror, ERR_Color='blu5'
+;       
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
 ;        David W. Fanning 
@@ -303,6 +323,8 @@
 ;         Fixed incorrect use of MARGIN keyword in cgAspect. 1 Sep 2014. DWF.
 ;         Fixed a problem with plotting with a map coordinate object. I had reversed independent and
 ;              dependent data vectors. 2 Sept 2014. DWF.
+;         Modified the error bar plotting section of the code to accommodate zoomable plots (eg., cgZPlot). 
+;              Error bars are drawn only on points inside the axes range. 30 Sep 2014. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
@@ -858,6 +880,8 @@ PRO cgPlot, x, y, $
            IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=color, _EXTRA=extra  
         ENDIF  
     ENDELSE
+    IF N_Elements(xrange) EQ 0 THEN xrange = !X.CRange
+    IF N_Elements(yrange) EQ 0 THEN yrange = !Y.CRange
     IF Abs(psym) GT 0 THEN BEGIN
         asymbol = cgSymCat(Abs(psym), COLOR=symcolor, _Extra=extra)
         IF ~Keyword_Set(nodata) THEN OPlot, indep, dep, COLOR=symcolor, $
@@ -905,10 +929,19 @@ PRO cgPlot, x, y, $
             ; X high error bars.
             IF (N_Elements(err_xhigh) NE 0) THEN BEGIN
                 xhigh = indep + err_xhigh
-                FOR j=0,N_Elements(err_xhigh)-1 DO BEGIN
-                    PlotS, [indep[j], xhigh[j]], [dep[j], dep[j]], Color=err_color, Thick=err_thick, $
+                indices = Where(indep GE xrange[0] AND indep LE xrange[1], cnt)
+                IF cnt GT 0 && cnt NE N_Elements(xhigh) THEN BEGIN
+                    indep_ = indep[indices]
+                    dep_ = dep[indices]
+                    xhigh = xhigh[indices]
+                ENDIF ELSE BEGIN
+                    indep_ = indep
+                    dep_ = dep
+                ENDELSE
+                FOR j=0,N_Elements(xhigh)-1 DO BEGIN
+                    PlotS, [indep_[j], xhigh[j]], [dep_[j], dep_[j]], Color=err_color, Thick=err_thick, $
                         NoClip=1-Keyword_Set(err_clip)
-                    nCoord = Convert_Coord(xhigh[j], dep[j], /Data, /To_Normal)
+                    nCoord = Convert_Coord(xhigh[j], dep_[j], /Data, /To_Normal)
                     PlotS, [nCoord[0], nCoord[0]], [nCoord[1]+yerr_width, nCoord[1]-yerr_width], $
                         /Normal, Color=err_color, Thick=err_thick, NoClip=1-Keyword_Set(err_clip)
                 ENDFOR
@@ -917,10 +950,19 @@ PRO cgPlot, x, y, $
             ; X low error bars.
             IF (N_Elements(err_xlow) NE 0) THEN BEGIN
                 xlow = indep - err_xlow
-                FOR j=0,N_Elements(err_xlow)-1 DO BEGIN
-                    PlotS, [indep[j], xlow[j]], [dep[j], dep[j]], Color=err_color, Thick=err_thick, $
+                indices = Where(indep GE xrange[0] AND indep LE xrange[1], cnt)
+                IF cnt GT 0 && cnt NE N_Elements(xlow) THEN BEGIN
+                    indep_ = indep[indices]
+                    dep_ = dep[indices]
+                    xlow = xlow[indices]
+                ENDIF ELSE BEGIN
+                    indep_ = indep
+                    dep_ = dep
+                ENDELSE
+                FOR j=0,N_Elements(xlow)-1 DO BEGIN
+                    PlotS, [indep_[j], xlow[j]], [dep_[j], dep_[j]], Color=err_color, Thick=err_thick, $
                     NoClip=1-Keyword_Set(err_clip)
-                    nCoord = Convert_Coord(xlow[j], dep[j], /Data, /To_Normal)
+                    nCoord = Convert_Coord(xlow[j], dep_[j], /Data, /To_Normal)
                     PlotS, [nCoord[0], nCoord[0]], [nCoord[1]+yerr_width, nCoord[1]-yerr_width], $
                         /Normal, Color=err_color, Thick=err_thick, NoClip=1-Keyword_Set(err_clip)
                 ENDFOR
@@ -940,10 +982,19 @@ PRO cgPlot, x, y, $
             ; Y high error bars.
             IF (N_Elements(err_yhigh) NE 0) THEN BEGIN
                 yhigh = dep + err_yhigh
-                FOR j=0,N_Elements(err_yhigh)-1 DO BEGIN
-                    PlotS, [indep[j], indep[j]], [yhigh[j], dep[j]], Color=err_color, Thick=err_thick, $
+                indices = Where(dep GE yrange[0] AND dep LE yrange[1], cnt)
+                IF cnt GT 0 && cnt NE N_Elements(yhigh) THEN BEGIN
+                    indep_ = indep[indices]
+                    dep_ = dep[indices]
+                    yhigh = yhigh[indices]
+                ENDIF ELSE BEGIN
+                    indep_ = indep
+                    dep_ = dep
+                ENDELSE
+                FOR j=0,N_Elements(yhigh)-1 DO BEGIN
+                    PlotS, [indep_[j], indep_[j]], [yhigh[j], dep_[j]], Color=err_color, Thick=err_thick, $
                         NoClip=1-Keyword_Set(err_clip)
-                    nCoord = Convert_Coord(indep[j], yhigh[j], /Data, /To_Normal)
+                    nCoord = Convert_Coord(indep_[j], yhigh[j], /Data, /To_Normal)
                     PlotS, [nCoord[0]-xerr_width, nCoord[0]+xerr_width], [nCoord[1], nCoord[1]], $
                         /Normal, Color=err_color, Thick=err_thick, NoClip=1-Keyword_Set(err_clip)
                 ENDFOR
@@ -952,10 +1003,19 @@ PRO cgPlot, x, y, $
             ; Y low error bars.
             IF (N_Elements(err_ylow) NE 0) THEN BEGIN
                 ylow = dep - err_ylow
-                FOR j=0,N_Elements(err_ylow)-1 DO BEGIN
-                    PlotS, [indep[j], indep[j]], [ylow[j], dep[j]], Color=err_color, Thick=err_thick, $
-                    NoClip=1-Keyword_Set(err_clip)
-                    nCoord = Convert_Coord(indep[j], ylow[j], /Data, /To_Normal)
+                indices = Where(dep GE yrange[0] AND dep LE yrange[1], cnt)
+                IF cnt GT 0 && cnt NE N_Elements(yhigh) THEN BEGIN
+                    indep_ = indep[indices]
+                    dep_ = dep[indices]
+                    ylow = ylow[indices]
+                ENDIF ELSE BEGIN
+                    indep_ = indep
+                    dep_ = dep
+                ENDELSE
+                FOR j=0,N_Elements(ylow)-1 DO BEGIN
+                    PlotS, [indep_[j], indep_[j]], [ylow[j], dep_[j]], Color=err_color, Thick=err_thick, $
+                        NoClip=1-Keyword_Set(err_clip)
+                    nCoord = Convert_Coord(indep_[j], ylow[j], /Data, /To_Normal)
                     PlotS, [nCoord[0]-xerr_width, nCoord[0]+xerr_width], [nCoord[1], nCoord[1]], $
                         /Normal, Color=err_color, Thick=err_thick, NoClip=1-Keyword_Set(err_clip)
                 ENDFOR

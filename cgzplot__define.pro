@@ -66,22 +66,37 @@
 ;  File output requires that ImageMagick and GhostScript be installed on your machine. Note
 ;  that exact axis scaling is always in effect.
 ;
-;  The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
-;  to be installed on your machine.
-;        
+;  This program object is accessed through the cgZPlot procedure, as in the examples below.
+;  
 ; :Categories:
 ;    Graphics
 ;    
 ; :Examples:
-;    Plot examples::
-;       cgZPlot, cgDemodata(1), PSYM=2, Color='dodger blue'
-;       
-;    To put this in your own widget program::
-;        tlb = Widget_Base(Title='My Program')
-;        cgZPlot, cgDemodata(1), PSYM=2, Color='dodger blue', Parent=tlb
-;        Widget_Control, tlb, /Realize
-;        Widget_Control, 'myprogram', tlb, /NoBlock
-;    
+;    Use as you would use the cgPlot command::
+;       cgZPlot, cgDemoData(1)
+;       cgZPlot, cgDemoData(1), Aspect=1.0
+;       cgZPlot, cgDemoData(1), Color='olive', AxisColor='red', Thick=2
+;       cgZPlot, cgDemoData(1), Color='blue', SymColor='red', PSym=-16
+;
+;     Example using error bars::
+;       data = Congrid(cgDemoData(1), 15)
+;       seed = -5L
+;       time = cgScaleVector(Findgen(N_Elements(data)), 1, 9)
+;       high_yerror = RandomU(seed, N_Elements(data)) * 5 > 0.5
+;       low_yerror = RandomU(seed, N_Elements(data)) * 4 > 0.25
+;       high_xerror = RandomU(seed, N_Elements(data)) * 0.75 > 0.1
+;       low_xerror = RandomU(seed, N_Elements(data))  * 0.75 > 0.1
+;       xtitle = 'Time'
+;       ytitle = 'Signal Strength'
+;       title = 'Error Bar Plot'
+;       position = [0.125, 0.125, 0.9, 0.925]
+;       thick = (!D.Name EQ 'PS') ? 3 : 1
+;       cgZPlot, time, data, Color='red5', PSym=-16, $
+;           SymSize=1.0, Thick=thick, Title=title, XTitle=xtitle, YTitle=ytitle, $
+;           Position=position, YStyle=1, $
+;           ERR_XLow=low_xerror, ERR_XHigh=high_xerror, ERR_CLIP=1, $
+;           ERR_YLow=low_yerror, ERR_YHigh=high_yerror, ERR_Color='blu5'
+;
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
 ;       David W. Fanning 
@@ -114,6 +129,8 @@
 ;        Added a Destroy method and now remove widget GUI in CLEANUP method. 2 Oct 2012. DWF.
 ;        I had the GetProperty and SetProperty keyword inheritance mechanism screwed up. Sorted
 ;           now. 13 March 2013. DWF.
+;        Added the ability to display error bars on the zoomable plot. 30 Sep 2014. DWF.
+;        Added a SYMCOLOR keyword to the zoomable plot. 30 Sep 2014. DWF.
 ;-
 
 ;+
@@ -132,15 +149,32 @@
 ;     aspect: in, optional, type=float, default=none
 ;        Set this keyword to a floating point ratio that represents the aspect ratio 
 ;        (ysize/xsize) of the resulting plot. The plot position may change as a result
-;        of setting this keyword. Note that `Aspect` cannot be used when plotting with
-;        !P.MULTI.
+;        of setting this keyword. 
+;     err_clip: in, optional, type=boolean, default=1
+;        Set this keyword to cause error bars to be clipped to the borders of the plot.
+;        The default is to clip the error bars to the extent of the zoomed plot.
+;     err_color: in, optional, type=varies
+;        The color error bars should be drawn in. The default is to use the `Color` keyword.
+;     err_thick:, in, optional, type=integer
+;        The thickness of the line for drawing the error bars. By default, !P.Thick.
+;     err_width: in, optional, type=float
+;        The width of the end lines on error bars in normalized coordinates. By default, the
+;        width is one percent of the width of the axes length in the appropriate dimension.
+;     err_xhigh: in, optional
+;         he high error values that should be added to the independent or X data values.
+;     err_xlow: in, optional
+;        The low error values that should be subtracted from the independent or X data values.
+;     err_yhigh: in, optional
+;        The high error values that should be added to the dependent or Y data values.
+;     err_ylow: in, optional
+;        The low error values that should be subtracted from the dependent or Y data values.
 ;     label: in, optional, type=string
 ;        A label is similar to a plot title, but it is aligned to the left edge
 ;        of the plot and is written in hardware fonts. Use of the label keyword
 ;        will suppress the plot title.
 ;     legends: in, optional, type=object
-;         A single cgLegendItem object, or an array of cgLegendItem objects that will be
-;         drawn on the plot as a legend.
+;        A single cgLegendItem object, or an array of cgLegendItem objects that will be
+;        drawn on the plot as a legend.
 ;     max_value: in, optional, type=float
 ;        Set this keyword to the maximum value to plot. Any values greater than this 
 ;        value are treated as missing.
@@ -148,11 +182,14 @@
 ;        Set this keyword to the minimu value to plot. Any values smaller than this 
 ;        value are treated as missing.
 ;     oplots: in, optional, type=object
-;         A single cgOverPlot object, or an array of cgOverPlot objects that will be
-;         overplot on the axes set up by the original data.
+;        A single cgOverPlot object, or an array of cgOverPlot objects that will be
+;        overplot on the axes set up by the original data.
 ;     parent: in, optional, type=long
 ;        The identifer of the parent widget for this program's draw widget. If not
 ;        provided, the program will create it's own top-level base widget as a parent.
+;     symcolor: in, optional, type=string/integer, default='black'
+;        If this keyword is a string, the name of the symbol color. By default, 'black'.
+;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     xlog: in, optional, type=boolean, default=0
 ;        Set this keyword to use a logarithmic X axis
 ;     xrange: in, optional, type=double
@@ -164,14 +201,14 @@
 ;     ynozero: in, optional, type=boolean, default=0
 ;        Set this keyword to use allow the Y axis to start at a value other than zero.
 ;     yrange: in, optional, type=double
-;         Set this keyword to a two-element array giving the Y data range of the plot.
+;        Set this keyword to a two-element array giving the Y data range of the plot.
 ;     ysize: in, optional, type=int, default=512
-;         The Y size of the program's draw widget.
+;        The Y size of the program's draw widget.
 ;     zoomfactor: in, optional, type=float
-;         Set this keyword to a number between 0.01 and 0.25. This affects the amount
-;         of zooming when the X axis and Y axis are zoomed with the LEFT mouse button.
-;         The default value is 0.05 or five percent of the current axis range on each
-;         end of the axis, resulting in a 10 percent change in the axis length.
+;        Set this keyword to a number between 0.01 and 0.25. This affects the amount
+;        of zooming when the X axis and Y axis are zoomed with the LEFT mouse button.
+;        The default value is 0.05 or five percent of the current axis range on each
+;        end of the axis, resulting in a 10 percent change in the axis length.
 ;     _ref_extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot or Coyote Graphic cgPlot command is 
 ;        allowed in the program. Note that this is not the same as saying it is a good
@@ -180,12 +217,21 @@
 FUNCTION cgZPlot::INIT, x, y, $
     ASPECT=aspect, $
     DRAWID=drawid, $
+    ERR_CLIP=err_clip, $
+    ERR_COLOR=err_color, $
+    ERR_THICK=err_thick, $
+    ERR_WIDTH=err_width, $
+    ERR_XHIGH=err_xhigh, $
+    ERR_XLOW=err_xlow, $
+    ERR_YHIGH=err_yhigh, $
+    ERR_YLOW=err_ylow, $
     LABEL=label, $
     LEGENDS=legends, $
     MAX_VALUE=max_value, $
     MIN_VALUE=min_value, $
     OPLOTS=oplots, $
     PARENT=parent, $
+    SYMCOLOR=symcolor, $
     XLOG=xlog, $
     XRANGE=xrange, $
     XSIZE=xsize, $
@@ -231,11 +277,18 @@ FUNCTION cgZPlot::INIT, x, y, $
     IF N_Elements(indep) EQ 1 THEN indep = [indep]
     
     ; Allocate heap for variables.
+    self.aspect = Ptr_New(/Allocate_Heap)
     self.indep = Ptr_New(/Allocate_Heap)
     self.dep = Ptr_New(/Allocate_Heap)
-    self.aspect = Ptr_New(/Allocate_Heap)
+    self.err_color = Ptr_New(/Allocate_Heap)
+    self.err_width = Ptr_New(/Allocate_Heap)
+    self.err_xhigh = Ptr_New(/Allocate_Heap)
+    self.err_xlow = Ptr_New(/Allocate_Heap)
+    self.err_yhigh = Ptr_New(/Allocate_Heap)
+    self.err_ylow = Ptr_New(/Allocate_Heap)
     self.max_value = Ptr_New(/Allocate_Heap)
     self.min_value = Ptr_New(/Allocate_Heap)
+    self.symcolor = Ptr_New(/Allocate_Heap)
     self.xlog = Ptr_New(/Allocate_Heap)
     self.ylog = Ptr_New(/Allocate_Heap)
     self.ynozero = Ptr_New(/Allocate_Heap)
@@ -244,12 +297,24 @@ FUNCTION cgZPlot::INIT, x, y, $
     IF N_Elements(oplots) NE 0 THEN self.oplots = Ptr_New(oplots) ELSE self.oplots = Ptr_New(/ALLOCATE_HEAP)
     IF N_Elements(legends) NE 0 THEN self.legends = Ptr_New(legends) ELSE self.legends = Ptr_New(/ALLOCATE_HEAP)
     
+    IF N_Elements(err_clip) EQ 0 THEN err_clip = 1 ELSE err_clip = Keyword_Set(err_clip)
+    IF N_Elements(err_thick) EQ 0 THEN err_thick = !P.Thick
+
     self -> SetProperty, $
         INDEP=indep, $
         DEP=dep, $
         ASPECT=aspect, $
+        ERR_CLIP=err_clip, $
+        ERR_COLOR=err_color, $
+        ERR_THICK=err_thick, $
+        ERR_WIDTH=err_width, $
+        ERR_XHIGH=err_xhigh, $
+        ERR_XLOW=err_xlow, $
+        ERR_YHIGH=err_yhigh, $
+        ERR_YLOW=err_ylow, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
+        SYMCOLOR=symcolor, $
         XLOG=xlog, $
         XRANGE=xrange, $
         YLOG=ylog, $
@@ -302,18 +367,12 @@ FUNCTION cgZPlot::INIT, x, y, $
     ; Set object properties.
     self.drag = 0
     IF N_Elements(label) NE 0 THEN self.label = label
-    IF N_Elements(xrange) EQ 0 THEN xrange = [Min(indep), Max(indep)]
-    IF N_Elements(yrange) EQ 0 THEN yrange = [Min(dep), Max(dep)*1.05]
-    self.orig_xrange = xrange
-    self.orig_yrange = yrange
+    IF N_Elements(xrange) NE 0 THEN self.orig_xrange = xrange
+    IF N_Elements(yrange) NE 0 THEN self.orig_yrange = yrange
     self.zoomfactor = zoomfactor
     *self.xlog = Keyword_Set(xlog)
     *self.ylog = Keyword_Set(ylog)
-    
-    ; Must do exact axis scaling for smooth operation.
-    IF N_Elements(*self.xstyle) NE 0 THEN *self.xstyle = *self.xstyle && 1 ELSE *self.xstyle = 1
-    IF N_Elements(*self.ystyle) NE 0 THEN *self.ystyle = *self.ystyle && 1 ELSE *self.ystyle = 1
-    
+        
     ; Realize the widget and get it going, if you created the TLB.
     IF N_Elements(parent) EQ 0 THEN BEGIN
         Widget_Control, self.tlb, /Realize
@@ -344,8 +403,15 @@ PRO cgZPlot::CLEANUP
     Ptr_Free, self.indep
     Ptr_Free, self.dep
     Ptr_Free, self.aspect
+    Ptr_Free, self.err_color
+    Ptr_Free, self.err_width
+    Ptr_Free, self.err_xhigh
+    Ptr_Free, self.err_xlow
+    Ptr_Free, self.err_yhigh
+    Ptr_Free, self.err_ylow
     Ptr_Free, self.max_value
     Ptr_Free, self.min_value
+    Ptr_Free, self.symcolor
     Ptr_Free, self.xlog
     Ptr_Free, self.ylog
     Ptr_Free, self.ynozero
@@ -860,6 +926,14 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
    cgPlot, *self.indep, *self.dep, $
         OUTPUT=output, $
         ASPECT=*self.aspect, $
+        ERR_CLIP=self.err_clip, $
+        ERR_COLOR=*self.err_color, $
+        ERR_THICK=self.err_thick, $
+        ERR_WIDTH=*self.err_width, $
+        ERR_XHIGH=*self.err_xhigh, $
+        ERR_XLOW=*self.err_xlow, $
+        ERR_YHIGH=*self.err_yhigh, $
+        ERR_YLOW=*self.err_ylow, $
         LABEL=self.label, $
         MAX_VALUE=*self.max_value, $
         MIN_VALUE=*self.min_value, $
@@ -884,6 +958,7 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         POSITION=position, $
         PSYM=psym, $
         SUBTITLE=subtitle, $
+        SYMCOLOR=*self.symcolor, $
         SYMSIZE=symsize, $
         T3D=t3d, $
         THICK=thick, $
@@ -893,7 +968,7 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         XGRIDSTYLE=xgridstyle, $
         XMARGIN=xmargin, $
         XMINOR=xminor, $
-        XRANGE=xrange, $
+        XRANGE=*self.xrange, $
         XSTYLE=xstyle, $
         XTHICK=xthick, $
         XTICK_GET=xtick_get, $
@@ -910,7 +985,7 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         YGRIDSTYLE=ygridstyle, $
         YMARGIN=ymargin, $
         YMINOR=yminor, $
-        YRANGE=yrange, $
+        YRANGE=*self.yrange, $
         YSTYLE=ystyle, $
         YTHICK=ythick, $
         YTICK_GET=ytick_get, $
@@ -942,6 +1017,19 @@ PRO cgZPlot::DrawPlot, OUTPUT=output
         ZTITLE=ztitle, $
         ZVALUE=zvalue
         
+   ; If this is the first time you have drawn the plot, fill in the X and Y range.
+   IF N_Elements(xrange) EQ 0 THEN BEGIN
+       *self.xrange = !X.CRange
+       self.orig_xrange = *self.xrange
+       self -> cgGraphicsKeywords::SetProperty, XRANGE=!X.CRange
+   ENDIF
+   IF N_Elements(yrange) EQ 0 THEN BEGIN
+       *self.yrange = !Y.CRange
+       self.orig_yrange = *self.yrange
+       self -> cgGraphicsKeywords::SetProperty, YRANGE=!Y.CRange
+   ENDIF
+   IF N_Elements(*self.xstyle) NE 0 THEN *self.xstyle = *self.xstyle && 1 ELSE *self.xstyle = 1
+   IF N_Elements(*self.ystyle) NE 0 THEN *self.ystyle = *self.ystyle && 1 ELSE *self.ystyle = 1
 END
 
 
@@ -1281,18 +1369,36 @@ END
 ;        of setting this keyword. Note that `Aspect` cannot be used when plotting with
 ;        !P.MULTI.
 ;     dep: in, optional, type=any
-;         The dependent data to plot.
+;        The dependent data to plot.
 ;     draw: in, optional, type=boolean, default=0
-;         Set this keyword if you would like to immediately draw the plot after properties are set.
+;        Set this keyword if you would like to immediately draw the plot after properties are set.
+;     err_clip: in, optional, type=boolean, default=0
+;        Set this keyword to cause error bars to be clipped to the borders of the plot.
+;        The default is to draw error bars, even if outside the plot.
+;     err_color: in, optional, type=varies
+;        The color error bars should be drawn in. The default is to use the `Color` keyword.
+;     err_thick:, in, optional, type=integer
+;        The thickness of the line for drawing the error bars. By default, !P.Thick.
+;     err_width: in, optional, type=float
+;        The width of the end lines on error bars in normalized coordinates. By default, the
+;        width is one percent of the width of the axes length in the appropriate dimension.
+;     err_xhigh: in, optional
+;         he high error values that should be added to the independent or X data values.
+;     err_xlow: in, optional
+;        The low error values that should be subtracted from the independent or X data values.
+;     err_yhigh: in, optional
+;        The high error values that should be added to the dependent or Y data values.
+;     err_ylow: in, optional
+;        The low error values that should be subtracted from the dependent or Y data values.
 ;     indep: in, optional, type=any
-;         The independent data to plot.
+;        The independent data to plot.
 ;     label: in, optional, type=string
-;         A label is similar to a plot title, but it is aligned to the left edge
-;         of the plot and is written in hardware fonts. Use of the label keyword
-;         will suppress the plot title.
+;        A label is similar to a plot title, but it is aligned to the left edge
+;        of the plot and is written in hardware fonts. Use of the label keyword
+;        will suppress the plot title.
 ;     legends: in, optional, type=object
-;         A single cgLegendItem object, or an array of cgLegendItem objects that will be
-;         drawn on the plot as a legend.
+;        A single cgLegendItem object, or an array of cgLegendItem objects that will be
+;        drawn on the plot as a legend.
 ;     max_value: in, optional, type=float
 ;        Set this keyword to the maximum value to plot. Any values greater than this 
 ;        value are treated as missing.
@@ -1300,19 +1406,22 @@ END
 ;        Set this keyword to the minimu value to plot. Any values smaller than this 
 ;        value are treated as missing.
 ;     oplots: in, optional, type=object
-;         A single cgOverPlot object, or an array of cgOverPlot objects that will be
-;         overplot on the axes set up by the original data.
+;        A single cgOverPlot object, or an array of cgOverPlot objects that will be
+;        overplot on the axes set up by the original data.
+;     symcolor: in, optional, type=string/integer, default='black'
+;        If this keyword is a string, the name of the symbol color. By default, 'black'.
+;        Otherwise, the keyword is assumed to be a color index into the current color table.
 ;     xlog: in, optional, type=boolean, default=0
-;         Set this keyword to use a logarithmic X axis
+;        Set this keyword to use a logarithmic X axis
 ;     ylog: in, optional, type=boolean, default=0
-;         Set this keyword to use a logarithmic Y axis
+;        Set this keyword to use a logarithmic Y axis
 ;     ynozero: in, optional, type=boolean, default=0
-;         Set this keyword to use allow the Y axis to start at a value other than zero.
+;        Set this keyword to use allow the Y axis to start at a value other than zero.
 ;     zoomfactor: in, optional, type=float
-;         Set this keyword to a number between 0.01 and 0.25. This affects the amount
-;         of zooming when the X axis and Y axis are zoomed with the LEFT mouse button.
-;         The default value is 0.05 or five percent of the current axis range on each
-;         end of the axis, resulting in a 10 percent change in the axis length.
+;        Set this keyword to a number between 0.01 and 0.25. This affects the amount
+;        of zooming when the X axis and Y axis are zoomed with the LEFT mouse button.
+;        The default value is 0.05 or five percent of the current axis range on each
+;        end of the axis, resulting in a 10 percent change in the axis length.
 ;     _extra: in, optional, type=any
 ;        Any keyword appropriate for the IDL Plot or Coyote Graphic cgPlot command is 
 ;        allowed in the program.
@@ -1321,12 +1430,21 @@ PRO cgZPlot::SetProperty, $
         ASPECT=aspect, $
         DEP=dep, $
         DRAW=draw, $
+        ERR_CLIP=err_clip, $
+        ERR_COLOR=err_color, $
+        ERR_THICK=err_thick, $
+        ERR_WIDTH=err_width, $
+        ERR_XHIGH=err_xhigh, $
+        ERR_XLOW=err_xlow, $
+        ERR_YHIGH=err_yhigh, $
+        ERR_YLOW=err_ylow, $
         INDEP=indep, $
         LABEL=label, $
         LEGENDS=legends, $
         MAX_VALUE=max_value, $
         MIN_VALUE=min_value, $
         OPLOTS=oplots, $
+        SYMCOLOR=symcolor, $
         XLOG=xlog, $
         YLOG=ylog, $
         YNOZERO=ynozero, $
@@ -1346,12 +1464,21 @@ PRO cgZPlot::SetProperty, $
     
     IF N_Elements(indep) NE 0 THEN *self.indep = indep
     IF N_Elements(dep) NE 0 THEN *self.dep = dep
+    IF N_Elements(err_clip) NE 0 THEN self.err_clip = err_clip
+    IF N_Elements(err_color) NE 0 THEN *self.err_color = err_color
+    IF N_Elements(err_thick) NE 0 THEN self.err_thick = err_thick
+    IF N_Elements(err_width) NE 0 THEN *self.err_width = err_width
+    IF N_Elements(err_xhigh) NE 0 THEN *self.err_xhigh = err_xhigh
+    IF N_Elements(err_xlow) NE 0 THEN *self.err_xlow = err_xlow
+    IF N_Elements(err_yhigh) NE 0 THEN *self.err_yhigh = err_yhigh
+    IF N_Elements(err_ylow) NE 0 THEN *self.err_ylow = err_ylow
     IF N_Elements(aspect) NE 0 THEN *self.aspect = aspect
     IF N_Elements(label) NE 0 THEN self.label = label
     IF N_Elements(legends) NE 0 THEN self -> AddLegends, legends, /Clear
     IF N_Elements(max_value) NE 0 THEN *self.max_value = max_value
     IF N_Elements(min_value) NE 0 THEN *self.min_value = min_value
     IF N_Elements(oplots) NE 0 THEN self -> AddOverplots, oplots, /Clear
+    IF N_Elements(symcolor) NE 0 THEN *self.symcolor = symcolor
     IF N_Elements(xlog) NE 0 THEN *self.xlog = Keyword_Set(xlog)
     IF N_Elements(ylog) NE 0 THEN *self.ylog = Keyword_Set(ylog)
     IF N_Elements(ynozero) NE 0 THEN *self.ynozero = Keyword_Set(ynozero)
@@ -1689,9 +1816,18 @@ PRO cgZPlot__Define, class
    class = { cgZPLOT, $
              INHERITS cgGraphicsKeywords, $
              ASPECT: Ptr_New(), $
+             ERR_CLIP: 0B, $
+             ERR_COLOR: Ptr_New(), $
+             ERR_THICK: 0L, $
+             ERR_WIDTH: Ptr_New(), $
+             ERR_XHIGH: Ptr_New(), $
+             ERR_XLOW: Ptr_New(), $
+             ERR_YHIGH: Ptr_New(), $
+             ERR_YLOW: Ptr_New(), $
              MAX_VALUE: Ptr_New(), $
              MIN_VALUE: Ptr_New(), $
              NSUM: Ptr_New(), $
+             SYMCOLOR: Ptr_New(), $
              XLOG: Ptr_New(), $
              YLOG: Ptr_New(), $
              YNOZERO: Ptr_New(), $

@@ -40,7 +40,7 @@
 ;+
 ; The purpose of cgPS_SETUP__DEFINE is to define a structure that is
 ; used by cgPS_Open and cgPS_Close to communicate PostScript set-up information
-; back and forth. The idea is to allow simple and error set-up of PostScript and
+; back and forth. The idea is to allow simple and easy set-up of PostScript and
 ; raster file output (though PostScript intermediate files and ImageMagick). The 
 ; program uses a common block named " _$FSC_PS_START_ ".
 ;

@@ -326,26 +326,28 @@
 ;          probability line, respectively. 25 May 2012. DWF.
 ;       If the cumulative probability option (keyword OPROBABILITY) is set, a second axis is drawn indicating
 ;          the cumulative probablity from 0 to 1. 25 May 2012. DWF.
-;        Whoops! Don't want to set default position unless Total(!P.MULTI) equals zero. 25 May 2012. DWF.
-;        More work on getting the cumulative probability to be correctly plotted. 30 May 2012. DWF.
-;        More whoops! Setting POSITION now interfering with LAYOUT keyword. More fixes to restore LAYOUT. 26 July 2012. DWF.
-;        Aaauuughhh! Typo introduced in yesterday's fix before I saved final version. 27 July 2012. DWF.
-;        Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
-;        Mis-spelled "probability" in one section of the code. Fixed. 31 July 2012. DWF.
-;        Added COLOR keyword. 19 Sept 2012. DWF.
-;        Now restoring previous plot parameters after drawing cumulative probability axis, so as not
+;       Whoops! Don't want to set default position unless Total(!P.MULTI) equals zero. 25 May 2012. DWF.
+;       More work on getting the cumulative probability to be correctly plotted. 30 May 2012. DWF.
+;       More whoops! Setting POSITION now interfering with LAYOUT keyword. More fixes to restore LAYOUT. 26 July 2012. DWF.
+;       Aaauuughhh! Typo introduced in yesterday's fix before I saved final version. 27 July 2012. DWF.
+;       Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
+;       Mis-spelled "probability" in one section of the code. Fixed. 31 July 2012. DWF.
+;       Added COLOR keyword. 19 Sept 2012. DWF.
+;       Now restoring previous plot parameters after drawing cumulative probability axis, so as not
 ;           to interfere with subsequent overplotting. 27 Sept 2012. DWF.
-;        Changed the way the "ystart" variable is set on log plots. 21 Jan 2013. DWF.
-;        Now taking into account the MININPUT and MAXINPUT values when calculating a default bin size. 19 Feb 2013. DWF.
-;        Added [XY]TickNames, [XY]Tickformat, [XY]TickS, and [XY]TickValues keywords. 21 Feb 2013. DWF.
-;        Now choosing the default tick format of '(F)' when LOG is set. 28 April 2013. DWF.
-;        Added Line_Thick keyword to change thickness of fill line. 28 Aug 2013. DWF.
-;        Changed the default background color to "white" from "background" and default axis 
+;       Changed the way the "ystart" variable is set on log plots. 21 Jan 2013. DWF.
+;       Now taking into account the MININPUT and MAXINPUT values when calculating a default bin size. 19 Feb 2013. DWF.
+;       Added [XY]TickNames, [XY]Tickformat, [XY]TickS, and [XY]TickValues keywords. 21 Feb 2013. DWF.
+;       Now choosing the default tick format of '(F)' when LOG is set. 28 April 2013. DWF.
+;       Added Line_Thick keyword to change thickness of fill line. 28 Aug 2013. DWF.
+;       Changed the default background color to "white" from "background" and default axis 
 ;           color to "black" from "opposite". It's about time this routine behaved like other
 ;           Coyote Graphic routines! 22 Oct 2013. DWF.
-;        Fixed problem with XTICKVALUES and YTICKVALUES keywords when plot is rotated. 19 Nov 2013. DWF.
-;        Added OL_STYLE keyword. 25 Feb 2014. DWF.
-;        Added Peak_Height keyword. 26 May 2014.
+;       Fixed problem with XTICKVALUES and YTICKVALUES keywords when plot is rotated. 19 Nov 2013. DWF.
+;       Added OL_STYLE keyword. 25 Feb 2014. DWF.
+;       Added Peak_Height keyword. 26 May 2014.
+;       The starting position for overplotted histograms was taken from the calculated data range, rather 
+;            than from the axes range of the previous plot. Fixed. 9 Oct 2014. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2007-2013, Fanning Software Consulting, Inc.
@@ -1044,9 +1046,9 @@ PRO cgHistoplot, $                  ; The program name.
 
          step = (xrange[1] - xrange[0]) / (binsize + 1)
          IF Keyword_Set(rotate) THEN BEGIN
-            start = yrange[0] + binsize
+            IF Keyword_Set(overplot) THEN start = !Y.CRange[0] + binsize ELSE start = yrange[0] + binsize
          ENDIF ELSE BEGIN
-            start = xrange[0] + binsize
+            IF Keyword_Set(overplot) THEN start = !X.CRange[0] + binsize ELSE start = xrange[0] + binsize
          ENDELSE
          endpt = start + binsize
          FOR j=0,N_Elements(histdata)-1 DO BEGIN
@@ -1179,9 +1181,9 @@ PRO cgHistoplot, $                  ; The program name.
     
     step = (xrange[1] - xrange[0]) / (binsize + 1)
     IF Keyword_Set(rotate) THEN BEGIN
-        start = yrange[0] + binsize
+        IF Keyword_Set(overplot) THEN start = !Y.CRange[0] + binsize ELSE start = yrange[0] + binsize
     ENDIF ELSE BEGIN
-        start = xrange[0] + binsize
+        IF Keyword_Set(overplot) THEN start = !X.CRange[0] + binsize ELSE start = xrange[0] + binsize
     ENDELSE
     endpt = start + binsize
     IF log THEN BEGIN

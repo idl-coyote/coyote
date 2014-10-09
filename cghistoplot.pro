@@ -346,11 +346,9 @@
 ;       Fixed problem with XTICKVALUES and YTICKVALUES keywords when plot is rotated. 19 Nov 2013. DWF.
 ;       Added OL_STYLE keyword. 25 Feb 2014. DWF.
 ;       Added Peak_Height keyword. 26 May 2014.
-;       The starting position for overplotted histograms was taken from the calculated data range, rather 
-;            than from the axes range of the previous plot. Fixed. 9 Oct 2014. DWF.
 ;        
 ; :Copyright:
-;     Copyright (c) 2007-2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2007-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgHistoplot, $                  ; The program name.
    data, $                          ; The data to draw a histogram of.

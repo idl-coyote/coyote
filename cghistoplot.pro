@@ -899,7 +899,7 @@ PRO cgHistoplot, $                  ; The program name.
 
    ; Do you need to smooth the data?
    IF N_Elements(smooth) NE 0 THEN histdata = Smooth(histdata, smooth)
-   
+
    ; Are you plotting the frequency rather than the count?
    IF frequency THEN histdata = Float(histdata)/N_Elements(_data)
    
@@ -1181,9 +1181,9 @@ PRO cgHistoplot, $                  ; The program name.
     
     step = (xrange[1] - xrange[0]) / (binsize + 1)
     IF Keyword_Set(rotate) THEN BEGIN
-        IF Keyword_Set(overplot) THEN start = !Y.CRange[0] + binsize ELSE start = yrange[0] + binsize
+        start = yrange[0] + binsize
     ENDIF ELSE BEGIN
-        IF Keyword_Set(overplot) THEN start = !X.CRange[0] + binsize ELSE start = xrange[0] + binsize
+        start = xrange[0] + binsize
     ENDELSE
     endpt = start + binsize
     IF log THEN BEGIN

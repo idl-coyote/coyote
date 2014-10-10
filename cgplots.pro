@@ -73,10 +73,11 @@
 ;        keyword to provide a cgMap object that will allow you to convert the `x` and `y`
 ;        parameters from longitude and latitude, respectively, to projected meter space
 ;        before drawing. X and Y must both be present.
-;     psym: in, optional, type=integer
-;        Any normal IDL PSYM values, plus any value supported by the Coyote Library
-;        routine cgSYMCAT. An integer between 0 and 46. May also be specified as a
-;        symbol names. See `cgSymCat` for details.
+;     psym: in, optional
+;        Any symbol value supported by the Coyote Library routine cgSYMCAT. In particular, an 
+;        integer or integer array the same length as X with values between 0 and 46. The keyword 
+;        may also be specified as a symbol name or names. If using symbol names, the symbol cannot 
+;        be set to a negative value. See `cgSymCat` for details.
 ;     symcolor: in, optional, type=string/integer/vector, default=COLOR
 ;        If this keyword is a string, the name of the symbol color. By default, same as COLOR.
 ;        Otherwise, the keyword is assumed to be a color index into the current color table.
@@ -92,8 +93,18 @@
 ;         
 ; :Examples:
 ;    Use like the IDL PLOTS command::
-;       IDL> cgPlot, Findgen(11)
-;       IDL> cgPlotS, !X.CRange, [5,5], LINESTYLE=2, THICK=2, COLOR='red'
+;        cgPlot, Findgen(11)
+;        cgPlotS, !X.CRange, [5,5], LINESTYLE=2, THICK=2, COLOR='red'
+;       
+;    Use vectors for symbols and colors::
+;        seed = -3L
+;        x = Randomu(seed, 5) * 9 + 0.5
+;        x = x[Sort(x)]
+;        y = Randomu(seed, 5) * 9 + 0.5
+;        cgPlot, x, y, /NoData
+;        colors = ['red6', 'blu6', 'grn6', 'dodger blue', 'orange']
+;        symbols = Indgen(5)+14
+;        cgPlots, x, y, PSYM=symbols, Color=colors, SymSize=2
 ;       
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
@@ -129,9 +140,10 @@
 ;        Added the ability to specify the PSYM keyword as a string. 20 July 2012. DWF.
 ;        Added a check for a window to draw into, if needed. 8 July 2012. DWF.
 ;        Loop counter didn't assume someone would pass in 2D array of XY pairs. Fixed. 31 Jan 2013. DWF.
+;        Added the ability to pass a vector of values via the PSYM keyword. 10 Oct 2014. DWF
 ;        
 ; :Copyright:
-;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
 ;-
 PRO cgPlotS, x, y, z, $
     ADDCMD=addcmd, $
@@ -164,9 +176,12 @@ PRO cgPlotS, x, y, z, $
     ; Check to see if psymIn is a string. If so, covert it here.
     IF N_Elements(psymIn) NE 0 THEN BEGIN
         IF Size(psymIn, /TNAME) EQ 'STRING' THEN BEGIN
-              names = cgSymCat(/Names) 
-              index = Where(STRUPCASE(StrCompress(names, /REMOVE_ALL)) EQ STRUPCASE(StrCompress(psymIN, /REMOVE_ALL)), count)
-              IF count GT 0 THEN psym = index[0] ELSE Message, 'Cannot resolve the PSYM value: ' + psymIn
+              names = cgSymCat(/Names)
+              psym = IntArr(N_Elements(psymIn))
+              FOR j=0,N_Elements(psymIn)-1 DO BEGIN 
+                 index = Where(STRUPCASE(StrCompress(names, /REMOVE_ALL)) EQ STRUPCASE(StrCompress(psymIN[j], /REMOVE_ALL)), count)
+                 IF count GT 0 THEN psym[j] = index[0] ELSE Message, 'Cannot resolve the PSYM value: ' + psymIn[j]
+              ENDFOR
         ENDIF ELSE psym = psymIn
     ENDIF
     
@@ -237,7 +252,10 @@ PRO cgPlotS, x, y, z, $
        IF N_Elements(symsize) NE xsize THEN $
           Message, 'SYMSIZE vector must contain the same number of elements as the data.'
     ENDIF
-    IF N_Elements(psym) GT 1 THEN Message, 'PSYM value must be a scalar value.'
+    IF N_Elements(psym) GT 1 THEN BEGIN
+       IF N_Elements(psym) NE xsize THEN $
+          Message, 'PSYM vector must contain the same number of elements as the data.'
+    ENDIF
     
     ; Do you have a map obect? If so, you need both an X and a Y vector.
     ; Convert from lon/lat to projected XY.
@@ -300,43 +318,42 @@ PRO cgPlotS, x, y, z, $
     ENDELSE
    
     ; Draw the symbol, if required.
-    IF Abs(psym) GT 0 THEN BEGIN
       
-       FOR j=0,xsize-1 DO BEGIN
-      
+    FOR j=0,xsize-1 DO BEGIN
+
           ; Get information about the symbol you are drawing.
           IF N_Elements(symcolor) GT 1 THEN thisColor = symcolor[j] ELSE thisColor = symcolor
           IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = cgColor(thisColor)
           IF N_Elements(symsize) GT 1 THEN thisSize = symsize[j] ELSE thisSize = symsize
+          IF N_Elements(psym) GT 1 THEN thisSymbol = psym[j] ELSE thisSymbol = psym
+
           CASE n_params OF
               
                 1: BEGIN
-                   PlotS, x[*,j], COLOR=thisColor, PSYM=cgSymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
+                   PlotS, x[*,j], COLOR=thisColor, PSYM=cgSymCat(Abs(thisSymbol), _EXTRA=extra, COLOR=thisColor), $
                       SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    END
                    
                 2: BEGIN
                    IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
                        map_object -> Draw, /NoGraphics
-                       PlotS, xmap[j], ymap[j], COLOR=thisColor, PSYM=cgSymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
+                       PlotS, xmap[j], ymap[j], COLOR=thisColor, PSYM=cgSymCat(Abs(thisSymbol), _EXTRA=extra, COLOR=thisColor), $
                            SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    ENDIF ELSE BEGIN
-                       PlotS, x[j], y[j], COLOR=thisColor, PSYM=cgSymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
+                       PlotS, x[j], y[j], COLOR=thisColor, PSYM=cgSymCat(Abs(thisSymbol), _EXTRA=extra, COLOR=thisColor), $
                            SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    ENDELSE
                    END
                    
                 3: BEGIN
-                   PlotS, x[j], y[j], z[j], COLOR=thisColor, PSYM=cgSymCat(Abs(psym), _EXTRA=extra, COLOR=thisColor), $
+                   PlotS, x[j], y[j], z[j], COLOR=thisColor, PSYM=cgSymCat(Abs(thisSymbol), _EXTRA=extra, COLOR=thisColor), $
                        SYMSIZE=thisSize, _STRICT_EXTRA=extra
                    END
                        
           ENDCASE  
-           
-       ENDFOR
+
+    ENDFOR
        
-    ENDIF 
-   
     ; Restore the decomposed state if you can.
     cgSetColorState, currentState
    

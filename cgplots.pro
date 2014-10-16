@@ -141,11 +141,14 @@
 ;        Added a check for a window to draw into, if needed. 8 July 2012. DWF.
 ;        Loop counter didn't assume someone would pass in 2D array of XY pairs. Fixed. 31 Jan 2013. DWF.
 ;        Added the ability to pass a vector of values via the PSYM keyword. 10 Oct 2014. DWF
+;        Changes on 10 Oct 2014 caused some problems with cgMap_Grid, which calls cgPlots with arguments 
+;             that are not the same length. Added code to make sure all positional parameters are the same
+;             length. 16 Oct 2014. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
 ;-
-PRO cgPlotS, x, y, z, $
+PRO cgPlotS, x_, y_, z_, $
     ADDCMD=addcmd, $
     COLOR=scolor, $
     MAP_OBJECT=map_object, $
@@ -162,7 +165,7 @@ PRO cgPlotS, x, y, z, $
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = cgErrorMsg()
-        IF Keyword_Set(dataSwitch) THEN x = Temporary(y)
+        IF Keyword_Set(dataSwitch) THEN x_ = Temporary(y_)
         IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         RETURN
     ENDIF
@@ -188,7 +191,7 @@ PRO cgPlotS, x, y, z, $
     ; Should this be added to a resizeable graphics window?
     IF (Keyword_Set(window) OR Keyword_Set(addcmd)) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
     
-        cgWindow, 'cgPlotS', x, y, z, $
+        cgWindow, 'cgPlotS', x_, y_, z_, $
             COLOR=scolor, $
             MAP_OBJECT=map_object, $
             PSYM=psym, $
@@ -210,10 +213,10 @@ PRO cgPlotS, x, y, z, $
     ; If we only have one, then we will fake it, as we do in a line
     ; plot.
     n_params = N_Params()
-    IF (n_params EQ 1) && Size(x, /N_DIMENSIONS) EQ 1 THEN BEGIN
-        temp = x
-        x = Indgen(N_Elements(x))
-        y = Temporary(temp)
+    IF (n_params EQ 1) && Size(x_, /N_DIMENSIONS) EQ 1 THEN BEGIN
+        temp = x_
+        x_ = Indgen(N_Elements(x_))
+        y_ = Temporary(temp)
         n_params = 2
         dataSwitch = 1
     ENDIF
@@ -235,11 +238,38 @@ PRO cgPlotS, x, y, z, $
     IF N_Elements(psym) EQ 0 THEN psym = 0
     IF N_Elements(symsize) EQ 0 THEN symsize = 1.0
    
-    ; Be sure the vectors are the right length.
+    ; Be sure the vectors are the right length and are defined.
     CASE n_params OF
-        1: xsize = N_Elements(x[0,*])
-        ELSE: xsize = N_Elements(x)
+        2: BEGIN
+           maxsize = Max([N_Elements(x_), N_Elements(y_)], maxIndex)
+           IF (maxIndex EQ 0) && (N_Elements(y_) EQ 1) THEN y = Replicate(y_, N_Elements(x_))
+           IF (maxIndex EQ 1) && (N_Elements(x_) EQ 1) THEN x = Replicate(x_, N_Elements(y_))
+           END
+        3: BEGIN
+               maxsize = Max([N_Elements(x_), N_Elements(y_), N_Elements(z_)], maxIndex)
+               
+               IF (maxIndex EQ 0) && (N_Elements(y_) EQ 1) THEN y = Replicate(y_, N_Elements(x_))
+               IF (maxIndex EQ 0) && (N_Elements(z_) EQ 1) THEN z = Replicate(z_, N_Elements(x_))
+               IF (maxIndex EQ 0) THEN x = x_
+               
+               IF (maxIndex EQ 1) && (N_Elements(x_) EQ 1) THEN x = Replicate(x_, N_Elements(y_))
+               IF (maxIndex EQ 1) && (N_Elements(z_) EQ 1) THEN z = Replicate(z_, N_Elements(y_))
+               IF (maxIndex EQ 1) THEN y = y_
+               
+               IF (maxIndex EQ 2) && (N_Elements(x_) EQ 1) THEN x = Replicate(x_, N_Elements(z_))
+               IF (maxIndex EQ 2) && (N_Elements(y_) EQ 1) THEN y = Replicate(y_, N_Elements(z_))
+               IF (maxIndex EQ 2) THEN z = z_
+               
+           END
     ENDCASE
+    
+    ; Make sure you have everything accounted for.
+    IF N_Elements(x) EQ 0 THEN x = x_
+    IF N_Elements(y) EQ 0 THEN y = y_
+    IF (n_params EQ 3) && (N_Elements(z) EQ 0) THEN z = z_
+    
+    ; Check other variables.
+    xsize = N_Elements(x)
     IF N_Elements(color) GT 1 THEN BEGIN
        IF N_Elements(color) NE xsize THEN $
           Message, 'COLOR vector must contain the same number of elements as the data.'
@@ -318,7 +348,6 @@ PRO cgPlotS, x, y, z, $
     ENDELSE
    
     ; Draw the symbol, if required.
-      
     FOR j=0,xsize-1 DO BEGIN
 
           ; Get information about the symbol you are drawing.
@@ -326,32 +355,32 @@ PRO cgPlotS, x, y, z, $
           IF Size(thisColor, /TNAME) EQ 'STRING' THEN thisColor = cgColor(thisColor)
           IF N_Elements(symsize) GT 1 THEN thisSize = symsize[j] ELSE thisSize = symsize
           IF N_Elements(psym) GT 1 THEN thisSymbol = psym[j] ELSE thisSymbol = psym
-
-          CASE n_params OF
-              
-                1: BEGIN
-                   PlotS, x[*,j], COLOR=thisColor, PSYM=cgSymCat(Abs(thisSymbol), _EXTRA=extra, COLOR=thisColor), $
-                      SYMSIZE=thisSize, _STRICT_EXTRA=extra
-                   END
-                   
-                2: BEGIN
-                   IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
-                       map_object -> Draw, /NoGraphics
-                       PlotS, xmap[j], ymap[j], COLOR=thisColor, PSYM=cgSymCat(Abs(thisSymbol), _EXTRA=extra, COLOR=thisColor), $
-                           SYMSIZE=thisSize, _STRICT_EXTRA=extra
-                   ENDIF ELSE BEGIN
-                       PlotS, x[j], y[j], COLOR=thisColor, PSYM=cgSymCat(Abs(thisSymbol), _EXTRA=extra, COLOR=thisColor), $
-                           SYMSIZE=thisSize, _STRICT_EXTRA=extra
-                   ENDELSE
-                   END
-                   
-                3: BEGIN
-                   PlotS, x[j], y[j], z[j], COLOR=thisColor, PSYM=cgSymCat(Abs(thisSymbol), _EXTRA=extra, COLOR=thisColor), $
-                       SYMSIZE=thisSize, _STRICT_EXTRA=extra
-                   END
+          IF Abs(thisSymbol) GT 0 THEN BEGIN
+              CASE n_params OF
+                  
+                    1: BEGIN
+                       PlotS, x[*,j], COLOR=thisColor, PSYM=cgSymCat(Abs(thisSymbol), _EXTRA=extra, COLOR=thisColor), $
+                          SYMSIZE=thisSize, _STRICT_EXTRA=extra
+                       END
                        
-          ENDCASE  
-
+                    2: BEGIN
+                       IF Obj_Valid(map_object) && (N_Params() EQ 2) THEN BEGIN
+                           map_object -> Draw, /NoGraphics
+                           PlotS, xmap[j], ymap[j], COLOR=thisColor, PSYM=cgSymCat(Abs(thisSymbol), _EXTRA=extra, COLOR=thisColor), $
+                               SYMSIZE=thisSize, _STRICT_EXTRA=extra
+                       ENDIF ELSE BEGIN
+                           PlotS, x[j], y[j], COLOR=thisColor, PSYM=cgSymCat(Abs(thisSymbol), _EXTRA=extra, COLOR=thisColor), $
+                               SYMSIZE=thisSize, _STRICT_EXTRA=extra
+                       ENDELSE
+                       END
+                       
+                    3: BEGIN
+                       PlotS, x[j], y[j], z[j], COLOR=thisColor, PSYM=cgSymCat(Abs(thisSymbol), _EXTRA=extra, COLOR=thisColor), $
+                           SYMSIZE=thisSize, _STRICT_EXTRA=extra
+                       END
+                           
+              ENDCASE  
+          ENDIF
     ENDFOR
        
     ; Restore the decomposed state if you can.

@@ -144,6 +144,7 @@
 ;        Changes on 10 Oct 2014 caused some problems with cgMap_Grid, which calls cgPlots with arguments 
 ;             that are not the same length. Added code to make sure all positional parameters are the same
 ;             length. 16 Oct 2014. DWF.
+;        Running into more problems from 10 Oct 2014 changes. Have to unpack 2D and 3D data passed in as single parameter.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
@@ -166,6 +167,7 @@ PRO cgPlotS, x_, y_, z_, $
         Catch, /CANCEL
         void = cgErrorMsg()
         IF Keyword_Set(dataSwitch) THEN x_ = Temporary(y_)
+        IF Keyword_Set(restore) THEN x_ = tempData
         IF N_Elements(currentState) NE 0 THEN cgSetColorState, currentState
         RETURN
     ENDIF
@@ -219,6 +221,27 @@ PRO cgPlotS, x_, y_, z_, $
         y_ = Temporary(temp)
         n_params = 2
         dataSwitch = 1
+    ENDIF
+    
+    ; If we have one parameter, but it is two or three dimensional, extract the data.
+    restore = 0
+    IF (n_params EQ 1) && Size(x_, /N_DIMENSIONS) EQ 2 THEN BEGIN
+        dims = Size(x_, /DIMENSIONS)
+        IF dims[0] EQ 2 THEN BEGIN
+            tempData = x_
+             x_ = Reform(tempData[0,*])
+             y_ = Reform(tempData[1,*])
+             n_params = 2
+             restore = 1
+        ENDIF
+        IF dims[0] EQ 3 THEN BEGIN
+            tempData = x_
+             x_ = Reform(tempData[0,*])
+             y_ = Reform(tempData[1,*])
+             z_ = Reform(tempData[2,*])
+             n_params = 3
+             restore = 1
+        ENDIF
     ENDIF
     
     ; Going to draw the lines in decomposed color, if possible
@@ -391,6 +414,9 @@ PRO cgPlotS, x_, y_, z_, $
     IF (!D.Name NE 'Z') THEN TVLCT, rr, gg, bb
    
     ; If you switched data, switch it back.
-    IF Keyword_Set(dataSwitch) THEN x = Temporary(y)
+    IF Keyword_Set(dataSwitch) THEN x_ = Temporary(y_)
+    
+    ; If you unpacked the data, restore it.
+    IF Keyword_Set(restore) THEN x_ = Temporary(tempData)
    
 END

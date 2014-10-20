@@ -47,7 +47,7 @@
 ;
 ; :Examples:
 ;    An example of how to use the program can be found in the
-;    `Coyote Plot Gallery <http://www.idlcoyote.com/gallery.index#WINDROSE>`.
+;    `Coyote Plot Gallery <http://www.idlcoyote.com/gallery/index.html#WINDROSE>`.
 ;
 ; .. image:: cgwindrose.png
 ; 

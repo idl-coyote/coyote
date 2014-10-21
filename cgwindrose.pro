@@ -230,7 +230,7 @@ PRO cgWindRose, speed, direction, $
       RETURN
    ENDIF
    
-   ; We need speed and direction arrays. If we don't have them, many we have the
+   ; We need speed and direction arrays. If we don't have them, maybe we have the
    ; name of a SAMPSON file that we can read to obtain these arrays.
    IF N_Params() NE 2 THEN BEGIN
     

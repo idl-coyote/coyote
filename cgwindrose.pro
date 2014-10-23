@@ -41,6 +41,13 @@
 ; 
 ; Data to test the program (in SAMPSON formatted data files) can be freely downloaded from
 ; the `Meteorological Resource Center <http://www.webmet.com/>`.
+; 
+; Changes made to the program in Oct 2014 allow multiple windrose plots to be placed in
+; a graphics window, but with a few reservations. Windrose plots normally have an aspect
+; ratio of 1 (i.e., they are square). Unfortunately, this cannot be guaranteed if you use
+; !P.Multi to create multiple plots. Therefore, it is recommened that you use cgLayout to
+; obtain a multi-plot layout for multiple windrose plots, and give each plot a specific
+; position in the graphics window with the `Position` keyword.
 ;
 ; :Categories:
 ;    Graphics
@@ -50,6 +57,15 @@
 ;    `Coyote Plot Gallery <http://www.idlcoyote.com/gallery/index.html#WINDROSE>`.
 ;
 ; .. image:: cgwindrose.png
+; 
+;    To display multiple plots in the window, set the positions with `cgLayout`, like this::
+;    
+;        pos = cgLayout([2,1], OXMargin=[5,5], OYMargin=[8, 5], XGap=10)
+;        cgDisplay, 900, 550
+;        cgWindRose, SamFile='93058_90.sam', Position=pos[*,0], Title='Plot 1', /NoLegend
+;        cgWindRose, SamFile='94018_90.sam', Position=pos[*,1], Title='Plot 2', LegendPosition=[0.44, 0.325], /NoErase
+; 
+; .. image:: cgwindrosetwo.png
 ; 
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -64,9 +80,13 @@
 ;     Change History::
 ;        Written, 7 March 2013 by David W. Fanning.
 ;        Fixed error in which I was assuming some calm winds. 23 May 2013. DWF.
+;        Added LegendPosition, Position, CircleLabelSize, and NoLegend keywords and made changes 
+;            that allow multiple windrose plots to be place in a graphics window. To better 
+;            accommodate multiple plots, the cardinal directions are now indicated with a 
+;            single letter and the default circle label font size is reduced. 22 Oct 2014. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2013-2014, Fanning Software Consulting, Inc.
 ;-
 
 ;+
@@ -201,24 +221,41 @@ END
 ;         assumed to be measured in meters/second.
 ;      direction: in, required, type=float
 ;         The direction of the wind. This should have the same number of elements as the `speed` array.
-;        The wind directions are assumed to be in the range 0 to 360.
+;         The wind directions are assumed to be in the range 0 to 360.
 ;
 ; :Keywords:
-;       calmsfreq: out, optional, type=float
-;           The frequency of calms measurements in the data. (Winds less than 1 meter/second.)
-;       samfile: in, optional, type=string
-;           The path to a SAMSON (*.sam) format meteorological data file from which wind speed and wind
-;           direction can be obtained.
-;       speedbinsize:, in, optional, type=float, default=3
-;           The size of the bin when the speed is binned with the Histogram command.
-;       title: in, optional, type=string
-;           The plot title.
+;      calmsfreq: out, optional, type=float
+;         The frequency of calms measurements in the data. (Winds less than 1 meter/second.)
+;      circlelabelsize: in, optional, type=float, default=0.6
+;         A multiplier of the default character size, used for labelling the circle percents.
+;      legendposition: in, optional, type=float
+;         A two-element array giving the X and Y position of the top-left corner of the legend box
+;         in normalized coordinates. By default, to the southwest of the windrose plot. Depending on
+;         window size, etc., the legend may not be visible or may be only partially visible. Adjust
+;         either the size of the window or the location of the legend for improved visibility.
+;      nolegend: in, optional, type=boolean, default=0
+;         Set this keyword to prevent the windrose legend from being drawn with the windrose plot.;         
+;      position: in, optional, type=float
+;         The usual four-element POSITION keyword giving the plot position of the windrose plot in
+;         normalized coordinates.
+;      samfile: in, optional, type=string
+;         The path to a SAMSON (*.sam) format meteorological data file from which wind speed and wind
+;         direction can be obtained.
+;      speedbinsize:, in, optional, type=float, default=3
+;         The size of the bin when the speed is binned with the Histogram command.
+;      title: in, optional, type=string, default=""
+;         The plot title. Not displayed if a null string.
 ;-
 PRO cgWindRose, speed, direction, $
     CALMSFREQ=calmsFreq, $
+    CIRCLELABELSIZE=circlelablesize, $
+    LEGENDPOSITION=legendposition, $
+    NOLEGEND=nolegend, $
+    POSITION=position, $
     SAMFILE=samFile, $
     SPEEDBINSIZE=speedBinSize, $
-    TITLE=title
+    TITLE=title, $
+    _EXTRA=extra
 
    Compile_Opt idl2
    
@@ -254,8 +291,18 @@ PRO cgWindRose, speed, direction, $
    ENDIF
    
    ; Set keyword default values.
+   SetDefaultValue, circleLabelSize, 0.6
+   nolegend = Keyword_Set(nolegend)
    SetDefaultValue, speedBinSize, 3.0
-   SetDefaultValue, title, ''
+   SetDefaultValue, title, ""
+   IF Total(!P.Multi) EQ 0 THEN BEGIN
+       IF title EQ "" THEN BEGIN
+           SetDefaultValue, position, [0.15, 0.15, 0.85, 0.85]
+       ENDIF ELSE BEGIN
+           SetDefaultValue, position, [0.15, 0.125, 0.85, 0.825]
+       ENDELSE
+   ENDIF
+
    
    ; Are these arrays the same size?
    IF N_Elements(speed) NE N_Elements(direction) THEN $
@@ -297,12 +344,19 @@ PRO cgWindRose, speed, direction, $
    IF maxFreq MOD 2 NE 0 THEN maxFreq = maxFreq + 1
    ;Print, 'Maximum Frequency: ', maxFreq
    
-   ; Open a display window.
-   cgDisplay, 600, 600
+   ; Open a display window, if needed
+   IF Total(!P.Multi) GT 0 THEN BEGIN
+       win_xsize = 400 * (!P.Multi[1] < 3)
+       win_ysize = 400 * (!P.Multi[2] < 3)
+   ENDIF ELSE BEGIN
+       win_xsize = 700
+       win_ysize = 500
+   ENDELSE
+   IF !D.Window LT 0 THEN cgDisplay, win_xsize, win_ysize
    
    ; Set up the data coordinate system. Nothing shown here.
    cgPlot, [-maxFreq, maxFreq],[-maxFreq, maxFreq], /NoData, $
-       ASPECT=1.0, XStyle=5, YStyle=5, position=[0.15, 0.15, 0.89, 0.9]
+       ASPECT=1.0, XStyle=5, YStyle=5, Position=position, _STRICT_EXTRA=extra
        
    ; Draw four circles, last at maxFreq.
    radii = (Indgen(4)+1) *(maxFreq/4.0)
@@ -319,13 +373,15 @@ PRO cgWindRose, speed, direction, $
    
    ; Draw a horizontal E-W axis.
    cgAxis, 0, 0, /XAxis, XTickformat='cgWindRose_PositiveLabel', $
-      XTicks=8, XRange=[-maxFreq, maxFreq], XStyle=1, Charsize=cgDefCharSize()*0.75
+      XTicks=8, XRange=[-maxFreq, maxFreq], XStyle=1, Charsize=cgDefCharSize()*circleLabelSize
       
    ; Label the cardinal directions.
-   cgText, !X.CRange[0]-1.75, 0.0, 'West ', Alignment=1.0
-   cgText, !X.CRange[1]+1.75, 0.0, ' East', Alignment=0.0
-   cgText, 0.525, !Y.Window[1]+ 0.025, 'North', Alignment=0.5, /Normal
-   cgText, 0.525, !Y.Window[0]-0.040, 'South', Alignment=0.5, /Normal
+   xfudge = (!D.X_CH_SIZE * 3.5) / !D.X_Size
+   yfudge = (!D.Y_CH_SIZE * 1.5) / !D.Y_Size
+   cgText, !X.Window[0] - xfudge, (!Y.Window[1] - !Y.Window[0]) / 2.0 + !Y.Window[0], 'W', Alignment=1.0, /Normal
+   cgText, !X.Window[1] + xfudge, (!Y.Window[1] - !Y.Window[0]) / 2.0 + !Y.Window[0], 'E', Alignment=0.0, /Normal
+   cgText, (!X.Window[1] - !X.Window[0]) / 2.0 + !X.Window[0], !Y.Window[1] + yfudge, 'N', Alignment=0.5, /Normal
+   cgText, (!X.Window[1] - !X.Window[0]) / 2.0 + !X.Window[0], !Y.Window[0] - (yfudge*1.75), 'S', Alignment=0.5, /Normal
    
    ; Draw the wind triangles.
    angles = (Indgen(16)*22.5)
@@ -350,22 +406,34 @@ PRO cgWindRose, speed, direction, $
    ; Put a circle in the center of the plot.
    TVCircle, 0.5, 0, 0, /Data, Color='white', /Fill
  
-   ; Add a legend.
-   speeds = Indgen(s[0]-1) * speedBinSize + 1
-   sym = cgCheckForSymbols('$\geq$' + String(speeds[N_Elements(speeds)-1], Format='(F0.1)'))
-   speedStr = StrArr(N_Elements(speeds))
-   speedStr[0] = '1.0-' + String(speeds[1], Format='(F0.1)')
-   FOR j=2,N_Elements(speeds)-1 DO BEGIN
-      speedStr[j-1] = String(speeds[j-1], Format='(F0.1)') + '-' + String(speeds[j], Format='(F0.1)')
-   ENDFOR
-   speedStr[N_Elements(speeds)-1] = sym
-   
-   cgLegend, Title=speedStr, PSym=15, SymSize=1.5, Color=colors[0:5], Length=0.0, $
-       Location=[0.05, 0.22], VSpace=1.5, Charsize=cgDefCharsize()*0.75, /Box
-   cgText, 0.045, 0.24, /Normal, 'Wind Speed (m/s)', Charsize=cgDefCharsize()*0.85
+   ; Add a legend unless requested not to.
+   IF ~nolegend THEN BEGIN
+       speeds = Indgen(s[0]-1) * speedBinSize + 1
+       sym = cgCheckForSymbols('$\geq$' + String(speeds[N_Elements(speeds)-1], Format='(F0.1)'))
+       speedStr = StrArr(N_Elements(speeds))
+       speedStr[0] = '1.0-' + String(speeds[1], Format='(F0.1)')
+       FOR j=2,N_Elements(speeds)-1 DO BEGIN
+          speedStr[j-1] = String(speeds[j-1], Format='(F0.1)') + '-' + String(speeds[j], Format='(F0.1)')
+       ENDFOR
+       speedStr[N_Elements(speeds)-1] = sym
+       
+       IF N_Elements(legendPosition) EQ 0 THEN BEGIN
+           xpos = !X.Window[0] - ((!D.X_CH_SIZE * 18.0) / !D.X_Size)
+           ypos = !Y.Window[0] + ((!D.Y_CH_SIZE * 10.0) / !D.Y_Size)
+           legendPosition = [xpos, ypos]
+       ENDIF
+       cgLegend, Title=speedStr, PSym=15, SymSize=1.5, Color=colors[0:5], Length=0.0, $
+           Location=legendPosition, VSpace=1.5, Charsize=cgDefCharsize()*0.75, /Box
+       xtextpos = legendPosition[0] - ((!D.X_CH_SIZE * 1.5) / !D.X_Size)
+       ytextpos = legendPosition[1] + ((!D.Y_CH_SIZE * 1.0) / !D.Y_Size)
+       cgText, xtextpos, ytextpos, /Normal, 'Wind Speed (m/s)', Charsize=cgDefCharsize()*0.85
+   END
    
    ; Add a title to the plot.
-   cgText, 0.045, 0.90, /Normal, title
+   cgText, (!X.Window[1] - !X.Window[0]) / 2.0 + !X.Window[0], $
+            !Y.Window[1] + 3.5*(!D.Y_CH_SIZE)/!D.Y_Size, $
+            /Normal, title, Alignment=0.5, $
+            Charsize=cgDefCharsize()*1.25
    
  END
  

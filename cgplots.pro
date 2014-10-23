@@ -48,14 +48,14 @@
 ;    Graphics
 ;    
 ; :Params:
-;    X: in, required, type=any
+;    X_: in, required, type=any
 ;         A vector or scalar argument providing the X components of the points to be
 ;         drawn or connected. May be a 2xN or 3xN array, if Y and Z parameters are
 ;         not used.
-;    Y: in, optional, type=any
+;    Y_: in, optional, type=any
 ;         A vector or scalar argument providing the Y components of the points to be
 ;         drawn or connected.
-;    Z: in, optional, type=any
+;    Z_: in, optional, type=any
 ;         A vector or scalar argument providing the Z components of the points to be
 ;         drawn or connected.
 ;         

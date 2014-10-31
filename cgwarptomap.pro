@@ -142,6 +142,7 @@
 ;        Written by David W. Fanning, 12 Sept 2012.
 ;        Modifications to accommodate lat/lon arrays that are one-dimensional to go along
 ;           with 2D data. 13 Sept 2012. DWF.
+;        Fixed a problems in which projected meter X values were sometimes reversed in order. 31 Oct 2014. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -254,6 +255,11 @@ FUNCTION cgWarpToMap, data, lons, lats, $
           ymin = ymax
           ymax = temp 
         ENDIF 
+        IF xmin GT xmax THEN BEGIN
+            temp = xmin
+            xmin = xmax
+            xmax = temp
+        ENDIF
    ENDELSE
    rect = [xmin-(delta_x/2.), ymin-(delta_y/2.), xmax+(delta_x/2.), ymax+(delta_y/2.)]  
    xrange = rect[[0,2]]

@@ -373,6 +373,7 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
    IF mapTransform THEN BEGIN
        scaledVx = length * (ABS(velx) * Cos(origAngle) / referenceVector)
        scaledVy = length * (ABS(vely) * Sin(origAngle) / referenceVector)
+       maplength = SQRT(scaledVx^2 + scaledVy^2)
    ENDIF ELSE BEGIN
        scaledVx = length * (ABS(velx) * Cos(angle) / referenceVector)
        scaledVy = length * (ABS(vely) * Sin(angle) / referenceVector)
@@ -391,8 +392,8 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
          ; If you have a map projection, you have to turn these normalized points into
          ; the map projection location.
          IF mapTransform THEN BEGIN
-             x1 = length * Cos(angle)
-             y1 = length * Sin(angle)
+             x1 = maplength * Cos(angle)
+             y1 = maplength * Sin(angle)
              xyd = Convert_Coord(px+x1, py+y1, /Device, /To_Data)
              xyn = Convert_Coord(xyd[0,*], xyd[1,*], /Data, /To_Normal)
              x1 = xyn[0,*]
@@ -410,8 +411,8 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
           ; If you have a map projection, you have to turn these normalized points into
           ; the map projection location.
           IF mapTransform THEN BEGIN
-              x1 = length * Cos(angle)
-              y1 = length * Sin(angle)
+              x1 = maplength * Cos(angle)
+              y1 = maplength * Sin(angle)
               xyn = Convert_Coord(px+x1, py+y1, /Normal, /To_Data)
               xyd = Convert_Coord(xyn[0,*], xyn[1,*], /Data, /To_Normal)
               x1 = xyd[0,*]
@@ -432,8 +433,8 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
          ; If you have a map projection, you have to turn these normalized points into
          ; the map projection location.
          IF mapTransform THEN BEGIN
-            x1 = length * Cos(angle)
-            y1 = length * Sin(angle)
+            x1 = maplength * Cos(angle)
+            y1 = maplength * Sin(angle)
             xyd = Convert_Coord(px+x1, py+y1, /Normal, /To_Data)
             xyn = Convert_Coord(xyd[0,*], xyd[1,*], /Data, /To_Normal)
             x1 = xyn[0,*]

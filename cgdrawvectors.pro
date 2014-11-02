@@ -146,6 +146,22 @@
 ;         colors = BytScl(magnitude)
 ;         cgDrawVectors, velx, vely, posx, posy, VecColors=colors
 ;
+;    Example using a map projection::
+;        
+;          posx = Indgen(10)*36
+;          posy = Replicate(30,10)
+;          velx = Replicate(10.,10) ; Wind out of the West
+;          vely = Replicate(0, 10)  ; No vertical component
+;          cgDisplay
+;          mapNorth = Obj_New('cgMap', 'Polar Stereographic', $
+;                Limit=[0, -180, 90, 180], /NoBorder)
+;          mapNorth -> Draw
+;          cgMap_Continents, Color='black', Map_Structure=mapNorth
+;          cgMap_Grid, LatDel=15, LonDel=15, LineStyle=1, Color='charcoal', $
+;                /Label, LonLabel=2, Map_Structure=mapNorth
+;          cgDrawVectors, velx, vely, posx, posy, VecColors='blu6', /Overplot, $
+;                ReferenceVector=10, /Solid, Thick=2, MapCoord=mapNorth
+;                
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
 ;        David W. Fanning
@@ -165,6 +181,11 @@
 ;           added CLIP and CRECT keywords. 25 March 2014. DWF.
 ;        Added MAPCOORD keyword. 27 March 2014. DWF.
 ;        Modified to set color information once here, instead of allowing cgArrow to do it. 27 March 2014. DWF.
+;        Some map projections (e.g., polar stereographic) can change the direction of the vector on the 
+;           projected map. To solve this problem, I needed to create a second point in the original coordinate
+;           system and project both points into the map coordinate system before calculating the angle
+;           between points. Also then had to figure out how to scale the moved point to the reference
+;           vector. All appears normal now. 2 Nov 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2014, Fanning Software Consulting, Inc.
@@ -298,15 +319,33 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
    IF N_Elements(referenceVector) EQ 0 THEN referenceVector = Max(magnitudes)
    referenceVector = Double(referenceVector)
    
+   ; Calculate the angle between velocity vectors in radians.
+   angle = ATan(vely, Double(velx))
+   
+   ; Pick an arbitary point in the correct direction. We need this point if we
+   ; are going to point the vector in the correct direction if we have a weird
+   ; map projection space.
+   aPx = (ABS(velx) * Cos(angle)) + posx_
+   aPy = (ABS(vely) * Sin(angle)) + posy_
+   
    ; Do we need to transform the position coordinates with a map coordinate object?
    IF N_Elements(mapcoord) NE 0 THEN BEGIN
        IF Obj_Valid(mapCoord) THEN mapStruct = mapCoord -> GetMapStruct() ELSE mapStruct = mapCoord
        xy = Map_Proj_Forward(posx_, posy_, MAP_STRUCTURE=mapStruct)
        posx = Reform(xy[0,*])
        posy = Reform(xy[1,*])
+       xy = Map_Proj_Forward(aPx, aPy, MAP_STRUCTURE=mapStruct)
+       aposx = Reform(xy[0,*])
+       aposy = Reform(xy[1,*])
+             
+       ; Recalculate the angle in the XY map projection space.
+       origAngle = angle
+       angle = ATan(aposy-posy, Double(aposx-posx))
+       mapTransform = 1
    ENDIF ELSE BEGIN
        posx = posx_
        posy = posy_
+       mapTransform = 0
    ENDELSE
    
    ; Do we need a plot?
@@ -330,12 +369,14 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
    ; Calculate default head size.
    IF N_Elements(hsize) EQ 0 THEN hsize = !D.X_SIZE / 100.
    
-   ; Calculate the angle between X and Y in radians.
-   angle = ATan(vely, Double(velx))
-   
    ; Calculate scaled velocities in normalized coordinate units.
-   scaledVx = length * (ABS(velx) * Cos(angle) / referenceVector)
-   scaledVy = length * (ABS(vely) * Sin(angle) / referenceVector)
+   IF mapTransform THEN BEGIN
+       scaledVx = length * (ABS(velx) * Cos(origAngle) / referenceVector)
+       scaledVy = length * (ABS(vely) * Sin(origAngle) / referenceVector)
+   ENDIF ELSE BEGIN
+       scaledVx = length * (ABS(velx) * Cos(angle) / referenceVector)
+       scaledVy = length * (ABS(vely) * Sin(angle) / referenceVector)
+   ENDELSE
    
    ; What kind of coordinate system are you using? You need to know to 
    ; calcuate the arrow end  of the vector.
@@ -346,6 +387,18 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
          y1 = scaledVy + Reform(xy[1,*])
          px = Reform(xy[0,*])
          py = Reform(xy[1,*])
+         
+         ; If you have a map projection, you have to turn these normalized points into
+         ; the map projection location.
+         IF mapTransform THEN BEGIN
+             x1 = length * Cos(angle)
+             y1 = length * Sin(angle)
+             xyd = Convert_Coord(px+x1, py+y1, /Device, /To_Data)
+             xyn = Convert_Coord(xyd[0,*], xyd[1,*], /Data, /To_Normal)
+             x1 = xyn[0,*]
+             y1 = xyn[1,*]
+         ENDIF
+         
          END
         
        Keyword_Set(normal): BEGIN  
@@ -353,14 +406,40 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
           y1 = posy + scaledVy
           px = posx
           py = posy
+          
+          ; If you have a map projection, you have to turn these normalized points into
+          ; the map projection location.
+          IF mapTransform THEN BEGIN
+              x1 = length * Cos(angle)
+              y1 = length * Sin(angle)
+              xyn = Convert_Coord(px+x1, py+y1, /Normal, /To_Data)
+              xyd = Convert_Coord(xyn[0,*], xyn[1,*], /Data, /To_Normal)
+              x1 = xyd[0,*]
+              y1 = xyd[1,*]
+          ENDIF
+          
           END
 
        ELSE: BEGIN
+        
+         ; Create normalized points.
          xy = Convert_Coord(posx, posy, /Data, /To_Normal)
          x1 = scaledVx + Reform(xy[0,*])
          y1 = scaledVy + Reform(xy[1,*])
          px = Reform(xy[0,*])
          py = Reform(xy[1,*])
+         
+         ; If you have a map projection, you have to turn these normalized points into
+         ; the map projection location.
+         IF mapTransform THEN BEGIN
+            x1 = length * Cos(angle)
+            y1 = length * Sin(angle)
+            xyd = Convert_Coord(px+x1, py+y1, /Normal, /To_Data)
+            xyn = Convert_Coord(xyd[0,*], xyd[1,*], /Data, /To_Normal)
+            x1 = xyn[0,*]
+            y1 = xyn[1,*]
+         ENDIF
+          
        END
    ENDCASE
    

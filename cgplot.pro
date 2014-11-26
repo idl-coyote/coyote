@@ -325,6 +325,7 @@
 ;              dependent data vectors. 2 Sept 2014. DWF.
 ;         Modified the error bar plotting section of the code to accommodate zoomable plots (eg., cgZPlot). 
 ;              Error bars are drawn only on points inside the axes range. 30 Sep 2014. DWF.
+;         Further modified error bar plotting to account for possible log axes on the plot. 24 Nov 2014. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
@@ -929,7 +930,11 @@ PRO cgPlot, x, y, $
             ; X high error bars.
             IF (N_Elements(err_xhigh) NE 0) THEN BEGIN
                 xhigh = indep + err_xhigh
-                indices = Where(indep GE xrange[0] AND indep LE xrange[1], cnt)
+                IF !X.Type EQ 1 THEN BEGIN ; Log X axis
+                   indices = Where(indep GE 10^xrange[0] AND indep LE 10^xrange[1], cnt)
+                ENDIF ELSE BEGIN
+                   indices = Where(indep GE xrange[0] AND indep LE xrange[1], cnt)
+                ENDELSE
                 IF cnt GT 0 && cnt NE N_Elements(xhigh) THEN BEGIN
                     indep_ = indep[indices]
                     dep_ = dep[indices]
@@ -950,7 +955,11 @@ PRO cgPlot, x, y, $
             ; X low error bars.
             IF (N_Elements(err_xlow) NE 0) THEN BEGIN
                 xlow = indep - err_xlow
-                indices = Where(indep GE xrange[0] AND indep LE xrange[1], cnt)
+                IF !X.Type EQ 1 THEN BEGIN ; Log X axis
+                    indices = Where(indep GE 10^xrange[0] AND indep LE 10^xrange[1], cnt)
+                ENDIF ELSE BEGIN
+                    indices = Where(indep GE xrange[0] AND indep LE xrange[1], cnt)
+                ENDELSE
                 IF cnt GT 0 && cnt NE N_Elements(xlow) THEN BEGIN
                     indep_ = indep[indices]
                     dep_ = dep[indices]
@@ -982,7 +991,11 @@ PRO cgPlot, x, y, $
             ; Y high error bars.
             IF (N_Elements(err_yhigh) NE 0) THEN BEGIN
                 yhigh = dep + err_yhigh
-                indices = Where(dep GE yrange[0] AND dep LE yrange[1], cnt)
+                IF !Y.Type EQ 1 THEN BEGIN ; Log Y axis
+                    indices = Where(dep GE 10^yrange[0] AND dep LE 10^yrange[1], cnt)
+                ENDIF ELSE BEGIN
+                    indices = Where(dep GE yrange[0] AND dep LE yrange[1], cnt)
+                ENDELSE
                 IF cnt GT 0 && cnt NE N_Elements(yhigh) THEN BEGIN
                     indep_ = indep[indices]
                     dep_ = dep[indices]
@@ -1003,7 +1016,11 @@ PRO cgPlot, x, y, $
             ; Y low error bars.
             IF (N_Elements(err_ylow) NE 0) THEN BEGIN
                 ylow = dep - err_ylow
-                indices = Where(dep GE yrange[0] AND dep LE yrange[1], cnt)
+                IF !Y.Type EQ 1 THEN BEGIN ; Log Y axis
+                    indices = Where(dep GE 10^yrange[0] AND dep LE 10^yrange[1], cnt)
+                ENDIF ELSE BEGIN
+                    indices = Where(dep GE yrange[0] AND dep LE yrange[1], cnt)
+                ENDELSE
                 IF cnt GT 0 && cnt NE N_Elements(yhigh) THEN BEGIN
                     indep_ = indep[indices]
                     dep_ = dep[indices]

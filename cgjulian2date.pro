@@ -52,7 +52,7 @@
 ; :Keywords:
 ;    format: in, optional, type=integer, default=0
 ;         An integer value that selects the date format. 
-;         Possible values are:
+;         Possible values are::
 ;              0: 09 Jan 1951
 ;              1: 09 Jan 1951 08:21:10
 ;              2: 09 Jan 1951 08h 21m 10s

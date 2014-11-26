@@ -203,8 +203,7 @@
 ;        it is assumed that the length corresponds to the number of levels to be contoured.
 ;     position: in, optional, type=float
 ;        Set this keyword to a four-element [x0,y0,x1,y1] array giving the contour plot
-;        position in normalized coordinates. Default is [0.15, 0.15, 0.915, 0.915] for
-;        graphics windows. There is no default in PostScript output.
+;        position in normalized coordinates. 
 ;     resolution: in, optional, type=integer array, default=[41\,41]
 ;        If the IRREGULAR keyword is set, this keyword specifies the X and Y resolution
 ;        in a two element integer array of the final gridded data that is sent to the 
@@ -366,7 +365,10 @@
 ;           files can only be written in Portrait mode. I also modified the default position to be [0.15, 0.15, 0.915, 0.915],
 ;           but I am doing this ONLY for graphics windows, not in PostScript output. This should accommodate a wider range
 ;           of contour plot output. If you find axes cut off, use the POSITION keyword to position the plot correctly. 19 March 2014. DWF
-;        
+;        Previous fix caused other problems. Reverted to 23 Feb 2014 version of cgContour and have tried another way
+;           to solve encapsulated ASPECT problem. Now setting initial position in window with cgAspect. Appears to be
+;           working correctly. 25 Nov 2014. DWF.
+;           
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
 ;-
@@ -775,7 +777,7 @@ PRO cgContour, data, x, y, $
     
         ; If position is set, then fit the plot into those bounds.
         IF (N_Elements(position) GT 0) THEN BEGIN
-          trial_position = cgAspect(aspect, margin=0.)
+          trial_position = cgAspect(aspect, /Single_Plot)
           trial_width = trial_position[2]-trial_position[0]
           trial_height = trial_position[3]-trial_position[1]
           pos_width = position[2]-position[0]
@@ -796,10 +798,12 @@ PRO cgContour, data, x, y, $
           position[2] -= 0.5*(pos_width - trial_width)
           position[1] += 0.5*(pos_height - trial_height)
           position[3] -= 0.5*(pos_height - trial_height)
-        ENDIF
+        ENDIF ELSE BEGIN
+            position=cgAspect(aspect, /Single_Plot)
+        ENDELSE
         
     ENDIF
-
+    
     ; If you want to overplot on an image, set the OVERPLOT keyword.
     IF Keyword_Set(onImage) THEN overplot = 1
     
@@ -1025,11 +1029,10 @@ PRO cgContour, data, x, y, $
     IF Size(con_colors, /TNAME) EQ 'STRING' THEN con_colors = cgColor(con_colors)
     
     ; If you get here with no position defined, and no layout, and no !P.Multi and no nothing,
-    ; then for God's sake, define a reasonable position in the window! Except, don't do this
-    ; in PostScript because it is very likely there that you will choose the wrong value.
+    ; then for God's sake, define a reasonable position in the window!
     IF (N_Elements(position) EQ 0) && (Total(!P.Position) EQ 0) && $
         (N_Elements(layout) EQ 0) && (Total(!P.Multi) LE 0) && ~Keyword_Set(overplot) THEN BEGIN
-        IF !D.Name NE 'PS' THEN position = [0.15, 0.15, 0.915, 0.915]
+        position = [0.125, 0.125, 0.925, 0.9]
     ENDIF
     
     ; Do you need a PostScript background color? Lot's of problems here!

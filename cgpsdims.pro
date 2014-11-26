@@ -49,7 +49,7 @@
 ;
 ; :Keywords:
 ;    success: out, optional, type=boolean
-;         This kewyord will be set to 1 if the program is successful and to 0 otherwise.
+;         This keyword will be set to 1 if the program is successful and to 0 otherwise.
 ;
 ; :Examples:
 ;    Here is how to use this program::

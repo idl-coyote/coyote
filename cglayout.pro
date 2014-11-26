@@ -117,6 +117,14 @@
 ;         plots. There is a little additional room at the top of the plot in the defaults for adding 
 ;         a title to a multiple plot set-up. Units are multiples of !D.Y_CH_SIZE. Default = [6,8].
 ;         
+;    unit: in, optional, type=float
+;          The most difficult part of calculating a layout in a device-indepentent manner is 
+;          coming up with a "unit" of measurement that makes sense. The current default unit is 
+;          !D.X_PX_CM / 4.0. This gives respectable results for "normal" sized windows and a
+;          "normal" number of multiplots. It may not work for you. If not, feel free to set your
+;          own unit here. The margin and gap keywords are multiplied by this value before the 
+;          layout is calculated.
+;         
 ;    xgap: in, optional, type=integer, default=14
 ;         This keywords sets the distance between plots in the X dimension. Units are multiples
 ;         of !D.X_CH_SIZE.
@@ -180,9 +188,11 @@
 ;       Changed the notion of one "unit" from the values of !D.X_CH_SIZE and !D.Y_CH_SIZE to
 ;           1/3 of the value of !D.X_PX_CM. This gives me more consistent measurements on the
 ;           display and in a PostScript file. 12 Feb 2013. DWF.
+;       Modified the default unit to be !D.X_PX_CM/4.0 and added a UNIT keyword so users can
+;           choose a value that makes senses for their layouts. 25 Nov 2014. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2012-2014, Fanning Software Consulting, Inc.
 ;-
 FUNCTION cgLayout, layout, $
    ASPECT=aspect, $
@@ -190,6 +200,7 @@ FUNCTION cgLayout, layout, $
    IYMARGIN=iyMargin, $
    OXMARGIN=oxMargin, $
    OYMARGIN=oyMargin, $
+   UNIT=unit, $
    XGAP=xgap, $
    YGAP=ygap
    
@@ -204,7 +215,7 @@ FUNCTION cgLayout, layout, $
    
    ; Check parameters.
    IF N_Elements(layout) EQ 0 THEN BEGIN
-      Print, 'Syntax: pos = cgLocator([2,3,1])'
+      Print, 'Syntax: pos = cgLayout([2,3,1])'
       RETURN, -1
    ENDIF
    IF N_Elements(layout) EQ 3 THEN layoutIndex = layout[2]-1
@@ -233,8 +244,14 @@ FUNCTION cgLayout, layout, $
    ncols = layout[0]
    nrows = layout[1]
    
+   ; Calculate a default "unit" that works in a device-independent way.
+   IF N_Elements(unit) EQ 0 THEN BEGIN
+       ;IF xsize GT ysize THEN unit = !D.X_CH_SIZE ELSE unit = !D.Y_CH_SIZE
+       unit = !D.X_PX_CM / 4.0
+   ENDIF
+   
    ; Set up the inside and outside margins and the gaps between positions.
-   unit = !D.X_PX_CM / 3
+   ; All values multiplied by "unit" to achieve device-independance.
    xomargin = oxmargin * unit
    yomargin = oymargin * unit
    ximargin = ixmargin * unit / xsize
@@ -242,6 +259,15 @@ FUNCTION cgLayout, layout, $
    gapx = xgap * unit
    gapy = ygap * unit
    
+    ; Debugging code. Left in for users to take advantage of.
+;   print, 'XOMargin:', xomargin
+;   print, 'YOMargin:', yomargin
+;   print, 'XIMargin:', ximargin
+;   print, 'YIMargin:', yimargin
+;   print, 'GapX:', gapx
+;   print, 'GapY:', gapy
+;   print, 'Unit:', unit
+;   
    ; Calculate the window or drawing area inside the graphics window.
    winarea = [ xomargin[0], yomargin[0], xsize - xomargin[1], ysize - yomargin[1] ]   
    

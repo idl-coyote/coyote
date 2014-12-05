@@ -93,10 +93,15 @@
 ;
 ;        IDL> cgPlot, cgDemoData(1), XTitle='$\Omega$$\exp\\lambda$', Charsize=2.0
 ;
-;     To use lambda as a subscript, type this:
+;     To use lambda as a subscript, type this::
 ;
 ;         IDL> cgPlot, cgDemoData(1), XTitle='$\Omega$$\sub\\lambda$', Charsize=2.0
-;
+;         
+;     You would do the same thing if you wanted, say, the Sun symbol to be a subscript::
+;     
+;         IDL> cgSet_TTFont, 'dejavusans'
+;         IDL> cgPlot, cgDemoData(1), XTitle='R$\sub\\sun$', Charsize=2.0, Output='test.png'
+;         
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
 ;           David W. Fanning 
@@ -113,6 +118,8 @@
 ;        Added "up", "down", "exp" "sub" and "n" symbols for subscripting and superscripting. 9 Nov 2012. DWF.
 ;        Added "division" and "times" signs. 24 Nov 2012. DWF.
 ;        Updated UNICODE values to display capital letters correctly. 23 Dec 2012. DWF.
+;        Change to allow for astronomically correct Sun symbol in DejaVuSans font when in the PostScript
+;            device, using True-Type fonts. 5 Dec 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -352,11 +359,15 @@ FUNCTION cgSymbol, symbol, CAPITAL=capital, EXAMPLE=example, PS=PS, UNICODE=unic
                        IF (ps_struct.font EQ 1) && (StrUpCase(ps_struct.tt_font) EQ 'DEJAVUSANS') THEN BEGIN
                           retSymbol = '!Z(2609)'
                        ENDIF ELSE BEGIN
-                         thisDevice = !D.Name
-                         Set_Plot, 'PS'
-                         Device, /AVANTGARDE, ISOLATIN1=0, /BOOK, FONT_INDEX = 20
-                         retSymbol = '!20!S!DO!R!I ' + string(183b) + '!X!N'
-                         Set_Plot, thisDevice
+                          IF (!P.FONT EQ 1) && (Float(!Version.Release) GE 8.0) THEN BEGIN
+                             retSymbol = '!10!Z(2609)!X'
+                          ENDIF ELSE BEGIN
+                             thisDevice = !D.Name
+                             Set_Plot, 'PS'
+                             Device, /AVANTGARDE, ISOLATIN1=0, /BOOK, FONT_INDEX = 20
+                             retSymbol = '!20!S!DO!R!I ' + string(183b) + '!X!N'
+                             Set_Plot, thisDevice
+                          ENDELSE
                        ENDELSE
                        END
             'varphi':  retSymbol = '!9' + String("152B) + '!X'

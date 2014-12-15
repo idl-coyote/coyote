@@ -190,6 +190,7 @@
 ;           display and in a PostScript file. 12 Feb 2013. DWF.
 ;       Modified the default unit to be !D.X_PX_CM/4.0 and added a UNIT keyword so users can
 ;           choose a value that makes senses for their layouts. 25 Nov 2014. DWF.
+;       Added checks to be sure margin keywords contain two elements. 15 Dec 2014. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2012-2014, Fanning Software Consulting, Inc.
@@ -228,6 +229,12 @@ FUNCTION cgLayout, layout, $
    IF N_Elements(oymargin) EQ 0 THEN oymargin = [6,8]
    IF N_Elements(xgap) EQ 0 THEN xgap = 14
    IF N_Elements(ygap) EQ 0 THEN ygap = 8
+   
+   ; Make sure all margins are two-element arrays.
+   IF N_Elements(ixmargin) EQ 1 THEN ixmargin = [ixmargin, 0]
+   IF N_Elements(iymargin) EQ 1 THEN iymargin = [iymargin, 0]
+   IF N_Elements(oxmargin) EQ 1 THEN oxmargin = [oxmargin, 4]
+   IF N_Elements(oymargin) EQ 1 THEN oymargin = [oymargin, 8]
    
    ; Get the size of the window. If the current device supports windows,
    ; a window has to be open.

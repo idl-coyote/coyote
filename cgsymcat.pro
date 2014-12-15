@@ -104,12 +104,12 @@
 ; :Examples:
 ; 
 ;    To use with normal IDL routines::
-;       Plot, findgen(11), PSYM=SYMCAT(theSymbol)
+;       Plot, findgen(11), PSYM=cgSymCat(theSymbol)
 ;
 ;    To connect symbols with lines, use a negative value for the PSYM keyword::
-;       Plot, findgen(11), PSYM=-SYMCAT(theSymbol)
+;       Plot, findgen(11), PSYM=-cgSymCat(theSymbol)
 ;       
-;    To use with Coyote Library routines, you can call SYMCAT indirectly::
+;    To use with Coyote Library routines, you can call cgSymCat indirectly::
 ;       cgPlot, findgne(11), PSYM=16, SYMCOLOR='dodger blue'
 ;       
 ; :Author:
@@ -147,9 +147,10 @@
 ;       Modified the program to allow a "negative" string to be used as the symbol name
 ;           (e.g., PSYM="-star"). 30 July 2012. DWF.
 ;       Modified to use 36 points in circle, rather than 72. 10 May 2013. DWF.
+;       Fixed a problem with using parentheses, rather than square brackets. 15 Dec 2014. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2006-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2006-2014, Fanning Software Consulting, Inc.
 ;-
 FUNCTION cgSymCat, theInSymbol, COLOR=color, NAMES=names, THICK=thick
 
@@ -297,7 +298,7 @@ FUNCTION cgSymCat, theInSymbol, COLOR=color, NAMES=names, THICK=thick
    
    ; Define helper variables for creating circles.
    phi = Findgen(36) * (!PI * 2 / 36.)
-   phi = [ phi, phi(0) ]
+   phi = [ phi, phi[0]) ]
 
    ; Use user defined symbol by default.
    result = 8

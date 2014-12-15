@@ -181,6 +181,12 @@
 ;     window: in, optional, type=boolean, default=0
 ;        Set this keyword to replace all the commands in a current cgWindow or to
 ;        create a new cgWindow for displaying this command.
+;     xmargin: in, optional
+;         Set this keyword to a two-element array giving the left and right sides of the plot window
+;         in units of character size. Use of this keyword is greatly discouraged and is included here
+;         strictly to make code backward compatable. Use the `Position` keyword instead. This 
+;         keyword value is only used for the default positioning of a single plot, if no other
+;         method of specifying the plot position is used.
 ;     xrange: in, optional
 ;         Set this keyword to a two-element vector setting the X axis range for the plot.
 ;         If this keyword is used, and the `XStyle` keyword is NOT used, then XSTYLE is set to 1.
@@ -198,6 +204,12 @@
 ;             cgPlot, cgDemoData(1), XRange=[15,78], XStyle=9
 ;     xtitle: in, optional, type=string
 ;         The X title of the plot.
+;     ymargin: in, optional
+;         Set this keyword to a two-element array giving the bottom and top sides of the plot window
+;         in units of character size. Use of this keyword is greatly discouraged and is included here
+;         strictly to make code backward compatable. Use the `Position` keyword instead. This
+;         keyword value is only used for the default positioning of a single plot, if no other
+;         method of specifying the plot position is used.
 ;     yrange: in, optional
 ;         Set this keyword to a two-element vector setting the Y axis range for the plot.
 ;         If this keyword is used, and the `YStyle` keyword is NOT used, then YSTYLE is set to 1.
@@ -326,6 +338,7 @@
 ;         Modified the error bar plotting section of the code to accommodate zoomable plots (eg., cgZPlot). 
 ;              Error bars are drawn only on points inside the axes range. 30 Sep 2014. DWF.
 ;         Further modified error bar plotting to account for possible log axes on the plot. 24 Nov 2014. DWF.
+;         Added XMargin and YMargin keywords against my better judgement. 15 December 2014. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
@@ -365,9 +378,11 @@ PRO cgPlot, x, y, $
     TITLE=title, $
     TRADITIONAL=traditional, $
     WINDOW=window, $
+    XMARGIN=xmargin, $
     XRANGE=xrange, $
     XSTYLE=xstyle, $
     XTITLE=xtitle, $
+    YMARGIN=ymargin, $
     YRANGE=yrange, $
     YSTYLE=ystyle, $
     YTITLE=ytitle, $
@@ -438,9 +453,11 @@ PRO cgPlot, x, y, $
                 SYMSIZE=symsize, $
                 TITLE=title, $
                 TRADITIONAL=traditional, $
-                XTITLE=xtitle, $
+                XMARGIN=xmargin, $
                 XRANGE=xrange, $
                 XSTYLE=xstyle, $
+                XTITLE=xtitle, $
+                YMARGIN=ymargin, $
                 YRANGE=yrange, $
                 YSTYLE=ystyle, $
                 YTITLE=ytitle, $
@@ -483,9 +500,10 @@ PRO cgPlot, x, y, $
             SYMSIZE=symsize, $
             TITLE=title, $
             TRADITIONAL=traditional, $
-            XTITLE=xtitle, $
             XRANGE=xrange, $
             XSTYLE=xstyle, $
+            XTITLE=xtitle, $
+            YMARGIN=ymargin, $
             YRANGE=yrange, $
             YSTYLE=ystyle, $
             YTITLE=ytitle, $
@@ -811,8 +829,15 @@ PRO cgPlot, x, y, $
     
     ; If you get here with no position defined, and no layout, and no !P.Multi and no nothing,
     ; then for God's sake, define a reasonable position in the window!
-    IF (N_Elements(position) EQ 0) && (Total(!P.Position) EQ 0) && (N_Elements(layout) EQ 0) && (Total(!P.Multi) LE 0) THEN BEGIN
-        position = [0.125, 0.125, 0.925, 0.9] 
+    IF (N_Elements(position) EQ 0) && (Total(!P.Position) EQ 0) && (N_Elements(layout) EQ 0) && (Total(!P.Multi) LE 0) THEN BEGIN       
+
+        ; If [XY]Margins are defined, use cgLayout to figure out a position.
+        IF (N_Elements(xmargin) NE 0) || (N_Elements(ymargin) NE 0) THEN BEGIN
+            position = cgLayout([1,1], OXMargin=xmargin, OYMargin=ymargin)
+        ENDIF ELSE BEGIN
+            position = [0.125, 0.125, 0.925, 0.9] 
+        ENDELSE
+        
     ENDIF
            
     ; Do you need a PostScript background color? Lot's of problems here!

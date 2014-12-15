@@ -339,6 +339,8 @@
 ;              Error bars are drawn only on points inside the axes range. 30 Sep 2014. DWF.
 ;         Further modified error bar plotting to account for possible log axes on the plot. 24 Nov 2014. DWF.
 ;         Added XMargin and YMargin keywords against my better judgement. 15 December 2014. DWF.
+;         Now taking default values for Title, XTitle, YTitle, XStyle, and YStyle from corresponding
+;              system variables. 15 December 2014. DWF.
 ;         
 ; :Copyright:
 ;     Copyright (c) 2010-2014, Fanning Software Consulting, Inc.
@@ -714,16 +716,19 @@ PRO cgPlot, x, y, $
        ENDELSE
     ENDIF
 
-    ; Check the color keywords.
-    IF N_Elements(title) EQ 0 THEN title = ""
-    IF N_Elements(xtitle) EQ 0 THEN xtitle = ""
-    IF N_Elements(ytitle) EQ 0 THEN ytitle = ""
+    ; Check the keywords.
+    SetDefaultValue, title, !P.Title
+    SetDefaultValue, xtitle, !X.Title
+    SetDefaultValue, ytitle, !Y.Title
+    SetDefaultValue, xstyle, !X.Style
+    SetDefaultValue, ystyle, !Y.Style
     IF N_Elements(xrange) NE 0 THEN BEGIN
-       IF N_Elements(xstyle) EQ 0 THEN xstyle = 1 
+       IF cgBitGet(xstyle, 0) NE 1 THEN xstyle = xstyle + 1 
     ENDIF
     IF N_Elements(yrange) NE 0 THEN BEGIN
-        IF N_Elements(ystyle) EQ 0 THEN ystyle = 1
+        IF cgBitGet(ystyle, 0) NE 1 THEN ystyle = ystyle + 1 
     ENDIF
+   
     title = cgCheckForSymbols(title)
     xtitle = cgCheckForSymbols(xtitle)
     ytitle = cgCheckForSymbols(ytitle)

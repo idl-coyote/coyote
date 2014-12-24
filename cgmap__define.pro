@@ -96,6 +96,7 @@
 ;        Added FORMAT keyword to LanLonLabels method. 27 November 2013. DWF.
 ;        Change EASTING and NORTHING keywords to FALSE_EASTING and FALSE_NOTHING to conform to Map_Proj_Init. 29 Nov 2013. DWF.
 ;        Forgetting to add the false_easting and false_northing values to the structure in INIT method. 29 Nov 2013. DWF.
+;        Added Cylindrical Equal Area to list of projections that don't allow CENTER_LATITUDE keyword. 24 Dec 2014. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -1887,7 +1888,7 @@ FUNCTION cgMap::SetMapProjection, map_projection, $
    badprojLatstr = ['GOODES HOMOLOSINE', 'STATE PLANE', 'MERCATOR', 'SINUSOIDAL', 'EQUIRECTANGULAR', $
       'MILLER CYLINDRICAL', 'ROBINSON', 'SPACE OBLIQUE MERCATOR A', 'SPACE OBLIQUE MERCATOR B', $
       'ALASKA CONFORMAL', 'INTERRUPTED GOODE', 'MOLLWEIDE', 'INTERRUPED MOLLWEIDE', 'HAMMER', $
-      'WAGNER IV', 'WAGNER VII', 'INTEGERIZED SINUSOIDAL']
+      'WAGNER IV', 'WAGNER VII', 'INTEGERIZED SINUSOIDAL', 'CYLINDRICAL EQUAL AREA']
    void = Where(badprojLatstr EQ StrUpCase(thisProjection), count)
    IF count GT 0 THEN centerlatOK = 0
 

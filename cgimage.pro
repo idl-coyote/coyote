@@ -215,9 +215,11 @@
 ;       Fixed a couple of places where I meant "missing_index" and used "missing_color". 26 Jan 2014. DWF.
 ;       Added check for open graphics window when displaying alpha-channel image. 31 March 2014. DWF.
 ;       Added XVECTOR and YVECTOR keywords. 1 April 2014. DWF.
+;       Fixed a problem in which the POSITION of the image was specified as an integer array when it 
+;            should have been a floating point array. 8 January 2015. DWF.
 ;       
 ; :Copyright:
-;     Copyright (c) 2011-2014, Fanning Software Consulting, Inc.
+;     Copyright (c) 2011-2015, Fanning Software Consulting, Inc.
 ;-
 ;
 ;+
@@ -1470,7 +1472,7 @@ PRO cgImage, image, x, y, $
         IF (N_Elements(alphafgpos) EQ 0) THEN BEGIN
              restorePosition = position
              alphafgpos = position
-             position = [0,0,1,1]
+             position = [0.0,0.0,1.0,1.0]
              Message, 'POSITION keyword value switched to ALPHAFGPOS because TRANSPARENT keyword is set.', /Informational
         ENDIF
     ENDIF
@@ -1525,12 +1527,12 @@ PRO cgImage, image, x, y, $
             image = transImage
             IF (N_Elements(alphabackgroundimage) EQ 0) THEN BEGIN
                 IF !D.Name NE "PS" THEN BEGIN
-                   alphabackgroundimage = cgSnapshot(POSITION=[0,0,1,1])
+                   alphabackgroundimage = cgSnapshot(POSITION=[0.0,0.0,1.0,1.0])
                 ENDIF ELSE Message, 'An AlphaBackgroundImage is required to create transparent images in PostScript.'
             ENDIF
-            IF ~multi THEN IF N_Elements(alphabgpos) EQ 0 THEN alphabgpos = [0,0,1,1]
-            IF ~multi THEN IF N_Elements(alphafgpos) EQ 0 THEN alphafgpos = [0,0,1,1]
-            IF ~multi THEN IF N_Elements(position) EQ 0 THEN position= [0,0,1,1]
+            IF ~multi THEN IF N_Elements(alphabgpos) EQ 0 THEN alphabgpos = [0.0,0.0,1.0,1.0]
+            IF ~multi THEN IF N_Elements(alphafgpos) EQ 0 THEN alphafgpos = [0.0,0.0,1.0,1.0]
+            IF ~multi THEN IF N_Elements(position) EQ 0 THEN position= [0.0,0.0,1.0,1.0]
             noerase = 1
         ENDIF ELSE BEGIN
             image = oldImage
@@ -2004,7 +2006,7 @@ PRO cgImage, image, x, y, $
              IF N_Elements(transparent) NE 0 THEN BEGIN
                 restorePosition = position
                 alphafgpos = position
-                position = [0,0,1,1]
+                position = [0.0,0.0,1.0,1.0]
              ENDIF
           ENDIF
        ENDELSE
@@ -2211,7 +2213,7 @@ PRO cgImage, image, x, y, $
        trialX = xpixSize
        trialY = trialX * ratio
        IF trialY GT ypixSize THEN BEGIN
-          trialY = ypixSize
+          trialY = Float(ypixSize)
           trialX = trialY / ratio
        ENDIF
     

@@ -4,10 +4,10 @@
 ;
 ; PURPOSE:
 ;
-;       This is a utility routine demonstrates the several ways it is possible
-;       to use the NCDF_FILE object to create netCDF files, copy information
-;       from one netCDF file to another, and to read information from a netCDF
-;       file.
+;       This is a utility routine that demonstrates how to use the NCDF_FILE object 
+;       to create a new netCDF file, copy information from one netCDF file to another, 
+;       read information out of a netCDF file, and add a new variable to an already 
+;       existing netCDF file.
 ;
 ; AUTHOR:
 ;
@@ -39,6 +39,7 @@
 ;
 ;       Written by:  David W. Fanning, 3 February 2010.
 ;       Updated to use a time variable for the frame number. 29 Oct 2011.
+;       Added example of adding a new variable to an already exisiting netCDF file. 9 Jan 2015. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc.                                ;

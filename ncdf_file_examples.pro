@@ -236,4 +236,45 @@ PRO NCDF_File_Examples
     
     ; Destroy the file object.
     Obj_Destroy, sObj
+
+
+;**************************************************************************************
+;**************************************************************************************
+    
+    ; Open the original file in MODIFY mode so you can write the new variable into it.
+    sObj = Obj_New('NCDF_FILE', sourceFile, /MODIFY)
+    IF Obj_Valid(sObj) EQ 0 THEN Message, 'Source object cannot be created.'
+    
+    ; Create an image variable to add to the file.
+    image = Congrid(cgDemoData(18), 500, 250)
+    s = Size(image, /Dimensions)
+    img_xsize = s[0]
+    img_ysize = s[1]
+    
+    ; Add dimensions to the file.
+    sObj -> WriteDim, 'img_xsize', img_xsize, OBJECT=ximgdimObj
+    sObj -> WriteDim, 'img_ysize', img_ysize, OBJECT=yimgdimObj
+    
+    ; Get the dimension names.
+    dimNames = [ximgdimObj->GetName(), yimgdimObj->GetName()]
+    
+    ; Define a variable for the file.
+    sObj -> WriteVarDef, 'image', dimNames, DATATYPE='BYTE', OBJECT=imageObj
+    IF Obj_Valid(imageObj) EQ 0 THEN Message, 'Invalid data object returned.'
+    
+    ; Define variable attributes.
+    sObj -> WriteVarAttr, imageObj, 'comment', 'Image variable added later.'
+    
+    ; Write the data to the file.
+    sObj -> WriteVarData, 'image', image
+    
+    ; Sync the file by writing memory to disk.
+    sObj -> Sync
+    
+    ; Browse the file.
+    sObj -> Browse, XOFFSET=350, YOFFSET=350, TITLE='File with Variable Added'
+    
+    ; Destroy this file object.
+    Obj_Destroy, sObj
+    
     END

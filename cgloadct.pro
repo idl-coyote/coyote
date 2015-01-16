@@ -161,9 +161,12 @@
 ;       Added CubeHelix color table from code written by James R. A. Davenport. 5 Nov 2012. DWF.
 ;       Made sure NCOLORS default takes BOTTOM value into account. 18 June 2013. DWF.
 ;       Changed the way the brewer color table is searched for. Speed-up over 300x. 27 Jan 2014. DWF.
+;       Added two additional color tables to the "Brewer" color table file, fsc_brewer.tbl: "sunset" and "cgrainbow".
+;           These color tables are especially formulated to assist people with color blindness.
+;           See `this reference <http://www.sron.nl/~pault/>`. 16 Jan 2015. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2007-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2007-2015, Fanning Software Consulting, Inc.
 ;-
 PRO cgLoadCT, table, $
    ADDCMD=addcmd, $

@@ -84,9 +84,11 @@
 ;       Removed system color names, since these are no longer available in cgColor. 
 ;          27 Nov 2010. DWF
 ;       Renamed cgPickColorName. 20 Oct 2012. DWF.
+;       Added 12 colors suggested by Paul Krummel for people with color blindness. See the last line in 
+;          Figure 3 of `this reference <http://www.sron.nl/~pault/>`. 16 Jan 2015. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2000-2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2000-2015, Fanning Software Consulting, Inc.
 ;-
 
 
@@ -212,6 +214,10 @@ END ;---------------------------------------------------------------------------
 ;            RYB1      RYB2      RYB3      RYB4      RYB5      RYB6      RYB7      RYB8
 ;            TG1       TG2       TG3       TG4       TG5       TG6       TG7       TG8
 ;       
+;        Here are color names for colors appropriate for color blind users::
+;
+;           CG1 CG2 CG3 CG4 CG5 CG6 CG7 CG8 CG9 CG10 CG11 CG12
+;           
 ; :Keywords:
 ;     bottom: in, optional, type=integer
 ;        The colors used in the program are loaded in the color table. This keyword indicates 
@@ -476,6 +482,14 @@ FUNCTION cgPickColorName, theName, $         ; The name of the starting color.
          red =   [ red,      84,    163,   197,   220,   105,    51,    13,     0 ]
          green = [ green,    48,    103,   141,   188,   188,   149,   113,    81 ]
          blue =  [ blue,      5,     26,    60,   118,   177,   141,   105,    71 ]   
+         colors = [ colors, 'CG1', 'CG2', 'CG3', 'CG4', 'CG5', 'CG6', 'CG7', 'CG8']
+         red =   [ red,  51,    102,   136,    68,    17,   153,   221,    102 ]
+         green = [ green,  34,    153,   204,   170,   119,   153,   204,     17]
+         blue =  [ blue, 136,    204,   238,   153,    51,    51,   119,      0 ]
+         colors = [ colors, 'CG9', 'CG10', 'CG11', 'CG12']
+         red =   [ red,  204,    170,   136,   170 ]
+         green = [ green,  102,     68,    34,   68 ]
+         blue =  [ blue,  119,    102,    85,   153 ]
      ENDELSE
      ENDIF ELSE BEGIN
   

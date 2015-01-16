@@ -137,9 +137,11 @@
 ;        Removed cgColor_Color24 module in favor of using Coyote Library routine cgColor24. 5 Jan 2013. DWF.
 ;        The keyword ROW was being ignored if multiple colors were specified with TRIPLE keyword. Fixed. 10 July 2013. DWF.
 ;        Another fix to handle Windows 8 computers that report their window size incorrectly. 21 Oct 2013. DWF.
+;        Added 12 colors suggested by Paul Krummel for people with color blindness. See the last line in 
+;              Figure 3 of `this reference <http://www.sron.nl/~pault/>`. 16 Jan 2015. DWF.
 ;        
 ; :Copyright:
-;     Copyright (c) 2009-2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2009-2015, Fanning Software Consulting, Inc.
 ;-
 ;
 ;+
@@ -202,6 +204,10 @@
 ;           YGB1      YGB2      YGB3      YGB4      YGB5      YGB6      YGB7      YGB8
 ;           RYB1      RYB2      RYB3      RYB4      RYB5      RYB6      RYB7      RYB8
 ;           TG1        TG2       TG3       TG4       TG5       TG6       TG7       TG8
+;           
+;        Here are color names for colors appropriate for color blind users::
+;        
+;           CG1 CG2 CG3 CG4 CG5 CG6 CG7 CG8 CG9 CG10 CG11 CG12
 ;            
 ;        The color name "OPPOSITE" is also available. It chooses a color "opposite" to the 
 ;        color of the pixel in the upper-right corner of the display, if a window is open.
@@ -678,6 +684,14 @@ FUNCTION cgColor, theColour, colorIndex, $
            rvalue = [ rvalue,  84,    163,   197,   220,   105,    51,    13,     0 ]
            gvalue = [ gvalue,  48,    103,   141,   188,   188,   149,   113,    81 ]
            bvalue = [ bvalue,   5,     26,    60,   118,   177,   141,   105,    71 ]
+           colors = [ colors, 'CG1', 'CG2', 'CG3', 'CG4', 'CG5', 'CG6', 'CG7', 'CG8']
+           rvalue = [ rvalue,  51,    102,   136,    68,    17,   153,   221,    102 ]
+           gvalue = [ gvalue,  34,    153,   204,   170,   119,   153,   204,     17]
+           bvalue = [ bvalue, 136,    204,   238,   153,    51,    51,   119,      0 ]
+           colors = [ colors, 'CG9', 'CG10', 'CG11', 'CG12']
+           rvalue = [ rvalue,  204,    170,   136,   170 ]
+           gvalue = [ gvalue,  102,     68,    34,   68 ]
+           bvalue = [ bvalue,  119,    102,    85,   153 ]           
            colors = [ colors, 'OPPOSITE', 'BACKGROUND']
            rvalue = [ rvalue,  opixel[0],  bgcolor[0]]
            gvalue = [ gvalue,  opixel[1],  bgcolor[1]]

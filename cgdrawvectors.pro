@@ -186,6 +186,10 @@
 ;           system and project both points into the map coordinate system before calculating the angle
 ;           between points. Also then had to figure out how to scale the moved point to the reference
 ;           vector. All appears normal now. 2 Nov 2014. DWF.
+;        Still a couple of problems in the direction of the vector when the scale is different in the X and
+;           Y directions. This version of the program allows the vector to be distorted by scale and by a map
+;           projection. It more closely resembles the NASA program PartVelVec now than it did previously.
+;           18 Feb 2015. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2014, Fanning Software Consulting, Inc.
@@ -319,14 +323,35 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
    IF N_Elements(referenceVector) EQ 0 THEN referenceVector = Max(magnitudes)
    referenceVector = Double(referenceVector)
    
+   ; Do we need to calculate a plot range?
+   IF N_Elements(xrange) EQ 0 THEN BEGIN
+       IF ~overplot THEN BEGIN
+          xr = Max(posx_)- Min(posx_)
+          xrange = [Min(posx_) - (xr*0.1), Max(posx_)+(xr*0.1)]
+       ENDIF ELSE xrange = !X.CRange
+
+   ENDIF
+   IF N_Elements(yrange) EQ 0 THEN BEGIN
+       IF ~overplot THEN BEGIN
+          yr = Max(posy_)- Min(posy_)
+          yrange = [Min(posy_) - (yr*0.1), Max(posy_)+(yr*0.1)]
+        ENDIF ELSE yrange = !Y.CRange
+   ENDIF
+   
+   ; Do we need a plot?
+   IF ~overplot THEN cgPlot, [1], /NoData, XRANGE=xrange, YRANGE=yrange, _STRICT_EXTRA=extra
+
    ; Calculate the angle between velocity vectors in radians.
    angle = ATan(vely, Double(velx))
    
    ; Pick an arbitary point in the correct direction. We need this point if we
    ; are going to point the vector in the correct direction if we have a weird
    ; map projection space.
+   plotaspect = (xrange[1]-xrange[0])/(yrange[1]-yrange[0])
+
    aPx = (ABS(velx) * Cos(angle)) + posx_
-   aPy = (ABS(vely) * Sin(angle)) + posy_
+   aPy = (ABS(vely * plotaspect) * Sin(angle)) + posy_
+   
    
    ; Do we need to transform the position coordinates with a map coordinate object?
    IF N_Elements(mapcoord) NE 0 THEN BEGIN
@@ -345,19 +370,11 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
    ENDIF ELSE BEGIN
        posx = posx_
        posy = posy_
+;       originalAngle = angle
+;       angle = ATan(aPx - posx_, Double(aPy - posy_))
        mapTransform = 0
    ENDELSE
    
-   ; Do we need a plot?
-   IF N_Elements(xrange) EQ 0 THEN BEGIN
-       xr = Max(posx)- Min(posx)
-       xrange = [Min(posx) - (xr*0.1), Max(posx)+(xr*0.1)]
-   ENDIF
-   IF N_Elements(yrange) EQ 0 THEN BEGIN
-       yr = Max(posy)- Min(posy)
-       yrange = [Min(posy) - (yr*0.1), Max(posy)+(yr*0.1)]
-   ENDIF
-   IF ~overplot THEN cgPlot, [1], /NoData, XRANGE=xrange, YRANGE=yrange, _STRICT_EXTRA=extra
    
    ; Color determination is postponed to here, after a plot is drawn.
    SetDefaultValue, veccolors_in, cgColor('opposite')
@@ -372,11 +389,11 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
    ; Calculate scaled velocities in normalized coordinate units.
    IF mapTransform THEN BEGIN
        scaledVx = length * (ABS(velx) * Cos(origAngle) / referenceVector)
-       scaledVy = length * (ABS(vely) * Sin(origAngle) / referenceVector)
+       scaledVy = length * plotaspect * (ABS(vely) * Sin(origAngle) / referenceVector)
        maplength = SQRT(scaledVx^2 + scaledVy^2)
    ENDIF ELSE BEGIN
        scaledVx = length * (ABS(velx) * Cos(angle) / referenceVector)
-       scaledVy = length * (ABS(vely) * Sin(angle) / referenceVector)
+       scaledVy = length * plotaspect * (ABS(vely) * Sin(angle) / referenceVector)
    ENDELSE
    
    ; What kind of coordinate system are you using? You need to know to 
@@ -443,7 +460,9 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
           
        END
    ENDCASE
-   
+   Print, 'Start of Vector: ', px, py
+   Print, 'End of Vector:    ', x1, y1
+  
    ; Are we doing just a fraction of the vectors.
    IF fraction LT 1.0 THEN BEGIN
     

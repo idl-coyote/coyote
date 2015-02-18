@@ -152,6 +152,7 @@
 ;        Modified the algorithm that places the "Correlation" label to allow multiple plots in a 
 ;           window. Also removed a cgPolyFill command that appeared to have no effect. 19 Nov 2013. DWF.
 ;        Added NOERASE keyword and made sure no window was opened when OUTPUT keyword is used. 21 Nov 2013. DWF.
+;        Added check to not create initial plot if PostScript is the current device. 18 Feb 2015. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2013, Fanning Software Consulting, Inc.
@@ -381,7 +382,7 @@ PRO cgTaylorDiagram, stddev, correlation, $
   ENDIF
    
   ; Initial plot in window.
-  IF (!D.Window LT 0) && (~overplot) THEN cgDisplay, 680, 640
+  IF (!D.Window LT 0) && (~overplot) && (!D.Name NE 'PS') THEN cgDisplay, 680, 640
   cgPlot, x, y, /NoData, XTITLE='Standard Deviation', YTITLE='Standard Deviation', $
       XSTYLE=9, YSTYLE=9, POSITION=position, BACKGROUND='white', NOERASE=noerase
   

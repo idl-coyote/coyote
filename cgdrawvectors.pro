@@ -460,9 +460,7 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
           
        END
    ENDCASE
-   Print, 'Start of Vector: ', px, py
-   Print, 'End of Vector:    ', x1, y1
-  
+ 
    ; Are we doing just a fraction of the vectors.
    IF fraction LT 1.0 THEN BEGIN
     

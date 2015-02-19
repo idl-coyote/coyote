@@ -85,6 +85,7 @@
 ;        Added the ability to turn markers on or off with VisibleMarkers keyword and property. 29 June 2012. DWF.
 ;        Added a WID keyword to the GetProperty method to all the user to obtain the Goggle Map 
 ;            window index number. 29 Aug 2012. DWF.
+;        Goggle appreciates lat/lon values to six decimal points, so now passing all of it. 19 Feb 2015. DWF.
 ;            
 ; :Copyright:
 ;     Copyright (c) 2012, Fanning Software Consulting, Inc.
@@ -395,8 +396,8 @@ PRO cgGoogleMapWidget::Draw, SUCCESS=success
     googleString = 'http://maps.googleapis.com/maps/api/staticmap?center='
 
     ; Add the center latitude and longitude
-    googleString = googleString + String(self.centerLat,format='(F0.4)') + ',' + $
-       String(self.centerLon,format='(F0.4)')
+    googleString = googleString + String(self.centerLat,format='(F0.6)') + ',' + $
+       String(self.centerLon,format='(F0.6)')
        
     ; Add the zoom level.
     googleString = googleString + '&zoom=' + StrTrim(self.zoomLevel,2)

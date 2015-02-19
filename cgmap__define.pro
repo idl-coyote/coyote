@@ -97,6 +97,7 @@
 ;        Change EASTING and NORTHING keywords to FALSE_EASTING and FALSE_NOTHING to conform to Map_Proj_Init. 29 Nov 2013. DWF.
 ;        Forgetting to add the false_easting and false_northing values to the structure in INIT method. 29 Nov 2013. DWF.
 ;        Added Cylindrical Equal Area to list of projections that don't allow CENTER_LATITUDE keyword. 24 Dec 2014. DWF.
+;        Typo in code to handle ASPECT ratio was causing aspect ratio of output to be lost. Fixed. 19 Feb 2015. DWF.
 ;        
 ; :Copyright:
 ;     Copyright (c) 2011-2013, Fanning Software Consulting, Inc.
@@ -749,11 +750,11 @@ PRO cgMap::Draw, ERASE=erase, NOGRAPHICS=nographics, _EXTRA=extra
     ENDIF
     
     ; Do you need an aspect ratio?
-    IF (self._cg_aspect NE 0.0) AND (Total(!P.MULTI) LT 0) THEN BEGIN
+    IF (self._cg_aspect NE 0.0) AND (Total(!P.MULTI) LE 0) THEN BEGIN
         
       position = self._cg_position
        
-      trial_position = cgAspect(self._cg_aspect, margin=0.)
+      trial_position = cgAspect(self._cg_aspect, POSITION=position)
       trial_width = trial_position[2]-trial_position[0]
       trial_height = trial_position[3]-trial_position[1]
       pos_width = position[2]-position[0]

@@ -129,7 +129,9 @@
 ;        Misspelled keyword in PackageCommand method. 21 February 2013. DWF.
 ;        Modified GUI so there is only one Raster Image File choice, depending on if ImageMagick is
 ;           installed. 21 May 2013. DWF.
-;        I made the IM_WIDTH field in the object a pointer, so it could remain an undefined variable, if necessary. 20 FEB 2014. DWF.
+;        I made the IM_WIDTH field in the object a pointer, so it could remain an undefined variable, 
+;            if necessary. 20 FEB 2014. DWF.
+;        Typo in the spelling of DESTROYOBJECTS when restoring a graphic visualization. Fixed. 20 Feb 2015. DWF.
 ;-
 
 
@@ -724,34 +726,34 @@ FUNCTION cgWindow_Command::Copy
         CASE self.nparams OF
            0: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, $
                 KEYWORDS=*self.keywords, TYPE=self.type, $
-                DESTROYOBECTS=self.destroyObjects)
+                DESTROYOBJECTS=self.destroyObjects)
            1: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, $
                 KEYWORDS=*self.keywords, TYPE=self.type, $
-                DESTROYOBECTS=self.destroyObjects)
+                DESTROYOBJECTS=self.destroyObjects)
            2: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, $
                 KEYWORDS=*self.keywords, TYPE=self.type, $
-                DESTROYOBECTS=self.destroyObjects)
+                DESTROYOBJECTS=self.destroyObjects)
            3: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, $
                 P3=*self.p3, KEYWORDS=*self.keywords, TYPE=self.type, $
-                DESTROYOBECTS=self.destroyObjects)
+                DESTROYOBJECTS=self.destroyObjects)
            4: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, $
                 P3=*self.p3, P4=*self.p4, KEYWORDS=*self.keywords, TYPE=self.type, $
-                DESTROYOBECTS=self.destroyObjects)
+                DESTROYOBJECTS=self.destroyObjects)
         ENDCASE
         
     ENDIF ELSE BEGIN
     
         CASE self.nparams OF
            0: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, $
-                TYPE=self.type, DESTROYOBECTS=self.destroyObjects)
+                TYPE=self.type, DESTROYOBJECTS=self.destroyObjects)
            1: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, $
-                 TYPE=self.type, DESTROYOBECTS=self.destroyObjects)
+                 TYPE=self.type, DESTROYOBJECTS=self.destroyObjects)
            2: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, P2=*self.p2, $
-                 TYPE=self.type, DESTROYOBECTS=self.destroyObjects)
+                 TYPE=self.type, DESTROYOBJECTS=self.destroyObjects)
            3: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, p2=*self.p2, P3=*self.p3, $
-                 TYPE=self.type, DESTROYOBECTS=self.destroyObjects)
+                 TYPE=self.type, DESTROYOBJECTS=self.destroyObjects)
            4: copyObj = Obj_New('cgWindow_Command', COMMAND=self.command, P1=*self.p1, p2=*self.p2, P3=*self.p3, P4=*self.p4, $
-                 TYPE=self.type, DESTROYOBECTS=self.destroyObjects)
+                 TYPE=self.type, DESTROYOBJECTS=self.destroyObjects)
         ENDCASE
     
     ENDELSE

@@ -113,9 +113,12 @@
 ;        Added Window keyword 24 January 2011. DWF.
 ;        Modified error handler to restore the entry decomposition state if there is an error. 17 March 2011. DWF
 ;        Added the ADDCMD keyword to make the interface more consistent with other Coyote Grapics routines. 18 April 2013. DWF.
+;        Modified to allow a vector of colors to be added with the COLOR keyword. 23 February 2015. DWF.
+;        Algorithm modified slightly to get the program a little closer to the machine to speed up
+;           vector drawing when there are lots of vectors. 23 February 2015. DWF.
 ;        
 ; :Copyright:
-;     Copyright (c) 2010-2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2010-2015, Fanning Software Consulting, Inc.
 ;-
 PRO cgArrow, x0, y0, x1, y1, $
     ADDCMD=addcmd, $
@@ -196,6 +199,12 @@ PRO cgArrow, x0, y0, x1, y1, $
     IF Size(color, /TYPE) EQ 3 THEN IF cgGetColorState() EQ 0 THEN color = Byte(color)
     IF Size(color, /TYPE) LE 2 THEN color = StrTrim(Fix(color),2)
     
+    ; Make sure colors are using 24-bit values.
+    cgSetColorState, 1, CURRENT=currentState
+    IF N_Elements(color) NE N_Elements(x0) $
+        THEN thisColor = Replicate(cgColor(color), N_Elements(x0)) $
+        ELSE thisColor = cgColor(color)
+    
     ; Head size in device units
     IF N_Elements(hsize) EQ 0 $
         THEN arrowsize = !D.X_Size/50. * (hthick/2. > 1) $
@@ -214,12 +223,14 @@ PRO cgArrow, x0, y0, x1, y1, $
     
     ; Process each arrow in the vector.
     FOR i = 0L, N_Elements(x0)-1 DO BEGIN   
-    
+       
        CASE 1 OF
             Keyword_Set(data):   p = Convert_Coord([x0[i],x1[i]],[y0[i],y1[i]], /DATA, /TO_DEVICE)
             Keyword_Set(normal): p = Convert_Coord([x0[i],x1[i]],[y0[i],y1[i]], /NORMAL, /TO_DEVICE)
             ELSE:                p = [[x0[i], y0[i]],[x1[i], y1[i]]]
        ENDCASE
+       
+       aColor = thisColor[i]
     
        xp0 = p[0,0]
        xp1 = p[0,1]
@@ -249,24 +260,26 @@ PRO cgArrow, x0, y0, x1, y1, $
        xxp1 = xp1 + a * (dx*mcost - dy * sint)
        yyp1 = yp1 + a * (dx*sint  + dy * mcost)
      
-       cgSetColorState, 1, CURRENT=currentState
        IF Keyword_Set(solid) THEN BEGIN   ;Use polyfill?
          b = a * mcost*.9d ; End of arrow shaft (Fudge to force join)
-         cgPlotS, [xp0, xp1+b*dx], [yp0, yp1+b*dy], /DEVICE, $
-            COLOR=color, THICK=thick, LINESTYLE=linestyle, $
+         Plots, [xp0, xp1+b*dx], [yp0, yp1+b*dy], /DEVICE, $
+            COLOR=aColor, THICK=thick, LINESTYLE=linestyle, $
             NOCLIP=noclip, CLIP=clip, _Extra=extra
-         cgColorFill, [xxp0, xxp1, xp1, xxp0], [yyp0, yyp1, yp1, yyp0], $
-            /DEVICE, COLOR=color, NOCLIP=noclip, CLIP=clip, _Extra=extra
+         Polyfill, [xxp0, xxp1, xp1, xxp0], [yyp0, yyp1, yp1, yyp0], $
+            /DEVICE, COLOR=aColor, NOCLIP=noclip, CLIP=clip, _Extra=extra
        ENDIF ELSE BEGIN
-         cgPlotS, [xp0, xp1], [yp0, yp1], /DEVICE, COLOR=color, THICK=thick, $
+         Plots, [xp0, xp1], [yp0, yp1], /DEVICE, COLOR=aColor, THICK=thick, $
              LINESTYLE=linestyle, NOCLIP=noclip, CLIP=clip,_Extra=extra
-         cgPlotS, [xxp0,xp1,xxp1],[yyp0,yp1,yyp1], /DEVICE, COLOR=color, $
+         Polyfill, [xxp0,xp1,xxp1],[yyp0,yp1,yyp1], /DEVICE, COLOR=aColor, $
             THICK=hthick, LINESTYLE=linestyle, $
              NOCLIP=noclip, CLIP=clip,_Extra=extra
        ENDELSE
-       cgSetColorState, currentState
-       ENDFOR
        
-       ; Restore the input colors.
-       IF !D.NAME NE 'Z' THEN TVLCT, rr, gg, bb
+    ENDFOR
+       
+    ; Restore color state.
+    cgSetColorState, currentState
+
+    ; Restore the input colors.
+    IF !D.NAME NE 'Z' THEN TVLCT, rr, gg, bb
 END

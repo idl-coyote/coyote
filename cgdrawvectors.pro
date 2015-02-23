@@ -107,6 +107,7 @@
 ;         system plot.
 ;     referencevector: in, optional, type=float
 ;         The magnitude of a reference vector that is used to scale all other vectors before display.
+;         If undefined, 75 percent of the maximum vector magnitude.
 ;     solid: in, optional, type=boolean, default=0
 ;         Set this keyword to draw solid, filled arrows.
 ;     thick: in, optional, type=float
@@ -190,9 +191,17 @@
 ;           Y directions. This version of the program allows the vector to be distorted by scale and by a map
 ;           projection. It more closely resembles the NASA program PartVelVec now than it did previously.
 ;           18 Feb 2015. DWF.
+;        “To kill an error is as good a service as, and sometimes even better than, the establishing of a 
+;           new truth or fact,” asserted Charles Darwin. In that vein, I have completely gutted the internal
+;           vector placing algorithm in cgDrawVectors and replaced it with an algorithm that essentially 
+;           duplicates the vectors of the NASA Astronomy Library routine PartVelVec. The essential change was
+;           to take into account the plot scale in both the X and Y direction when computing the end point
+;           of a vector. You will see an "aspect" variable in the code. When being placed on map projections,
+;           using either cgMap_Set or cgMap, the aspect ratio of 180./360. is always used. The aspect ratio is
+;           used to scale the vector components before placement of the vector. 23 February 2015. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2014, Fanning Software Consulting, Inc.
+;     Copyright (c) 2014-2015, Fanning Software Consulting, Inc.
 ;-
 PRO cgDrawVectors, velx, vely, posx_, posy_, $
    ADDCMD=addcmd, $
@@ -320,62 +329,13 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
    
    ; Calculated keyword values.
    magnitudes = SQRT(velx^2 + vely^2)
-   IF N_Elements(referenceVector) EQ 0 THEN referenceVector = Max(magnitudes)
+   IF N_Elements(referenceVector) EQ 0 THEN referenceVector = Max(magnitudes) * 0.75D
    referenceVector = Double(referenceVector)
    
-   ; Do we need to calculate a plot range?
-   IF N_Elements(xrange) EQ 0 THEN BEGIN
-       IF ~overplot THEN BEGIN
-          xr = Max(posx_)- Min(posx_)
-          xrange = [Min(posx_) - (xr*0.1), Max(posx_)+(xr*0.1)]
-       ENDIF ELSE xrange = !X.CRange
-
-   ENDIF
-   IF N_Elements(yrange) EQ 0 THEN BEGIN
-       IF ~overplot THEN BEGIN
-          yr = Max(posy_)- Min(posy_)
-          yrange = [Min(posy_) - (yr*0.1), Max(posy_)+(yr*0.1)]
-        ENDIF ELSE yrange = !Y.CRange
-   ENDIF
-   
    ; Do we need a plot?
-   IF ~overplot THEN cgPlot, [1], /NoData, XRANGE=xrange, YRANGE=yrange, _STRICT_EXTRA=extra
+   IF ~overplot THEN cgPlot, [1], /NoData, XRange=[Min(posx_), Max(posx_)], $
+        YRange=[Min(posy_), Max(posy_)], _STRICT_EXTRA=extra
 
-   ; Calculate the angle between velocity vectors in radians.
-   angle = ATan(vely, Double(velx))
-   
-   ; Pick an arbitary point in the correct direction. We need this point if we
-   ; are going to point the vector in the correct direction if we have a weird
-   ; map projection space.
-   plotaspect = (xrange[1]-xrange[0])/(yrange[1]-yrange[0])
-
-   aPx = (ABS(velx) * Cos(angle)) + posx_
-   aPy = (ABS(vely * plotaspect) * Sin(angle)) + posy_
-   
-   
-   ; Do we need to transform the position coordinates with a map coordinate object?
-   IF N_Elements(mapcoord) NE 0 THEN BEGIN
-       IF Obj_Valid(mapCoord) THEN mapStruct = mapCoord -> GetMapStruct() ELSE mapStruct = mapCoord
-       xy = Map_Proj_Forward(posx_, posy_, MAP_STRUCTURE=mapStruct)
-       posx = Reform(xy[0,*])
-       posy = Reform(xy[1,*])
-       xy = Map_Proj_Forward(aPx, aPy, MAP_STRUCTURE=mapStruct)
-       aposx = Reform(xy[0,*])
-       aposy = Reform(xy[1,*])
-             
-       ; Recalculate the angle in the XY map projection space.
-       origAngle = angle
-       angle = ATan(aposy-posy, Double(aposx-posx))
-       mapTransform = 1
-   ENDIF ELSE BEGIN
-       posx = posx_
-       posy = posy_
-;       originalAngle = angle
-;       angle = ATan(aPx - posx_, Double(aPy - posy_))
-       mapTransform = 0
-   ENDELSE
-   
-   
    ; Color determination is postponed to here, after a plot is drawn.
    SetDefaultValue, veccolors_in, cgColor('opposite')
    
@@ -386,118 +346,84 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
    ; Calculate default head size.
    IF N_Elements(hsize) EQ 0 THEN hsize = !D.X_SIZE / 100.
    
-   ; Calculate scaled velocities in normalized coordinate units.
-   IF mapTransform THEN BEGIN
-       scaledVx = length * (ABS(velx) * Cos(origAngle) / referenceVector)
-       scaledVy = length * plotaspect * (ABS(vely) * Sin(origAngle) / referenceVector)
-       maplength = SQRT(scaledVx^2 + scaledVy^2)
+   ; If we have a map coordinate object, convert the lat/lon position coordinates into XY map grid locations.
+   IF N_Elements(mapCoord) THEN BEGIN
+       xy = mapCoord -> Forward(posx_, posy_, /NoForwardFix)
+       px = Reform(xy[0,*])
+       py = Reform(xy[1,*])
    ENDIF ELSE BEGIN
-       scaledVx = length * (ABS(velx) * Cos(angle) / referenceVector)
-       scaledVy = length * plotaspect * (ABS(vely) * Sin(angle) / referenceVector)
+       px = posx_
+       py = posy_
    ENDELSE
    
-   ; What kind of coordinate system are you using? You need to know to 
-   ; calcuate the arrow end  of the vector.
+   ; We need the positions of  vectors in a normalized coordinate system
    CASE 1 OF
        Keyword_Set(device): BEGIN
-         xy = Convert_Coord(posx, posy, /Device, /To_Normal)
-         x1 = scaledVx + Reform(xy[0,*])
-         y1 = scaledVy + Reform(xy[1,*])
-         px = Reform(xy[0,*])
-         py = Reform(xy[1,*])
-         
-         ; If you have a map projection, you have to turn these normalized points into
-         ; the map projection location.
-         IF mapTransform THEN BEGIN
-             x1 = maplength * Cos(angle)
-             y1 = maplength * Sin(angle)
-             xyd = Convert_Coord(px+x1, py+y1, /Device, /To_Data)
-             xyn = Convert_Coord(xyd[0,*], xyd[1,*], /Data, /To_Normal)
-             x1 = xyn[0,*]
-             y1 = xyn[1,*]
-         ENDIF
-         
-         END
-        
-       Keyword_Set(normal): BEGIN  
-          x1 = posx + scaledVx
-          y1 = posy + scaledVy
-          px = posx
-          py = posy
-          
-          ; If you have a map projection, you have to turn these normalized points into
-          ; the map projection location.
-          IF mapTransform THEN BEGIN
-              x1 = maplength * Cos(angle)
-              y1 = maplength * Sin(angle)
-              xyn = Convert_Coord(px+x1, py+y1, /Normal, /To_Data)
-              xyd = Convert_Coord(xyn[0,*], xyn[1,*], /Data, /To_Normal)
-              x1 = xyd[0,*]
-              y1 = xyd[1,*]
-          ENDIF
-          
-          END
-
-       ELSE: BEGIN
-        
-         ; Create normalized points.
-         xy = Convert_Coord(posx, posy, /Data, /To_Normal)
-         x1 = scaledVx + Reform(xy[0,*])
-         y1 = scaledVy + Reform(xy[1,*])
-         px = Reform(xy[0,*])
-         py = Reform(xy[1,*])
-         
-         ; If you have a map projection, you have to turn these normalized points into
-         ; the map projection location.
-         IF mapTransform THEN BEGIN
-            x1 = maplength * Cos(angle)
-            y1 = maplength * Sin(angle)
-            xyd = Convert_Coord(px+x1, py+y1, /Normal, /To_Data)
-            xyn = Convert_Coord(xyd[0,*], xyd[1,*], /Data, /To_Normal)
-            x1 = xyn[0,*]
-            y1 = xyn[1,*]
-         ENDIF
-          
+           nc = Convert_Coord(px, py, /Device, /To_Normal)
+           px = nc[0,*]
+           py = nc[1,*]
+       END
+       
+       Keyword_Set(normal): 
+       
+       ELSE: BEGIN ; Data coordinates
+           nc = Convert_Coord(px, py, /Data, /To_Normal)
+           px = nc[0,*]
+           py = nc[1,*]
        END
    ENDCASE
- 
+   
+   ; We have to take the plot aspect ratio into account when calculating the vector components.
+   IF (!X.Type EQ 3) || (N_Elements(mapCoord) NE 0) THEN BEGIN ; Map projection
+      aspect = 180./360.
+   ENDIF ELSE BEGIN
+      aspect = (!Y.CRange[1] - !Y.CRange[0]) / (!X.CRange[1] - !X.CRange[0])
+   ENDELSE
+   
+   ; Modify the longest vector component by the aspect ratio of the plot.
+   IF aspect LT 1.0 THEN BEGIN
+       vx = length*(velx/referenceVector)
+       vy = length*(vely/referenceVector/aspect)
+   ENDIF ELSE BEGIN
+       vx = length*(velx/referenceVector*aspect)
+       vy = length*(vely/referenceVector)
+   ENDELSE
+   x1 = px + vx
+   y1 = py + vy
+   
    ; Are we doing just a fraction of the vectors.
    IF fraction LT 1.0 THEN BEGIN
-    
-        ; Make sure you can get some.
-        numGood = Long(fraction * vecLength)
-        IF numGood EQ 0 THEN RETURN
-        
-        ; Compute indices of the vectors to plot. 
-        IF Keyword_Set(ordered) THEN BEGIN
-            goodIndices = Long(DIndGen(numGood) / (numGood - 1L) * vecLength)
-        ENDIF ELSE BEGIN
-            goodIndices = Long(RandomU(seed, numGood) * vecLength)
-        ENDELSE
-        scaledVx = scaledVx[goodIndices]
-        scaledVy = scaledVy[goodIndices]
-        px = px[goodIndices]
-        py = py[goodIndices]
-        veccolors = veccolors[goodIndices]
-        x1 = x1[goodIndices]
-        y1 = y1[goodIndices]
-        veclength = N_Elements(px)
-        
-   ENDIF 
-
+   
+       ; Make sure you can get some.
+       numGood = Long(fraction * vecLength)
+       IF numGood EQ 0 THEN RETURN
+       
+       ; Compute indices of the vectors to plot.
+       IF Keyword_Set(ordered) THEN BEGIN
+           goodIndices = Long(DIndGen(numGood) / (numGood - 1L) * vecLength)
+       ENDIF ELSE BEGIN
+           goodIndices = Long(RandomU(seed, numGood) * vecLength)
+       ENDELSE
+       px = px[goodIndices]
+       py = py[goodIndices]
+       veccolors = veccolors[goodIndices]
+       x1 = x1[goodIndices]
+       y1 = y1[goodIndices]
+       veclength = N_Elements(px)
+       
+   ENDIF
+   
    ; Draw the vectors.
-   FOR j=0,vecLength-1 DO BEGIN
-       cgArrow, px[j], py[j], x1[j], y1[j], $
-           CLIP=clipit, $
-           COLOR = veccolors[j], $
-           CRECT=crect, $
-           HSIZE = hsize, $
-           HTHICK = hthick, $
-           LINESTYLE=linestyle, $
-           NORMAL = 1, $
-           SOLID = solid, $
-           THICK = thick
-    ENDFOR
+   cgArrow, px, py, x1, y1, $
+       CLIP=clipit, $
+       COLOR = veccolors, $
+       CRECT=crect, $
+       HSIZE = hsize, $
+       HTHICK = hthick, $
+       LINESTYLE=linestyle, $
+       NORMAL = 1, $
+       SOLID = solid, $
+       THICK = thick
     
     ; Restore color state
     cgSetColorState, thisColorState

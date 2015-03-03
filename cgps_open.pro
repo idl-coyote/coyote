@@ -199,6 +199,7 @@
 ;       The program wasn't picking up default values from cgWindow_GetDefs. 22 Jan 2014. DWF.
 ;       Modified the program so that the PostScript file location is printed only if the PostScript file 
 ;          is being retrained. 17 March 2014. DWF.
+;       Fixed a problem that prevented setting FONT=0 when setting cgPS_Open parameters with cgControl. 3 Mar 2015. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2014, Fanning Software Consulting, Inc.
@@ -323,7 +324,8 @@ PRO cgPS_Open, filename, $
         Window, /FREE, /PIXMAP
         pixmap = !D.Window
    ENDIF
-   !P.Font = font 
+   !P.Font = ps_struct.font 
+
    IF N_Elements(pixmap) NE 0 THEN WDelete, pixmap
 
    ; Configure the PostScript Device

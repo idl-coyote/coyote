@@ -121,6 +121,7 @@
 ; 
 ;       Written by David W. Fanning, Fanning Software Consulting, 17 August 2008.
 ;       Ideas taken from discussion with Ben Tupper and Ben's program HBB_ANALYZER.
+;       Example program rewritten to bring up-to-date with Coyote Library routines. 9 March 2015. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -638,7 +639,7 @@ FUNCTION Blob_Analyzer::INIT, inputImage, $
 END ; ------------------------------------------------------------------------------
 
 
-PRO Example
+PRO Blob_Analyzer_Example_Program
 
   ; Get a file for analysis.
   file = FILEPATH('r_seeberi.jpg', SUBDIRECTORY = ['examples', 'data'])
@@ -658,16 +659,16 @@ PRO Example
   mask = openImage GE 150
   
   ; Do the analysis.
-  blobs = Obj_New('blob_analyzer', openImage, MASK=mask, SCALE=[0.5, 0.5])
+  blobs = Obj_New('blob_analyzer', openImage, MASK=mask)
   
   ; Display the original image
   s = Size(image, /DIMENSIONS)
-  Window, XSIZE=2*s[0], YSIZE=2*s[1], Title='Blob Analyzer Example'
-  LoadCT, 0
-  cgImage, image, 0, /TV
+  cgDisplay, 800, 800, Aspect=image, Title='Blob Analyzer Example'
+  cgLoadCT, 0
+  cgImage, image, Position=[0.0, 0.5, 0.5, 1.0]
   
   ; Display the opened image beside it.
-  cgImage, openImage, 1, /TV
+  cgImage, openImage, Position=[0.5, 0.5, 1.0, 1.0], /NoErase
   
   ; Display the blobs we located with LABEL_REGION.
   count = blobs -> NumberOfBlobs()
@@ -676,22 +677,31 @@ PRO Example
     blobIndices = blobs -> GetIndices(j)
     blank[blobIndices] = image[blobIndices]
   ENDFOR
-  cgImage, blank, 2, /TV
+  cgImage, blank, Position=[0.0, 0.0, 0.5, 0.5], /NoErase
+  
   
   ; Display the original image, with blob outlined and labelled.
-  cgImage, image, 3, /TV
+  cgImage, image, Position=[0.5, 0.0, 1.0, 0.5], /NoErase, $
+     /Save, XRange=[0,1], YRange=[0,1]
+
   FOR j=0,count-1 DO BEGIN
-    stats = blobs -> GetStats(j, /NoScale)
-    PLOTS, stats.perimeter_pts[0,*] + s[0], stats.perimeter_pts[1,*], /Device, COLOR=cgColor('dodger blue')
-    XYOUTS, stats.center[0]+s[0], stats.center[1]-5, /Device, StrTrim(j,2), $
-        COLOR=cgColor('red'), ALIGNMENT=0.5, CHARSIZE=0.75
+
+      ; Convert the perimeter points into normalized data coordinates.
+      stats = blobs -> GetStats(j, /NoScale)
+      xpts = Reform(stats.perimeter_pts[0,*]) / Float(s[0])
+      ypts = Reform(stats.perimeter_pts[1,*]) / Float(s[1])
+      xcenter = stats.center[0] / Float(s[0])
+      ycenter = stats.center[1] / Float(s[1])
+      cgPlots, xpts, ypts, COLOR='dodger blue', /DATA
+      cgText, xcenter, ycenter, StrTrim(j,2), $
+        COLOR='red', ALIGNMENT=0.5, CHARSIZE=0.75, /DATA
   ENDFOR
   
   ; Add labels for captions.
-  XYOUTS, 0.05, 0.95, 'A', FONT=0, ALIGNMENT=0.5, COLOR=cgColor('Yellow')
-  XYOUTS, 0.55, 0.95, 'B', FONT=0, ALIGNMENT=0.5, COLOR=cgColor('Yellow')
-  XYOUTS, 0.05, 0.45, 'C', FONT=0, ALIGNMENT=0.5, COLOR=cgColor('Yellow')
-  XYOUTS, 0.55, 0.45, 'D', FONT=0, ALIGNMENT=0.5, COLOR=cgColor('Yellow')
+  cgText, 0.05, 0.95, 'A', FONT=0, ALIGNMENT=0.5, COLOR='Yellow', /NORMAL
+  cgText, 0.55, 0.95, 'B', FONT=0, ALIGNMENT=0.5, COLOR='Yellow', /NORMAL
+  cgText, 0.05, 0.45, 'C', FONT=0, ALIGNMENT=0.5, COLOR='Yellow', /NORMAL
+  cgText, 0.55, 0.45, 'D', FONT=0, ALIGNMENT=0.5, COLOR='Yellow', /NORMAL
   
   ; Report stats.
   blobs -> ReportStats

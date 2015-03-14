@@ -1,5 +1,5 @@
 The Coyote Library is an Open Source programming project, hosted at
-http://idl-coyote.googlecode.com.
+https://github.com/davidwfanning/idl-coyote.
 
 Programs in the Coyote Library are updated frequently and new
 programs are added continuously. It is extremely important that
@@ -14,7 +14,7 @@ You can find the latest version of the Coyote Library here:
 
 Or, in the Download section here:
 
-   http://idl-coyote.googlecode.com
+   https://github.com/davidwfanning/idl-coyote
 
 The Coyote Library evolved from work David Fanning was doing
 teaching IDL courses and answering IDL questions on the IDL
@@ -24,7 +24,7 @@ programs that are easy to maintain and extend. You can learn
 more about these programs and about IDL programming in general
 at David's web page, Coyote's Guide to IDL Programming.
 
-   http://www.idlcoyote.com
+   http://www.idlcoyote.com/
 
 PROGRAMS RENAMED:
 

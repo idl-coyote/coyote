@@ -8,7 +8,7 @@ Coyote Library and all of the other IDL programs in the world that
 use the Coyote Library. Please update your library every time
 you think of it! 
 
-You can find the latest version of the Coyote Library here:
+You can find the latest version of the Coyote Library at this location:
 
    http://wwww.idlcoyote.com/programs/coyoteprograms.zip
 

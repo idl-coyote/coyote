@@ -300,9 +300,11 @@
 ;           program code. 8 August 2013. DWF.
 ;       The check for a valid position is now done before the colorbar is drawn so that
 ;           a colorbar sans axes is not left dangling on the display. 25 September 2013. Matthew Argall
+;       The TextThick keyword value was not being applied correctly when the text was written on the right
+;           of a vertical colorbar or at the top of a horizontal colorbar. 27 March 2015. DWF.
 ;       
 ; :Copyright:
-;     Copyright (c) 2008-2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2008-2015, Fanning Software Consulting, Inc.
 ;-
 PRO cgColorbar, $
     ADDCMD=addcmd, $
@@ -712,7 +714,8 @@ PRO cgColorbar, $
               AXIS, YAXIS=1, YRANGE=[minrange, maxrange], YTICKFORMAT=format, YTICKS=divisions, $
                  YTICKLEN=ticklen, YSTYLE=1, COLOR=color, CHARSIZE=charsize, XTITLE="", $
                  FONT=font, YTITLE=title, _STRICT_EXTRA=extra, YMINOR=minor, YTICKNAME=ticknames, $
-                 YLOG=ylog, YTICKINTERVAL=tickinterval, YTICK_GET=ticks, YTICKLAYOUT=yticklayout
+                 YLOG=ylog, YTICKINTERVAL=tickinterval, YTICK_GET=ticks, YTICKLAYOUT=yticklayout, $
+                 CHARTHICK=textThick
           ENDELSE
 
        ENDIF ELSE BEGIN
@@ -767,7 +770,7 @@ PRO cgColorbar, $
              XTICKFORMAT=format, XTICKLEN=ticklen, XRANGE=[minrange, maxrange], XAXIS=1, $
              FONT=font, XTITLE="", _STRICT_EXTRA=extra, XMINOR=minor, $
              XTICKNAME=ticknames, XLOG=xlog, YTITLE="", XTICKINTERVAL=tickInterval, $
-             XTICKLAYOUT=xticklayout
+             XTICKLAYOUT=xticklayout, CHARTHICK=textThick
              
           IF title NE "" THEN BEGIN
              xloc = (position[2] - position[0]) / 2.0 + position[0]

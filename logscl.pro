@@ -82,6 +82,13 @@
 ;
 ;       Written by:  David W. Fanning, 20 February 2006.
 ;       Fixed a problem with output scaling. 1 July 2009. DWF (with input from Bo Milvang-Jensen).
+;       Discovered that I implemented the wrong equation in this routine, so that the program
+;          is implementing a compression stretch, rather than a log stretch. To solve the 
+;          problem, this program is being retired and replaced with two new programs: cgLogScl
+;          will perform the log stretch that this program was suppose to do, and cgCompressScl
+;          will perform the compression stretch that this program actually does. If you currently
+;          use LogScl and you like what it does, replace it with cgCompressScl. If you want
+;          a true logarithmic scaling, use cgLogScl. 27 Mar 2015. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;

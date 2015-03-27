@@ -72,6 +72,7 @@
 ;
 ;       Written by:  David W. Fanning, 5 September 2007.
 ;       Now setting NAN keyword on all MIN and MAX functions. 2 Dec 2011. DWF.
+;       Renamed cgGaussScl and retired. 26 March 2015. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;

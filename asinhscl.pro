@@ -100,6 +100,7 @@
 ;       Removed ALPHA keyword and redefined the BETA keyword to correspond
 ;         to the "softening parameter" of Lupton et. al., following the
 ;         suggestions of Marshall Perrin. 25 April 2006. DWF.
+;       Renamed cgASinhScl from ASinhScl. 27 March 2015. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;

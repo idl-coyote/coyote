@@ -84,6 +84,7 @@
 ;       Written by:  David W. Fanning, 17 February 2006.
 ;       Fixed a problem with output scaling. 1 July 2009. DWF (with input from Bo Milvang-Jensen).
 ;       Now setting NAN keyword on all MIN and MAX functions. 2 Dec 2011. DWF.
+;       Renamed cgGmaScl and retired. 27 March 2015. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;

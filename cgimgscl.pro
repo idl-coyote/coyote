@@ -64,10 +64,12 @@
 ;    clip: in, optional, type=float, default=2
 ;         A number between 0 and 50 that indicates the percentage of pixels to clip
 ;         off either end of the image histogram before performing a linear stretch.
+;    constant: in, optional, type=float, default=1.0
+;         A constant value applied in a logarithmic stretch.
 ;    exclude: in, optional, type=numeric
 ;         The value to exclude in a standard deviation stretch.
 ;    exponent: in, optional, type=float, default=4.0
-;         The logarithm exponent in a logarithmic stretch.
+;         The logarithm exponent in a compression stretch.
 ;    gamma: in, optional, type=float, default=1.5
 ;         The gamma factor in a gamma stretch.
 ;    interpolate: in, optional, type=boolean, default=0
@@ -82,7 +84,7 @@
 ;         keyword to a value automatically sets `SCALE` to 1. If the maximum value of the 
 ;         image is greater than 255, this keyword is defined and SCALE=1.
 ;    mean: in, optional, type=float, default=0.5
-;         The mean factor in a logarithmic stretch.
+;         The mean factor in a compression stretch.
 ;    minus_one: in, optional, type=boolean, default=0
 ;         The value of this keyword is passed along to the cgResizeImage
 ;         command. It prevents cgResizeImage from adding an extra row and
@@ -126,15 +128,17 @@
 ;             0         None           No scaling whatsoever is done.
 ;             1         Linear         scaled = BytScl(image, MIN=minValue, MAX=maxValue)
 ;             2         Linear 2%      A histogram stretch, with a percentage of pixels clipped at both the top and bottom
-;             3         Gamma          scaled = GmaScl(image, MIN=minValue, MAX=maxValue, Gamma=gamma)
-;             4         Log            scaled = LogScl(image, MIN=minValue, MAX=maxValue, Mean=mean, Exponent=exponent)
-;             5         Asinh          scaled = AsinhScl(image, MIN=minValue, MAX=maxValue, Beta=beta)
+;             3         Gamma          scaled = cgGmaScl(image, MIN=minValue, MAX=maxValue, Gamma=gamma)
+;             4         Log            scaled = cgLogScl(image, MIN=minValue, MAX=maxValue, Mean=mean, Exponent=exponent)
+;             5         Asinh          scaled = cgAsinhScl(image, MIN=minValue, MAX=maxValue, Beta=beta)
 ;             6         SquareRoot     A linear stretch of the square root histogram of the image values.
 ;             7         Equalization   A linear stretch of the histogram equalized image histogram.
 ;             8         Gaussian       A Gaussian normal function is applied to the image histogram.
 ;             9         MODIS          Scaling done in the differential manner of the MODIS Rapid Response Team
 ;                                      and implemented in the Coyote Library routine ScaleModis.
-;             10        StdDev         Standard deviation stretch. scaled = SDevScl(image, MULTIPLIER=2).
+;             10        StdDev         Standard deviation stretch. scaled = cgSDevScl(image, MULTIPLIER=2).
+;             11        Compression    Compress mid-tones in image with cgCompressScl.
+;             
 ;    sigma: in, optional, type=float, default=1.0
 ;         The sigma scale factor in a Gaussian stretch.
 ;    top: in, optional, type=integer, default=255
@@ -162,15 +166,17 @@
 ;       Only define MISSING_INDEX value if needed. Change to support TRANSPARENT keyword
 ;          in cgImage. 18 October 2012. DWF.
 ;       Only 2D images can be scaled. 18 October 2012. DWF.
+;       Made LOG stretch a real log stretch and add a compression stretch. 27 March 2015. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2012, Fanning Software Consulting, Inc.
+;     Copyright (c) 2012-2015, Fanning Software Consulting, Inc.
 
 ;-
 FUNCTION cgImgScl, image, xsize, ysize, $
    BOTTOM=bottom, $
    BETA=beta, $
    CLIP=clip, $
+   CONSTANT=contant, $
    EXCLUDE=exclude, $
    EXPONENT=exponent, $
    GAMMA=gamma, $
@@ -305,14 +311,15 @@ FUNCTION cgImgScl, image, xsize, ysize, $
 ;             0         None           No scaling whatsoever is done.
 ;             1         Linear         scaled = BytScl(image, MIN=minValue, MAX=maxValue)
 ;             2         Clip           A histogram stretch, with a percentage of pixels clipped at both the top and bottom
-;             3         Gamma          scaled = GmaScl(image, MIN=minValue, MAX=maxValue, Gamma=gamma)
-;             4         Log            scaled = LogScl(image, MIN=minValue, MAX=maxValue, Mean=mean, Exponent=exponent)
-;             5         Asinh          scaled = AsinhScl(image, MIN=minValue, MAX=maxValue, Beta=beta)
+;             3         Gamma          scaled = cgGmaScl(image, MIN=minValue, MAX=maxValue, Gamma=gamma)
+;             4         Log            scaled =  cgLogScl(image, MIN=minValue, MAX=maxValue, CONSTANT=constant)
+;             5         Asinh          scaled = cgAsinhScl(image, MIN=minValue, MAX=maxValue, Beta=beta)
 ;             6         SquareRoot     A linear stretch of the square root histogram of the image values.
 ;             7         Equalization   A linear stretch of the histogram equalized image histogram.
 ;             8         Gaussian       A Gaussian normal function is applied to the image histogram.
 ;             9         MODIS          Scaling done in the differential manner of the MODIS Rapid Response Team
 ;             10        StdDev         A standard deviation stretch.
+;             11        Compression    Compress mid-tones in image with cgCompressScl.
 
           0: ; No stretch at all. 
        
@@ -322,22 +329,22 @@ FUNCTION cgImgScl, image, xsize, ysize, $
              END
     
           2: BEGIN ; Histogram clip stretch.
-             tempImage = ClipScl(tempImage, clip, OMIN=bottom, OMAX=top, NEGATIVE=negative)
+             tempImage = cgClipScl(tempImage, clip, OMIN=bottom, OMAX=top, NEGATIVE=negative)
              END
 
           3: BEGIN ; Gamma log scale stretch.
-             tempImage = GmaScl(tempImage, Max=maxvalue, Min=minvalue, $
+             tempImage = cgGmaScl(tempImage, Max=maxvalue, Min=minvalue, $
                        Gamma=gamma, Negative=negative, OMAX=top, OMIN=bottom)
              END
     
           4: BEGIN ; Log scale stretch.
-             tempImage =  LogScl(tempImage, Max=maxvalue, Min=minvalue, $
+             tempImage =  cgLogScl(tempImage, Max=maxvalue, Min=minvalue, $
                        Mean=mean, Exponent=exponent, Negative=negative, $
                        OMIN=bottom, OMAX=top)
              END
     
           5: BEGIN ; Hyperpolic sine stretch.
-             tempImage = ASinhScl(tempImage, Max=maxvalue, Min=minvalue, $
+             tempImage = cgASinhScl(tempImage, Max=maxvalue, Min=minvalue, $
                       BETA=beta, Negative=negative, OMAX=top, OMIN=bottom)
              END
                
@@ -357,7 +364,7 @@ FUNCTION cgImgScl, image, xsize, ysize, $
              END
     
           8: BEGIN ; Gaussian stretch.
-             tempImage = GaussScl(tempImage, Max=maxvalue, Min=minvalue, $
+             tempImage = cgGaussScl(tempImage, Max=maxvalue, Min=minvalue, $
                        Sigma=sigma, Negative=negative, OMIN=bottom, OMAX=top)
              END
          
@@ -366,10 +373,15 @@ FUNCTION cgImgScl, image, xsize, ysize, $
              END
              
           10: BEGIN ; Standard deviation stretch.
-              tempImage = SDevScl(tempImage, MULTIPLIER=multiplier, EXCLUDE=exclude, $
+              tempImage = cgSDevScl(tempImage, MULTIPLIER=multiplier, EXCLUDE=exclude, $
                    Negative=negative, OMAX=top, OMIN=bottom)
               END
                
+          11: BEGIN ; Compression stretch.
+                  tempImage = cgCompressScl(tempImage, Max=maxvalue, Min=minvalue, $
+                       Mean=mean, Exponent=exponent, Negative=negative, $
+                       OMIN=bottom, OMAX=top)
+              END
             ELSE: Message, 'Unknown scaling index.'
             
        ENDCASE

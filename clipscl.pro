@@ -80,6 +80,7 @@
 ;       Written by:  David W. Fanning, 6 September 2007.
 ;       Not sure what this program was doing, but not what I thought. I've reworked
 ;          the algorithm to scale the data appropriately. 25 Oct 2011. DWF.
+;       Renamed cgClipScl and retired. 27 March 2015. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;

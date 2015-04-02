@@ -1,12 +1,12 @@
 The Coyote Library is an Open Source programming project, hosted at
-https://github.com/davidwfanning/idl-coyote.
+https://github.com/idl-coyote/coyote.
 
 Programs in the Coyote Library are updated frequently and new
 programs are added continuously. It is extremely important that
 you keep up with recent changes if you expect to work with the
 Coyote Library and all of the other IDL programs in the world that
 use the Coyote Library. Please update your library every time
-you think of it! 
+you think of it!
 
 You can find the latest version of the Coyote Library at this location:
 
@@ -14,7 +14,7 @@ You can find the latest version of the Coyote Library at this location:
 
 Or, in the Download section here:
 
-   https://github.com/davidwfanning/idl-coyote
+   https://github.com/idl-coyote/coyote/archive/master.zip
 
 The Coyote Library evolved from work David Fanning was doing
 teaching IDL courses and answering IDL questions on the IDL
@@ -33,7 +33,7 @@ were renamed to start with the letter "cg" for Coyote Graphics.
 The old programs didn't go away, they simply moved to the "retired"
 sub-directory in the Coyote Library. If you want to use them, all
 you need to is add the Coyote Library and all its sub-directories to
-your IDL path. (Normally this is done by putting a check mark in 
+your IDL path. (Normally this is done by putting a check mark in
 front of the directory if you set your path with the IDL workbench,
 or by adding a + sign to the name of the directory in an IDL start-up
 file.)
@@ -54,13 +54,13 @@ the right:
 
 AUTHOR:
 
-  David W. Fanning              
-  FANNING SOFTWARE CONSULTING   
-  1645 Sheely Drive            
-  Fort Collins                  
-  CO 80526 USA                  
-  Phone: 970-221-0438           
-  E-mail: david@idlcoyote.com  
+  David W. Fanning
+  FANNING SOFTWARE CONSULTING
+  1645 Sheely Drive
+  Fort Collins
+  CO 80526 USA
+  Phone: 970-221-0438
+  E-mail: david@idlcoyote.com
 
 If you have a question about the software or how to use
 it, please contact David Fanning via e-mail.
@@ -98,7 +98,7 @@ All Coyote Library routines use the following BSD Open Source License:
 DOCUMENTATION:
 
    Documentation for Coyote Graphics Routines (any program starting with "cg" as
-   a prefex as well as other intimately tied to Coyote Graphics routines) is 
+   a prefex as well as other intimately tied to Coyote Graphics routines) is
    available on line:
 
         http://www.idlcoyote.com/idldoc/cg/index.html

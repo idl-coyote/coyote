@@ -9,6 +9,7 @@
 *.pro text
 *.txt text
 *.html text
+.idlwave_catalog text
 
 # Declare files that will always have CRLF line endings on checkout.
 

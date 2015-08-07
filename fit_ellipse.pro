@@ -37,7 +37,7 @@
 ; INPUT KEYWORDS:
 ;
 ;       NPOINTS - The number of points in the fitted ellipse. Set to 120 by default.
-;       
+;
 ;       SCALE - A two-element array that gives the scaling parameters for each X and Y pixel, respectively.
 ;            Set to [1.0,1.0] by default.
 ;
@@ -123,7 +123,7 @@ FUNCTION Fit_Ellipse, indices, $
     ; an ellipse to it. This is used to calculate the major and minor axes of
     ; the ellipse, as well as its orientation. The orientation is calculated in
     ; degrees counter-clockwise from the X axis.
-    
+
     IF N_Elements(xsize) EQ 0 THEN xsize = !D.X_Size
     IF N_Elements(ysize) EQ 0 THEN ysize = !D.Y_Size
     IF N_Elements(npoints) EQ 0 THEN npoints = 120
@@ -140,7 +140,7 @@ FUNCTION Fit_Ellipse, indices, $
        array[xs:xf, ys:yf] = 255B
        indices = Where(array EQ 255)
     ENDIF
-    
+
     ; Convert the indices to COL/ROW coordinates. Find min and max values
     xyindices = Array_Indices([xsize,ysize], indices, /DIMENSIONS)
     minX = Min(xyindices[0,*], MAX=maxX)
@@ -149,14 +149,14 @@ FUNCTION Fit_Ellipse, indices, $
     rows = Reform(xyindices[1,*]) - minY
 
     ; Make an array large enough to hold the blob.
-    arrayXSize = maxX-minX+1
-    arrayYSize = maxY-minY+1
+    arrayXSize = maxX-minX+1 > 3
+    arrayYSize = maxY-minY+1 > 3
     array = BytArr(arrayXSize, arrayYSize)
     array[xyindices[0,*] - minX, xyindices[1,*] - minY] = 255B
     totalMass = Total(array)
     xcm = Total( Total(array, 2) * Indgen(arrayXSize) * scale[0] ) / totalMass
     ycm = Total( Total(array, 1) * Indgen(arrayYSize) * scale[1] ) / totalMass
-    center = [xcm, ycm] 
+    center = [xcm, ycm]
 
     ; Obtain the position of every pixel in the image, with the origin
     ; at the center of mass of the ROI.
@@ -216,5 +216,5 @@ FUNCTION Fit_Ellipse, indices, $
     center = center + [minX, minY]
 
     RETURN, pts
-    
+
 END

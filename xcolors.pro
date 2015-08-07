@@ -50,12 +50,12 @@
 ; color tables can also be accessed from this program, if the file
 ; fsc_brewer.tbl can be found somewhere in your IDL path.
 ;
-; Events are sent to widgets if the `NotifyID` keyword is used. Object 
-; methods are called if the `NotifyObj` keyword is used. This program 
+; Events are sent to widgets if the `NotifyID` keyword is used. Object
+; methods are called if the `NotifyObj` keyword is used. This program
 ; is a non-blocking widget unless the `Block` keyword is set.
-; 
+;
 ; .. image:: xcolors.png
-; 
+;
 ; :Categories:
 ;    Graphics
 ;
@@ -67,7 +67,7 @@
 ;
 ; :Author:
 ;       FANNING SOFTWARE CONSULTING::
-;           David W. Fanning 
+;           David W. Fanning
 ;           1645 Sheely Drive
 ;           Fort Collins, CO 80526 USA
 ;           Phone: 970-221-0438
@@ -76,32 +76,32 @@
 ;
 ; :History:
 ;    Change History::
-;       Written by David W. Fanning, 15 April 97. 
+;       Written by David W. Fanning, 15 April 97.
 ;       Added OBJECT_DATA keyword so that I can get additional information
 ;           about the state of the color table tool into object methods. 21 October 2008. DWF.
 ;       Add REVERSE keyword and Reverse Color Table button. 12 April 2009. DWF.
-;       In looking for a Brewer color table file, I replaced all FILE_WHICH 
+;       In looking for a Brewer color table file, I replaced all FILE_WHICH
 ;           commands with cgFindPathTo commands. 28 April 2009. DWF.
-;       Made sure all "NOTIFY" data structures have both a "REVERSED" and 
-;           "BREWER" field in them to indicate the status of the XCOLORS program. Also 
+;       Made sure all "NOTIFY" data structures have both a "REVERSED" and
+;           "BREWER" field in them to indicate the status of the XCOLORS program. Also
 ;           inproved the documentation and made it more accurate. 20 Sept 2009. DWF.
-;       Still a few problems getting the Brewer color tables completely integrated. 
+;       Still a few problems getting the Brewer color tables completely integrated.
 ;           Fixed several bugs with updating color table names and type. 14 Oct 2009. DWF.
 ;       Modified the program to work correctly with a user-supplied color table file. 29 Sept 2010. DWF.
-;       Fixed a problem I noticed when starting the program with reversed color tables. The 
-;            initial colors were incorrect on subsequent calls. Also made a modification so that 
+;       Fixed a problem I noticed when starting the program with reversed color tables. The
+;            initial colors were incorrect on subsequent calls. Also made a modification so that
 ;            color index -1 as input is handled properly (ignored). 26 November 2010. DWF.
 ;       Added WINDOW and WINID keywords. 26 January 2011. DWF.
 ;       Changed several Get_Decomposed calls to the more generic cgSetColorState. 15 Jan 2012. DWF.
-;       
+;
 ; :Copyright:
 ;     Copyright (c) 1997-2012, Fanning Software Consulting, Inc.
 ;-------------------------------------------------------------------------------------------
 
 ;+
-; This routines is identical to the IDL Congrid command, except that it 
+; This routines is identical to the IDL Congrid command, except that it
 ; handles a problem with floating divides by zero properly.
-; 
+;
 ; :Params:
 ;    arr: in, required
 ;       The input array to be resized.
@@ -111,7 +111,7 @@
 ;       The Y dimension of the output.
 ;    z: in, optional
 ;       The Z dimension of the output.
-;       
+;
 ; :Keywords:
 ;    cubic: in, optional, type=boolean, default=0
 ;       Set this keyword to perform cubic convolution interpolation rather than nearest neighbor
@@ -183,7 +183,7 @@ END ; ***************************************************************
 
 ;+
 ; Set the new colors for the program.
-; 
+;
 ; :Params:
 ;     info: in, required, type=structure
 ;         The information structure for the widget program, containing all the
@@ -192,19 +192,19 @@ END ; ***************************************************************
 PRO XColors_Set, info
 
     TVLCT, r, g, b, /Get
-    
+
        ; Is the color table reversed?
-       
+
     reverseSet = Widget_Info(info.reverseID, /BUTTON_SET)
-    
+
        ; Make sure the current bottom index is less than the current top index.
-    
+
     IF info.currentbottom GE info.currenttop THEN BEGIN
        temp = info.currentbottom
        info.currentbottom = info.currenttop
        info.currenttop = temp
     ENDIF
-    
+
     IF reverseSet THEN BEGIN
         r(info.bottom:info.currentbottom) = info.topcolor(0)
         g(info.bottom:info.currentbottom) = info.topcolor(1)
@@ -220,28 +220,28 @@ PRO XColors_Set, info
         g(info.currenttop:info.top) = info.topcolor(1)
         b(info.currenttop:info.top) = info.topcolor(2)
     ENDELSE
-    
+
     red = info.r
     green = info.g
     blue = info.b
     number = ABS((info.currenttop-info.currentbottom) + 1)
-    
+
     gamma = info.gamma
     index = Findgen(info.ncolors)
     distribution = index^gamma > 10e-6
     index = Round(distribution * (info.ncolors-1) / (Max(distribution) > 10e-6))
-    
+
     IF info.currentbottom GE info.currenttop THEN BEGIN
        temp = info.currentbottom
        info.currentbottom = info.currenttop
        info.currenttop = temp
     ENDIF
-    
+
     IF info.reversed EQ 0 THEN BEGIN
        IF reverseSet THEN BEGIN
            r(info.currentbottom:info.currenttop) = Reverse(XColors_Congrid(red(index), number, /Minus_One))
            g(info.currentbottom:info.currenttop) = Reverse(XColors_Congrid(green(index), number, /Minus_One))
-           b(info.currentbottom:info.currenttop) = Reverse(XColors_Congrid(blue(index), number, /Minus_One))   
+           b(info.currentbottom:info.currenttop) = Reverse(XColors_Congrid(blue(index), number, /Minus_One))
        ENDIF ELSE BEGIN
            r(info.currentbottom:info.currenttop) = XColors_Congrid(red(index), number, /Minus_One)
            g(info.currentbottom:info.currenttop) = XColors_Congrid(green(index), number, /Minus_One)
@@ -255,14 +255,14 @@ PRO XColors_Set, info
        b(info.currentbottom:info.currenttop) = $
           Reverse(XColors_Congrid(blue(index), number, /Minus_One))
     ENDELSE
-    
+
     TVLCT, r, g, b
     WSet, info.windowindex
     cgSetColorState, 0, Current=theState
     TV, info.colorimage
     Device, Decomposed=theState
     WSet, info.thisWindow
-    
+
     (*info.colorInfoPtr).R = r
     (*info.colorInfoPtr).G = g
     (*info.colorInfoPtr).B = b
@@ -273,14 +273,14 @@ PRO XColors_Set, info
     IF (*info.colorInfoPtr).type EQ 'BREWER' $
         THEN (*info.colorInfoPtr).brewer = 1 $
         ELSE (*info.colorInfoPtr).brewer = 0
-    
+
        ; Don't bother with notification if this is just a color
        ; protection event.
-    
+
     IF info.from EQ 'PROTECT' THEN RETURN
-    
+
        ; Are there widgets to notify?
-    
+
     s = SIZE(info.notifyID)
     IF s(0) EQ 1 THEN count = 0 ELSE count = s(2)-1
     FOR j=0,count DO BEGIN
@@ -299,9 +299,9 @@ PRO XColors_Set, info
        IF Widget_Info(info.notifyID(0,j), /Valid_ID) THEN $
           Widget_Control, info.notifyID(0,j), Send_Event=colorEvent
     ENDFOR
-    
+
        ; Is there an object to notify?
-    
+
     nelements = SIZE(info.notifyobj, /N_Elements)
     FOR j=0,nelements-1 DO BEGIN
        IF Obj_Valid((info.notifyobj)[j].object) THEN BEGIN
@@ -318,7 +318,7 @@ PRO XColors_Set, info
                 IF info.object_data $
                    THEN Call_Method, (info.notifyobj)[j].method, $
                           (info.notifyobj)[j].object,_Strict_Extra=*info.extra, $
-                          XCOLORS_DATA=*info.colorinfoptr $ 
+                          XCOLORS_DATA=*info.colorinfoptr $
                    ELSE Call_Method, (info.notifyobj)[j].method, $
                           (info.notifyobj)[j].object,_Strict_Extra=*info.extra
              ENDELSE
@@ -328,7 +328,7 @@ PRO XColors_Set, info
                 IF info.object_data $
                    THEN Call_Method, (info.notifyobj)[j].method, $
                       (info.notifyobj)[j].object, DATA=*info.xcolorsData, $
-                      XCOLORS_DATA=*info.colorinfoptr $ 
+                      XCOLORS_DATA=*info.colorinfoptr $
                    ELSE Call_Method, (info.notifyobj)[j].method, $
                       (info.notifyobj)[j].object, DATA=*info.xcolorsData
             ENDIF ELSE BEGIN
@@ -343,9 +343,9 @@ PRO XColors_Set, info
           ENDELSE
        ENDIF
     ENDFOR
-    
+
        ; Is there a procedure to notify?
-    
+
     IF info.notifyPro NE "" THEN BEGIN
        IF N_Elements(*info.xcolorsData) EQ 0 THEN BEGIN
           s = Size(*info.extra)
@@ -371,7 +371,7 @@ END ; ***************************************************************
 ;+
 ; The event handler for the TOP slider. Modify the color table when
 ; the slider is moved.
-; 
+;
 ; :Params:
 ;     event: in, required
 ;         The event structure passed from the Window Manager.
@@ -379,18 +379,18 @@ END ; ***************************************************************
 PRO XCOLORS_TOP_SLIDER, event
 
        ; Get the info structure from storage location.
-    
+
     Widget_Control, event.top, Get_UValue=info, /No_Copy
-    
+
        ; Update the current top value of the slider.
-    
+
     currentTop = event.value
     Widget_Control, info.botSlider, Get_Value=currentBottom
     currentBottom = currentBottom + info.bottom
     currentTop = currentTop + info.bottom
-    
+
        ; Error handling. Is currentBottom = currentTop?
-    
+
     IF currentBottom EQ currentTop THEN BEGIN
        currentBottom = (currentTop - 1) > 0
        thisValue = (currentBottom-info.bottom)
@@ -400,29 +400,29 @@ PRO XCOLORS_TOP_SLIDER, event
        ENDIF
        Widget_Control, info.botSlider, Set_Value=thisValue
     ENDIF
-    
+
        ; Error handling. Is currentBottom > currentTop?
-    
+
     IF currentBottom GT currentTop THEN BEGIN
-    
+
        bottom = currentTop
        top = currentBottom
        bottomcolor = info.topColor
        topcolor = info.bottomColor
        reversed = 1
-    
+
     ENDIF ELSE BEGIN
-    
+
        bottom = currentBottom
        top = currentTop
        bottomcolor = info.bottomColor
        topcolor = info.topColor
        reversed = 0
-    
+
     ENDELSE
-    
+
        ; Create a pseudo structure.
-    
+
     pseudo = {currenttop:top, currentbottom:bottom, reversed:reversed, $
        bottomcolor:bottomcolor, topcolor:topcolor, gamma:info.gamma, index:info.index, $
        top:info.top, bottom:info.bottom, ncolors:info.ncolors, r:info.r, $
@@ -432,17 +432,17 @@ PRO XCOLORS_TOP_SLIDER, event
        colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
        needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
        object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer}
-    
+
        ; Update the colors.
-    
+
     XColors_Set, pseudo
-    
+
     info.currentTop = currentTop
-    
+
        ; Put the info structure back in storage location.
-    
+
     Widget_Control, event.top, Set_UValue=info, /No_Copy
-    
+
 END ; ************************************************************************
 
 
@@ -450,7 +450,7 @@ END ; ************************************************************************
 ;+
 ; The event handler for the BOTTOM slider. Modify the color table when
 ; the slider is moved.
-; 
+;
 ; :Params:
 ;     event: in, required
 ;         The event structure passed from the Window Manager.
@@ -458,45 +458,45 @@ END ; ************************************************************************
 PRO XCOLORS_BOTTOM_SLIDER, event
 
        ; Get the info structure from storage location.
-    
+
     Widget_Control, event.top, Get_UValue=info, /No_Copy
-    
+
        ; Update the current bottom value of the slider.
-    
+
     currentBottom = event.value + info.bottom
     Widget_Control, info.topSlider, Get_Value=currentTop
     ;currentBottom = currentBottom + info.bottom
     currentTop = currentTop + info.bottom
-    
+
        ; Error handling. Is currentBottom = currentTop?
-    
+
     IF currentBottom EQ currentTop THEN BEGIN
        currentBottom = currentTop
        Widget_Control, info.botSlider, Set_Value=(currentBottom-info.bottom)
     ENDIF
-    
+
        ; Error handling. Is currentBottom > currentTop?
-    
+
     IF currentBottom GT currentTop THEN BEGIN
-    
+
        bottom = currentTop
        top = currentBottom
        bottomcolor = info.topColor
        topcolor = info.bottomColor
        reversed = 1
-    
+
     ENDIF ELSE BEGIN
-    
+
        bottom = currentBottom
        top = currentTop
        bottomcolor = info.bottomColor
        topcolor = info.topColor
        reversed = 0
-    
+
     ENDELSE
-    
+
        ; Create a pseudo structure.
-    
+
     pseudo = {currenttop:top, currentbottom:bottom, reversed:reversed, $
        bottomcolor:bottomcolor, topcolor:topcolor, gamma:info.gamma, index:info.index, $
        top:info.top, bottom:info.bottom, ncolors:info.ncolors, r:info.r, $
@@ -506,17 +506,17 @@ PRO XCOLORS_BOTTOM_SLIDER, event
        colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
        needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
        object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer}
-    
+
        ; Update the colors.
-    
+
     XColors_Set, pseudo
-    
+
     info.currentBottom = currentBottom
-    
+
        ; Put the info structure back in storage location.
-    
+
     Widget_Control, event.top, Set_UValue=info, /No_Copy
-    
+
 END ; ************************************************************************
 
 
@@ -525,7 +525,7 @@ END ; ************************************************************************
 ;+
 ; The event handler for the GAMMA slider. Modify the color table when
 ; the slider is moved.
-; 
+;
 ; :Params:
 ;     event: in, required
 ;         The event structure passed from the Window Manager.
@@ -533,20 +533,20 @@ END ; ************************************************************************
 PRO XCOLORS_GAMMA_SLIDER, event
 
        ; Get the info structure from storage location.
-    
+
     Widget_Control, event.top, Get_UValue=info, /No_Copy
-    
+
        ; Get the gamma value from the slider.
-    
+
     Widget_Control, event.id, Get_Value=gamma
     gamma = 10^((gamma/50.0) - 1)
-    
+
        ; Update the gamma label.
-    
+
     Widget_Control, info.gammaID, Set_Value=String(gamma, Format='(F6.3)')
-    
+
        ; Make a pseudo structure.
-    
+
     IF info.currentBottom GT info.currentTop THEN $
        pseudo = {currenttop:info.currentbottom, currentbottom:info.currenttop, $
           reversed:1, bottomcolor:info.topcolor, topcolor:info.bottomcolor, $
@@ -569,17 +569,17 @@ PRO XCOLORS_GAMMA_SLIDER, event
           colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
           needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
           object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer}
-    
+
        ; Load the colors.
-    
+
     XColors_Set, pseudo
-    
+
     info.gamma = gamma
-    
+
        ; Put the info structure back in storage location.
-    
+
     Widget_Control, event.top, Set_UValue=info, /No_Copy
-    
+
 END ; ************************************************************************
 
 
@@ -587,7 +587,7 @@ END ; ************************************************************************
 ;+
 ; The event handler for the REVERSE button. Modify the color table when
 ; the button is selectd.
-; 
+;
 ; :Params:
 ;     event: in, required
 ;         The event structure passed from the Window Manager.
@@ -595,24 +595,24 @@ END ; ************************************************************************
 PRO XCOLORS_REVERSE_BUTTON, event
 
        ; Get the info structure from storage location.
-    
+
     Widget_Control, event.top, Get_UValue=info, /No_Copy
-    
+
     ; To get the initial colors correct. We have to load the colors as if they
     ; were not reversed.
-    IF info.index GE 0 THEN BEGIN  
+    IF info.index GE 0 THEN BEGIN
     cgLoadCT, info.index, BREWER=info.brewer, RGB_TABLE=c
     info.r = c[*,0]
     info.g = c[*,1]
     info.b = c[*,2]
     ENDIF ELSE TVLCT, info.r, info.g, info.b
-    
+
     ; Is the button set or not?
     buttonSet = Widget_Info(event.id, /BUTTON_SET)
-    
+
     ; Make a pseudo structure.
     IF buttonSet THEN  BEGIN
-        
+
         IF info.currentBottom GT info.currentTop THEN $
            pseudo = {currenttop:info.currentbottom, currentbottom:info.currenttop, $
               reversed:1, bottomcolor:info.topcolor, topcolor:info.bottomcolor, $
@@ -635,9 +635,9 @@ PRO XCOLORS_REVERSE_BUTTON, event
               colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
               needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
               object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer}
-              
+
     ENDIF ELSE BEGIN
-    
+
         IF info.currentBottom GT info.currentTop THEN $
            pseudo = {currenttop:info.currentbottom, currentbottom:info.currenttop, $
               reversed:0, bottomcolor:info.topcolor, topcolor:info.bottomcolor, $
@@ -660,17 +660,17 @@ PRO XCOLORS_REVERSE_BUTTON, event
               colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
               needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
               object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer}
-              
+
     ENDELSE
-    
+
        ; Load the colors.
-    
+
     XColors_Set, pseudo
-    
+
        ; Put the info structure back in storage location.
-    
+
     Widget_Control, event.top, Set_UValue=info, /No_Copy
-    
+
 END ; ************************************************************************
 
 
@@ -678,7 +678,7 @@ END ; ************************************************************************
 ;+
 ; The event handler for the color table selector. Modify the color table when
 ; the selector is clicked.
-; 
+;
 ; :Params:
 ;     event: in, required
 ;         The event structure passed from the Window Manager.
@@ -686,21 +686,21 @@ END ; ************************************************************************
 PRO XCOLORS_COLORTABLE, event
 
        ; Get the info structure from storage location.
-    
+
     Widget_Control, event.top, Get_UValue=info, /No_Copy
-    
+
     LoadCT, event.index, File=info.file, /Silent, $
        NColors=info.ncolors, Bottom=info.bottom
-    
+
     TVLct, r, g, b, /Get
     info.r = r(info.bottom:info.top)
     info.g = g(info.bottom:info.top)
     info.b = b(info.bottom:info.top)
     info.topcolor = [r(info.top), g(info.top), b(info.top)]
     info.bottomcolor = [r(info.bottom), g(info.bottom), b(info.bottom)]
-    
+
        ; Update the slider positions and values.
-    
+
     IF 1 - info.nosliders THEN BEGIN
        Widget_Control, info.botSlider, Set_Value=0
        Widget_Control, info.topSlider, Set_Value=info.ncolors-1
@@ -712,9 +712,9 @@ PRO XCOLORS_COLORTABLE, event
     info.gamma = 1.0
     info.index = event.index
     info.ctname = (*info.colornames)[event.index]
-    
+
        ; Create a pseudo structure.
-    
+
     pseudo = {currenttop:info.currenttop, currentbottom:info.currentbottom, $
        reversed:info.reversed, windowindex:info.windowindex, index:event.index, $
        bottomcolor:info.bottomcolor, topcolor:info.topcolor, gamma:info.gamma, $
@@ -725,22 +725,22 @@ PRO XCOLORS_COLORTABLE, event
        colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
        needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
        object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer}
-    
+
        ; Update the colors.
-    
+
     XColors_Set, pseudo
-    
+
        ; Put the info structure back in storage location.
-    
+
     Widget_Control, event.top, Set_UValue=info, /No_Copy
-    
+
 END ; ************************************************************************
 
 
 
 ;+
 ; The event handler for updating the colors on a 24-bit display.
-; 
+;
 ; :Params:
 ;     event: in, required
 ;         The event structure passed from the Window Manager.
@@ -748,11 +748,11 @@ END ; ************************************************************************
 PRO XCOLORS_PROTECT_COLORS, event
 
        ; Get the info structure from storage location.
-    
+
     Widget_Control, event.top, Get_UValue=info, /No_Copy
-    
+
        ; Create a pseudo structure.
-    
+
     pseudo = {currenttop:info.currenttop, currentbottom:info.currentbottom, $
        reversed:info.reversed, $
        bottomcolor:info.bottomcolor, topcolor:info.topcolor, gamma:info.gamma, $
@@ -763,31 +763,31 @@ PRO XCOLORS_PROTECT_COLORS, event
        colorInfoPtr:info.colorInfoPtr, colornames:info.colornames, ctname:info.ctname, $
        needColorInfo:info.needColorInfo, colortabletype:info.colortabletype, $
        object_data:info.object_data, reverseID:info.reverseID, brewer:info.brewer}
-    
+
        ; Update the colors.
-    
+
     XColors_Set, pseudo
-    
+
        ; Put the info structure back in storage location.
-    
+
     Widget_Control, event.top, Set_UValue=info, /No_Copy
-    
+
 END ; ************************************************************************
 
 
 
 ;+
 ; The event handler for the CANCEL button. Update to original color table.
-; 
+;
 ; :Params:
 ;     event: in, required
 ;         The event structure passed from the Window Manager.
 ;-
 PRO XCOLORS_CANCEL, event
     Widget_Control, event.top, Get_UValue=info, /No_Copy
-    
+
        ; Update the colors.
-    
+
     XColors_Set, info.cancelStruct
     Widget_Control, event.top, Set_UValue=info, /No_Copy
     Widget_Control, event.top, /Destroy
@@ -797,7 +797,7 @@ END ; ************************************************************************
 
 ;+
 ; The event handler for the QUIT button. Destroy the widget.
-; 
+;
 ; :Params:
 ;     event: in, required
 ;         The event structure passed from the Window Manager.
@@ -811,7 +811,7 @@ END ; ************************************************************************
 ;+
 ; The event handler for the BREWER colors button. Switch between IDL
 ; and Brewer color tables.
-; 
+;
 ; :Params:
 ;     event: in, required
 ;         The event structure passed from the Window Manager.
@@ -823,15 +823,15 @@ PRO XCOLORS_SWITCH_COLORS, event
    thisType = colortypes[event.index]
    parent = Widget_Info(event.id, /PARENT)
    oldList = info.tableList
-   
+
    CASE thisType OF
-   
-   
+
+
         'IDL': BEGIN
            info.file = Filepath(SubDir=['resource','colors'], 'colors1.tbl')
            info.brewer = 0
            END
-           
+
         'USER-DEFINED': BEGIN
            info.file = info.userfile
            info.brewer = 0
@@ -842,7 +842,7 @@ PRO XCOLORS_SWITCH_COLORS, event
            info.brewer = 1
            END
    ENDCASE
-   
+
    ; Load the appropriate colors and the new color table names into
    ; the list widget.
     colorNames=''
@@ -853,7 +853,7 @@ PRO XCOLORS_SWITCH_COLORS, event
     info.tableList = Widget_List(info.tableListBase, Value=colorNamesIndex, YSize=12 + (12*Keyword_Set(nosliders)), Scr_XSize=256, $
        Event_Pro='XColors_ColorTable')
     Widget_Control, oldList, /Destroy
-    
+
     ; Update the color table type and names in the info structure.
     info.colorTableType = thisType
     *info.colornames = colorNames
@@ -866,7 +866,7 @@ END ; *****************************************************************
 ;+
 ; The cleanup routine for the widget program. Called when the widget
 ; dies.
-; 
+;
 ; :Params:
 ;     tlb: in, required
 ;         The widget identifier of the widget that just died.
@@ -882,7 +882,7 @@ PRO XCOLORS_CLEANUP, tlb
 END ; ************************************************************************
 
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-; This is a procedure to load color tables into a restricted color range of the physical 
+; This is a procedure to load color tables into a restricted color range of the physical
 ; color table. It is a highly simplified, but much more powerful, version of XLoadCT.
 ;
 ; :Keywords:
@@ -897,15 +897,15 @@ END ; ************************************************************************
 ;        Set this keyword if you wish to use the Brewer Colors, as explained
 ;        in this reference: http://www.idlcoyote.com/color_tips/brewer.html. The
 ;        file, `fsc_brewer.tbl <http://www.idlcoyote.com/programs/fsc_brewer.tbl>`
-;        must be found somewhere in your IDL path for this option to be available. 
+;        must be found somewhere in your IDL path for this option to be available.
 ;        Note that if this file is found, the Brewer colors are automatically added
 ;        to the program as an option. In this case, the BREWER keyword just makes sure
 ;        this is the initial user choice.
 ;     bottom: in, optional, type=integer, default=0
 ;        The lowest color index of the colors to be changed.
 ;     colorinfo: out, optional
-;        This output keyword will return either a pointer to a color information structure 
-;        (if the program is called in a non-modal fashion) or a color information structure 
+;        This output keyword will return either a pointer to a color information structure
+;        (if the program is called in a non-modal fashion) or a color information structure
 ;        (if the program is called in modal or blocking fashion). The color information
 ;         structure is an anonymous structure defined like this::
 ;
@@ -917,7 +917,7 @@ END ; ************************************************************************
 ;                        TYPE: "", $                 ; The type of color table (e.g, BREWER or IDL).
 ;                        BREWER: 0, $                ; Set to 1 if using BREWER color tables, else to 0.
 ;                        REVERSED: 0B }              ; Set to 1 if the color table is reversed.
-;                        
+;
 ;        If a pointer to the structure is obtained, you will be responsible
 ;        for freeing it to prevent memory leakage::
 ;
@@ -995,7 +995,7 @@ END ; ************************************************************************
 ;        have the index number of the just-loaded color table. The name
 ;        field will have the name of the currently loaded color table.
 ;        The TYPE field with be "BREWER" if a Brewer color table was loaded,
-;        or "IDL" otherwise. The BREWER field will be set to 1 if a Brewer 
+;        or "IDL" otherwise. The BREWER field will be set to 1 if a Brewer
 ;        color table was loaded, or to 0 otherwise. The REVERSED field will
 ;        be set to 1 if the color table is reversed, or to 0 otherwise.
 ;
@@ -1049,9 +1049,9 @@ END ; ************************************************************************
 ;
 ;              Widget_Control, event.top, Set_UValue=info, /No_Copy
 ;              END
-;              
+;
 ;     notifyobj: in, optional, type=structure
-;        A vector of structures (or a single structure), with each element of the vector 
+;        A vector of structures (or a single structure), with each element of the vector
 ;        defined as follows::
 ;
 ;             struct = {XCOLORS_NOTIFYOBJ, object:Obj_New(), method:''}
@@ -1079,17 +1079,17 @@ END ; ************************************************************************
 ;        the object method, which makes this an alternative way to get information
 ;        to your methods. If you expect such keywords, your methods should be defined
 ;        with an _Extra keyword.
-;          
-;        If you set the /OBJECT_DATA keyword, the same structure defined for the 
-;        COLORINFO keyword above will be passed to your object method via an 
+;
+;        If you set the /OBJECT_DATA keyword, the same structure defined for the
+;        COLORINFO keyword above will be passed to your object method via an
 ;        XCOLORS_DATA keyword that you will have to define for the method.
-;        
+;
 ;     notifypro: in, optional, type=string
 ;        The name of a procedure to notify or call when the color
 ;        tables are loaded. If the DATA keyword is also defined with a valid
-;        IDL variable, it will be passed to this program via an DATA keyword. 
-;        But note that *any* keyword appropriate for the procedure can be used 
-;        in the call to XCOLORS. For example, here is a procedure that re-displays 
+;        IDL variable, it will be passed to this program via an DATA keyword.
+;        But note that *any* keyword appropriate for the procedure can be used
+;        in the call to XCOLORS. For example, here is a procedure that re-displays
 ;        an image in the current graphics window::
 ;
 ;             PRO REFRESH_IMAGE, Image=image, _Extra=extra, WID=wid
@@ -1107,38 +1107,38 @@ END ; ************************************************************************
 ;        your procedure, which makes this an alternative way to get information
 ;        to your procedure. If you expect such keywords, your procedure should
 ;        be defined with an _Extra keyword as illustrated above.
-;     object_data: in, optional, type=boolean, default=0        
+;     object_data: in, optional, type=boolean, default=0
 ;        Set this keyword if you wish color information to be
 ;        supplied to your object notification method via an XCOLORS_DATA
 ;        keyword. This keyword is ignored unless the NOTIFYOBJ keyword is
 ;        also used. The color information is supplied as a structure and is
 ;        defined in the COLORINFO keyword definition above.
-;     reverse: in, optional, type=boolean, default=0      
+;     reverse: in, optional, type=boolean, default=0
 ;        If this keyword is set, the color table is reversed and the
 ;        Reverse Color Table button is set on.
 ;     title: in, optional, type='string'
-;        This is the window title. It is "Load Color Tables" by default. The program 
-;        is registered with the name 'XCOLORS:' plus the TITLE string. The "register 
-;        name" is checked before the widgets are defined. If a program with that name 
-;        has already been registered you cannot register another with that name. This 
-;        means that you can have several versions of XCOLORS open simultaneously as long 
+;        This is the window title. It is "Load Color Tables" by default. The program
+;        is registered with the name 'XCOLORS:' plus the TITLE string. The "register
+;        name" is checked before the widgets are defined. If a program with that name
+;        has already been registered you cannot register another with that name. This
+;        means that you can have several versions of XCOLORS open simultaneously as long
 ;        as each has a unique title or name. For example, like this::
 ;
 ;            IDL> XColors, NColors=100, Bottom=0, Title='First 100 Colors'
 ;            IDL> XColors, NColors=100, Bottom=100, Title='Second 100 Colors'
 ;     window: in, optional, type=boolean, default=0
 ;        Set this keyword to send the colors to a Coyote Graphics cgWindow program.
-;     winid: in, optional, type=integer   
+;     winid: in, optional, type=integer
 ;        The window index number of a Coyote Graphics cgWindow program to receive the color vectors.
 ;     xoffset: in, optional, type=integer
-;        This is the X offset of the program on the display. The program will be placed 
+;        This is the X offset of the program on the display. The program will be placed
 ;        approximately in the middle of the display by default.
 ;     yoffset: in, optional, type=integer
-;        This is the Y offset of the program on the display. The program will be placed 
+;        This is the Y offset of the program on the display. The program will be placed
 ;        approximately in the middle of the display by default.
 ;     _extra: in, optional
-;        The keyword inheritance mechanism will pick up and pass along to any method or procedure 
-;        to be notified any keywords that are defined for that procedure. Note that you should be 
+;        The keyword inheritance mechanism will pick up and pass along to any method or procedure
+;        to be notified any keywords that are defined for that procedure. Note that you should be
 ;        sure that keywords are spelled correctly. Any mis-spelled keyword will be ignored.
 ;
 ;---------------------------------------------------------------------------------------
@@ -1169,28 +1169,28 @@ PRO XCOLORS, $
 
 
     On_Error, 1
-    
+
        ; Current graphics window.
-    
+
     thisWindow = !D.Window
-    
+
        ; Check keyword parameters. Define defaults.
-    
+
     IF N_Elements(title) EQ 0 THEN title = 'Load Color Tables'
     IF N_Elements(drag) EQ 0 THEN drag = 0
-    
+
     IF N_Elements(file) EQ 0 THEN BEGIN
         file = Filepath(SubDir=['resource','colors'], 'colors1.tbl')
         userfile = ""
     ENDIF ELSE userfile = file
-    
+
        ; Try to locate the brewer file. Check resource/colors directory, then look for it
        ; in the IDL path if it is not found there.
-    
+
     brewerfile = Filepath(SubDir=['resource','colors'], 'fsc_brewer.tbl')
     IF File_Test(brewerfile, /READ) EQ 0 THEN brewerfile = cgFindPathTo('fsc_brewer.tbl')
     IF brewerfile EQ "" THEN BEGIN
-        locatedBrewerFile = 0 
+        locatedBrewerFile = 0
     ENDIF ELSE BEGIN
         locatedBrewerFile = 1
         IF Keyword_Set(brewer) THEN file = brewerfile
@@ -1201,11 +1201,11 @@ PRO XCOLORS, $
     object_data = Keyword_Set(object_data)
     IF N_Elements(notifyID) EQ 0 THEN notifyID = [-1L, -1L]
     IF StrUpCase(colortabletype) EQ 'BREWER' THEN brewer = 1 ELSE brewer = 0
-    
+
     ; Is the window keyword set? If so, you will be sending this to
     ; an FSC_Window to load the colors.
     IF Keyword_Set(window) THEN BEGIN
-      
+
           ; Does a window object exist somewhere?
           DefSysV, '!FSC_WINDOW_LIST', EXISTS=exists
           IF exists THEN BEGIN
@@ -1230,11 +1230,11 @@ PRO XCOLORS, $
                         ENDIF ELSE BEGIN
                            notifyObj = [notifyObj, thisStruct]
                         ENDELSE
-                    ENDIF 
-               ENDIF 
-           ENDIF 
+                    ENDIF
+               ENDIF
+           ENDIF
     ENDIF
-    
+
     IF N_Elements(notifyObj) EQ 0 THEN BEGIN
        notifyObj = {object:Obj_New(), method:'', wid:-1}
     ENDIF
@@ -1261,51 +1261,51 @@ PRO XCOLORS, $
     IF Arg_Present(colorinfoPtr) THEN needcolorInfo = 1 ELSE needcolorInfo = 0
     noblock = 1 - Keyword_Set(block)
     block = Keyword_Set(block)
-    
+
        ; Find the center of the display.
-    
+
     DEVICE, GET_SCREEN_SIZE=theScreenSize
     IF theScreenSize[0] GT 2000 THEN theScreenSize[0] = theScreenSize[0]/2
     xCenter = FIX(theScreenSize[0] / 2.0)
     yCenter = FIX(theScreenSize[1] / 2.0)
-    
+
     IF N_ELEMENTS(xoffset) EQ 0 THEN xoffset = xCenter - 150
     IF N_ELEMENTS(yoffset) EQ 0 THEN yoffset = yCenter - 200
-    
+
     registerName = 'XCOLORS:' + title
-    
+
        ; Only one XCOLORS with this title.
-    
+
     IF XRegistered(registerName) GT 0 THEN BEGIN
        Ptr_Free, xdata
        Ptr_Free, extra
        IF N_Elements(colorInfoPtr) NE 0 THEN Ptr_Free, colorInfoPtr
        RETURN
     ENDIF
-    
+
        ; Create the top-level base. No resizing.
-    
+
     IF Keyword_Set(modal) AND N_Elements(group_leader) NE 0 THEN BEGIN
        tlb = Widget_Base(Column=1, Title=title, TLB_Frame_Attr=1, $
           XOffSet=xoffset, YOffSet=yoffset, Base_Align_Center=1, $
           Modal=1, Group_Leader=group_leader)
        modal = 1
-    
+
     ENDIF ELSE BEGIN
        tlb = Widget_Base(Column=1, Title=title, TLB_Frame_Attr=1, $
           XOffSet=xoffset, YOffSet=yoffset, Base_Align_Center=1, Space=5)
        modal = 0
        IF N_Elements(group_leader) EQ 0 THEN group_leader = -1L
     ENDELSE
-    
+
        ; Create a draw widget to display the current colors.
-    
+
        draw = Widget_Draw(tlb, XSize=256, YSize=40, Retain=2)
-    
+
     IF N_Elements(bottom) EQ 0 THEN bottom = 0
     IF N_Elements(ncolors) EQ 0 THEN ncolors = (256 < !D.Table_Size) - bottom
     IF (ncolors + bottom) GT 256 THEN ncolors = 256 - bottom
-    
+
        ; Load colors in INDEX if specified.
     IF userfile NE "" THEN file = userfile
     IF N_Elements(index) GE 1 THEN BEGIN
@@ -1313,10 +1313,10 @@ PRO XCOLORS, $
             LoadCT, index, File=file, /Silent, NColors=ncolors, Bottom=bottom
        ENDIF ELSE index = -1
     ENDIF ELSE index = -1
-    
-    
+
+
        ; Create a pointer to the color information.
-    
+
     TVLCT, rr, gg, bb, /Get
     IF Keyword_Set(reverse) THEN BEGIN
        rr = Reverse(rr)
@@ -1327,13 +1327,13 @@ PRO XCOLORS, $
     colorInfoPtr = Ptr_New({R:rr, G:gg, B:bb, Name:'Unknown', $
        Index:index, Type:colortabletype, Reversed:Keyword_Set(reverse), $
        Brewer:Keyword_Set(locatedBrewerFile)})
-    
+
        ; Calculate top parameter.
-    
+
     top = ncolors + bottom - 1
-    
+
        ; Create sliders to control stretchs and gamma correction.
-    
+
     IF 1 - Keyword_Set(nosliders) THEN BEGIN
        sliderbase = Widget_Base(tlb, Column=1, XPad=0, YPad=0, /Frame)
        botSlider = Widget_Slider(sliderbase, Value=0, Min=0, $
@@ -1352,14 +1352,14 @@ PRO XCOLORS, $
        gammaID = 0L
        gammaSlider = 0L
     ENDELSE
-    
+
     ; A reverse button.
     cbase = WIDGET_BASE(tlb, Row=1, BASE_ALIGN_CENTER=1, FRAME=1, SCR_XSIZE=256)
     reverseBase = WIDGET_BASE(cbase, Row=1, XPAD=0, YPAD=0, SPACE=0, /NONEXCLUSIVE)
     reverseStr = StrUpCase(!Version.OS_Family) EQ 'WINDOWS' ? 'Reverse Color Table' : 'Reverse Colors'
     reverseID = Widget_Button(reversebase, Value=reverseStr, EVENT_PRO='XColors_Reverse_Button')
     IF Keyword_Set(reverse) THEN Widget_Control, reverseID, SET_BUTTON=1
-    
+
        ; A row for additional control.
     IF locatedBrewerFile THEN BEGIN
         IF userfile NE "" THEN BEGIN
@@ -1370,12 +1370,12 @@ PRO XCOLORS, $
            coloruvalue = ['IDL','BREWER']
         ENDELSE
         colorType = Widget_Droplist(cbase, Value=colorvalues, $
-            /DYNAMIC_RESIZE, EVENT_PRO='XCOLORS_SWITCH_COLORS', UVALUE=coloruvalue) 
+            /DYNAMIC_RESIZE, EVENT_PRO='XCOLORS_SWITCH_COLORS', UVALUE=coloruvalue)
         IF Keyword_Set(Brewer) THEN Widget_Control, colorType, Set_Droplist_Select=1
-    ENDIF 
-        
+    ENDIF
+
        ; Get the colortable names for the list widget.
-    
+
     colorNames=''
     LoadCT, Get_Names=colorNames, File=file
     IF index NE -1 THEN ctname = colorNames[index] ELSE ctname = 'Unknown'
@@ -1385,28 +1385,28 @@ PRO XCOLORS, $
     tableListBase = Widget_Base(tlb, XPad=0, YPad=0)
     tablelist = Widget_List(tableListBase, Value=colorNamesIndex, YSize=12 + (12*Keyword_Set(nosliders)), $
         Scr_XSize=256, Event_Pro='XColors_ColorTable')
-    
+
        ; Dialog Buttons
     dialogbase = WIDGET_BASE(tlb, Row=1, BASE_ALIGN_CENTER=1)
     cancel = Widget_Button(dialogbase, Value='Cancel', $
        Event_Pro='XColors_Cancel', UVALUE='CANCEL')
     dismiss = Widget_Button(dialogbase, Value='Accept', $
        Event_Pro='XColors_Dismiss', UVALUE='ACCEPT')
-    
+
     Widget_Control, tlb, /Realize
-    
+
        ; If you used INDEX, then position this color table near the top of the list.
     IF index NE -1 THEN BEGIN
        Widget_Control, tablelist, Set_List_Top=(0 > (index-3))
        Widget_Control, tablelist, Set_List_Select=index
     ENDIF
-    
+
        ; Get window index number of the draw widget.
-    
+
     Widget_Control, draw, Get_Value=windowIndex
-    
+
        ; Put a picture of the color table in the window.
-    
+
     bar = BINDGEN(ncolors) # REPLICATE(1B, 10)
     bar = BYTSCL(bar, TOP=ncolors-1) + bottom
     bar = XColors_Congrid(bar, 256, 40, /INTERP)
@@ -1414,21 +1414,21 @@ PRO XCOLORS, $
     cgSetColorState, 0, Current=theState
     TV, bar
     Device, Decomposed=theState
-    
+
        ; Get the colors that make up the current color table
        ; in the range that this program deals with.
-    
+
     TVLCT, rr, gg, bb, /Get
     r = rr(bottom:top)
     g = gg(bottom:top)
     b = bb(bottom:top)
-    
+
     topColor = [rr(top), gg(top), bb(top)]
     bottomColor = [rr(bottom), gg(bottom), bb(bottom)]
     colornames = Ptr_New(colornames)
-    
+
        ; Create a cancel structure.
-    
+
     cancelstruct = {currenttop:top, currentbottom:bottom, $
        reversed:Keyword_Set(reverse), windowindex:windowindex, $
        bottomcolor:bottomcolor, topcolor:topcolor, gamma:1.0, $
@@ -1439,10 +1439,10 @@ PRO XCOLORS, $
        colorInfoPtr:colorInfoPtr, colornames:colornames, ctname:ctname, $
        needColorInfo:needColorInfo, colortabletype:colortabletype, $
        object_data:object_data, reverseID:reverseID, brewer:Keyword_Set(locatedBrewerFile)}
-    
-    
+
+
        ; Create an info structure to hold information to run the program.
-    
+
     info = {  windowIndex:windowIndex, $         ; The WID of the draw widget.
               botSlider:botSlider, $             ; The widget ID of the bottom slider.
               currentBottom:bottom, $            ; The current bottom slider value.
@@ -1491,18 +1491,18 @@ PRO XCOLORS, $
               object_data:object_data, $         ; Flag to indicate data should be sent with object notification.
               colortabletype:colortabletype, $   ; The type of color table, e.g, BREWER or IDL.
               colorimage:bar }                   ; The color table image.
-    
+
        ; Turn color protection on.
-    
+
     IF !D.NAME NE 'MAC' THEN Widget_Control, draw, Draw_Expose_Events=1
-    
+
        ; Store the info structure in the user value of the top-level base.
     Widget_Control, tlb, Set_UValue=info, /No_Copy
     Widget_Control, tlb, /Managed
     WSet, thisWindow
-    
+
     XManager, registerName, tlb, Group=(group_leader GE 0) ? group_leader : xx, No_Block=noblock, Cleanup="XColors_Cleanup"
-       
+
        ; Return the colorInfo information as a structure if this program
        ; was called as a modal widget.
     IF (Keyword_Set(modal) AND N_Elements(group_leader) NE 0 AND needColorInfo) OR (noblock EQ 0 AND needColorInfo) THEN BEGIN

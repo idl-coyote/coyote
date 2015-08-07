@@ -230,12 +230,12 @@ secPt = LonArr(2)
    ;
    ;                     T.S. Eliot
 REPEAT BEGIN
-    
+
    ; The break condition is normally to get back to the first point, but this is not enough to
    ; always find the perimeter. In particualr, small areas that are connected only by corner
    ; pixels touching can get missed or cut off by using this algorithm. To get around this, we also
-   ; check the second pixel. If the first and second pixel are the same, then we know we have 
-   ; come around to the same spot and are retracing our steps. 
+   ; check the second pixel. If the first and second pixel are the same, then we know we have
+   ; come around to the same spot and are retracing our steps.
    AGAIN:
    ptIndex = ptIndex + 1L
    from_direction = Find_Boundary_Outline(mask, darray, $
@@ -319,8 +319,8 @@ ENDELSE
 
 mask = mask GT 0
 totalMass = Total(mask)
-xcm = Total( Total(mask, 2) * Indgen(xsize) ) / totalMass
-ycm = Total( Total(mask, 1) * Indgen(ysize) ) / totalMass
+xcm = Total( Total(mask, 2) * lindgen(xsize) ) / totalMass
+ycm = Total( Total(mask, 1) * lindgen(ysize) ) / totalMass
 center = [xcm, ycm]
 
 RETURN, boundaryPts

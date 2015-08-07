@@ -319,8 +319,8 @@ ENDELSE
 
 mask = mask GT 0
 totalMass = Total(mask)
-xcm = Total( Total(mask, 2) * Indgen(xsize) ) / totalMass
-ycm = Total( Total(mask, 1) * Indgen(ysize) ) / totalMass
+xcm = Total( Total(mask, 2) * lindgen(xsize) ) / totalMass
+ycm = Total( Total(mask, 1) * lindgen(ysize) ) / totalMass
 center = [xcm, ycm]
 
 RETURN, boundaryPts

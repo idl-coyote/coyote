@@ -4,10 +4,10 @@
 ; The purpose of this program is to create a TV command that works the way
 ; the TV command would be expected to work if it was written today, rather
 ; than 25 years ago. In other words, it knows the difference between an
-; 8-bit device and a 24-bit device, it honors the POSITION keyword like 
+; 8-bit device and a 24-bit device, it honors the POSITION keyword like
 ; other graphics commands in IDL, it honors the !P.MULTI value, like other
 ; graphics commands in IDL, it works seamlessly with both 8-bit and 24-bit
-; images. In addition to other modern features, this program can also 
+; images. In addition to other modern features, this program can also
 ; display images that contain an alpha channel and can display images with
 ; transparency.
 ;
@@ -43,16 +43,16 @@
 ; The purpose of this program is to create a TV command that works the way
 ; the TV command would be expected to work if it was written today, rather
 ; than 25 years ago. In other words, it knows the difference between an
-; 8-bit device and a 24-bit device, it honors the POSITION keyword like 
+; 8-bit device and a 24-bit device, it honors the POSITION keyword like
 ; other graphics commands in IDL, it honors the !P.MULTI value, like other
 ; graphics commands in IDL, it works seamlessly with both 8-bit and 24-bit
-; images. In addition to other modern features, this program can also 
+; images. In addition to other modern features, this program can also
 ; display images that contain an alpha channel and can display transparent
 ; images.
-;   
+;
 ; There is a common block in cgImage that is defined as follows upon exiting
 ; this command::
-; 
+;
 ;    COMMON FSC_$CGIMAGE, $
 ;       _cgimage_xsize, $    ; The X size of the image.
 ;       _cgimage_ysize, $    ; The Y size of the imge.
@@ -61,16 +61,16 @@
 ;       _cgimage_position, $ ; The final position of the image in the window.
 ;       _cgimage_winID, $    ; The window index number of the window displaying the image.
 ;       _cgimage_current     ; Set to 1 if a call to cgImage is made.
-; 
+;
 ; The program requires the `Coyote Library <http://www.idlcoyote.com/documents/programs.php>`
 ; to be installed on your machine.
-; 
+;
 ; To learn more about transparent images and cgImage see the article
-; `Working with Transparent Images and cgImage <http://www.idlcoyote.com/cg_tips/transimage.php>`. 
+; `Working with Transparent Images and cgImage <http://www.idlcoyote.com/cg_tips/transimage.php>`.
 ;
 ; :Categories:
 ;    Graphics
-;       
+;
 ; :Examples:
 ;     To display an image with a contour plot on top of it, type::
 ;
@@ -114,25 +114,25 @@
 ;        cgImage, image, Position=p
 ;        cgColorbar, Position=[p[0], p[1]-0.1, p[2], p[1]-0.05]
 ;        !P.Multi =0
-;     
+;
 ;     To set a missing value to -32767 and the color white and do
 ;     a 3% histogram clip of the image::
-;     
+;
 ;        cgLoadCT, 4, /Brewer, NColors=254
 ;        TVLCT, palette, /Get
 ;        cgImage, image, Missing_Value=-32767, Missing_Color='white', Stretch='Clip', Clip=3
-;        
+;
 ;     To display a transparent image on top of another image::
-;     
+;
 ;        cgImage, cgDemoData(7), CTIndex=0
 ;        cgImage, cgDemoData(5), CTIndex=33, Transparent=50, $
 ;             AlphaFGPosition=[0.25, 0.25, 0.75, 0.75], Missing_Value=0
-;   
+;
 ; .. image:: cgimage.png
-; 
+;
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
-;        David W. Fanning 
+;        David W. Fanning
 ;        1645 Sheely Drive
 ;        Fort Collins, CO 80526 USA
 ;        Phone: 970-221-0438
@@ -145,9 +145,9 @@
 ;      8 Feb 2011. Added OPOSITION keyword. DWF.
 ;      27 Feb 2011. Added keywords to make cgImage more compatible with TVImage calls. DWF.
 ;      Color table vectors must be obtained AFTER loading the color palette. 6 March 2011. DWF.
-;      I have been convinced (conversations with Wayne Landsman) that if the 
-;         CENTER keyword is set, the MINUS_ONE keyword is not needed, since 
-;         it was created to solve the same problem. So, I have changed the 
+;      I have been convinced (conversations with Wayne Landsman) that if the
+;         CENTER keyword is set, the MINUS_ONE keyword is not needed, since
+;         it was created to solve the same problem. So, I have changed the
 ;         default setting of MINUS_ONE to 0. 14 March 2011. DWF.
 ;       Corrected a problem with restoring color tables if a PALETTE is used. 31 March 2011. DWF.
 ;       Whoops! Documented a CHARSIZE keyword, but forgot to define it. 7 July 2011.
@@ -185,11 +185,11 @@
 ;       Fixed a problem with the INTERPOLATE variable that prevented interpolaton from occurring. 12 Sept 2012. DWF.
 ;       A misspelled MULTIPLIER keyword was interfering with a Standard Deviation stretch. 16 Sept 2012. DWF
 ;       Added the TRANSPARENT keyword to allow transparent display of images. 17 October 2012. DWF.
-;       Added the MAPCOORD keyword to allow the XRANGE and YRANGE of the image to be specified by the map 
+;       Added the MAPCOORD keyword to allow the XRANGE and YRANGE of the image to be specified by the map
 ;          coordinate object. 17 October 2012. DWF.
 ;       Added CTINDEX, BREWER, and REVERSE keywords to make loading a color table palette easier. 17 October 2012. DWF.
 ;       Now setting MISSING_VALUE pixels to completely transparent if a transparent image is created. 17 October 2012. DWF.
-;       Added the ability to apply a stretch to a 2D image prior to converting it to a transparent image. 18 October 2012.DWF.   
+;       Added the ability to apply a stretch to a 2D image prior to converting it to a transparent image. 18 October 2012.DWF.
 ;       Added a FILENAME keyword so that files of known format (GeoTIFF, JPEG, PNG, etc.) can be read to supply an
 ;          image for display. 18 October 2012. DWF.
 ;       Fixed a problem that prevented transparent images from be displayed with !P.Multi. 20 Oct 2012. DWF.
@@ -204,35 +204,35 @@
 ;       I had some code dealing with XRANGE and YRANGE properties of the image when a map coodinate object
 ;           was used with cgImage. This was inadvertently setting the XRANGE and YRANGE properties of the
 ;           image, which was in turn causing the range values to be SAVED in the plotting system variables.
-;           This interferred with backward compatibility with the TV command, so I have removed it. 31 Jan 2013. DWF. 
+;           This interferred with backward compatibility with the TV command, so I have removed it. 31 Jan 2013. DWF.
 ;       Whoops! Typo in my last fix. Getting too old, I guess. 6 Feb 2013. DWF.
 ;       Setting any of the MISSING_*** keywords while doing multiple plots resulted in the value
 ;           of !P.Multi being ignored for the image. This is fixed for now, but just a warning. Setting
-;           these keywords creates transparent images, and makes things MUCH more complicated. So, I'm 
+;           these keywords creates transparent images, and makes things MUCH more complicated. So, I'm
 ;           probably at the limit of what is possible now. :-) 30 April 2013. DWF.
 ;       The LAYOUT keyword went on walkabout after the last changes. Restored to operation. 12 July 2013. DWF.
 ;       The YTITLE keyword was missing when passed to cgWindow. Fixed now. 24 Oct 2013. DWF.
 ;       Fixed a couple of places where I meant "missing_index" and used "missing_color". 26 Jan 2014. DWF.
 ;       Added check for open graphics window when displaying alpha-channel image. 31 March 2014. DWF.
 ;       Added XVECTOR and YVECTOR keywords. 1 April 2014. DWF.
-;       Fixed a problem in which the POSITION of the image was specified as an integer array when it 
+;       Fixed a problem in which the POSITION of the image was specified as an integer array when it
 ;            should have been a floating point array. 8 January 2015. DWF.
 ;       Added compression stretch and updated retired program references. 27 Mar 2015. DWF.
-;       
+;
 ; :Copyright:
 ;     Copyright (c) 2011-2015, Fanning Software Consulting, Inc.
 ;-
 ;
 ;+
 ; This function creates a transparent image out of a normal 2D or 3D image.
-; 
+;
 ; :Params:
 ;   image: in, required
 ;        The input image. Must be either 2D or a true-color image.
 ;   transparent: in, optional, type=integer, default=50
-;        The transparentcy of the image with respect to the background image. A number 
+;        The transparentcy of the image with respect to the background image. A number
 ;        from 0 to 100.
-;        
+;
 ; :Keywords:
 ;    missing_value: in, optional, type=integer
 ;         The number that represents the missing value in the image. Available only with 2D images.
@@ -250,7 +250,7 @@ FUNCTION cgImage_Make_Transparent_Image, image, transparent, $
    SUCCESS=success
 
     Compile_Opt idl2
-    
+
     Catch, theError
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
@@ -262,12 +262,12 @@ FUNCTION cgImage_Make_Transparent_Image, image, transparent, $
     success = 1
     IF N_Elements(image) EQ 0 THEN Message, 'An image parameter is required'
     IF N_Elements(transparent) EQ 0 THEN transparent = 50
-    
+
     ; Make sure the transparent value is between 0 and 100 initially, and between 0 and 1 finally.
     transparent = (0 > transparent < 100) / 100.0
-    
+
     ndims = Size(image, /N_DIMENSIONS)
-    
+
     CASE ndims OF
         2: BEGIN
            s = Size(image, /DIMENSIONS)
@@ -284,38 +284,38 @@ FUNCTION cgImage_Make_Transparent_Image, image, transparent, $
            ENDIF ELSE BEGIN
               TVLCT, r, g, b, /Get
            ENDELSE
-           
+
            newimage = BytArr(4, s[0], s[1])
            newImage[0,*,*] = r[image]
            newImage[1,*,*] = g[image]
            newImage[2,*,*] = b[image]
-           newimage[3,*,*] = BytArr(s[0],s[1]) + (255 * (1.0 - transparent)) 
-           
+           newimage[3,*,*] = BytArr(s[0],s[1]) + (255 * (1.0 - transparent))
+
            ; Is there missing data to consider?
            IF (N_Elements(missing_value) NE 0) THEN BEGIN
-   
+
                ; The missing value may be the symbol for NAN.
                IF Finite(missing_value) THEN BEGIN
                    missingIndices = Where(image EQ missing_value, missingCnt)
                ENDIF ELSE BEGIN
                    missingIndices = Where(Finite(image) EQ 0, missingCnt)
                ENDELSE
-               
+
                ; Make the missing pixels completely transparent in the alpha channel.
                IF missingCnt GT 0 THEN BEGIN
                   alpha = Reform(newimage[3,*,*])
                   alpha[missingIndices] = 0B
                   newimage[3,*,*] = Temporary(alpha)
                ENDIF
-               
+
            ENDIF
-           
+
            END
-           
+
          3: BEGIN
             dims = Image_Dimensions(image, XSIZE=xsize, YSIZE=ysize, ALPHACHANNEL=alpha, TRUEINDEX=true)
             newimage = BytArr(4, xsize, ysize)
-            
+
             ; Prepare an alpha image, if needed.
             IF ~alpha THEN BEGIN
                 index = Where(Size(image,/DIMENSIONS) EQ 3)
@@ -325,7 +325,7 @@ FUNCTION cgImage_Make_Transparent_Image, image, transparent, $
                      2: aimage = Transpose(image, [2,0,1])
                 ENDCASE
                 newImage[0:2,*,*] = aImage
-                newimage[3,*,*] = BytArr(xsize,ysize) + (255 * (1.0 - transparent)) 
+                newimage[3,*,*] = BytArr(xsize,ysize) + (255 * (1.0 - transparent))
           ENDIF ELSE BEGIN
                 index = Where(Size(image,/DIMENSIONS) EQ 4)
                 CASE index OF
@@ -334,13 +334,13 @@ FUNCTION cgImage_Make_Transparent_Image, image, transparent, $
                      2: aimage = Transpose(image, [2,0,1])
                 ENDCASE
                 newImage[0:2,*,*] = aImage[0:2,*,*]
-                newimage[3,*,*] = BytArr(xsize,ysize) + (255 * (1.0 - transparent)) 
+                newimage[3,*,*] = BytArr(xsize,ysize) + (255 * (1.0 - transparent))
           ENDELSE
             END
-            
-            
+
+
          ELSE: Message, 'Cannot process images that are not 2D or True-Color for transparentcy.'
-         
+
     ENDCASE
     RETURN, newImage
 END
@@ -349,11 +349,11 @@ END
 ;+
 ; This routine prepares a transparent image (an image with an alpha channel)
 ; for display.
-; 
+;
 ; :Returns:
 ;     Returns an image that has been blended with the background image and is
 ;     suitable for display with cgImage.
-; 
+;
 ; :Params:
 ;    image: in, required
 ;       The input image that is being prepared for display. It will contain
@@ -361,7 +361,7 @@ END
 ;    alphabackgroundimage: in, required
 ;       The background image. The input image will be blended
 ;       with the background image.
-;   
+;
 ; :Keywords:
 ;    alphabgposition: in, required, type=fltarr
 ;       The normalized position or portion of the background image used to create the alpha image.
@@ -370,12 +370,12 @@ END
 ;    tv: in, optional, type=boolean, default=0
 ;       If this keyword is set, the alpha channel is removed from the
 ;       input image, because we cannot display an image with an alpha
-;       channel if the cgImage command is acting like a smarter IDL 
+;       channel if the cgImage command is acting like a smarter IDL
 ;       TV command.
 ;-
 FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
     ALPHABGPOSITION=alphabgpos, $
-    ALPHAFGPOSITION=alphafgpos, $    
+    ALPHAFGPOSITION=alphafgpos, $
     TV=tv
 
     ; Error handling.
@@ -398,18 +398,18 @@ FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
          1: aImage = Transpose(image, [0,2,1])
          ELSE: aImage = image
     ENDCASE
-       
+
     ; Separate the alpha channel.
     alpha_channel = aImage[*,*,3]
-       
+
     ; If this is acting like a TV command, then there is no alpha channel.
     ; Exit now.
     IF Keyword_Set(tv) THEN RETURN, aImage[*,*,0:2]
-    
+
     ; Now we have an alpha channel.
     alpha_channel = (alpha_channel / 255.0) * 1.0
     foregndImage = aImage[*,*,0:2]
-           
+
     ; Get the size and dimensions of the background image.
     ndim = Size(alphaBackgroundImage, /N_DIMENSIONS)
     CASE ndim OF
@@ -431,21 +431,21 @@ FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
            END
       ELSE: Message, 'Unexpected dimensions of the background image.'
     ENDCASE
-    
+
     ; I need a 24-bit image to work with. This is most easily done
     ; in the Z-Graphics buffer, set to work in 24-bit mode. Unfortunately,
     ; this mode was introduced in IDL 7, so I can't use it with IDL 6.4
     ; or earlier versions. I can, however, TRY to use a pixmap in earlier
     ; versions. I have reports that this works fine. So, I am modifying this
     ; section of code to get the 24-bit image I need out of a pixmap for versions
-    ; of IDL before IDL 7.0. 
+    ; of IDL before IDL 7.0.
     thisRelease = Float(!Version.Release)
 
     ; Now that we have a background image, display that in
     ; the Z-Graphics buffer or in a pixmap if IDL 6.4 or earlier.
     sb = Size(bImage, /DIMENSIONS)
     sf = Size(foregndImage, /DIMENSIONS)
-    IF thisRelease GE 6.5 THEN BEGIN                       
+    IF thisRelease GE 6.5 THEN BEGIN
        thisDevice = !D.Name
        Set_Plot, 'Z'
        Device, Get_Decomposed=theState
@@ -470,22 +470,22 @@ FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
         cgImage, bImage, Position=alphabgpos
     ENDELSE
     !P.Multi = multi
-    
+
     ; Calculate the parameters for taking a snapshot of the
     ; relevant portion of the window.
     xstart = alphafgpos[0]*sb[0]
     cols = Round((alphafgpos[2] - alphafgpos[0]) * sb[0])
     ystart = alphafgpos[1]*sb[1]
     rows = Round((alphafgpos[3] - alphafgpos[1]) * sb[1])
-            
+
     ; Take a snapshot
     bsnap = TVRD(xstart, ystart, cols, rows, TRUE=3)
-            
+
     ; Get the size of the snapshot.
     sb = Size(bsnap, /DIMENSIONS)
-    
+
     ; Clean-up
-    IF thisRelease GE 6.5 THEN BEGIN 
+    IF thisRelease GE 6.5 THEN BEGIN
        Device, Decomposed=theState
        Set_Plot, thisDevice
     ENDIF ELSE BEGIN
@@ -493,27 +493,27 @@ FUNCTION cgImage_Prepare_Alpha, image, alphaBackgroundImage, $
        IF N_Elements(setToDev) NE 0 THEN Set_Plot, thisDevice
        IF (currentWindow LE 0) AND ((!D.Flags AND 256) NE 0) THEN WSet, currentWindow
     ENDELSE
-            
+
      ; Make the foreground image the right size.
      foregndImage = cgResizeImage(foregndImage, cols, rows)
      alpha = cgResizeImage(alpha_channel, sb[0], sb[1], /INTERPOLATE)
      alpha = Rebin(alpha, sb[0], sb[1], 3)
-            
+
      ; Blend the two images in the location of the POSITION.
-     blendImage = foregndImage*alpha + (1 - alpha)*bsnap  
-     
+     blendImage = foregndImage*alpha + (1 - alpha)*bsnap
+
      ; Now put this blended portion back into the background image.
      outimage = bimage
      outimage[xstart:xstart+cols-1, ystart:ystart+rows-1, *] = blendImage
-            
-     ; Put the dimensions back the way they came in.   
+
+     ; Put the dimensions back the way they came in.
      index = Where(Size(foregndImage,/DIMENSIONS) EQ 3)
      CASE index OF
         0: outImage = Transpose(outImage, [2,0,1])
         1: outImage = Transpose(outImage, [1,0,2])
         ELSE: outImage = outImage
      ENDCASE
-    
+
      RETURN, outimage
 END
 ;--------------------------------------------------------------------------
@@ -521,22 +521,22 @@ END
 
 ;+
 ; This routine scales or otherwise prepares an image to be displayed.
-; 
+;
 ; :Returns:
 ;     Returns an image that can be displaye properly.
-; 
+;
 ; :Params:
 ;    image: in, required
-;       The input image that is being prepared for display. 
+;       The input image that is being prepared for display.
 ;    xsize: in, optional
 ;       The output X size of the image.
 ;    ysize: in, optional
 ;       The output Y size of the image.
-;   
+;
 ; :Keywords:
 ;    bottom: in, optional, type=integer, default=0
-;         If the SCALE keyword is set, the image is scaled before display so that all 
-;         displayed pixels have values greater than or equal to BOTTOM and less than 
+;         If the SCALE keyword is set, the image is scaled before display so that all
+;         displayed pixels have values greater than or equal to BOTTOM and less than
 ;         or equal to TOP.
 ;    beta: in, optional, type=float, default=3.0
 ;         The beta factor in a Hyperpolic Sine stretch.
@@ -552,15 +552,15 @@ END
 ;    gamma: in, optional, type=float, default=1.5
 ;         The gamma factor in a gamma stretch.
 ;    interpolate: in, optional, type=boolean, default=0
-;         Set this keyword to interpolate with bilinear interpolation the display image as it 
-;         is sized to its final position in the display window. Interpolation will potentially 
+;         Set this keyword to interpolate with bilinear interpolation the display image as it
+;         is sized to its final position in the display window. Interpolation will potentially
 ;         create image values that do not exist in the original image. The default is to do no
 ;         interpolation, so that image values to not change upon resizing. Interpolation can
 ;         result in smoother looking final images.
 ;    maxvalue: in, optional, type=varies
 ;         If this value is defined, the data is linearly scaled between MINVALUE
-;         and MAXVALUE. MAXVALUE is set to MAX(image) by default. Setting this 
-;         keyword to a value automatically sets `SCALE` to 1. If the maximum value of the 
+;         and MAXVALUE. MAXVALUE is set to MAX(image) by default. Setting this
+;         keyword to a value automatically sets `SCALE` to 1. If the maximum value of the
 ;         image is greater than 255, this keyword is defined and SCALE=1.
 ;    mean: in, optional, type=float, default=0.5
 ;         The mean factor in a logarithmic stretch.
@@ -568,11 +568,11 @@ END
 ;         The value of this keyword is passed along to the cgResizeImage
 ;         command. It prevents cgResizeImage from adding an extra row and
 ;         column to the resulting array, which can be a problem with
-;         small image arrays. 
+;         small image arrays.
 ;    minvalue: in, optional, type=varies
 ;         If this value is defined, the data is linearly scaled between MINVALUE
-;         and `MAXVALUE`. MINVALUE is set to MIN(image) by default. Setting this 
-;         keyword to a value automatically sets SCALE=1. If the minimum value of the 
+;         and `MAXVALUE`. MINVALUE is set to MIN(image) by default. Setting this
+;         keyword to a value automatically sets SCALE=1. If the minimum value of the
 ;         image is less than 0, this keyword is defined and SCALE=1.
 ;    missing_index: in, optional, type=integer, default=255
 ;         The index of the missing color in the final byte scaled image.
@@ -584,11 +584,11 @@ END
 ;    negative: in, optional, type=boolean, default=0
 ;         Set this keyword if you want to display the image with a negative or reverse stretch.
 ;    scale: in, optional, type=boolean, default=0
-;         Set this keyword to byte scale the image before display. If this keyword is not set, 
+;         Set this keyword to byte scale the image before display. If this keyword is not set,
 ;         the image is not scaled before display. This keyword will be set automatically by using
 ;         any of the keywords normally associated with byte scaling an image.
 ;    stretch: in, optional, type=integer/string, default=1
-;         The type of scaling performed prior to display. 
+;         The type of scaling performed prior to display.
 ;         May be specified as a number or as a string (e.g, 4 or "Log").
 ;
 ;           Number   Type of Stretch
@@ -608,8 +608,8 @@ END
 ;    sigma: in, optional, type=float, default=1.0
 ;         The sigma scale factor in a Gaussian stretch.
 ;    top: in, optional, type=integer, default=255
-;         If the SCALE keyword is set, the image is scaled before display so that all 
-;         displayed pixels have values greater than or equal to BOTTOM and less than 
+;         If the SCALE keyword is set, the image is scaled before display so that all
+;         displayed pixels have values greater than or equal to BOTTOM and less than
 ;         or equal to TOP.
 ;-
 FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
@@ -635,7 +635,7 @@ FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
    TOP=top
 
    Compile_Opt idl2
-   
+
     ; Error handling.
     Catch, theError
     IF theError NE 0 THEN BEGIN
@@ -643,65 +643,65 @@ FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
        ok = cgErrorMsg()
        RETURN, image
     ENDIF
-    
+
    ; I would like to avoid making a copy of the image, if possible.
    ; If nothing needs to be done, just return the image.
    IF (N_Elements(xsize) EQ 0) && $
       (N_Elements(missing_value) EQ 0) && $
       ~scale THEN RETURN, image
-      
+
    ; Is there a missing value to worry about? We can only worry
    ; about missing values with 2D image arrays.
    ndims = Size(image, /N_DIMENSIONS)
    IF (N_Elements(missing_value) NE 0) && (ndims EQ 2) THEN BEGIN
-   
+
        ; Get the image type.
        imageType = Size(image, /TNAME)
-       
+
        ; Create a temporary image variable. If you will be scaling the data,
        ; make the image a float if it is not float or double already.
        CASE imageType OF
           'FLOAT': tempImage = image
           'DOUBLE': tempImage = image
-          ELSE: tempImage = Float(image) 
+          ELSE: tempImage = Float(image)
        ENDCASE
-       
+
        ; The missing value may be the symbol for NAN.
        IF Finite(missing_value) THEN BEGIN
            missingIndices = Where(tempImage EQ missing_value, missingCnt)
        ENDIF ELSE BEGIN
            missingIndices = Where(Finite(tempImage) EQ 0, missingCnt)
        ENDELSE
-       
+
        ; Set the missing indices to the correct NAN value.
        IF imageType EQ 'DOUBLE' THEN BEGIN
            IF missingCnt GT 0 THEN tempImage[missingIndices] = !Values.D_NAN
        ENDIF ELSE BEGIN
            IF missingCnt GT 0 THEN tempImage[missingIndices] = !Values.F_NAN
        ENDELSE
-   
+
    ENDIF
-   
+
    ; Do you need scaling?
    IF Keyword_Set(scale) || (stretch NE 0) THEN BEGIN
-   
+
       ; Create a temporary image, if you don't already have one.
       IF N_Elements(tempImage) EQ 0 THEN BEGIN
           imageType = Size(image, /TNAME)
           CASE imageType OF
               'FLOAT': tempimage = image
               'DOUBLE': tempimage = image
-              ELSE: tempImage = Float(image) 
+              ELSE: tempImage = Float(image)
           ENDCASE
        ENDIF
-      
+
       ; Select the particular kind of stretch you want to do. Unfortunately, we
       ; can still cause underflow error messages when doing stretch, despite best
       ; attempts to prevent this. Turn these messages off here.
       curExcept = !Except
-      !Except = 0      
+      !Except = 0
        CASE stretch OF
-       
+
 ;             0         None           No scaling whatsoever is done.
 ;             1         Linear         scaled = BytScl(image, MIN=minValue, MAX=maxValue)
 ;             2         Clip           A histogram stretch, with a percentage of pixels clipped at both the top and bottom
@@ -715,13 +715,13 @@ FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
 ;             10        StdDev         A standard deviation stretch.
 ;             11        Compressioni   A compression stretch of the image mid-tones.
 
-          0: ; No stretch at all. 
-       
+          0: ; No stretch at all.
+
           1: BEGIN ; Linear stretch.
              tempImage = BytScl(tempImage, Max=maxvalue, Min=minvalue, /NAN, TOP=top) + bottom
              IF negative THEN tempImage = Byte(top) - tempImage
              END
-    
+
           2: BEGIN ; Histogram clip stretch.
              tempImage = cgClipScl(tempImage, clip, OMIN=bottom, OMAX=top, NEGATIVE=negative)
              END
@@ -730,24 +730,24 @@ FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
              tempImage = cgGmaScl(tempImage, Max=maxvalue, Min=minvalue, $
                        Gamma=gamma, Negative=negative, OMAX=top, OMIN=bottom)
              END
-    
+
           4: BEGIN ; Log scale stretch.
              tempImage =  cgLogScl(tempImage, Max=maxvalue, Min=minvalue, $
                        Constant=constant, Negative=negative, $
                        OMIN=bottom, OMAX=top)
              END
-    
+
           5: BEGIN ; Hyperpolic sine stretch.
              tempImage = cgASinhScl(tempImage, Max=maxvalue, Min=minvalue, $
                       BETA=beta, Negative=negative, OMAX=top, OMIN=bottom)
              END
-               
-    
+
+
           6: BEGIN ; Square Root stretch.
              tempImage = BytScl(SQRT(tempImage), Max=maxvalue, Min=minvalue, /NAN, TOP=top) + bottom
              IF negative THEN tempImage = Byte(top) - tempImage
              END
-    
+
           7: BEGIN ; Histogram equalization stretch.
              IF (top EQ 255) && (bottom EQ 0) THEN BEGIN
                  tempImage = Hist_Equal(tempImage, MaxV=maxvalue, MinV=minvalue)
@@ -756,44 +756,44 @@ FUNCTION cgImage_Prepare_Output, image, xsize, ysize, $
              ENDELSE
              IF negative THEN tempImage = Byte(top) - tempImage
              END
-    
+
           8: BEGIN ; Gaussian stretch.
              tempImage = cgGaussScl(tempImage, Max=maxvalue, Min=minvalue, $
                        Sigma=sigma, Negative=negative, OMIN=bottom, OMAX=top)
              END
-         
+
           9: BEGIN ; MODIS image stretch.
              tempImage = ScaleModis(tempImage)
              END
-             
+
           10: BEGIN ; Standard deviation stretch.
               tempImage = cgSDevScl(tempImage, MULTIPLIER=multiplier, EXCLUDE=exclude, $
                    Negative=negative, OMAX=top, OMIN=bottom)
               END
-               
+
           11: BEGIN ; Compression scale stretch.
                   tempImage =  cgCompressScl(tempImage, Max=maxvalue, Min=minvalue, $
                       Mean=mean, Exponent=exponent, Negative=negative, $
                       OMIN=bottom, OMAX=top)
               END
-              
+
             ELSE: Message, 'Unknown scaling index.'
-            
+
        ENDCASE
-       
+
        ; Clear the math error register and turn normal error checking on.
        void = Check_Math()
        !Except = curExcept
-       
+
    ENDIF
-   
-   
+
+
    ; After scaling, you may need to replace missing values with the
    ; missing index.
    IF N_Elements(missingCnt) NE 0 THEN BEGIN
       IF missingCnt GT 0 THEN tempImage[missingIndices] = missing_index
    ENDIF
-   
+
    ; If you created a temporary image, then return that.
    ; Otherwise you can return the original image, modified
    ; to the appropriate size.
@@ -819,55 +819,55 @@ END
 ; The purpose of this program is to create a TV command that works the way
 ; the TV command would be expected to work if it was written today, rather
 ; than 25 years ago. In other words, it knows the difference between an
-; 8-bit device and a 24-bit device, it honors the POSITION keyword like 
+; 8-bit device and a 24-bit device, it honors the POSITION keyword like
 ; other graphics commands in IDL, it honors the !P.MULTI value, like other
 ; graphics commands in IDL, it works seamlessly with both 8-bit and 24-bit
-; images. In addition to other modern features, this program can also 
+; images. In addition to other modern features, this program can also
 ; display images that contain an alpha channel and can display transparent
 ; images.
-; 
+;
 ; Also, two-dimensional image arrays can be manipulated, stretched,
 ; and scaled directly with keywords to cgImage. These keywords do not
 ; work with alpha channel images, or if the TV keyword is used with
 ; cgImage.
-; 
+;
 ; :Params:
 ;    image:  in, required, type=various
 ;        An 8-bit (MxN), 24-bit (e.g., MxNx3), or a 24-bit + alpha channel
 ;        (e.g., MxNx4) image  to display.
 ;    x: in, optional, type=integer
 ;        The X position of the lower-left corner of the image in device
-;        coordinates. This parameter is only recognized if the TV keyword 
+;        coordinates. This parameter is only recognized if the TV keyword
 ;        is set. If the Y position is not used, X is taken to be the image
-;        "position" in the window. See the TV command documenation for details. 
-;    y: in, optional, type=integer      
+;        "position" in the window. See the TV command documenation for details.
+;    y: in, optional, type=integer
 ;        The Y position of the lower-left corner of the image in device
-;        coordinates. This parameter is only recognized if the TV keyword 
+;        coordinates. This parameter is only recognized if the TV keyword
 ;        is set.
-;        
+;
 ; :Keywords:
 ;    addcmd: in, optional, type=boolean, default=0
 ;         Set this keyword to add this command to an already open cgWindow to
 ;         be executed when the window is resized. If the DISPLAY keyword is also
 ;         set, this keyword will act as if the WINDOW keyword were set.
 ;    alphabackgroundimage: in, optional, type=varies
-;         Normally, when a image with an alpha channel is displayed, the image is 
-;         blended with whatever is currently in the display window. This means, the 
-;         program has to obtain that background image. This is not a problem on devices 
-;         (e.g., WIN, X, Z) that allow this kind of operation, but it is on devices 
-;         (e.g., the PostScript device, PS) that do not. To get around this problem, 
+;         Normally, when a image with an alpha channel is displayed, the image is
+;         blended with whatever is currently in the display window. This means, the
+;         program has to obtain that background image. This is not a problem on devices
+;         (e.g., WIN, X, Z) that allow this kind of operation, but it is on devices
+;         (e.g., the PostScript device, PS) that do not. To get around this problem,
 ;         you can pass the background image to the cgImage program. This background image
-;         will be blended with the alpha channel image you wish to display. If an alpha 
-;         channel image is displayed on a device in which there is no way to obtain the 
+;         will be blended with the alpha channel image you wish to display. If an alpha
+;         channel image is displayed on a device in which there is no way to obtain the
 ;         background image, and this keyword is not used to pass a background image, then
 ;         the alpha channel image will be blended with a white background image.
-;         This keyword is only used if an alpha channel image is passed to the 
+;         This keyword is only used if an alpha channel image is passed to the
 ;         program via the IMAGE parameter. The AlphaBackgroundImage does not need
 ;         to have the same dimensions as the alpha channel image. The background image
 ;         can be either a 2D image or a 24-bit image.
 ;    alphabgposition: in, optional, type=fltarr(4)
 ;         The normalized position or portion of the background image that is going to be used
-;         to create the alpha channel image. Normally, and by default, the alphabgposition encompasses 
+;         to create the alpha channel image. Normally, and by default, the alphabgposition encompasses
 ;         the entire graphics window, [0.0, 0.0, 1.0, 1.0].
 ;    alphafgposition: in, optional, type=fltarr(4)
 ;         The normalized position in the background image where the input image is to be located.
@@ -882,7 +882,7 @@ END
 ;         the axis sit on top of the image data.
 ;    axkeywords: in, optional, type=structure
 ;         A structure of AXIS keywords and values that can be used to configure the axes
-;         in whatever way the user desires. Many of the most often used axis keywords are available 
+;         in whatever way the user desires. Many of the most often used axis keywords are available
 ;         as cgImage keywords. For example::
 ;            IDL> axis_format = {XTicks:4, XTickname:['Cow', 'Pig', 'Dog', 'Cat', 'Owl']}
 ;            IDL> cgImage, cgDemoData(7), AXKEYWORDS=axis_format, /Axes, XRange=[0,20]
@@ -893,14 +893,14 @@ END
 ;    beta: in, optional, type=float, default=3.0
 ;         The beta factor in a Hyperpolic Sine stretch. Available only with 2D images.
 ;    bottom: in, optional, type=integer, default=0
-;         If the SCALE keyword is set, the image is scaled before display so that all 
-;         displayed pixels have values greater than or equal to BOTTOM and less than 
+;         If the SCALE keyword is set, the image is scaled before display so that all
+;         displayed pixels have values greater than or equal to BOTTOM and less than
 ;         or equal to TOP. Available only with 2D images.
 ;    brewer: in, optional, type=boolean, default=0
 ;         This keyword is used only if the `CTIndex` keyword is used to select a color table number.
 ;         Setting this keyword allows Brewer color tables to be used.
 ;    charsize: in, optional, type=float
-;         Sets the character size. Used only if the AXES keyword is also set. By default, 
+;         Sets the character size. Used only if the AXES keyword is also set. By default,
 ;         the value from cgDefCharsize().
 ;    clip: in, optional, type=float, default=2
 ;         A number between 0 and 50 that indicates the percentage of pixels to clip
@@ -917,7 +917,7 @@ END
 ;         If this keyword is set, a new display window is created (with cgDisplay) that has the
 ;         same aspect ratio as the image. The image is displayed in that window. If the WINDOW
 ;         keyword is also set, a new cgWindow is created with the WASPECT keyword set to the image
-;         aspect ratio, and the image is displayed in that new cgwindow. 
+;         aspect ratio, and the image is displayed in that new cgwindow.
 ;    erase: in, optional, type=boolean, default=1
 ;         An obsolete keyword. Used only for compatibility with the earlier TVImage command. The
 ;         default for cgImage is to always erase the graphics display before displaying the image
@@ -940,8 +940,8 @@ END
 ;    gamma: in, optional, type=float, default=1.5
 ;         The gamma factor in a gamma stretch. Available only with 2D images.
 ;    interpolate: in, optional, type=boolean, default=0
-;         Set this keyword to interpolate with bilinear interpolation the display image as it 
-;         is sized to its final position in the display window. Interpolation will potentially 
+;         Set this keyword to interpolate with bilinear interpolation the display image as it
+;         is sized to its final position in the display window. Interpolation will potentially
 ;         create image values that do not exist in the original image. The default is to do no
 ;         interpolation, so that image values to not change upon resizing. Interpolation can
 ;         result in smoother looking final images.
@@ -951,21 +951,21 @@ END
 ;         divided by the X size of the image). Setting this keyword will preserve the original
 ;         aspect ratio of the image in the output display window. In effect, the image will
 ;         be placed in the window `POSITION` in a way that preserves its aspect ratio. The
-;         actual final location of the image in the display window can be obtained via the 
+;         actual final location of the image in the display window can be obtained via the
 ;         `OPOSITION` keyword.
 ;    layout: in, optional, type=intarr
-;         This keyword specifies a grid with a graphics window and determines 
-;         where the graphic should appear. The syntax of LAYOUT is a 3-element 
-;         array: [ncolumns, nrows, location]. The grid is determined by the 
-;         number of columns (ncolumns) by the number of rows (nrows). The location 
-;         of the graphic is determined by the third number. The grid numbering 
+;         This keyword specifies a grid with a graphics window and determines
+;         where the graphic should appear. The syntax of LAYOUT is a 3-element
+;         array: [ncolumns, nrows, location]. The grid is determined by the
+;         number of columns (ncolumns) by the number of rows (nrows). The location
+;         of the graphic is determined by the third number. The grid numbering
 ;         starts in the upper left (1) and goes sequentually by column and then
-;         by row. Note that using the LAYOUT keyword automatically sets the NOERASE 
+;         by row. Note that using the LAYOUT keyword automatically sets the NOERASE
 ;         keyword to 1.
 ;    mapcoord: in, optional, type=object
 ;         An object reference to a map coordinate object (e.g., cgMap). If present, the
 ;         XRANGE and YRANGE keyword values will be obtained from this map object, if they
-;         are not defined otherwise. 
+;         are not defined otherwise.
 ;    margin: in, optional, type=float, default=0.0
 ;         A single value, expressed as a normalized coordinate, that
 ;         can easily be used to calculate a position in the window.
@@ -981,8 +981,8 @@ END
 ;         it from other images or graphics. The default margin is 0.05.)
 ;    maxvalue: in, optional, type=varies
 ;         If this value is defined, the data is linearly scaled between MINVALUE
-;         and MAXVALUE. MAXVALUE is set to MAX(image) by default. Setting this 
-;         keyword to a value automatically sets `SCALE` to 1. If the maximum value of the 
+;         and MAXVALUE. MAXVALUE is set to MAX(image) by default. Setting this
+;         keyword to a value automatically sets `SCALE` to 1. If the maximum value of the
 ;         image is greater than 255, this keyword is defined and SCALE=1.
 ;    mean: in, optional, type=float, default=0.5
 ;         The mean factor in a logarithmic stretch. Available only with 2D images.
@@ -990,15 +990,15 @@ END
 ;         The value of this keyword is passed along to the cgResizeImage
 ;         command. It prevents cgResizeImage from adding an extra row and
 ;         column to the resulting array, which can be a problem with
-;         small image arrays. 
+;         small image arrays.
 ;    minvalue: in, optional, type=varies
 ;         If this value is defined, the data is linearly scaled between MINVALUE
-;         and `MAXVALUE`. MINVALUE is set to MIN(image) by default. Setting this 
-;         keyword to a value automatically sets SCALE=1. If the minimum value of the 
+;         and `MAXVALUE`. MINVALUE is set to MIN(image) by default. Setting this
+;         keyword to a value automatically sets SCALE=1. If the minimum value of the
 ;         image is less than 0, this keyword is defined and SCALE=1.
 ;    missing_color: in, optional, type=string, default='white'
 ;         The color name of the missing value. Available only with 2D images.
-;    missing_index: in, optional, type=integer, default=255 
+;    missing_index: in, optional, type=integer, default=255
 ;         The index of the missing color in the final byte scaled image. Available only with 2D images.
 ;    missing_value: in, optional, type=integer
 ;         The number that represents the missing value in the image. Available only with 2D images.
@@ -1007,26 +1007,26 @@ END
 ;         want the images to be slightly smaller than the position created
 ;         by !P.Multi so you can add, for example, a colorbar or an annotation
 ;         to the image. This keyword can be used to adjust the image position
-;         by a small margin. A four-element array, the margins apply to the 
+;         by a small margin. A four-element array, the margins apply to the
 ;         [bottom, left, top, right] of the image position. So, to
 ;         leave room at the top of an image for a color bar, you might
 ;         type this::
-;               
+;
 ;             cgImage, image, MultiMargin=[0, 0, 4, 0]
-;                  
+;
 ;         This keyword applies *only* to images displayed with !P.Multi, and if
 ;         passed a scalar value, will use the same value for all four positions.
 ;    multiplier: in, optional, type=float
 ;         The multiplication factor in a standard deviation stretch. The standard deviation
 ;         is multiplied by this factor to produce the thresholds for a linear stretch.
 ;    ncolors: in, optional, type=integer, default=256
-;         If this keyword is supplied, the `TOP` keyword is ignored and the TOP keyword 
-;         is set equal to  NCOLORS-1. This keyword is provided to make cgImgScl easier 
+;         If this keyword is supplied, the `TOP` keyword is ignored and the TOP keyword
+;         is set equal to  NCOLORS-1. This keyword is provided to make cgImgScl easier
 ;         to use with the color-loading programs such as cgLOADCT::
 ;
 ;              cgLoadCT, 5, NColors=100, Bottom=100
 ;              scaled = cgImgScl(image, NColors=100, Bottom=100)
-;                  
+;
 ;         Setting this keyword to a value automatically sets SCALE=1 and STRETCH='LINEAR', if not
 ;         defined otherwise. Available only with 2D images.
 ;    negative: in, optional, type=boolean, default=0
@@ -1039,15 +1039,15 @@ END
 ;         This is an obsolete keyword that is included here only for compatibility with
 ;         the older TVImage command. Use the `INTERPOLATE` keyword.
 ;    normal: in, optional, type=boolean, default=0
-;         Setting this keyword means image position coordinates x and y are interpreted 
-;         as being in normalized coordinates. This keyword is only valid if the TV 
+;         Setting this keyword means image position coordinates x and y are interpreted
+;         as being in normalized coordinates. This keyword is only valid if the TV
 ;         keyword is set.
 ;    oposition: out, optional, type=float
 ;         Set this keyword to a named variable to obtain the actual position in the
 ;         graphics window where the image was located. The output position may be
 ;         different from the input `POSITION`, especially if the `KEEP_ASPECT_RATIO`
-;         keyword is set. Note that the output position is also stored in a 
-;         FSC_$CGIMAGE common block so that other programs (e.g., cgMap, cgImageInfo, 
+;         keyword is set. Note that the output position is also stored in a
+;         FSC_$CGIMAGE common block so that other programs (e.g., cgMap, cgImageInfo,
 ;         etc.) can take advantage of this information.
 ;    outfilename: in, optional, type=string
 ;         If the `Output` keyword is set, the user will be asked to supply an output
@@ -1056,7 +1056,7 @@ END
 ;         presented to the user.
 ;    output: in, optional, type=string, default=""
 ;         Set this keyword to the type of output desired. Possible values are these::
-;            
+;
 ;            'PS'   - PostScript file
 ;            'EPS'  - Encapsulated PostScript file
 ;            'PDF'  - PDF file
@@ -1065,16 +1065,16 @@ END
 ;            'JPEG' - JPEG raster file
 ;            'PNG'  - PNG raster file
 ;            'TIFF' - TIFF raster file
-;            
+;
 ;         Or, you can simply set this keyword to the name of the output file, and the type of
 ;         file desired will be determined by the file extension. If you use this option, the
 ;         user will not be prompted to supply the name of the output file.
-;            
+;
 ;         All raster file output is created through PostScript intermediate files (the
-;         PostScript files will be deleted), so ImageMagick and Ghostview MUST be installed 
-;         to produce anything other than PostScript output. (See cgPS2PDF and cgPS_Close for 
-;         details.) And also note that you should NOT use this keyword when doing multiple 
-;         plots. The keyword is to be used as a convenient way to get PostScript or raster 
+;         PostScript files will be deleted), so ImageMagick and Ghostview MUST be installed
+;         to produce anything other than PostScript output. (See cgPS2PDF and cgPS_Close for
+;         details.) And also note that you should NOT use this keyword when doing multiple
+;         plots. The keyword is to be used as a convenient way to get PostScript or raster
 ;         output for a single graphics command. Output parameters can be set with cgWindow_SetDefs.
 ;    overplot: in, optional, type=boolean, default=0
 ;         Setting this keyword causes the POSITION keyword to be ignored
@@ -1086,48 +1086,48 @@ END
 ;         position or range of the previous image. If not, an informational error is generated and
 ;         the position is forced into the range of 0 to 1.
 ;    palette: in, optional, type=byte
-;         Set this keyword to a 3x256 or 256x3 byte array containing the RGB color 
-;         vectors to be loaded before the image is displayed. Such vectors can be 
+;         Set this keyword to a 3x256 or 256x3 byte array containing the RGB color
+;         vectors to be loaded before the image is displayed. Such vectors can be
 ;         obtained, for example, from cgLoadCT with the RGB_TABLE keyword::
-;               
+;
 ;                cgLoadCT, 4, /BREWER, /REVERSE, RGB_TABLE=palette
 ;                cgImage, cgDemoData(7), PALETTE=palette
 ;    position: in, optional, type=float
-;         The location of the image in the output window. This is a four-element 
-;         floating array of normalized coordinates of the type given by !P.POSITION 
+;         The location of the image in the output window. This is a four-element
+;         floating array of normalized coordinates of the type given by !P.POSITION
 ;         or the POSITION keyword to other IDL graphics commands. The form is [x0, y0, x1, y1].
-;         The default is [0.0, 0.0, 1.0, 1.0]. Note that this keyword is ALSO an output 
-;         keyword. That is to say, upon return from cgImage this keyword (if passed by 
-;         reference) contains the actual position in the window where the image was 
+;         The default is [0.0, 0.0, 1.0, 1.0]. Note that this keyword is ALSO an output
+;         keyword. That is to say, upon return from cgImage this keyword (if passed by
+;         reference) contains the actual position in the window where the image was
 ;         displayed. This may be different from the input values if the KEEP_ASPECT_RATIO
-;         keyword is set, or if you are using cgImage with the POSITION keyword when !P.MULTI 
-;         is set to something other than a single plot. Note that the POSITION keyword should 
+;         keyword is set, or if you are using cgImage with the POSITION keyword when !P.MULTI
+;         is set to something other than a single plot. Note that the POSITION keyword should
 ;         not, normally, be used when displaying multiple images with !P.MULTI. If it is used,
-;         its meaning differs slightly from its normal meaning. !P.MULTI is responsible for 
-;         calculating the position of graphics in the display window. Normally, it would be a 
+;         its meaning differs slightly from its normal meaning. !P.MULTI is responsible for
+;         calculating the position of graphics in the display window. Normally, it would be a
 ;         mistake to use a POSITION graphics keyword on a graphics command that was being drawn with
-;         !P.MULTI. But in this special case, cgImage will use the POSITION coordinates to calculate 
-;         an image position in the actual position calculated for the image by !P.MULTI. The main 
+;         !P.MULTI. But in this special case, cgImage will use the POSITION coordinates to calculate
+;         an image position in the actual position calculated for the image by !P.MULTI. The main
 ;         purpose of this functionality is to allow the user to display images along with
-;         color bars when using !P.MULTI. 
+;         color bars when using !P.MULTI.
 ;    quiet: in, optional, type=boolean, default=0
-;         There are situations when you would prefer that cgIMAGE does not advertise itself by 
-;         filling out the FSC_$CGIMAGE common block. For example, if you are using cgImage to 
-;         draw a color bar, it would not be necessary. Setting this keyword means that cgImage 
-;         just goes quietly about it's business without bothering anyone else.    
+;         There are situations when you would prefer that cgIMAGE does not advertise itself by
+;         filling out the FSC_$CGIMAGE common block. For example, if you are using cgImage to
+;         draw a color bar, it would not be necessary. Setting this keyword means that cgImage
+;         just goes quietly about it's business without bothering anyone else.
 ;    reverse: in, optional, type=boolean, default=0
 ;         Set this keyword to reverse the color table vectors selected with the `CTIndex` keyword.
 ;    save: in, optional, type=boolean, default=0
-;         Set this to cause a data coordinate system to be established for the image. The XRANGE 
-;         and YRANGE keyword values will be used to establish a data coordinate system coincident 
+;         Set this to cause a data coordinate system to be established for the image. The XRANGE
+;         and YRANGE keyword values will be used to establish a data coordinate system coincident
 ;         with the final image position. Setting the `AXES` keyword automatically sets SAVE=1.
 ;    scale: in, optional, type=boolean, default=0
-;         Set this keyword to byte scale the image before display. If this keyword is not set, 
+;         Set this keyword to byte scale the image before display. If this keyword is not set,
 ;         the image is not scaled before display. This keyword will be set automatically by using
-;         any of the keywords normally associated with byte scaling an image. Available only with 
+;         any of the keywords normally associated with byte scaling an image. Available only with
 ;         2D images. If set, STRETCH is set to 1, unless it is set to another value.
 ;    stretch: in, optional, type=integer/string, default=0
-;         The type of scaling performed prior to display. May be specified as a number 
+;         The type of scaling performed prior to display. May be specified as a number
 ;         or as a string (e.g, 3 or "Log"). Available only with 2D images. If  Min(image)
 ;         is less than zero or Max(image) is greater than 255, then the default value for
 ;         stretch is 1.
@@ -1136,7 +1136,7 @@ END
 ;             0         None           No scaling whatsoever is done.
 ;             1         Linear         scaled = BytScl(image, MIN=minValue, MAX=maxValue)
 ;             2         Clip           A histogram stretch, with a percentage of pixels clipped at both the top and bottom
-;             3         Gamma          scaled = GmaScl(image, MIN=minValue, MAX=maxValue, Gamma=gamma)
+;             3         Gamma          scaled = cgGmaScl(image, MIN=minValue, MAX=maxValue, Gamma=gamma)
 ;             4         Log            scaled = LogScl(image, MIN=minValue, MAX=maxValue, Mean=mean, Exponent=exponent)
 ;             5         Asinh          scaled = AsinhScl(image, MIN=minValue, MAX=maxValue, Beta=beta)
 ;             6         SquareRoot     A linear stretch of the square root histogram of the image values.
@@ -1145,15 +1145,15 @@ END
 ;             9         MODIS          Scaling done in the differential manner of the MODIS Rapid Response Team
 ;                                      and implemented in the Coyote Library routine ScaleModis.
 ;             10        StdDev         Standard deviation stretch. scaled = SDevScl(image, MULTIPLIER=2).
-;             
+;
 ;    sigma: in, optional, type=float, default=1.0
 ;         The sigma scale factor in a Gaussian stretch. Available only with 2D images.
 ;    title: in, optional, type=string, default=""
 ;         Set this keyword to the title of the image plot. No title will appear with the
 ;         image unless the `AXES` keyword is also set.
 ;    top: in, optional, type=integer, default=255
-;         If the SCALE keyword is set, the image is scaled before display so that all 
-;         displayed pixels have values greater than or equal to BOTTOM and less than 
+;         If the SCALE keyword is set, the image is scaled before display so that all
+;         displayed pixels have values greater than or equal to BOTTOM and less than
 ;         or equal to TOP. Available only with 2D images.
 ;    transparent: in, optional, type=integer, default=50
 ;         A number between 0 and 100 that specifies the percent of transparency between the
@@ -1184,7 +1184,7 @@ END
 ;    _ref_extra: in, optional, type=varies
 ;         Any keywords defined for the TV command can be used. This applies only
 ;         if the TV keyword is set.
-;-           
+;-
 PRO cgImage, image, x, y, $
    ADDCMD=addcmd, $
    ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
@@ -1262,13 +1262,13 @@ PRO cgImage, image, x, y, $
        IF transparentImage THEN image = oldImage
        RETURN
     ENDIF
-    
+
     ; Check parameters.
     IF (N_Params() EQ 0) && (N_Elements(filename) EQ 0) THEN BEGIN
         Print, 'USE SYNTAX: cgImage, image'
         RETURN
     ENDIF
-    
+
     ; Was a filename used to pass in an image filename? Check to see if this is a GeoTiff image
     ; before doing anything else. If it is, use cgGeoMap to read it. Otherwise, read the image
     ; file with READ_IMAGE.
@@ -1280,12 +1280,12 @@ PRO cgImage, image, x, y, $
            image = Read_Image(filename, r, g, b)
            IF N_Elements(r) NE 0 THEN palette = [[r],[g],[b]]
         ENDELSE
-    ENDIF 
-    
+    ENDIF
+
     ; Handle obsolete keywords.
     IF N_Elements(obsolete_erase) NE 0 THEN noerase = 1 - obsolete_erase
     IF N_Elements(obsolete_nointerpolation) NE 0 THEN interp = 1 - obsolete_nointerpolation
-    
+
     ; Set up a common block as input to cgImageInfo.
     COMMON FSC_$CGIMAGE, _cgimage_xsize, $    ; The X size of the image.
                          _cgimage_ysize, $    ; The Y size of the imge.
@@ -1294,16 +1294,16 @@ PRO cgImage, image, x, y, $
                          _cgimage_position, $ ; The final position of the image in the window.
                          _cgimage_winID, $    ; The window index number of the window displaying the image.
                          _cgimage_current     ; Set to 1 if a call to cgImage is made.
-    
+
     ; Add the command to cgWindow?
     IF Keyword_Set(addcmd) THEN BEGIN
         noerase = 1
         window = 1
     ENDIF
-    
+
     ; Do we want to display the image in a window with the proper aspect ratio?
     IF Keyword_Set(display) THEN BEGIN
-    
+
          ; Are we making a cgWindow?
          IF Keyword_Set(window) THEN BEGIN
              dims = Image_Dimensions(image, XSIZE=xsize, YSIZE=ysize)
@@ -1314,18 +1314,18 @@ PRO cgImage, image, x, y, $
          ENDIF ELSE BEGIN
              IF ~Keyword_Set(addcmd) THEN cgDisplay, /Free, ASPECT=image
          ENDELSE
-    
+
     ENDIF
-    
+
     ; If we want a cgWindow and we can make windows in this device, do so now.
     IF Keyword_Set(window) AND ((!D.Flags AND 256) NE 0) THEN BEGIN
-    
+
         currentWindow = cgQuery(/CURRENT, COUNT=wincnt)
         IF wincnt EQ 0 THEN replaceCmd = 0 ELSE replaceCmd=1
-        
+
         ; If you are using a layout, you can't ever erase.
         IF N_Elements(layout) NE 0 THEN noerase = 1
-        
+
         ; If we are adding a command, we have to do something different.
         IF Keyword_Set(addcmd) THEN BEGIN
             cgWindow, 'cgImage', image, x, y, $
@@ -1393,7 +1393,7 @@ PRO cgImage, image, x, y, $
                _EXTRA=extra
             RETURN
         ENDIF
-        
+
         ; Otherwise, we are replacing the commands in a new or existing window.
         cgWindow, 'cgImage', image, x, y, $
                ALPHABACKGROUNDIMAGE=alphaBackgroundImage, $
@@ -1460,20 +1460,20 @@ PRO cgImage, image, x, y, $
                _EXTRA=extra
              RETURN
     ENDIF
-    
+
     ; Obtain information about the size of the image.
     void = Image_Dimensions(image, XSIZE=imgXSize, YSIZE=imgYSize)
-    
+
     ; Doing multiple plots?
     IF (Total(!P.Multi) GT 0) || (N_Elements(layout) NE 0) THEN multi = 1 ELSE multi = 0
-    
+
     ; Did you specify a color table index?
     TVLCT, r_start, g_start, b_start, /Get
     IF N_Elements(ctindex) NE 0 THEN BEGIN
         cgLoadCT, ctindex, Reverse=reverse, Brewer=brewer, RGB_TABLE=palette
     ENDIF
-    
-    ; If the missing_value (or missing_color) and noerase keywords are set, then 
+
+    ; If the missing_value (or missing_color) and noerase keywords are set, then
     ; the transparent keyword should be defined and set to zero transparency.
     IF ((N_Elements(missing_value) NE 0) || ( N_Elements(missing_color) NE 0) ) $
       && (N_Elements(transparent) EQ 0) && (N_Elements(missing_index) EQ 0) THEN transparent = 0
@@ -1488,7 +1488,7 @@ PRO cgImage, image, x, y, $
              Message, 'POSITION keyword value switched to ALPHAFGPOS because TRANSPARENT keyword is set.', /Informational
         ENDIF
     ENDIF
-    
+
     ; Load the color palette if you are using one.
     IF N_Elements(palette) NE 0 THEN BEGIN
         IF Size(palette, /N_DIMENSIONS) NE 2 THEN Message, 'Color palette is not a 3xN array.'
@@ -1498,15 +1498,15 @@ PRO cgImage, image, x, y, $
         IF threeIndex[0] EQ 0 THEN palette = Transpose(palette)
         TVLCT, p_red, p_grn, p_blu, /Get ; Save the color vectors before loading the palette.
     ENDIF
-    
+
     ; Are we doing a transparent image? Please scale the image before passing
     ; it into cgImage.
     transparentImage = 0
     IF N_Elements(transparent) NE 0 THEN BEGIN
-    
+
         ; Do you need a window?
         IF ((!D.Flags AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
-    
+
         transparent = 0 > transparent < 100
         oldImage = image
         scaledImage = cgImgScl(image, $
@@ -1551,30 +1551,30 @@ PRO cgImage, image, x, y, $
             RETURN
         ENDELSE
     ENDIF
-      
+
     ; Need a data range? Set it up if you have a map coordinate object or a vector.
     IF N_Elements(plotxrange) EQ 0 THEN BEGIN
        IF Obj_Valid(mapCoord) THEN BEGIN
-             mapCoord -> GetProperty, XRANGE=plotxrange 
+             mapCoord -> GetProperty, XRANGE=plotxrange
              save = 1
-       ENDIF 
+       ENDIF
        IF N_Elements(xvector) NE 0 THEN BEGIN
            plotxrange = [Min(xvector), Max(xvector)]
        ENDIF
     ENDIF ELSE save = 1
     IF N_Elements(plotyrange) EQ 0 THEN BEGIN
        IF Obj_Valid(mapCoord) THEN BEGIN
-            mapCoord -> GetProperty, YRANGE=plotyrange 
+            mapCoord -> GetProperty, YRANGE=plotyrange
             save = 1
-       ENDIF 
+       ENDIF
        IF N_Elements(yvector) NE 0 THEN BEGIN
            plotyrange = [Min(yvector), Max(yvector)]
        ENDIF
     ENDIF ELSE save = 1
-    
+
     ; Are we doing some kind of output?
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
-    
+
        ; If the output string has a dot character, then this must be a
        ; filename, and we will determine the type of file from the filename extension.
        IF StrPos(output, '.') NE -1 THEN BEGIN
@@ -1583,18 +1583,18 @@ PRO cgImage, image, x, y, $
              outfilename = output
              outputSelection = StrUpCase(ext)
        ENDIF
-    
+
        IF N_Elements(outputSelection) EQ 0 THEN outputSelection = StrUpCase(output)
        typeOfOutput = ['PS','EPS','PDF','BMP','GIF','JPEG','JPG','PNG','TIFF', 'TIF']
        void = Where(typeOfOutput EQ outputSelection, count)
        IF count EQ 0 THEN Message, 'Cannot find ' + outputSelection + ' in allowed output types.'
-       
+
        ; Set things up.
        CASE outputSelection OF
           'PS': BEGIN
               ext = '.ps'
               delete_ps = 0
-              END    
+              END
           'EPS': BEGIN
               ext = '.eps'
               encapsulated = 1
@@ -1604,12 +1604,12 @@ PRO cgImage, image, x, y, $
               ext = '.pdf'
               pdf_flag = 1
               delete_ps = 1
-              END     
+              END
           'BMP': BEGIN
               ext = '.bmp'
               bmp_flag = 1
               delete_ps = 1
-              END      
+              END
           'GIF': BEGIN
               ext = '.gif'
               gif_flag = 1
@@ -1619,7 +1619,7 @@ PRO cgImage, image, x, y, $
               ext = '.jpg'
               jpeg_flag = 1
               delete_ps = 1
-              END      
+              END
           'JPG': BEGIN
               ext = '.jpg'
               jpeg_flag = 1
@@ -1629,7 +1629,7 @@ PRO cgImage, image, x, y, $
               ext = '.png'
               png_flag = 1
               delete_ps = 1
-              END      
+              END
           'TIFF': BEGIN
               ext = '.tif'
               tiff_flag = 1
@@ -1639,17 +1639,17 @@ PRO cgImage, image, x, y, $
               ext = '.tif'
               tiff_flag = 1
               delete_ps = 1
-              END    
+              END
        ENDCASE
-              
+
        ; Do you need a filename?
-       IF ( (N_Elements(outfilename) EQ 0) || (outfilename EQ "") ) THEN BEGIN 
+       IF ( (N_Elements(outfilename) EQ 0) || (outfilename EQ "") ) THEN BEGIN
             filename = 'cgplot' + ext
             outfilename = cgPickfile(FILE=filename, TITLE='Select Output File Name...', $
                 FILTER=ext, /WRITE)
             IF outfilename EQ "" THEN RETURN
        ENDIF
-       
+
        ; We need to know the root name of the file, because we have to make a PostScript
        ; file of the same name. At least we do if the type is not PS or EPS.
        IF (outputSelection NE 'PS') && (outputSelection NE 'EPS') THEN BEGIN
@@ -1657,7 +1657,7 @@ PRO cgImage, image, x, y, $
            IF theDir EQ "" THEN CD, CURRENT=theDir
            ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
        ENDIF ELSE ps_filename = outfilename
-       
+
        ; Get the output default values.
        cgWindow_GetDefs, $
          PS_Charsize = ps_charsize, $          ; The PostScript character size.
@@ -1666,8 +1666,8 @@ PRO cgImage, image, x, y, $
          PS_Delete = ps_delete, $              ; Delete PS file when making IM raster.
          PS_Metric = ps_metric, $              ; Select metric measurements in PostScript output.
          PS_Scale_factor = ps_scale_factor, $  ; Select the scale factor for PostScript output.
-         PS_TT_Font = ps_tt_font               ; Select the true-type font to use for PostScript output.   
-       
+         PS_TT_Font = ps_tt_font               ; Select the true-type font to use for PostScript output.
+
        ; Set up the PostScript device.
        cgPS_Open, $
           CHARSIZE=ps_charsize, $
@@ -1679,25 +1679,25 @@ PRO cgImage, image, x, y, $
           SCALE_FACTOR=ps_scale_factor, $
           TT_FONT=ps_tt_font, $
           QUIET=1
-    
+
     ENDIF
-   
+
     ; Set up PostScript device for working with colors.
     IF !D.Name EQ 'PS' THEN Device, COLOR=1, BITS_PER_PIXEL=8
-    
+
     ; Which release of IDL is this?
     thisRelease = Float(!Version.Release)
-    
+
     ; If the OVERPLOT keyword is set, also set the NOERASE keyword, unless it is already set.
     IF Keyword_Set(overplot) THEN BEGIN
         IF (N_Elements(noerase) EQ 0) THEN noerase = 1
     ENDIF
-            
+
      ; Pay attention to !P.Noerase in setting the NOERASE kewyord. This must be
     ; done BEFORE checking the LAYOUT properties.
     IF !P.NoErase NE 0 THEN noerase = !P.NoErase ELSE noerase = Keyword_Set(noerase)
     keep_aspect = Keyword_Set(keep_aspect)
-    
+
     ; Set up the layout, if necessary.
     IF N_Elements(layout) NE 0 THEN BEGIN
        thisMulti = !P.Multi
@@ -1717,10 +1717,10 @@ PRO cgImage, image, x, y, $
     IF N_Elements(charsize) EQ 0 THEN charsize = cgDefCharSize(FONT=font)
     IF N_Elements(color) EQ 0 THEN acolorname = 'opposite' ELSE acolorname = color
     interp = Keyword_Set(interp)
-    
+
     ; Check for image parameter and keywords.
     IF N_Elements(image) EQ 0 THEN MESSAGE, 'You must pass a valid image argument.'
-    
+
     ; Did the user want to scale the image?
     ; If either MIN or MAX are set, this implies SCALE=1.
     ; If min LT 0 or max GT 255, this implies SCALE=1.
@@ -1734,85 +1734,85 @@ PRO cgImage, image, x, y, $
         top = (N_Elements(missing_index) NE 0) ? (ncolors - 2) < 255 : (ncolors - 1)
         scale = 1
     ENDIF
-    
+
     ncolors = top-bottom+1
     negative = Keyword_Set(negative)
     scale = Keyword_Set(scale)
     IF scale THEN BEGIN
        IF N_Elements(stretch) EQ 0 THEN stretch = 1
-    ENDIF 
-    
+    ENDIF
+
     ; Set default values.
     SetDefaultValue, alphafgpos, [0.0, 0.0, 1.0, 1.0]
     SetDefaultValue, alphabgpos, [0.0, 0.0, 1.0, 1.0]
     SetDefaultValue, beta, 3.0
     SetDefaultValue, clip, 2
     SetDefaultValue, exponent, 4.0
-    SetDefaultValue, gamma, 1.5 
+    SetDefaultValue, gamma, 1.5
     SetDefaultValue, mean, 1.0
     SetDefaultValue, missing_index, 255
     SetDefaultValue, negative, 0
     SetDefaultValue, sigma, 1.0
     SetDefaultValue, stretch, 0
-    
+
     ; Make sure you can specify the type of stretch with a string name.
     IF Size(stretch, /TNAME) EQ 'STRING' THEN BEGIN
         stretches = ['None', 'Linear', 'Clip', 'Gamma', 'Log', 'ASinh', $
               'SquareRoot', 'Equalization', 'Gaussian', 'MODIS', 'StdDev']
-       
+
        index = Where(StrUpCase(stretch) EQ StrUpCase(stretches), count)
        IF count GT 0 THEN stretch=index ELSE Message, 'Cannot find stretch: ' + StrUpCase(stretch)
     ENDIF
     IF stretch NE 0 THEN scale = 1
-    
+
     ; Check for mis-spelling of AXES as AXIS.
-    IF Keyword_Set(axis) THEN axes = 1    
+    IF Keyword_Set(axis) THEN axes = 1
     axes = Keyword_Set(axes)
-    
-    ; If you want axes, then save the coordinate system, unless 
+
+    ; If you want axes, then save the coordinate system, unless
     ; specifically asked not to.
     IF axes THEN IF N_Elements(save) EQ 0 THEN save = 1
-    
+
     ; If axes are set and MARGIN and POSITION are NOT set and you are NOT
     ; doing multiplots, then set a normal "plot" margin.
     IF Keyword_Set(axes) && ((N_Elements(margin) EQ 0) && (N_Elements(position) EQ 0) $
         && (multi EQ 0)) THEN position=[0.125, 0.125, 0.925, 0.9]
-    
+
     ; Check other keywords.
     interp = Keyword_Set(interp)
     IF N_Elements(minusOne) EQ 0 THEN minusOne = 0
     minusOne = Keyword_Set(minusOne)
-        
+
     IF N_Elements(background) EQ 0 THEN background = 'white'
     IF Size(background, /TNAME) EQ 'STRING' THEN BEGIN
         IF StrUpCase(background) EQ 'BACKGROUND' THEN BEGIN
            IF N_Elements(acolorname) EQ 0 THEN acolorname = 'opposite'
-        ENDIF 
+        ENDIF
         IF StrUpCase(background) EQ 'WHITE' THEN BEGIN
-           IF N_Elements(acolorname) EQ 0 THEN acolorname = 'black' 
-        ENDIF 
+           IF N_Elements(acolorname) EQ 0 THEN acolorname = 'black'
+        ENDIF
     ENDIF
     noerase = Keyword_Set(noerase) ; Don't change, used in PS output.
-    
+
     ; Choose an axis color.
     acolor = cgDefaultColor(acolorname, DEFAULT='OPPOSITE')
-    
+
     ; If you have a palette, load it now.
     IF N_Elements(palette) NE 0 THEN TVLCT, palette
-    
+
     ; If you have a missing color, load it at the missing color index.
     IF N_Elements(missing_color) NE 0 THEN TVLCT, cgColor(missing_color, /Triple), missing_index
-    
+
     ; Before you do anything, get the current color table vectors
     ; so they can be restored later. Must do AFTER loading a palette!
     TVLCT, rr, gg, bb, /Get
-    
+
     ; If this is an image with an alpha channel, and there is no alphachannel background image
     ; supplied, you will have to take a snapshot of the current window right now before you
     ; erase the window. If the smallest image dimension is a 4, then we will assume this is
     ; an image with an alpha channel.
     IF Min(Size(image, /DIMENSIONS)) EQ 4 THEN BEGIN
-    
+
        ; We can get the background image on devices that support windows.
        IF (!D.Flags AND 256) NE 0 THEN BEGIN
            IF N_Elements(alphabackgroundImage) EQ 0 THEN BEGIN
@@ -1827,7 +1827,7 @@ PRO cgImage, image, x, y, $
            ENDIF
        ENDELSE
     ENDIF
-    
+
     ; If you have an alpha background image, make sure it is a true-color image.
     IF N_Elements(alphaBackgroundImage) NE 0 THEN BEGIN
        IF Size(alphaBackgroundImage, /N_DIMENSIONS) EQ 2 THEN BEGIN
@@ -1836,7 +1836,7 @@ PRO cgImage, image, x, y, $
              [[g_start[alphaBackgroundImage]]], [[b_start[alphaBackgroundImage]]] ]
        ENDIF
     ENDIF
-    
+
     ; Do you need to erase the window before image display?
     IF ~Keyword_Set(noerase) && (!P.MULTI[0] LE 0) && (N_Elements(layout) EQ 0) THEN BEGIN
          IF (!D.Flags AND 256) NE 0 THEN BEGIN
@@ -1845,36 +1845,36 @@ PRO cgImage, image, x, y, $
             IF (!D.NAME EQ 'Z') THEN BEGIN
                 cgErase, background
             ENDIF
-            
+
             ; Do you need a PostScript background color? Lot's of problems here!
             ; Basically, I MUST draw a plot to advance !P.MULTI. But, drawing a
-            ; plot of any sort erases the background color. So, I have to draw a 
+            ; plot of any sort erases the background color. So, I have to draw a
             ; plot, store the new system variables, then draw my background, etc.
             ; I have tried LOTS of options. This is the only one that worked.
             IF !D.Name EQ 'PS' THEN BEGIN
                IF ~noerase THEN BEGIN
-               
+
                    ; I only have to do this, if this is the first plot.
                    IF !P.MULTI[0] EQ 0 THEN BEGIN
-                   
+
                         ; Save the current system variables. Will need to restore later.
                         bangx = !X
                         bangy = !Y
                         bangp = !P
-                        
+
                         ; Draw the plot that doesn't draw anything.
                         Plot, [0], POSITION=position, /NODATA, XSTYLE=4, YSTYLE=4, ZSTYLE=4
-                        
-                        ; Save the "after plot" system variables. Will use later. 
+
+                        ; Save the "after plot" system variables. Will use later.
                         afterx = !X
                         aftery = !Y
-                        afterp = !P     
-                        
+                        afterp = !P
+
                         ; Draw the background color and set the variables you will need later.
                         PS_Background, background
                         psnodraw = 1
                         tempNoErase = 1
-                        
+
                         ; Restore the original system variables so that it is as if you didn't
                         ; draw the invisible plot.
                         !X = bangx
@@ -1886,33 +1886,33 @@ PRO cgImage, image, x, y, $
              ENDIF ELSE tempNoErase = noerase
          ENDELSE
     ENDIF
-    
+
     ; Need a margin around the plot?
     IF (N_Elements(margin) GT 0) THEN BEGIN
        IF Keyword_Set(margin) EQ 0 THEN BEGIN
-          IF N_Elements(multimargin) EQ 0 THEN multimargin=[0., 0., 0., 0.] 
+          IF N_Elements(multimargin) EQ 0 THEN multimargin=[0., 0., 0., 0.]
        ENDIF ELSE BEGIN
           IF N_Elements(multimargin) EQ 0 THEN multimargin=[1., 1., 1., 1.]
        ENDELSE
        IF margin[0] EQ 1 THEN margin = 0.075  ; Comes from /MARGIN
-    ENDIF 
-    
+    ENDIF
+
     ; Make sure the multimargin has four elements.
-    IF N_Elements(multimargin) EQ 0 THEN multimargin = [0., 0., 0., 0.] 
+    IF N_Elements(multimargin) EQ 0 THEN multimargin = [0., 0., 0., 0.]
     IF N_Elements(multimargin) EQ 1 THEN multimargin = [multimargin, multimargin, multimargin, multimargin]
     IF N_Elements(multimargin) NE 4 THEN Message, 'The keyword MULTIMARGIN must be a four-element array.'
-    
+
     ; Check image size.
     s = Size(image)
     IF s[0] LT 2 OR s[0] GT 3 THEN $
        MESSAGE, 'Argument does not appear to be an image. Returning...'
     alphaImage = 0
-    
+
     ; Allow 24-bit images and 2D images that are sent in as 3D
     ; arrays where one dimension is a 1. 24-bit images can have an
     ; alpha channel.
     IF s[0] EQ 3 THEN BEGIN
-    
+
        ; We are going to fake doing something with the alpha channel here.
        i = Where(s[1:3] EQ 3, threeCnt)
        i = Where(s[1:3] EQ 4, fourCnt)
@@ -1920,7 +1920,7 @@ PRO cgImage, image, x, y, $
             s[i+1] = 3
             alphaImage = 1
        ENDIF ELSE alphaImage = 0
-       
+
        ; Now handle normal 24-bit images and suspect 2D images.
        IF (s[1] NE 3L) AND (s[2] NE 3L) AND (s[3] NE 3L) THEN BEGIN
           IF (s[1] NE 1L) AND (s[2] NE 1L) AND (s[3] NE 1L) THEN BEGIN
@@ -1938,11 +1938,11 @@ PRO cgImage, image, x, y, $
           ENDELSE
        ENDIF
     ENDIF ELSE s = Size(image)
-    
+
     ; If a window is not open, open one, otherwise in X devices you get incorrect
     ; window size information the first time you call cgImage.
     IF ((!D.FLAGS AND 256) NE 0) && (!D.Window LT 0) THEN cgDisplay
-    
+
     ; Check for position and overplot keywords.
     IF N_Elements(position) EQ 0 THEN BEGIN
        IF Keyword_Set(multi) AND (Keyword_Set(overplot) NE 1) THEN BEGIN
@@ -1955,7 +1955,7 @@ PRO cgImage, image, x, y, $
           TVLCT, rr, gg, bb
        ENDIF ELSE BEGIN
           IF Keyword_Set(overplot) THEN BEGIN
-          
+
              IF (N_Elements(plotxrange) NE 0) && (N_Elements(plotyrange) NE 0) THEN BEGIN
                 x0 = !X.S[1]*plotxrange[0] + !X.S[0]
                 x1 = !X.S[1]*plotxrange[1] + !X.S[0]
@@ -1963,14 +1963,14 @@ PRO cgImage, image, x, y, $
                 y1 = !Y.S[1]*plotyrange[1] + !Y.S[0]
                 position = [x0, y0, x1, y1]
                 IF N_Elements(restorePosition) NE 0 THEN restorePosition = position
-                
+
                 IF (x0 LT 0.0) || (x1 GT 1.0) || (y0 LT 0.0) || (y1 GT 1.0) THEN BEGIN
                     Message, 'Range of overplotted image is outside the currently established range.', /Informational
                 ENDIF
-                
+
                 ; Make sure the position is inside of normalized coordinates.
                 position = 0.0 > [x0, y0, x1, y1] < 1.0
-                
+
              ENDIF ELSE BEGIN
                 position = [!X.Window[0], !Y.Window[0], !X.Window[1], !Y.Window[1]]
              ENDELSE
@@ -1989,11 +1989,11 @@ PRO cgImage, image, x, y, $
               xrange = !X.Window[1] - !X.Window[0]
               xstart = !X.Window[0] + position[0]*xrange
               xend = xrange * (position[2] - position[0]) + xstart
-        
+
               yrange = !Y.Window[1] - !Y.Window[0]
               ystart = !Y.Window[0] + position[1]*yrange
               yend = yrange * (position[3] - position[1]) + ystart
-        
+
               ; New position based on !P.MULTI position.
               position = [xstart, ystart, xend, yend]
           ENDIF
@@ -2009,11 +2009,11 @@ PRO cgImage, image, x, y, $
                 IF (x0 LT 0.0) || (x1 GT 1.0) || (y0 LT 0.0) || (y1 GT 1.0) THEN BEGIN
                     Message, 'Range of overplotted image is outside the currently established range.', /Informational
                 ENDIF
-                
+
                 ; Make sure the position is inside of normalized coordinates.
                 position = 0.0 > [x0, y0, x1, y1] < 1.0
                 IF N_Elements(restorePosition) NE 0 THEN restorePosition = position
-                
+
              ENDIF ELSE position = Float(position)
              IF N_Elements(transparent) NE 0 THEN BEGIN
                 restorePosition = position
@@ -2023,14 +2023,14 @@ PRO cgImage, image, x, y, $
           ENDIF
        ENDELSE
     ENDELSE
-    
+
     ; Check to be sure the position is not all zeros.
     IF Total(position) EQ 0.0 THEN BEGIN
         IF Keyword_Set(overplot) $
             THEN Message, 'A previous coordinate system cannot be found for overplotting.' $
             ELSE Message, 'Unable to obtain a valid position for the image.'
     ENDIF
-    
+
     ; Check for margin keyword.
     IF (Keyword_Set(multi) EQ 0) AND (Keyword_Set(overplot) EQ 0) THEN BEGIN
        IF N_Elements(margin) NE 0 THEN BEGIN
@@ -2039,14 +2039,14 @@ PRO cgImage, image, x, y, $
                            position[2] - margin, position[3] - margin]
        ENDIF
     ENDIF
-    
+
     ; 2D image.
     IF s[0] EQ 2 THEN BEGIN
-    
+
        imgXsize = FLOAT(s[1])
        imgYsize = FLOAT(s[2])
        true = 0
-    
+
        ; Decomposed color off if device supports it.
        CASE  StrUpCase(!D.NAME) OF
             'X': BEGIN
@@ -2055,7 +2055,7 @@ PRO cgImage, image, x, y, $
                 Device, Decomposed=0
                 ENDCASE
             'WIN': BEGIN
-    
+
                 Device, Get_Visual_Depth=thisDepth
                 IF thisRelease GE 5.2 THEN Device, Get_Decomposed=thisDecomposed
                 Device, Decomposed=0
@@ -2080,17 +2080,17 @@ PRO cgImage, image, x, y, $
                 ENDCASE
             ELSE: thisDepth = 8
        ENDCASE
-    
+
     ENDIF
-    
+
     ; 3D image.
     IF s[0] EQ 3 THEN BEGIN
-    
+
       ; What kind of pixel interleaving?
       IF s[1] EQ 3 THEN true = 1 ; Pixel interleaved
       IF s[2] EQ 3 THEN true = 2 ; Row interleaved
       IF s[3] EQ 3 THEN true = 3 ; Band interleaved
-    
+
        ; Decomposed color on if device supports it.
        CASE StrUpCase(!D.NAME) OF
           'X': BEGIN
@@ -2124,10 +2124,10 @@ PRO cgImage, image, x, y, $
                    TVLCT, r, g, b
              ENDIF ELSE thisDepth = 8
              ENDCASE
-          
+
           ELSE: thisDepth = 8
        ENDCASE
-    
+
        CASE true OF
           1: BEGIN
              imgXsize = FLOAT(s[2])
@@ -2142,12 +2142,12 @@ PRO cgImage, image, x, y, $
              imgYsize = FLOAT(s[2])
              ENDCASE
        ENDCASE
-    
+
     ENDIF
-    
+
     ; Check for TV keyword. If present, then act like a TV command.
     IF Keyword_Set(tv) THEN BEGIN
-    
+
        IF N_Params() GE 3 OR N_Params() EQ 1 THEN BEGIN
          IF N_Elements(x) EQ 0 THEN x = 0
          IF N_Elements(y) EQ 0 THEN y = 0
@@ -2158,7 +2158,7 @@ PRO cgImage, image, x, y, $
                TV, outImage, x, y, True=3, _STRICT_EXTRA=extra, /Normal
             ENDIF ELSE BEGIN
                CASE scale OF
-                    0: TV, image, x, y, True=true, _STRICT_EXTRA=extra, /Normal 
+                    0: TV, image, x, y, True=true, _STRICT_EXTRA=extra, /Normal
                     1: TV, BytScl(image, Top=top, Max=max, Min=min) + bottom, $
                            x, y, True=true, _STRICT_EXTRA=extra, /Normal
                 ENDCASE
@@ -2184,7 +2184,7 @@ PRO cgImage, image, x, y, $
                        TV=1, ALPHABGPOSITION=alphapos, ALPHAFGPOSITION=alphafgpos)
                    TV, outImage, x,  True=3, _STRICT_EXTRA=extra, /Normal
                 ENDIF ELSE BEGIN
-                   CASE scale OF 
+                   CASE scale OF
                         0: TV, image, x, True=true, _STRICT_EXTRA=extra, /Normal
                         1: TV, BytScl(image, Top=top, Max=max, Min=min) + bottom, $
                                 x, True=true, _STRICT_EXTRA=extra, /Normal
@@ -2196,7 +2196,7 @@ PRO cgImage, image, x, y, $
                         TV=1, ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
                    TV, outImage, x,  True=3, _STRICT_EXTRA=extra, /Device
                 ENDIF ELSE BEGIN
-                   CASE scale OF 
+                   CASE scale OF
                         0: TV, image, x, True=true, _STRICT_EXTRA=extra, /Device
                         1: TV, BytScl(image, Top=top, Max=max, Min=min) + bottom, $
                                 x, True=true, _STRICT_EXTRA=extra, /Device
@@ -2206,20 +2206,20 @@ PRO cgImage, image, x, y, $
          ENDIF
        ENDELSE
        GoTo, restoreDecomposed
-    
+
     ENDIF
-    
+
     ; Maintain aspect ratio (ratio of height to width)?
     IF KEYWORD_SET(keep_aspect) THEN BEGIN
-    
+
        ; Find aspect ratio of image.
        ratio = FLOAT(imgYsize) / imgXSize
-    
+
        ; Find the proposed size of the image in pixels without aspect
        ; considerations.
        xpixSize = (position[2] - position[0]) * !D.X_VSize
        ypixSize = (position[3] - position[1]) * !D.Y_VSize
-    
+
        ; Try to fit the image width. If you can't maintain
        ; the aspect ratio, fit the image height.
        trialX = xpixSize
@@ -2228,15 +2228,15 @@ PRO cgImage, image, x, y, $
           trialY = Float(ypixSize)
           trialX = trialY / ratio
        ENDIF
-    
+
        ; Recalculate the position of the image in the window.
        position[0] = (((xpixSize - trialX) / 2.0) / !D.X_VSize) + position[0]
        position[2] = position[0] + (trialX/FLOAT(!D.X_VSize))
        position[1] = (((ypixSize - trialY) / 2.0) / !D.Y_VSize)  + position[1]
        position[3] = position[1] + (trialY/FLOAT(!D.Y_VSize))
-    
+
     ENDIF
-    
+
     ; Calculate the image size and start locations. The plus and minus
     ; factor values are designed to keep the image completely inside the axes.
     ; In other words, if you draw the axes first, then put the image in
@@ -2248,10 +2248,10 @@ PRO cgImage, image, x, y, $
     ysize = Ceil((position[3] - position[1]) * !D.Y_VSIZE) - factor
     xstart = Round(position[0] * !D.X_VSIZE) + factor
     ystart = Round(position[1] * !D.Y_VSIZE) + factor
-    
+
     ; Display the image. Sizing different for scalable pixels devices.
     IF (!D.Flags AND 1) NE 0 THEN BEGIN
-    
+
        ; Need a gray-scale color table if this is a true
        ; color image.
        IF true GT 0 THEN LOADCT, 0, /Silent
@@ -2283,7 +2283,7 @@ PRO cgImage, image, x, y, $
                        YSIZE=ysize, _STRICT_EXTRA=extra, True=true
        ENDELSE
     ENDIF ELSE BEGIN ; All other devices.
-    
+
        CASE true OF
           0: BEGIN
                TV, cgImage_Prepare_Output(image, xsize, ysize, $
@@ -2326,10 +2326,10 @@ PRO cgImage, image, x, y, $
                 IF alphaImage THEN BEGIN
                     outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
                        ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
-                    image2d = Color_Quan(outImage, 3, r, g, b, _EXTRA=extra)               
+                    image2d = Color_Quan(outImage, 3, r, g, b, _EXTRA=extra)
                 ENDIF ELSE BEGIN
-                    image2d = Color_Quan(image, 1, r, g, b, _EXTRA=extra)   
-                ENDELSE                
+                    image2d = Color_Quan(image, 1, r, g, b, _EXTRA=extra)
+                ENDELSE
                 TVLCT, r, g, b
                 TV, cgResizeImage(image2d, xsize, ysize, INTERP=0, $
                    MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=0
@@ -2352,10 +2352,10 @@ PRO cgImage, image, x, y, $
              ENDIF ELSE BEGIN
                 IF alphaImage THEN BEGIN
                     outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, ALPHABGPOSITION=alphapos)
-                    image2d = Color_Quan(outImage, 3, r, g, b, _EXTRA=extra)               
+                    image2d = Color_Quan(outImage, 3, r, g, b, _EXTRA=extra)
                 ENDIF ELSE BEGIN
                     image2d = Color_Quan(image, 2, r, g, b, _EXTRA=extra)
-                ENDELSE                
+                ENDELSE
                 TVLCT, r, g, b
                 TV, cgResizeImage(image2d, xsize, ysize, INTERP=0, $
                    MINUS_ONE=minusOne), xstart, ystart, _STRICT_EXTRA=extra, True=0
@@ -2379,7 +2379,7 @@ PRO cgImage, image, x, y, $
                 IF alphaImage THEN BEGIN
                     outImage = cgImage_Prepare_Alpha(image, alphaBackgroundImage, $
                        ALPHABGPOSITION=alphabgpos, ALPHAFGPOSITION=alphafgpos)
-                    image2d = Color_Quan(outImage, 3, r, g, b, _EXTRA=extra)               
+                    image2d = Color_Quan(outImage, 3, r, g, b, _EXTRA=extra)
                 ENDIF ELSE BEGIN
                     image2d = Color_Quan(image, 3, r, g, b, _EXTRA=extra)
                 ENDELSE
@@ -2389,10 +2389,10 @@ PRO cgImage, image, x, y, $
              ENDELSE
       ENDCASE
     ENDELSE
-        
+
     ; Restore Decomposed state if necessary.
     RestoreDecomposed:
-    
+
     ; If this is the first plot in PS, then we have to make it appear that we have
     ; drawn a plot, even though we haven't.
     IF N_Elements(psnodraw) EQ 1 THEN BEGIN
@@ -2400,7 +2400,7 @@ PRO cgImage, image, x, y, $
         !Y = afterY
         !P = afterP
     ENDIF
-     
+
     CASE StrUpCase(!D.NAME) OF
        'X': BEGIN
           IF thisRelease GE 5.2 THEN Device, Decomposed=thisDecomposed
@@ -2411,7 +2411,7 @@ PRO cgImage, image, x, y, $
        'MAC': BEGIN
           IF thisRelease GE 5.2 THEN BEGIN
              Device, Decomposed=thisDecomposed
-    
+
              ; Here is a hack that fixes a longstanding Mac problem with
              ; color tables after changing the decomposed state.
              TV, [0]
@@ -2440,26 +2440,26 @@ PRO cgImage, image, x, y, $
             _cgimage_winysize = !D.Y_Size
             _cgimage_position = position
             _cgimage_current = 1
-        ENDIF 
-        
+        ENDIF
+
         ; Save the position, at least, if you are in PostScript as cgMap may need it.
         IF (!D.NAME EQ 'PS') THEN BEGIN
             _cgimage_position = position
             _cgimage_current = 1
         ENDIF
     ENDIF
-    
+
     ; Save plot system variables.
     bangp = !P
     bangx = !X
     bangy = !Y
-     
+
     ; If you changed the position, restore it.
     IF N_Elements(restorePosition) NE 0 THEN position = RestorePosition
-    
+
     ; Set the output position.
     oposition = position
-    
+
     ; Need a data range?
     IF N_Elements(plotxrange) EQ 0 THEN BEGIN
         plotxrange = [0, imgXSize]
@@ -2467,7 +2467,7 @@ PRO cgImage, image, x, y, $
     IF N_Elements(plotyrange) EQ 0 THEN BEGIN
         plotyrange = [0, imgYSize]
     ENDIF ELSE save = 1
-    
+
     ; Check title for cgSymbols.
     IF N_Elements(plotxtitle) NE 0 THEN plotxtitle = cgCheckForSymbols(plotxtitle)
     IF N_Elements(plotytitle) NE 0 THEN plotytitle = cgCheckForSymbols(plotytitle)
@@ -2475,20 +2475,20 @@ PRO cgImage, image, x, y, $
 
     ; If the user wanted axes, draw them now.
     IF axes THEN BEGIN
-    
+
         cgPLOT, [0], FONT=font, /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
             XSTYLE=1, YSTYLE=1, POSITION=position, AXISCOLOR=acolor, $
             XTITLE=plotxtitle, YTITLE=plotytitle, TITLE=title, CHARSIZE=charsize, $
             _STRICT_EXTRA=axkeywords
-            
+
     ENDIF ELSE BEGIN
-    
+
         ; If you are saving the data coordinate space, draw invisible axes.
         IF Keyword_Set(save) THEN BEGIN
             PLOT, [0], /NODATA, /NOERASE, XRANGE=plotxrange, YRANGE=plotyrange, $
                 XSTYLE=5, YSTYLE=5, POSITION=position, _STRICT_EXTRA=axkeywords
         ENDIF
-    
+
     ENDELSE
 
     ; Clean up after yourself.
@@ -2508,7 +2508,7 @@ PRO cgImage, image, x, y, $
 
     ; Are we producing output? If so, we need to clean up here.
     IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
-    
+
        ; Get the output default values.
        cgWindow_GetDefs, $
            IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
@@ -2518,7 +2518,7 @@ PRO cgImage, image, x, y, $
            IM_Width = im_width, $                          ; Sets the width of raster file output created with ImageMagick.
            PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
            PDF_Path = pdf_path                             ; The path to the Ghostscript conversion command.
-    
+
         ; Close the PostScript file and create whatever output is needed.
         cgPS_Close, DELETE_PS=delete_ps, $
              ALLOW_TRANSPARENT=im_transparent, $
@@ -2534,14 +2534,14 @@ PRO cgImage, image, x, y, $
              TIFF=tiff_flag, $
              UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $
              WIDTH=im_width
-              
+
          basename = File_Basename(outfilename)
          dirname = File_Dirname(outfilename)
          IF dirname EQ "." THEN CD, CURRENT=dirname
          Print, 'Output File: ' + Filepath(ROOT_DIR=dirname, basename)
     ENDIF
-    
+
     ; If you were doing a transparent image, return the original.
     IF transparentImage THEN image = oldImage
-    
+
 END

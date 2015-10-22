@@ -44,17 +44,17 @@
 ;
 ; :Categories:
 ;    Graphics
-;    
+;
 ; :Examples:
 ;    Code examples::
 ;       IDL> image = cgDemoData(7)
 ;       IDL> cgZImage, image ; 2D image
 ;       IDL> image = cgDemoData(16)
 ;       IDL> cgZImage, image ; True-Color image
-;       
+;
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
-;       David W. Fanning 
+;       David W. Fanning
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
@@ -66,7 +66,7 @@
 ;        Written, 20 September 2012 from previous FSC_ZImage program. DWF.
 ;        Modernized the info structure handling to reflect modern sensibilities. 3 Oct 2012. DWF.
 ;        Changes to allow this to work with very large images. Can now zoom to actual pixel values.
-;           Also fixed a problem that left zoom windows lying around unused if scroll bars were 
+;           Also fixed a problem that left zoom windows lying around unused if scroll bars were
 ;           needed. 18 October 2012. DWF.
 ;        The color palette was not always being included when images were zoomed. Fixed. 17 Nov 2012. DWF.
 ;        Added ZoomFactor keyword to allow the zoom factor to be set on start-up. 28 Nov 2012. DWF.
@@ -98,13 +98,13 @@ PRO cgZImage_ZoomWindow_Events, event
     ; Get the info structure.
     Widget_Control, event.top, Get_UValue=tlb
     Widget_Control, tlb, Get_UValue=info
-    
+
     ; Create the proper vectors to locate the cursor in the image.
     xvec = cgScaleVector(Findgen((*info).zxsize), (*info).xrange[0], (*info).xrange[1])
     yvec = cgScaleVector(Findgen((*info).zysize), (*info).yrange[0], (*info).yrange[1])
     xloc = 0 > Round(xvec[event.x]) < ((*info).xsize-1)
     yloc = 0 > Round(yvec[event.y]) < ((*info).ysize-1)
-    
+
     ; Create the text for the status bar.
     dims = Image_Dimensions((*info).image, XSize=xsize, YSize=ysize, TrueIndex=trueindex)
     CASE trueIndex OF
@@ -123,7 +123,7 @@ PRO cgZImage_ZoomWindow_Events, event
           value = [((*info).image[*,*,0])[xloc, yloc], ((*info).image[*,*,1])[xloc, yloc], ((*info).image[*,*,1])[xloc, yloc]]
           END
     ENDCASE
-    
+
     ; Create the text for the statusbar widget and update the status bar.
     IF Obj_Valid(*(*info).map) THEN BEGIN
         *(*info).map -> GetProperty, XRANGE=xrange, YRANGE=yrange
@@ -143,11 +143,11 @@ PRO cgZImage_ZoomWindow_Events, event
              StrTrim(value[1],2) + ', ' + StrTrim(value[2],2) + ')'
     ENDELSE
     Widget_Control, (*info).statusbar, Set_Value=loctext + valuetext
-     
+
     ; Draw the box and a small circle to locate the cursor on the
     ; larger image.
     WSet, (*info).drawIndex
-    Device, Copy=[0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).pixIndex]    
+    Device, Copy=[0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).pixIndex]
     xvec = cgScaleVector(Findgen(!D.X_Size), 0, (*info).xsize)
     yvec = cgScaleVector(Findgen(!D.Y_Size), 0, (*info).ysize)
     xdloc = Value_Locate(xvec, xloc)
@@ -156,7 +156,7 @@ PRO cgZImage_ZoomWindow_Events, event
              [(*info).ys, (*info).yd, (*info).yd, (*info).ys, (*info).ys], $
               /Device, Color=(*info).boxcolor
     cgPlotS, xdloc, ydloc, /Device, PSYM='OpenCircle', Color=(*info).boxcolor, SymSize=1.5
-    
+
 END
 
 
@@ -169,9 +169,9 @@ END
 ;-
 PRO cgZImage_ZoomDied, zoomID
 
-    ; Come here when the zoom window dies. Basically, you 
+    ; Come here when the zoom window dies. Basically, you
     ; want to erase the zoom box in the full-size window.
-  
+
     ; Error handling
     Catch, theError
     IF theError NE 0 THEN BEGIN
@@ -182,13 +182,13 @@ PRO cgZImage_ZoomDied, zoomID
 
     ; Get the TLB of the full-sized window.
     Widget_Control, zoomID, GET_UVALUE=tlb
-    
+
     ; If that base is gone, disappear!
     IF Widget_Info(tlb, /VALID_ID) EQ 0 THEN RETURN
-    
+
     ; Get the information you need to redisplay the image.
     Widget_Control, tlb, Get_UValue=info
-    
+
     ; Redisplay the image.
     WSet, (*info).drawIndex
     cgImage, (*info).image, $
@@ -213,13 +213,13 @@ PRO cgZImage_ZoomDied, zoomID
        SIGMA=*(*info).sigma, $
        STRETCH=*(*info).stretch, $
        TOP=*(*info).top
-       
+
     WSet, (*info).pixIndex
     Device, Copy=[0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).drawIndex]
-    
+
     ; Clear the statusbar widget.
     Widget_Control, (*info).statusbar, Set_Value=""
-    
+
 END ; ----------------------------------------------------------------------
 
 
@@ -233,7 +233,7 @@ END ; ----------------------------------------------------------------------
 PRO cgZImage_BoxColor, event
 
     ; Come here to change the selector box color.
-  
+
     ; Error handling
     Catch, theError
     IF theError NE 0 THEN BEGIN
@@ -244,13 +244,13 @@ PRO cgZImage_BoxColor, event
 
     ; Get the information you need to redisplaythe image.
     Widget_Control, event.top, Get_UValue=info
-    
+
     boxcolor = cgPickColorName((*info).boxColor, Group_Leader=event.top)
     (*info).boxColor = boxColor
-    
+
     ; Redisplay the image.
     WSet, (*info).drawIndex
-    cgImage, (*info).image, $      
+    cgImage, (*info).image, $
        BETA=*(*info).beta, $
        BOTTOM=*(*info).bottom, $
        CLIP=*(*info).clip, $
@@ -275,11 +275,11 @@ PRO cgZImage_BoxColor, event
 
     WSet, (*info).pixIndex
     Device, Copy=[0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).drawIndex]
-    
+
     ; Unmap the controls.
     Widget_Control, (*info).controlID, Map=0
-    (*info).mapcontrols = 0    
-    
+    (*info).mapcontrols = 0
+
 END ; ----------------------------------------------------------------------
 
 
@@ -303,13 +303,13 @@ PRO cgZImage_LoadColors, event
     ENDIF
 
     Widget_Control, event.top, Get_UValue=info
-    
+
     ; What kind of event is this?
     thisEvent = Tag_Names(event, /Structure)
-    
+
     ; Do the right thing.
     CASE thisEvent OF
-    
+
         'WIDGET_BUTTON': BEGIN
             TVLCT, (*info).r, (*info).g, (*info).b, *(*info).bottom
             XColors, Group=event.top, NColors = *(*info).ncolors, $
@@ -318,18 +318,18 @@ PRO cgZImage_LoadColors, event
             Widget_Control, (*info).controlID, Map=0
             (*info).mapcontrols = 0
             END
-            
+
         'XCOLORS_LOAD':BEGIN
-    
+
                 ; Extract the new color table vectors from XCOLORS.
-    
+
             (*info).r = event.r(*(*info).bottom:*(*info).bottom+*(*info).ncolors-1)
             (*info).g = event.g(*(*info).bottom:*(*info).bottom+*(*info).ncolors-1)
             (*info).b = event.b(*(*info).bottom:*(*info).bottom+*(*info).ncolors-1)
-    
+
             ; Redisplay the image.
             WSet, (*info).drawIndex
-            cgImage, (*info).image, $      
+            cgImage, (*info).image, $
                BETA=*(*info).beta, $
                BOTTOM=*(*info).bottom, $
                CLIP=*(*info).clip, $
@@ -354,12 +354,12 @@ PRO cgZImage_LoadColors, event
 
             WSet, (*info).pixIndex
             Device, Copy=[0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).drawIndex]
-    
+
             ; Is a zoom window open? If so, redisplay it as well.
             IF Widget_Info((*info).zoomDrawID, /Valid_ID) THEN BEGIN
                WSet, (*info).zoomWindowID
                IF Ptr_Valid((*info).zoomedImage) THEN BEGIN
-                  cgImage, *(*info).zoomedImage, $      
+                  cgImage, *(*info).zoomedImage, $
                        BETA=*(*info).beta, $
                        BOTTOM=*(*info).bottom, $
                        CLIP=*(*info).clip, $
@@ -383,7 +383,7 @@ PRO cgZImage_LoadColors, event
                        TOP=*(*info).top
                ENDIF
             ENDIF
-    
+
             END
     ENDCASE
 END ; ----------------------------------------------------------------------
@@ -435,7 +435,7 @@ PRO cgZImage_Cleanup, tlb
         IF (*info).createdmap THEN BEGIN
            mapObj = *(*info).map
            Obj_Destroy, mapObj
-           Ptr_Free, (*info).map 
+           Ptr_Free, (*info).map
         ENDIF ELSE BEGIN
            mapObj = *(*info).map
            Ptr_Free, (*info).map
@@ -475,12 +475,12 @@ PRO cgZImage_Factor, event
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = cgErrorMsg()
-         
+
         ; Put the info structure back.
         IF N_Elements(info) NE 0 THEN Widget_Control, event.top, Set_UValue=info
         RETURN
     ENDIF
-    
+
     Widget_Control, event.top, Get_UValue=info
     Widget_Control, event.id, Get_UValue=factor
     (*info).zoomfactor = factor[event.index]
@@ -508,24 +508,24 @@ PRO cgZImage_DrawEvents, event
     IF theError NE 0 THEN BEGIN
         Catch, /CANCEL
         void = cgErrorMsg()
-         
+
         ; Turn motion events off.
-        Widget_Control, event.id, Draw_Motion_Events=0        
+        Widget_Control, event.id, Draw_Motion_Events=0
         RETURN
     ENDIF
 
    ; Get the info structure out of the top-level base.
     Widget_Control, event.top, Get_UValue=info
-    
+
    ; What type of an event is this?
     possibleEventTypes = [ 'DOWN', 'UP', 'MOTION', 'SCROLL' ]
     thisEvent = possibleEventTypes[event.type]
     buttons = ['NONE', 'LEFT', 'MIDDLE', 'NONE', 'RIGHT']
-    
+
     CASE thisEvent OF
-    
+
        'DOWN': BEGIN
-    
+
        ; Is this the left or right button?
        ; If RIGHT, then map or unmap controls.
        buttonPressed = buttons[event.press]
@@ -547,11 +547,11 @@ PRO cgZImage_DrawEvents, event
 
       ; Turn draw MOTION events ON.
       Widget_Control, event.id, Draw_Motion_Events=1
-    
+
       ENDCASE
-    
+
       'UP': BEGIN
-    
+
        ; Is this the left or right button?
        ; If RIGHT, then do nothing.
        buttonReleased = buttons[event.release]
@@ -570,24 +570,24 @@ PRO cgZImage_DrawEvents, event
       event.y = 0 > event.y < ((*info).ysize - 1)
       x = [(*info).xs, event.x]
       y = [(*info).ys, event.y]
-      
+
       ; Make sure the user didn't just click in the window.
       IF (*info).xs EQ event.x OR (*info).ys EQ event.y THEN BEGIN
-      
+
           ; Erase the zoombox.
           WSet, (*info).drawIndex
           TVLCT, (*info).r, (*info).g, (*info).b
-          
+
           ; Copy from the pximap.
           Device, Copy = [0, 0, (*info).xsize, (*info).ysize, 0, 0, (*info).pixIndex]
           RETURN
-          
+
       ENDIF
 
       ; Make sure the x and y values are ordered as [min, max].
       IF (*info).xs GT event.x THEN x = [event.x, (*info).xs]
       IF (*info).ys GT event.y THEN y = [event.y, (*info).ys]
-      
+
       ; Make sure these are in image pixel coordinates, not just
       ; window pixel coordinates.
       xvec = cgScaleVector(Indgen((*info).xsize), 0, !D.X_Size-1)
@@ -611,7 +611,7 @@ PRO cgZImage_DrawEvents, event
            1: imageSubset = (*info).scaled[x[0]:x[1], *, y[0]:y[1]]
            2: imageSubset = (*info).scaled[x[0]:x[1], y[0]:y[1], *]
       ENDCASE
-      
+
       zoomedImage = cgResizeImage(imageSubset, zoomXSize, zoomYSize, Interp=0)
       IF Ptr_Valid((*info).zoomedImage) $
         THEN *(*info).zoomedImage = zoomedImage $
@@ -625,14 +625,14 @@ PRO cgZImage_DrawEvents, event
          ; scroll bars, destroy it and recreate it.
          dims = Image_Dimensions(*(*info).zoomedimage, XSIZE=ixsize, YSIZE=iysize)
          IF (ixsize GT (*info).maxSize) OR (iysize GT (*info).maxSize) OR ((*info).hasScrollBars) THEN BEGIN
-         
+
              ; Get offset positions for the non-existing zoom window.
              Widget_Control, (*info).zoomDrawID, TLB_Get_Offset=offsets
-             xpos = offsets[0] 
+             xpos = offsets[0]
              ypos = offsets[1]
-             
+
              Widget_Control, (*info).zoomtlb, /Destroy
-             
+
              ; Calculate a window size. Maximum window size is 800.
              dims = Image_Dimensions(*(*info).zoomedimage, XSIZE=ixsize, YSIZE=iysize)
              aspect = Float(ixsize)/iysize
@@ -641,7 +641,7 @@ PRO cgZImage_DrawEvents, event
                  x_scroll_size = MAXSIZE < ixsize
                  y_scroll_size = MAXSIZE < iysize
                  (*info).hasScrollBars = 1
-                 
+
                  ; Make sure window is not off the display.
                  maxwinsize = MaxWindowSize()
                  IF (xpos + x_scroll_size) GT maxwinsize[0] THEN $
@@ -649,7 +649,7 @@ PRO cgZImage_DrawEvents, event
                  IF (ypos + y_scroll_size) GT maxwinsize[1] THEN $
                     ypos = maxwinsize[1] - y_scroll_size
              ENDIF ELSE (*info).hasScrollBars = 0
-             
+
              ; Zoom window does not exist. Create it.
              zoomTLB = Widget_Base(Title='Zoomed Image', Group=event.top, $
                  XOffset=xpos, YOffset=ypos, KILL_NOTIFY='cgZImage_ZoomDied', $
@@ -663,14 +663,14 @@ PRO cgZImage_DrawEvents, event
              (*info).zoomTLB = zoomTLB
              WSet, windowID
              IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage, PALETTE=*(*info).palette
-     
+
           ENDIF ELSE BEGIN
-         
+
          ; Zoomed window exists. Make it correct size and load image.
          Widget_Control, (*info).zoomDrawID, XSize=zoomXSize, YSize=zoomYSize
          WSet, (*info).zoomWindowID
          IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage, PALETTE=*(*info).palette
-         
+
          ENDELSE
       ENDIF ELSE BEGIN
 
@@ -678,7 +678,7 @@ PRO cgZImage_DrawEvents, event
          Widget_Control, event.top, TLB_Get_Size=sizes, TLB_Get_Offset=offsets
          xpos = sizes[0] + offsets[0] + 20
          ypos = offsets[1] + 40
-         
+
          ; Calculate a window size. Maximum window size is 800.
          dims = Image_Dimensions(*(*info).zoomedimage, XSIZE=ixsize, YSIZE=iysize)
          aspect = Float(ixsize)/iysize
@@ -687,7 +687,7 @@ PRO cgZImage_DrawEvents, event
              x_scroll_size = MAXSIZE < ixsize
              y_scroll_size = MAXSIZE < iysize
              (*info).hasScrollBars = 1
-                 
+
              ; Make sure window is not off the display.
              maxwinsize = MaxWindowSize()
              IF (xpos + x_scroll_size) GT maxwinsize[0] THEN $
@@ -695,7 +695,7 @@ PRO cgZImage_DrawEvents, event
              IF (ypos + y_scroll_size) GT maxwinsize[1] THEN $
                 ypos = maxwinsize[1] - y_scroll_size
          ENDIF ELSE (*info).hasScrollBars = 0
-         
+
          ; Zoom window does not exist. Create it.
          zoomtlb = Widget_Base(Title='Zoomed Image', Group=event.top, TLB_Frame_Attr=1, $
              XOffset=xpos, YOffset=ypos, KILL_NOTIFY='cgZImage_ZoomDied', $
@@ -709,7 +709,7 @@ PRO cgZImage_DrawEvents, event
          (*info).zoomTLB = zoomTLB
          WSet, windowID
          IF Ptr_Valid((*info).zoomedImage) THEN cgImage, *(*info).zoomedImage, PALETTE=*(*info).palette
-         
+
       ENDELSE
 
       ; If the controls were mapped, unmap them.
@@ -717,7 +717,7 @@ PRO cgZImage_DrawEvents, event
           Widget_Control, (*info).controlID, Map=0
           (*info).mapcontrols = 0
       ENDIF
-    
+
       ENDCASE
 
     'MOTION': BEGIN
@@ -735,14 +735,14 @@ PRO cgZImage_DrawEvents, event
     (*info).xd = event.x
     (*info).yd = event.y
 
-    ; Draw the zoom box. 
+    ; Draw the zoom box.
     Device, Get_Decomposed=theState
     Device, Decomposed=1
     PlotS, [(*info).xs, (*info).xs, (*info).xd, (*info).xd, (*info).xs], $
        [(*info).ys, (*info).yd, (*info).yd, (*info).ys, (*info).ys], $
        /Device, Color=cgColor((*info).boxcolor)
     Device, Decomposed=theState
-       
+
     ENDCASE
 
 ENDCASE
@@ -761,13 +761,13 @@ END ; ----------------------------------------------------------------------
 ;        A 2D or true-color image of any normal data type. If not a BYTE array,
 ;        cgImage keywords for proper image scaling must be used to provide image
 ;        scaling parameters.
-;       
+;
 ; :Keywords:
 ;    beta: in, optional, type=float, default=3.0
 ;         The beta factor in a Hyperpolic Sine stretch. Available only with 2D images.
 ;    bottom: in, optional, type=integer, default=0
-;         If the SCALE keyword is set, the image is scaled before display so that all 
-;         displayed pixels have values greater than or equal to BOTTOM and less than 
+;         If the SCALE keyword is set, the image is scaled before display so that all
+;         displayed pixels have values greater than or equal to BOTTOM and less than
 ;         or equal to TOP. Available only with 2D images.
 ;    boxcolor: in, optional, type=string, default='gold'
 ;         The name of the color of the rubber-band selection box.
@@ -787,8 +787,8 @@ END ; ----------------------------------------------------------------------
 ;         The widget identifier of the group leader for this program. When the group leader
 ;         dies, this program will be destroyed, too.
 ;    interpolate: in, optional, type=boolean, default=0
-;         Set this keyword to interpolate with bilinear interpolation the display image as it 
-;         is sized to its final position in the display window. Interpolation will potentially 
+;         Set this keyword to interpolate with bilinear interpolation the display image as it
+;         is sized to its final position in the display window. Interpolation will potentially
 ;         create image values that do not exist in the original image. The default is to do no
 ;         interpolation, so that image values to not change upon resizing. Interpolation can
 ;         result in smoother looking final images.
@@ -796,19 +796,19 @@ END ; ----------------------------------------------------------------------
 ;         A cgMap object for navigating the input image.
 ;    maxvalue: in, optional, type=varies
 ;         If this value is defined, the data is linearly scaled between MINVALUE
-;         and MAXVALUE. MAXVALUE is set to MAX(image) by default. Setting this 
-;         keyword to a value automatically sets `SCALE` to 1. If the maximum value of the 
+;         and MAXVALUE. MAXVALUE is set to MAX(image) by default. Setting this
+;         keyword to a value automatically sets `SCALE` to 1. If the maximum value of the
 ;         image is greater than 255, this keyword is defined and SCALE=1.
 ;    mean: in, optional, type=float, default=0.5
 ;         The mean factor in a logarithmic stretch. Available only with 2D images.
 ;    minvalue: in, optional, type=varies
 ;         If this value is defined, the data is linearly scaled between MINVALUE
-;         and `MAXVALUE`. MINVALUE is set to MIN(image) by default. Setting this 
-;         keyword to a value automatically sets SCALE=1. If the minimum value of the 
+;         and `MAXVALUE`. MINVALUE is set to MIN(image) by default. Setting this
+;         keyword to a value automatically sets SCALE=1. If the minimum value of the
 ;         image is less than 0, this keyword is defined and SCALE=1.
 ;    missing_color: in, optional, type=string, default='white'
 ;         The color name of the missing value. Available only with 2D images.
-;    missing_index: in, optional, type=integer, default=255 
+;    missing_index: in, optional, type=integer, default=255
 ;         The index of the missing color in the final byte scaled image. Available only with 2D images.
 ;    missing_value: in, optional, type=integer
 ;         The number that represents the missing value in the image. Available only with 2D images.
@@ -816,38 +816,38 @@ END ; ----------------------------------------------------------------------
 ;         The multiplication factor in a standard deviation stretch. The standard deviation
 ;         is multiplied by this factor to produce the thresholds for a linear stretch.
 ;    ncolors: in, optional, type=integer, default=256
-;         If this keyword is supplied, the `TOP` keyword is ignored and the TOP keyword 
-;         is set equal to  NCOLORS-1. This keyword is provided to make cgImage easier 
+;         If this keyword is supplied, the `TOP` keyword is ignored and the TOP keyword
+;         is set equal to  NCOLORS-1. This keyword is provided to make cgImage easier
 ;         to use with the color-loading programs such as cgLOADCT::
 ;
 ;              cgLoadCT, 5, NColors=100, Bottom=100
 ;              cgImage, image, NColors=100, Bottom=100
-;                  
+;
 ;         Setting this keyword to a value automatically sets SCALE=1. Available only with 2D images.
 ;    negative: in, optional, type=boolean, default=0
 ;         Set this keyword if you want to display the image with a negative or reverse stretch.
 ;         Available only with 2D images.
 ;    palette: in, optional, type=byte
-;         Set this keyword to a 3x256 or 256x3 byte array containing the RGB color 
-;         vectors to be loaded before the image is displayed. Such vectors can be 
+;         Set this keyword to a 3x256 or 256x3 byte array containing the RGB color
+;         vectors to be loaded before the image is displayed. Such vectors can be
 ;         obtained, for example, from cgLoadCT with the RGB_TABLE keyword::
-;               
+;
 ;                cgLoadCT, 4, /BREWER, /REVERSE, RGB_TABLE=palette
 ;                cgImage, cgDemoData(7), PALETTE=palette
 ;    scale: in, optional, type=boolean, default=0
-;         Set this keyword to byte scale the image before display. If this keyword is not set, 
+;         Set this keyword to byte scale the image before display. If this keyword is not set,
 ;         the image is not scaled before display. This keyword will be set automatically by using
-;         any of the keywords normally associated with byte scaling an image. Available only with 
+;         any of the keywords normally associated with byte scaling an image. Available only with
 ;         2D images. If set, STRETCH is set to 1, unless it is set to another value.
 ;    stretch: in, optional, type=integer/string, default=1
-;         The type of scaling performed prior to display. May be specified as a number 
+;         The type of scaling performed prior to display. May be specified as a number
 ;         or as a string (e.g, 3 or "Log"). Available only with 2D images.
 ;
 ;           Number   Type of Stretch
 ;             0         None           No scaling whatsoever is done.
 ;             1         Linear         scaled = BytScl(image, MIN=minValue, MAX=maxValue)
 ;             2         Clip           A histogram stretch, with a percentage of pixels clipped at both the top and bottom
-;             3         Gamma          scaled = GmaScl(image, MIN=minValue, MAX=maxValue, Gamma=gamma)
+;             3         Gamma          scaled = cgGmaScl(image, MIN=minValue, MAX=maxValue, Gamma=gamma)
 ;             4         Log            scaled = LogScl(image, MIN=minValue, MAX=maxValue, Mean=mean, Exponent=exponent)
 ;             5         Asinh          scaled = AsinhScl(image, MIN=minValue, MAX=maxValue, Beta=beta)
 ;             6         SquareRoot     A linear stretch of the square root histogram of the image values.
@@ -860,8 +860,8 @@ END ; ----------------------------------------------------------------------
 ;    title: in, optional, type=string, default=""
 ;         Set this keyword to the title of the plot window.
 ;    top: in, optional, type=integer, default=255
-;         If the SCALE keyword is set, the image is scaled before display so that all 
-;         displayed pixels have values greater than or equal to BOTTOM and less than 
+;         If the SCALE keyword is set, the image is scaled before display so that all
+;         displayed pixels have values greater than or equal to BOTTOM and less than
 ;         or equal to TOP. Available only with 2D images.
 ;    zoomfactor: in, optional, type=string, default=3
 ;         Use this keyword to set the starting zoom factor. The values you can use are as follows::
@@ -905,9 +905,9 @@ PRO cgZImage, image, $
    TITLE=title, $
    TOP=top, $
    ZOOMFACTOR=zoomfactor
-    
+
     Compile_Opt idl2
-    
+
     ; Error handling
     Catch, theError
     IF theError NE 0 THEN BEGIN
@@ -915,7 +915,7 @@ PRO cgZImage, image, $
         void = cgErrorMsg()
         RETURN
     ENDIF
-    
+
     ; Was a filename used to pass in an image filename? Check to see if this is a GeoTiff image
     ; before doing anything else. If it is, use cgGeoMap to read it. Otherwise, read the image
     ; file with READ_IMAGE.
@@ -928,37 +928,37 @@ PRO cgZImage, image, $
            image = Read_Image(filename, r, g, b)
            IF N_Elements(r) NE 0 THEN palette = [[r],[g],[b]]
         ENDELSE
-    ENDIF 
+    ENDIF
     IF N_Elements(createdMap) EQ 0 THEN createdMap = 0
-    
+
     ; Was an image passed into the procedure?
     ; If not, find one in the IDL examples/data directory.
     IF N_Elements(image) EQ 0 THEN BEGIN
        image = ImageSelect(FILENAME='marsglobe.jpg', CANCEL=cancelled, /EXAMPLES)
        IF cancelled THEN RETURN
     ENDIF
-    
+
     ; Make sure this is a 2D or true-color image.
     ndims = Size(image, /N_DIMENSIONS)
     IF (ndims LT 2) || (ndims GT 3) THEN Message, 'Only 2D or True-Color images are allowed in cgZImage.'
-    
+
     ; Get image size.
     dims = Image_Dimensions(image, XSize=ixsize, YSize=iysize, $
         XIndex=xindex, YIndex=yindex, TrueIndex=trueindex)
-    IF trueIndex NE -1 THEN nframes = dims[trueIndex] ELSE nframes = 1 
+    IF trueIndex NE -1 THEN nframes = dims[trueIndex] ELSE nframes = 1
     IF nframes GT 3 THEN BEGIN
         Help, image
         Message, 'Image does not have the correct dimensions for cgZImage.'
     ENDIF
-    
-    ; Check for keywords. 
+
+    ; Check for keywords.
     IF N_Elements(sboxcolor) EQ 0 THEN boxcolor = 'gold' ELSE boxcolor = sboxcolor
     IF N_Elements(stretch) EQ 0 THEN BEGIN
        maxValue = Max(image, MIN=minValue)
        IF (minValue LT 0) || (maxValue GT 255) THEN stretch=1
     ENDIF
     IF N_Elements(zoomfactor) EQ 0 THEN zoomfactor = 3 ELSE zoomfactor = 0 > zoomfactor < 9
-    
+
     ; Calculate a window size. Maximum window size is 600.
      aspect = Float(ixsize)/iysize
      MAXSIZE = 600
@@ -1004,7 +1004,7 @@ PRO cgZImage, image, $
      IF N_Elements(sigma) EQ 0 THEN  sigmaptr = Ptr_New(/Allocate_Heap) ELSE sigmaptr = Ptr_New(sigma)
      IF N_Elements(stretch) EQ 0 THEN  stretchptr = Ptr_New(/Allocate_Heap) ELSE stretchptr = Ptr_New(stretch)
      IF N_Elements(top) EQ 0 THEN  topptr = Ptr_New(/Allocate_Heap) ELSE topptr = Ptr_New(top)
-    
+
     ; Create a top-level base for this program. No resizing of this base.
     tlb = Widget_Base(TLB_Frame_Attr=1, TITLE=title)
 
@@ -1021,19 +1021,19 @@ PRO cgZImage, image, $
     void = Widget_Button(controlID, Value='Change Selection Box Color', Event_Pro='cgZImage_BoxColor')
     quitter = Widget_Button(controlID, Value='Exit Program', $
        Event_Pro='cgZImage_Quit')
-    
+
     drawbase = Widget_Base(tlb, Map=1, Column=1)
     drawID = Widget_Draw(drawbase, XSize=xsize, YSize=ysize, $
        Button_Events=1, Event_Pro='cgZImage_DrawEvents')
 
     statusbar = Widget_Label(drawbase, Value="Ready for Zooming", SCR_XSIZE=xsize, /Sunken_Frame)
-    
+
     ; Realize the program.
     Widget_Control, tlb, /Realize
-    
+
     ; Set the initial default zoom factor.
     Widget_Control, zoomfactorID, SET_DROPLIST_SELECT=zoomfactor
-    
+
     ; Get the window index number of the draw widget.
     ; Make the draw widget the current graphics window
     ; and display the image in it.
@@ -1067,7 +1067,7 @@ PRO cgZImage, image, $
         Widget_Control, tlb, TLB_Set_Title='Full Size Image (' + StrTrim(drawIndex,2) + ') -- ' + $
            'Right Click for Controls.'
     ENDIF
-    
+
     ; Set the current zoom factor
     factor = factors[zoomfactor]
 
@@ -1101,7 +1101,7 @@ PRO cgZImage, image, $
 
    ; Get color vectors for this application.
    IF N_Elements(r) EQ 0 THEN TVLCT, r, g, b, /Get
-   
+
    ; Scale the data, because this is what you will show in the zoomed window.
    scaled = cgImgScl(image, $
        BETA=*betaptr, $
@@ -1186,7 +1186,5 @@ PRO cgZImage, image, $
 
     ; Register this program and set up the event loop.
     XManager, 'cgzimage', tlb, Cleanup='cgZImage_Cleanup', Group_Leader=group_leader, /No_Block
-    
+
 END ; ----------------------------------------------------------------------
-
-

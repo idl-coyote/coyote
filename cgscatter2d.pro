@@ -212,7 +212,9 @@
 ;         Added the ability to use escape characters in plot titles to specify cgSymbol symbols. 27 July 2012. DWF.
 ;         Bad logic when creating a GRID and setting [XY]Style keywords. 30 Aug 2013. DWF.
 ;         If you are setting a range, but not using the [XY]Style keywords, then I am going to set [XY]Style=1. 17 Feb 2014. DWF.
-;                  
+;         Corrected a problem with axis ranges when drawing the first plot in a PostScript file. The problem was that the 
+;             Plot command there was not identical to the other Plot commands in the program and it needs to be
+;             to get the spacing and axis notation correct. 7 January 2016. DWF.
 ; :Copyright:
 ;     Copyright (c) 2012-2014, Fanning Software Consulting, Inc.
 ;-
@@ -607,7 +609,12 @@ PRO cgScatter2D, x, y, $
                     
                     ; Draw the plot that doesn't draw anything.
                     Plot, x, y, POSITION=position, CHARSIZE=charsize, /NODATA, $
-                        FONT=font, XRANGE=xrange, YRANGE=yrange, _STRICT_EXTRA=extra  
+                        NOERASE=tempNoErase, FONT=font, $
+                        XTICKLEN=xticklen, YTICKLEN=yticklen, XRANGE=xrange, YRANGE=yrange, $
+                        XGRIDSTYLE=glinestyle, YGRIDSTYLE=glinestyle, $
+                        XSTYLE=(2S^16-5) AND xstyle, YSTYLE=(2S^16-5) AND ystyle, $
+                        _STRICT_EXTRA=extra, XTickFormat='(A1)', YTickFormat='(A1)', $
+                        XTITLE="", YTITLE="", TITLE=""
                     
                     ; Save the "after plot" system variables. Will use later. 
                     afterx = !X

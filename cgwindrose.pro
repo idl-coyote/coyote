@@ -84,6 +84,7 @@
 ;            that allow multiple windrose plots to be place in a graphics window. To better 
 ;            accommodate multiple plots, the cardinal directions are now indicated with a 
 ;            single letter and the default circle label font size is reduced. 22 Oct 2014. DWF.
+;        Fixed a couple of hardcoded number problems when using your own speed and direction vectors. 20 June 2015. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 2013-2014, Fanning Software Consulting, Inc.
@@ -328,6 +329,8 @@ PRO cgWindRose, speed, direction, $
    ENDELSE
    
    maxSpeed = Round(Max(speed)/10.)*10
+   IF maxSpeed EQ 0 THEN maxSpeed = Ceil(Max(speed))
+   ;maxSpeed = Ceil(Max(speed))
 
    ; Compute the 2D matrix for speed and direction.
    matrix = Hist_ND(Transpose([[speed_final],[direction_final]]), [speedBinSize, 22.5], $
@@ -422,7 +425,7 @@ PRO cgWindRose, speed, direction, $
            ypos = !Y.Window[0] + ((!D.Y_CH_SIZE * 10.0) / !D.Y_Size)
            legendPosition = [xpos, ypos]
        ENDIF
-       cgLegend, Title=speedStr, PSym=15, SymSize=1.5, Color=colors[0:5], Length=0.0, $
+       cgLegend, Title=speedStr, PSym=15, SymSize=1.5, Color=colors[0:N_Elements(speedStr)-1], Length=0.0, $
            Location=legendPosition, VSpace=1.5, Charsize=cgDefCharsize()*0.75, /Box
        xtextpos = legendPosition[0] - ((!D.X_CH_SIZE * 1.5) / !D.X_Size)
        ytextpos = legendPosition[1] + ((!D.Y_CH_SIZE * 1.0) / !D.Y_Size)

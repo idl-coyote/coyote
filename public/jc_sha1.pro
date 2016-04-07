@@ -44,7 +44,7 @@
 ;           5c9eabac232b38b1e418a17fa984582f491b5b75
 ;
 ; :Author:
-;    John Corriera
+;    John Correira
 ;
 ; :History:
 ;     Change History::

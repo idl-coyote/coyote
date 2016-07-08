@@ -88,9 +88,10 @@
 ;         to the "softening parameter" of Lupton et. al., following the
 ;         suggestions of Marshall Perrin. 25 April 2006. DWF.
 ;       Renamed cgASinhScl from ASinhScl. 27 March 2015. DWF.
+;       Yikes! Two instances of naming problems from 2015! Fixed. 8 July 2016. DWF.
 ;       
 ; :Copyright:
-;     Copyright (c) 2008-2015, Fanning Software Consulting, Inc.
+;     Copyright (c) 2008-2016, Fanning Software Consulting, Inc.
 ;-
 
 ;+
@@ -207,10 +208,10 @@ FUNCTION cgASinhScl, image, $
 
   ; Find out where 0 and 1 map in ASINH, then set these as MINVALUE and MAXVALUE
    ; in next cgScaleVector call. This is necessary to preserve proper scaling.
-   extrema = ASinhScl_ASinh([0, 1.0D] * nonlinearity)
+   extrema = cgASinhScl_ASinh([0, 1.0D] * nonlinearity)
 
    ; Inverse hyperbolic sine scaling.
-   output = cgScaleVector(ASinhScl_ASinh(Temporary(output)*nonlinearity), $
+   output = cgScaleVector(cgASinhScl_ASinh(Temporary(output)*nonlinearity), $
       minOut, maxOut, /NAN, Double=1, MinValue=extrema[0], MaxValue=extrema[1])
 
    ; Clear math errors.

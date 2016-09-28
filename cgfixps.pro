@@ -183,8 +183,14 @@ PRO cgFIXPS, in_filename, out_filename, $
         ELSE: Message, 'Unknown PageType: ' + pageType
   ENDCASE
   
+  ; Move along in the file until the end of the Prolog.
+  line = ""
+  count = 0
+  target = "void"
+  buffer = StrArr(100)
+  
+  OpenR, in_lun, in_filename,  /GET_LUN
   ; If the file size is 0, then there is nothing to fix. Clean up and exit with success.
-  Get_Lun, in_lun
   IF (FStat(in_lun)).size EQ 0 THEN BEGIN
     Free_lun, in_lun
     Free_lun, out_lun
@@ -192,13 +198,6 @@ PRO cgFIXPS, in_filename, out_filename, $
     RETURN
   ENDIF
   
-  ; Move along in the file until the end of the Prolog.
-  line = ""
-  count = 0
-  target = "void"
-  buffer = StrArr(100)
-  
-  OpenR, in_lun, in_filename
   WHILE target NE '%%EndProlog' DO BEGIN
       ReadF, in_lun, line
       buffer[count] = line

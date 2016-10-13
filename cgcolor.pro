@@ -148,6 +148,8 @@
 ;              any problems reading this pixel, I report the background color as "white". 27 Feb 2015. DWF.
 ;         Ran into an ATV image that was less than 5 pixels on a side! More fooling around to avoid calling
 ;              cgSnapshot when it might fail. 29 March 2016. DWF.
+;         Don't call cgSnapshot on X-windows when there is no backing store (Retain = 2) as this often   
+;              yields spurious results.     12 Oct 2016 W. Landsman
 ;        
 ; :Copyright:
 ;     Copyright (c) 2009-2016, Fanning Software Consulting, Inc.
@@ -433,12 +435,14 @@ FUNCTION cgColor, theColour, colorIndex, $
     ; The pixel I am going to read, an an attempt to avoid problems is a pixel five pixels
     ; into what I *think* is the end of the window. If the image is smaller than 5 pixels on
     ; a side, I'm going to give up and shoot myself (after I make the background white and
-    ; the opposite color black).
+    ; the opposite color black).     I will also give up if using X windows without
+    ; backing store because TVRD() can then give spurious results.
     index = Where(theColor EQ 'OPPOSITE' OR theColor EQ 'BACKGROUND', bgcount)
     IF bgcount GT 0 THEN BEGIN 
         IF ((!D.Window GE 0) && ((!D.Flags AND 256) NE 0)) || (!D.Name EQ 'Z') THEN BEGIN
            Catch, theError
-           IF theError NE 0 THEN BEGIN
+           IF (theError NE 0) || $
+              ((!D.NAME EQ 'X') && (pref_get('IDL_GR_X_RETAIN') LT 2)) THEN BEGIN
               opixel =  [255B, 255B, 255B]
            ENDIF
            IF N_Elements(opixel) EQ 0 THEN BEGIN

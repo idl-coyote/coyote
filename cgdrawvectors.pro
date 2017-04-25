@@ -199,9 +199,12 @@
 ;           of a vector. You will see an "aspect" variable in the code. When being placed on map projections,
 ;           using either cgMap_Set or cgMap, the aspect ratio of 180./360. is always used. The aspect ratio is
 ;           used to scale the vector components before placement of the vector. 23 February 2015. DWF.
+;        Well, duh! Had the WINDOW keyword set when I passed this to a cgWindow. This started a beautiful 
+;           infinite loop! Removed. 11 Nov 2016. DWF.
+;        Fixed a problem with default vector colors not being byte values. 11 Nov 2016. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2014-2015, Fanning Software Consulting, Inc.
+;     Copyright (c) 2014-2016, Fanning Software Consulting, Inc.
 ;-
 PRO cgDrawVectors, velx, vely, posx_, posy_, $
    ADDCMD=addcmd, $
@@ -278,7 +281,6 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
                SOLID=solid, $
                THICK=thick, $
                VECCOLORS=veccolors_in, $
-               WINDOW=window, $
                XRANGE=xrange, $
                YRANGE=yrange, $
                ADDCMD=1, $
@@ -306,7 +308,6 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
                SOLID=solid, $
                THICK=thick, $
                VECCOLORS=veccolors_in, $
-               WINDOW=window, $
                XRANGE=xrange, $
                YRANGE=yrange, $
                REPLACECMD=replaceCmd, $
@@ -337,7 +338,7 @@ PRO cgDrawVectors, velx, vely, posx_, posy_, $
         YRange=[Min(posy_), Max(posy_)], _STRICT_EXTRA=extra
 
    ; Color determination is postponed to here, after a plot is drawn.
-   SetDefaultValue, veccolors_in, cgColor('opposite')
+   SetDefaultValue, veccolors_in, Byte(cgColor('opposite'))
    
    ; Vector colors should be the same length as other vectors.
    veclength = N_Elements(velx)

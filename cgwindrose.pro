@@ -85,9 +85,10 @@
 ;            accommodate multiple plots, the cardinal directions are now indicated with a 
 ;            single letter and the default circle label font size is reduced. 22 Oct 2014. DWF.
 ;        Fixed a couple of hardcoded number problems when using your own speed and direction vectors. 20 June 2015. DWF.
-;
+;        Added an OUTPUT keyword so that the windrose output can be sent directly to an output file. 1 July 2016. DWF.
+;        
 ; :Copyright:
-;     Copyright (c) 2013-2014, Fanning Software Consulting, Inc.
+;     Copyright (c) 2013-2016, Fanning Software Consulting, Inc.
 ;-
 
 ;+
@@ -236,6 +237,28 @@ END
 ;         either the size of the window or the location of the legend for improved visibility.
 ;      nolegend: in, optional, type=boolean, default=0
 ;         Set this keyword to prevent the windrose legend from being drawn with the windrose plot.;         
+;     output: in, optional, type=string, default=""
+;        Set this keyword to the type of output desired. Possible values are these::
+;
+;            'PS'   - PostScript file
+;            'EPS'  - Encapsulated PostScript file
+;            'PDF'  - PDF file
+;            'BMP'  - BMP raster file
+;            'GIF'  - GIF raster file
+;            'JPEG' - JPEG raster file
+;            'PNG'  - PNG raster file
+;            'TIFF' - TIFF raster file
+;
+;        Or, you can simply set this keyword to the name of the output file, and the type of
+;        file desired will be determined by the file extension. If you use this option, the
+;        user will not be prompted to supply the name of the output file.
+;
+;        All raster file output is created through PostScript intermediate files (the
+;        PostScript files will be deleted), so ImageMagick and Ghostview MUST be installed
+;        to produce anything other than PostScript output. (See cgPS2PDF and cgPS_Close for
+;        details.) And also note that you should NOT use this keyword when doing multiple
+;        plots. The keyword is to be used as a convenient way to get PostScript or raster
+;        output for a single graphics command. Output parameters can be set with cgWindow_SetDefs.
 ;      position: in, optional, type=float
 ;         The usual four-element POSITION keyword giving the plot position of the windrose plot in
 ;         normalized coordinates.
@@ -252,6 +275,7 @@ PRO cgWindRose, speed, direction, $
     CIRCLELABELSIZE=circlelablesize, $
     LEGENDPOSITION=legendposition, $
     NOLEGEND=nolegend, $
+    OUTPUT=output, $
     POSITION=position, $
     SAMFILE=samFile, $
     SPEEDBINSIZE=speedBinSize, $
@@ -265,6 +289,7 @@ PRO cgWindRose, speed, direction, $
    IF theError NE 0 THEN BEGIN
       Catch, /CANCEL
       void = cgErrorMsg()
+      IF (N_Elements(output) NE 0) THEN cgPS_Close, /NOFIX
       RETURN
    ENDIF
    
@@ -357,6 +382,118 @@ PRO cgWindRose, speed, direction, $
    ENDELSE
    IF !D.Window LT 0 THEN cgDisplay, win_xsize, win_ysize
    
+   ; Are we doing some kind of output?
+   IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
+   
+       ; If the output string has a dot character, then this must be a
+       ; filename, and we will determine the type of file from the filename extension.
+       IF StrPos(output, '.') NE -1 THEN BEGIN
+           root_name = cgRootName(output, DIRECTORY=theDir, EXTENSION=ext)
+           IF theDir EQ "" THEN CD, CURRENT=theDir
+           outfilename = output
+           outputSelection = StrUpCase(ext)
+       ENDIF
+       
+       IF N_Elements(outputSelection) EQ 0 THEN outputSelection = StrUpCase(output)
+       typeOfOutput = ['PS','EPS','PDF','BMP','GIF','JPEG','JPG','PNG','TIFF', 'TIF']
+       void = Where(typeOfOutput EQ outputSelection, count)
+       IF count EQ 0 THEN Message, 'Cannot find ' + outputSelection + ' in allowed output types.'
+       
+       ; Set things up.
+       CASE outputSelection OF
+           'PS': BEGIN
+               ext = '.ps'
+               delete_ps = 0
+           END
+           'EPS': BEGIN
+               ext = '.eps'
+               encapsulated = 1
+               delete_ps = 0
+           END
+           'PDF': BEGIN
+               ext = '.pdf'
+               pdf_flag = 1
+               delete_ps = 1
+           END
+           'BMP': BEGIN
+               ext = '.bmp'
+               bmp_flag = 1
+               delete_ps = 1
+           END
+           'GIF': BEGIN
+               ext = '.gif'
+               gif_flag = 1
+               delete_ps = 1
+           END
+           'JPEG': BEGIN
+               ext = '.jpg'
+               jpeg_flag = 1
+               delete_ps = 1
+           END
+           'JPG': BEGIN
+               ext = '.jpg'
+               jpeg_flag = 1
+               delete_ps = 1
+           END
+           'PNG': BEGIN
+               ext = '.png'
+               png_flag = 1
+               delete_ps = 1
+           END
+           'TIFF': BEGIN
+               ext = '.tif'
+               tiff_flag = 1
+               delete_ps = 1
+           END
+           'TIF': BEGIN
+               ext = '.tif'
+               tiff_flag = 1
+               delete_ps = 1
+           END
+       ENDCASE
+       
+       ; Do you need a filename?
+       IF ( (N_Elements(outfilename) EQ 0) || (outfilename EQ "") ) THEN BEGIN
+           filename = 'cgplot' + ext
+           outfilename = cgPickfile(FILE=filename, TITLE='Select Output File Name...', $
+               FILTER=ext, /WRITE)
+           IF outfilename EQ "" THEN RETURN
+       ENDIF
+       
+       ; We need to know the root name of the file, because we have to make a PostScript
+       ; file of the same name. At least we do if the type is not PS or EPS.
+       IF (outputSelection NE 'PS') && (outputSelection NE 'EPS') THEN BEGIN
+           root_name = cgRootName(outfilename, DIRECTORY=theDir)
+           IF theDir EQ "" THEN CD, CURRENT=theDir
+           ps_filename = Filepath(ROOT_DIR=theDir, root_name + '.ps')
+       ENDIF ELSE ps_filename = outfilename
+       
+       ; Get the output default values.
+       cgWindow_GetDefs, $
+           PS_Charsize = ps_charsize, $          ; The PostScript character size.
+           PS_FONT = ps_font, $                  ; Select the font for PostScript output.
+           PS_Decomposed = ps_decomposed, $      ; Sets the PostScript color mode.
+           PS_Delete = ps_delete, $              ; Delete PS file when making IM raster.
+           PS_Metric = ps_metric, $              ; Select metric measurements in PostScript output.
+           PS_Scale_factor = ps_scale_factor, $  ; Select the scale factor for PostScript output.
+           PS_TT_Font = ps_tt_font               ; Select the true-type font to use for PostScript output.
+           
+       ; Set up the PostScript device.
+       cgPS_Open, $
+           CHARSIZE=ps_charsize, $
+           DECOMPOSED=ps_decomposed, $
+           FILENAME=ps_filename, $
+           FONT=ps_font , $
+           ENCAPSULATED=encapsulated, $
+           METRIC=ps_metric, $
+           SCALE_FACTOR=ps_scale_factor, $
+           TT_FONT=ps_tt_font, $
+           QUIET=1
+           
+           
+   ENDIF
+
+   
    ; Set up the data coordinate system. Nothing shown here.
    cgPlot, [-maxFreq, maxFreq],[-maxFreq, maxFreq], /NoData, $
        ASPECT=1.0, XStyle=5, YStyle=5, Position=position, _STRICT_EXTRA=extra
@@ -438,5 +575,39 @@ PRO cgWindRose, speed, direction, $
             /Normal, title, Alignment=0.5, $
             Charsize=cgDefCharsize()*1.25
    
- END
+   ; Are we producing output? If so, we need to clean up here.
+   IF (N_Elements(output) NE 0) && (output NE "") THEN BEGIN
+        
+            ; Get the output default values.
+            cgWindow_GetDefs, $
+                IM_Density = im_density, $                      ; Sets the density parameter on ImageMagick convert command.
+                IM_Options = im_options, $                      ; Sets extra ImageMagick options on the ImageMagick convert command.
+                IM_Resize = im_resize, $                        ; Sets the resize parameter on ImageMagick convert command.
+                IM_Transparent = im_transparent, $              ; Sets the "alpha" keyword on ImageMagick convert command.
+                IM_Width = im_width, $                          ; Sets the width of raster file output created with ImageMagick.
+                PDF_Unix_Convert_Cmd = pdf_unix_convert_cmd, $  ; Command to convert PS to PDF.
+                PDF_Path = pdf_path                             ; The path to the Ghostscript conversion command.
+                
+            ; Close the PostScript file and create whatever output is needed.
+            cgPS_Close, DELETE_PS=delete_ps, $
+                ALLOW_TRANSPARENT=im_transparent, $
+                BMP=bmp_flag, $
+                DENSITY=im_density, $
+                GIF=gif_flag, $
+                GS_PATH=pdf_path, $
+                IM_OPTIONS=im_options, $
+                JPEG=jpeg_flag, $
+                PDF=pdf_flag, $
+                PNG=png_flag, $
+                RESIZE=im_resize, $
+                TIFF=tiff_flag, $
+                UNIX_CONVERT_CMD=pdf_unix_convert_cmd, $
+                WIDTH=im_width
+                
+            basename = File_Basename(outfilename)
+            dirname = File_Dirname(outfilename)
+            IF dirname EQ "." THEN CD, CURRENT=dirname
+            Print, 'Output File: ' + Filepath(ROOT_DIR=dirname, basename)
+     ENDIF
+END
  

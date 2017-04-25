@@ -147,7 +147,8 @@
 ;       Typo (CONTINUOUS->CONTIGUOUS) fixed in WriteDefVar method. 30 July 2013. DWF.
 ;       Modified CopyVarDefTo method to allow new NCDF4 keywords. 30 July 2013. DWF.
 ;       Added DelGlobalAttr method to allow deletion of global attributes. 11 Jan 2014. DWF.
-;       
+;       Found typo in UBYTE variable code, which I fixed. 12 Fef 2016. DWF.
+;              
 ;-
 ;******************************************************************************************;
 ;  Copyright (c)2010, by Fanning Software Consulting, Inc.                                 ;
@@ -2644,7 +2645,7 @@ PRO NCDF_File::WriteVarDef, varName, dimNames, $
         'SHORT': tshort = 1
         'INT': tshort = 1
         'STRING': tchar = 1
-        'UBYTE': tubtye = 1
+        'UBYTE': tubyte = 1
         'ULONG': tulong = 1
         'UINT64': tuint64 = 1
         'UINT': tuint = 1

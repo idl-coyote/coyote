@@ -1725,7 +1725,7 @@ PRO cgZPlot::Zoom_Events, event
            ENDELSE
            *self.xrange = x
            *self.yrange = y
-            
+
            ; Draw the plot.
            self -> Draw
            END

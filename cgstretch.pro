@@ -561,7 +561,7 @@ PRO cgSTRETCH_DRAWLINES, minThresh, maxThresh, info
 
       'ASINH': BEGIN
             ; Draw the asinh function.
-            line = ASinhScl(Findgen(101), BETA=info.beta)
+            line = cgASinhScl(Findgen(101), BETA=info.beta)
             line = cgScaleVector(line, 0.0, !Y.CRange[1])
              x = cgScaleVector(Findgen(101), minThresh, maxThresh)
             OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2

@@ -349,7 +349,7 @@ IF Arg_Present(range) THEN range = self.range
 IF Arg_Present(color) THEN color = self.color
 IF Arg_Present(name) THEN self->IDLgrMODEL::GetProperty, Name=name
 IF Arg_Present(transform) THEN self->IDLgrMODEL::GetProperty, Transform=transform
-IF Arg_Present(extra) THEN self->IDLgrMODEL::GetProperty, _Ref_Extra=extra
+IF Arg_Present(extra) THEN self->IDLgrMODEL::GetProperty, _Extra=extra
 
 END
 ;-------------------------------------------------------------------------

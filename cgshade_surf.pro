@@ -258,6 +258,6 @@ PRO cgShade_Surf, data, x, y, $
         YTITLE=ytitle, $
         ZSTYLE=zstyle, $
         ZTITLE=ztitle, $
-       _Ref_Extra=extra
+       _Extra=extra
       
 END

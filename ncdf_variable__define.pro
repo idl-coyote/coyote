@@ -332,7 +332,7 @@ FUNCTION NCDF_Variable::GetAttrValue, attrName, DATATYPE=datatype
     CASE Size(attrName, /TNAME) OF
     
         'STRING': BEGIN
-            attrObj = self.attrs -> FindByName(attrName, COUNT=attrcount, /CASE_SENSITIVE)
+            attrObj = self.attrs -> FindByName(attrName, COUNT=attrcount)
             IF attrcount EQ 0 THEN Message, 'Cannot find an attribute object with name ' + attrName + '.'
             IF ~Obj_Valid(attrObj) THEN Message, 'Invalid object with name "' + attrName + '" has been found.'
             END

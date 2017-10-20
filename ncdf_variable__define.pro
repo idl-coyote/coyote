@@ -295,9 +295,9 @@ END
 ;                                                                              
 ;    attrValue = GetAttrValue(attrName, DATATYPE=datatype)                     
 ;                                                                              
-; Auguments:                                                                   
+; Arguments:                                                                   
 ;                                                                              
-;    attrName:     A case sensitive name of a variable attribute.              
+;    attrName:     A case insensitive name of a variable attribute.              
 ;                                                                              
 ; Keywords:                                                                    
 ;                                                                              

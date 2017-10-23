@@ -69,7 +69,11 @@
 ;           so that these values can be returned to the caller at run-time. 29 April 2010. DWF.
 ;       Modified AddAttr method to allow for additional data types in attributes, specifically
 ;           INT data type. 3 June 2013. DWF.
-;       Had to modify AddAttr method again to allow compatibility with IDL versions below 8.1. 26 July 2013. DWF.
+;       Had to modify AddAttr method again to allow compatibility with IDL
+;           versions below 8.1. 26 July 2013. DWF.
+;       Set Default attribute searching to case insensitive via
+;       idl-coyote/coyote#13 21 Oct 2017. MHS (mandrakos) 
+;
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2010, by Fanning Software Consulting, Inc.                                ;
@@ -295,9 +299,10 @@ END
 ;                                                                              
 ;    attrValue = GetAttrValue(attrName, DATATYPE=datatype)                     
 ;                                                                              
-; Auguments:                                                                   
+; Arguments:                                                                   
 ;                                                                              
-;    attrName:     A case sensitive name of a variable attribute.              
+;    attrName:     A case name of a variable attribute. Case sensitivity
+;                  determined by self.caseSensitiveAttributes
 ;                                                                              
 ; Keywords:                                                                    
 ;                                                                              
@@ -332,7 +337,7 @@ FUNCTION NCDF_Variable::GetAttrValue, attrName, DATATYPE=datatype
     CASE Size(attrName, /TNAME) OF
     
         'STRING': BEGIN
-            attrObj = self.attrs -> FindByName(attrName, COUNT=attrcount, /CASE_SENSITIVE)
+            attrObj = self.attrs -> FindByName(attrName, COUNT=attrcount,  CASE_SENSITIVE = self.caseSensitiveAttributes)
             IF attrcount EQ 0 THEN Message, 'Cannot find an attribute object with name ' + attrName + '.'
             IF ~Obj_Valid(attrObj) THEN Message, 'Invalid object with name "' + attrName + '" has been found.'
             END
@@ -981,7 +986,7 @@ END
 
 
 
-FUNCTION NCDF_Variable::INIT, varName, parent
+FUNCTION NCDF_Variable::INIT, varName, parent,  caseSensitivity = caseSensitivity
 
     ; Compiler options.
     Compile_Opt DEFINT32
@@ -1005,8 +1010,9 @@ FUNCTION NCDF_Variable::INIT, varName, parent
     IF N_Elements(parent) EQ 0 THEN Message, 'A parent object is required.'
     IF Size(parent, /TNAME) NE 'OBJREF' THEN Message, 'The parent parameter must be an object reference.'
     self.parent = parent
-    self.attrs = Obj_New('NCDF_Container')
+    self.attrs = Obj_New( 'NCDF_Container' )
     
+    if keyword_set( caseSensitivity ) then self.caseSensitiveAttributes = 1
     ; Obtain information about the variable and fill out the variable object.
     self -> ParseVariable
     
@@ -1019,6 +1025,7 @@ PRO NCDF_Variable__DEFINE, class
     class = { NCDF_VARIABLE, $
               name: "", $                 ; The variable name.
               ID: 0L, $                   ; The variable ID.
+              caseSensitiveAttributes: 0, $ ; Should variable attribute searches be case sensitive 
               dimensions: Ptr_New(), $    ; The actual dimensions of the variable.
               dimNames: Ptr_New(), $      ; A vector of dimension names.
               dims: Ptr_New(), $          ; The dimension IDs of the dimensions

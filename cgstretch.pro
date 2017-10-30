@@ -79,6 +79,7 @@
 ;        Written by David W. Fanning, April 1996, as XStretch.
 ;        XStretch retired and the program was renamed cgStretch, 21 October 2012.
 ;        Added Compression stretch and updated to Coyote Graphics stretch functions. 27 March 2015. DWF.
+;        Missed a couple of retire program name changes in the program. 7 April 2015. DWF.
 ;
 ; :Copyright:
 ;     Copyright (c) 1996-2012, Fanning Software Consulting, Inc.
@@ -561,7 +562,7 @@ PRO cgSTRETCH_DRAWLINES, minThresh, maxThresh, info
 
       'ASINH': BEGIN
             ; Draw the asinh function.
-            line = ASinhScl(Findgen(101), BETA=info.beta)
+            line = cgASinhScl(Findgen(101), BETA=info.beta)
             line = cgScaleVector(line, 0.0, !Y.CRange[1])
              x = cgScaleVector(Findgen(101), minThresh, maxThresh)
             OPlot, x, line, Color=cgColor(info.colors[4]), LineStyle=2, Thick=2

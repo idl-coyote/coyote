@@ -577,7 +577,7 @@ PRO cgMap_Grid, $
   ENDELSE
   
   if ((!x.type NE 3) && ~hasMap) THEN $
-     message, 'cgMap_Grid---Current ploting device must have mapping coordinates'
+     message, 'cgMap_Grid---Current plotting device must have mapping coordinates'
   
   ; Put a grid on a previously established map projection.
   ;

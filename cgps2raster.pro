@@ -93,7 +93,7 @@
 ;        Set this keyword to a named variable to return the ImageMagick command or commands used to 
 ;        produce the desired output. If this keyword is used, the ImageMagick commands are NOT executed,
 ;        but are simply constructed and returned to the user. If a resize is required by using either the
-;        `HEIGH`T or `WIDTH` keywords, then the return value is a two-element string array. Otherwise, it
+;        `HEIGHT` or `WIDTH` keywords, then the return value is a two-element string array. Otherwise, it
 ;        is a scalar string.
 ;     im_options: in, optional, type=string, default=""
 ;        A string of ImageMagick "convert" options that can be passed to the ImageMagick convert 
@@ -118,7 +118,7 @@
 ;        Set this command to show the command used to do any PostScript coversions.
 ;     silent: in, optional, type=boolean, default=0
 ;        Set this keyword to suppress output from the file. Is this keyword is set, be
-;        sure to check the `Success` keyword on exit.
+;        sure to check the `SUCCESS` keyword on exit.
 ;     success: out, optional, type=boolean
 ;         On exit, this keyword is set to 1 if the program successfully managed to create a 
 ;         raster file. It will be set to 0 otherwise.

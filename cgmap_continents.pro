@@ -45,7 +45,7 @@
 ;    Graphics, Map Projections
 ;    
 ; :Examples:
-;     To display a map of the Cuba and Haiti::
+;     To display a map of Cuba and Haiti::
 ;         cgMap_Set, /Mercator, Limit=[5.0, -95, 35.0, -55.0]
 ;         cgMap_Continents, Background='dodger blue', /Continents, /Fill, Color='tan'
 ;         cgMap_Continents, /Countries, /USA, Color='navy', /Continents
@@ -65,7 +65,7 @@
 ;        The name of the drawing color for the program.
 ;     continents: in, optional, type=boolean  
 ;        Set this keyword if you want continental outlines to be drawn. This will be
-;        set automatically if COASTS, COUNTRIES, RIVERS, AND USA keywords are all set
+;        set automatically if COASTS, COUNTRIES, RIVERS, and USA keywords are all set
 ;        to zero. This keyword is ignored if using FILENAME.
 ;     countries: in, optional, type=boolean, default=0
 ;        Set this keyword to draw political boundaries.
@@ -87,7 +87,7 @@
 ;        This keyword depreciated in favor of LINESTYLE keyword.
 ;     mlinethick:
 ;        This keyword depreciated in favor of THICK keyword.
-;     orientation: in, optional, type=float default=0.0
+;     orientation: in, optional, type=float, default=0.0
 ;        Set this keyword to the counterclockwise angle in degrees from horizontal that 
 ;        the line fill should be drawn. Only applies if the FILL_CONTINENTS keyword is 2.
 ;     rivers: in, optional, type=boolean, default=0  

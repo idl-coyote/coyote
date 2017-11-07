@@ -70,7 +70,7 @@
 ;    clip: in, optional, type=integer
 ;       A one- or two-element integer array that indicates how to clip the original color 
 ;       table vectors. This is useful if you are restricting the number of colors, and do 
-;       not which to have black or white (the usual color table end members) in the
+;       not wish to have black or white (the usual color table end members) in the
 ;       loaded color table. CLIP[0] is the lower bound. (A scalar value of CLIP is treated as 
 ;       CLIP[0].) CLIP[1] is the upper bound. For example, to load a blue-temperature color bar
 ;       with only blue colors, you might type this::

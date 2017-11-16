@@ -201,6 +201,8 @@
 ;       the Smooth function.
 ;    spacing: in, optional
 ;       The spacing of fill line if the 'LINE_FILL` keyword is set. (See POLYFILL documentation.)
+;    subtitle: in, optional, type=string
+;       The subtitle of the histogram plot.
 ;    thick: in, optional, type=integer, default=1   
 ;       Set this keyword to a value greater than 1 to draw thicker axes and lines.
 ;    title: in, optional, type=string
@@ -397,6 +399,7 @@ PRO cgHistoplot, $                  ; The program name.
    ROTATE=rotate, $                 ; Rotate plot so histogram bars are drawn left to right.
    SMOOTH=smooth, $                 ; Run a smoothing filter of this width over the histogram data before plotting.
    SPACING=spacing, $               ; The spacing of filled lines.
+   SUBTITLE=subtitle, $
    THICK=thick, $                   ; Set to draw thicker lines and axes.
    TITLE=title, $                   ; The plot title.
    WINDOW=window, $                 ; Display this in an cgWindow.
@@ -464,6 +467,7 @@ PRO cgHistoplot, $                  ; The program name.
                PROBTHICK=probthick, $           ; The thickness of the probability line.
                ROTATE=rotate, $
                SMOOTH=smooth, $
+               SUBTITLE=subtitle, $
                THICK=thick, $                   ; Set to draw thicker lines and axes.
                TITLE=title, $
                XTITLE=xtitle, $                 ; The X title.
@@ -881,6 +885,7 @@ PRO cgHistoplot, $                  ; The program name.
    IF N_Elements(title) NE 0 THEN title = cgCheckForSymbols(title)
    IF N_Elements(xtitle) NE 0 THEN xtitle = cgCheckForSymbols(xtitle)
    IF N_Elements(ytitle) NE 0 THEN ytitle = cgCheckForSymbols(ytitle)
+   IF N_Elements(subtitle) NE 0 THEN subtitle = cgCheckForSymbols(subtitle)
    
    
    ; Calculate the histogram.
@@ -1110,6 +1115,7 @@ PRO cgHistoplot, $                  ; The program name.
              POSITION=position, $
              XLOG=log, $
              NoData=1, $                              ; Draw the axes only. No data.
+             SUBTITLE=subtitle, $
              XThick=thick, $  
              YThick=thick, $
              YStyle=ystyle, $                              ; Exact axis scaling. No autoscaled axes.
@@ -1136,6 +1142,7 @@ PRO cgHistoplot, $                  ; The program name.
              POSITION=position, $
              YLOG=log, $
              NoData=1, $                              ; Draw the axes only. No data.
+             SUBTITLE=subtitle, $
              XThick=thick, $  
              YThick=thick, $
              XStyle=xstyle, $                              ; Exact axis scaling. No autoscaled axes.

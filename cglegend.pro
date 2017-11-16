@@ -140,6 +140,12 @@
 ;     window: in, optional, type=boolean, default=0
 ;         If this keyword is set, the object replaces any commands in a current
 ;         cgWindow or it opens a new cgWindow and adds itself to it.
+;     x_margin: in, optional, type=float, default=2.25
+;        A scale factor for the horizontal margin within a box. This number is multiplied by
+;        `Charsize` to determine horizontal spacing.
+;     y_margin: in, optional, type=float, default=1.75
+;        A scale factor for the vertical margin within a box. This number is multiplied by
+;        `Charsize` to determine vertical spacing.
 ;
 ; :Author:
 ;    FANNING SOFTWARE CONSULTING::
@@ -185,7 +191,9 @@ PRO cgLegend, $
     TT_FONT=tt_font, $
     VISIBLE=visible, $
     VSPACE=vspace, $
-    WINDOW=window
+    WINDOW=window, $
+    X_MARGIN=x_margin, $
+    Y_MARGIN=y_margin
     
     Compile_Opt idl2
     
@@ -225,7 +233,9 @@ PRO cgLegend, $
         TT_FONT=tt_font, $
         VISIBLE=visible, $
         VSPACE=vspace, $
-        WINDOW=window)
+        WINDOW=window, $
+        X_MARGIN=x_margin, $
+        Y_MARGIN=y_margin)
         
     
     ; If you haven't added this to a cgWindow, destroy the object.

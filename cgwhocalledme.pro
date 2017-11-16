@@ -80,6 +80,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 16 January 2011. DWF. 
+;        Fix call-stack-position detection, 30 December 2015. JWS.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -96,7 +97,7 @@ FUNCTION cgWhoCalledMe
    
    ; Find where I am in the call stack. The calling program is up
    ; two levels from there. Unless, of course, I am close to $MAIN$.
-   index = Where(StrMid(callstack, 0, 11) EQ 'WHOCALLEDME', count)
+   index = Where(StrMid(callstack, 0, 11) EQ 'CGWHOCALLEDME', count)
    IF count GE 1 THEN index = (Reverse(index))[0] 
    callingRoutine = (StrSplit(StrCompress(callStack[(index-2) > 0])," ", /Extract))[0]
    

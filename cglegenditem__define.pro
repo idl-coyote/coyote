@@ -169,6 +169,12 @@
 ;     vspace: in, optional, type=float, default=1.5
 ;         A scale factor for vertical spacing between legend items. This number is multiplied by
 ;         `Charsize` to determine vertical spacing.
+;     x_margin: in, optional, type=float, default=2.25
+;        A scale factor for the horizontal margin within a box. This number is multiplied by
+;        `Charsize` to determine horizontal spacing.
+;     y_margin: in, optional, type=float, default=1.75
+;        A scale factor for the vertical margin within a box. This number is multiplied by
+;        `Charsize` to determine vertical spacing.
 ;     window: in, optional, type=boolean, default=0
 ;         If this keyword is set, the object replaces any commands in a current
 ;         cgWindow or it opens a new cgWindow and adds itself to it.
@@ -201,7 +207,9 @@ FUNCTION cgLegendItem::INIT, $
     TT_FONT=tt_font, $
     VISIBLE=visible, $
     VSPACE=vspace, $
-    WINDOW=window
+    WINDOW=window, $
+    X_MARGIN=x_margin, $
+    Y_MARGIN=y_margin
     
     Compile_Opt idl2
     
@@ -269,6 +277,8 @@ FUNCTION cgLegendItem::INIT, $
     ENDCASE
     SetDefaultValue, visible, 1
     SetDefaultValue, vspace, 1.5
+    SetDefaultValue, x_margin, 2.25
+    SetDefaultValue, y_margin, 1.75
     
     ; Set the appropriate alignment keywords.
     alignment = 0 > alignment < 8
@@ -359,6 +369,8 @@ FUNCTION cgLegendItem::INIT, $
     self.visible = Keyword_Set(visible)
     self.vspace = vspace
     self.wid = -1
+    self.x_margin = x_margin
+    self.y_margin = y_margin
     IF (N_Elements(thick) NE 0) && (N_Elements(charthick) EQ 0) THEN charthick = thick ; Don't move these two lines.
     IF N_Elements(charthick) NE 0 THEN self.charthick = charthick
     
@@ -436,9 +448,9 @@ PRO cgLegendItem::CalculateBoxSize
     IF self.box THEN BEGIN
         bx0 = location[0]
         by1 = location[1]
-        x0 = bx0 + (2.25 * Float(!D.X_CH_Size)/!D.X_Size)
+        x0 = bx0 + (self.x_margin * Float(!D.X_CH_Size)/!D.X_Size)
         x1 = x0 + self.length
-        y = by1 - (1.75 * Float(!D.Y_CH_Size)/!D.Y_Size)
+        y = by1 - (self.y_margin * Float(!D.Y_CH_Size)/!D.Y_Size)
         y_offset = self.vspace * Float(!D.Y_CH_Size)/!D.Y_Size
     ENDIF ELSE BEGIN
         x0 = location[0]
@@ -668,9 +680,9 @@ PRO cgLegendItem::Draw
     IF self.box THEN BEGIN
         bx0 = self.bx_pos[0]
         by1 = self.bx_pos[3]
-        x0 = bx0 + (2.25 * Float(!D.X_CH_Size)/!D.X_Size)
+        x0 = bx0 + (self.x_margin * Float(!D.X_CH_Size)/!D.X_Size)
         x1 = x0 + self.length
-        y = by1 - (1.75 * Float(!D.Y_CH_Size)/!D.Y_Size)
+        y = by1 - (self.y_margin * Float(!D.Y_CH_Size)/!D.Y_Size)
         y_offset = self.vspace * Float(!D.Y_CH_Size)/!D.Y_Size
     ENDIF ELSE BEGIN
         x0 = self.bx_pos[0] + (2 * Float(!D.X_CH_Size)/!D.X_Size)
@@ -797,6 +809,12 @@ END
 ;     vspace: out, optional, type=float, default=1.5
 ;        A scale factor for vertical spacing between legend items. This number is multiplied by
 ;        `Charsize` to determine vertical spacing.
+;     x_margin: out, optional, type=float, default=2.25
+;        A scale factor for the horizontal margin within a box. This number is multiplied by
+;        `Charsize` to determine horizontal spacing.
+;     y_margin: out, optional, type=float, default=1.75
+;        A scale factor for the vertical margin within a box. This number is multiplied by
+;        `Charsize` to determine vertical spacing.
 ;---------------------------------------------------------------------------
 PRO cgLegendItem::GetProperty, $
    ALIGNMENT=alignment, $
@@ -823,7 +841,9 @@ PRO cgLegendItem::GetProperty, $
    TITLES=titles, $
    TT_FONT=tt_font, $
    VISIBLE=visible, $
-   VSPACE=vspace
+   VSPACE=vspace, $
+   X_MARGIN=x_margin, $
+   Y_MARGIN=y_margin
 
     Compile_Opt idl2
     
@@ -859,6 +879,8 @@ PRO cgLegendItem::GetProperty, $
     IF Arg_Present(tt_font) THEN tt_font = *self.tt_font
     IF Arg_Present(visible) THEN visible = self.visible
     IF Arg_Present(vspace) THEN vspace = self.vspace
+    IF Arg_Present(x_margin) THEN x_margin = self.x_margin
+    IF Arg_Present(y_margin) THEN y_margin = self.y_margin
 
 END
 
@@ -939,6 +961,12 @@ END
 ;     vspace: in, optional, type=float, default=1.5
 ;        A scale factor for vertical spacing between legend items. This number is multiplied by
 ;        `Charsize` to determine vertical spacing.
+;     x_margin: in, optional, type=float, default=2.25
+;        A scale factor for the horizontal margin within a box. This number is multiplied by
+;        `Charsize` to determine horizontal spacing.
+;     y_margin: in, optional, type=float, default=1.75
+;        A scale factor for the vertical margin within a box. This number is multiplied by
+;        `Charsize` to determine vertical spacing.
 ;---------------------------------------------------------------------------
 PRO cgLegendItem::SetProperty, $
    ALIGNMENT=alignment, $ $
@@ -965,7 +993,9 @@ PRO cgLegendItem::SetProperty, $
    TITLES=titles, $
    TT_FONT=tt_font, $
    VISIBLE=visible, $
-   VSPACE=vspace
+   VSPACE=vspace, $
+   X_MARGIN=x_margin, $
+   Y_MARGIN=y_margin
 
 
     Compile_Opt idl2
@@ -1067,6 +1097,8 @@ PRO cgLegendItem::SetProperty, $
     IF N_Elements(tt_font) NE 0 THEN *self.tt_font = tt_font
     IF N_Elements(visible) NE 0 THEN self.visible = Keyword_Set(visible)
     IF N_Elements(vspace) NE 0 THEN *self.vspace = vspace
+    IF N_Elements(x_margin) NE 0 THEN *self.x_margin = x_margin
+    IF N_Elements(y_margin) NE 0 THEN *self.y_margin = x_margin
    
 END
 
@@ -1133,6 +1165,8 @@ PRO cgLegendItem__Define, class
               visible: 0,  $                ; A flag to indicate if the legend should be drawn.
               vspace: 0.0, $                ; The vertical spacing between legend items.
               wid: 0L, $                    ; The window index number of a cgWindow if added to it.
-              width: Ptr_New() $            ; The width of each legend item.
+              width: Ptr_New(), $           ; The width of each legend item.
+              x_margin: 2.25, $             ; The X margin within a box, in terms of normalized character length
+              y_margin: 1.75 $              ; The Y margin within a box, in terms of normalized character length
             }
 END

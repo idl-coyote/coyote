@@ -90,7 +90,7 @@
 ;     orientation: in, optional, type=float, default=0.0
 ;        Set this keyword to the counterclockwise angle in degrees from horizontal that 
 ;        the line fill should be drawn. Only applies if the FILL_CONTINENTS keyword is 2.
-;     ouline: in, optional, type=boolean, default=1
+;     outline: in, optional, type=boolean, default=1
 ;        Draw outlines of coastlines (really just sets the `COASTS` keyword). The `COASTS`
 ;        keyword overrides this setting.
 ;     rivers: in, optional, type=boolean, default=0  

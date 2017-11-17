@@ -109,7 +109,9 @@
 ;     Modified the E_GRID and E_HORIZON structure code to allow color names. 29 April 2013. Joe Sapp.
 ;     In some situations, the "extra" continents structure was not being passed along. 29 May 2013. DWF.
 ;     Now, when "extra" structures are passed along, they can have duplicate fields. Put check in place. 22 June 2013. DWF.
-;        
+;     Removed parameters E_GRID and E_CONTINENTS in call to MAP_SET so they don't interfere with later calls to cgMap_Grid and cgMap_Continents. 23 Nov 2015. Joe Sapp.
+;     Fix typo in passing extra parameters to cgMap_Continents. 23 Nov 2015. Joe Sapp.
+;
 ; :Copyright:
 ;     Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
 ;-
@@ -528,9 +530,7 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
         COLOR=color, $
         CONIC = conic, $
         CYLINDRICAL = cylindrical, $
-        E_CONTINENTS=econt, $ 
         E_HORIZON=ehorizon, $
-        E_GRID=egrid, $      
         ELLIPSOID = ellips, $
         GOODESHOMOLOSINE = goodes, $  
         GNOMIC = gnomic, $
@@ -583,8 +583,8 @@ PRO cgMap_Set, p0lat, p0lon, rot, $
          THICK=thick, $
          USA = usa, $
          ZVALUE=zvalue, $
-         _EXTRA=e_cont
-       
+         _EXTRA=econt
+
     ENDIF
     
     ; Need a map grid?

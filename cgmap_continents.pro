@@ -90,6 +90,9 @@
 ;     orientation: in, optional, type=float, default=0.0
 ;        Set this keyword to the counterclockwise angle in degrees from horizontal that 
 ;        the line fill should be drawn. Only applies if the FILL_CONTINENTS keyword is 2.
+;     outline: in, optional, type=boolean, default=1
+;        Draw outlines of coastlines (really just sets the `COASTS` keyword). The `COASTS`
+;        keyword overrides this setting.
 ;     rivers: in, optional, type=boolean, default=0  
 ;        Set this keyword if you wish to draw rivers. This keyword is ignored if using FILENAME.
 ;     spacing: in, optional, type=float, default=0.5
@@ -123,6 +126,7 @@
 ;       Changed the default line thickness to !P.Thick to better support PostScript files. 28 Dec 2011. DWF.
 ;       Modified slightly to allow a three-element byte array to be used as the COLOR. 18 April 2012. DWF.
 ;       Added a BACKGROUND keyword. 31 Aug 2012. DWF.
+;       Implemented the OUTLINE keyword and make it default so outlines are drawn when, e.g., FILL_CONTINENTS=2. 23 Nov 2015. Joe Sapp.
 ;        
 ; :Copyright:
 ;    Copyright (c) 2011-2012, Fanning Software Consulting, Inc.
@@ -159,6 +163,9 @@ PRO cgMap_Continents, $
       RETURN
     ENDIF
       
+    if (((N_Elements(outline) eq 0) || keyword_set(outline)) && $
+        (N_Elements(kcoasts) eq 0)) then kcoasts = 1
+
     IF Keyword_Set(addcmd) THEN BEGIN
     
        cgWindow, 'cgMap_Continents', $

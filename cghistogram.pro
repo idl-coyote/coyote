@@ -248,6 +248,7 @@ FUNCTION cgHistogram, $       ; The program name.
       ENDELSE
    ENDIF ELSE BEGIN
        IF Size(binsize, /TYPE) NE dataType THEN BEGIN
+          binsize_orig = binsize
           IF dataType LE 3 THEN binsize = Round(binsize) > 1
           binsize = Convert_To_Type(binsize, dataType)
        ENDIF
@@ -291,6 +292,9 @@ FUNCTION cgHistogram, $       ; The program name.
        
    ENDELSE
    
+   if (n_elements(binsize_orig) ne 0) then $
+     binsize = temporary(binsize_orig)
+
    ; Return the data.
    RETURN, histdata
    

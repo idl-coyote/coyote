@@ -59,6 +59,11 @@
 ;          - The centered RMS difference, 
 ;          - The correlation, 
 ;          - The standard deviation
+;          
+; The reference to Karl Taylor's original paper explaining the diagram is Taylor, K.E., 
+; `Summarizing multiple aspects of model performance in a single diagram, <http://onlinelibrary.wiley.com/doi/10.1029/2000JD900719/abstract>` J. Geophys. Res., 106, 7183-7192, 2001.
+;       
+; Here is a `simple, but complete, explanation <http://www-pcmdi.llnl.gov/about/staff/Taylor/CV/Taylor_diagram_primer.pdf>` of the diagram.      
 ;  
 ; :Categories:
 ;    Graphics
@@ -153,9 +158,13 @@
 ;           window. Also removed a cgPolyFill command that appeared to have no effect. 19 Nov 2013. DWF.
 ;        Added NOERASE keyword and made sure no window was opened when OUTPUT keyword is used. 21 Nov 2013. DWF.
 ;        Added check to not create initial plot if PostScript is the current device. 18 Feb 2015. DWF.
+;        Small modification to prevent extraneous drawing on right edge of plot in PostScript files,
+;           and updated figures and documentation. 10 April 2015. DWF.
+;        Another small modification to accommodate extraneous line removal when doing multiple plots on
+;           a page. Appears to work in both PostScript and on the display for multiple plots. 19 May 2015. DWF.
 ;
 ; :Copyright:
-;     Copyright (c) 2013, Fanning Software Consulting, Inc.
+;     Copyright (c) 2013-2015, Fanning Software Consulting, Inc.
 ;-
 PRO cgTaylorDiagram, stddev, correlation, $
     ADDCMD=addcmd, $
@@ -410,8 +419,14 @@ PRO cgTaylorDiagram, stddev, correlation, $
        
         multi_circlesx = Findgen(multi_cir)/(multi_cir-1)*(multi_max-multi_min)+multi_min
         multi_circlesy = SQRT(rms_increment^2 - (multi_circlesx-ref_stddev)^2)
-    
-        cgPlotS, 0 > multi_circlesx < stddev_max, 0 > multi_circlesy < stddev_max, COLOR=c_stddev, LINESTYLE=1
+        x_to_plot = 0 > multi_circlesx < stddev_max
+        y_to_plot = 0 > multi_circlesy < stddev_max
+        maxIndex = Where(x_to_plot GE stddev_max, maxCnt)
+        IF maxCnt GT 0 THEN BEGIN
+            x_to_plot = x_to_plot[0:maxIndex[0]-1]
+            y_to_plot = y_to_plot[0:maxIndex[0]-1]
+        ENDIF
+        cgPlotS, x_to_plot, y_to_plot, COLOR=c_stddev, LINESTYLE=1
         number = String(rms_increment, Format=rms_format)
 
         IF ~Keyword_Set(rms_labels_off) THEN BEGIN
@@ -425,20 +440,18 @@ PRO cgTaylorDiagram, stddev, correlation, $
       ENDFOR
   ENDIF
   
-  ; Mask: Masking part of the RMS circles out:
+  ; Masking part of the RMS circles out.
   cgColorFill, [x, stddev_max, x[0]],[y, stddev_max, y[0]], /data, COLOR='white'
-  cgPolygon, [x, stddev_max, x[0]],[y, stddev_max, y[0]], /data, COLOR='white'
-  
-  ; Not sure this is needed. Certainly not on my windows machine in IDL 8.2.3.
-;  cgColorFill, [!X.Window[0],!X.Window[0], !X.Window[1], !X.Window[1], !X.Window[0]], $
-;               [!Y.Window[1], 1.0, 1.0, !Y.Window[1]], $
-;               /Normal, COLOR='white'
+  cgPolygon,   [x, stddev_max, x[0]],[y, stddev_max, y[0]], /data, COLOR='white'
+  cgColorFill, [         0,               0, stddev_max*1.05, stddev_max*1.05,          0], $
+               [stddev_max, stddev_max*1.05, stddev_max*1.05,      stddev_max, stddev_max], $
+               COLOR='white' ; To remove traces of line above plot in PostScript files.
   
   cgPlotS, x, y
   
  ; Short Ticks
  ; new circle where its points will be used as the end point of the short ticks
-  short_cir = 1000
+   short_cir = 1000
   short_max = stddev_max*.98
   short_min = 0.0
   short_cir_x = Findgen(short_cir)/(short_cir-1)*(short_max-short_min)+short_min

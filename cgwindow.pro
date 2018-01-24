@@ -299,6 +299,7 @@
 ;             original name in this version. 13 July 2012. DWF.
 ;         Added WDestroyObjects keyword to destroy objects parameters, if needed. 11 November 2012. DWF.
 ;         Restored the WMULTI keyword win calling cgCmdWindow. 11 Feb 2013. DWF.
+;         Fixed a problem in which the WinID keyword was being redefined internally. 18 June 2015. DWF.
 ;-
 PRO cgWindow, $
    command, $                       ; The graphics "command" to execute.
@@ -353,14 +354,14 @@ PRO cgWindow, $
                 structs = theList -> Get_Item(/ALL, /DEREFERENCE)
                 IF Size(structs, /TNAME) EQ 'POINTER' THEN RETURN
                 IF N_Elements(winID) EQ 0 THEN BEGIN
-                    winID = N_Elements(structs) - 1
+                    windowDisplay = N_Elements(structs) - 1
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
-                    IF count GT 0 THEN winID = index[0] ELSE BEGIN
+                    IF count GT 0 THEN windowDisplay = index[0] ELSE BEGIN
                         Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
-                thisWindowStruct = structs[winID]
+                thisWindowStruct = structs[windowDisplay]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     thisWindowStruct.windowObj -> ExecuteCommands
                 ENDIF ELSE BEGIN
@@ -382,14 +383,14 @@ PRO cgWindow, $
                 structs = theList -> Get_Item(/ALL, /DEREFERENCE)
                 IF Size(structs, /TNAME) EQ 'POINTER' THEN RETURN
                 IF N_Elements(winID) EQ 0 THEN BEGIN
-                    winID = N_Elements(structs) - 1
+                    windowDisplay = N_Elements(structs) - 1
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
-                    IF count GT 0 THEN winID = index[0] ELSE BEGIN
+                    IF count GT 0 THEN windowDisplay = index[0] ELSE BEGIN
                         Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
-                thisWindowStruct = structs[winID]
+                thisWindowStruct = structs[windowDisplay]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     thisWindowStruct.windowObj -> ListCommand
                 ENDIF ELSE BEGIN
@@ -411,14 +412,14 @@ PRO cgWindow, $
                 structs = theList -> Get_Item(/ALL, /DEREFERENCE)
                 IF Size(structs, /TNAME) EQ 'POINTER' THEN RETURN
                 IF N_Elements(winID) EQ 0 THEN BEGIN
-                    winID = N_Elements(structs) - 1
+                    windowDisplay = N_Elements(structs) - 1
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
-                    IF count GT 0 THEN winID = index[0] ELSE BEGIN
+                    IF count GT 0 THEN windowDisplay = index[0] ELSE BEGIN
                         Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
-                thisWindowStruct = structs[winID]
+                thisWindowStruct = structs[windowDisplay]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     ; If the cmdIndex is undefined, the last entered command is deleted.
                     thisWindowStruct.windowObj -> DeleteCommand, cmdIndex
@@ -444,14 +445,14 @@ PRO cgWindow, $
                 structs = theList -> Get_Item(/ALL, /DEREFERENCE)
                 IF Size(structs, /TNAME) EQ 'POINTER' THEN RETURN
                 IF N_Elements(winID) EQ 0 THEN BEGIN
-                    winID = N_Elements(structs) - 1
+                    windowDisplay = N_Elements(structs) - 1
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
-                    IF count GT 0 THEN winID = index[0] ELSE BEGIN
+                    IF count GT 0 THEN windowDisplay = index[0] ELSE BEGIN
                         Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
-                thisWindowStruct = structs[winID]
+                thisWindowStruct = structs[windowDisplay]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     
                     ; Check command components.
@@ -487,14 +488,14 @@ PRO cgWindow, $
                 structs = theList -> Get_Item(/ALL, /DEREFERENCE)
                 IF Size(structs, /TNAME) EQ 'POINTER' THEN RETURN
                 IF N_Elements(winID) EQ 0 THEN BEGIN
-                    winID = N_Elements(structs) - 1
+                    windowDisplay = N_Elements(structs) - 1
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
-                    IF count GT 0 THEN winID = index[0] ELSE BEGIN
+                    IF count GT 0 THEN windowDisplay = index[0] ELSE BEGIN
                         Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
-                thisWindowStruct = structs[winID]
+                thisWindowStruct = structs[windowDisplay]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $
@@ -521,14 +522,14 @@ PRO cgWindow, $
                 structs = theList -> Get_Item(/ALL, /DEREFERENCE)
                 IF Size(structs, /TNAME) EQ 'POINTER' THEN RETURN
                 IF N_Elements(winID) EQ 0 THEN BEGIN
-                    winID = N_Elements(structs) - 1
+                    windowDisplay = N_Elements(structs) - 1
                 ENDIF ELSE BEGIN
                     index = Where(structs.wid[*] EQ winID, count)
-                    IF count GT 0 THEN winID = index[0] ELSE BEGIN
+                    IF count GT 0 THEN windowDisplay = index[0] ELSE BEGIN
                         Message, 'Cannot find an cgWindow with window index ' + StrTrim(winID, 2) + '.'
                     ENDELSE
                 ENDELSE
-                thisWindowStruct = structs[winID]
+                thisWindowStruct = structs[windowDisplay]
                 IF Obj_Valid(thisWindowStruct.windowObj) THEN BEGIN
                     newCommand = Obj_New('cgWindow_Command', COMMAND=command, $
                         P1=p1, P2=p2, P3=p3, P4=p4, KEYWORDS=extra, AltPS_Keywords=altps_Keywords, $

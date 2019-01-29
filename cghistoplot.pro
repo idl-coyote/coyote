@@ -4,7 +4,7 @@
 ;   cgHistoplot
 ;
 ; PURPOSE:
-;   This program is used to draw a histogram plot in an IDL direct graphics window..
+;   This program is used to draw a histogram plot in an IDL direct graphics window.
 ;
 ;******************************************************************************************;
 ;                                                                                          ;
@@ -35,7 +35,7 @@
 ;******************************************************************************************;
 ;
 ;+
-; This program is used to draw a histogram plot in an IDL direct graphics window..
+; This program is used to draw a histogram plot in an IDL direct graphics window.
 ; 
 ; .. image:: cghistoplot.png
 ; 

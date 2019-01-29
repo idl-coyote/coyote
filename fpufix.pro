@@ -44,7 +44,7 @@
 ;
 ; EXAMPLES:
 ;
-;       data = FPTFIX(data)
+;       data = FPUFIX(data)
 ;
 ; RESTRICTIONS:
 ;

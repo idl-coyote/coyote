@@ -200,7 +200,9 @@
 ;       Modified the program so that the PostScript file location is printed only if the PostScript file 
 ;          is being retrained. 17 March 2014. DWF.
 ;       Fixed a problem that prevented setting FONT=0 when setting cgPS_Open parameters with cgControl. 3 Mar 2015. DWF.
-;       
+;       Fixed a problem that occurs when setting some keywords that are
+;          supposed to be set by cgPS_Config. 28 Jan 2019. JWS.
+;
 ; :Copyright:
 ;     Copyright (c) 2008-2014, Fanning Software Consulting, Inc.
 ;-
@@ -219,6 +221,11 @@ PRO cgPS_Open, filename, $
     QUIET=quiet, $
     SCALE_FACTOR=scale_factor, $
     TT_FONT=tt_font, $
+    INCHES=inches, $
+    XSIZE=xsize, $
+    XOFFSET=xoffset, $
+    YSIZE=ysize, $
+    YOFFSET=yoffset, $
    _REF_EXTRA=extra
  
    COMMON _$FSC_PS_START_, ps_struct
@@ -333,12 +340,26 @@ PRO cgPS_Open, filename, $
    IF ~Keyword_Set(nomatch) THEN BEGIN
       IF !D.X_Size GT !D.Y_Size THEN landscape = 1 ELSE landscape = 0
       IF Keyword_Set(encapsulated) THEN landscape = 0
+
+      ; Warn about ignored keywords
+      if N_Elements(inches) ne 0 then $
+        message, 'Ignoring the INCHES keyword (NOMATCH not set)', /continue
+      if N_Elements(xsize) ne 0 then $
+        message, 'Ignoring the XSIZE keyword (NOMATCH not set)', /continue
+      if N_Elements(xoffset) ne 0 then $
+        message, 'Ignoring the XOFFSET keyword (NOMATCH not set)', /continue
+      if N_Elements(ysize) ne 0 then $
+        message, 'Ignoring the YSIZE keyword (NOMATCH not set)', /continue
+      if N_Elements(yoffset) ne 0 then $
+        message, 'Ignoring the YOFFSET keyword (NOMATCH not set)', /continue
+
       sizes = cgPSWindow(_Extra=extra, LANDSCAPE=landscape, /SANE_OFFSETS)
       keywords = cgPS_Config(_Strict_Extra=extra, INCHES=sizes.inches, XSIZE=sizes.xsize, YSIZE=sizes.ysize, $
          XOFFSET=sizes.xoffset, YOFFSET=sizes.yoffset, Cancel=cancelled, NOGUI=(~gui), $
          LANDSCAPE=sizes.landscape, ENCAPSULATED=encapsulated, FILENAME=ps_filename[0])
    ENDIF ELSE BEGIN
       keywords = cgPS_Config(_Strict_Extra=extra, ENCAPSULATED=encapsulated, $
+          INCHES=inches, XSIZE=xsize, YSIZE=ysize, XOFFSET=xoffset, YOFFSET=yoffset, $
           LANDSCAPE=landscape, CANCEL=cancelled, NOGUI=(~gui), FILENAME=ps_filename[0])
    ENDELSE
    IF cancelled THEN BEGIN

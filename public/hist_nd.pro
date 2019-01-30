@@ -167,6 +167,8 @@ function hist_nd,V,bs,MIN=mn,MAX=mx,NBINS=nbins,REVERSE_INDICES=ri
   endelse
   
   total_bins=product(nbins,/PRESERVE_TYPE) ;Total number of bins
+  if (total_bins lt 0) then $
+    message, 'Too many bins for histogram'
   h=long((V[s[0]-1,*]-mn[s[0]-1])/bs[s[0]-1])
   
   ;; The scaled indices, s[n]+N[n-1]*(s[n-1]+N[n-2]*(s[n-2]+...

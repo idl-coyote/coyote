@@ -158,7 +158,13 @@ function hist_nd,V,bs,MIN=mn,MAX=mx,NBINS=nbins,REVERSE_INDICES=ri
         nbins=long(nbins)       ;No fractional bins, please
         bs=float(mx-mn)/nbins   ;a correct formulation
      endif else message,'Must pass either binsize or NBINS'
-  endif else nbins=long((mx-mn)/bs+1) 
+  endif $
+  else begin
+     if n_elements(nbins) ne 0 then $
+        message, 'Overriding given NBINS (BINSIZE takes precedence)', $
+          /continue
+     nbins=long((mx-mn)/bs+1)
+  endelse
   
   total_bins=product(nbins,/PRESERVE_TYPE) ;Total number of bins
   h=long((V[s[0]-1,*]-mn[s[0]-1])/bs[s[0]-1])

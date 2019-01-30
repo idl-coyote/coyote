@@ -145,7 +145,7 @@ function hist_nd,V,bs,MIN=mn,MAX=mx,NBINS=nbins,REVERSE_INDICES=ri
      if n_elements(mn)    eq 1 then mn=replicate(mn,s[0])
      if n_elements(mx)    eq 1 then mx=replicate(mx,s[0])
      if n_elements(bs)    eq 1 then bs=replicate(bs,s[0])
-     if n_elements(nbins) eq 1 then nbins=replicate(nbins,s[0])
+     if n_elements(nbins) eq 1 then nbins=replicate(long(nbins),s[0])
   endif else begin 
      mn=[mn] & mx=[mx]
   endelse 

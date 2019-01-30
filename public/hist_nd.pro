@@ -43,7 +43,9 @@
 ; KEYWORD PARAMETERS:
 ;       
 ;       MIN,MAX,NBINS: See above
-;       
+;
+;       NAN: Check for NaN in data and ignore.
+;
 ;       REVERSE_INDICES: Set to a named variable to receive the
 ;         reverse indices, for mapping which points occurred in a
 ;         given bin.  Note that this is a 1-dimensional reverse index
@@ -131,13 +133,25 @@
 ;
 ;##############################################################################
 
-function hist_nd,V,bs,MIN=mn,MAX=mx,NBINS=nbins,REVERSE_INDICES=ri
+function hist_nd,V,bs,MIN=mn,MAX=mx,NBINS=nbins,REVERSE_INDICES=ri,NAN=nan
+
+  nan=(n_elements(nan) ne 0) && keyword_set(nan)
+  if (~nan && ~array_equal(finite(V), 1)) then begin
+    message, 'NaN detected; setting NAN keyword', /continue
+    nan=1
+  endif
+
   s=size(V,/DIMENSIONS)
   if n_elements(s) ne 2 then message,'Input must be N (dimensions) x P (points)'
   if s[0] gt 8 then message, 'Only up to 8 dimensions allowed'
   
-  imx=max(V,DIMENSION=2,MIN=imn)
+  imx=max(V,DIMENSION=2,MIN=imn,NAN=nan)
   
+  if (nan && $
+      (array_equal(finite(imx), 0) || $
+       array_equal(finite(imn), 0))) then $
+    message, 'No finite values in at least one column', /continue
+
   if n_elements(mx) eq 0 then mx=imx
   if n_elements(mn) eq 0 then mn=imn
   

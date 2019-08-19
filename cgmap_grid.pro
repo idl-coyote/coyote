@@ -312,7 +312,7 @@ end
 ;        An number that tells how to label the grid line. A 0 means no grid lines are 
 ;        labelled. A 1 means all grid lines are labelled. A 2 means label every 2nd 
 ;        grid line is labelled. A 3 means every  3rd grid line is labelled, and so on.
-;     label_with_degree: in, optional, type=boolean, default=0
+;     degree_label: in, optional, type=boolean, default=0
 ;        Set this keyword to expand the labels with "degrees N/S/W/E" (i.e., $\deg$?).
 ;     latalign: in, optional, type=float, default=0.0
 ;        This keyword controls the alignment of the text baseline for latitude labels. 
@@ -431,7 +431,7 @@ PRO cgMap_Grid, $
    HORIZON=horizon, $
    INCREMENT=increment, $
    LABEL=label, $
-   LABEL_WITH_DEGREE=label_with_degree, $
+   DEGREE_LABEL=degree_label, $
    LATALIGN=latalign, $
    LATDELTA = latdelta, $
    LATLABEL=latlab, $
@@ -907,7 +907,7 @@ PRO cgMap_Grid, $
                 lonname=strtrim(string(lonnames[i], FORMAT=fmt),2)
           endif else $
               lonname=strtrim(string(lon2, format=fmt),2)
-          if keyword_set(label_with_degree) then $
+          if keyword_set(degree_label) then $
             lonname = lonname + '$\deg$' + ((lon2 >= 0) ? 'E' : 'W')
           latlontxt[i,0] = lonname
           if (box_thick eq 0) then begin
@@ -971,7 +971,7 @@ PRO cgMap_Grid, $
           endif else begin
               latname=strtrim(string(lat, format=fmt),2)
           endelse
-          if keyword_set(label_with_degree) then $
+          if keyword_set(degree_label) then $
             latname = latname + '$\deg$' + ((lat >= 0) ? 'N' : 'S')
           latlontxt[i, 1] = latname
           if (box_thick eq 0) then begin

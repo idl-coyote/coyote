@@ -174,9 +174,6 @@ function hist_nd,V,bs,MIN=mn,MAX=mx,NBINS=nbins,REVERSE_INDICES=ri,NAN=nan
      endif else message,'Must pass either binsize or NBINS'
   endif $
   else begin
-     if n_elements(nbins) ne 0 then $
-        message, 'Overriding given NBINS (BINSIZE takes precedence)', $
-          /continue
      nbins=long((mx-mn)/bs+1)
   endelse
   

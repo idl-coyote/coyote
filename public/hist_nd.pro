@@ -136,10 +136,7 @@
 function hist_nd,V,bs,MIN=mn,MAX=mx,NBINS=nbins,REVERSE_INDICES=ri,NAN=nan
 
   nan=(n_elements(nan) ne 0) && keyword_set(nan)
-  if (~nan && ~array_equal(finite(V), 1)) then begin
-    message, 'NaN detected; setting NAN keyword', /continue
-    nan=1
-  endif
+  if (~nan && ~array_equal(finite(V), 1)) then nan=1
 
   s=size(V,/DIMENSIONS)
   if n_elements(s) ne 2 then message,'Input must be N (dimensions) x P (points)'

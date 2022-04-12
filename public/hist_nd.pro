@@ -146,11 +146,6 @@ function hist_nd,V,bs,MIN=mn,MAX=mx,NBINS=nbins,REVERSE_INDICES=ri,NAN=nan
   if s[0] gt 8 then message, 'Only up to 8 dimensions allowed'
   
   imx=max(V,DIMENSION=2,MIN=imn,NAN=nan)
-  
-  if (nan && $
-      (array_equal(finite(imx), 0) || $
-       array_equal(finite(imn), 0))) then $
-    message, 'No finite values in at least one column', /continue
 
   if n_elements(mx) eq 0 then mx=imx
   if n_elements(mn) eq 0 then mn=imn

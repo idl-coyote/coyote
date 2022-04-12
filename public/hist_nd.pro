@@ -164,11 +164,8 @@ function hist_nd,V,bs,MIN=mn,MAX=mx,NBINS=nbins,REVERSE_INDICES=ri,NAN=nan
         nbins=long(nbins)       ;No fractional bins, please
         bs=float(mx-mn)/nbins   ;a correct formulation
      endif else message,'Must pass either binsize or NBINS'
-  endif $
-  else begin
-     nbins=long((mx-mn)/bs+1)
-  endelse
-  
+  endif else nbins=long((mx-mn)/bs+1)
+
   total_bins=product(nbins,/PRESERVE_TYPE) ;Total number of bins
   if (total_bins lt 0) then $
     message, 'Too many bins for histogram'

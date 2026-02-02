@@ -64,6 +64,7 @@
 ; :History:
 ;     Change History::
 ;        Written, 17 January 2011. DWF.
+;        Modified to support IMv7, 29 January 2026. IEC.
 ;
 ; :Copyright:
 ;     Copyright (c) 2011, Fanning Software Consulting, Inc.
@@ -80,13 +81,15 @@ FUNCTION cgHasImageMagick, VERSION=version
     ; Assume failure.
     retval = 0
     
-    ; To search for ImageMagick, I am going to spawn a call to convert.
+    ; To search for ImageMagick, we spam two calls (pre IMv7, IMv7 and later).
+    ; First one to "convert". If it fails we spawn "imagek"
     ; If the error_result is a null string, I assume this command worked.
     ; Otherwise, it didn't find ImageMagick.
     Spawn, 'convert -version', result, error_result
-    
-    ; If nothing is put in the error result, then we are good to go.
-    IF error_result[0] EQ "" THEN retval = 1 
+    IF error_result[0] EQ "" THEN retval = 1 ELSE BEGIN
+        Spawn, 'magick -version', result, error_result
+        IF error_result[0] EQ "" THEN retval = 1
+    ENDELSE
     
     ; For some reason Macs can't deal with the version number.
     IF retval EQ 1 && Arg_Present(version) THEN BEGIN
